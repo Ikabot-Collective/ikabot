@@ -392,7 +392,7 @@ def menuEdificios(prints, ciudad, posiciones):
 		nivelActual += 1
 
 	nivelFinal = read(min=nivelActual+1, msg='subir al nivel:')
-	
+
 	niveles = nivelFinal - nivelActual
 	rta = []
 	for i in range(0, niveles):
@@ -637,7 +637,7 @@ def printEstadoMina(s, url, bien):
 	else:
 		lv = levels.group(2)
 	infoMina = re.search(r':<\\/h4>\\n\s*<ul\sclass=\\"resources\\">\\n\s*<li\sclass=\\"wood\\">([\d,]+)<[\s\S]*?:<\\/h4>\\n\s*<ul\sclass=\\"resources\\">\\n\s*<li\sclass=\\"wood\\">([\d,]+)<', html)
-	if infoMina is not None:		
+	if infoMina is not None:
 		donado = infoMina.group(2)
 		porDonar = infoMina.group(1)
 		donado = int(donado.replace(',', ''))
@@ -656,7 +656,7 @@ def donar(s):
 	html = s.get(s.urlBase + urlCiudad + idCiudad)
 	ciudad = getCiudad(html)
 	banner()
-	
+
 	madera = getRescursosDisponibles(html)[0]
 	almacenamiento = getCapacidadDeAlmacenamiento(html)
 
@@ -679,7 +679,7 @@ def donar(s):
 	tipo = ['resource', 'tradegood']
 	print('Madera disopnible:{} / {}\n'.format(addPuntos(madera), addPuntos(almacenamiento)))
 
-	if aserraderoOk is True and bienOk is True:	
+	if aserraderoOk is True and bienOk is True:
 		msg = 'Aserradero(1) o ' + bien + '(2)?:'
 		tipoDonacion = read()(msg=msg)
 		while tipoDonacion != '1' and tipoDonacion != '2':
@@ -885,22 +885,6 @@ def setInfoSignal(s, info): # el proceso explica su funcion por stdout
 	def _printInfo(signum, frame):
 		print(info)
 	signal.signal(signal.SIGUSR1, _printInfo) # kill -SIGUSR1 pid
-
-def getEnvios(s):
-	html = s.get()
-	idCiudad = getCiudad(html)['id']
-	urlBarcos = 'view=merchantNavy&backgroundView=city&currentCityId={}&templateView=merchantNavy&actionRequest={}&ajax=1'.format(idCiudad, s.token())
-	html = s.post(s.urlBase + urlBarcos)
-	print(html)
-
-
-servidores = ['ar', 'br', 'dk', 'de', 'es', 'fr', 'it', 'lv', 'lt', 'hu', 'mx', 'nl', 'no', 'pl', 'pt', 'ro', 'si', 'fi', 'se', 'tr', 'us', 'en', 'gr', 'ru', 'rs', 'il', 'ae', 'tw']
-mundos = {'Alpha': '1', 'Beta': '2', 'Gamma': '3', 'Delta': '4', 'Epsilon': '5', 'Pi': '6', 'Rho': '7', 'Demeter': '8', 'Dionysos': '9', 'Eirene': '10', 'Eunomia': '11', 'Gaia': '12', 'Hades': '13', 'Hephaistos': '14'}
-
-def getMundosFavoritos(s):
-	with open(servidoresFile, 'r') as filehandler:
-		texto = filehandler.read()
-	return re.findall(r'(\w{2})\s(\w+)', texto)
 
 def getSesion():
 	banner()
