@@ -847,8 +847,7 @@ def menu(s):
 (4) Donar
 (5) Buscar espacios nuevos
 (6) Entrar diariamente
-(7) Alertar ataques
-"""
+(7) Alertar ataques"""
 	print(mnu)
 	eleccion = read(min=0, max=7)
 	if eleccion != 0:
