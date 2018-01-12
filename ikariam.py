@@ -715,40 +715,6 @@ def forkear(s):
 		esPadre = False
 	return esPadre
 
-servidores = ['ar', 'br', 'dk', 'de', 'es', 'fr', 'it', 'lv', 'lt', 'hu', 'mx', 'nl', 'no', 'pl', 'pt', 'ro', 'si', 'fi', 'se', 'tr', 'us', 'en', 'gr', 'ru', 'rs', 'il', 'ae', 'tw']
-mundos = {'Alpha': '1', 'Beta': '2', 'Gamma': '3', 'Delta': '4', 'Epsilon': '5', 'Pi': '6', 'Rho': '7', 'Demeter': '8', 'Dionysos': '9', 'Eirene': '10', 'Eunomia': '11', 'Gaia': '12', 'Hades': '13', 'Hephaistos': '14'}
-
-def getMundosFavoritos(s):
-	with open(servidoresFile, 'r') as filehandler:
-		texto = filehandler.read()
-	return re.findall(r'(\w{2})\s(\w+)', texto)
-
-def getSesion():
-	banner()
-	servidores = {'1': 'ar', '2': 'es', '3': 'us'}
-	for i in range(1, len(servidores) + 1):
-		print('({:d}) .{}'.format(i, servidores[str(i)]))
-	eleccion = read(msg='Servidor:')
-	while eleccion < '0' or eleccion > str(len(servidores)):
-		eleccion = read(msg='Servidor:')
-	mundo = read(msg='Mundo:')
-	while mundo != '1' and mundo != '2' and mundo != '3' and mundo != '4' and mundo != '5':
-		print(('ingrese 1 para alpha , 2 para beta.. (5 max)'))
-		mundo = read(msg='Mundo:')
-	urlBase = 'https://s' + mundo + '-' + servidores[eleccion] + '.ikariam.gameforge.com/index.php?'
-	uni_url = re.search(r'https://(.*?)/index\.php\?', urlBase).group(1)
-	usuario = read(msg='Usuario:')
-	password = getpass.getpass("Contraseña:")
-	if sesionActiva(usuario, urlBase):
-		password2 = getpass.getpass('Confirme:')
-		while password != password2:
-			print('Las contraseñas no coinciden')
-			password = getpass.getpass('Contraseña:')
-			password2 = getpass.getpass('Confirme:')
-	headers = {'Host': uni_url, 'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:54.0) Gecko/20100101 Firefox/54.0','Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Encoding':'gzip, deflate, br', 'Content-Type':'application/x-www-form-urlencoded', 'Referer': urlBase}
-	payload = {'uni_url': uni_url, 'name': usuario, 'password': password, 'pwat_uid': '', 'pwat_checksum': '' ,'startPageShown' : '1' , 'detectedDevice' : '1' , 'kid':''}
-	return Sesion(urlBase, payload, headers)
-
 def getIdsdeIslas(s):
 	(idsCiudades, ciudades) = getIdsDeCiudades(s)
 	idsIslas = set()
@@ -927,6 +893,44 @@ def getEnvios(s):
 	urlBarcos = 'view=merchantNavy&backgroundView=city&currentCityId={}&templateView=merchantNavy&actionRequest={}&ajax=1'.format(idCiudad, s.token())
 	html = s.post(s.urlBase + urlBarcos)
 	print(html)
+
+
+servidores = ['ar', 'br', 'dk', 'de', 'es', 'fr', 'it', 'lv', 'lt', 'hu', 'mx', 'nl', 'no', 'pl', 'pt', 'ro', 'si', 'fi', 'se', 'tr', 'us', 'en', 'gr', 'ru', 'rs', 'il', 'ae', 'tw']
+mundos = {'Alpha': '1', 'Beta': '2', 'Gamma': '3', 'Delta': '4', 'Epsilon': '5', 'Pi': '6', 'Rho': '7', 'Demeter': '8', 'Dionysos': '9', 'Eirene': '10', 'Eunomia': '11', 'Gaia': '12', 'Hades': '13', 'Hephaistos': '14'}
+
+def getMundosFavoritos(s):
+	with open(servidoresFile, 'r') as filehandler:
+		texto = filehandler.read()
+	return re.findall(r'(\w{2})\s(\w+)', texto)
+
+def getSesion():
+	banner()
+	servidores = ['ar', 'br', 'es', 'fr', 'it', 'mx', 'pt', 'us', 'en']
+	i = 0
+	for srv in servidores:
+		i += 1
+		print('({:d}) .{}'.format(i, srv))
+	servidor = read(msg='Servidor:', min=1, max=len(servidores))
+	banner()
+	mundos = ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 'Pi', 'Rho', 'Demeter', 'Dionysos', 'Eirene', 'Eunomia', 'Gaia', 'Hades', 'Hephaistos']
+	i = 0
+	for mundo in mundos:
+		i += 1
+		print('({:d}) .{}'.format(i, mundo))
+	mundo = read(msg='Mundo:', min=1, max=len(mundos))
+	urlBase = 'https://s' + mundo + '-' + servidores[servidor-1] + '.ikariam.gameforge.com/index.php?'
+	uni_url = re.search(r'https://(.*?)/index\.php\?', urlBase).group(1)
+	usuario = read(msg='Usuario:')
+	password = getpass.getpass("Contraseña:")
+	if sesionActiva(usuario, urlBase):
+		password2 = getpass.getpass('Confirme:')
+		while password != password2:
+			print('Las contraseñas no coinciden')
+			password = getpass.getpass('Contraseña:')
+			password2 = getpass.getpass('Confirme:')
+	headers = {'Host': uni_url, 'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:54.0) Gecko/20100101 Firefox/54.0','Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Encoding':'gzip, deflate, br', 'Content-Type':'application/x-www-form-urlencoded', 'Referer': urlBase}
+	payload = {'uni_url': uni_url, 'name': usuario, 'password': password, 'pwat_uid': '', 'pwat_checksum': '' ,'startPageShown' : '1' , 'detectedDevice' : '1' , 'kid':''}
+	return Sesion(urlBase, payload, headers)
 
 def main():
 	checkFile()
