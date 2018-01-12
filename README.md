@@ -21,3 +21,6 @@ Sus funcionalidades son:
 	Para aquellos que no quieren que pase ni un dia sin que su cuenta inicie sesion.
 7) Alertar ataques
 	Nos alerta por telegram si nos van a atacar, de manera similar que con 5), se necesita configurar telegram.
+
+Las contraseñas nunca se almacenan, al terminar el proceso las mismas se pierden.
+Cuando uno setea una accion, la misma se realiza en un proceso de fondo, el cual va a correr hasta que termine o hasta que la computadora se apague.
