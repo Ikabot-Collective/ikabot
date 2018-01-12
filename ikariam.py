@@ -919,6 +919,7 @@ def getSesion():
 	mundo = read(msg='Mundo:', min=1, max=len(mundos))
 	urlBase = 'https://s' + str(mundo) + '-' + servidores[servidor-1] + '.ikariam.gameforge.com/index.php?'
 	uni_url = re.search(r'https://(.*?)/index\.php\?', urlBase).group(1)
+	banner()
 	usuario = read(msg='Usuario:')
 	password = getpass.getpass("Contraseña:")
 	if sesionActiva(usuario, urlBase):
