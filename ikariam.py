@@ -391,7 +391,11 @@ def menuEdificios(prints, ciudad, posiciones):
 	if ciudad['position'][posicion]['isBusy']:
 		nivelActual += 1
 
-	nivelFinal = read(min=nivelActual+1, msg='subir al nivel:')
+	banner()
+	print('edificio:{}'.format(ciudad['position'][posicion]['name']))
+	print('nivel actual:{}'.format(nivelActual))
+
+	nivelFinal = read(min=nivelActual, msg='subir al nivel:')
 
 	niveles = nivelFinal - nivelActual
 	rta = []
