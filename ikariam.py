@@ -927,6 +927,8 @@ def main():
 	try:
 		menu(s)
 		os.system('clear')
+	except KeyboardInterrupt:
+		pass
 	finally:
 		s.updateCookieFile(salida=True)
 
