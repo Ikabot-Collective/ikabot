@@ -156,8 +156,11 @@ def read(min=None, max=None, digit=False, msg=prompt): # lee input del usuario
 			return _invalido()
 	return leido
 
-def banner():
+def clear():
 	os.system('clear')
+
+def banner():
+	clear()
 	bner = """
 	`7MMF'  `7MM                       `7MM\"""Yp,                 mm    
 	  MM      MM                         MM    Yb                 MM    
@@ -857,6 +860,8 @@ def menu(s):
 	if eleccion != 0:
 		menu_actions[eleccion](s)
 		menu(s)
+	else:
+		clear()
 
 menu_actions = {
 	1: subirEdificios,
@@ -922,11 +927,13 @@ def getSesion():
 
 def main():
 	checkFile()
-	s = getSesion()
+	try:
+		s = getSesion()
+	except KeyboardInterrupt:
+		return
 	setSignalsHandlers(s)
 	try:
 		menu(s)
-		os.system('clear')
 	except KeyboardInterrupt:
 		pass
 	finally:
