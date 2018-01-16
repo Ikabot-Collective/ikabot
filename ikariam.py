@@ -927,17 +927,15 @@ def getSesion():
 
 def main():
 	checkFile()
-	try:
-		s = getSesion()
-	except KeyboardInterrupt:
-		return
-	setSignalsHandlers(s)
-	try:
-		menu(s)
-	except KeyboardInterrupt:
-		pass
-	finally:
-		s.updateCookieFile(salida=True)
+	with getSesion() as s:
+		setSignalsHandlers(s)
+		try:
+			menu(s)
+		finally:
+			s.updateCookieFile(salida=True)
 
 if __name__ == "__main__":
-	main()
+	try:
+		main()
+	except KeyboardInterrupt:
+		pass
