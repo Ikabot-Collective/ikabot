@@ -1,10 +1,9 @@
-# ikabot
+## ikabot
 
-Ikabot es un script facilita mucho el crecer rapido en ikariam.
+_Es como usar una cuenta premium solo que con más funcionalidad y sin gastar ambrosia._
 
-_Es como usar una cuenta premium solo que con más funcionalidad y sin gastar una sola ambrosia._
+### Funcionalidades:
 
-Sus funcionalidades son:
 1) Lista de construcción
 
 	Uno puede configurar que el script suba N niveles de un edificio cualquiera.
@@ -32,13 +31,13 @@ Sus funcionalidades son:
 	Para aquellos que no quieren que pase ni un dia sin que su cuenta inicie sesion.
 7) Alertar ataques
 
-	Nos alerta por telegram si nos van a atacar, de manera similar que con 5), se necesita configurar telegram.
+	Nos alerta por telegram si nos van a atacar, de manera similar que con 5., se necesita configurar telegram.
 
 Cuando uno setea una accion, la misma se realiza en un proceso de fondo, el cual va a correr hasta que termine o hasta que la computadora se apague.
 
 Uno puede entrar en la cuenta sin problemas aun si hay un proceso que esta accediendola periodicamente (subiendo un edificio por ejemplo).
 
-### Como usarlo:
+### Instalación:
 
 simplemente ejecuten
 
