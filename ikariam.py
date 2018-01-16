@@ -927,12 +927,12 @@ def getSesion():
 
 def main():
 	checkFile()
-	with getSesion() as s:
-		setSignalsHandlers(s)
-		try:
-			menu(s)
-		finally:
-			s.updateCookieFile(salida=True)
+	s = getSesion()
+	setSignalsHandlers(s)
+	try:
+		menu(s)
+	finally:
+		s.updateCookieFile(salida=True)
 
 if __name__ == "__main__":
 	try:
