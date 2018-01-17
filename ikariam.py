@@ -525,6 +525,11 @@ def menuRutaComercial(s):
 		print('¿Proceder? [Y/n]')
 		rta = read()
 		if rta.lower() == 'n':
+			disponible[0] += md
+			disponible[1] += vn
+			disponible[2] += mr
+			disponible[3] += cr
+			disponible[4] += az
 			continue
 		ruta = (idCiudadOrigen, idCiudadDestino, idIsla, md, vn, mr, cr, az)
 		rutas.append(ruta)
