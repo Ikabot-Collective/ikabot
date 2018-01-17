@@ -511,26 +511,21 @@ def menuRutaComercial(s):
 		print('Madera ' + addPuntos(disponible[0]) + ' Vino ' + addPuntos(disponible[1]) + ' Marmol ' + addPuntos(disponible[2]) + ' Cristal ' + addPuntos(disponible[3]) + ' Azufre ' + addPuntos(disponible[4]))
 		print('Enviar:')
 		md = pedirValor('Madera: ', disponible[0])
-		disponible[0] -= md
 		vn = pedirValor('Vino:   ', disponible[1])
-		disponible[1] -= vn
 		mr = pedirValor('Marmol: ', disponible[2])
-		disponible[2] -= mr
 		cr = pedirValor('Cristal:', disponible[3])
-		disponible[3] -= cr
 		az = pedirValor('Azufre: ', disponible[4])
-		disponible[4] -= az
 		banner()
 		print('Por enviar de {} a {}\nMadera {} Vino {} Marmol {} Cristal {} Azufre {}'.format(ciudadO['cityName'], ciudadD['cityName'], addPuntos(md), addPuntos(vn), addPuntos(mr), addPuntos(cr), addPuntos(az)))
 		print('¿Proceder? [Y/n]')
 		rta = read()
 		if rta.lower() == 'n':
-			disponible[0] += md
-			disponible[1] += vn
-			disponible[2] += mr
-			disponible[3] += cr
-			disponible[4] += az
 			continue
+		disponible[0] -= md
+		disponible[1] -= vn
+		disponible[2] -= mr
+		disponible[3] -= cr
+		disponible[4] -= az
 		ruta = (idCiudadOrigen, idCiudadDestino, idIsla, md, vn, mr, cr, az)
 		rutas.append(ruta)
 		print('¿Realizar otro envio? [y/N]')
