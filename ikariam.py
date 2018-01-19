@@ -133,9 +133,9 @@ class Sesion:
 
 def read(min=None, max=None, digit=False, msg=prompt): # lee input del usuario
 	def _invalido():
-		sys.stdout.write("\033[F\r") # Cursor up one line
+		sys.stdout.write('\033[F\r') # Cursor up one line
 		blank = ' ' * len(str(leido) + msg)
-		sys.stdout.write(blank + "\r")
+		sys.stdout.write(blank + '\r')
 		return read(min, max, digit, msg)
 
 	leido = input(msg)
@@ -736,7 +736,7 @@ def sendToBot(msg):
 	with open(telegramFile, 'r') as filehandler:
 		text = filehandler.read()
 		(botToken, chatId) = text.splitlines()
-		requests.get('https://api.telegram.org/bot{}/sendMessage'.format(botToken), params={ "chat_id": chatId, "text": msg })
+		requests.get('https://api.telegram.org/bot{}/sendMessage'.format(botToken), params={'chat_id': chatId, 'text': msg})
 
 def botValido(s):
 	with open(telegramFile, 'r') as filehandler:
@@ -915,7 +915,7 @@ def getSesion():
 	uni_url = re.search(r'https://(.*?)/index\.php\?', urlBase).group(1)
 	banner()
 	usuario = read(msg='Usuario:')
-	password = getpass.getpass("Contraseña:")
+	password = getpass.getpass('Contraseña:')
 	if sesionActiva(usuario, urlBase):
 		password2 = getpass.getpass('Confirme:')
 		while password != password2:
@@ -935,7 +935,7 @@ def main():
 	finally:
 		s.updateCookieFile(salida=True)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 	try:
 		main()
 	except KeyboardInterrupt:
