@@ -903,6 +903,7 @@ def getSesion():
 		i += 1
 		print('({:d}) .{}'.format(i, srv))
 	servidor = read(msg='Servidor:', min=1, max=len(servidores))
+	servidor = servidores[servidor-1]
 	banner()
 	mundos = ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 'Pi', 'Rho', 'Demeter', 'Dionysos', 'Eirene', 'Eunomia', 'Gaia', 'Hades', 'Hephaistos']
 	i = 0
@@ -910,7 +911,7 @@ def getSesion():
 		i += 1
 		print('({:d}) {}'.format(i, mundo))
 	mundo = read(msg='Mundo:', min=1, max=len(mundos))
-	urlBase = 'https://s' + str(mundo) + '-' + servidores[servidor-1] + '.ikariam.gameforge.com/index.php?'
+	urlBase = 'https://s{:d}-{}.ikariam.gameforge.com/index.php?'.format(mundo, servidor)
 	uni_url = re.search(r'https://(.*?)/index\.php\?', urlBase).group(1)
 	banner()
 	usuario = read(msg='Usuario:')
