@@ -131,12 +131,12 @@ class Sesion:
 		self.updateCookieFile(salida=True)
 		os._exit(0)
 
-def read(min=None, max=None, digit=False, msg=prompt): # lee input del usuario
+def read(min=None, max=None, digit=False, msg=prompt, values=None): # lee input del usuario
 	def _invalido():
 		sys.stdout.write('\033[F\r') # Cursor up one line
 		blank = ' ' * len(str(leido) + msg)
 		sys.stdout.write(blank + '\r')
-		return read(min, max, digit, msg)
+		return read(min, max, digit, msg, values)
 
 	leido = input(msg)
 
@@ -154,6 +154,8 @@ def read(min=None, max=None, digit=False, msg=prompt): # lee input del usuario
 			return _invalido()
 	if max is not None and leido > max:
 			return _invalido()
+	if values is not None and leido not in values:
+		return _invalido()
 	return leido
 
 def clear():
@@ -480,9 +482,11 @@ def getProduccion(s, idCiudad):
 	return (wood, good, typeGood)
 
 def pedirValor(text, max):
-	var = read(msg=text)
-	while (var.isdigit is False and var != '') or (var.isdigit is True and int(var) > max):
-		var = read(msg=text)
+	vals = list()
+	for n in range(0, max+1):
+		vals.append(str(n))
+	vals.append('')
+	var = read(msg=prompt, values=vals)
 	if var == '':
 		var = 0
 	return int(var)
