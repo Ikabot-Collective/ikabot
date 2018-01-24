@@ -343,6 +343,12 @@ def getIdsDeCiudades(s):
 
 def getIdCiudad(s):
 	(ids, ciudades) = getIdsDeCiudades(s)
+	maxNombre = 0
+	for unId in ids:
+		largo = len(ciudades[unId]['name'])
+		if largo > maxNombre:
+			maxNombre = largo
+	pad = lambda name: ' ' * (maxNombre - len(name) + 2)
 	bienes = {'1': '(V)', '2': '(M)', '3': '(C)', '4': '(A)'}
 	prints = []
 	i = 0
@@ -350,9 +356,11 @@ def getIdCiudad(s):
 		i += 1
 		tradegood = ciudades[unId]['tradegood']
 		bien = bienes[tradegood]
-		prints.append(str(i) + ': ' + ciudades[unId]['name'] + ' \t' + bien)
-	eleccion = menuCiudades(prints)
-	return ids[int(eleccion) - 1]
+		nombre = ciudades[unId]['name']
+		num = ' ' + str(i) if i < 10 else str(i)
+		prints.append('{}: {}{}{}'.format(num, nombre, pad(nombre), bien))
+	eleccion = int(menuCiudades(prints)) - 1
+	return ids[eleccion]
 
 def menuCiudades(ciudades):
 	for textoCiudad in ciudades:
