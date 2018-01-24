@@ -358,14 +358,10 @@ def getIdCiudad(s):
 		bien = bienes[tradegood]
 		nombre = ciudades[unId]['name']
 		num = ' ' + str(i) if i < 10 else str(i)
-		prints.append('{}: {}{}{}'.format(num, nombre, pad(nombre), bien))
-	eleccion = int(menuCiudades(prints)) - 1
+		print('{}: {}{}{}'.format(num, nombre, pad(nombre), bien))
+	eleccion = read(min=1, max=i)
+	eleccion = int(eleccion) - 1
 	return ids[eleccion]
-
-def menuCiudades(ciudades):
-	for textoCiudad in ciudades:
-		print(textoCiudad)
-	return read(min=1, max=len(ciudades))
 
 def getEdificios(s, idCiudad):
 	html = s.get(s.urlBase + urlCiudad + idCiudad)
