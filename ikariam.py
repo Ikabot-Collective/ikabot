@@ -392,10 +392,10 @@ def menuEdificios(prints, ciudad, posiciones):
 		print(textoEdificio)
 
 	eleccion = read(min=0, max=len(prints)-1)
-	posicion = posiciones[eleccion]
+
 	if eleccion == 0:
 		return []
-
+	posicion = posiciones[eleccion]
 	nivelActual = int(ciudad['position'][posicion]['level'])
 	if ciudad['position'][posicion]['isBusy']:
 		nivelActual += 1
@@ -490,7 +490,7 @@ def pedirValor(text, max):
 	for n in range(0, max+1):
 		vals.append(str(n))
 	vals.append('')
-	var = read(msg=prompt, values=vals)
+	var = read(msg=text, values=vals)
 	if var == '':
 		var = 0
 	return int(var)
