@@ -503,7 +503,7 @@ def menuRutaComercial(s):
 	rutas = []
 	while True:
 		banner()
-		print('\nCiudad de destino')
+		print('Ciudad de destino')
 		idCiudadDestino = getIdCiudad(s)
 		if idCiudadOrigen == idCiudadDestino:
 			continue
