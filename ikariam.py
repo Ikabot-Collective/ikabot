@@ -18,7 +18,7 @@ import subprocess
 import signal
 
 cookieFile = '/tmp/.cookies.txt'
-path = re.search(r'(.*/).*', sys.argv[0]).group(1)
+path = os.path.dirname(os.path.abspath(__file__))
 telegramFile = path + '.telegram.txt'
 urlCiudad = 'view=city&cityId='
 urlIsla = 'view=island&islandId='
