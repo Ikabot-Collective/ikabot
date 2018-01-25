@@ -854,6 +854,7 @@ def entrarDiariamente(s):
 
 def menu(s):
 	banner()
+	menu_actions = [subirEdificios, menuRutaComercial, getStatus, donar, buscarEspacios, entrarDiariamente, alertarAtaques]
 	mnu="""
 (0) Salir
 (1) Lista de construcción
@@ -866,20 +867,10 @@ def menu(s):
 	print(mnu)
 	eleccion = read(min=0, max=7)
 	if eleccion != 0:
-		menu_actions[eleccion](s)
+		menu_actions[eleccion - 1](s)
 		menu(s)
 	else:
 		clear()
-
-menu_actions = {
-	1: subirEdificios,
-	2: menuRutaComercial,
-	3: getStatus,
-	4: donar,
-	5: buscarEspacios,
-	6: entrarDiariamente,
-	7: alertarAtaques
-}
 
 def checkFile(): # si no existe lo creo
 	run('touch ' + cookieFile)
