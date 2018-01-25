@@ -865,7 +865,8 @@ def menu(s):
 (6) Entrar diariamente
 (7) Alertar ataques"""
 	print(mnu)
-	eleccion = read(min=0, max=7)
+	entradas = len(mnu.split('\n')) - 2
+	eleccion = read(min=0, max=entradas)
 	if eleccion != 0:
 		menu_actions[eleccion - 1](s)
 		menu(s)
