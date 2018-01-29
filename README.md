@@ -46,4 +46,15 @@ simplemente ejecuten
 	
 y con el comando `ikabot` podran ejecutar el script.
 
+### Dependencias:
+
+Para que ikabot funcione debe estar instalado python3 y el modulo externo requests
+#### Python 3
+Probablemente se encuentre instalado por defecto en su sistema.
+https://www.python.org/download/releases/3.0/
+#### Requests
+Se encarga de realizar los post, gets y el manejo de las cookies.
+http://docs.python-requests.org/en/master/
+
 Por el momento no funciona en windows, aunque si se tiene windows 10 se lo puede ejecutar en el bash de ubuntu.
+
