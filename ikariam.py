@@ -17,6 +17,8 @@ import random
 import subprocess
 import signal
 
+ids = None
+ciudades = None
 cookieFile = '/tmp/.cookies.txt'
 telegramFile = '.telegram.txt'
 urlCiudad = 'view=city&cityId='
@@ -330,15 +332,19 @@ def subirEdificios(s):
 	s.bye()
 
 def getIdsDeCiudades(s):
-	html = s.get()
-	ciudades = re.search(r'relatedCityData:\sJSON\.parse\(\'(.+?),\\"additionalInfo', html).group(1) + '}'
-	ciudades = ciudades.replace('\\', '')
-	ciudades = ciudades.replace('city_', '')
-	ciudades = json.loads(ciudades, strict=False)
-	ids = []
-	for ciudad in ciudades:
-		ids.append(ciudad)
-	return (sorted(ids), ciudades)
+	global ciudades
+	global ids
+	if ids is None or ciudades is None:
+		html = s.get()
+		ciudades = re.search(r'relatedCityData:\sJSON\.parse\(\'(.+?),\\"additionalInfo', html).group(1) + '}'
+		ciudades = ciudades.replace('\\', '')
+		ciudades = ciudades.replace('city_', '')
+		ciudades = json.loads(ciudades, strict=False)
+		ids = []
+		for ciudad in ciudades:
+			ids.append(ciudad)
+	ids = sorted(ids)
+	return (ids, ciudades)
 
 def getIdCiudad(s):
 	(ids, ciudades) = getIdsDeCiudades(s)
