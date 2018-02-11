@@ -32,6 +32,9 @@ class Sesion:
 		self.urlBase = urlBase
 		self.payload = payload
 		self.username = payload['name']
+		data = re.search(r'https://(s\d+)-(\w+)', urlBase)
+		self.mundo = data.group(1)
+		self.servidor = data.group(2)
 		self.headers = headers
 		self.getCookie()
 
@@ -745,7 +748,9 @@ def getIdsdeIslas(s):
 		idsIslas.add(idIsla)
 	return list(idsIslas)
 
-def sendToBot(msg):
+def sendToBot(msg, Token=False):
+	if Token is False:
+		msg = 'servidor:{}, mundo:{}, jugador:{}\n{}'.format(s.servidor, s.mundo, s.username, msg)
 	with open(telegramFile, 'r') as filehandler:
 		text = filehandler.read()
 		(botToken, chatId) = text.splitlines()
@@ -768,7 +773,7 @@ def botValido(s):
 		else:
 			return False
 	rand = random.randint(1000, 9999)
-	sendToBot('El token a ingresar es:{:d}'.format(rand))
+	sendToBot('El token a ingresar es:{:d}'.format(rand), Token=True)
 	print('Se envio un mensaje por telegram, lo recibió? [Y/n]')
 	rta = read()
 	if rta.lower() == 'n':
@@ -836,7 +841,7 @@ def alertarAtaques(s):
 		posted = s.post(url)
 		ataque = re.search(r'"military":{"link":.*?","cssclass":"normalalert"', posted)
 		if ataque is not None and fueAvisado is False:
-			msg = 'Estan por atacar a la cuenta {} !!'.format(s.username)
+			msg = 'Te están por atacar !!'
 			sendToBot(msg)
 			fueAvisado = True
 		elif ataque is None and fueAvisado is True:
