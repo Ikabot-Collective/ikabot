@@ -821,6 +821,7 @@ def buscarEspacios(s):
 					sendToBot(msg)
 			espacios_dict[idIsla] = espacios
 		time.sleep(1*60*60)
+	sendToBot('Ya no se buscarán más espacios.')
 	s.bye()
 
 def alertarAtaques(s):
@@ -847,6 +848,7 @@ def alertarAtaques(s):
 		elif ataque is None and fueAvisado is True:
 			fueAvisado = False
 		time.sleep(15*60)
+	sendToBot('Ya no se alertarán más ataques.')
 	s.bye()
 
 def entrarDiariamente(s):
