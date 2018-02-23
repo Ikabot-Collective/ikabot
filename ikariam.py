@@ -91,12 +91,12 @@ class Sesion:
 			self.updateCookieFile(nuevo=True)
 
 	def login(self):
+		self.updateCookieFile(vencimiento=True)
 		self.s = requests.Session() # s es la sesion de conexion
 		login = self.s.post(self.urlBase + 'action=loginAvatar&function=login', data=self.payload, headers=self.headers).text
 		expired = re.search(r'index\.php\?logout', login)
 		if expired is not None:
 			sys.exit('Usuario o contrasenia incorrecta')
-		self.updateCookieFile(vencimiento=True)
 		self.updateCookieFile(primero=True)
 
 	def expiroLaSesion(self):
