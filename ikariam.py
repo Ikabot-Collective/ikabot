@@ -804,25 +804,28 @@ def buscarEspacios(s):
 	setInfoSignal(s, info)
 	idIslas = getIdsdeIslas(s)
 	espacios_dict = {}
-	while True:
-		for idIsla in idIslas:
-			html = s.get(s.urlBase + urlIsla + idIsla)
-			isla = getIsla(html)
-			espacios = 0
-			for city in isla['cities']:
-				if city['type'] == 'empty':
-					espacios += 1
-			if idIsla in espacios_dict:
-				if espacios_dict[idIsla] < espacios:
-					msg = 'Alguien desaparecio en {} {}:{} {}'.format(tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
-					sendToBot(msg)
-				if espacios_dict[idIsla] > espacios:
-					msg = 'Alguien fundó en {} {}:{} {}'.format(tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
-					sendToBot(msg)
-			espacios_dict[idIsla] = espacios
-		time.sleep(1*60*60)
-	sendToBot('Ya no se buscarán más espacios.')
-	s.bye()
+	try:
+		while True:
+			for idIsla in idIslas:
+				html = s.get(s.urlBase + urlIsla + idIsla)
+				isla = getIsla(html)
+				espacios = 0
+				for city in isla['cities']:
+					if city['type'] == 'empty':
+						espacios += 1
+				if idIsla in espacios_dict:
+					if espacios_dict[idIsla] < espacios:
+						msg = 'Alguien desaparecio en {} {}:{} {}'.format(tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
+						sendToBot(msg)
+					if espacios_dict[idIsla] > espacios:
+						msg = 'Alguien fundó en {} {}:{} {}'.format(tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
+						sendToBot(msg)
+				espacios_dict[idIsla] = espacios
+			time.sleep(1*60*60)
+	except Exception as e:
+		msg = 'Ya no se buscarán más espacios.\n{}'.format(e.message)
+		sendToBot(msg)
+		s.bye()
 
 def alertarAtaques(s):
 	if botValido(s) is False:
@@ -835,23 +838,28 @@ def alertarAtaques(s):
 	info = '\nEspero por ataques cada 29 minutos\n'
 	setInfoSignal(s, info)
 	fueAvisado = False
-	while True:
-		html = s.get()
-		idCiudad = re.search(r'currentCityId:\s(\d+),', html).group(1)
-		url = s.urlBase + 'view=militaryAdvisor&oldView=city&oldBackgroundView=city&backgroundView=city&currentCityId={}&actionRequest={}&ajax=1'.format(idCiudad, s.token())
-		posted = s.post(url)
-		ataque = re.search(r'"military":{"link":.*?","cssclass":"normalalert"', posted)
-		if ataque is not None and fueAvisado is False:
-			msg = 'Te están por atacar !!'
-			sendToBot(msg)
-			fueAvisado = True
-		elif ataque is None and fueAvisado is True:
-			fueAvisado = False
-		time.sleep(15*60)
-	sendToBot('Ya no se alertarán más ataques.')
-	s.bye()
+	try:	
+		while True:
+			html = s.get()
+			idCiudad = re.search(r'currentCityId:\s(\d+),', html).group(1)
+			url = s.urlBase + 'view=militaryAdvisor&oldView=city&oldBackgroundView=city&backgroundView=city&currentCityId={}&actionRequest={}&ajax=1'.format(idCiudad, s.token())
+			posted = s.post(url)
+			ataque = re.search(r'"military":{"link":.*?","cssclass":"normalalert"', posted)
+			if ataque is not None and fueAvisado is False:
+				msg = 'Te están por atacar !!'
+				sendToBot(msg)
+				fueAvisado = True
+			elif ataque is None and fueAvisado is True:
+				fueAvisado = False
+			time.sleep(15*60)
+	except Exception as e:
+		msg = 'Ya no se alertarán más ataques.\n{}'.format(e.message)
+		sendToBot(msg)
+		s.bye()
 
 def entrarDiariamente(s):
+	if botValido(s) is False:
+		return
 	print('Se entrará todos los días automaticamente.')
 	read(msg='[Enter]')
 	esPadre = forkear(s)
@@ -859,10 +867,14 @@ def entrarDiariamente(s):
 		return
 	info = '\nEntro diariamente\n'
 	setInfoSignal(s, info)
-	while True:
-		s.get()
-		time.sleep(24*60*60)
-	s.bye()
+	try:
+		while True:
+			s.get()
+			time.sleep(24*60*60)
+	except Exception as e:
+		msg = 'Ya no se entrará todos los días.\n{}'.format(e.message)
+		sendToBot(msg)
+		s.bye()
 
 def menu(s):
 	banner()
