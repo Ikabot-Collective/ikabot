@@ -36,7 +36,7 @@ class Sesion:
 		self.mundo = data.group(1)
 		self.servidor = data.group(2)
 		self.headers = headers
-		self.getCookie()
+		self.login()
 
 	def token(self):
 		html = self.get()
@@ -96,6 +96,7 @@ class Sesion:
 		expired = re.search(r'index\.php\?logout', login)
 		if expired is not None:
 			sys.exit('Usuario o contrasenia incorrecta')
+		self.updateCookieFile(vencimiento=True)
 		self.updateCookieFile(primero=True)
 
 	def expiroLaSesion(self):
@@ -943,12 +944,6 @@ def getSesion():
 	banner()
 	usuario = read(msg='Usuario:')
 	password = getpass.getpass('Contraseña:')
-	if sesionActiva(usuario, urlBase):
-		password2 = getpass.getpass('Confirme:')
-		while password != password2:
-			print('Las contraseñas no coinciden')
-			password = getpass.getpass('Contraseña:')
-			password2 = getpass.getpass('Confirme:')
 	headers = {'Host': uni_url, 'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:54.0) Gecko/20100101 Firefox/54.0','Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Encoding':'gzip, deflate, br', 'Content-Type':'application/x-www-form-urlencoded', 'Referer': urlBase}
 	payload = {'uni_url': uni_url, 'name': usuario, 'password': password, 'pwat_uid': '', 'pwat_checksum': '' ,'startPageShown' : '1' , 'detectedDevice' : '1' , 'kid':''}
 	return Sesion(urlBase, payload, headers)
