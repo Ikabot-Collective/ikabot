@@ -525,7 +525,7 @@ def menuRutaComercial(s):
 		idIsla = re.search(r'"islandId":"(\d+)"', htmlD).group(1)
 		banner()
 		print('Disponible:')
-		print('Madera ' + addPuntos(disponible[0]) + ' Vino ' + addPuntos(disponible[1]) + ' Marmol ' + addPuntos(disponible[2]) + ' Cristal ' + addPuntos(disponible[3]) + ' Azufre ' + addPuntos(disponible[4]))
+		print('Madera {} Vino {} Marmol {} Cristal {} Azufre {}'.format(addPuntos(disponible[0]), addPuntos(disponible[1]), addPuntos(disponible[2]), addPuntos(disponible[3]), addPuntos(disponible[4])))
 		print('Enviar:')
 		md = pedirValor('Madera: ', disponible[0])
 		vn = pedirValor('Vino:   ', disponible[1])
@@ -590,6 +590,9 @@ def diasHorasMinutos(segundosTotales):
 	minutos = int(segundosTotales / Decimal(60))
 	return (dias, horas, minutos)
 
+def enter():
+	getpass.getpass('\n[Enter]')
+
 def getStatus(s):
 	banner()
 	tipoCiudad = [bcolors.ENDC, bcolors.HEADER, bcolors.STONE, bcolors.BLUE, bcolors.WARNING]
@@ -650,7 +653,7 @@ def getStatus(s):
 			if edificio['isBusy'] is True:
 				level = level + '+'
 			print('lv:{}\t{}{}{}'.format(level, color, edificio['name'], bcolors.ENDC))
-		getpass.getpass('\n[Enter]')
+		enter()
 		print('')
 
 def printEstadoMina(s, url, bien):
@@ -781,13 +784,13 @@ def botValido(s):
 		with open(telegramFile, 'w') as file:
 			pass
 		print('Revíse las credenciales y vuelva a proveerlas.')
-		read(msg='[Enter]')
+		enter()
 		return False
 	else:
 		recibido = read(digit=True, msg='Ingrese el token recibido mediante telegram:')
 		if rand != recibido:
 			print('Token incorrecto')
-			read(msg='[Enter]')
+			enter()
 			return False
 		else:
 			print('El token es correcto.')
@@ -797,7 +800,7 @@ def buscarEspacios(s):
 	if botValido(s) is False:
 		return
 	print('Se buscarán espacios nuevos cada hora.')
-	read(msg='[Enter]')
+	enter()
 	esPadre = forkear(s)
 	if esPadre is True:
 		return
@@ -832,7 +835,7 @@ def alertarAtaques(s):
 	if botValido(s) is False:
 		return
 	print('Se buscarán ataques cada 15 minutos.')
-	read(msg='[Enter]')
+	enter()
 	esPadre = forkear(s)
 	if esPadre is True:
 		return
@@ -862,7 +865,7 @@ def entrarDiariamente(s):
 	if botValido(s) is False:
 		return
 	print('Se entrará todos los días automaticamente.')
-	read(msg='[Enter]')
+	enter()
 	esPadre = forkear(s)
 	if esPadre is True:
 		return
@@ -898,7 +901,7 @@ def menu(s):
 	else:
 		clear()
 
-def checkFiles():
+def inicializar():
 	path = os.path.abspath(__file__)
 	path = os.path.dirname(path)
 	os.chdir(path)
@@ -949,7 +952,7 @@ def getSesion():
 	return Sesion(urlBase, payload, headers)
 
 def main():
-	checkFiles()
+	inicializar()
 	s = getSesion()
 	setSignalsHandlers(s)
 	try:
