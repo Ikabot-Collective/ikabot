@@ -726,22 +726,6 @@ def donar(s):
 	cantidad = read(min=0, max=int(madera), msg='Cantidad:')
 	s.post(s.urlBase, {'islandId': idIsla, 'type': tipo, 'action': 'IslandScreen', 'function': 'donate', 'donation': cantidad, 'backgroundView': 'island', 'templateView': 'resource', 'actionRequest': s.token(), 'ajax': '1'})
 
-def run(command):
-	return subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
-
-def forkear(s):
-	newpid = os.fork()
-	if newpid != 0:
-		esPadre = True
-		s.updateCookieFile(nuevo=True)
-		newpid = str(newpid)
-		run('kill -SIGSTOP ' + newpid)
-		run('bg ' + newpid)
-		run('disown ' + newpid)
-	else:
-		esPadre = False
-	return esPadre
-
 def getIdsdeIslas(s):
 	(idsCiudades, ciudades) = getIdsDeCiudades(s)
 	idsIslas = set()
@@ -880,6 +864,22 @@ def entrarDiariamente(s):
 		sendToBot(msg)
 		s.bye()
 
+def run(command):
+	return subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
+
+def forkear(s):
+	newpid = os.fork()
+	if newpid != 0:
+		esPadre = True
+		s.updateCookieFile(nuevo=True)
+		newpid = str(newpid)
+		run('kill -SIGSTOP ' + newpid)
+		run('bg ' + newpid)
+		run('disown ' + newpid)
+	else:
+		esPadre = False
+	return esPadre
+
 def menu(s):
 	banner()
 	menu_actions = [subirEdificios, menuRutaComercial, getStatus, donar, buscarEspacios, entrarDiariamente, alertarAtaques]
@@ -961,6 +961,8 @@ def main():
 	setSignalsHandlers(s)
 	try:
 		menu(s)
+	except:
+		raise
 	finally:
 		s.updateCookieFile(salida=True)
 
@@ -968,4 +970,4 @@ if __name__ == '__main__':
 	try:
 		main()
 	except KeyboardInterrupt:
-		pass
+		clear()
