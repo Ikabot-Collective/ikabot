@@ -900,7 +900,7 @@ def menu(s):
 			menu_actions[eleccion - 1](s)
 		except KeyboardInterrupt:
 			pass
-		finally
+		finally:
 			menu(s)
 	else:
 		clear()
