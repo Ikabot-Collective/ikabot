@@ -16,7 +16,7 @@ import getpass
 import random
 import subprocess
 import signal
- 
+
 ids = None
 ciudades = None
 cookieFile = '/tmp/.cookies.txt'
@@ -82,13 +82,13 @@ class Sesion:
 
 	def getCookie(self):
 		fileInfo = getFileInfo(self.username, self.urlBase)[0]
-		if fileInfo is None:
-			self.login()
-		else:
+		if fileInfo:
 			cookie_dict = {'PHPSESSID': fileInfo.group(2), 'ikariam': fileInfo.group(3), 'ikariam_loginMode': '0'}
 			self.s = requests.Session()
 			requests.cookies.cookiejar_from_dict(cookie_dict, cookiejar=self.s.cookies, overwrite=True)
 			self.updateCookieFile(nuevo=True)
+		else:
+			self.login()
 
 	def login(self):
 		self.updateCookieFile(vencimiento=True)
