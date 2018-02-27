@@ -920,7 +920,7 @@ def create_handler(s):
 	return _handler
 
 def setSignalsHandlers(s):
-	signals = [signal.SIGHUP, signal.SIGINT, signal.SIGQUIT, signal.SIGABRT, signal.SIGTERM]
+	signals = [signal.SIGHUP, signal.SIGQUIT, signal.SIGABRT, signal.SIGTERM]
 	for sgn in signals:
 		signal.signal(sgn, create_handler(s))
 
@@ -965,7 +965,4 @@ def main():
 		s.updateCookieFile(salida=True)
 
 if __name__ == '__main__':
-	try:
-		main()
-	except KeyboardInterrupt:
-		pass
+	main()
