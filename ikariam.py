@@ -16,7 +16,7 @@ import getpass
 import random
 import subprocess
 import signal
-
+ 
 ids = None
 ciudades = None
 cookieFile = '/tmp/.cookies.txt'
@@ -226,11 +226,11 @@ def getIsla(html):
 
 	remove = []
 
-	sub = re.search(r'(,"wonderName":".+?),"cities', isla)
-	remove.append(sub.group(1))
+	sub = re.search(r'(,"wonderName":".+?),"cities', isla).group(1)
+	remove.append(sub)
 
-	sub = re.search(r',"type":\d', isla)
-	remove.append(sub.group())
+	sub = re.search(r',"type":\d', isla).group()
+	remove.append(sub)
 
 	quitar = re.search(r'(,"barbarians[\s\S]*?),"scores"', isla).group(1)
 
@@ -896,8 +896,12 @@ def menu(s):
 	entradas = len(mnu.split('\n')) - 2
 	eleccion = read(min=0, max=entradas)
 	if eleccion != 0:
-		menu_actions[eleccion - 1](s)
-		menu(s)
+		try:
+			menu_actions[eleccion - 1](s)
+		except KeyboardInterrupt:
+			pass
+		finally
+			menu(s)
 	else:
 		clear()
 
