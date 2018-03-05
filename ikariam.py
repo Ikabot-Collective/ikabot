@@ -899,8 +899,6 @@ def menu(s):
 		try:
 			menu_actions[eleccion - 1](s)
 		except KeyboardInterrupt:
-			pass
-		finally:
 			menu(s)
 	else:
 		clear()
