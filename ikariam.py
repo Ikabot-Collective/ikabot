@@ -314,12 +314,53 @@ def subirEdificio(s, idCiudad, posicion):
 	url = s.urlBase + 'action=CityScreen&function=upgradeBuilding&actionRequest={}&cityId={}&position={:d}&level={}&backgroundView=city&templateView={}&ajax=1'.format(s.token(), idCiudad, posicion, edificio['level'], edificio['building'])
 	s.post(url)
 
+def getReductores(ciudad):
+	(carpinteria, oficina, prensa, optico, area) = (0, 0, 0, 0, 0)
+	for edificio in ciudad['position']:
+		if edificio['name'] != 'empty':
+			lv = int(edificio['level'])
+			if edificio['building'] == 'carpentering':
+				carpinteria = lv
+			elif edificio['building'] == 'architect':
+				oficina = lv
+			elif edificio['building'] == 'vineyard':
+				prensa = lv
+			elif edificio['building'] == 'optician':
+				optico = lv
+			elif edificio['building'] == 'fireworker':
+				area = lv
+	return (carpinteria, oficina, prensa, optico, area)
+
+def recursosNecesarios(s, idCiudad, posEdifiico,  niveles):
+	html = s.get(s.urlBase + urlCiudad + idCiudad)
+	ciudad = getCiudad(html)
+	desde = int(ciudad['position'][posEdifiico]['level'])
+	hasta = desde + niveles
+	nombre = ciudad['position'][posEdifiico]['name']
+	nombre = nombre.split(' ')[0].lower()
+	(carpinteria, oficina, prensa, optico, area)  = getReductores(ciudad)
+	url = 'http://data-ikariam.com/ikabot.php?edificio={}&desde={}&hasta={}&carpinteria={}&oficina={}&prensa={}&optico={}&area={}'.format(nombre, desde, hasta, carpinteria, oficina, prensa, optico, area)
+	return requests.get(url).text.split(',')
+
 def subirEdificios(s):
 	banner()
 	idCiudad = getIdCiudad(s)
 	edificios = getEdificios(s, idCiudad)
 	if edificios == []:
 		return
+	try:
+		(madera, vino, marmol, cristal, azufre) = recursosNecesarios(s, idCiudad, edificios[0], len(edificios))
+		print('Costará:')
+		costo = 'Madera:{}, Vino:{}, Marmol:{}, Cristal:{}, Azufre:{}'.format(addPuntos(madera), addPuntos(vino), addPuntos(marmol), addPuntos(cristal), addPuntos(azufre))
+		print(costo)
+
+		print('¿Proceder? [Y/n]')
+		rta = read()
+		if rta.lower() == 'n':
+			return
+	except:
+		pass
+
 	esPadre = forkear(s)
 	if esPadre is True:
 		return
