@@ -36,7 +36,7 @@ class Sesion:
 		self.mundo = data.group(1)
 		self.servidor = data.group(2)
 		self.headers = headers
-		self.getCookie()
+		self.login()
 
 	def token(self):
 		html = self.get()
@@ -82,15 +82,16 @@ class Sesion:
 
 	def getCookie(self):
 		fileInfo = getFileInfo(self.username, self.urlBase)[0]
-		if fileInfo is None:
-			self.login()
-		else:
+		if fileInfo:
 			cookie_dict = {'PHPSESSID': fileInfo.group(2), 'ikariam': fileInfo.group(3), 'ikariam_loginMode': '0'}
 			self.s = requests.Session()
 			requests.cookies.cookiejar_from_dict(cookie_dict, cookiejar=self.s.cookies, overwrite=True)
 			self.updateCookieFile(nuevo=True)
+		else:
+			self.login()
 
 	def login(self):
+		self.updateCookieFile(vencimiento=True)
 		self.s = requests.Session() # s es la sesion de conexion
 		login = self.s.post(self.urlBase + 'action=loginAvatar&function=login', data=self.payload, headers=self.headers).text
 		expired = re.search(r'index\.php\?logout', login)
@@ -225,11 +226,11 @@ def getIsla(html):
 
 	remove = []
 
-	sub = re.search(r'(,"wonderName":".+?),"cities', isla)
-	remove.append(sub.group(1))
+	sub = re.search(r'(,"wonderName":".+?),"cities', isla).group(1)
+	remove.append(sub)
 
-	sub = re.search(r',"type":\d', isla)
-	remove.append(sub.group())
+	sub = re.search(r',"type":\d', isla).group()
+	remove.append(sub)
 
 	quitar = re.search(r'(,"barbarians[\s\S]*?),"scores"', isla).group(1)
 
@@ -565,7 +566,7 @@ def menuRutaComercial(s):
 		idIsla = re.search(r'"islandId":"(\d+)"', htmlD).group(1)
 		banner()
 		print('Disponible:')
-		print('Madera ' + addPuntos(disponible[0]) + ' Vino ' + addPuntos(disponible[1]) + ' Marmol ' + addPuntos(disponible[2]) + ' Cristal ' + addPuntos(disponible[3]) + ' Azufre ' + addPuntos(disponible[4]))
+		print('Madera {} Vino {} Marmol {} Cristal {} Azufre {}'.format(addPuntos(disponible[0]), addPuntos(disponible[1]), addPuntos(disponible[2]), addPuntos(disponible[3]), addPuntos(disponible[4])))
 		print('Enviar:')
 		md = pedirValor('Madera: ', disponible[0])
 		vn = pedirValor('Vino:   ', disponible[1])
@@ -630,6 +631,9 @@ def diasHorasMinutos(segundosTotales):
 	minutos = int(segundosTotales / Decimal(60))
 	return (dias, horas, minutos)
 
+def enter():
+	getpass.getpass('\n[Enter]')
+
 def getStatus(s):
 	banner()
 	tipoCiudad = [bcolors.ENDC, bcolors.HEADER, bcolors.STONE, bcolors.BLUE, bcolors.WARNING]
@@ -690,7 +694,7 @@ def getStatus(s):
 			if edificio['isBusy'] is True:
 				level = level + '+'
 			print('lv:{}\t{}{}{}'.format(level, color, edificio['name'], bcolors.ENDC))
-		getpass.getpass('\n[Enter]')
+		enter()
 		print('')
 
 def printEstadoMina(s, url, bien):
@@ -763,22 +767,6 @@ def donar(s):
 	cantidad = read(min=0, max=int(madera), msg='Cantidad:')
 	s.post(s.urlBase, {'islandId': idIsla, 'type': tipo, 'action': 'IslandScreen', 'function': 'donate', 'donation': cantidad, 'backgroundView': 'island', 'templateView': 'resource', 'actionRequest': s.token(), 'ajax': '1'})
 
-def run(command):
-	return subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
-
-def forkear(s):
-	newpid = os.fork()
-	if newpid != 0:
-		esPadre = True
-		s.updateCookieFile(nuevo=True)
-		newpid = str(newpid)
-		run('kill -SIGSTOP ' + newpid)
-		run('bg ' + newpid)
-		run('disown ' + newpid)
-	else:
-		esPadre = False
-	return esPadre
-
 def getIdsdeIslas(s):
 	(idsCiudades, ciudades) = getIdsDeCiudades(s)
 	idsIslas = set()
@@ -821,13 +809,13 @@ def botValido(s):
 		with open(telegramFile, 'w') as file:
 			pass
 		print('Revíse las credenciales y vuelva a proveerlas.')
-		read(msg='[Enter]')
+		enter()
 		return False
 	else:
 		recibido = read(digit=True, msg='Ingrese el token recibido mediante telegram:')
 		if rand != recibido:
 			print('Token incorrecto')
-			read(msg='[Enter]')
+			enter()
 			return False
 		else:
 			print('El token es correcto.')
@@ -837,7 +825,7 @@ def buscarEspacios(s):
 	if botValido(s) is False:
 		return
 	print('Se buscarán espacios nuevos cada hora.')
-	read(msg='[Enter]')
+	enter()
 	esPadre = forkear(s)
 	if esPadre is True:
 		return
@@ -845,63 +833,93 @@ def buscarEspacios(s):
 	setInfoSignal(s, info)
 	idIslas = getIdsdeIslas(s)
 	espacios_dict = {}
-	while True:
-		for idIsla in idIslas:
-			html = s.get(s.urlBase + urlIsla + idIsla)
-			isla = getIsla(html)
-			espacios = 0
-			for city in isla['cities']:
-				if city['type'] == 'empty':
-					espacios += 1
-			if idIsla in espacios_dict:
-				if espacios_dict[idIsla] < espacios:
-					msg = 'Alguien desaparecio en {} {}:{} {}'.format(tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
-					sendToBot(msg)
-				if espacios_dict[idIsla] > espacios:
-					msg = 'Alguien fundó en {} {}:{} {}'.format(tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
-					sendToBot(msg)
-			espacios_dict[idIsla] = espacios
-		time.sleep(1*60*60)
-	s.bye()
+	try:
+		while True:
+			for idIsla in idIslas:
+				html = s.get(s.urlBase + urlIsla + idIsla)
+				isla = getIsla(html)
+				espacios = 0
+				for city in isla['cities']:
+					if city['type'] == 'empty':
+						espacios += 1
+				if idIsla in espacios_dict:
+					if espacios_dict[idIsla] < espacios:
+						msg = 'Alguien desaparecio en {} {}:{} {}'.format(tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
+						sendToBot(msg)
+					if espacios_dict[idIsla] > espacios:
+						msg = 'Alguien fundó en {} {}:{} {}'.format(tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
+						sendToBot(msg)
+				espacios_dict[idIsla] = espacios
+			time.sleep(1*60*60)
+	except Exception as e:
+		msg = 'Ya no se buscarán más espacios.\n{}'.format(e.message)
+		sendToBot(msg)
+		s.bye()
 
 def alertarAtaques(s):
 	if botValido(s) is False:
 		return
 	print('Se buscarán ataques cada 15 minutos.')
-	read(msg='[Enter]')
+	enter()
 	esPadre = forkear(s)
 	if esPadre is True:
 		return
 	info = '\nEspero por ataques cada 29 minutos\n'
 	setInfoSignal(s, info)
 	fueAvisado = False
-	while True:
-		html = s.get()
-		idCiudad = re.search(r'currentCityId:\s(\d+),', html).group(1)
-		url = s.urlBase + 'view=militaryAdvisor&oldView=city&oldBackgroundView=city&backgroundView=city&currentCityId={}&actionRequest={}&ajax=1'.format(idCiudad, s.token())
-		posted = s.post(url)
-		ataque = re.search(r'"military":{"link":.*?","cssclass":"normalalert"', posted)
-		if ataque is not None and fueAvisado is False:
-			msg = 'Te están por atacar !!'
-			sendToBot(msg)
-			fueAvisado = True
-		elif ataque is None and fueAvisado is True:
-			fueAvisado = False
-		time.sleep(15*60)
-	s.bye()
+	try:	
+		while True:
+			html = s.get()
+			idCiudad = re.search(r'currentCityId:\s(\d+),', html).group(1)
+			url = s.urlBase + 'view=militaryAdvisor&oldView=city&oldBackgroundView=city&backgroundView=city&currentCityId={}&actionRequest={}&ajax=1'.format(idCiudad, s.token())
+			posted = s.post(url)
+			ataque = re.search(r'"military":{"link":.*?","cssclass":"normalalert"', posted)
+			if ataque is not None and fueAvisado is False:
+				msg = 'Te están por atacar !!'
+				sendToBot(msg)
+				fueAvisado = True
+			elif ataque is None and fueAvisado is True:
+				fueAvisado = False
+			time.sleep(15*60)
+	except Exception as e:
+		msg = 'Ya no se alertarán más ataques.\n{}'.format(e.message)
+		sendToBot(msg)
+		s.bye()
 
 def entrarDiariamente(s):
+	if botValido(s) is False:
+		return
 	print('Se entrará todos los días automaticamente.')
-	read(msg='[Enter]')
+	enter()
 	esPadre = forkear(s)
 	if esPadre is True:
 		return
 	info = '\nEntro diariamente\n'
 	setInfoSignal(s, info)
-	while True:
-		s.get()
-		time.sleep(24*60*60)
-	s.bye()
+	try:
+		while True:
+			s.get()
+			time.sleep(24*60*60)
+	except Exception as e:
+		msg = 'Ya no se entrará todos los días.\n{}'.format(e.message)
+		sendToBot(msg)
+		s.bye()
+
+def run(command):
+	return subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
+
+def forkear(s):
+	newpid = os.fork()
+	if newpid != 0:
+		esPadre = True
+		s.updateCookieFile(nuevo=True)
+		newpid = str(newpid)
+		run('kill -SIGSTOP ' + newpid)
+		run('bg ' + newpid)
+		run('disown ' + newpid)
+	else:
+		esPadre = False
+	return esPadre
 
 def menu(s):
 	banner()
@@ -919,12 +937,15 @@ def menu(s):
 	entradas = len(mnu.split('\n')) - 2
 	eleccion = read(min=0, max=entradas)
 	if eleccion != 0:
-		menu_actions[eleccion - 1](s)
+		try:
+			menu_actions[eleccion - 1](s)
+		except KeyboardInterrupt:
+			menu(s)
 		menu(s)
 	else:
 		clear()
 
-def checkFiles():
+def inicializar():
 	path = os.path.abspath(__file__)
 	path = os.path.dirname(path)
 	os.chdir(path)
@@ -939,7 +960,7 @@ def create_handler(s):
 	return _handler
 
 def setSignalsHandlers(s):
-	signals = [signal.SIGHUP, signal.SIGINT, signal.SIGQUIT, signal.SIGABRT, signal.SIGTERM]
+	signals = [signal.SIGHUP, signal.SIGQUIT, signal.SIGABRT, signal.SIGTERM]
 	for sgn in signals:
 		signal.signal(sgn, create_handler(s))
 
@@ -966,26 +987,22 @@ def getSesion():
 		print('({:d}) {}'.format(i, mundo))
 	mundo = read(msg='Mundo:', min=1, max=len(mundos))
 	urlBase = 'https://s{:d}-{}.ikariam.gameforge.com/index.php?'.format(mundo, servidor)
-	uni_url = re.search(r'https://(.*?)/index\.php\?', urlBase).group(1)
+	uni_url = 's{:d}-{}.ikariam.gameforge.com'.format(mundo, servidor)
 	banner()
 	usuario = read(msg='Usuario:')
 	password = getpass.getpass('Contraseña:')
-	if sesionActiva(usuario, urlBase):
-		password2 = getpass.getpass('Confirme:')
-		while password != password2:
-			print('Las contraseñas no coinciden')
-			password = getpass.getpass('Contraseña:')
-			password2 = getpass.getpass('Confirme:')
 	headers = {'Host': uni_url, 'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:54.0) Gecko/20100101 Firefox/54.0','Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Encoding':'gzip, deflate, br', 'Content-Type':'application/x-www-form-urlencoded', 'Referer': urlBase}
 	payload = {'uni_url': uni_url, 'name': usuario, 'password': password, 'pwat_uid': '', 'pwat_checksum': '' ,'startPageShown' : '1' , 'detectedDevice' : '1' , 'kid':''}
 	return Sesion(urlBase, payload, headers)
 
 def main():
-	checkFiles()
+	inicializar()
 	s = getSesion()
 	setSignalsHandlers(s)
 	try:
 		menu(s)
+	except:
+		raise
 	finally:
 		s.updateCookieFile(salida=True)
 
@@ -993,4 +1010,4 @@ if __name__ == '__main__':
 	try:
 		main()
 	except KeyboardInterrupt:
-		pass
+		clear()
