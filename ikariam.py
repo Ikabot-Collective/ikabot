@@ -825,14 +825,14 @@ def botDonador(s):
 	esPadre = forkear(s)
 	if esPadre is True:
 		return
-	signal.signal(signum, signal.SIG_DFL)
+	info = '\nDono todos los días\n'
+	setInfoSignal(s, info)
 	(idsCiudades, ciudades) = getIdsDeCiudades(s)
 	ciudades_dict = {}
 	for idCiudad in idsCiudades:
 		html = s.get(s.urlBase + urlCiudad + idCiudad)
 		ciudad = getCiudad(html)
 		ciudades_dict[idCiudad] = ciudad['islandId']
-
 	try:
 		while True:
 			for idCiudad in idsCiudades:
@@ -843,8 +843,8 @@ def botDonador(s):
 				s.post(s.urlBase, {'islandId': idIsla, 'type': tipo, 'action': 'IslandScreen', 'function': 'donate', 'donation': madera, 'backgroundView': 'island', 'templateView': 'resource', 'actionRequest': s.token(), 'ajax': '1'})
 			time.sleep(24*60*60)
 	except:
-		msg = 'Ya no se donará compulsivamente.\n{}'.format(traceback.format_exc())
-		sendToBot(s,msg)
+		msg = 'Ya no se donará.\n{}'.format(traceback.format_exc())
+		sendToBot(s, msg)
 		s.bye()
 
 def buscarEspacios(s):
