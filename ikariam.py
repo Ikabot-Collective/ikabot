@@ -16,7 +16,7 @@ import getpass
 import random
 import subprocess
 import signal
-
+import traceback
 ids = None
 ciudades = None
 cookieFile = '/tmp/.cookies.txt'
@@ -731,9 +731,6 @@ def donar(s):
 	idIsla = ciudad['islandId']
 	html = s.get(s.urlBase + urlIsla + idIsla)
 	isla = getIsla(html)
-	print(str(len(isla['cities'])))
-	print(str(isla))
-	read()
 
 	tipo = re.search(r'"tradegood":"(\d)"', html).group(1)
 	bien = bienes[tipo]
@@ -749,20 +746,18 @@ def donar(s):
 
 	if aserraderoOk is True and bienOk is True:
 		msg = 'Aserradero(1) o ' + bien + '(2)?:'
-		tipoDonacion = read()(msg=msg)
-		while tipoDonacion != '1' and tipoDonacion != '2':
-			tipoDonacion = read()(msg=msg)
+		tipoDonacion = read(msg=msg, min=1, max=2)
 	elif aserraderoOk is True and bienOk is False:
-		tipoDonacion = '1'
+		tipoDonacion = 1
 		print('Aserradero:\n')
 	elif aserraderoOk is False and bienOk is True:
-		tiptipoDonaciono = '2'
+		tipoDonacion = 2
 		print('{}:\n'.format(bien))
 	else:
 		print('No se puede donar\n')
 		return
 
-	tipo = tipo[int(tipoDonacion) - 1]
+	tipo = tipo[tipoDonacion - 1]
 
 	cantidad = read(min=0, max=int(madera), msg='Cantidad:')
 	s.post(s.urlBase, {'islandId': idIsla, 'type': tipo, 'action': 'IslandScreen', 'function': 'donate', 'donation': cantidad, 'backgroundView': 'island', 'templateView': 'resource', 'actionRequest': s.token(), 'ajax': '1'})
@@ -851,8 +846,8 @@ def buscarEspacios(s):
 						sendToBot(msg)
 				espacios_dict[idIsla] = espacios
 			time.sleep(1*60*60)
-	except Exception as e:
-		msg = 'Ya no se buscarán más espacios.\n{}'.format(e.message)
+	except:
+		msg = 'Ya no se buscarán más espacios.\n{}'.format(traceback.format_exc())
 		sendToBot(msg)
 		s.bye()
 
@@ -881,8 +876,8 @@ def alertarAtaques(s):
 			elif ataque is None and fueAvisado is True:
 				fueAvisado = False
 			time.sleep(15*60)
-	except Exception as e:
-		msg = 'Ya no se alertarán más ataques.\n{}'.format(e.message)
+	except:
+		msg = 'Ya no se alertarán más ataques.\n{}'.format(traceback.format_exc())
 		sendToBot(msg)
 		s.bye()
 
@@ -900,8 +895,8 @@ def entrarDiariamente(s):
 		while True:
 			s.get()
 			time.sleep(24*60*60)
-	except Exception as e:
-		msg = 'Ya no se entrará todos los días.\n{}'.format(e.message)
+	except:
+		msg = 'Ya no se entrará todos los días.\n{}'.format(traceback.format_exc())
 		sendToBot(msg)
 		s.bye()
 
