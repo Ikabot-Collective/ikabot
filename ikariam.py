@@ -17,6 +17,7 @@ import random
 import subprocess
 import signal
 import traceback
+
 ids = None
 ciudades = None
 cookieFile = '/tmp/.cookies.txt'
@@ -772,7 +773,7 @@ def getIdsdeIslas(s):
 		idsIslas.add(idIsla)
 	return list(idsIslas)
 
-def sendToBot(msg, Token=False):
+def sendToBot(s, msg, Token=False):
 	if Token is False:
 		msg = 'servidor:{}, mundo:{}, jugador:{}\n{}'.format(s.servidor, s.mundo, s.username, msg)
 	with open(telegramFile, 'r') as filehandler:
@@ -797,7 +798,7 @@ def botValido(s):
 		else:
 			return False
 	rand = random.randint(1000, 9999)
-	sendToBot('El token a ingresar es:{:d}'.format(rand), Token=True)
+	sendToBot(s, 'El token a ingresar es:{:d}'.format(rand), Token=True)
 	print('Se envio un mensaje por telegram, lo recibió? [Y/n]')
 	rta = read()
 	if rta.lower() == 'n':
@@ -815,6 +816,36 @@ def botValido(s):
 		else:
 			print('El token es correcto.')
 			return True
+
+def botDonador(s):
+	if botValido(s) is False:
+		return
+	print('Se donará compulsivamente cada día.')
+	enter()
+	esPadre = forkear(s)
+	if esPadre is True:
+		return
+	signal.signal(signum, signal.SIG_DFL)
+	(idsCiudades, ciudades) = getIdsDeCiudades(s)
+	ciudades_dict = {}
+	for idCiudad in idsCiudades:
+		html = s.get(s.urlBase + urlCiudad + idCiudad)
+		ciudad = getCiudad(html)
+		ciudades_dict[idCiudad] = ciudad['islandId']
+
+	try:
+		while True:
+			for idCiudad in idsCiudades:
+				html = s.get(s.urlBase + urlCiudad + idCiudad)
+				madera = getRescursosDisponibles(html)[0]
+				idIsla = ciudades_dict[idCiudad]
+				tipo = 'tradegood' # resource
+				s.post(s.urlBase, {'islandId': idIsla, 'type': tipo, 'action': 'IslandScreen', 'function': 'donate', 'donation': madera, 'backgroundView': 'island', 'templateView': 'resource', 'actionRequest': s.token(), 'ajax': '1'})
+			time.sleep(24*60*60)
+	except:
+		msg = 'Ya no se donará compulsivamente.\n{}'.format(traceback.format_exc())
+		sendToBot(s,msg)
+		s.bye()
 
 def buscarEspacios(s):
 	if botValido(s) is False:
@@ -840,15 +871,15 @@ def buscarEspacios(s):
 				if idIsla in espacios_dict:
 					if espacios_dict[idIsla] < espacios:
 						msg = 'Alguien desaparecio en {} {}:{} {}'.format(tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
-						sendToBot(msg)
+						sendToBot(s, msg)
 					if espacios_dict[idIsla] > espacios:
 						msg = 'Alguien fundó en {} {}:{} {}'.format(tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
-						sendToBot(msg)
+						sendToBot(s, msg)
 				espacios_dict[idIsla] = espacios
 			time.sleep(1*60*60)
 	except:
 		msg = 'Ya no se buscarán más espacios.\n{}'.format(traceback.format_exc())
-		sendToBot(msg)
+		sendToBot(s, msg)
 		s.bye()
 
 def alertarAtaques(s):
@@ -871,14 +902,14 @@ def alertarAtaques(s):
 			ataque = re.search(r'"military":{"link":.*?","cssclass":"normalalert"', posted)
 			if ataque is not None and fueAvisado is False:
 				msg = 'Te están por atacar !!'
-				sendToBot(msg)
+				sendToBot(s, msg)
 				fueAvisado = True
 			elif ataque is None and fueAvisado is True:
 				fueAvisado = False
 			time.sleep(15*60)
 	except:
 		msg = 'Ya no se alertarán más ataques.\n{}'.format(traceback.format_exc())
-		sendToBot(msg)
+		sendToBot(s, msg)
 		s.bye()
 
 def entrarDiariamente(s):
@@ -897,7 +928,7 @@ def entrarDiariamente(s):
 			time.sleep(24*60*60)
 	except:
 		msg = 'Ya no se entrará todos los días.\n{}'.format(traceback.format_exc())
-		sendToBot(msg)
+		sendToBot(s, msg)
 		s.bye()
 
 def run(command):
@@ -918,7 +949,7 @@ def forkear(s):
 
 def menu(s):
 	banner()
-	menu_actions = [subirEdificios, menuRutaComercial, getStatus, donar, buscarEspacios, entrarDiariamente, alertarAtaques]
+	menu_actions = [subirEdificios, menuRutaComercial, getStatus, donar, buscarEspacios, entrarDiariamente, alertarAtaques, botDonador]
 	mnu="""
 (0) Salir
 (1) Lista de construcción
@@ -927,9 +958,10 @@ def menu(s):
 (4) Donar
 (5) Buscar espacios nuevos
 (6) Entrar diariamente
-(7) Alertar ataques"""
+(7) Alertar ataques
+(8) Bot donador"""
 	print(mnu)
-	entradas = len(mnu.split('\n')) - 2
+	entradas = len(menu_actions)
 	eleccion = read(min=0, max=entradas)
 	if eleccion != 0:
 		try:
@@ -949,9 +981,7 @@ def inicializar():
 
 def create_handler(s):
 	def _handler(signum, frame):
-		s.updateCookieFile(salida=True)
-		signal.signal(signum, signal.SIG_DFL)
-		os.kill(os.getpid(), signum) # Rethrow signal, this time without catching it
+		raise Exception('señal recibida')
 	return _handler
 
 def setSignalsHandlers(s):
