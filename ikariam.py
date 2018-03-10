@@ -820,6 +820,12 @@ def botValido(s):
 def botDonador(s):
 	if botValido(s) is False:
 		return
+	print('¿Donar a aserraderos o bienes de cambio? [a/b]')
+	rta = read(values=['a', 'A', 'b', 'B'])
+	if rta.lower() == 'a':
+		tipo = 'resource'
+	else:
+		tipo = 'tradegood'
 	print('Se donará compulsivamente cada día.')
 	enter()
 	esPadre = forkear(s)
@@ -839,7 +845,6 @@ def botDonador(s):
 				html = s.get(s.urlBase + urlCiudad + idCiudad)
 				madera = getRescursosDisponibles(html)[0]
 				idIsla = ciudades_dict[idCiudad]
-				tipo = 'tradegood' # resource
 				s.post(s.urlBase, {'islandId': idIsla, 'type': tipo, 'action': 'IslandScreen', 'function': 'donate', 'donation': madera, 'backgroundView': 'island', 'templateView': 'resource', 'actionRequest': s.token(), 'ajax': '1'})
 			time.sleep(24*60*60)
 	except:
