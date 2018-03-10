@@ -353,7 +353,15 @@ def subirEdificios(s):
 	try:
 		(madera, vino, marmol, cristal, azufre) = recursosNecesarios(s, idCiudad, edificios[0], len(edificios))
 		print('Costará:')
-		costo = 'Madera:{}, Vino:{}, Marmol:{}, Cristal:{}, Azufre:{}'.format(addPuntos(madera), addPuntos(vino), addPuntos(marmol), addPuntos(cristal), addPuntos(azufre))
+		costo = 'Madera:{}'.format(addPuntos(madera))
+		if vino > 0:
+			costo = costo + ', Vino:{}'.format(addPuntos(vino))
+		if marmol > 0:
+			costo = costo + ', Marmol:{}'.format(addPuntos(marmol))
+		if cristal > 0:
+			costo = costo + ', Cristal:{}'.format(addPuntos(cristal))
+		if azufre > 0:
+			costo = costo + ', Azufre:{}'.format(addPuntos(azufre))
 		print(costo)
 
 		print('¿Proceder? [Y/n]')
@@ -820,12 +828,9 @@ def botValido(s):
 def botDonador(s):
 	if botValido(s) is False:
 		return
-	print('¿Donar a aserraderos o bienes de cambio? [a/b]')
+	print('¿Donar a aserraderos o a bienes de cambio? [a/b]')
 	rta = read(values=['a', 'A', 'b', 'B'])
-	if rta.lower() == 'a':
-		tipo = 'resource'
-	else:
-		tipo = 'tradegood'
+	tipo = 'resource' if rta.lower() == 'a' else 'tradegood'
 	print('Se donará compulsivamente cada día.')
 	enter()
 	esPadre = forkear(s)
