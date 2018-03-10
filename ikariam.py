@@ -354,13 +354,13 @@ def subirEdificios(s):
 		(madera, vino, marmol, cristal, azufre) = recursosNecesarios(s, idCiudad, edificios[0], len(edificios))
 		print('Costará:')
 		costo = 'Madera:{}'.format(addPuntos(madera))
-		if vino > 0:
+		if int(vino) > 0:
 			costo = costo + ', Vino:{}'.format(addPuntos(vino))
-		if marmol > 0:
+		if int(marmol) > 0:
 			costo = costo + ', Marmol:{}'.format(addPuntos(marmol))
-		if cristal > 0:
+		if int(cristal) > 0:
 			costo = costo + ', Cristal:{}'.format(addPuntos(cristal))
-		if azufre > 0:
+		if int(azufre) > 0:
 			costo = costo + ', Azufre:{}'.format(addPuntos(azufre))
 		print(costo)
 
