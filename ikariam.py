@@ -977,7 +977,7 @@ def menu(s):
 		try:
 			menu_actions[eleccion - 1](s)
 		except KeyboardInterrupt:
-			menu(s)
+			pass
 		menu(s)
 	else:
 		clear()
