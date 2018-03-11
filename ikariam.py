@@ -1008,7 +1008,7 @@ def setInfoSignal(s, info): # el proceso explica su funcion por stdout
 
 def getSesion():
 	banner()
-	html = requests.get('https://ar.ikariam.gameforge.com/?').text
+	html = requests.get('https://es.ikariam.gameforge.com/?').text
 	servidores = re.findall(r'<a href="(?:https:)?//(\w{2})\.ikariam\.gameforge\.com/\?kid=[\d\w-]*" target="_top" rel="nofollow" class="mmoflag mmo_\w{2}">(.+)</a>', html)
 	i = 0
 	for server in servidores:
@@ -1017,7 +1017,9 @@ def getSesion():
 	servidor = read(msg='Servidor:', min=1, max=len(servidores))
 	srv = servidores[servidor - 1][0]
 	banner()
-	mundos = re.findall(r'mobileUrl="s(\d{1,2})-ar\.ikariam\.gameforge\.com"\s*?cookieName=""\s*>\s*(\w+)\s*</option>', html)
+	if srv != 'es':
+		html = requests.get('https://{}.ikariam.gameforge.com/?'.format(srv)).text
+	mundos = re.findall(r'mobileUrl="s(\d{1,2})-\w{2}\.ikariam\.gameforge\.com"\s*?cookieName=""\s*>\s*(\w+)\s*</option>', html)
 	i = 0
 	for mundo in mundos:
 		i += 1
