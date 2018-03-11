@@ -1021,6 +1021,7 @@ def getSesion():
 	banner()
 	if srv != 'es':
 		html = requests.get('https://{}.ikariam.gameforge.com/?'.format(srv)).text
+	html = re.search(r'registerServer[\s\S]*registerServerServerInfo', html).group()
 	mundos = re.findall(r'mobileUrl="s(\d{1,2})-\w{2}\.ikariam\.gameforge\.com"\s*?cookieName=""\s*>\s*(\w+)\s*</option>', html)
 	i = 0
 	for mundo in mundos:
