@@ -981,7 +981,7 @@ def inicializar():
 
 def create_handler(s):
 	def _handler(signum, frame):
-		raise Exception('señal recibida')
+		raise Exception('Señal recibida número {:d}'.format(signum))
 	return _handler
 
 def setSignalsHandlers(s):
