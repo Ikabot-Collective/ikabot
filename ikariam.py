@@ -353,7 +353,15 @@ def subirEdificios(s):
 	try:
 		(madera, vino, marmol, cristal, azufre) = recursosNecesarios(s, idCiudad, edificios[0], len(edificios))
 		print('Costará:')
-		costo = 'Madera:{}, Vino:{}, Marmol:{}, Cristal:{}, Azufre:{}'.format(addPuntos(madera), addPuntos(vino), addPuntos(marmol), addPuntos(cristal), addPuntos(azufre))
+		costo = 'Madera:{}'.format(addPuntos(madera))
+		if int(vino) > 0:
+			costo = costo + ', Vino:{}'.format(addPuntos(vino))
+		if int(marmol) > 0:
+			costo = costo + ', Marmol:{}'.format(addPuntos(marmol))
+		if int(cristal) > 0:
+			costo = costo + ', Cristal:{}'.format(addPuntos(cristal))
+		if int(azufre) > 0:
+			costo = costo + ', Azufre:{}'.format(addPuntos(azufre))
 		print(costo)
 
 		print('¿Proceder? [Y/n]')
@@ -820,31 +828,33 @@ def botValido(s):
 def botDonador(s):
 	if botValido(s) is False:
 		return
+	print('¿Donar a aserraderos o a bienes de cambio? [a/b]')
+	rta = read(values=['a', 'A', 'b', 'B'])
+	tipo = 'resource' if rta.lower() == 'a' else 'tradegood'
 	print('Se donará compulsivamente cada día.')
 	enter()
 	esPadre = forkear(s)
 	if esPadre is True:
 		return
-	signal.signal(signum, signal.SIG_DFL)
+	info = '\nDono todos los días\n'
+	setInfoSignal(s, info)
 	(idsCiudades, ciudades) = getIdsDeCiudades(s)
 	ciudades_dict = {}
 	for idCiudad in idsCiudades:
 		html = s.get(s.urlBase + urlCiudad + idCiudad)
 		ciudad = getCiudad(html)
 		ciudades_dict[idCiudad] = ciudad['islandId']
-
 	try:
 		while True:
 			for idCiudad in idsCiudades:
 				html = s.get(s.urlBase + urlCiudad + idCiudad)
 				madera = getRescursosDisponibles(html)[0]
 				idIsla = ciudades_dict[idCiudad]
-				tipo = 'tradegood' # resource
 				s.post(s.urlBase, {'islandId': idIsla, 'type': tipo, 'action': 'IslandScreen', 'function': 'donate', 'donation': madera, 'backgroundView': 'island', 'templateView': 'resource', 'actionRequest': s.token(), 'ajax': '1'})
 			time.sleep(24*60*60)
 	except:
-		msg = 'Ya no se donará compulsivamente.\n{}'.format(traceback.format_exc())
-		sendToBot(s,msg)
+		msg = 'Ya no se donará.\n{}'.format(traceback.format_exc())
+		sendToBot(s, msg)
 		s.bye()
 
 def buscarEspacios(s):
