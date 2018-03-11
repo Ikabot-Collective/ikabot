@@ -1007,6 +1007,7 @@ def setInfoSignal(s, info): # el proceso explica su funcion por stdout
 	signal.signal(signal.SIGUSR1, _printInfo) # kill -SIGUSR1 pid
 
 def getSesion():
+	global infoUser
 	banner()
 	html = requests.get('https://es.ikariam.gameforge.com/?').text
 	servidores = re.findall(r'<a href="(?:https:)?//(\w{2})\.ikariam\.gameforge\.com/\?kid=[\d\w-]*" target="_top" rel="nofollow" class="mmoflag mmo_\w{2}">(.+)</a>', html)
@@ -1016,6 +1017,7 @@ def getSesion():
 		print('({:d}) {}'.format(i, server[1]))
 	servidor = read(msg='Servidor:', min=1, max=len(servidores))
 	srv = servidores[servidor - 1][0]
+	infoUser = 'Servidor:{}'.format(servidores[servidor-1][1])
 	banner()
 	if srv != 'es':
 		html = requests.get('https://{}.ikariam.gameforge.com/?'.format(srv)).text
@@ -1025,6 +1027,7 @@ def getSesion():
 		i += 1
 		print('({:d}) {}'.format(i, mundo[1]))
 	mundo = read(msg='Mundo:', min=1, max=len(mundos))
+	infoUser += ', Mundo:{}'.format(mundos[mundo - 1][1])
 	urlBase = 'https://s{:d}-{}.ikariam.gameforge.com/index.php?'.format(mundo, srv)
 	uni_url = 's{:d}-{}.ikariam.gameforge.com'.format(mundo, srv)
 	banner()
@@ -1032,8 +1035,7 @@ def getSesion():
 	password = getpass.getpass('Contraseña:')
 	headers = {'Host': uni_url, 'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:54.0) Gecko/20100101 Firefox/54.0','Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Encoding':'gzip, deflate, br', 'Content-Type':'application/x-www-form-urlencoded', 'Referer': urlBase}
 	payload = {'uni_url': uni_url, 'name': usuario, 'password': password, 'pwat_uid': '', 'pwat_checksum': '' ,'startPageShown' : '1' , 'detectedDevice' : '1' , 'kid':''}
-	global infoUser
-	infoUser = 'Servidor:{}, Mundo:{}, Jugador:{}'.format(servidores[servidor-1][1], mundos[mundo - 1][1], usuario)
+	infoUser += ', Jugador:{}'.format(servidores[servidor-1][1], mundos[mundo - 1][1], usuario)
 	return Sesion(urlBase, payload, headers)
 
 def main():
