@@ -20,6 +20,7 @@ import traceback
 
 ids = None
 ciudades = None
+infoUser = ''
 cookieFile = '/tmp/.cookies.txt'
 telegramFile = '.telegram.txt'
 urlCiudad = 'view=city&cityId='
@@ -178,7 +179,7 @@ def banner():
 	  MM      MM `Mb.   8M   MM          MM    ,9   YA.   ,A9     MM    
 	.JMML.  .JMML. YA.  `Moo9^Yo.      .JMMmmmd9     `Ybmd9'      `Mbmo
 	"""
-	print('\n{}\n'.format(bner))
+	print('\n{}\n\n{}\n'.format(bner, infoUser))
 
 def getFileInfo(username, urlBase):
 	with open(cookieFile, 'r') as filehandler:
@@ -783,7 +784,7 @@ def getIdsdeIslas(s):
 
 def sendToBot(s, msg, Token=False):
 	if Token is False:
-		msg = 'servidor:{}, mundo:{}, jugador:{}\n{}'.format(s.servidor, s.mundo, s.username, msg)
+		msg = '{}\n{}'.format(infoUser, msg)
 	with open(telegramFile, 'r') as filehandler:
 		text = filehandler.read()
 		(botToken, chatId) = text.splitlines()
@@ -1007,13 +1008,14 @@ def setInfoSignal(s, info): # el proceso explica su funcion por stdout
 
 def getSesion():
 	banner()
+	servidoresName = ['Argentina', 'Brasil', 'España', 'Francia', 'Italia', 'Mexico', 'Portugal', 'USA', 'UK']
 	servidores = ['ar', 'br', 'es', 'fr', 'it', 'mx', 'pt', 'us', 'en']
 	i = 0
-	for srv in servidores:
+	for srv in servidoresName:
 		i += 1
-		print('({:d}) .{}'.format(i, srv))
-	servidor = read(msg='Servidor:', min=1, max=len(servidores))
-	servidor = servidores[servidor-1]
+		print('({:d}) {}'.format(i, srv))
+	servidor = read(msg='Servidor:', min=1, max=len(servidoresName))
+	srv = servidores[servidor-1]
 	banner()
 	mundos = ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 'Pi', 'Rho', 'Demeter', 'Dionysos', 'Eirene', 'Eunomia', 'Gaia', 'Hades', 'Hephaistos']
 	i = 0
@@ -1021,13 +1023,15 @@ def getSesion():
 		i += 1
 		print('({:d}) {}'.format(i, mundo))
 	mundo = read(msg='Mundo:', min=1, max=len(mundos))
-	urlBase = 'https://s{:d}-{}.ikariam.gameforge.com/index.php?'.format(mundo, servidor)
-	uni_url = 's{:d}-{}.ikariam.gameforge.com'.format(mundo, servidor)
+	urlBase = 'https://s{:d}-{}.ikariam.gameforge.com/index.php?'.format(mundo, srv)
+	uni_url = 's{:d}-{}.ikariam.gameforge.com'.format(mundo, srv)
 	banner()
 	usuario = read(msg='Usuario:')
 	password = getpass.getpass('Contraseña:')
 	headers = {'Host': uni_url, 'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:54.0) Gecko/20100101 Firefox/54.0','Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Encoding':'gzip, deflate, br', 'Content-Type':'application/x-www-form-urlencoded', 'Referer': urlBase}
 	payload = {'uni_url': uni_url, 'name': usuario, 'password': password, 'pwat_uid': '', 'pwat_checksum': '' ,'startPageShown' : '1' , 'detectedDevice' : '1' , 'kid':''}
+	global infoUser
+	infoUser = 'Servidor:{}, Mundo:{}, Jugador:{}'.format(servidoresName[servidor-1], mundos[mundo - 1], usuario)
 	return Sesion(urlBase, payload, headers)
 
 def main():
