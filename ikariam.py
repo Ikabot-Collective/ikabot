@@ -1036,7 +1036,7 @@ def getSesion():
 	password = getpass.getpass('Contraseña:')
 	headers = {'Host': uni_url, 'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:54.0) Gecko/20100101 Firefox/54.0','Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Encoding':'gzip, deflate, br', 'Content-Type':'application/x-www-form-urlencoded', 'Referer': urlBase}
 	payload = {'uni_url': uni_url, 'name': usuario, 'password': password, 'pwat_uid': '', 'pwat_checksum': '' ,'startPageShown' : '1' , 'detectedDevice' : '1' , 'kid':''}
-	infoUser += ', Jugador:{}'.format(servidores[servidor-1][1], mundos[mundo - 1][1], usuario)
+	infoUser += ', Jugador:{}'.format(usuario)
 	return Sesion(urlBase, payload, headers)
 
 def main():
