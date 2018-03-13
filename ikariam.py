@@ -142,7 +142,7 @@ def read(min=None, max=None, digit=False, msg=prompt, values=None): # lee input 
 	def _invalido():
 		sys.stdout.write('\033[F\r') # Cursor up one line
 		blank = ' ' * len(str(leido) + msg)
-		sys.stdout.write(blank + '\r')
+		sys.stdout.write('\r' + blank + '\r')
 		return read(min, max, digit, msg, values)
 
 	leido = input(msg)
@@ -569,7 +569,7 @@ def enviarVino(s):
 			recursos = getRescursosDisponibles(html)
 			vinoTotal += int(recursos[1])
 	aEnviar = len(ciudades) - len(idsVino)
-	vinoXciudad = vinoTotal / aEnviar
+	vinoXciudad = int(vinoTotal / aEnviar)
 	maximo = addPuntos(vinoXciudad)
 
 	if vinoXciudad > 100000:
@@ -1116,8 +1116,7 @@ def main():
 	except:
 		raise
 	finally:
-		esPadre = forkear(s)
-		if esPadre is False:
+		if os.fork() == 0:
 			s.updateCookieFile(salida=True)
 
 if __name__ == '__main__':
