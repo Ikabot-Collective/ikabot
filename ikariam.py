@@ -666,7 +666,7 @@ def menuRutaComercial(s):
 		print('¿Proceder? [Y/n]')
 		rta = read()
 		if rta.lower() == 'n':
-			idCiudadDestino = None
+			idCiudadOrigen = None
 		else:
 			ruta = (idCiudadOrigen, idCiudadDestino, idIsla, md, vn, mr, cr, az)
 			rutas.append(ruta)
@@ -678,7 +678,7 @@ def menuRutaComercial(s):
 				rta = read()
 				ciudadDistinta = rta.lower() == 'n'
 				if ciudadDistinta is True:
-					idCiudadDestino = None
+					idCiudadOrigen = None
 			else:
 				break
 	esPadre = forkear(s)
