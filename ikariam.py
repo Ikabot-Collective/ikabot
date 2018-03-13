@@ -555,7 +555,7 @@ def pedirValor(text, max):
 		var = 0
 	return int(var)
 
-def enviarVino(s)
+def enviarVino(s):
 	banner()
 	vinoTotal = 0
 	idsVino = []
@@ -585,21 +585,41 @@ def enviarVino(s)
 		maximo = maximo[:-1] + '0'
 	print('Se puede enviar como máximo {} a cada ciudad'.format(maximo))
 	cantidad = read(msg='¿Cuanto vino enviar a cada ciudad?:', min=0, max=vinoXciudad)
-
+	
+	esPadre = forkear(s)
+	if esPadre is True:
+		return
 
 	rutas = []
-	for idCiudad in idsCiudades:
-		esVino =  ciudades[idCiudad]['tradegood'] == '1'
+	for idCiudadDestino in idsCiudades:
+		esVino =  ciudades[idCiudadDestino]['tradegood'] == '1'
 		if esVino is False:
-			html = s.get(s.urlBase + urlCiudad + idCiudad)
+			htmlD = s.get(s.urlBase + urlCiudad + idCiudadDestino)
 			ciudadD = getCiudad(htmlD)
 			idIsla = ciudadD['islandId']
-			for idVino in idsVino:
-				idCiudadOrigen = getIdCiudad(s)
-				html = s.get(s.urlBase + urlCiudad + idVino)
-				ciudadO = getCiudad(html)
+			faltante = cantidad
+			for idCiudadOrigen in idsVino:
+				if faltante == 0:
+					break
+				htmlO = s.get(s.urlBase + urlCiudad + idCiudadOrigen)
 				max = getRescursosDisponibles(htmlO)
-				total = list(map(int, max))
+				vinoDisponible = int(max[1])
+				enviar = faltante if vinoDisponible > faltante else vinoDisponible
+				faltante -= enviar
+				ruta = (idCiudadOrigen, idCiudadDestino, idIsla, 0, enviar, 0, 0, 0)
+				rutas.append(ruta)
+
+	info = '\nEnviar vino\n'
+	for ruta in rutas:
+		(idciudadOrigen, idCiudadDestino, idIsla, md, vn, mr, cr, az) = ruta
+		html = s.get(s.urlBase + urlCiudad + idciudadOrigen)
+		ciudadO = getCiudad(html)
+		html = s.get(s.urlBase + urlCiudad + idCiudadDestino)
+		ciudadD = getCiudad(html)
+		info = info + '{} -> {}\nVino: {}\n'.format(ciudadO['cityName'], ciudadD['cityName'], addPuntos(vn))
+	setInfoSignal(s, info)
+	planearViajes(s, rutas)
+	s.bye()
 
 def menuRutaComercial(s):
 	idCiudadOrigen = None
@@ -1002,17 +1022,18 @@ def forkear(s):
 
 def menu(s):
 	banner()
-	menu_actions = [subirEdificios, menuRutaComercial, getStatus, donar, buscarEspacios, entrarDiariamente, alertarAtaques, botDonador]
+	menu_actions = [subirEdificios, menuRutaComercial, enviarVino, getStatus, donar, buscarEspacios, entrarDiariamente, alertarAtaques, botDonador]
 	mnu="""
 (0) Salir
 (1) Lista de construcción
 (2) Enviar recursos
-(3) Estado de la cuenta
-(4) Donar
-(5) Buscar espacios nuevos
-(6) Entrar diariamente
-(7) Alertar ataques
-(8) Bot donador"""
+(3) Enviar vino
+(4) Estado de la cuenta
+(5) Donar
+(6) Buscar espacios nuevos
+(7) Entrar diariamente
+(8) Alertar ataques
+(9) Bot donador"""
 	print(mnu)
 	entradas = len(menu_actions)
 	eleccion = read(min=0, max=entradas)
@@ -1084,8 +1105,6 @@ def getSesion():
 def main():
 	inicializar()
 	s = getSesion()
-	enviarVino(s)
-	return
 	setSignalsHandlers(s)
 	try:
 		menu(s)
