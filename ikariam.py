@@ -567,8 +567,7 @@ def enviarVino(s):
 			html = s.get(s.urlBase + urlCiudad + idCiudad)
 			ciudad = getCiudad(html)
 			recursos = getRescursosDisponibles(html)
-			recursos = list(map(int, recursos))
-			vinoTotal += recursos[1]
+			vinoTotal += int(recursos[1])
 	aEnviar = len(ciudades) - len(idsVino)
 	vinoXciudad = vinoTotal / aEnviar
 	maximo = addPuntos(vinoXciudad)
@@ -598,8 +597,8 @@ def enviarVino(s):
 
 	rutas = []
 	for idCiudadDestino in idsCiudades:
-		esVino =  ciudades[idCiudadDestino]['tradegood'] == '1'
-		if esVino is False:
+		noEsVino =  ciudades[idCiudadDestino]['tradegood'] != '1'
+		if noEsVino:
 			htmlD = s.get(s.urlBase + urlCiudad + idCiudadDestino)
 			ciudadD = getCiudad(htmlD)
 			idIsla = ciudadD['islandId']
@@ -1117,7 +1116,9 @@ def main():
 	except:
 		raise
 	finally:
-		s.updateCookieFile(salida=True)
+		esPadre = forkear(s)
+		if esPadre is False:
+			s.updateCookieFile(salida=True)
 
 if __name__ == '__main__':
 	try:
