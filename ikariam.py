@@ -555,6 +555,52 @@ def pedirValor(text, max):
 		var = 0
 	return int(var)
 
+def enviarVino(s)
+	banner()
+	vinoTotal = 0
+	idsVino = []
+	(idsCiudades, ciudades) = getIdsDeCiudades(s)
+	for idCiudad in idsCiudades:
+		esVino =  ciudades[idCiudad]['tradegood'] == '1'
+		if esVino:
+			idsVino.append(idCiudad)
+			html = s.get(s.urlBase + urlCiudad + idCiudad)
+			ciudad = getCiudad(html)
+			recursos = getRescursosDisponibles(html)
+			recursos = list(map(int, recursos))
+			vinoTotal += recursos[1]
+	aEnviar = len(ciudades) - len(idsVino)
+	vinoXciudad = vinoTotal / aEnviar
+	maximo = addPuntos(vinoXciudad)
+
+	if vinoXciudad > 100000:
+		maximo = maximo[:-6] + '00.000'
+	elif vinoXciudad > 10000:
+		maximo = maximo[:-5] + '0.000'
+	elif vinoXciudad > 1000:
+		maximo = maximo[:-3] + '000'
+	elif vinoXciudad > 100:
+		maximo = maximo[:-2] + '00'
+	elif vinoXciudad > 10:
+		maximo = maximo[:-1] + '0'
+	print('Se puede enviar como máximo {} a cada ciudad'.format(maximo))
+	cantidad = read(msg='¿Cuanto vino enviar a cada ciudad?:', min=0, max=vinoXciudad)
+
+
+	rutas = []
+	for idCiudad in idsCiudades:
+		esVino =  ciudades[idCiudad]['tradegood'] == '1'
+		if esVino is False:
+			html = s.get(s.urlBase + urlCiudad + idCiudad)
+			ciudadD = getCiudad(htmlD)
+			idIsla = ciudadD['islandId']
+			for idVino in idsVino:
+				idCiudadOrigen = getIdCiudad(s)
+				html = s.get(s.urlBase + urlCiudad + idVino)
+				ciudadO = getCiudad(html)
+				max = getRescursosDisponibles(htmlO)
+				total = list(map(int, max))
+
 def menuRutaComercial(s):
 	idCiudadOrigen = None
 	rutas = []
@@ -1038,6 +1084,8 @@ def getSesion():
 def main():
 	inicializar()
 	s = getSesion()
+	enviarVino(s)
+	return
 	setSignalsHandlers(s)
 	try:
 		menu(s)
