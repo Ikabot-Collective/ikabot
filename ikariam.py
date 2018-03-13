@@ -586,6 +586,12 @@ def enviarVino(s):
 	print('Se puede enviar como máximo {} a cada ciudad'.format(maximo))
 	cantidad = read(msg='¿Cuanto vino enviar a cada ciudad?:', min=0, max=vinoXciudad)
 	
+	print('\nPor enviar {} de vino a cada ciudad'.format(addPuntos(cantidad)))
+	print('¿Proceder? [Y/n]')
+	rta = read()
+	if rta.lower() == 'n':
+		return
+
 	esPadre = forkear(s)
 	if esPadre is True:
 		return
