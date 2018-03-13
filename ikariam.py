@@ -556,16 +556,17 @@ def pedirValor(text, max):
 	return int(var)
 
 def menuRutaComercial(s):
-	banner()
-	print('Ciudad de origen:')
-	idCiudadOrigen = getIdCiudad(s)
-	htmlO = s.get(s.urlBase + urlCiudad + idCiudadOrigen)
-	ciudadO = getCiudad(htmlO)
-	max = getRescursosDisponibles(htmlO)
-	disponible = [int(max[0]), int(max[1]), int(max[2]), int(max[3]), int(max[4])]
-
+	idCiudadOrigen = None
 	rutas = []
 	while True:
+		if idCiudadOrigen is None:
+			banner()
+			print('Ciudad de origen:')
+			idCiudadOrigen = getIdCiudad(s)
+			htmlO = s.get(s.urlBase + urlCiudad + idCiudadOrigen)
+			ciudadO = getCiudad(htmlO)
+			max = getRescursosDisponibles(htmlO)
+			total = list(map(int, max))
 		banner()
 		print('Ciudad de destino')
 		idCiudadDestino = getIdCiudad(s)
@@ -573,46 +574,41 @@ def menuRutaComercial(s):
 			continue
 		htmlD = s.get(s.urlBase + urlCiudad + idCiudadDestino)
 		ciudadD = getCiudad(htmlD)
-		idIsla = re.search(r'"islandId":"(\d+)"', htmlD).group(1)
+		idIsla = ciudadD['islandId']
 		banner()
 		print('Disponible:')
-		print('Madera {} Vino {} Marmol {} Cristal {} Azufre {}'.format(addPuntos(disponible[0]), addPuntos(disponible[1]), addPuntos(disponible[2]), addPuntos(disponible[3]), addPuntos(disponible[4])))
+		resto = total
+		for ruta in rutas:
+			(origen, _, _, md, vn, mr, cr, az) = ruta
+			if origen == idCiudadOrigen:
+				resto = (resto[0] - md, resto[1] - vn, resto[2] - mr, resto[3] - cr, resto[4] - az)
+		print('Madera {} Vino {} Marmol {} Cristal {} Azufre {}'.format(addPuntos(resto[0]), addPuntos(resto[1]), addPuntos(resto[2]), addPuntos(resto[3]), addPuntos(resto[4])))
 		print('Enviar:')
-		md = pedirValor('Madera: ', disponible[0])
-		vn = pedirValor('Vino:   ', disponible[1])
-		mr = pedirValor('Marmol: ', disponible[2])
-		cr = pedirValor('Cristal:', disponible[3])
-		az = pedirValor('Azufre: ', disponible[4])
+		md = pedirValor('Madera: ', resto[0])
+		vn = pedirValor('Vino:   ', resto[1])
+		mr = pedirValor('Marmol: ', resto[2])
+		cr = pedirValor('Cristal:', resto[3])
+		az = pedirValor('Azufre: ', resto[4])
 		banner()
 		print('Por enviar de {} a {}\nMadera {} Vino {} Marmol {} Cristal {} Azufre {}'.format(ciudadO['cityName'], ciudadD['cityName'], addPuntos(md), addPuntos(vn), addPuntos(mr), addPuntos(cr), addPuntos(az)))
 		print('¿Proceder? [Y/n]')
 		rta = read()
 		if rta.lower() == 'n':
-			continue
-		disponible[0] -= md
-		disponible[1] -= vn
-		disponible[2] -= mr
-		disponible[3] -= cr
-		disponible[4] -= az
-		ruta = (idCiudadOrigen, idCiudadDestino, idIsla, md, vn, mr, cr, az)
-		rutas.append(ruta)
-		print('¿Realizar otro envio? [y/N]')
-		rta = read()
-		otroViaje = rta.lower() == 'y'
-		if otroViaje is True:
-			print('¿Misma ciudad de origen? [Y/n]')
-			rta = read()
-			mismaCiudad = rta == '' or rta.lower() == 'y'
-			if mismaCiudad is False:
-				banner()
-				print('Ciudad de origen:')
-				idCiudadOrigen = getIdCiudad(s)
-				htmlO = s.get(s.urlBase + urlCiudad + idCiudadOrigen)
-				ciudadO = getCiudad(htmlO)
-				max = getRescursosDisponibles(htmlO)
-				disponible = [int(max[0]), int(max[1]), int(max[2]), int(max[3]), int(max[4])]
+			idCiudadDestino = None
 		else:
-			break
+			ruta = (idCiudadOrigen, idCiudadDestino, idIsla, md, vn, mr, cr, az)
+			rutas.append(ruta)
+			print('¿Realizar otro envio? [y/N]')
+			rta = read()
+			otroViaje = rta.lower() == 'y'
+			if otroViaje is True:
+				print('¿Misma ciudad de origen? [Y/n]')
+				rta = read()
+				ciudadDistinta = rta.lower() == 'n'
+				if ciudadDistinta is True:
+					idCiudadDestino = None
+			else:
+				break
 	esPadre = forkear(s)
 	if esPadre is True:
 		return
