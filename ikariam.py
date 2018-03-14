@@ -348,8 +348,7 @@ def recursosNecesarios(s, idCiudad, posEdifiico,  niveles):
 	ciudad = getCiudad(html)
 	desde = int(ciudad['position'][posEdifiico]['level'])
 	hasta = desde + niveles
-	nombre = ciudad['position'][posEdifiico]['name']
-	nombre = nombre.split(' ')[0].lower()
+	nombre = ciudad['position'][posEdifiico]['building']
 	(carpinteria, oficina, prensa, optico, area)  = getReductores(ciudad)
 	url = 'http://data-ikariam.com/ikabot.php?edificio={}&desde={}&hasta={}&carpinteria={}&oficina={}&prensa={}&optico={}&area={}'.format(nombre, desde, hasta, carpinteria, oficina, prensa, optico, area)
 	return requests.get(url).text.split(',')
@@ -362,6 +361,7 @@ def subirEdificios(s):
 		return
 	try:
 		(madera, vino, marmol, cristal, azufre) = recursosNecesarios(s, idCiudad, edificios[0], len(edificios))
+		assert madera != '0'
 		print('Costará:')
 		costo = 'Madera:{}'.format(addPuntos(madera))
 		if int(vino) > 0:
