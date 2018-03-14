@@ -11,25 +11,29 @@ _Es como usar una cuenta premium solo que con más funcionalidad y sin gastar am
 2) Enviar recursos 
 
 	Enviar cualquier cantidad de recursos de una ciudad a otra. Por ejemplo uno puede mandar medio millón de madera de la ciudad A a la ciudad B y el script se encargara de hacer los envios necesarios
-	
-3) Estado de la cuenta
+
+3) Enviar vino
+
+	Envia una cantidad igual de vino a todas las ciudades. Esto se hace solo una vez, por ende se recomienda mandar tanto como se pueda. La maxima cantidad a enviar se calcula automaticamente.
+
+4) Estado de la cuenta
 
 	Muestra informacion como niveles de los edificios, tiempo hasta que se acabe el vino, recursos entre otras cosas de todas las ciudades.
 	
-4) Donar
+5) Donar
 
 	Le permite a uno donar.
 	
-5) Buscar espacios nuevos
+6) Buscar espacios nuevos
 
 	Esta funcionalidad le envia un mensaje por telegram a uno si la cantidad de espacios disponible en cualquiera de sus islas varia (aumentando o disminuyendo).
 	
 	Para poder configurarlo, hay que tener la aplicacion de telegram y crear un bot.
 	
-6) Entrar diariamente
+7) Entrar diariamente
 
 	Para aquellos que no quieren que pase ni un dia sin que su cuenta inicie sesion.
-7) Alertar ataques
+8) Alertar ataques
 
 	Nos alerta por telegram si nos van a atacar, de manera similar que con 5., se necesita configurar telegram.
 
