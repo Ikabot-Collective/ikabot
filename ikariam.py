@@ -60,7 +60,7 @@ class Sesion:
 			oldline = fileInfo.group(0)
 			sesionesActivas = int(fileInfo.group(1))
 			lines = text.splitlines()
-			if salida is True:
+			if salida is True and sesionesActivas == 1:
 				html = self.get()
 			with open(cookieFile, 'w') as filehandler:
 				for line in lines:
