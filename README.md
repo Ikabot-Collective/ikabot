@@ -37,6 +37,10 @@ _Es como usar una cuenta premium solo que con más funcionalidad y sin gastar am
 
 	Nos alerta por telegram si nos van a atacar, de manera similar que con 5., se necesita configurar telegram.
 
+9) Bot donador
+
+	Entra una vez al día y dona toda la madera disponible de todas las ciudades al bien de lujo o a los aserraderos
+
 Cuando uno setea una accion, la misma se realiza en un proceso de fondo, el cual va a correr hasta que termine o hasta que la computadora se apague.
 
 Uno puede entrar en la cuenta sin problemas aun si hay un proceso que esta accediendola periodicamente (subiendo un edificio por ejemplo).
