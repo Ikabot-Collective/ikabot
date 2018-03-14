@@ -58,7 +58,7 @@ class Sesion:
 				for line in lines:
 					if line not in repetidos:
 						filehandler.write(line + '\n')
-				filehandler.write(entrada + '\n')
+				filehandler.write(entrada)
 		else:
 			(fileInfo, text) = getFileInfo(self.username, self.urlBase)
 			if fileInfo is None:
