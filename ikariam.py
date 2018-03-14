@@ -17,6 +17,7 @@ import random
 import subprocess
 import signal
 import traceback
+import hashlib
 
 ids = None
 ciudades = None
@@ -29,6 +30,14 @@ prompt = ' >>  '
 tipoDeBien = ['Madera', 'Vino', 'Marmol', 'Cristal', 'Azufre']
 getcontext().prec = 30
 
+def encriptPasswd(servidor, mundo, usuario, password):
+	sha = hashlib.sha256()
+	sha.update(servidor.encode('utf-8') + b'0')
+	sha.update(mundo.encode('utf-8') + b'0')
+	sha.update(usuario.encode('utf-8') + b'0')
+	sha.update(password.encode('utf-8'))
+	return sha.hexdigest()
+
 class Sesion:
 	def __init__(self, urlBase, payload, headers):
 		self.urlBase = urlBase
@@ -38,6 +47,7 @@ class Sesion:
 		self.mundo = data.group(1)
 		self.servidor = data.group(2)
 		self.headers = headers
+		self.sha = encriptPasswd(self.servidor, self.mundo, payload['name'], payload['password'])
 		self.login()
 
 	def token(self):
