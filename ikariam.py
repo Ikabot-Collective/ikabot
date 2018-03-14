@@ -48,8 +48,17 @@ class Sesion:
 		if primero is True:
 			cookie_dict = dict(self.s.cookies.items())
 			entrada = self.username + ' 1 ' + cookie_dict['PHPSESSID'] + ' ' + cookie_dict['ikariam'] + ' ' + self.urlBase + '\n'
-			with open(cookieFile, 'a') as filehandler:
-				filehandler.write(entrada)
+
+			with open(cookieFile, 'r') as filehandler:
+				text = filehandler.read()
+			lines = text.splitlines()
+			regex =  re.escape(self.username) + r'\s(\d+)\s(.*?)\s(.*?)\s' + re.escape(self.urlBase)
+			repetidos = re.findall(regex, text)
+			with open(cookieFile, 'w') as filehandler:
+				for line in lines:
+					if line not in repetidos:
+						filehandler.write(line + '\n')
+				filehandler.write(entrada + '\n')
 		else:
 			(fileInfo, text) = getFileInfo(self.username, self.urlBase)
 			if fileInfo is None:
