@@ -38,6 +38,14 @@ def encriptPasswd(servidor, mundo, usuario, password):
 	sha.update(password.encode('utf-8'))
 	return sha.hexdigest()
 
+def passwordEsValida(servidor, mundo, usuario, password):
+	sha = getFileInfo(servidor, mundo, usuario)[0]
+	if sha:
+		sha = sha.group(4)
+	else:
+		return True # es el primero
+	return sha == encriptPasswd(servidor, mundo, usuario, password)
+
 class Sesion:
 	def __init__(self, urlBase, payload, headers):
 		self.urlBase = urlBase
@@ -48,7 +56,10 @@ class Sesion:
 		self.servidor = data.group(2)
 		self.headers = headers
 		self.sha = encriptPasswd(self.servidor, self.mundo, payload['name'], payload['password'])
-		self.login()
+		if passwordEsValida(self.servidor, self.mundo, payload['name'], payload['password']):
+			self.getCookie()
+		else:
+			sys.exit('Usuario o contrasenia incorrecta')
 
 	def token(self):
 		html = self.get()
@@ -57,20 +68,19 @@ class Sesion:
 	def updateCookieFile(self, primero=False, salida=False, nuevo=False, vencimiento=False):
 		if primero is True:
 			cookie_dict = dict(self.s.cookies.items())
-			entrada = self.username + ' 1 ' + cookie_dict['PHPSESSID'] + ' ' + cookie_dict['ikariam'] + ' ' + self.urlBase + '\n'
-
+			entrada = self.servidor + ' ' + self.mundo + ' ' + self.username + ' 1 ' + cookie_dict['PHPSESSID'] + ' ' + cookie_dict['ikariam'] + ' ' + self.sha
 			with open(cookieFile, 'r') as filehandler:
 				text = filehandler.read()
 			lines = text.splitlines()
-			regex =  re.escape(self.username) + r'\s(\d+)\s(.*?)\s(.*?)\s' + re.escape(self.urlBase)
+			regex = re.escape(self.servidor) + r' ' + re.escape(self.mundo) + r' ' + re.escape(self.username) + r' (\d+) ([\w\d]+) ([\w\d_]+) ([\w\d]+)'
 			repetidos = re.findall(regex, text)
 			with open(cookieFile, 'w') as filehandler:
 				for line in lines:
 					if line not in repetidos:
 						filehandler.write(line + '\n')
-				filehandler.write(entrada)
+				filehandler.write(entrada + '\n')
 		else:
-			(fileInfo, text) = getFileInfo(self.username, self.urlBase)
+			(fileInfo, text) = getFileInfo(self.servidor, self.mundo, self.username)
 			if fileInfo is None:
 				if nuevo is True:
 					raise ValueError('No se encontro linea en el cookieFile', text)
@@ -88,7 +98,7 @@ class Sesion:
 					else:
 						if salida is True:
 							if sesionesActivas > 1:
-								newline = self.username + ' ' + str(sesionesActivas - 1) + ' ' + fileInfo.group(2) + ' ' + fileInfo.group(3) + ' ' + self.urlBase + '\n'
+								newline = self.servidor + ' ' + self.mundo + ' ' + self.username + ' ' + str(sesionesActivas - 1) + ' ' + fileInfo.group(2) + ' ' + fileInfo.group(3) + ' ' + self.sha + '\n'
 								filehandler.write(newline)
 							else:
 								idCiudad = getCiudad(html)['id']
@@ -96,13 +106,13 @@ class Sesion:
 								urlLogout = 'action=logoutAvatar&function=logout&sideBarExt=undefined&startPageShown=1&detectedDevice=1&cityId={0}&backgroundView=city&currentCityId={0}&actionRequest={1}'.format(idCiudad, token)
 								self.s.get(self.urlBase + urlLogout, headers=self.headers)
 						if nuevo is True:
-							newline = self.username + ' ' + str(sesionesActivas + 1) + ' ' + fileInfo.group(2) + ' ' + fileInfo.group(3) + ' ' + self.urlBase + '\n'
+							newline = self.servidor + ' ' + self.mundo + ' ' + self.username + ' ' + str(sesionesActivas + 1) + ' ' + fileInfo.group(2) + ' ' + fileInfo.group(3) + ' ' + self.sha + '\n'
 							filehandler.write(newline)
 						if vencimiento is True:
 							pass
 
 	def getCookie(self):
-		fileInfo = getFileInfo(self.username, self.urlBase)[0]
+		fileInfo = getFileInfo(self.servidor, self.mundo, self.username)[0]
 		if fileInfo:
 			cookie_dict = {'PHPSESSID': fileInfo.group(2), 'ikariam': fileInfo.group(3), 'ikariam_loginMode': '0'}
 			self.s = requests.Session()
@@ -125,7 +135,7 @@ class Sesion:
 		self.login()
 
 	def checkCookie(self):
-		sigueActiva = sesionActiva(self.username, self.urlBase, cookies=self.s.cookies)
+		sigueActiva = sesionActiva(self.servidor, self.mundo, self.username, cookies=self.s.cookies)
 		if sigueActiva is False:
 			self.getCookie()
 
@@ -200,14 +210,14 @@ def banner():
 	"""
 	print('\n{}\n\n{}\n'.format(bner, infoUser))
 
-def getFileInfo(username, urlBase):
+def getFileInfo(servidor, mundo, username): # 1 num de sesiones 2 cookie1 3 cookie2 4 sha
 	with open(cookieFile, 'r') as filehandler:
 		text = filehandler.read()
-	regex =  re.escape(username) + r'\s(\d+)\s(.*?)\s(.*?)\s' + re.escape(urlBase)
+	regex = re.escape(servidor) + r' ' + re.escape(mundo) + r' ' + re.escape(username) + r' (\d+) ([\w\d]+) ([\w\d_]+) ([\w\d]+)'
 	return (re.search(regex, text), text)
 
-def sesionActiva(username, urlBase, cookies=None):
-	fileInfo = getFileInfo(username, urlBase)[0]
+def sesionActiva(servidor, mundo, username, cookies=None):
+	fileInfo = getFileInfo(servidor, mundo, username)[0]
 	if fileInfo is None:
 		return False
 	if cookies is not None:
