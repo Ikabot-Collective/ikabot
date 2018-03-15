@@ -594,7 +594,9 @@ def enviarVino(s):
 		if esVino:
 			html = s.get(s.urlBase + urlCiudad + idCiudad)
 			recursos = getRescursosDisponibles(html)
-			dict_idVino_diponible[idCiudad] = int(recursos[1])
+			dict_idVino_diponible[idCiudad] = int(recursos[1]) - 1000 # dejo 1000 por las dudas
+			if dict_idVino_diponible[idCiudad] < 0:
+				dict_idVino_diponible[idCiudad] = 0
 			vinoTotal += dict_idVino_diponible[idCiudad]
 	aEnviar = len(ciudades) - len(dict_idVino_diponible)
 	vinoXciudad = int(vinoTotal / aEnviar)
