@@ -587,17 +587,16 @@ def pedirValor(text, max):
 def enviarVino(s):
 	banner()
 	vinoTotal = 0
-	idsVino = []
+	dict_idVino_diponible = {}
 	(idsCiudades, ciudades) = getIdsDeCiudades(s)
 	for idCiudad in idsCiudades:
 		esVino =  ciudades[idCiudad]['tradegood'] == '1'
 		if esVino:
-			idsVino.append(idCiudad)
 			html = s.get(s.urlBase + urlCiudad + idCiudad)
-			ciudad = getCiudad(html)
 			recursos = getRescursosDisponibles(html)
-			vinoTotal += int(recursos[1])
-	aEnviar = len(ciudades) - len(idsVino)
+			dict_idVino_diponible[idCiudad] = int(recursos[1])
+			vinoTotal += dict_idVino_diponible[idCiudad]
+	aEnviar = len(ciudades) - len(dict_idVino_diponible)
 	vinoXciudad = int(vinoTotal / aEnviar)
 	maximo = addPuntos(vinoXciudad)
 
@@ -632,12 +631,14 @@ def enviarVino(s):
 			ciudadD = getCiudad(htmlD)
 			idIsla = ciudadD['islandId']
 			faltante = cantidad
-			for idCiudadOrigen in idsVino:
+			for idCiudadOrigen in dict_idVino_diponible:
 				if faltante == 0:
 					break
-				htmlO = s.get(s.urlBase + urlCiudad + idCiudadOrigen)
-				max = getRescursosDisponibles(htmlO)
-				vinoDisponible = int(max[1])
+				vinoDisponible = dict_idVino_diponible[idCiudadOrigen]
+				for ruta in rutas:
+					(origen, _, _, _, vn, _, _, _) = ruta
+					if origen == idCiudadOrigen:
+						vinoDisponible -= vn
 				enviar = faltante if vinoDisponible > faltante else vinoDisponible
 				faltante -= enviar
 				ruta = (idCiudadOrigen, idCiudadDestino, idIsla, 0, enviar, 0, 0, 0)
