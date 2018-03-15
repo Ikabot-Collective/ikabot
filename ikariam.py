@@ -371,7 +371,8 @@ def recursosNecesarios(s, idCiudad, posEdifiico,  niveles):
 	nombre = ciudad['position'][posEdifiico]['building']
 	(carpinteria, oficina, prensa, optico, area)  = getReductores(ciudad)
 	url = 'http://data-ikariam.com/ikabot.php?edificio={}&desde={}&hasta={}&carpinteria={}&oficina={}&prensa={}&optico={}&area={}'.format(nombre, desde, hasta, carpinteria, oficina, prensa, optico, area)
-	return requests.get(url).text.split(',')
+	rta = requests.get(url).text.split(',')
+	return list(map(int, rta))
 
 def subirEdificios(s):
 	banner()
@@ -381,23 +382,31 @@ def subirEdificios(s):
 		return
 	try:
 		(madera, vino, marmol, cristal, azufre) = recursosNecesarios(s, idCiudad, edificios[0], len(edificios))
-		assert madera != '0'
-		print('Costará:')
-		costo = 'Madera:{}'.format(addPuntos(madera))
-		if int(vino) > 0:
-			costo = costo + ', Vino:{}'.format(addPuntos(vino))
-		if int(marmol) > 0:
-			costo = costo + ', Marmol:{}'.format(addPuntos(marmol))
-		if int(cristal) > 0:
-			costo = costo + ', Cristal:{}'.format(addPuntos(cristal))
-		if int(azufre) > 0:
-			costo = costo + ', Azufre:{}'.format(addPuntos(azufre))
-		print(costo)
-
-		print('¿Proceder? [Y/n]')
-		rta = read()
-		if rta.lower() == 'n':
-			return
+		assert madera != 0
+		html = s.get(s.urlBase + urlCiudad + idCiudad)
+		(maderaDisp, vinoDisp, marmolDisp, cristalDisp, azufreDisp) = getRescursosDisponibles(html, num=True)
+		if maderaDisp < madera or vinoDisp < vino or marmolDisp < marmol or cristalDisp < cristal or azufreDisp < azufre:
+			print('\nFalta:')
+			if maderaDisp < madera:
+				print('{} de madera'.format(addPuntos(madera - maderaDisp)))
+			if vinoDisp < vino:
+				print('{} de vino'.format(addPuntos(vino - vinoDisp)))
+			if marmolDisp < marmol:
+				print('{} de marmol'.format(addPuntos(marmol - marmolDisp)))
+			if cristalDisp < cristal:
+				print('{} de cristal'.format(addPuntos(cristal - cristalDisp)))
+			if azufreDisp < azufre:
+				print('{} de azufre'.format(addPuntos(azufre - azufreDisp)))
+			print('¿Proceder de todos modos? [Y/n]')
+			rta = read()
+			if rta.lower() == 'n':
+				return
+		else:
+			print('\nTiene materiales suficientes')
+			print('¿Proceder? [Y/n]')
+			rta = read()
+			if rta.lower() == 'n':
+				return
 	except:
 		pass
 
@@ -557,9 +566,12 @@ def getBarcosTotales(s):
 	html = s.get()
 	return int(re.search(r'maxTransporters">(\d+)<', html).group(1))
 
-def getRescursosDisponibles(html):
+def getRescursosDisponibles(html, num=False):
 	recursos = re.search(r'\\"resource\\":(\d+),\\"2\\":(\d+),\\"1\\":(\d+),\\"4\\":(\d+),\\"3\\":(\d+)}', html)
-	return [recursos.group(1), recursos.group(3), recursos.group(2), recursos.group(5), recursos.group(4)]
+	if num:
+		return [int(recursos.group(1)), int(recursos.group(3)), int(recursos.group(2)), int(recursos.group(5)), int(recursos.group(4))]
+	else:
+		return [recursos.group(1), recursos.group(3), recursos.group(2), recursos.group(5), recursos.group(4)]
 
 def getCapacidadDeAlmacenamiento(html):
 	return re.search(r'maxResources:\s*JSON\.parse\(\'{\\"resource\\":(\d+),', html).group(1)
