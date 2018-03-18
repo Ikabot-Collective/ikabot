@@ -42,9 +42,9 @@ def passwordEsValida(servidor, mundo, usuario, password):
 	sha = getFileInfo(servidor, mundo, usuario)[0]
 	if sha:
 		sha = sha.group(4)
+		return sha == encriptPasswd(servidor, mundo, usuario, password)
 	else:
 		return True # es el primero
-	return sha == encriptPasswd(servidor, mundo, usuario, password)
 
 class Sesion:
 	def __init__(self, urlBase, payload, headers):
