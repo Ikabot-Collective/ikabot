@@ -704,8 +704,23 @@ def menuRutaComercial(s):
 		mr = pedirValor('Marmol: ', resto[2])
 		cr = pedirValor('Cristal:', resto[3])
 		az = pedirValor('Azufre: ', resto[4])
+		if md + vn + mr + cr + az == 0:
+			idCiudadOrigen = None
+			continue
 		banner()
-		print('Por enviar de {} a {}\nMadera {} Vino {} Marmol {} Cristal {} Azufre {}'.format(ciudadO['cityName'], ciudadD['cityName'], addPuntos(md), addPuntos(vn), addPuntos(mr), addPuntos(cr), addPuntos(az)))
+		print('Por enviar de {} a {}'.format(ciudadO['cityName'], ciudadD['cityName']))
+		enviado = ''
+		if md:
+			enviado += 'Madera:{} '.format(addPuntos(md))
+		if vn:
+			enviado += 'Vino:{} '.format(addPuntos(vn))
+		if mr:
+			enviado += 'Marmol:{} '.format(addPuntos(mr))
+		if cr:
+			enviado += 'Cristal:{} '.format(addPuntos(cr))
+		if az:
+			enviado += 'Azufre:{}'.format(addPuntos(az))
+		print(enviado)
 		print('¿Proceder? [Y/n]')
 		rta = read()
 		if rta.lower() == 'n':
