@@ -367,6 +367,8 @@ def recursosNecesarios(s, idCiudad, posEdifiico,  niveles):
 	html = s.get(s.urlBase + urlCiudad + idCiudad)
 	ciudad = getCiudad(html)
 	desde = int(ciudad['position'][posEdifiico]['level'])
+	if ciudad['position'][posEdifiico]['isBusy']:
+		desde += 1
 	hasta = desde + niveles
 	nombre = ciudad['position'][posEdifiico]['building']
 	(carpinteria, oficina, prensa, optico, area)  = getReductores(ciudad)
