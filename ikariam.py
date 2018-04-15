@@ -184,7 +184,7 @@ def read(min=None, max=None, digit=False, msg=prompt, values=None): # lee input 
 				try:
 					leido = eval(leido)
 					break
-				except:
+				except SyntaxError:
 					return _invalido()
 	if min is not None and leido < min:
 			return _invalido()
