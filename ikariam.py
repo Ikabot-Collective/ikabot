@@ -1025,7 +1025,7 @@ def buscarEspacios(s):
 							if encontro is False:
 								desaparecio = cityAntes
 								break
-						msg = '{} desaparecio en {} {}:{} {}'.format(desaparecio['Name'], tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
+						msg = '{} desapareció en {} {}:{} {}'.format(desaparecio['Name'], tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
 						sendToBot(s, msg)
 					if lugaresAntes > espacios:
 						# alguien fundo
