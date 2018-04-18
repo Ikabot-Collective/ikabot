@@ -416,9 +416,8 @@ def subirEdificios(s):
 				return
 	except:
 		pass
-
-	esPadre = forkear(s)
-	if esPadre is True:
+	forkear(s)
+	if s.padre is True:
 		return
 
 	info = '\nSubir edificio\n'
@@ -640,8 +639,8 @@ def enviarVino(s):
 	if rta.lower() == 'n':
 		return
 
-	esPadre = forkear(s)
-	if esPadre is True:
+	forkear(s)
+	if s.padre is True:
 		return
 
 	rutas = []
@@ -746,8 +745,9 @@ def menuRutaComercial(s):
 					idCiudadOrigen = None
 			else:
 				break
-	esPadre = forkear(s)
-	if esPadre is True:
+
+	forkear(s)
+	if s.padre is True:
 		return
 
 	info = '\nRuta comercial\n'
@@ -967,9 +967,11 @@ def botDonador(s):
 	tipo = 'resource' if rta.lower() == 'a' else 'tradegood'
 	print('Se donará compulsivamente cada día.')
 	enter()
-	esPadre = forkear(s)
-	if esPadre is True:
+
+	forkear(s)
+	if s.padre is True:
 		return
+
 	info = '\nDono todos los días\n'
 	setInfoSignal(s, info)
 	(idsCiudades, ciudades) = getIdsDeCiudades(s)
@@ -996,9 +998,11 @@ def buscarEspacios(s):
 		return
 	print('Se buscarán espacios nuevos cada hora.')
 	enter()
-	esPadre = forkear(s)
-	if esPadre is True:
+
+	forkear(s)
+	if s.padre is True:
 		return
+
 	info = '\nBusco espacios nuevos en las islas cada 1 hora\n'
 	setInfoSignal(s, info)
 	idIslas = getIdsdeIslas(s)
@@ -1057,9 +1061,11 @@ def alertarAtaques(s):
 		return
 	print('Se buscarán ataques cada 15 minutos.')
 	enter()
-	esPadre = forkear(s)
-	if esPadre is True:
+
+	forkear(s)
+	if s.padre is True:
 		return
+
 	info = '\nEspero por ataques cada 29 minutos\n'
 	setInfoSignal(s, info)
 	fueAvisado = False
@@ -1087,9 +1093,11 @@ def entrarDiariamente(s):
 		return
 	print('Se entrará todos los días automaticamente.')
 	enter()
-	esPadre = forkear(s)
-	if esPadre is True:
+
+	forkear(s)
+	if s.padre is True:
 		return
+
 	info = '\nEntro diariamente\n'
 	setInfoSignal(s, info)
 	try:
@@ -1107,16 +1115,13 @@ def run(command):
 def forkear(s):
 	newpid = os.fork()
 	if newpid != 0:
-		esPadre = True
 		s.updateCookieFile(nuevo=True)
 		newpid = str(newpid)
 		run('kill -SIGSTOP ' + newpid)
 		run('bg ' + newpid)
 		run('disown ' + newpid)
 	else:
-		esPadre = False
 		s.padre = False
-	return esPadre
 
 def menu(s):
 	banner()
