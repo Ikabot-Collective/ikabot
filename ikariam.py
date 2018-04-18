@@ -48,6 +48,7 @@ def passwordEsValida(servidor, mundo, usuario, password):
 
 class Sesion:
 	def __init__(self, urlBase, payload, headers):
+		self.padre = True
 		self.urlBase = urlBase
 		self.payload = payload
 		self.username = payload['name']
@@ -131,10 +132,11 @@ class Sesion:
 		self.updateCookieFile(primero=True)
 
 	def backoff(self):
-		time.sleep(5 * random.randint(0, 10))
+		if self.padre is False:
+			time.sleep(5 * random.randint(0, 10))
 
 	def expiroLaSesion(self):
-		backoff()
+		self.backoff()
 		self.updateCookieFile(vencimiento=True) # borra la entrada vieja del CookieFile
 		self.login()
 
@@ -1113,6 +1115,7 @@ def forkear(s):
 		run('disown ' + newpid)
 	else:
 		esPadre = False
+		s.padre = False
 	return esPadre
 
 def menu(s):
