@@ -241,7 +241,6 @@ def borrar(texto, ocurrencias):
 		texto = texto.replace(ocurrencia, '')
 	return texto
 
-
 def getIsla(html):
 	isla = re.search(r'\[\["updateBackgroundData",([\s\S]*?),"specialServerBadges', html).group(1) + '}'
 
@@ -282,7 +281,7 @@ def getIsla(html):
 	remove.append(',"viewAble":1')
 	remove.append(',"viewAble":2')
 	isla = borrar(isla, remove)
-
+	# {"id":idIsla,"name":nombreIsla,"x":,"y":,"good":numeroBien,"woodLv":,"goodLv":,"wonder":numeroWonder,"wonderLv":"5","cities":[{"type":"city","name":cityName,"id":cityId,"level":lvIntendencia,"Id":playerId,"Name":playerName,"AllyId":,"AllyTag":,"state":"vacation"},...}}
 	return json.loads(isla, strict=False)
 
 def getCiudad(html):
@@ -1019,7 +1018,7 @@ def buscarEspacios(s):
 						for cityAntes in ciudadesAntes:
 							encontro = False
 							for cityAhora in ciudadesAhora:
-								if cityAhora['id'] == cityAntes['id']:
+								if cityAhora['type'] != 'empty' and cityAhora['id'] == cityAntes['id']:
 									encontro = True
 									break
 							if encontro is False:
@@ -1032,7 +1031,7 @@ def buscarEspacios(s):
 						for cityAhora in ciudadesAhora:
 							encontro = False
 							for cityAntes in ciudadesAntes:
-								if cityAhora['id'] == cityAntes['id']:
+								if cityAhora['type'] != 'empty' and cityAhora['id'] == cityAntes['id']:
 									encontro = True
 									break
 							if encontro is False:
