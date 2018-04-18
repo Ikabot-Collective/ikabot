@@ -30,7 +30,7 @@ prompt = ' >>  '
 tipoDeBien = ['Madera', 'Vino', 'Marmol', 'Cristal', 'Azufre']
 getcontext().prec = 30
 
-def encriptPasswd(servidor, mundo, usuario, password):
+def hashPasswd(servidor, mundo, usuario, password):
 	sha = hashlib.sha256()
 	sha.update(servidor.encode('utf-8') + b'0')
 	sha.update(mundo.encode('utf-8') + b'0')
@@ -42,7 +42,7 @@ def passwordEsValida(servidor, mundo, usuario, password):
 	sha = getFileInfo(servidor, mundo, usuario)[0]
 	if sha:
 		sha = sha.group(4)
-		return sha == encriptPasswd(servidor, mundo, usuario, password)
+		return sha == hashPasswd(servidor, mundo, usuario, password)
 	else:
 		return True # es el primero
 
@@ -56,7 +56,7 @@ class Sesion:
 		self.mundo = data.group(1)
 		self.servidor = data.group(2)
 		self.headers = headers
-		self.sha = encriptPasswd(self.servidor, self.mundo, payload['name'], payload['password'])
+		self.sha = hashPasswd(self.servidor, self.mundo, payload['name'], payload['password'])
 		if passwordEsValida(self.servidor, self.mundo, payload['name'], payload['password']):
 			self.getCookie()
 		else:
