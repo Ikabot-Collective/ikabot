@@ -66,7 +66,7 @@ class Sesion:
 		html = self.get()
 		return re.search(r'actionRequest"?:\s*"(.*?)"', html).group(1)
 
-	def updateCookieFile(self, primero=False, salida=False, nuevo=False, vencimiento=False):
+	def updateCookieFile(self, primero=False, salida=False, nuevo=False):
 		if primero is True:
 			cookie_dict = dict(self.s.cookies.items())
 			entrada = self.servidor + ' ' + self.mundo + ' ' + self.username + ' 1 ' + cookie_dict['PHPSESSID'] + ' ' + cookie_dict['ikariam'] + ' ' + self.sha
@@ -109,8 +109,6 @@ class Sesion:
 						if nuevo is True:
 							newline = self.servidor + ' ' + self.mundo + ' ' + self.username + ' ' + str(sesionesActivas + 1) + ' ' + fileInfo.group(2) + ' ' + fileInfo.group(3) + ' ' + self.sha + '\n'
 							filehandler.write(newline)
-						if vencimiento is True:
-							pass
 
 	def getCookie(self):
 		fileInfo = getFileInfo(self.servidor, self.mundo, self.username)[0]
@@ -123,7 +121,6 @@ class Sesion:
 			self.login()
 
 	def login(self):
-		self.updateCookieFile(vencimiento=True)
 		self.s = requests.Session() # s es la sesion de conexion
 		login = self.s.post(self.urlBase + 'action=loginAvatar&function=login', data=self.payload, headers=self.headers).text
 		expired = re.search(r'index\.php\?logout', login)
@@ -137,7 +134,6 @@ class Sesion:
 
 	def expiroLaSesion(self):
 		self.backoff()
-		self.updateCookieFile(vencimiento=True) # borra la entrada vieja del CookieFile
 		self.login()
 
 	def checkCookie(self):
