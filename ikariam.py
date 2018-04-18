@@ -1011,9 +1011,10 @@ def buscarEspacios(s):
 					else:
 						ciudades.append(city)
 				if idIsla in ciudades_espacios_dict:
+					lugaresAntes = ciudades_espacios_dict[idIsla][1]
 					ciudadesAntes = ciudades_espacios_dict[idIsla][0]
 					ciudadesAhora = isla['cities']
-					if ciudades_espacios_dict[idIsla][1] < espacios:
+					if lugaresAntes < espacios:
 						# alguien desaparecio
 						for cityAntes in ciudadesAntes:
 							encontro = False
@@ -1026,7 +1027,7 @@ def buscarEspacios(s):
 								break
 						msg = '{} desaparecio en {} {}:{} {}'.format(desaparecio['Name'], tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
 						sendToBot(s, msg)
-					if ciudades_espacios_dict[idIsla][1] > espacios:
+					if lugaresAntes > espacios:
 						# alguien fundo
 						for cityAhora in ciudadesAhora:
 							encontro = False
