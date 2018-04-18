@@ -851,7 +851,7 @@ def printEstadoMina(s, url, bien):
 		print('{} lv:{}'.format(bien, lv))
 		print('{} / {} {}%'.format(addPuntos(donado), addPuntos(porDonar), addPuntos(int((100 * donado) / porDonar))))
 	else:
-		print('{}: Se encuentra en ampliación\n'.format(bien))
+		print('{}: Está ampliando al nivel {:d}\n'.format(bien, int(lv) + 1))
 	return infoMina is not None
 
 def donar(s):
