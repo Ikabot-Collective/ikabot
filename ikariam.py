@@ -130,7 +130,11 @@ class Sesion:
 			sys.exit('Usuario o contrasenia incorrecta')
 		self.updateCookieFile(primero=True)
 
+	def backoff(self):
+		time.sleep(5 * random.randint(0, 10))
+
 	def expiroLaSesion(self):
+		backoff()
 		self.updateCookieFile(vencimiento=True) # borra la entrada vieja del CookieFile
 		self.login()
 
