@@ -997,24 +997,49 @@ def buscarEspacios(s):
 	info = '\nBusco espacios nuevos en las islas cada 1 hora\n'
 	setInfoSignal(s, info)
 	idIslas = getIdsdeIslas(s)
-	espacios_dict = {}
+	ciudades_espacios_dict = {}
 	try:
 		while True:
 			for idIsla in idIslas:
 				html = s.get(s.urlBase + urlIsla + idIsla)
 				isla = getIsla(html)
 				espacios = 0
+				ciudades = []
 				for city in isla['cities']:
 					if city['type'] == 'empty':
 						espacios += 1
-				if idIsla in espacios_dict:
-					if espacios_dict[idIsla] < espacios:
-						msg = 'Alguien desaparecio en {} {}:{} {}'.format(tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
+					else:
+						ciudades.append(city)
+				if idIsla in ciudades_espacios_dict:
+					ciudadesAntes = ciudades_espacios_dict[idIsla][0]
+					ciudadesAhora = isla['cities']
+					if ciudades_espacios_dict[idIsla][1] < espacios:
+						# alguien desaparecio
+						for cityAntes in ciudadesAntes:
+							encontro = False
+							for cityAhora in ciudadesAhora:
+								if cityAhora['id'] == cityAntes['id']:
+									encontro = True
+									break
+							if encontro is False:
+								desaparecio = cityAntes
+								break
+						msg = '{} desaparecio en {} {}:{} {}'.format(desaparecio['Name'], tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
 						sendToBot(s, msg)
-					if espacios_dict[idIsla] > espacios:
-						msg = 'Alguien fundó en {} {}:{} {}'.format(tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
+					if ciudades_espacios_dict[idIsla][1] > espacios:
+						# alguien fundo
+						for cityAhora in ciudadesAhora:
+							encontro = False
+							for cityAntes in ciudadesAntes:
+								if cityAhora['id'] == cityAntes['id']:
+									encontro = True
+									break
+							if encontro is False:
+								fundo = cityAhora
+								break
+						msg = '{} fundó en {} {}:{} {}'.format(fundo['Name'], tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
 						sendToBot(s, msg)
-				espacios_dict[idIsla] = espacios
+				ciudades_espacios_dict[idIsla] = (ciudades, espacios)
 			time.sleep(1*60*60)
 	except:
 		msg = 'Ya no se buscarán más espacios.\n{}'.format(traceback.format_exc())
