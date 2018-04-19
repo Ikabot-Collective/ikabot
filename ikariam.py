@@ -97,14 +97,14 @@ class Sesion:
 					self.updateCookieFile(primero=True)
 				return
 
+			oldline = fileInfo.group(0)
+			sesionesActivas = int(fileInfo.group(1))
+			newTextFile = ''
+
 			if salida is True and sesionesActivas == 1:
 				html = self.s.get(self.urlBase, headers=self.headers).text
 				if self.isExpired(html):
 					html = None
-
-			oldline = fileInfo.group(0)
-			sesionesActivas = int(fileInfo.group(1))
-			newTextFile = ''
 
 			for line in lines:
 				if line != oldline:
