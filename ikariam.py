@@ -88,7 +88,7 @@ class Sesion:
 			entrada = self.servidor + ' ' + self.mundo + ' ' + self.username + ' 1 ' + cookie_dict['PHPSESSID'] + ' ' + cookie_dict['ikariam'] + ' ' + self.sha
 			newTextFile = ''
 			for line in lines:
-				if isMyCookie(line) is False:
+				if self.isMyCookie(line) is False:
 					newTextFile += line + '\n'
 			newTextFile += entrada + '\n'
 		else:
