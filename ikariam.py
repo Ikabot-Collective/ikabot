@@ -76,7 +76,7 @@ class Sesion:
 	def __isExpired(self, html):
 		return re.search(r'index\.php\?logout', html) is not None
 
-	def __updateCookieFile(self, primero=False, salida=False, nuevo=False):
+	def __updateCookieFile(self, primero=False, nuevo=False, salida=False):
 		(fileInfo, text) = self.__getFileInfo(self.servidor, self.mundo, self.username)
 		lines = text.splitlines()
 		if primero is True:
@@ -1122,12 +1122,14 @@ def run(command):
 def forkear(s):
 	newpid = os.fork()
 	if newpid != 0:
+		# padre
 		s.login()
 		newpid = str(newpid)
 		run('kill -SIGSTOP ' + newpid)
 		run('bg ' + newpid)
 		run('disown ' + newpid)
 	else:
+		# hijo
 		s.padre = False
 
 def menu(s):
