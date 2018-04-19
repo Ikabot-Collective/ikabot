@@ -81,21 +81,17 @@ class Sesion:
 		return re.search(r'index\.php\?logout', html) is not None
 
 	def updateCookieFile(self, primero=False, salida=False, nuevo=False):
+		(fileInfo, text) = getFileInfo(self.servidor, self.mundo, self.username)
+		lines = text.splitlines()
 		if primero is True:
 			cookie_dict = dict(self.s.cookies.items())
 			entrada = self.servidor + ' ' + self.mundo + ' ' + self.username + ' 1 ' + cookie_dict['PHPSESSID'] + ' ' + cookie_dict['ikariam'] + ' ' + self.sha
-			with open(cookieFile, 'r') as filehandler:
-				text = filehandler.read()
-			lines = text.splitlines()
 			newTextFile = ''
 			for line in lines:
 				if isMyCookie(line) is False:
 					newTextFile += line + '\n'
 			newTextFile += entrada + '\n'
-			with open(cookieFile, 'w') as filehandler:
-				filehandler.write(newTextFile)
 		else:
-			(fileInfo, text) = getFileInfo(self.servidor, self.mundo, self.username)
 			if fileInfo is None:
 				if nuevo is True:
 					raise ValueError('No se encontro linea en el cookieFile', text)
@@ -109,7 +105,6 @@ class Sesion:
 
 			oldline = fileInfo.group(0)
 			sesionesActivas = int(fileInfo.group(1))
-			lines = text.splitlines()
 			newTextFile = ''
 
 			for line in lines:
@@ -125,8 +120,8 @@ class Sesion:
 					elif nuevo is True:
 						newline = self.servidor + ' ' + self.mundo + ' ' + self.username + ' ' + str(sesionesActivas + 1) + ' ' + fileInfo.group(2) + ' ' + fileInfo.group(3) + ' ' + self.sha
 						newTextFile += newline + '\n'
-			with open(cookieFile, 'w') as filehandler:
-				filehandler.write(newTextFile)
+		with open(cookieFile, 'w') as filehandler:
+			filehandler.write(newTextFile)
 
 	def getCookie(self):
 		fileInfo = getFileInfo(self.servidor, self.mundo, self.username)[0]
