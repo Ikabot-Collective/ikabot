@@ -30,22 +30,6 @@ prompt = ' >>  '
 tipoDeBien = ['Madera', 'Vino', 'Marmol', 'Cristal', 'Azufre']
 getcontext().prec = 30
 
-def hashPasswd(servidor, mundo, usuario, password):
-	sha = hashlib.sha256()
-	sha.update(servidor.encode('utf-8') + b'0')
-	sha.update(mundo.encode('utf-8') + b'0')
-	sha.update(usuario.encode('utf-8') + b'0')
-	sha.update(password.encode('utf-8'))
-	return sha.hexdigest()
-
-def passwordEsValida(servidor, mundo, usuario, password):
-	sha = getFileInfo(servidor, mundo, usuario)[0]
-	if sha:
-		sha = sha.group(4)
-		return sha == hashPasswd(servidor, mundo, usuario, password)
-	else:
-		return True # es el primero
-
 class Sesion:
 	def __init__(self, urlBase, payload, headers):
 		self.padre = True
@@ -56,45 +40,57 @@ class Sesion:
 		self.mundo = data.group(1)
 		self.servidor = data.group(2)
 		self.headers = headers
-		self.sha = hashPasswd(self.servidor, self.mundo, payload['name'], payload['password'])
-		if passwordEsValida(self.servidor, self.mundo, payload['name'], payload['password']):
-			self.getCookie()
+		self.sha = self.__hashPasswd(self.servidor, self.mundo, payload['name'], payload['password'])
+		if self.__passwordEsValida(self.servidor, self.mundo, payload['name'], payload['password']):
+			self.__getCookie()
 		else:
 			sys.exit('Usuario o contrasenia incorrecta')
 
-	def token(self):
-		html = self.get()
-		return re.search(r'actionRequest"?:\s*"(.*?)"', html).group(1)
+	def __hashPasswd(self, servidor, mundo, usuario, password):
+		sha = hashlib.sha256()
+		sha.update(servidor.encode('utf-8') + b'0')
+		sha.update(mundo.encode('utf-8') + b'0')
+		sha.update(usuario.encode('utf-8') + b'0')
+		sha.update(password.encode('utf-8'))
+		return sha.hexdigest()
 
-	def logout(self, html):
+	def __passwordEsValida(self, servidor, mundo, usuario, password):
+		sha = self.__getFileInfo(servidor, mundo, usuario)[0]
+		if sha:
+			sha = sha.group(4)
+			return sha == self.__hashPasswd(servidor, mundo, usuario, password)
+		else:
+			return True # es el primero
+
+	def __logout(self, html):
 		if html is not None:
 			idCiudad = getCiudad(html)['id']
 			token = re.search(r'actionRequest"?:\s*"(.*?)"', html).group(1)
 			urlLogout = 'action=logoutAvatar&function=logout&sideBarExt=undefined&startPageShown=1&detectedDevice=1&cityId={0}&backgroundView=city&currentCityId={0}&actionRequest={1}'.format(idCiudad, token)
 			self.s.get(self.urlBase + urlLogout, headers=self.headers)
 
-	def isMyCookie(self, line):
+	def __isMyCookie(self, line):
 		regex = re.escape(self.servidor) + r' ' + re.escape(self.mundo) + r' ' + re.escape(self.username) + r' (\d+) ([\w\d]+) ([\w\d_]+) ([\w\d]+)'
 		return re.search(regex, line) is not None
 
-	def isExpired(self, html):
+	def __isExpired(self, html):
 		return re.search(r'index\.php\?logout', html) is not None
 
-	def updateCookieFile(self, primero=False, salida=False, nuevo=False):
-		(fileInfo, text) = getFileInfo(self.servidor, self.mundo, self.username)
+	def __updateCookieFile(self, primero=False, salida=False, nuevo=False):
+		(fileInfo, text) = self.__getFileInfo(self.servidor, self.mundo, self.username)
 		lines = text.splitlines()
 		if primero is True:
 			cookie_dict = dict(self.s.cookies.items())
 			entrada = self.servidor + ' ' + self.mundo + ' ' + self.username + ' 1 ' + cookie_dict['PHPSESSID'] + ' ' + cookie_dict['ikariam'] + ' ' + self.sha
 			newTextFile = ''
 			for line in lines:
-				if self.isMyCookie(line) is False:
+				if self.__isMyCookie(line) is False:
 					newTextFile += line + '\n'
 			newTextFile += entrada + '\n'
 		else:
 			if fileInfo is None:
 				if nuevo is True:
-					self.updateCookieFile(primero=True)
+					self.__updateCookieFile(primero=True)
 				return
 
 			oldline = fileInfo.group(0)
@@ -103,7 +99,7 @@ class Sesion:
 
 			if salida is True and sesionesActivas == 1:
 				html = self.s.get(self.urlBase, headers=self.headers).text
-				if self.isExpired(html):
+				if self.__isExpired(html):
 					html = None
 
 			for line in lines:
@@ -115,68 +111,88 @@ class Sesion:
 							newline = self.servidor + ' ' + self.mundo + ' ' + self.username + ' ' + str(sesionesActivas - 1) + ' ' + fileInfo.group(2) + ' ' + fileInfo.group(3) + ' ' + self.sha
 							newTextFile += newline + '\n'
 						else:
-							self.logout(html)
+							self.__logout(html)
 					elif nuevo is True:
 						newline = self.servidor + ' ' + self.mundo + ' ' + self.username + ' ' + str(sesionesActivas + 1) + ' ' + fileInfo.group(2) + ' ' + fileInfo.group(3) + ' ' + self.sha
 						newTextFile += newline + '\n'
 		with open(cookieFile, 'w') as filehandler:
 			filehandler.write(newTextFile)
 
-	def getCookie(self):
-		fileInfo = getFileInfo(self.servidor, self.mundo, self.username)[0]
+	def __getCookie(self):
+		fileInfo = self.__getFileInfo(self.servidor, self.mundo, self.username)[0]
 		if fileInfo:
 			cookie_dict = {'PHPSESSID': fileInfo.group(2), 'ikariam': fileInfo.group(3), 'ikariam_loginMode': '0'}
 			self.s = requests.Session()
 			requests.cookies.cookiejar_from_dict(cookie_dict, cookiejar=self.s.cookies, overwrite=True)
-			self.updateCookieFile(nuevo=True)
+			self.__updateCookieFile(nuevo=True)
 		else:
-			self.login()
+			self.__login()
 
-	def login(self):
+	def __login(self):
 		self.s = requests.Session() # s es la sesion de conexion
 		html = self.s.post(self.urlBase + 'action=loginAvatar&function=login', data=self.payload, headers=self.headers).text
-		if self.isExpired(html):
+		if self.__isExpired(html):
 			sys.exit('Usuario o contrasenia incorrecta')
-		self.updateCookieFile(primero=True)
+		self.__updateCookieFile(primero=True)
 
-	def backoff(self):
+	def __backoff(self):
 		if self.padre is False:
 			time.sleep(5 * random.randint(0, 10))
 
-	def expiroLaSesion(self):
-		self.backoff()
-		self.login()
+	def __expiroLaSesion(self):
+		self.__backoff()
+		self.__login()
 
-	def checkCookie(self):
-		sigueActiva = sesionActiva(self.servidor, self.mundo, self.username, cookies=self.s.cookies)
+	def __checkCookie(self):
+		sigueActiva = self.__sesionActiva(self.servidor, self.mundo, self.username, self.s.cookies)
 		if sigueActiva is False:
-			self.getCookie()
+			self.__getCookie()
+
+	def __getFileInfo(self, servidor, mundo, username): # 1 num de sesiones 2 cookie1 3 cookie2 4 sha
+		with open(cookieFile, 'r') as filehandler:
+			text = filehandler.read()
+		regex = re.escape(servidor) + r' ' + re.escape(mundo) + r' ' + re.escape(username) + r' (\d+) ([\w\d]+) ([\w\d_]+) ([\w\d]+)'
+		return (re.search(regex, text), text)
+
+	def __sesionActiva(self, servidor, mundo, username, cookies):
+		fileInfo = self.__getFileInfo(servidor, mundo, username)[0]
+		if fileInfo is None:
+			return False
+		return fileInfo.group(2) == cookies['PHPSESSID']
+
+	def token(self):
+		html = self.get()
+		return re.search(r'actionRequest"?:\s*"(.*?)"', html).group(1)
 
 	def get(self, url=None):
-		self.checkCookie()
+		self.__checkCookie()
 		url = url or self.urlBase
 		while True:
 			try:
 				html = self.s.get(url, headers=self.headers).text
-				assert self.isExpired(html) is False
+				assert self.__isExpired(html) is False
 				return html
 			except:
-				self.expiroLaSesion()
+				self.__expiroLaSesion()
 
 	def post(self, url, payloadPost=None):
-		self.checkCookie()
+		self.__checkCookie()
 		payloadPost = payloadPost or {}
 		while True:
 			try:
 				html = self.s.post(url, data=payloadPost, headers=self.headers).text
-				assert self.isExpired(html) is False
+				assert self.__isExpired(html) is False
 				return html
 			except:
-				self.expiroLaSesion()
+				self.__expiroLaSesion()
 
-	def bye(self):
-		self.updateCookieFile(salida=True)
-		os._exit(0)
+	def login(self):
+		self.__updateCookieFile(nuevo=True)
+
+	def logout(self):
+		self.__updateCookieFile(salida=True)
+		if self.padre is False:
+			os._exit(0)
 
 def read(min=None, max=None, digit=False, msg=prompt, values=None): # lee input del usuario
 	def _invalido():
@@ -220,20 +236,6 @@ def banner():
 	.JMML.  .JMML. YA.  `Moo9^Yo.      .JMMmmmd9     `Ybmd9'      `Mbmo
 	"""
 	print('\n{}\n\n{}\n'.format(bner, infoUser))
-
-def getFileInfo(servidor, mundo, username): # 1 num de sesiones 2 cookie1 3 cookie2 4 sha
-	with open(cookieFile, 'r') as filehandler:
-		text = filehandler.read()
-	regex = re.escape(servidor) + r' ' + re.escape(mundo) + r' ' + re.escape(username) + r' (\d+) ([\w\d]+) ([\w\d_]+) ([\w\d]+)'
-	return (re.search(regex, text), text)
-
-def sesionActiva(servidor, mundo, username, cookies=None):
-	fileInfo = getFileInfo(servidor, mundo, username)[0]
-	if fileInfo is None:
-		return False
-	if cookies is not None:
-		return fileInfo.group(2) == cookies['PHPSESSID']
-	return True
 
 class bcolors:
 	HEADER = '\033[95m'
@@ -433,7 +435,7 @@ def subirEdificios(s):
 	setInfoSignal(s, info)
 	for edificio in edificios:
 		subirEdificio(s, idCiudad, edificio)
-	s.bye()
+	s.logout()
 
 def getIdsDeCiudades(s):
 	global ciudades
@@ -679,7 +681,7 @@ def enviarVino(s):
 		info = info + '{} -> {}\nVino: {}\n'.format(ciudadO['cityName'], ciudadD['cityName'], addPuntos(vn))
 	setInfoSignal(s, info)
 	planearViajes(s, rutas)
-	s.bye()
+	s.logout()
 
 def menuRutaComercial(s):
 	idCiudadOrigen = None
@@ -766,7 +768,7 @@ def menuRutaComercial(s):
 
 	setInfoSignal(s, info)
 	planearViajes(s, rutas)
-	s.bye()
+	s.logout()
 
 def addPuntos(num):
 	return '{0:,}'.format(int(num)).replace(',','.')
@@ -996,7 +998,7 @@ def botDonador(s):
 	except:
 		msg = 'Ya no se donará.\n{}'.format(traceback.format_exc())
 		sendToBot(s, msg)
-		s.bye()
+		s.logout()
 
 def buscarEspacios(s):
 	if botValido(s) is False:
@@ -1059,7 +1061,7 @@ def buscarEspacios(s):
 	except:
 		msg = 'Ya no se buscarán más espacios.\n{}'.format(traceback.format_exc())
 		sendToBot(s, msg)
-		s.bye()
+		s.logout()
 
 def alertarAtaques(s):
 	if botValido(s) is False:
@@ -1091,7 +1093,7 @@ def alertarAtaques(s):
 	except:
 		msg = 'Ya no se alertarán más ataques.\n{}'.format(traceback.format_exc())
 		sendToBot(s, msg)
-		s.bye()
+		s.logout()
 
 def entrarDiariamente(s):
 	if botValido(s) is False:
@@ -1112,7 +1114,7 @@ def entrarDiariamente(s):
 	except:
 		msg = 'Ya no se entrará todos los días.\n{}'.format(traceback.format_exc())
 		sendToBot(s, msg)
-		s.bye()
+		s.logout()
 
 def run(command):
 	return subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
@@ -1120,7 +1122,7 @@ def run(command):
 def forkear(s):
 	newpid = os.fork()
 	if newpid != 0:
-		s.updateCookieFile(nuevo=True)
+		s.login()
 		newpid = str(newpid)
 		run('kill -SIGSTOP ' + newpid)
 		run('bg ' + newpid)
@@ -1220,7 +1222,7 @@ def main():
 		raise
 	finally:
 		if os.fork() == 0:
-			s.updateCookieFile(salida=True)
+			s.logout()
 
 if __name__ == '__main__':
 	try:
