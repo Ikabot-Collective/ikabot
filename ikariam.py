@@ -166,7 +166,9 @@ class Sesion:
 
 	def get(self, url=None):
 		self.__checkCookie()
-		url = url or self.urlBase
+		if url is None:
+			url = ''
+		url = self.urlBase + url
 		while True:
 			try:
 				html = self.s.get(url, headers=self.headers).text
@@ -175,8 +177,11 @@ class Sesion:
 			except:
 				self.__expiroLaSesion()
 
-	def post(self, url, payloadPost=None):
+	def post(self, url=None, payloadPost=None):
 		self.__checkCookie()
+		if url is None:
+			url = ''
+		url = self.urlBase + url
 		payloadPost = payloadPost or {}
 		while True:
 			try:
@@ -343,7 +348,7 @@ def getTiempoDeConstruccion(html):
 def esperarConstruccion(s, idCiudad):
 	slp = 1
 	while slp > 0:
-		html = s.get(s.urlBase + urlCiudad + idCiudad)
+		html = s.get(urlCiudad + idCiudad)
 		slp = getTiempoDeConstruccion(html)
 		time.sleep(slp + 5)
 	return getCiudad(html)
@@ -355,7 +360,7 @@ def subirEdificio(s, idCiudad, posicion):
 	if edificio['isMaxLevel'] is True or edificio['canUpgrade'] is False:
 		return
 
-	url = s.urlBase + 'action=CityScreen&function=upgradeBuilding&actionRequest={}&cityId={}&position={:d}&level={}&backgroundView=city&templateView={}&ajax=1'.format(s.token(), idCiudad, posicion, edificio['level'], edificio['building'])
+	url = 'action=CityScreen&function=upgradeBuilding&actionRequest={}&cityId={}&position={:d}&level={}&backgroundView=city&templateView={}&ajax=1'.format(s.token(), idCiudad, posicion, edificio['level'], edificio['building'])
 	s.post(url)
 
 def getReductores(ciudad):
@@ -376,7 +381,7 @@ def getReductores(ciudad):
 	return (carpinteria, oficina, prensa, optico, area)
 
 def recursosNecesarios(s, idCiudad, posEdifiico,  niveles):
-	html = s.get(s.urlBase + urlCiudad + idCiudad)
+	html = s.get(urlCiudad + idCiudad)
 	ciudad = getCiudad(html)
 	desde = int(ciudad['position'][posEdifiico]['level'])
 	if ciudad['position'][posEdifiico]['isBusy']:
@@ -397,7 +402,7 @@ def subirEdificios(s):
 	try:
 		(madera, vino, marmol, cristal, azufre) = recursosNecesarios(s, idCiudad, edificios[0], len(edificios))
 		assert madera != 0
-		html = s.get(s.urlBase + urlCiudad + idCiudad)
+		html = s.get(urlCiudad + idCiudad)
 		(maderaDisp, vinoDisp, marmolDisp, cristalDisp, azufreDisp) = getRescursosDisponibles(html, num=True)
 		if maderaDisp < madera or vinoDisp < vino or marmolDisp < marmol or cristalDisp < cristal or azufreDisp < azufre:
 			print('\nFalta:')
@@ -428,7 +433,7 @@ def subirEdificios(s):
 		return
 
 	info = '\nSubir edificio\n'
-	html = s.get(s.urlBase + urlCiudad + idCiudad)
+	html = s.get(urlCiudad + idCiudad)
 	ciudad = getCiudad(html)
 	info = info + 'Ciudad: {}\nEdificio: {}'.format(ciudad['cityName'], ciudad['position'][edificios[0]]['name'])
 
@@ -475,7 +480,7 @@ def getIdCiudad(s):
 	return ids[eleccion]
 
 def getEdificios(s, idCiudad):
-	html = s.get(s.urlBase + urlCiudad + idCiudad)
+	html = s.get(urlCiudad + idCiudad)
 	ciudad = getCiudad(html)
 	i = 0
 	pos = -1
@@ -524,8 +529,8 @@ def menuEdificios(prints, ciudad, posiciones):
 	return rta
 
 def enviarBienes(s, idCiudadOrigen, idCiudadDestino, idIsla, md, vn, mr, cr, az, barcos):
-	s.post(s.urlBase, payloadPost={'action': 'header', 'function': 'changeCurrentCity', 'actionRequest': s.token(), 'cityId': idCiudadOrigen, 'ajax': '1'}) 
-	s.post(s.urlBase, payloadPost={'action': 'transportOperations', 'function': 'loadTransportersWithFreight', 'destinationCityId': idCiudadDestino, 'islandId': idIsla, 'oldView': '', 'position': '', 'avatar2Name': '', 'city2Name': '', 'type': '', 'activeTab': '', 'premiumTransporter': '0', 'minusPlusValue': '500', 'cargo_resource': md, 'cargo_tradegood1': vn, 'cargo_tradegood2': mr, 'cargo_tradegood3': cr, 'cargo_tradegood4': az, 'capacity': '5', 'max_capacity': '5', 'jetPropulsion': '0', 'transporters': barcos, 'backgroundView': 'city', 'currentCityId': idCiudadOrigen, 'templateView': 'transport', 'currentTab': 'tabSendTransporter', 'actionRequest': s.token(), 'ajax': '1'})
+	s.post(payloadPost={'action': 'header', 'function': 'changeCurrentCity', 'actionRequest': s.token(), 'cityId': idCiudadOrigen, 'ajax': '1'}) 
+	s.post(payloadPost={'action': 'transportOperations', 'function': 'loadTransportersWithFreight', 'destinationCityId': idCiudadDestino, 'islandId': idIsla, 'oldView': '', 'position': '', 'avatar2Name': '', 'city2Name': '', 'type': '', 'activeTab': '', 'premiumTransporter': '0', 'minusPlusValue': '500', 'cargo_resource': md, 'cargo_tradegood1': vn, 'cargo_tradegood2': mr, 'cargo_tradegood3': cr, 'cargo_tradegood4': az, 'capacity': '5', 'max_capacity': '5', 'jetPropulsion': '0', 'transporters': barcos, 'backgroundView': 'city', 'currentCityId': idCiudadOrigen, 'templateView': 'transport', 'currentTab': 'tabSendTransporter', 'actionRequest': s.token(), 'ajax': '1'})
 
 def planearViajes(s, rutas):
 	for ruta in rutas:
@@ -558,7 +563,7 @@ def esperarLlegada(s):
 	while barcos == 0:
 		html = s.get()
 		idCiudad = re.search(r'currentCityId:\s(\d+),', html).group(1)
-		url = s.urlBase + 'view=militaryAdvisor&oldView=city&oldBackgroundView=city&backgroundView=city&currentCityId={}&actionRequest={}&ajax=1'.format(idCiudad, s.token())
+		url = 'view=militaryAdvisor&oldView=city&oldBackgroundView=city&backgroundView=city&currentCityId={}&actionRequest={}&ajax=1'.format(idCiudad, s.token())
 		posted = s.post(url)
 		eventos = re.findall(r'"enddate":(\d+),"currentdate":(\d+)}', posted)
 		esperaMinima = 10000000
@@ -593,7 +598,7 @@ def getConsumoDeVino(html):
 	return int(re.search(r'GlobalMenu_WineConsumption"\s*class="rightText">\s*(\d*)\s', html).group(1))
 
 def getProduccion(s, idCiudad):
-	prod = s.post(s.urlBase, payloadPost={'action': 'header', 'function': 'changeCurrentCity', 'actionRequest': s.token(), 'cityId': idCiudad, 'ajax': '1'}) 
+	prod = s.post(payloadPost={'action': 'header', 'function': 'changeCurrentCity', 'actionRequest': s.token(), 'cityId': idCiudad, 'ajax': '1'}) 
 	wood = Decimal(re.search(r'"resourceProduction":([\d|\.]+),', prod).group(1))
 	good = Decimal(re.search(r'"tradegoodProduction":([\d|\.]+),', prod).group(1))
 	typeGood = int(re.search(r'"producedTradegood":"([\d|\.]+)"', prod).group(1))
@@ -617,7 +622,7 @@ def enviarVino(s):
 	for idCiudad in idsCiudades:
 		esVino =  ciudades[idCiudad]['tradegood'] == '1'
 		if esVino:
-			html = s.get(s.urlBase + urlCiudad + idCiudad)
+			html = s.get(urlCiudad + idCiudad)
 			recursos = getRescursosDisponibles(html)
 			dict_idVino_diponible[idCiudad] = int(recursos[1]) - 1000 # dejo 1000 por las dudas
 			if dict_idVino_diponible[idCiudad] < 0:
@@ -654,7 +659,7 @@ def enviarVino(s):
 	for idCiudadDestino in idsCiudades:
 		noEsVino =  ciudades[idCiudadDestino]['tradegood'] != '1'
 		if noEsVino:
-			htmlD = s.get(s.urlBase + urlCiudad + idCiudadDestino)
+			htmlD = s.get(urlCiudad + idCiudadDestino)
 			ciudadD = getCiudad(htmlD)
 			idIsla = ciudadD['islandId']
 			faltante = cantidad
@@ -674,9 +679,9 @@ def enviarVino(s):
 	info = '\nEnviar vino\n'
 	for ruta in rutas:
 		(idciudadOrigen, idCiudadDestino, idIsla, md, vn, mr, cr, az) = ruta
-		html = s.get(s.urlBase + urlCiudad + idciudadOrigen)
+		html = s.get(urlCiudad + idciudadOrigen)
 		ciudadO = getCiudad(html)
-		html = s.get(s.urlBase + urlCiudad + idCiudadDestino)
+		html = s.get(urlCiudad + idCiudadDestino)
 		ciudadD = getCiudad(html)
 		info = info + '{} -> {}\nVino: {}\n'.format(ciudadO['cityName'], ciudadD['cityName'], addPuntos(vn))
 	setInfoSignal(s, info)
@@ -691,7 +696,7 @@ def menuRutaComercial(s):
 			banner()
 			print('Ciudad de origen:')
 			idCiudadOrigen = getIdCiudad(s)
-			htmlO = s.get(s.urlBase + urlCiudad + idCiudadOrigen)
+			htmlO = s.get(urlCiudad + idCiudadOrigen)
 			ciudadO = getCiudad(htmlO)
 			max = getRescursosDisponibles(htmlO)
 			total = list(map(int, max))
@@ -700,7 +705,7 @@ def menuRutaComercial(s):
 		idCiudadDestino = getIdCiudad(s)
 		if idCiudadOrigen == idCiudadDestino:
 			continue
-		htmlD = s.get(s.urlBase + urlCiudad + idCiudadDestino)
+		htmlD = s.get(urlCiudad + idCiudadDestino)
 		ciudadD = getCiudad(htmlD)
 		idIsla = ciudadD['islandId']
 		banner()
@@ -760,9 +765,9 @@ def menuRutaComercial(s):
 	info = '\nRuta comercial\n'
 	for ruta in rutas:
 		(idciudadOrigen, idCiudadDestino, idIsla, md, vn, mr, cr, az) = ruta
-		html = s.get(s.urlBase + urlCiudad + idciudadOrigen)
+		html = s.get(urlCiudad + idciudadOrigen)
 		ciudadO = getCiudad(html)
-		html = s.get(s.urlBase + urlCiudad + idCiudadDestino)
+		html = s.get(urlCiudad + idCiudadDestino)
 		ciudadD = getCiudad(html)
 		info = info + '{} -> {}\nMadera: {} Vino: {} Marmol: {} Cristal: {} Azufre: {}\n'.format(ciudadO['cityName'], ciudadD['cityName'], addPuntos(md), addPuntos(vn), addPuntos(mr), addPuntos(cr), addPuntos(az))
 
@@ -793,7 +798,7 @@ def getStatus(s):
 	ids = sorted(ids)
 	print('Barcos {:d}/{:d}'.format(getBarcosDisponibles(s), getBarcosTotales(s)))
 	for unId in ids:
-		html = s.get(s.urlBase + urlCiudad + unId)
+		html = s.get(urlCiudad + unId)
 		ciudad = getCiudad(html)
 		(wood, good, typeGood) = getProduccion(s, unId)
 		print('\033[1m' + tipoCiudad[int(typeGood)] + ciudad['cityName'] + tipoCiudad[0])
@@ -871,7 +876,7 @@ def donar(s):
 	banner()
 
 	idCiudad = getIdCiudad(s)
-	html = s.get(s.urlBase + urlCiudad + idCiudad)
+	html = s.get(urlCiudad + idCiudad)
 	ciudad = getCiudad(html)
 	banner()
 
@@ -879,16 +884,16 @@ def donar(s):
 	almacenamiento = getCapacidadDeAlmacenamiento(html)
 
 	idIsla = ciudad['islandId']
-	html = s.get(s.urlBase + urlIsla + idIsla)
+	html = s.get(urlIsla + idIsla)
 	isla = getIsla(html)
 
 	tipo = re.search(r'"tradegood":"(\d)"', html).group(1)
 	bien = bienes[tipo]
 
-	urlAserradero = s.urlBase + 'view=resource&type=resource&islandId={0}&backgroundView=island&currentIslandId={0}&actionRequest={1}&ajax=1'.format(idIsla, s.token())
+	urlAserradero = 'view=resource&type=resource&islandId={0}&backgroundView=island&currentIslandId={0}&actionRequest={1}&ajax=1'.format(idIsla, s.token())
 	aserraderoOk = printEstadoMina(s, urlAserradero, 'Aserradero')
 
-	urlBien = s.urlBase + 'view=tradegood&type={0}&islandId={1}&backgroundView=island&currentIslandId={1}&actionRequest={2}&ajax=1'.format(tipo, idIsla, s.token())
+	urlBien = 'view=tradegood&type={0}&islandId={1}&backgroundView=island&currentIslandId={1}&actionRequest={2}&ajax=1'.format(tipo, idIsla, s.token())
 	bienOk = printEstadoMina(s, urlBien, bien)
 
 	tipo = ['resource', 'tradegood']
@@ -910,13 +915,13 @@ def donar(s):
 	tipo = tipo[tipoDonacion - 1]
 
 	cantidad = read(min=0, max=int(madera), msg='Cantidad:')
-	s.post(s.urlBase, {'islandId': idIsla, 'type': tipo, 'action': 'IslandScreen', 'function': 'donate', 'donation': cantidad, 'backgroundView': 'island', 'templateView': 'resource', 'actionRequest': s.token(), 'ajax': '1'})
+	s.post(payloadPost={'islandId': idIsla, 'type': tipo, 'action': 'IslandScreen', 'function': 'donate', 'donation': cantidad, 'backgroundView': 'island', 'templateView': 'resource', 'actionRequest': s.token(), 'ajax': '1'})
 
 def getIdsdeIslas(s):
 	(idsCiudades, ciudades) = getIdsDeCiudades(s)
 	idsIslas = set()
 	for idCiudad in idsCiudades:
-		html = s.get(s.urlBase + urlCiudad + idCiudad)
+		html = s.get(urlCiudad + idCiudad)
 		ciudad = getCiudad(html)
 		idIsla = ciudad['islandId']
 		idsIslas.add(idIsla)
@@ -984,16 +989,16 @@ def botDonador(s):
 	(idsCiudades, ciudades) = getIdsDeCiudades(s)
 	ciudades_dict = {}
 	for idCiudad in idsCiudades:
-		html = s.get(s.urlBase + urlCiudad + idCiudad)
+		html = s.get(urlCiudad + idCiudad)
 		ciudad = getCiudad(html)
 		ciudades_dict[idCiudad] = ciudad['islandId']
 	try:
 		while True:
 			for idCiudad in idsCiudades:
-				html = s.get(s.urlBase + urlCiudad + idCiudad)
+				html = s.get(urlCiudad + idCiudad)
 				madera = getRescursosDisponibles(html)[0]
 				idIsla = ciudades_dict[idCiudad]
-				s.post(s.urlBase, {'islandId': idIsla, 'type': tipo, 'action': 'IslandScreen', 'function': 'donate', 'donation': madera, 'backgroundView': 'island', 'templateView': 'resource', 'actionRequest': s.token(), 'ajax': '1'})
+				s.post(payloadPost={'islandId': idIsla, 'type': tipo, 'action': 'IslandScreen', 'function': 'donate', 'donation': madera, 'backgroundView': 'island', 'templateView': 'resource', 'actionRequest': s.token(), 'ajax': '1'})
 			time.sleep(24*60*60)
 	except:
 		msg = 'Ya no se donará.\n{}'.format(traceback.format_exc())
@@ -1017,7 +1022,7 @@ def buscarEspacios(s):
 	try:
 		while True:
 			for idIsla in idIslas:
-				html = s.get(s.urlBase + urlIsla + idIsla)
+				html = s.get(urlIsla + idIsla)
 				isla = getIsla(html)
 				espacios = 0
 				ciudades = []
@@ -1080,7 +1085,7 @@ def alertarAtaques(s):
 		while True:
 			html = s.get()
 			idCiudad = re.search(r'currentCityId:\s(\d+),', html).group(1)
-			url = s.urlBase + 'view=militaryAdvisor&oldView=city&oldBackgroundView=city&backgroundView=city&currentCityId={}&actionRequest={}&ajax=1'.format(idCiudad, s.token())
+			url = 'view=militaryAdvisor&oldView=city&oldBackgroundView=city&backgroundView=city&currentCityId={}&actionRequest={}&ajax=1'.format(idCiudad, s.token())
 			posted = s.post(url)
 			ataque = re.search(r'"military":{"link":.*?","cssclass":"normalalert"', posted)
 			if ataque is not None and fueAvisado is False:
