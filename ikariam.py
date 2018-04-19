@@ -66,6 +66,20 @@ class Sesion:
 		html = self.get()
 		return re.search(r'actionRequest"?:\s*"(.*?)"', html).group(1)
 
+	def logout(self, html):
+		if html is not None:
+			idCiudad = getCiudad(html)['id']
+			token = re.search(r'actionRequest"?:\s*"(.*?)"', html).group(1)
+			urlLogout = 'action=logoutAvatar&function=logout&sideBarExt=undefined&startPageShown=1&detectedDevice=1&cityId={0}&backgroundView=city&currentCityId={0}&actionRequest={1}'.format(idCiudad, token)
+			self.s.get(self.urlBase + urlLogout, headers=self.headers)
+
+	def isMyCookie(self, line):
+		regex = re.escape(self.servidor) + r' ' + re.escape(self.mundo) + r' ' + re.escape(self.username) + r' (\d+) ([\w\d]+) ([\w\d_]+) ([\w\d]+)'
+		return re.search(regex, line) is not None
+
+	def isExpired(self, html):
+		return re.search(r'index\.php\?logout', html) is not None
+
 	def updateCookieFile(self, primero=False, salida=False, nuevo=False):
 		if primero is True:
 			cookie_dict = dict(self.s.cookies.items())
@@ -73,13 +87,13 @@ class Sesion:
 			with open(cookieFile, 'r') as filehandler:
 				text = filehandler.read()
 			lines = text.splitlines()
-			regex = re.escape(self.servidor) + r' ' + re.escape(self.mundo) + r' ' + re.escape(self.username) + r' (\d+) ([\w\d]+) ([\w\d_]+) ([\w\d]+)'
-			repetidos = re.findall(regex, text)
+			newTextFile = ''
+			for line in lines:
+				if isMyCookie(line) is False:
+					newTextFile += line + '\n'
+			newTextFile += entrada + '\n'
 			with open(cookieFile, 'w') as filehandler:
-				for line in lines:
-					if line not in repetidos:
-						filehandler.write(line + '\n')
-				filehandler.write(entrada + '\n')
+				filehandler.write(newTextFile)
 		else:
 			(fileInfo, text) = getFileInfo(self.servidor, self.mundo, self.username)
 			if fileInfo is None:
@@ -87,28 +101,32 @@ class Sesion:
 					raise ValueError('No se encontro linea en el cookieFile', text)
 				else:
 					return
+
+			if salida is True and sesionesActivas == 1:
+				html = self.s.get(self.urlBase, headers=self.headers).text
+				if self.isExpired(html):
+					html = None
+
 			oldline = fileInfo.group(0)
 			sesionesActivas = int(fileInfo.group(1))
 			lines = text.splitlines()
-			if salida is True and sesionesActivas == 1:
-				html = self.get()
+			newTextFile = ''
+
+			for line in lines:
+				if line != oldline:
+					newTextFile += line + '\n'
+				else:
+					if salida is True:
+						if sesionesActivas > 1:
+							newline = self.servidor + ' ' + self.mundo + ' ' + self.username + ' ' + str(sesionesActivas - 1) + ' ' + fileInfo.group(2) + ' ' + fileInfo.group(3) + ' ' + self.sha
+							newTextFile += newline + '\n'
+						else:
+							self.logout(html)
+					elif nuevo is True:
+						newline = self.servidor + ' ' + self.mundo + ' ' + self.username + ' ' + str(sesionesActivas + 1) + ' ' + fileInfo.group(2) + ' ' + fileInfo.group(3) + ' ' + self.sha
+						newTextFile += newline + '\n'
 			with open(cookieFile, 'w') as filehandler:
-				for line in lines:
-					if line != oldline:
-						filehandler.write(line + '\n')
-					else:
-						if salida is True:
-							if sesionesActivas > 1:
-								newline = self.servidor + ' ' + self.mundo + ' ' + self.username + ' ' + str(sesionesActivas - 1) + ' ' + fileInfo.group(2) + ' ' + fileInfo.group(3) + ' ' + self.sha + '\n'
-								filehandler.write(newline)
-							else:
-								idCiudad = getCiudad(html)['id']
-								token = re.search(r'actionRequest"?:\s*"(.*?)"', html).group(1)
-								urlLogout = 'action=logoutAvatar&function=logout&sideBarExt=undefined&startPageShown=1&detectedDevice=1&cityId={0}&backgroundView=city&currentCityId={0}&actionRequest={1}'.format(idCiudad, token)
-								self.s.get(self.urlBase + urlLogout, headers=self.headers)
-						if nuevo is True:
-							newline = self.servidor + ' ' + self.mundo + ' ' + self.username + ' ' + str(sesionesActivas + 1) + ' ' + fileInfo.group(2) + ' ' + fileInfo.group(3) + ' ' + self.sha + '\n'
-							filehandler.write(newline)
+				filehandler.write(newTextFile)
 
 	def getCookie(self):
 		fileInfo = getFileInfo(self.servidor, self.mundo, self.username)[0]
@@ -123,8 +141,7 @@ class Sesion:
 	def login(self):
 		self.s = requests.Session() # s es la sesion de conexion
 		login = self.s.post(self.urlBase + 'action=loginAvatar&function=login', data=self.payload, headers=self.headers).text
-		expired = re.search(r'index\.php\?logout', login)
-		if expired is not None:
+		if self.isExpired(html):
 			sys.exit('Usuario o contrasenia incorrecta')
 		self.updateCookieFile(primero=True)
 
@@ -147,8 +164,7 @@ class Sesion:
 		while True:
 			try:
 				html = self.s.get(url, headers=self.headers).text
-				expired = re.search(r'index\.php\?logout', html)
-				assert expired is None
+				assert self.isExpired(html) is False
 				return html
 			except:
 				self.expiroLaSesion()
@@ -159,8 +175,7 @@ class Sesion:
 		while True:
 			try:
 				html = self.s.post(url, data=payloadPost, headers=self.headers).text
-				expired = re.search(r'index\.php\?logout', html)
-				assert expired is None
+				assert self.isExpired(html) is False
 				return html
 			except:
 				self.expiroLaSesion()
