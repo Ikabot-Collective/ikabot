@@ -94,9 +94,8 @@ class Sesion:
 		else:
 			if fileInfo is None:
 				if nuevo is True:
-					raise ValueError('No se encontro linea en el cookieFile', text)
-				else:
-					return
+					self.updateCookieFile(primero=True)
+				return
 
 			if salida is True and sesionesActivas == 1:
 				html = self.s.get(self.urlBase, headers=self.headers).text
@@ -135,7 +134,7 @@ class Sesion:
 
 	def login(self):
 		self.s = requests.Session() # s es la sesion de conexion
-		login = self.s.post(self.urlBase + 'action=loginAvatar&function=login', data=self.payload, headers=self.headers).text
+		html = self.s.post(self.urlBase + 'action=loginAvatar&function=login', data=self.payload, headers=self.headers).text
 		if self.isExpired(html):
 			sys.exit('Usuario o contrasenia incorrecta')
 		self.updateCookieFile(primero=True)
