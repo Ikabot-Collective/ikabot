@@ -1123,7 +1123,7 @@ def entrarDiariamente(s):
 
 def update(s):
 	out = run('git pull').read().decode("utf-8") 
-	if 'Already up to date' in out:
+	if 'Already up' in out:
 		print('Está actualizado')
 	else:
 		print('Actualizando...')
