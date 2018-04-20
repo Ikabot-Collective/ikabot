@@ -70,11 +70,11 @@ class Sesion:
 			self.s.get(self.urlBase + urlLogout, headers=self.headers)
 
 	def __isMyCookie(self, line):
-		regex = re.escape(self.servidor) + r' ' + re.escape(self.mundo) + r' ' + re.escape(self.username) + r' (\d+) ([\w\d]+) ([\w\d_]+) ([\w\d]+)'
-		return re.search(regex, line) is not None
+		string = self.servidor + ' ' + self.mundo + ' ' + self.username + ' '
+		return string in line
 
 	def __isExpired(self, html):
-		return re.search(r'index\.php\?logout', html) is not None
+		return 'index.php?logout' in html
 
 	def __updateCookieFile(self, primero=False, nuevo=False, salida=False):
 		(fileInfo, text) = self.__getFileInfo(self.servidor, self.mundo, self.username)
@@ -1122,8 +1122,14 @@ def entrarDiariamente(s):
 		s.logout()
 
 def update(s):
-	out = run('git pull')
-	print(out)
+	out = run('git pull').read().decode("utf-8") 
+	if 'Already up to date' in out:
+		print('Está actualizado')
+	else:
+		print('Actualizando...')
+		print(out)
+		print('Listo.')
+	enter()
 
 def run(command):
 	return subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
