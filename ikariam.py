@@ -1121,6 +1121,10 @@ def entrarDiariamente(s):
 		sendToBot(s, msg)
 		s.logout()
 
+def update(s):
+	out = run('git pull')
+	print(out)
+
 def run(command):
 	return subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
 
@@ -1139,7 +1143,7 @@ def forkear(s):
 
 def menu(s):
 	banner()
-	menu_actions = [subirEdificios, menuRutaComercial, enviarVino, getStatus, donar, buscarEspacios, entrarDiariamente, alertarAtaques, botDonador]
+	menu_actions = [subirEdificios, menuRutaComercial, enviarVino, getStatus, donar, buscarEspacios, entrarDiariamente, alertarAtaques, botDonador, update]
 	mnu="""
 (0) Salir
 (1) Lista de construcción
@@ -1150,7 +1154,8 @@ def menu(s):
 (6) Buscar espacios nuevos
 (7) Entrar diariamente
 (8) Alertar ataques
-(9) Bot donador"""
+(9) Bot donador
+(10) Actualizar"""
 	print(mnu)
 	entradas = len(menu_actions)
 	eleccion = read(min=0, max=entradas)
