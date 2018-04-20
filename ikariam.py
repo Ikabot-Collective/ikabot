@@ -1126,7 +1126,7 @@ def update(s):
 	if 'Already up' in out:
 		print('Está actualizado')
 	else:
-		print('Actualizando...')
+		print('Actualizando...\n')
 		print(out)
 		print('Listo.')
 	enter()
@@ -1161,7 +1161,7 @@ def menu(s):
 (7) Entrar diariamente
 (8) Alertar ataques
 (9) Bot donador
-(10) Actualizar"""
+(10) Actualizar IkaBot"""
 	print(mnu)
 	entradas = len(menu_actions)
 	eleccion = read(min=0, max=entradas)
