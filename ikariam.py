@@ -141,7 +141,14 @@ class Sesion:
 
 	def __expiroLaSesion(self):
 		self.__backoff()
-		self.__login()
+		sigueActiva = self.__sesionActiva(self.servidor, self.mundo, self.username, self.s.cookies)
+		if sigueActiva:
+			try:
+				self.__login()
+			except:
+				self.__expiroLaSesion()
+		else:
+			self.__getCookie()
 
 	def __checkCookie(self):
 		sigueActiva = self.__sesionActiva(self.servidor, self.mundo, self.username, self.s.cookies)
@@ -158,7 +165,8 @@ class Sesion:
 		fileInfo = self.__getFileInfo(servidor, mundo, username)[0]
 		if fileInfo is None:
 			return False
-		return fileInfo.group(2) == cookies['PHPSESSID']
+		else:
+			return fileInfo.group(2) == cookies['PHPSESSID']
 
 	def token(self):
 		html = self.get()
