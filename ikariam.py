@@ -4,7 +4,7 @@
 import sys
 try:
 	import requests
-except:
+except ImportError:
 	sys.exit('Debe instalar el modulo de requests:\nsudo pip install requests')
 import os
 import time
@@ -142,11 +142,10 @@ class Sesion:
 
 	def __expiroLaSesion(self):
 		self.__backoff()
-		sigueActiva = self.__sesionActiva()
-		if sigueActiva:
+		if self.__sesionActiva():
 			try:
 				self.__login()
-			except:
+			except SystemExit:
 				self.__expiroLaSesion()
 		else:
 			self.__getCookie()
@@ -182,7 +181,7 @@ class Sesion:
 				html = self.s.get(url, headers=self.headers).text
 				assert self.__isExpired(html) is False
 				return html
-			except:
+			except AssertionError:
 				self.__expiroLaSesion()
 
 	def post(self, url=None, payloadPost=None):
@@ -196,7 +195,7 @@ class Sesion:
 				html = self.s.post(url, data=payloadPost, headers=self.headers).text
 				assert self.__isExpired(html) is False
 				return html
-			except:
+			except AssertionError:
 				self.__expiroLaSesion()
 
 	def login(self):
