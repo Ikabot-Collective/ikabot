@@ -36,29 +36,30 @@ class Sesion:
 		self.urlBase = urlBase
 		self.payload = payload
 		self.username = payload['name']
+		self.password = payload['password']
 		data = re.search(r'https://(s\d+)-(\w+)', urlBase)
 		self.mundo = data.group(1)
 		self.servidor = data.group(2)
 		self.headers = headers
-		self.sha = self.__hashPasswd(self.servidor, self.mundo, payload['name'], payload['password'])
-		if self.__passwordEsValida(self.servidor, self.mundo, payload['name'], payload['password']):
+		self.sha = self.__hashPasswd()
+		if self.__passwordEsValida():
 			self.__getCookie()
 		else:
 			sys.exit('Usuario o contrasenia incorrecta')
 
-	def __hashPasswd(self, servidor, mundo, usuario, password):
+	def __hashPasswd(self):
 		sha = hashlib.sha256()
-		sha.update(servidor.encode('utf-8') + b'0')
-		sha.update(mundo.encode('utf-8') + b'0')
-		sha.update(usuario.encode('utf-8') + b'0')
-		sha.update(password.encode('utf-8'))
+		sha.update(self.servidor.encode('utf-8') + b'0')
+		sha.update(self.mundo.encode('utf-8') + b'0')
+		sha.update(self.username.encode('utf-8') + b'0')
+		sha.update(self.password.encode('utf-8'))
 		return sha.hexdigest()
 
-	def __passwordEsValida(self, servidor, mundo, usuario, password):
-		sha = self.__getFileInfo(servidor, mundo, usuario)[0]
+	def __passwordEsValida(self):
+		sha = self.__getFileInfo()[0]
 		if sha:
 			sha = sha.group(4)
-			return sha == self.__hashPasswd(servidor, mundo, usuario, password)
+			return sha == self.__hashPasswd()
 		else:
 			return True # es el primero
 
@@ -77,7 +78,7 @@ class Sesion:
 		return 'index.php?logout' in html
 
 	def __updateCookieFile(self, primero=False, nuevo=False, salida=False):
-		(fileInfo, text) = self.__getFileInfo(self.servidor, self.mundo, self.username)
+		(fileInfo, text) = self.__getFileInfo()
 		lines = text.splitlines()
 		if primero is True:
 			cookie_dict = dict(self.s.cookies.items())
@@ -119,7 +120,7 @@ class Sesion:
 			filehandler.write(newTextFile)
 
 	def __getCookie(self):
-		fileInfo = self.__getFileInfo(self.servidor, self.mundo, self.username)[0]
+		fileInfo = self.__getFileInfo()[0]
 		if fileInfo:
 			cookie_dict = {'PHPSESSID': fileInfo.group(2), 'ikariam': fileInfo.group(3), 'ikariam_loginMode': '0'}
 			self.s = requests.Session()
@@ -141,7 +142,7 @@ class Sesion:
 
 	def __expiroLaSesion(self):
 		self.__backoff()
-		sigueActiva = self.__sesionActiva(self.servidor, self.mundo, self.username, self.s.cookies)
+		sigueActiva = self.__sesionActiva()
 		if sigueActiva:
 			try:
 				self.__login()
@@ -151,22 +152,21 @@ class Sesion:
 			self.__getCookie()
 
 	def __checkCookie(self):
-		sigueActiva = self.__sesionActiva(self.servidor, self.mundo, self.username, self.s.cookies)
-		if sigueActiva is False:
+		if self.__sesionActiva() is False:
 			self.__getCookie()
 
-	def __getFileInfo(self, servidor, mundo, username): # 1 num de sesiones 2 cookie1 3 cookie2 4 sha
+	def __getFileInfo(self): # 1 num de sesiones 2 cookie1 3 cookie2 4 sha
 		with open(cookieFile, 'r') as filehandler:
 			text = filehandler.read()
-		regex = re.escape(servidor) + r' ' + re.escape(mundo) + r' ' + re.escape(username) + r' (\d+) ([\w\d]+) ([\w\d_]+) ([\w\d]+)'
+		regex = re.escape(self.servidor) + r' ' + re.escape(self.mundo) + r' ' + re.escape(self.username) + r' (\d+) ([\w\d]+) ([\w\d_]+) ([\w\d]+)'
 		return (re.search(regex, text), text)
 
-	def __sesionActiva(self, servidor, mundo, username, cookies):
-		fileInfo = self.__getFileInfo(servidor, mundo, username)[0]
+	def __sesionActiva(self):
+		fileInfo = self.__getFileInfo()[0]
 		if fileInfo is None:
 			return False
 		else:
-			return fileInfo.group(2) == cookies['PHPSESSID']
+			return fileInfo.group(2) == self.s.cookies['PHPSESSID']
 
 	def token(self):
 		html = self.get()
