@@ -183,6 +183,8 @@ class Sesion:
 				return html
 			except AssertionError:
 				self.__expiroLaSesion()
+			except requests.exceptions.ConnectionError:
+				time.sleep(5 * 60)
 
 	def post(self, url=None, payloadPost=None):
 		self.__checkCookie()
@@ -197,6 +199,8 @@ class Sesion:
 				return html
 			except AssertionError:
 				self.__expiroLaSesion()
+			except requests.exceptions.ConnectionError:
+				time.sleep(5 * 60)
 
 	def login(self):
 		self.__updateCookieFile(nuevo=True)
