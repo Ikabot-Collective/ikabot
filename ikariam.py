@@ -231,9 +231,9 @@ def read(min=None, max=None, digit=False, msg=prompt, values=None): # lee input 
 			except SyntaxError:
 				return _invalido()
 	if min is not None and leido < min:
-			return _invalido()
+		return _invalido()
 	if max is not None and leido > max:
-			return _invalido()
+		return _invalido()
 	if values is not None and leido not in values:
 		return _invalido()
 	return leido
@@ -658,7 +658,7 @@ def enviarVino(s):
 		maximo = maximo[:-1] + '0'
 	print('Se puede enviar como máximo {} a cada ciudad'.format(maximo))
 	cantidad = read(msg='¿Cuanto vino enviar a cada ciudad?:', min=0, max=vinoXciudad)
-	
+
 	print('\nPor enviar {} de vino a cada ciudad'.format(addPuntos(cantidad)))
 	print('¿Proceder? [Y/n]')
 	rta = read()
@@ -1095,7 +1095,7 @@ def alertarAtaques(s):
 	info = '\nEspero por ataques cada 29 minutos\n'
 	setInfoSignal(s, info)
 	fueAvisado = False
-	try:	
+	try:
 		while True:
 			html = s.get()
 			idCiudad = re.search(r'currentCityId:\s(\d+),', html).group(1)
