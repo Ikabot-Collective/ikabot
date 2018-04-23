@@ -226,12 +226,10 @@ def read(min=None, max=None, digit=False, msg=prompt, values=None): # lee input 
 		if leido.isdigit() is False:
 			return _invalido()
 		else:
-			while True:
-				try:
-					leido = eval(leido)
-					break
-				except SyntaxError:
-					return _invalido()
+			try:
+				leido = eval(leido)
+			except SyntaxError:
+				return _invalido()
 	if min is not None and leido < min:
 			return _invalido()
 	if max is not None and leido > max:
