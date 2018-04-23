@@ -161,14 +161,14 @@ class Sesion:
 		return (re.search(regex, text), text)
 
 	def __sesionActiva(self):
-		try:
-			fileInfo = self.__getFileInfo()[0]
-			if fileInfo is None:
-				return False
-			else:
-				return fileInfo.group(2) == self.s.cookies['PHPSESSID']
-		except KeyError:
+		fileInfo = self.__getFileInfo()[0]
+		if fileInfo is None:
 			return False
+		else:
+			try:
+				return fileInfo.group(2) == self.s.cookies['PHPSESSID']
+			except KeyError:
+				return False
 
 	def token(self):
 		html = self.get()
