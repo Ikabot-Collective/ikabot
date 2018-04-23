@@ -217,7 +217,10 @@ def read(min=None, max=None, digit=False, msg=prompt, values=None): # lee input 
 		sys.stdout.write('\r' + blank + '\r')
 		return read(min, max, digit, msg, values)
 
-	leido = input(msg)
+	try:
+		leido = input(msg)
+	except EOFError:
+		return _invalido()
 
 	if digit is True or min is not None or max is not None:
 		if leido.isdigit() is False:
