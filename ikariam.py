@@ -21,6 +21,10 @@ import getStatus
 import enter
 import run
 import clear
+import update
+import fork
+import signals
+import read
 
 ids = None
 ciudades = None
@@ -32,35 +36,6 @@ urlIsla = 'view=island&islandId='
 prompt = ' >>  '
 tipoDeBien = ['Madera', 'Vino', 'Marmol', 'Cristal', 'Azufre']
 getcontext().prec = 30
-
-def read(min=None, max=None, digit=False, msg=prompt, values=None): # lee input del usuario
-	def _invalido():
-		sys.stdout.write('\033[F\r') # Cursor up one line
-		blank = ' ' * len(str(leido) + msg)
-		sys.stdout.write('\r' + blank + '\r')
-		return read(min, max, digit, msg, values)
-
-	try:
-		leido = input(msg)
-	except EOFError:
-		return _invalido()
-
-	if digit is True or min is not None or max is not None:
-		if leido.isdigit() is False:
-			return _invalido()
-		else:
-			try:
-				leido = eval(leido)
-			except SyntaxError:
-				return _invalido()
-	if min is not None and leido < min:
-		return _invalido()
-	if max is not None and leido > max:
-		return _invalido()
-	if values is not None and leido not in values:
-		return _invalido()
-	return leido
-
 
 def banner():
 	clear()
@@ -157,84 +132,6 @@ def menuEdificios(prints, ciudad, posiciones):
 	for i in range(0, niveles):
 		rta.append(posicion)
 	return rta
-
-def enviarBienes(s, idCiudadOrigen, idCiudadDestino, idIsla, md, vn, mr, cr, az, barcos):
-	s.post(payloadPost={'action': 'header', 'function': 'changeCurrentCity', 'actionRequest': s.token(), 'cityId': idCiudadOrigen, 'ajax': '1'}) 
-	s.post(payloadPost={'action': 'transportOperations', 'function': 'loadTransportersWithFreight', 'destinationCityId': idCiudadDestino, 'islandId': idIsla, 'oldView': '', 'position': '', 'avatar2Name': '', 'city2Name': '', 'type': '', 'activeTab': '', 'premiumTransporter': '0', 'minusPlusValue': '500', 'cargo_resource': md, 'cargo_tradegood1': vn, 'cargo_tradegood2': mr, 'cargo_tradegood3': cr, 'cargo_tradegood4': az, 'capacity': '5', 'max_capacity': '5', 'jetPropulsion': '0', 'transporters': barcos, 'backgroundView': 'city', 'currentCityId': idCiudadOrigen, 'templateView': 'transport', 'currentTab': 'tabSendTransporter', 'actionRequest': s.token(), 'ajax': '1'})
-
-def planearViajes(s, rutas):
-	for ruta in rutas:
-		(idciudadOrigen, idCiudadDestino, idIsla, md, vn, mr, cr, az) = ruta
-		barcosTotales = getBarcosTotales(s)
-		while (md + vn + mr + cr + az) > 0:
-			barcosDisp = esperarLlegada(s)
-			capacidad = barcosDisp * 500
-			mdEnv = md if capacidad > md else capacidad
-			capacidad -= mdEnv
-			md -= mdEnv
-			vnEnv = vn if capacidad > vn else capacidad
-			capacidad -= vnEnv
-			vn -= vnEnv
-			mrEnv = mr if capacidad > mr else capacidad
-			capacidad -= mrEnv
-			mr -= mrEnv
-			crEnv = cr if capacidad > cr else capacidad
-			capacidad -= crEnv
-			cr -= crEnv
-			azEnv = az if capacidad > az else capacidad
-			capacidad -= azEnv
-			az -= azEnv
-			cantEnviada = mdEnv + vnEnv + mrEnv + crEnv + azEnv
-			barcos = int(math.ceil((Decimal(cantEnviada) / Decimal(500))))
-			enviarBienes(s, idciudadOrigen, idCiudadDestino, idIsla, mdEnv, vnEnv, mrEnv, crEnv, azEnv, barcos)
-
-def esperarLlegada(s):
-	barcos = getBarcosDisponibles(s)
-	while barcos == 0:
-		html = s.get()
-		idCiudad = re.search(r'currentCityId:\s(\d+),', html).group(1)
-		url = 'view=militaryAdvisor&oldView=city&oldBackgroundView=city&backgroundView=city&currentCityId={}&actionRequest={}&ajax=1'.format(idCiudad, s.token())
-		posted = s.post(url)
-		eventos = re.findall(r'"enddate":(\d+),"currentdate":(\d+)}', posted)
-		esperaMinima = 10000000
-		for evento in eventos:
-			tiempoRestante = int(evento[0]) - int(evento[1])
-			if tiempoRestante < esperaMinima:
-				esperaMinima = tiempoRestante
-		if eventos:
-			time.sleep(esperaMinima)
-		else:
-			time.sleep(10 * 60)
-		barcos = getBarcosDisponibles(s)
-	return barcos
-
-def getBarcosDisponibles(s):
-	html = s.get()
-	return int(re.search(r'GlobalMenu_freeTransporters">(\d+)<', html).group(1))
-
-def getBarcosTotales(s):
-	html = s.get()
-	return int(re.search(r'maxTransporters">(\d+)<', html).group(1))
-
-def getRescursosDisponibles(html, num=False):
-	recursos = re.search(r'\\"resource\\":(\d+),\\"2\\":(\d+),\\"1\\":(\d+),\\"4\\":(\d+),\\"3\\":(\d+)}', html)
-	if num:
-		return [int(recursos.group(1)), int(recursos.group(3)), int(recursos.group(2)), int(recursos.group(5)), int(recursos.group(4))]
-	else:
-		return [recursos.group(1), recursos.group(3), recursos.group(2), recursos.group(5), recursos.group(4)]
-
-def getCapacidadDeAlmacenamiento(html):
-	return re.search(r'maxResources:\s*JSON\.parse\(\'{\\"resource\\":(\d+),', html).group(1)
-
-def getConsumoDeVino(html):
-	return int(re.search(r'GlobalMenu_WineConsumption"\s*class="rightText">\s*(\d*)\s', html).group(1))
-
-def getProduccion(s, idCiudad):
-	prod = s.post(payloadPost={'action': 'header', 'function': 'changeCurrentCity', 'actionRequest': s.token(), 'cityId': idCiudad, 'ajax': '1'}) 
-	wood = Decimal(re.search(r'"resourceProduction":([\d|\.]+),', prod).group(1))
-	good = Decimal(re.search(r'"tradegoodProduction":([\d|\.]+),', prod).group(1))
-	typeGood = int(re.search(r'"producedTradegood":"([\d|\.]+)"', prod).group(1))
-	return (wood, good, typeGood)
 
 def pedirValor(text, max):
 	vals = list()
@@ -437,84 +334,6 @@ def printEstadoMina(s, url, bien):
 		print('{}: Está ampliando al nivel {:d}\n'.format(bien, int(lv) + 1))
 	return infoMina is not None
 
-def sendToBot(s, msg, Token=False):
-	if Token is False:
-		msg = '{}\n{}'.format(infoUser, msg)
-	with open(telegramFile, 'r') as filehandler:
-		text = filehandler.read()
-		(botToken, chatId) = text.splitlines()
-		sesion.get('https://api.telegram.org/bot{}/sendMessage'.format(botToken), params={'chat_id': chatId, 'text': msg})
-
-def botValido(s):
-	with open(telegramFile, 'r') as filehandler:
-		text = filehandler.read()
-	rta = re.search(r'\d{6,}:[A-Za-z0-9_-]{34,}\n\d{8,9}', text)
-	if rta is None:
-		print('Debe proporcionar las credenciales válidas para comunicarse por telegram.')
-		print('Se requiere del token del bot a utilizar y de su chat_id')
-		print('El token se le proporciona al momento de crear el bot, para averiguar su chat_id, hablele por telegram a @get_id_bot')
-		rta = read(msg='Porporcionará las credenciales ahora? [y/N]')
-		if rta.lower() == 'y':
-			botToken = read(msg='Token del bot:')
-			chat_id = read(msg='Char_id:')
-			with open(telegramFile, 'w') as filehandler:
-				filehandler.write(botToken + '\n' + chat_id)
-		else:
-			return False
-	rand = random.randint(1000, 9999)
-	sendToBot(s, 'El token a ingresar es:{:d}'.format(rand), Token=True)
-	print('Se envio un mensaje por telegram, lo recibió? [Y/n]')
-	rta = read()
-	if rta.lower() == 'n':
-		with open(telegramFile, 'w') as file:
-			pass
-		print('Revíse las credenciales y vuelva a proveerlas.')
-		enter()
-		return False
-	else:
-		recibido = read(digit=True, msg='Ingrese el token recibido mediante telegram:')
-		if rand != recibido:
-			print('Token incorrecto')
-			enter()
-			return False
-		else:
-			print('El token es correcto.')
-			return True
-
-def botDonador(s):
-	if botValido(s) is False:
-		return
-	print('¿Donar a aserraderos o a bienes de cambio? [a/b]')
-	rta = read(values=['a', 'A', 'b', 'B'])
-	tipo = 'resource' if rta.lower() == 'a' else 'tradegood'
-	print('Se donará compulsivamente cada día.')
-	enter()
-
-	forkear(s)
-	if s.padre is True:
-		return
-
-	info = '\nDono todos los días\n'
-	setInfoSignal(s, info)
-	(idsCiudades, ciudades) = getIdsDeCiudades(s)
-	ciudades_dict = {}
-	for idCiudad in idsCiudades:
-		html = s.get(urlCiudad + idCiudad)
-		ciudad = getCiudad(html)
-		ciudades_dict[idCiudad] = ciudad['islandId']
-	try:
-		while True:
-			for idCiudad in idsCiudades:
-				html = s.get(urlCiudad + idCiudad)
-				madera = getRescursosDisponibles(html)[0]
-				idIsla = ciudades_dict[idCiudad]
-				s.post(payloadPost={'islandId': idIsla, 'type': tipo, 'action': 'IslandScreen', 'function': 'donate', 'donation': madera, 'backgroundView': 'island', 'templateView': 'resource', 'actionRequest': s.token(), 'ajax': '1'})
-			time.sleep(24*60*60)
-	except:
-		msg = 'Ya no se donará.\n{}'.format(traceback.format_exc())
-		sendToBot(s, msg)
-		s.logout()
-
 def buscarEspacios(s):
 	if botValido(s) is False:
 		return
@@ -631,31 +450,6 @@ def entrarDiariamente(s):
 		sendToBot(s, msg)
 		s.logout()
 
-def update(s):
-	out = run('git pull').read().decode("utf-8") 
-	if 'Already up' in out:
-		print('\nEstá actualizado')
-	else:
-		clear()
-		print('Actualizando...\n')
-		print(out)
-		print('Listo.')
-		print('Reinicie el preceso para que los cambios surjan efecto.')
-	enter()
-
-def forkear(s):
-	newpid = os.fork()
-	if newpid != 0:
-		# padre
-		s.login()
-		newpid = str(newpid)
-		run('kill -SIGSTOP ' + newpid)
-		run('bg ' + newpid)
-		run('disown ' + newpid)
-	else:
-		# hijo
-		s.padre = False
-
 def menu(s):
 	banner()
 	menu_actions = [subirEdificios, menuRutaComercial, enviarVino, getStatus, donar, buscarEspacios, entrarDiariamente, alertarAtaques, botDonador, update]
@@ -689,22 +483,6 @@ def inicializar():
 	os.chdir(path)
 	run('touch ' + cookieFile)
 	run('touch ' + telegramFile)
-
-def create_handler(s):
-	def _handler(signum, frame):
-		raise Exception('Señal recibida número {:d}'.format(signum))
-	return _handler
-
-def setSignalsHandlers(s):
-	signals = [signal.SIGHUP, signal.SIGQUIT, signal.SIGABRT, signal.SIGTERM]
-	for sgn in signals:
-		signal.signal(sgn, create_handler(s))
-
-def setInfoSignal(s, info): # el proceso explica su funcion por stdout
-	info = '{}\n{}'.format(s.urlBase, s.username) + info
-	def _printInfo(signum, frame):
-		print(info)
-	signal.signal(signal.SIGUSR1, _printInfo) # kill -SIGUSR1 pid
 
 def getSesion():
 	global infoUser
