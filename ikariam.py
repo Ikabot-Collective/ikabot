@@ -2,10 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import sys
-try:
-	import requests
-except ImportError:
-	sys.exit('Debe instalar el modulo de requests:\nsudo pip install requests')
 import os
 import time
 import json
@@ -17,7 +13,9 @@ import random
 import subprocess
 import signal
 import traceback
-import hashlib
+import sesion
+import parser
+import subirEdificio
 
 ids = None
 ciudades = None
@@ -29,189 +27,6 @@ urlIsla = 'view=island&islandId='
 prompt = ' >>  '
 tipoDeBien = ['Madera', 'Vino', 'Marmol', 'Cristal', 'Azufre']
 getcontext().prec = 30
-
-class Sesion:
-	def __init__(self, urlBase, payload, headers):
-		self.padre = True
-		self.urlBase = urlBase
-		self.payload = payload
-		self.username = payload['name']
-		self.password = payload['password']
-		data = re.search(r'https://(s\d+)-(\w+)', urlBase)
-		self.mundo = data.group(1)
-		self.servidor = data.group(2)
-		self.headers = headers
-		self.sha = self.__hashPasswd()
-		if self.__passwordEsValida():
-			self.__getCookie()
-		else:
-			sys.exit('Usuario o contrasenia incorrecta')
-
-	def __hashPasswd(self):
-		sha = hashlib.sha256()
-		sha.update(self.servidor.encode('utf-8') + b'0')
-		sha.update(self.mundo.encode('utf-8') + b'0')
-		sha.update(self.username.encode('utf-8') + b'0')
-		sha.update(self.password.encode('utf-8'))
-		return sha.hexdigest()
-
-	def __passwordEsValida(self):
-		sha = self.__getFileInfo()[0]
-		if sha:
-			sha = sha.group(4)
-			return sha == self.__hashPasswd()
-		else:
-			return True # es el primero
-
-	def __logout(self, html):
-		if html is not None:
-			idCiudad = getCiudad(html)['id']
-			token = re.search(r'actionRequest"?:\s*"(.*?)"', html).group(1)
-			urlLogout = 'action=logoutAvatar&function=logout&sideBarExt=undefined&startPageShown=1&detectedDevice=1&cityId={0}&backgroundView=city&currentCityId={0}&actionRequest={1}'.format(idCiudad, token)
-			self.s.get(self.urlBase + urlLogout, headers=self.headers)
-
-	def __isMyCookie(self, line):
-		string = self.servidor + ' ' + self.mundo + ' ' + self.username + ' '
-		return string in line
-
-	def __isExpired(self, html):
-		return 'index.php?logout' in html
-
-	def __updateCookieFile(self, primero=False, nuevo=False, salida=False):
-		(fileInfo, text) = self.__getFileInfo()
-		lines = text.splitlines()
-		if primero is True:
-			cookie_dict = dict(self.s.cookies.items())
-			entrada = self.servidor + ' ' + self.mundo + ' ' + self.username + ' 1 ' + cookie_dict['PHPSESSID'] + ' ' + cookie_dict['ikariam'] + ' ' + self.sha
-			newTextFile = ''
-			for line in lines:
-				if self.__isMyCookie(line) is False:
-					newTextFile += line + '\n'
-			newTextFile += entrada + '\n'
-		else:
-			if fileInfo is None:
-				if nuevo is True:
-					self.__updateCookieFile(primero=True)
-				return
-
-			oldline = fileInfo.group(0)
-			sesionesActivas = int(fileInfo.group(1))
-			newTextFile = ''
-
-			if salida is True and sesionesActivas == 1:
-				html = self.s.get(self.urlBase, headers=self.headers).text
-				if self.__isExpired(html):
-					html = None
-
-			for line in lines:
-				if line != oldline:
-					newTextFile += line + '\n'
-				else:
-					if salida is True:
-						if sesionesActivas > 1:
-							newline = self.servidor + ' ' + self.mundo + ' ' + self.username + ' ' + str(sesionesActivas - 1) + ' ' + fileInfo.group(2) + ' ' + fileInfo.group(3) + ' ' + self.sha
-							newTextFile += newline + '\n'
-						else:
-							self.__logout(html)
-					elif nuevo is True:
-						newline = self.servidor + ' ' + self.mundo + ' ' + self.username + ' ' + str(sesionesActivas + 1) + ' ' + fileInfo.group(2) + ' ' + fileInfo.group(3) + ' ' + self.sha
-						newTextFile += newline + '\n'
-		with open(cookieFile, 'w') as filehandler:
-			filehandler.write(newTextFile)
-
-	def __getCookie(self):
-		fileInfo = self.__getFileInfo()[0]
-		if fileInfo:
-			cookie_dict = {'PHPSESSID': fileInfo.group(2), 'ikariam': fileInfo.group(3), 'ikariam_loginMode': '0'}
-			self.s = requests.Session()
-			requests.cookies.cookiejar_from_dict(cookie_dict, cookiejar=self.s.cookies, overwrite=True)
-			self.__updateCookieFile(nuevo=True)
-		else:
-			self.__login()
-
-	def __login(self):
-		self.s = requests.Session() # s es la sesion de conexion
-		html = self.s.post(self.urlBase + 'action=loginAvatar&function=login', data=self.payload, headers=self.headers).text
-		if self.__isExpired(html):
-			sys.exit('Usuario o contrasenia incorrecta')
-		self.__updateCookieFile(primero=True)
-
-	def __backoff(self):
-		if self.padre is False:
-			time.sleep(5 * random.randint(0, 10))
-
-	def __expiroLaSesion(self):
-		self.__backoff()
-		if self.__sesionActiva():
-			try:
-				self.__login()
-			except SystemExit:
-				self.__expiroLaSesion()
-		else:
-			self.__getCookie()
-
-	def __checkCookie(self):
-		if self.__sesionActiva() is False:
-			self.__getCookie()
-
-	def __getFileInfo(self): # 1 num de sesiones 2 cookie1 3 cookie2 4 sha
-		with open(cookieFile, 'r') as filehandler:
-			text = filehandler.read()
-		regex = re.escape(self.servidor) + r' ' + re.escape(self.mundo) + r' ' + re.escape(self.username) + r' (\d+) ([\w\d]+) ([\w\d_]+) ([\w\d]+)'
-		return (re.search(regex, text), text)
-
-	def __sesionActiva(self):
-		fileInfo = self.__getFileInfo()[0]
-		if fileInfo is None:
-			return False
-		else:
-			try:
-				return fileInfo.group(2) == self.s.cookies['PHPSESSID']
-			except KeyError:
-				return False
-
-	def token(self):
-		html = self.get()
-		return re.search(r'actionRequest"?:\s*"(.*?)"', html).group(1)
-
-	def get(self, url=None):
-		self.__checkCookie()
-		if url is None:
-			url = ''
-		url = self.urlBase + url
-		while True:
-			try:
-				html = self.s.get(url, headers=self.headers).text
-				assert self.__isExpired(html) is False
-				return html
-			except AssertionError:
-				self.__expiroLaSesion()
-			except requests.exceptions.ConnectionError:
-				time.sleep(5 * 60)
-
-	def post(self, url=None, payloadPost=None):
-		self.__checkCookie()
-		if url is None:
-			url = ''
-		url = self.urlBase + url
-		payloadPost = payloadPost or {}
-		while True:
-			try:
-				html = self.s.post(url, data=payloadPost, headers=self.headers).text
-				assert self.__isExpired(html) is False
-				return html
-			except AssertionError:
-				self.__expiroLaSesion()
-			except requests.exceptions.ConnectionError:
-				time.sleep(5 * 60)
-
-	def login(self):
-		self.__updateCookieFile(nuevo=True)
-
-	def logout(self):
-		self.__updateCookieFile(salida=True)
-		if self.padre is False:
-			os._exit(0)
 
 def read(min=None, max=None, digit=False, msg=prompt, values=None): # lee input del usuario
 	def _invalido():
@@ -268,209 +83,6 @@ class bcolors:
 	ENDC = '\033[0m'
 	BOLD = '\033[1m'
 	UNDERLINE = '\033[4m'
-
-def borrar(texto, ocurrencias):
-	for ocurrencia in ocurrencias:
-		texto = texto.replace(ocurrencia, '')
-	return texto
-
-def getIsla(html):
-	isla = re.search(r'\[\["updateBackgroundData",([\s\S]*?),"specialServerBadges', html).group(1) + '}'
-
-	isla = isla.replace('buildplace', 'empty')
-	isla = isla.replace('xCoord', 'x')
-	isla = isla.replace('yCoord', 'y')
-	isla = isla.replace(',"owner', ',"')
-	isla = isla.replace(',"tradegoodLevel',',"goodLv')
-	isla = isla.replace(',"tradegood', ',"good')
-	isla = isla.replace(',"resourceLevel', ',"woodLv')
-	isla = isla.replace(',"wonderLevel', ',"wonderLv')
-	isla = isla.replace('avatarScores', 'scores')
-
-	remove = []
-
-	sub = re.search(r'(,"wonderName":".+?),"cities', isla).group(1)
-	remove.append(sub)
-
-	sub = re.search(r',"type":\d', isla).group()
-	remove.append(sub)
-
-	quitar = re.search(r'(,"barbarians[\s\S]*?),"scores"', isla).group(1)
-
-	remove.append(quitar)
-	remove.append(',"goodTarget":"tradegood"')
-	remove.append(',"name":"Building ground"')
-	remove.append(',"name":"Terreno"')
-	remove.append(',"actions":[]')
-	remove.append('"id":-1,')
-	remove.append(',"level":0,"viewAble":1')
-	remove.append(',"empty_type":"normal"')
-	remove.append(',"empty_type":"premium"')
-	remove.append(',"hasTreaties":0')
-	remove.append(',"hasTreaties":1')
-	remove.append(',"infestedByPlague":false')
-	remove.append(',"infestedByPlague":true')
-	remove.append(',"viewAble":0')
-	remove.append(',"viewAble":1')
-	remove.append(',"viewAble":2')
-	isla = borrar(isla, remove)
-	# {"id":idIsla,"name":nombreIsla,"x":,"y":,"good":numeroBien,"woodLv":,"goodLv":,"wonder":numeroWonder,"wonderLv":"5","cities":[{"type":"city","name":cityName,"id":cityId,"level":lvIntendencia,"Id":playerId,"Name":playerName,"AllyId":,"AllyTag":,"state":"vacation"},...}}
-	return json.loads(isla, strict=False)
-
-def getCiudad(html):
-	ciudad = re.search(r'"updateBackgroundData",([\s\S]*?),"(?:beachboys|spiesInside)', html).group(1) + '}'
-
-	ciudad = ciudad.replace(',"owner', ',"')
-	ciudad = ciudad.replace('islandXCoord','x')
-	ciudad = ciudad.replace('islandYCoord','y')
-	ciudad = '{"cityName"' + ciudad[len('{"name"'):]
-
-	remove = []
-
-	sub = re.search(r',"buildingSpeedupActive":\d', ciudad)
-	remove.append(sub.group())
-
-	sub = re.search(r',"showPirateFortressBackground":\d', ciudad)
-	remove.append(sub.group())
-
-	sub = re.search(r',"showPirateFortressShip":\d', ciudad)
-	remove.append(sub.group())
-
-	ciudad = borrar(ciudad, remove)
-
-	for elem in ['sea', 'land', 'shore', 'wall']:
-		ciudad = ciudad.replace('"building":"buildingGround {}"'.format(elem),'"name":"empty"')
-	ciudad = ciudad.replace('"isBusy":true,','"isBusy":false,')
-
-	ampliando = re.findall(r'(("name":"[\w\s\\]*","level":"\d*","isBusy":false,"canUpgrade":\w*,"isMaxLevel":\w*,"building":"\w*?)\sconstructionSite","(?:completed|countdownText|buildingimg).*?)}',ciudad)
-	for edificio in ampliando:
-		viejo = edificio[1]+'"'
-		nuevo = viejo.replace('"isBusy":false,', '"isBusy":true,')
-		ciudad = ciudad.replace(edificio[0], nuevo)
-
-	return json.loads(ciudad, strict=False)
-
-def getTiempoDeConstruccion(html):
-	fin = re.search(r'"endUpgradeTime":(\d{10})', html)
-	if fin is None:
-		return 0
-	inicio = re.search(r'serverTime:\s"(\d{10})', html)
-	espera = int(fin.group(1)) - int(inicio.group(1))
-	if espera < 0:
-		espera = 5
-	return espera
-
-def esperarConstruccion(s, idCiudad):
-	slp = 1
-	while slp > 0:
-		html = s.get(urlCiudad + idCiudad)
-		slp = getTiempoDeConstruccion(html)
-		time.sleep(slp + 5)
-	return getCiudad(html)
-
-def subirEdificio(s, idCiudad, posicion):
-	ciudad = esperarConstruccion(s, idCiudad)
-	edificio = ciudad['position'][posicion]
-
-	if edificio['isMaxLevel'] is True or edificio['canUpgrade'] is False:
-		return
-
-	url = 'action=CityScreen&function=upgradeBuilding&actionRequest={}&cityId={}&position={:d}&level={}&backgroundView=city&templateView={}&ajax=1'.format(s.token(), idCiudad, posicion, edificio['level'], edificio['building'])
-	s.post(url)
-
-def getReductores(ciudad):
-	(carpinteria, oficina, prensa, optico, area) = (0, 0, 0, 0, 0)
-	for edificio in ciudad['position']:
-		if edificio['name'] != 'empty':
-			lv = int(edificio['level'])
-			if edificio['building'] == 'carpentering':
-				carpinteria = lv
-			elif edificio['building'] == 'architect':
-				oficina = lv
-			elif edificio['building'] == 'vineyard':
-				prensa = lv
-			elif edificio['building'] == 'optician':
-				optico = lv
-			elif edificio['building'] == 'fireworker':
-				area = lv
-	return (carpinteria, oficina, prensa, optico, area)
-
-def recursosNecesarios(s, idCiudad, posEdifiico,  niveles):
-	html = s.get(urlCiudad + idCiudad)
-	ciudad = getCiudad(html)
-	desde = int(ciudad['position'][posEdifiico]['level'])
-	if ciudad['position'][posEdifiico]['isBusy']:
-		desde += 1
-	hasta = desde + niveles
-	nombre = ciudad['position'][posEdifiico]['building']
-	(carpinteria, oficina, prensa, optico, area)  = getReductores(ciudad)
-	url = 'http://data-ikariam.com/ikabot.php?edificio={}&desde={}&hasta={}&carpinteria={}&oficina={}&prensa={}&optico={}&area={}'.format(nombre, desde, hasta, carpinteria, oficina, prensa, optico, area)
-	rta = requests.get(url).text.split(',')
-	return list(map(int, rta))
-
-def subirEdificios(s):
-	banner()
-	idCiudad = getIdCiudad(s)
-	edificios = getEdificios(s, idCiudad)
-	if edificios == []:
-		return
-	try:
-		(madera, vino, marmol, cristal, azufre) = recursosNecesarios(s, idCiudad, edificios[0], len(edificios))
-		assert madera != 0
-		html = s.get(urlCiudad + idCiudad)
-		(maderaDisp, vinoDisp, marmolDisp, cristalDisp, azufreDisp) = getRescursosDisponibles(html, num=True)
-		if maderaDisp < madera or vinoDisp < vino or marmolDisp < marmol or cristalDisp < cristal or azufreDisp < azufre:
-			print('\nFalta:')
-			if maderaDisp < madera:
-				print('{} de madera'.format(addPuntos(madera - maderaDisp)))
-			if vinoDisp < vino:
-				print('{} de vino'.format(addPuntos(vino - vinoDisp)))
-			if marmolDisp < marmol:
-				print('{} de marmol'.format(addPuntos(marmol - marmolDisp)))
-			if cristalDisp < cristal:
-				print('{} de cristal'.format(addPuntos(cristal - cristalDisp)))
-			if azufreDisp < azufre:
-				print('{} de azufre'.format(addPuntos(azufre - azufreDisp)))
-			print('¿Proceder de todos modos? [Y/n]')
-			rta = read()
-			if rta.lower() == 'n':
-				return
-		else:
-			print('\nTiene materiales suficientes')
-			print('¿Proceder? [Y/n]')
-			rta = read()
-			if rta.lower() == 'n':
-				return
-	except:
-		pass
-	forkear(s)
-	if s.padre is True:
-		return
-
-	info = '\nSubir edificio\n'
-	html = s.get(urlCiudad + idCiudad)
-	ciudad = getCiudad(html)
-	info = info + 'Ciudad: {}\nEdificio: {}'.format(ciudad['cityName'], ciudad['position'][edificios[0]]['name'])
-
-	setInfoSignal(s, info)
-	for edificio in edificios:
-		subirEdificio(s, idCiudad, edificio)
-	s.logout()
-
-def getIdsDeCiudades(s):
-	global ciudades
-	global ids
-	if ids is None or ciudades is None:
-		html = s.get()
-		ciudades = re.search(r'relatedCityData:\sJSON\.parse\(\'(.+?),\\"additionalInfo', html).group(1) + '}'
-		ciudades = ciudades.replace('\\', '')
-		ciudades = ciudades.replace('city_', '')
-		ciudades = json.loads(ciudades, strict=False)
-		ids = []
-		for ciudad in ciudades:
-			ids.append(ciudad)
-	ids = sorted(ids)
-	return (ids, ciudades)
 
 def getIdCiudad(s):
 	(ids, ciudades) = getIdsDeCiudades(s)
@@ -806,69 +418,6 @@ def diasHorasMinutos(segundosTotales):
 def enter():
 	getpass.getpass('\n[Enter]')
 
-def getStatus(s):
-	banner()
-	tipoCiudad = [bcolors.ENDC, bcolors.HEADER, bcolors.STONE, bcolors.BLUE, bcolors.WARNING]
-	html = s.get()
-	ids = re.findall(r'city_(\d+)', html)
-	ids = set(ids)
-	ids = sorted(ids)
-	print('Barcos {:d}/{:d}'.format(getBarcosDisponibles(s), getBarcosTotales(s)))
-	for unId in ids:
-		html = s.get(urlCiudad + unId)
-		ciudad = getCiudad(html)
-		(wood, good, typeGood) = getProduccion(s, unId)
-		print('\033[1m' + tipoCiudad[int(typeGood)] + ciudad['cityName'] + tipoCiudad[0])
-		max = getRescursosDisponibles(html)
-		capacidadDeAlmacenamiento = getCapacidadDeAlmacenamiento(html)
-		crecursos = []
-		for i in range(0,5):
-			if max[i] == capacidadDeAlmacenamiento:
-				crecursos.append(bcolors.RED)
-			else:
-				crecursos.append(bcolors.ENDC)
-		print('Almacenamiento:')
-		print(addPuntos(capacidadDeAlmacenamiento))
-		print('Recursos:')
-		print('Madera {1}{2}{0} Vino {3}{4}{0} Marmol {5}{6}{0} Cristal {7}{8}{0} Azufre {9}{10}{0}'.format(bcolors.ENDC, crecursos[0], addPuntos(max[0]), crecursos[1], addPuntos(max[1]), crecursos[2], addPuntos(max[2]), crecursos[3], addPuntos(max[3]), crecursos[4], addPuntos(max[4])))
-		consumoXhr = getConsumoDeVino(html)
-		tipo = tipoDeBien[typeGood]
-		print('Producción:')
-		print('Madera:{} {}:{}'.format(addPuntos(wood*3600), tipo, addPuntos(good*3600)))
-		if consumoXhr == 0:
-			print('{}{}No se consume vino!{}'.format(bcolors.RED, bcolors.BOLD, bcolors.ENDC))
-		elif typeGood == 1 and (good*3600) > consumoXhr:
-			print('Hay vino para:\n∞')
-		else:
-			consumoXseg = Decimal(consumoXhr) / Decimal(3600)
-			segsRestantes = Decimal(int(max[1])) / Decimal(consumoXseg)
-			(dias, horas, minutos) = diasHorasMinutos(segsRestantes)
-			texto = ''
-			if dias > 0:
-				texto = str(dias) + 'D '
-			if horas > 0:
-				texto = texto + str(horas) + 'H '
-			if minutos > 0 and dias == 0:
-				texto = texto + str(minutos) + 'M '
-			print('Hay vino para:\n{}'.format(texto))
-		for edificio in ciudad['position']:
-			if edificio['name'] == 'empty':
-				continue
-			if edificio['isMaxLevel'] is True:
-				color = bcolors.BLACK
-			elif edificio['canUpgrade'] is True:
-				color = bcolors.GREEN
-			else:
-				color = bcolors.RED
-			level = edificio['level']
-			if int(level) < 10:
-				level = ' ' + level
-			if edificio['isBusy'] is True:
-				level = level + '+'
-			print('lv:{}\t{}{}{}'.format(level, color, edificio['name'], bcolors.ENDC))
-		enter()
-		print('')
-
 def printEstadoMina(s, url, bien):
 	html = s.post(url)
 	levels = re.search(r'"resourceLevel":"(\d+)","tradegoodLevel":"(\d+)"', html)
@@ -888,69 +437,13 @@ def printEstadoMina(s, url, bien):
 		print('{}: Está ampliando al nivel {:d}\n'.format(bien, int(lv) + 1))
 	return infoMina is not None
 
-def donar(s):
-	bienes = {'1': 'Viñedo', '2': 'Cantera', '3': 'Mina de cristal', '4': 'Mina de azufre'}
-	banner()
-
-	idCiudad = getIdCiudad(s)
-	html = s.get(urlCiudad + idCiudad)
-	ciudad = getCiudad(html)
-	banner()
-
-	madera = getRescursosDisponibles(html)[0]
-	almacenamiento = getCapacidadDeAlmacenamiento(html)
-
-	idIsla = ciudad['islandId']
-	html = s.get(urlIsla + idIsla)
-	isla = getIsla(html)
-
-	tipo = re.search(r'"tradegood":"(\d)"', html).group(1)
-	bien = bienes[tipo]
-
-	urlAserradero = 'view=resource&type=resource&islandId={0}&backgroundView=island&currentIslandId={0}&actionRequest={1}&ajax=1'.format(idIsla, s.token())
-	aserraderoOk = printEstadoMina(s, urlAserradero, 'Aserradero')
-
-	urlBien = 'view=tradegood&type={0}&islandId={1}&backgroundView=island&currentIslandId={1}&actionRequest={2}&ajax=1'.format(tipo, idIsla, s.token())
-	bienOk = printEstadoMina(s, urlBien, bien)
-
-	tipo = ['resource', 'tradegood']
-	print('Madera disopnible:{} / {}\n'.format(addPuntos(madera), addPuntos(almacenamiento)))
-
-	if aserraderoOk is True and bienOk is True:
-		msg = 'Aserradero(1) o ' + bien + '(2)?:'
-		tipoDonacion = read(msg=msg, min=1, max=2)
-	elif aserraderoOk is True and bienOk is False:
-		tipoDonacion = 1
-		print('Aserradero:\n')
-	elif aserraderoOk is False and bienOk is True:
-		tipoDonacion = 2
-		print('{}:\n'.format(bien))
-	else:
-		print('No se puede donar\n')
-		return
-
-	tipo = tipo[tipoDonacion - 1]
-
-	cantidad = read(min=0, max=int(madera), msg='Cantidad:')
-	s.post(payloadPost={'islandId': idIsla, 'type': tipo, 'action': 'IslandScreen', 'function': 'donate', 'donation': cantidad, 'backgroundView': 'island', 'templateView': 'resource', 'actionRequest': s.token(), 'ajax': '1'})
-
-def getIdsdeIslas(s):
-	(idsCiudades, ciudades) = getIdsDeCiudades(s)
-	idsIslas = set()
-	for idCiudad in idsCiudades:
-		html = s.get(urlCiudad + idCiudad)
-		ciudad = getCiudad(html)
-		idIsla = ciudad['islandId']
-		idsIslas.add(idIsla)
-	return list(idsIslas)
-
 def sendToBot(s, msg, Token=False):
 	if Token is False:
 		msg = '{}\n{}'.format(infoUser, msg)
 	with open(telegramFile, 'r') as filehandler:
 		text = filehandler.read()
 		(botToken, chatId) = text.splitlines()
-		requests.get('https://api.telegram.org/bot{}/sendMessage'.format(botToken), params={'chat_id': chatId, 'text': msg})
+		sesion.get('https://api.telegram.org/bot{}/sendMessage'.format(botToken), params={'chat_id': chatId, 'text': msg})
 
 def botValido(s):
 	with open(telegramFile, 'r') as filehandler:
@@ -1219,7 +712,7 @@ def setInfoSignal(s, info): # el proceso explica su funcion por stdout
 def getSesion():
 	global infoUser
 	banner()
-	html = requests.get('https://es.ikariam.gameforge.com/?').text
+	html = sesion.get('https://es.ikariam.gameforge.com/?').text
 	servidores = re.findall(r'<a href="(?:https:)?//(\w{2})\.ikariam\.gameforge\.com/\?kid=[\d\w-]*" target="_top" rel="nofollow" class="mmoflag mmo_\w{2}">(.+)</a>', html)
 	i = 0
 	for server in servidores:
@@ -1230,7 +723,7 @@ def getSesion():
 	infoUser = 'Servidor:{}'.format(servidores[servidor-1][1])
 	banner()
 	if srv != 'es':
-		html = requests.get('https://{}.ikariam.gameforge.com/?'.format(srv)).text
+		html = sesion.get('https://{}.ikariam.gameforge.com/?'.format(srv)).text
 	html = re.search(r'registerServer[\s\S]*registerServerServerInfo', html).group()
 	mundos = re.findall(r'mobileUrl="s(\d{1,2})-\w{2}\.ikariam\.gameforge\.com"\s*?cookieName=""\s*>\s*(\w+)\s*</option>', html)
 	i = 0
@@ -1247,7 +740,7 @@ def getSesion():
 	headers = {'Host': uni_url, 'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:54.0) Gecko/20100101 Firefox/54.0','Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Encoding':'gzip, deflate, br', 'Content-Type':'application/x-www-form-urlencoded', 'Referer': urlBase}
 	payload = {'uni_url': uni_url, 'name': usuario, 'password': password, 'pwat_uid': '', 'pwat_checksum': '' ,'startPageShown' : '1' , 'detectedDevice' : '1' , 'kid':''}
 	infoUser += ', Jugador:{}'.format(usuario)
-	return Sesion(urlBase, payload, headers)
+	return sesion.Sesion(urlBase, payload, headers)
 
 def main():
 	inicializar()
