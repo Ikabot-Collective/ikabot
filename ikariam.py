@@ -14,8 +14,13 @@ import subprocess
 import signal
 import traceback
 import sesion
-import parser
+import getJson
 import subirEdificio
+import getIds
+import getStatus
+import enter
+import run
+import clear
 
 ids = None
 ciudades = None
@@ -56,8 +61,6 @@ def read(min=None, max=None, digit=False, msg=prompt, values=None): # lee input 
 		return _invalido()
 	return leido
 
-def clear():
-	os.system('clear')
 
 def banner():
 	clear()
@@ -415,9 +418,6 @@ def diasHorasMinutos(segundosTotales):
 	minutos = int(segundosTotales / Decimal(60))
 	return (dias, horas, minutos)
 
-def enter():
-	getpass.getpass('\n[Enter]')
-
 def printEstadoMina(s, url, bien):
 	html = s.post(url)
 	levels = re.search(r'"resourceLevel":"(\d+)","tradegoodLevel":"(\d+)"', html)
@@ -642,9 +642,6 @@ def update(s):
 		print('Listo.')
 		print('Reinicie el preceso para que los cambios surjan efecto.')
 	enter()
-
-def run(command):
-	return subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
 
 def forkear(s):
 	newpid = os.fork()
