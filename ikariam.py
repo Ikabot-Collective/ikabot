@@ -194,25 +194,6 @@ def diasHorasMinutos(segundosTotales):
 	minutos = int(segundosTotales / Decimal(60))
 	return (dias, horas, minutos)
 
-def printEstadoMina(s, url, bien):
-	html = s.post(url)
-	levels = re.search(r'"resourceLevel":"(\d+)","tradegoodLevel":"(\d+)"', html)
-	if bien == 'Aserradero':
-		lv = levels.group(1)
-	else:
-		lv = levels.group(2)
-	infoMina = re.search(r':<\\/h4>\\n\s*<ul\sclass=\\"resources\\">\\n\s*<li\sclass=\\"wood\\">([\d,]+)<[\s\S]*?:<\\/h4>\\n\s*<ul\sclass=\\"resources\\">\\n\s*<li\sclass=\\"wood\\">([\d,]+)<', html)
-	if infoMina is not None:
-		donado = infoMina.group(2)
-		porDonar = infoMina.group(1)
-		donado = int(donado.replace(',', ''))
-		porDonar = int(porDonar.replace(',', ''))
-		print('{} lv:{}'.format(bien, lv))
-		print('{} / {} {}%'.format(addPuntos(donado), addPuntos(porDonar), addPuntos(int((100 * donado) / porDonar))))
-	else:
-		print('{}: Está ampliando al nivel {:d}\n'.format(bien, int(lv) + 1))
-	return infoMina is not None
-
 def buscarEspacios(s):
 	if botValido(s) is False:
 		return

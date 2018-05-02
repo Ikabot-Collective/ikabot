@@ -4,6 +4,11 @@
 import sys
 import re
 from config import *
+from sisop.varios import *
+from pedirInfo import *
+from getJson import *
+from getVarios import *
+from varios import *
 
 def donar(s):
 	bienes = {'1': 'Viñedo', '2': 'Cantera', '3': 'Mina de cristal', '4': 'Mina de azufre'}
@@ -14,7 +19,7 @@ def donar(s):
 	ciudad = getCiudad(html)
 	banner()
 
-	madera = getRescursosDisponibles(html)[0]
+	madera = getRecursosDisponibles(html)[0]
 	almacenamiento = getCapacidadDeAlmacenamiento(html)
 
 	idIsla = ciudad['islandId']
@@ -50,3 +55,22 @@ def donar(s):
 
 	cantidad = read(min=0, max=int(madera), msg='Cantidad:')
 	s.post(payloadPost={'islandId': idIsla, 'type': tipo, 'action': 'IslandScreen', 'function': 'donate', 'donation': cantidad, 'backgroundView': 'island', 'templateView': 'resource', 'actionRequest': s.token(), 'ajax': '1'})
+
+def printEstadoMina(s, url, bien):
+	html = s.post(url)
+	levels = re.search(r'"resourceLevel":"(\d+)","tradegoodLevel":"(\d+)"', html)
+	if bien == 'Aserradero':
+		lv = levels.group(1)
+	else:
+		lv = levels.group(2)
+	infoMina = re.search(r':<\\/h4>\\n\s*<ul\sclass=\\"resources\\">\\n\s*<li\sclass=\\"wood\\">([\d,]+)<[\s\S]*?:<\\/h4>\\n\s*<ul\sclass=\\"resources\\">\\n\s*<li\sclass=\\"wood\\">([\d,]+)<', html)
+	if infoMina is not None:
+		donado = infoMina.group(2)
+		porDonar = infoMina.group(1)
+		donado = int(donado.replace(',', ''))
+		porDonar = int(porDonar.replace(',', ''))
+		print('{} lv:{}'.format(bien, lv))
+		print('{} / {} {}%'.format(addPuntos(donado), addPuntos(porDonar), addPuntos(int((100 * donado) / porDonar))))
+	else:
+		print('{}: Está ampliando al nivel {:d}\n'.format(bien, int(lv) + 1))
+	return infoMina is not None
