@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-prompt = ' >>  '
+from config import *
 
 def read(min=None, max=None, digit=False, msg=prompt, values=None): # lee input del usuario
 	def _invalido():

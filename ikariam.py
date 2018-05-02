@@ -14,49 +14,16 @@ import subprocess
 import signal
 import traceback
 from web.sesion import *
-import getJson
-import subirEdificio
-import getIds
-import getStatus
 from sisop.varios import *
 from sisop.signals import *
+from subirEdificio import *
+from bot.botDonador import *
+from donar import *
+from config import *
+import getJson
+import getIds
+from getStatus import *
 import update
-
-ids = None
-ciudades = None
-infoUser = ''
-cookieFile = '/tmp/.cookies.txt'
-telegramFile = '.telegram.txt'
-urlCiudad = 'view=city&cityId='
-urlIsla = 'view=island&islandId='
-prompt = ' >>  '
-tipoDeBien = ['Madera', 'Vino', 'Marmol', 'Cristal', 'Azufre']
-getcontext().prec = 30
-
-def banner():
-	clear()
-	bner = """
-	`7MMF'  `7MM                       `7MM\"""Yp,                 mm    
-	  MM      MM                         MM    Yb                 MM    
-	  MM      MM  ,MP'   ,6"Yb.          MM    dP    ,pW"Wq.    mmMMmm  
-	  MM      MM ;Y     8)   MM          MM\"""bg.   6W'   `Wb     MM    
-	  MM      MM;Mm      ,pm9MM          MM    `Y   8M     M8     MM    
-	  MM      MM `Mb.   8M   MM          MM    ,9   YA.   ,A9     MM    
-	.JMML.  .JMML. YA.  `Moo9^Yo.      .JMMmmmd9     `Ybmd9'      `Mbmo
-	"""
-	print('\n{}\n\n{}\n'.format(bner, infoUser))
-
-class bcolors:
-	HEADER = '\033[95m'
-	STONE = '\033[37m'
-	BLUE = '\033[94m'
-	GREEN = '\033[92m'
-	WARNING = '\033[93m'
-	RED = '\033[91m'
-	BLACK = '\033[90m'
-	ENDC = '\033[0m'
-	BOLD = '\033[1m'
-	UNDERLINE = '\033[4m'
 
 def getIdCiudad(s):
 	(ids, ciudades) = getIdsDeCiudades(s)
@@ -299,9 +266,6 @@ def menuRutaComercial(s):
 	setInfoSignal(s, info)
 	planearViajes(s, rutas)
 	s.logout()
-
-def addPuntos(num):
-	return '{0:,}'.format(int(num)).replace(',','.')
 
 def diasHorasMinutos(segundosTotales):
 	dias = int(segundosTotales / Decimal(86400))

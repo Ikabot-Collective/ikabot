@@ -3,11 +3,13 @@
 
 import re
 from decimal import *
-import sisop
+from sisop import *
+from config import *
+from sisop.varios import *
+from varios import *
+from getVarios import *
+from getJson import *
 
-ids = None
-urlCiudad = 'view=city&cityId='
-tipoDeBien = ['Madera', 'Vino', 'Marmol', 'Cristal', 'Azufre']
 getcontext().prec = 30
 
 def getStatus(s):

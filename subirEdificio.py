@@ -3,7 +3,7 @@
 
 import time
 import re
-from web import sesion
+from web import *
 
 urlCiudad = 'view=city&cityId='
 
@@ -62,7 +62,7 @@ def recursosNecesarios(s, idCiudad, posEdifiico,  niveles):
 	nombre = ciudad['position'][posEdifiico]['building']
 	(carpinteria, oficina, prensa, optico, area)  = getReductores(ciudad)
 	url = 'http://data-ikariam.com/ikabot.php?edificio={}&desde={}&hasta={}&carpinteria={}&oficina={}&prensa={}&optico={}&area={}'.format(nombre, desde, hasta, carpinteria, oficina, prensa, optico, area)
-	rta = sesion.get(url).text.split(',')
+	rta = get(url).text.split(',')
 	return list(map(int, rta))
 
 def subirEdificios(s):
