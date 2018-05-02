@@ -1,6 +1,8 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+prompt = ' >>  '
+
 def read(min=None, max=None, digit=False, msg=prompt, values=None): # lee input del usuario
 	def _invalido():
 		sys.stdout.write('\033[F\r') # Cursor up one line
