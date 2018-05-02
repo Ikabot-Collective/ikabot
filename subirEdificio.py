@@ -3,10 +3,14 @@
 
 import time
 import re
-from web import *
 from sisop.varios import *
 from getJson import *
 from config import *
+from pedirInfo import *
+from sisop.signals import *
+from web.sesion import *
+from getVarios import *
+from varios import *
 
 def getTiempoDeConstruccion(html):
 	fin = re.search(r'"endUpgradeTime":(\d{10})', html)
@@ -76,7 +80,7 @@ def subirEdificios(s):
 		(madera, vino, marmol, cristal, azufre) = recursosNecesarios(s, idCiudad, edificios[0], len(edificios))
 		assert madera != 0
 		html = s.get(urlCiudad + idCiudad)
-		(maderaDisp, vinoDisp, marmolDisp, cristalDisp, azufreDisp) = getRescursosDisponibles(html, num=True)
+		(maderaDisp, vinoDisp, marmolDisp, cristalDisp, azufreDisp) = getRecursosDisponibles(html, num=True)
 		if maderaDisp < madera or vinoDisp < vino or marmolDisp < marmol or cristalDisp < cristal or azufreDisp < azufre:
 			print('\nFalta:')
 			if maderaDisp < madera:
@@ -99,7 +103,7 @@ def subirEdificios(s):
 			rta = read()
 			if rta.lower() == 'n':
 				return
-	except:
+	except AssertionError:
 		pass
 	forkear(s)
 	if s.padre is True:

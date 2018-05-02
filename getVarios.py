@@ -14,7 +14,7 @@ def getBarcosTotales(s):
 	html = s.get()
 	return int(re.search(r'maxTransporters">(\d+)<', html).group(1))
 
-def getRescursosDisponibles(html, num=False):
+def getRecursosDisponibles(html, num=False):
 	recursos = re.search(r'\\"resource\\":(\d+),\\"2\\":(\d+),\\"1\\":(\d+),\\"4\\":(\d+),\\"3\\":(\d+)}', html)
 	if num:
 		return [int(recursos.group(1)), int(recursos.group(3)), int(recursos.group(2)), int(recursos.group(5)), int(recursos.group(4))]

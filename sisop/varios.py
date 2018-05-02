@@ -4,7 +4,7 @@
 import getpass
 import os
 import subprocess
-from config import *
+import config
 
 def enter():
 	getpass.getpass('\n[Enter]')
@@ -39,7 +39,7 @@ def banner():
 	  MM      MM `Mb.   8M   MM          MM    ,9   YA.   ,A9     MM    
 	.JMML.  .JMML. YA.  `Moo9^Yo.      .JMMmmmd9     `Ybmd9'      `Mbmo
 	"""
-	print('\n{}\n\n{}\n'.format(bner, infoUser))
+	print('\n{}\n\n{}\n'.format(bner, config.infoUser))
 
 class bcolors:
 	HEADER = '\033[95m'

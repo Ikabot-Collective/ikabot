@@ -21,7 +21,6 @@ from bot.botDonador import *
 from donar import *
 from config import *
 import getJson
-import getIds
 from getStatus import *
 import update
 from pedirInfo import *
