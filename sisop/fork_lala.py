@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-import sisop.run
+from sisop.run import *
 
 def forkear(s):
 	newpid = os.fork()

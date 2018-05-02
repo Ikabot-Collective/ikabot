@@ -3,10 +3,8 @@
 
 import re
 import random
-import sesion
-
-infoUser = ''
-telegramFile = '.telegram.txt'
+from web.sesion import *
+from  getVarios import *
 
 def sendToBot(s, msg, Token=False):
 	if Token is False:
