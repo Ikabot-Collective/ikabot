@@ -3,6 +3,7 @@
 
 import json
 import re
+from decimal import *
 
 ids = None
 ciudades = None
