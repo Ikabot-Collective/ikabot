@@ -3,6 +3,7 @@
 
 import re
 from decimal import *
+
 getcontext().prec = 30
 
 def getBarcosDisponibles(s):

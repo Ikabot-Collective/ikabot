@@ -4,8 +4,7 @@
 import getpass
 import os
 import subprocess
-
-prompt = ' >>  '
+from config import *
 
 def enter():
 	getpass.getpass('\n[Enter]')
@@ -69,3 +68,15 @@ def banner():
 	.JMML.  .JMML. YA.  `Moo9^Yo.      .JMMmmmd9     `Ybmd9'      `Mbmo
 	"""
 	print('\n{}\n\n{}\n'.format(bner, infoUser))
+
+class bcolors:
+	HEADER = '\033[95m'
+	STONE = '\033[37m'
+	BLUE = '\033[94m'
+	GREEN = '\033[92m'
+	WARNING = '\033[93m'
+	RED = '\033[91m'
+	BLACK = '\033[90m'
+	ENDC = '\033[0m'
+	BOLD = '\033[1m'
+	UNDERLINE = '\033[4m'

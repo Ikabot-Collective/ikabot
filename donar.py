@@ -3,9 +3,7 @@
 
 import sys
 import re
-
-urlCiudad = 'view=city&cityId='
-urlIsla = 'view=island&islandId='
+from config import *
 
 def donar(s):
 	bienes = {'1': 'Viñedo', '2': 'Cantera', '3': 'Mina de cristal', '4': 'Mina de azufre'}

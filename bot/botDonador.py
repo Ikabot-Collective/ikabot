@@ -1,13 +1,12 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import time
 from bot.botComm import *
 from sisop.varios import *
 from getJson import *
 from getVarios import *
-import time
-
-urlCiudad = 'view=city&cityId='
+from config import *
 
 def botDonador(s):
 	if botValido(s) is False:
