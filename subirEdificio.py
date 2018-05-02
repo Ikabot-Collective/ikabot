@@ -4,8 +4,9 @@
 import time
 import re
 from web import *
-
-urlCiudad = 'view=city&cityId='
+from sisop.varios import *
+from getJson import *
+from config import *
 
 def getTiempoDeConstruccion(html):
 	fin = re.search(r'"endUpgradeTime":(\d{10})', html)
