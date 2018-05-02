@@ -12,6 +12,7 @@ import re
 import random
 import hashlib
 import parser
+from getJson import *
 
 cookieFile = '/tmp/.cookies.txt'
 

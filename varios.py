@@ -1,6 +1,8 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from decimal import *
+
 def addPuntos(num):
 	return '{0:,}'.format(int(num)).replace(',','.')
 
