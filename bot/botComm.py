@@ -3,7 +3,7 @@
 
 import re
 import random
-import sesion
+from web.sesion import *
 
 infoUser = ''
 telegramFile = '.telegram.txt'
