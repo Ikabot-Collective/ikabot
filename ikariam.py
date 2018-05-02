@@ -14,12 +14,14 @@ import subprocess
 import signal
 import traceback
 from web.sesion import *
-import getJson
-import subirEdificio
-import getIds
-import getStatus
 from sisop.varios import *
 from sisop.signals import *
+from subirEdificio import *
+from bot.botDonador import *
+from donar import *
+import getJson
+import getIds
+import getStatus
 import update
 
 ids = None
