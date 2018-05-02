@@ -3,7 +3,7 @@
 
 import time
 import re
-import sesion
+from web import sesion
 
 urlCiudad = 'view=city&cityId='
 

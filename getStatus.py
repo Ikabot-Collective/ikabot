@@ -3,7 +3,7 @@
 
 import re
 from decimal import *
-import enter
+import sisop
 
 ids = None
 urlCiudad = 'view=city&cityId='

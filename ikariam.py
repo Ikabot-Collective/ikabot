@@ -13,18 +13,14 @@ import random
 import subprocess
 import signal
 import traceback
-import sesion
+from web.sesion import *
 import getJson
 import subirEdificio
 import getIds
 import getStatus
-import enter
-import run
-import clear
+from sisop.varios import *
+from sisop.signals import *
 import update
-import fork
-import signals
-import read
 
 ids = None
 ciudades = None
@@ -487,7 +483,7 @@ def inicializar():
 def getSesion():
 	global infoUser
 	banner()
-	html = sesion.get('https://es.ikariam.gameforge.com/?').text
+	html = get('https://es.ikariam.gameforge.com/?').text
 	servidores = re.findall(r'<a href="(?:https:)?//(\w{2})\.ikariam\.gameforge\.com/\?kid=[\d\w-]*" target="_top" rel="nofollow" class="mmoflag mmo_\w{2}">(.+)</a>', html)
 	i = 0
 	for server in servidores:
@@ -498,7 +494,7 @@ def getSesion():
 	infoUser = 'Servidor:{}'.format(servidores[servidor-1][1])
 	banner()
 	if srv != 'es':
-		html = sesion.get('https://{}.ikariam.gameforge.com/?'.format(srv)).text
+		html = get('https://{}.ikariam.gameforge.com/?'.format(srv)).text
 	html = re.search(r'registerServer[\s\S]*registerServerServerInfo', html).group()
 	mundos = re.findall(r'mobileUrl="s(\d{1,2})-\w{2}\.ikariam\.gameforge\.com"\s*?cookieName=""\s*>\s*(\w+)\s*</option>', html)
 	i = 0
@@ -515,7 +511,7 @@ def getSesion():
 	headers = {'Host': uni_url, 'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:54.0) Gecko/20100101 Firefox/54.0','Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Encoding':'gzip, deflate, br', 'Content-Type':'application/x-www-form-urlencoded', 'Referer': urlBase}
 	payload = {'uni_url': uni_url, 'name': usuario, 'password': password, 'pwat_uid': '', 'pwat_checksum': '' ,'startPageShown' : '1' , 'detectedDevice' : '1' , 'kid':''}
 	infoUser += ', Jugador:{}'.format(usuario)
-	return sesion.Sesion(urlBase, payload, headers)
+	return Sesion(urlBase, payload, headers)
 
 def main():
 	inicializar()
