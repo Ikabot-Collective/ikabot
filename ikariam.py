@@ -441,7 +441,7 @@ def subirEdificios(s):
 			rta = read()
 			if rta.lower() == 'n':
 				return
-	except:
+	except AssertionError:
 		pass
 	forkear(s)
 	if s.padre is True:
