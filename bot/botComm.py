@@ -4,7 +4,10 @@
 import re
 import random
 from web.sesion import *
-from  getVarios import *
+from getVarios import *
+from config import *
+from pedirInfo import *
+from sisop.varios import *
 
 def sendToBot(s, msg, Token=False):
 	if Token is False:
@@ -12,7 +15,7 @@ def sendToBot(s, msg, Token=False):
 	with open(telegramFile, 'r') as filehandler:
 		text = filehandler.read()
 		(botToken, chatId) = text.splitlines()
-		sesion.get('https://api.telegram.org/bot{}/sendMessage'.format(botToken), params={'chat_id': chatId, 'text': msg})
+		get('https://api.telegram.org/bot{}/sendMessage'.format(botToken), params={'chat_id': chatId, 'text': msg})
 
 def botValido(s):
 	with open(telegramFile, 'r') as filehandler:
