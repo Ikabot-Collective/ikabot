@@ -34,7 +34,7 @@ def enviarVino(s):
 		esVino =  ciudades[idCiudad]['tradegood'] == '1'
 		if esVino:
 			html = s.get(urlCiudad + idCiudad)
-			recursos = getRescursosDisponibles(html)
+			recursos = getRecursosDisponibles(html)
 			dict_idVino_diponible[idCiudad] = int(recursos[1]) - 1000 # dejo 1000 por las dudas
 			if dict_idVino_diponible[idCiudad] < 0:
 				dict_idVino_diponible[idCiudad] = 0
@@ -109,7 +109,7 @@ def menuRutaComercial(s):
 			idCiudadOrigen = getIdCiudad(s)
 			htmlO = s.get(urlCiudad + idCiudadOrigen)
 			ciudadO = getCiudad(htmlO)
-			max = getRescursosDisponibles(htmlO)
+			max = getRecursosDisponibles(htmlO)
 			total = list(map(int, max))
 		banner()
 		print('Ciudad de destino')
