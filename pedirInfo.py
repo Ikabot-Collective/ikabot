@@ -1,9 +1,16 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import sys
+import re
+import json
 from web import *
 from sisop.varios import *
 from config import *
+from decimal import *
+from getJson import *
+
+getcontext().prec = 30
 
 def read(min=None, max=None, digit=False, msg=prompt, values=None): # lee input del usuario
 	def _invalido():
@@ -113,3 +120,28 @@ def pedirValor(text, max):
 	if var == '':
 		var = 0
 	return int(var)
+
+def getIdsDeCiudades(s):
+	global ciudades
+	global ids
+	if ids is None or ciudades is None:
+		html = s.get()
+		ciudades = re.search(r'relatedCityData:\sJSON\.parse\(\'(.+?),\\"additionalInfo', html).group(1) + '}'
+		ciudades = ciudades.replace('\\', '')
+		ciudades = ciudades.replace('city_', '')
+		ciudades = json.loads(ciudades, strict=False)
+		ids = []
+		for ciudad in ciudades:
+			ids.append(ciudad)
+	ids = sorted(ids)
+	return (ids, ciudades)
+
+def getIdsdeIslas(s):
+	(idsCiudades, ciudades) = getIdsDeCiudades(s)
+	idsIslas = set()
+	for idCiudad in idsCiudades:
+		html = s.get(urlCiudad + idCiudad)
+		ciudad = getCiudad(html)
+		idIsla = ciudad['islandId']
+		idsIslas.add(idIsla)
+	return list(idsIslas)
