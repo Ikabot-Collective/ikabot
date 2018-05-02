@@ -24,87 +24,7 @@ import getJson
 import getIds
 from getStatus import *
 import update
-
-def getIdCiudad(s):
-	(ids, ciudades) = getIdsDeCiudades(s)
-	maxNombre = 0
-	for unId in ids:
-		largo = len(ciudades[unId]['name'])
-		if largo > maxNombre:
-			maxNombre = largo
-	pad = lambda name: ' ' * (maxNombre - len(name) + 2)
-	bienes = {'1': '(V)', '2': '(M)', '3': '(C)', '4': '(A)'}
-	prints = []
-	i = 0
-	for unId in ids:
-		i += 1
-		tradegood = ciudades[unId]['tradegood']
-		bien = bienes[tradegood]
-		nombre = ciudades[unId]['name']
-		num = ' ' + str(i) if i < 10 else str(i)
-		print('{}: {}{}{}'.format(num, nombre, pad(nombre), bien))
-	eleccion = read(min=1, max=i)
-	eleccion = int(eleccion) - 1
-	return ids[eleccion]
-
-def getEdificios(s, idCiudad):
-	html = s.get(urlCiudad + idCiudad)
-	ciudad = getCiudad(html)
-	i = 0
-	pos = -1
-	prints = []
-	posiciones = []
-	prints.append('(0)\t\tsalir')
-	posiciones.append(None)
-	for posicion in ciudad['position']:
-		pos += 1
-		if posicion['name'] != 'empty':
-			i += 1
-			level = posicion['level']
-			if int(level) < 10:
-				level = ' ' + level
-			if posicion['isBusy']:
-				level = level + '+'
-			prints.append('(' + str(i) + ')' + '\tlv:' + level + '\t' + posicion['name'])
-			posiciones.append(pos)
-	eleccion = menuEdificios(prints, ciudad, posiciones)
-	return eleccion
-
-def menuEdificios(prints, ciudad, posiciones):
-	banner()
-	for textoEdificio in prints:
-		print(textoEdificio)
-
-	eleccion = read(min=0, max=len(prints)-1)
-
-	if eleccion == 0:
-		return []
-	posicion = posiciones[eleccion]
-	nivelActual = int(ciudad['position'][posicion]['level'])
-	if ciudad['position'][posicion]['isBusy']:
-		nivelActual += 1
-
-	banner()
-	print('edificio:{}'.format(ciudad['position'][posicion]['name']))
-	print('nivel actual:{}'.format(nivelActual))
-
-	nivelFinal = read(min=nivelActual, msg='subir al nivel:')
-
-	niveles = nivelFinal - nivelActual
-	rta = []
-	for i in range(0, niveles):
-		rta.append(posicion)
-	return rta
-
-def pedirValor(text, max):
-	vals = list()
-	for n in range(0, max+1):
-		vals.append(str(n))
-	vals.append('')
-	var = read(msg=text, values=vals)
-	if var == '':
-		var = 0
-	return int(var)
+from pedirInfo import *
 
 def enviarVino(s):
 	banner()
@@ -443,39 +363,6 @@ def inicializar():
 	os.chdir(path)
 	run('touch ' + cookieFile)
 	run('touch ' + telegramFile)
-
-def getSesion():
-	global infoUser
-	banner()
-	html = get('https://es.ikariam.gameforge.com/?').text
-	servidores = re.findall(r'<a href="(?:https:)?//(\w{2})\.ikariam\.gameforge\.com/\?kid=[\d\w-]*" target="_top" rel="nofollow" class="mmoflag mmo_\w{2}">(.+)</a>', html)
-	i = 0
-	for server in servidores:
-		i += 1
-		print('({:d}) {}'.format(i, server[1]))
-	servidor = read(msg='Servidor:', min=1, max=len(servidores))
-	srv = servidores[servidor - 1][0]
-	infoUser = 'Servidor:{}'.format(servidores[servidor-1][1])
-	banner()
-	if srv != 'es':
-		html = get('https://{}.ikariam.gameforge.com/?'.format(srv)).text
-	html = re.search(r'registerServer[\s\S]*registerServerServerInfo', html).group()
-	mundos = re.findall(r'mobileUrl="s(\d{1,2})-\w{2}\.ikariam\.gameforge\.com"\s*?cookieName=""\s*>\s*(\w+)\s*</option>', html)
-	i = 0
-	for mundo in mundos:
-		i += 1
-		print('({:d}) {}'.format(i, mundo[1]))
-	mundo = read(msg='Mundo:', min=1, max=len(mundos))
-	infoUser += ', Mundo:{}'.format(mundos[mundo - 1][1])
-	urlBase = 'https://s{:d}-{}.ikariam.gameforge.com/index.php?'.format(mundo, srv)
-	uni_url = 's{:d}-{}.ikariam.gameforge.com'.format(mundo, srv)
-	banner()
-	usuario = read(msg='Usuario:')
-	password = getpass.getpass('Contraseña:')
-	headers = {'Host': uni_url, 'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:54.0) Gecko/20100101 Firefox/54.0','Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Encoding':'gzip, deflate, br', 'Content-Type':'application/x-www-form-urlencoded', 'Referer': urlBase}
-	payload = {'uni_url': uni_url, 'name': usuario, 'password': password, 'pwat_uid': '', 'pwat_checksum': '' ,'startPageShown' : '1' , 'detectedDevice' : '1' , 'kid':''}
-	infoUser += ', Jugador:{}'.format(usuario)
-	return Sesion(urlBase, payload, headers)
 
 def main():
 	inicializar()
