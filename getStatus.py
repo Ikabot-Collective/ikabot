@@ -5,6 +5,10 @@ import re
 from decimal import *
 from sisop import *
 from config import *
+from sisop.varios import *
+from varios import *
+from getVarios import *
+from getJson import *
 
 getcontext().prec = 30
 

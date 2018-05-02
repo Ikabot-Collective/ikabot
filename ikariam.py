@@ -22,7 +22,7 @@ from donar import *
 from config import *
 import getJson
 import getIds
-import getStatus
+from getStatus import *
 import update
 
 def getIdCiudad(s):
@@ -266,9 +266,6 @@ def menuRutaComercial(s):
 	setInfoSignal(s, info)
 	planearViajes(s, rutas)
 	s.logout()
-
-def addPuntos(num):
-	return '{0:,}'.format(int(num)).replace(',','.')
 
 def diasHorasMinutos(segundosTotales):
 	dias = int(segundosTotales / Decimal(86400))
