@@ -4,10 +4,8 @@
 import json
 import re
 from decimal import *
+from config import *
 
-ids = None
-ciudades = None
-urlCiudad = 'view=city&cityId='
 getcontext().prec = 30
 
 def getIdsDeCiudades(s):

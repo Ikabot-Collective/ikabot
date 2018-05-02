@@ -19,33 +19,11 @@ from sisop.signals import *
 from subirEdificio import *
 from bot.botDonador import *
 from donar import *
+from config import *
 import getJson
 import getIds
 import getStatus
 import update
-
-ids = None
-ciudades = None
-infoUser = ''
-cookieFile = '/tmp/.cookies.txt'
-telegramFile = '.telegram.txt'
-urlCiudad = 'view=city&cityId='
-urlIsla = 'view=island&islandId='
-prompt = ' >>  '
-tipoDeBien = ['Madera', 'Vino', 'Marmol', 'Cristal', 'Azufre']
-getcontext().prec = 30
-
-class bcolors:
-	HEADER = '\033[95m'
-	STONE = '\033[37m'
-	BLUE = '\033[94m'
-	GREEN = '\033[92m'
-	WARNING = '\033[93m'
-	RED = '\033[91m'
-	BLACK = '\033[90m'
-	ENDC = '\033[0m'
-	BOLD = '\033[1m'
-	UNDERLINE = '\033[4m'
 
 def getIdCiudad(s):
 	(ids, ciudades) = getIdsDeCiudades(s)
