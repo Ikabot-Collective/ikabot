@@ -3,6 +3,8 @@
 
 from decimal import *
 
+getcontext().prec = 30
+
 def addPuntos(num):
 	return '{0:,}'.format(int(num)).replace(',','.')
 
