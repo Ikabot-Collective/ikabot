@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import time
-from bot.botComm import *
-from sisop.varios import *
-from helpers.getJson import *
 from config import *
+from helpers.getJson import *
+from helpers.botComm import *
+from helpers.gui import *
 
 def botDonador(s):
 	if botValido(s) is False:

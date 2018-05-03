@@ -1,7 +1,8 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from sisop.varios import *
+from helpers.process import run
+from helpers.gui import *
 
 def update(s):
 	out = run('git pull').read().decode("utf-8") 

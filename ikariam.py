@@ -4,10 +4,11 @@
 import sys
 import os
 from web.getSesion import *
-from sisop.varios import *
 from config import *
 from helpers.pedirInfo import *
-from sisop.signals import *
+from helpers.signals import *
+from helpers.process import *
+from helpers.gui import *
 from funcion.subirEdificio import *
 from funcion.menuRutaComercial import *
 from funcion.enviarVino import *

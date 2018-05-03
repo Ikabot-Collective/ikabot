@@ -4,12 +4,11 @@
 import re
 import parser
 import getpass
-from helpers.getJson import *
-from sisop.varios import *
-from helpers.pedirInfo import read
-import config
 from config import cookieFile
 from web.sesion import *
+from helpers.getJson import *
+from helpers.pedirInfo import read
+from helpers.gui import *
 
 from web.sesion import *
 def getSesion():

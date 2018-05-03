@@ -3,7 +3,6 @@
 
 import getpass
 import os
-import subprocess
 import config
 
 def enter():
@@ -11,22 +10,6 @@ def enter():
 
 def clear():
 	os.system('clear')
-
-def forkear(s):
-	newpid = os.fork()
-	if newpid != 0:
-		# padre
-		s.login()
-		newpid = str(newpid)
-		run('kill -SIGSTOP ' + newpid)
-		run('bg ' + newpid)
-		run('disown ' + newpid)
-	else:
-		# hijo
-		s.padre = False
-
-def run(command):
-	return subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
 
 def banner():
 	clear()
