@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 
 from sisop.varios import *
-from getJson import *
-from getVarios import *
-from pedirInfo import *
-from varios import *
 from sisop.signals import *
-from planearViajes import *
+from helpers.getJson import *
+from helpers.pedirInfo import *
+from helpers.varios import *
+from helpers.planearViajes import *
+from helpers.recursos import *
 
 def menuRutaComercial(s):
 	idCiudadOrigen = None

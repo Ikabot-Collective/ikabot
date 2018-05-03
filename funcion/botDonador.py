@@ -4,8 +4,7 @@
 import time
 from bot.botComm import *
 from sisop.varios import *
-from getJson import *
-from getVarios import *
+from helpers.getJson import *
 from config import *
 
 def botDonador(s):

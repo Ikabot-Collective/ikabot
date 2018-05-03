@@ -4,9 +4,8 @@
 import re
 import random
 from web.sesion import *
-from getVarios import *
 from config import *
-from pedirInfo import *
+from helpers.pedirInfo import *
 from sisop.varios import *
 
 def sendToBot(s, msg, Token=False):

@@ -3,10 +3,11 @@
 
 from sisop.varios import *
 from sisop.signals import *
-from pedirInfo import *
-from getVarios import *
-from getJson import *
-from planearViajes import *
+from helpers.pedirInfo import *
+from helpers.getJson import *
+from helpers.planearViajes import *
+from helpers.recursos import *
+from helpers.varios import *
 
 def enviarVino(s):
 	banner()

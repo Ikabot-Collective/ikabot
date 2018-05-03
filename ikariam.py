@@ -3,10 +3,10 @@
 
 import sys
 import os
-from web.sesion import *
+from web.getSesion import *
 from sisop.varios import *
 from config import *
-from pedirInfo import *
+from helpers.pedirInfo import *
 from sisop.signals import *
 from funcion.subirEdificio import *
 from funcion.menuRutaComercial import *
