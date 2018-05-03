@@ -74,3 +74,13 @@ def getStatus(s):
 			print('lv:{}\t{}{}{}'.format(level, color, edificio['name'], bcolors.ENDC))
 		enter()
 		print('')
+
+def getConsumoDeVino(html):
+	return int(re.search(r'GlobalMenu_WineConsumption"\s*class="rightText">\s*(\d*)\s', html).group(1))
+
+def getProduccion(s, idCiudad):
+	prod = s.post(payloadPost={'action': 'header', 'function': 'changeCurrentCity', 'actionRequest': s.token(), 'cityId': idCiudad, 'ajax': '1'}) 
+	wood = Decimal(re.search(r'"resourceProduction":([\d|\.]+),', prod).group(1))
+	good = Decimal(re.search(r'"tradegoodProduction":([\d|\.]+),', prod).group(1))
+	typeGood = int(re.search(r'"producedTradegood":"([\d|\.]+)"', prod).group(1))
+	return (wood, good, typeGood)
