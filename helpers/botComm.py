@@ -6,7 +6,6 @@ import random
 from web.sesion import *
 from config import *
 from helpers.pedirInfo import *
-from sisop.varios import *
 
 def sendToBot(s, msg, Token=False):
 	if Token is False:

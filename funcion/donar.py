@@ -4,11 +4,11 @@
 import sys
 import re
 from config import *
-from sisop.varios import *
 from helpers.pedirInfo import *
 from helpers.getJson import *
 from helpers.varios import *
 from helpers.recursos import *
+from helpers.gui import *
 
 def donar(s):
 	bienes = {'1': 'Viñedo', '2': 'Cantera', '3': 'Mina de cristal', '4': 'Mina de azufre'}

@@ -13,7 +13,6 @@ import random
 import hashlib
 import parser
 from helpers.getJson import *
-from sisop.varios import *
 from helpers.pedirInfo import read
 import config
 from config import cookieFile

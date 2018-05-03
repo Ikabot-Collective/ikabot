@@ -4,10 +4,10 @@
 import sys
 import re
 import json
-from sisop.varios import *
 from config import *
 from decimal import *
 from helpers.getJson import *
+from helpers.gui import *
 
 getcontext().prec = 30
 

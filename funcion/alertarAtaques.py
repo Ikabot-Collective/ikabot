@@ -4,9 +4,9 @@
 import time
 import traceback
 import re
-from bot.botComm import *
-from sisop.varios import *
-from sisop.signals import *
+from helpers.signals import *
+from helpers.botComm import *
+from helpers.gui import *
 
 def alertarAtaques(s):
 	if botValido(s) is False:

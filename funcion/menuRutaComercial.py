@@ -1,13 +1,13 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from sisop.varios import *
-from sisop.signals import *
+from helpers.signals import *
 from helpers.getJson import *
 from helpers.pedirInfo import *
 from helpers.varios import *
 from helpers.planearViajes import *
 from helpers.recursos import *
+from helpers.gui import *
 
 def menuRutaComercial(s):
 	idCiudadOrigen = None

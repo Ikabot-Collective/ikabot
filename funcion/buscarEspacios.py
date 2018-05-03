@@ -3,11 +3,11 @@
 
 import time
 import traceback
-from bot.botComm import *
-from sisop.varios import *
-from sisop.signals import *
+from helpers.signals import *
+from helpers.botComm import *
 from helpers.pedirInfo import *
 from helpers.getJson import *
+from helpers.gui import *
 
 def buscarEspacios(s):
 	if botValido(s) is False:
