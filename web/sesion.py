@@ -202,7 +202,10 @@ class Sesion:
 			os._exit(0)
 
 def get(url):
-	return requests.get(url)
+	try:
+		return requests.get(url)
+	except requests.exceptions.ConnectionError:
+		sys.exit('Fallo la conexion a internet')
 
 def getSesion():
 	banner()
