@@ -8,17 +8,16 @@ from sisop.varios import *
 from config import *
 from pedirInfo import *
 from sisop.signals import *
-
-from subirEdificio import *
-from menuRutaComercial import *
-from enviarVino import *
-from getStatus import *
-from donar import *
-from buscarEspacios import *
-from entrarDiariamente import *
-from alertarAtaques import *
-from bot.botDonador import *
-from update import *
+from funcion.subirEdificio import *
+from funcion.menuRutaComercial import *
+from funcion.enviarVino import *
+from funcion.getStatus import *
+from funcion.donar import *
+from funcion.buscarEspacios import *
+from funcion.entrarDiariamente import *
+from funcion.alertarAtaques import *
+from funcion.botDonador import *
+from funcion.update import *
 
 def menu(s):
 	banner()
