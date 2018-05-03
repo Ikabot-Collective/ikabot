@@ -21,7 +21,16 @@ from funcion.update import *
 
 def menu(s):
 	banner()
-	menu_actions = [subirEdificios, menuRutaComercial, enviarVino, getStatus, donar, buscarEspacios, entrarDiariamente, alertarAtaques, botDonador, update]
+	menu_actions = [subirEdificios, 
+					menuRutaComercial, 
+					enviarVino, 
+					getStatus, 
+					donar, 
+					buscarEspacios, 
+					entrarDiariamente, 
+					alertarAtaques, 
+					botDonador, 
+					update]
 	mnu="""
 (0) Salir
 (1) Lista de construcción
