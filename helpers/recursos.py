@@ -2,17 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import re
-from decimal import *
-
-getcontext().prec = 30
-
-def getBarcosDisponibles(s):
-	html = s.get()
-	return int(re.search(r'GlobalMenu_freeTransporters">(\d+)<', html).group(1))
-
-def getBarcosTotales(s):
-	html = s.get()
-	return int(re.search(r'maxTransporters">(\d+)<', html).group(1))
 
 def getRecursosDisponibles(html, num=False):
 	recursos = re.search(r'\\"resource\\":(\d+),\\"2\\":(\d+),\\"1\\":(\d+),\\"4\\":(\d+),\\"3\\":(\d+)}', html)

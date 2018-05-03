@@ -6,8 +6,8 @@ import traceback
 from bot.botComm import *
 from sisop.varios import *
 from sisop.signals import *
-from pedirInfo import *
-from getJson import *
+from helpers.pedirInfo import *
+from helpers.getJson import *
 
 def buscarEspacios(s):
 	if botValido(s) is False:

@@ -3,12 +3,12 @@
 
 import re
 from decimal import *
-from sisop import *
 from config import *
 from sisop.varios import *
-from varios import *
-from getVarios import *
-from getJson import *
+from helpers.varios import *
+from helpers.getJson import *
+from helpers.naval import *
+from helpers.recursos import *
 
 getcontext().prec = 30
 
@@ -25,7 +25,7 @@ def getStatus(s):
 		ciudad = getCiudad(html)
 		(wood, good, typeGood) = getProduccion(s, unId)
 		print('\033[1m' + tipoCiudad[int(typeGood)] + ciudad['cityName'] + tipoCiudad[0])
-		max = getRescursosDisponibles(html)
+		max = getRecursosDisponibles(html)
 		capacidadDeAlmacenamiento = getCapacidadDeAlmacenamiento(html)
 		crecursos = []
 		for i in range(0,5):

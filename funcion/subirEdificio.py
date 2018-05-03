@@ -4,13 +4,13 @@
 import time
 import re
 from sisop.varios import *
-from getJson import *
+from helpers.getJson import *
+from helpers.varios import *
+from helpers.pedirInfo import *
+from helpers.recursos import *
 from config import *
-from pedirInfo import *
 from sisop.signals import *
 from web.sesion import *
-from getVarios import *
-from varios import *
 
 def getTiempoDeConstruccion(html):
 	fin = re.search(r'"endUpgradeTime":(\d{10})', html)
