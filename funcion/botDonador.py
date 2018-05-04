@@ -5,6 +5,7 @@ import time
 from config import *
 from helpers.getJson import *
 from helpers.botComm import *
+from helpers.process import *
 from helpers.gui import *
 
 def botDonador(s):

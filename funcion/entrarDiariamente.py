@@ -5,6 +5,7 @@ import time
 import traceback
 from helpers.botComm import *
 from helpers.signals import *
+from helpers.process import *
 from helpers.gui import *
 
 def entrarDiariamente(s):
