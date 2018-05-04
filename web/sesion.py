@@ -12,10 +12,9 @@ import re
 import random
 import hashlib
 import parser
-from helpers.getJson import *
-from helpers.pedirInfo import read
-import config
 from config import cookieFile
+from helpers.getJson import getCiudad
+from helpers.pedirInfo import read
 
 class Sesion:
 	def __init__(self, urlBase, payload, headers):

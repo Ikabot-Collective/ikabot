@@ -3,9 +3,10 @@
 
 import re
 import random
-from web.sesion import *
 from config import *
-from helpers.pedirInfo import *
+from web.sesion import get
+from helpers.pedirInfo import read
+from helpers.gui import enter
 
 def sendToBot(s, msg, Token=False):
 	if Token is False:

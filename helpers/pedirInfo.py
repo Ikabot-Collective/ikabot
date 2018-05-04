@@ -6,8 +6,8 @@ import re
 import json
 from config import *
 from decimal import *
-from helpers.getJson import *
-from helpers.gui import *
+from helpers.getJson import getCiudad
+from helpers.gui import banner
 
 getcontext().prec = 30
 
