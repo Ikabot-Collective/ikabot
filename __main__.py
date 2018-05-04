@@ -2,22 +2,22 @@
 # -*- coding: utf-8 -*-
 
 import os
-from web.getSesion import *
 from config import *
-from helpers.pedirInfo import *
-from helpers.signals import *
-from helpers.process import *
+from web.getSesion import getSesion
 from helpers.gui import *
-from funcion.subirEdificio import *
-from funcion.menuRutaComercial import *
-from funcion.enviarVino import *
-from funcion.getStatus import *
-from funcion.donar import *
-from funcion.buscarEspacios import *
-from funcion.entrarDiariamente import *
-from funcion.alertarAtaques import *
-from funcion.botDonador import *
-from funcion.update import *
+from helpers.pedirInfo import read
+from helpers.process import run
+from helpers.signals import setSignalsHandlers
+from funcion.subirEdificio import subirEdificios
+from funcion.menuRutaComercial import menuRutaComercial
+from funcion.enviarVino import enviarVino
+from funcion.getStatus import getStatus
+from funcion.donar import donar
+from funcion.buscarEspacios import buscarEspacios
+from funcion.entrarDiariamente import entrarDiariamente
+from funcion.alertarAtaques import alertarAtaques
+from funcion.botDonador import botDonador
+from funcion.update import update
 
 def menu(s):
 	banner()

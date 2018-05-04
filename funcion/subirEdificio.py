@@ -3,15 +3,15 @@
 
 import time
 import re
-from web.sesion import *
 from config import *
-from helpers.getJson import *
-from helpers.varios import *
 from helpers.pedirInfo import *
-from helpers.recursos import *
-from helpers.signals import *
-from helpers.process import *
-from helpers.gui import *
+from helpers.getJson import getCiudad
+from helpers.varios import addPuntos
+from helpers.recursos import getRecursosDisponibles
+from helpers.signals import setInfoSignal
+from helpers.process import forkear
+from helpers.gui import banner
+from web.sesion import get
 
 def getTiempoDeConstruccion(html):
 	fin = re.search(r'"endUpgradeTime":(\d{10})', html)
