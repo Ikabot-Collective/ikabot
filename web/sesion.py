@@ -200,8 +200,11 @@ class Sesion:
 		if self.padre is False:
 			os._exit(0)
 
-def get(url):
+def get(url, params=None):
 	try:
-		return requests.get(url)
+		if params:
+			return requests.get(url, params=params)
+		else:
+			return requests.get(url)
 	except requests.exceptions.ConnectionError:
 		sys.exit('Fallo la conexion a internet')
