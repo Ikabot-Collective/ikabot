@@ -6,6 +6,7 @@ import traceback
 import re
 from helpers.signals import *
 from helpers.botComm import *
+from helpers.process import *
 from helpers.gui import *
 
 def alertarAtaques(s):
