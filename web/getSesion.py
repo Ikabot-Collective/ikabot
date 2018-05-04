@@ -4,10 +4,9 @@
 import re
 import getpass
 import config
-from web.sesion import Sesion
+from web.sesion import *
 from helpers.pedirInfo import read
 from helpers.gui import banner
-from web.sesion import get
 
 def getSesion():
 	banner()
