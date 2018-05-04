@@ -1,14 +1,14 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from helpers.signals import *
 from helpers.pedirInfo import *
-from helpers.getJson import *
-from helpers.planearViajes import *
-from helpers.recursos import *
-from helpers.varios import *
-from helpers.process import *
-from helpers.gui import *
+from helpers.signals import setInfoSignal
+from helpers.getJson import getCiudad
+from helpers.planearViajes import planearViajes
+from helpers.recursos import getRecursosDisponibles
+from helpers.varios import addPuntos
+from helpers.process import forkear
+from helpers.gui import banner
 
 def enviarVino(s):
 	banner()

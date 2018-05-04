@@ -4,9 +4,9 @@
 import time
 import traceback
 from helpers.botComm import *
-from helpers.signals import *
-from helpers.process import *
-from helpers.gui import *
+from helpers.signals import setInfoSignal
+from helpers.process import forkear
+from helpers.gui import enter
 
 def entrarDiariamente(s):
 	if botValido(s) is False:

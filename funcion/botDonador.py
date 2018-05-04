@@ -3,10 +3,13 @@
 
 import time
 from config import *
-from helpers.getJson import *
 from helpers.botComm import *
-from helpers.process import *
-from helpers.gui import *
+from helpers.pedirInfo import *
+from helpers.process import forkear
+from helpers.gui import enter
+from helpers.signals import setInfoSignal
+from helpers.getJson import getCiudad
+from helpers.recursos import getRecursosDisponibles
 
 def botDonador(s):
 	if botValido(s) is False:
@@ -33,7 +36,7 @@ def botDonador(s):
 		while True:
 			for idCiudad in idsCiudades:
 				html = s.get(urlCiudad + idCiudad)
-				madera = getRescursosDisponibles(html)[0]
+				madera = getRecursosDisponibles(html)[0]
 				idIsla = ciudades_dict[idCiudad]
 				s.post(payloadPost={'islandId': idIsla, 'type': tipo, 'action': 'IslandScreen', 'function': 'donate', 'donation': madera, 'backgroundView': 'island', 'templateView': 'resource', 'actionRequest': s.token(), 'ajax': '1'})
 			time.sleep(24*60*60)

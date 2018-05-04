@@ -1,14 +1,13 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import sys
 import re
 from config import *
 from helpers.pedirInfo import *
 from helpers.getJson import *
-from helpers.varios import *
 from helpers.recursos import *
 from helpers.gui import *
+from helpers.varios import addPuntos
 
 def donar(s):
 	bienes = {'1': 'Viñedo', '2': 'Cantera', '3': 'Mina de cristal', '4': 'Mina de azufre'}

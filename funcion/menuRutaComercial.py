@@ -1,14 +1,14 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from helpers.signals import *
-from helpers.getJson import *
-from helpers.pedirInfo import *
-from helpers.varios import *
-from helpers.planearViajes import *
-from helpers.recursos import *
-from helpers.process import *
 from helpers.gui import *
+from helpers.pedirInfo import *
+from helpers.planearViajes import planearViajes
+from helpers.signals import setInfoSignal
+from helpers.getJson import getCiudad
+from helpers.process import forkear
+from helpers.varios import addPuntos
+from helpers.recursos import getRecursosDisponibles
 
 def menuRutaComercial(s):
 	idCiudadOrigen = None

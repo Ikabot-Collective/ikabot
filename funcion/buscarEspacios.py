@@ -3,12 +3,12 @@
 
 import time
 import traceback
-from helpers.signals import *
 from helpers.botComm import *
-from helpers.pedirInfo import *
-from helpers.getJson import *
-from helpers.process import *
-from helpers.gui import *
+from helpers.gui import enter
+from helpers.signals import setInfoSignal
+from helpers.pedirInfo import getIdsdeIslas
+from helpers.getJson import getIsla
+from helpers.process import forkear
 
 def buscarEspacios(s):
 	if botValido(s) is False:

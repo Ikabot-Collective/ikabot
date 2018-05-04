@@ -4,10 +4,10 @@
 import time
 import traceback
 import re
-from helpers.signals import *
+from helpers.signals import setInfoSignal
+from helpers.process import forkear
+from helpers.gui import enter
 from helpers.botComm import *
-from helpers.process import *
-from helpers.gui import *
 
 def alertarAtaques(s):
 	if botValido(s) is False:
