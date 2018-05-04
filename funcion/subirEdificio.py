@@ -10,6 +10,7 @@ from helpers.varios import *
 from helpers.pedirInfo import *
 from helpers.recursos import *
 from helpers.signals import *
+from helpers.process import *
 from helpers.gui import *
 
 def getTiempoDeConstruccion(html):
