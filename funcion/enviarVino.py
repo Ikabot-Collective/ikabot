@@ -7,6 +7,7 @@ from helpers.getJson import *
 from helpers.planearViajes import *
 from helpers.recursos import *
 from helpers.varios import *
+from helpers.process import *
 from helpers.gui import *
 
 def enviarVino(s):
