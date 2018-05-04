@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-from config import *
+import config
 from web.getSesion import getSesion
 from helpers.gui import *
 from helpers.pedirInfo import read
