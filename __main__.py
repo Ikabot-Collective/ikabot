@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-import config
+from config import *
 from web.getSesion import getSesion
 from helpers.gui import *
 from helpers.pedirInfo import read
@@ -59,8 +59,8 @@ def inicializar():
 	path = os.path.abspath(__file__)
 	path = os.path.dirname(path)
 	os.chdir(path)
-	run('touch ' + config.cookieFile)
-	run('touch ' + config.telegramFile)
+	run('touch ' + cookieFile)
+	run('touch ' + telegramFile)
 
 def main():
 	inicializar()

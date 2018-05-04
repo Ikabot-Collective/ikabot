@@ -3,7 +3,8 @@
 
 import re
 import getpass
-from config import cookieFile
+import config
+from web.sesion import Sesion
 from helpers.pedirInfo import read
 from helpers.gui import banner
 from web.sesion import get
