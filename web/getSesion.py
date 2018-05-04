@@ -2,15 +2,12 @@
 # -*- coding: utf-8 -*-
 
 import re
-import parser
 import getpass
 from config import cookieFile
-from web.sesion import *
-from helpers.getJson import *
 from helpers.pedirInfo import read
-from helpers.gui import *
+from helpers.gui import banner
+from web.sesion import get
 
-from web.sesion import *
 def getSesion():
 	banner()
 	html = get('https://es.ikariam.gameforge.com/?').text

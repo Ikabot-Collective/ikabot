@@ -5,7 +5,6 @@ import re
 import time
 import math
 from decimal import *
-from helpers.getJson import *
 from helpers.naval import *
 
 def enviarBienes(s, idCiudadOrigen, idCiudadDestino, idIsla, md, vn, mr, cr, az, barcos):
