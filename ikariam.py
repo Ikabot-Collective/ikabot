@@ -32,16 +32,16 @@ def menu(s):
 					botDonador, 
 					update]
 	mnu="""
-(0)  Salir
-(1)  Lista de construcción
-(2)  Enviar recursos
-(3)  Enviar vino
-(4)  Estado de la cuenta
-(5)  Donar
-(6)  Buscar espacios nuevos
-(7)  Entrar diariamente
-(8)  Alertar ataques
-(9)  Bot donador
+( 0) Salir
+( 1) Lista de construcción
+( 2) Enviar recursos
+( 3) Enviar vino
+( 4) Estado de la cuenta
+( 5) Donar
+( 6) Buscar espacios nuevos
+( 7) Entrar diariamente
+( 8) Alertar ataques
+( 9) Bot donador
 (10) Actualizar IkaBot"""
 	print(mnu)
 	entradas = len(menu_actions)
