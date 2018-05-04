@@ -68,8 +68,6 @@ def main():
 	setSignalsHandlers(s)
 	try:
 		menu(s)
-	except KeyboardInterrupt:
-		clear()
 	except:
 		raise
 	finally:
@@ -77,4 +75,7 @@ def main():
 			s.logout()
 
 if __name__ == '__main__':
-	main()
+	try:
+		main()
+	except KeyboardInterrupt:
+		clear()
