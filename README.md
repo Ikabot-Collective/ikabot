@@ -1,6 +1,6 @@
 ## ikabot
 
-_Es como usar una cuenta premium solo que con más funcionalidad y sin gastar ambrosia._
+_Es un script escrito en python que otorga la misma y mucha más funcinoalidad que pagar una cuenta premium, sin gastar ambrosia._
 
 ### Funcionalidades:
 
@@ -39,11 +39,15 @@ _Es como usar una cuenta premium solo que con más funcionalidad y sin gastar am
 
 9) Bot donador
 
-	Entra una vez al día y dona toda la madera disponible de todas las ciudades al bien de lujo o a los aserraderos
+	Entra una vez al día y dona toda la madera disponible de todas las ciudades al bien de lujo o a los aserraderos.
 
-Cuando uno setea una accion, la misma se realiza en un proceso de fondo, el cual va a correr hasta que termine o hasta que la computadora se apague.
+10) Actualizar IkaBot
 
-Uno puede entrar en la cuenta sin problemas aun si hay un proceso que esta accediendola periodicamente (subiendo un edificio por ejemplo).
+	Actualiza el programa haciendo un pull a este repositorio.
+
+Cuando uno setea una accion, la misma se realiza en un proceso de fondo, el cual va a correr hasta que termine o hasta que la computadora se apague o se mate el proceso.
+
+Uno puede entrar en la cuenta sin problemas aun si hay un proceso que esta accediendola periodicamente (subiendo un edificio, por ejemplo).
 
 ### Instalación:
 
@@ -63,6 +67,12 @@ https://www.python.org/download/releases/3.0/
 #### Requests
 Se encarga de realizar los post, gets y el manejo de las cookies.
 http://docs.python-requests.org/en/master/
+
+### Avanzado:
+
+Si existe un proceso de ikabot que identificamos con `ps aux | grep ika` podemos consesguir una descripción de lo que hace con `kill -SIGUSR1 <pid>`.
+
+### Windows
 
 Por el momento no funciona en windows, aunque si se tiene windows 10 se lo puede ejecutar en el bash de ubuntu.
 
