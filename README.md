@@ -1,6 +1,6 @@
-## ikabot
+## ikabot ~ Ikariam Bot
 
-_Es un script escrito en python que otorga la misma y mucha más funcinoalidad que pagar una cuenta premium, sin gastar ambrosia._
+_Es un script escrito en python que otorga la misma y mucha más funcinoalidad que pagar una cuenta premium en ikariam, sin gastar ambrosia._
 
 ### Funcionalidades:
 
