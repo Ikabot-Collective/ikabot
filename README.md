@@ -70,7 +70,7 @@ http://docs.python-requests.org/en/master/
 
 ### Avanzado:
 
-Si existe un proceso de ikabot que identificamos con `ps aux | grep ika` podemos consesguir una descripción de lo que hace con `kill -SIGUSR1 <pid>`.
+Si existe un proceso de ikabot que identificamos con `ps aux | grep ikabot` podemos consesguir una descripción de lo que hace con `kill -SIGUSR1 <pid>`.
 
 ### Windows
 
