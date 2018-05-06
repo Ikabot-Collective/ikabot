@@ -24,7 +24,7 @@ def telegramFileValido():
 
 def botValido(s):
 	if telegramFileValido():
-		return True:
+		return True
 	else:
 		print('Debe proporcionar las credenciales válidas para comunicarse por telegram.')
 		print('Se requiere del token del bot a utilizar y de su chat_id')
