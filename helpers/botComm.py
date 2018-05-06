@@ -3,7 +3,7 @@
 
 import re
 import random
-from config
+import config
 from web.sesion import get
 from helpers.pedirInfo import read
 from helpers.gui import enter
