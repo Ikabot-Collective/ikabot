@@ -63,10 +63,20 @@ y con el comando `ikabot` podran ejecutar el script.
 Para que ikabot funcione debe estar instalado python3 y el modulo externo requests
 #### Python 3
 Probablemente se encuentre instalado por defecto en su sistema.
+
 https://www.python.org/download/releases/3.0/
+
+#### Pip
+Es una tool para instalar paquetes de python.
+Para instalarlo bajen _get-pip.py_ desde https://pip.pypa.io/en/stable/installing/ 
+y corran `python3 get-pip.py`
+
 #### Requests
 Se encarga de realizar los post, gets y el manejo de las cookies.
+Para instalarlo `pip3 install requests`
+
 http://docs.python-requests.org/en/master/
+
 
 ### Avanzado:
 
