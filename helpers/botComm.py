@@ -4,6 +4,7 @@
 import re
 import random
 from config import *
+from config import infoUser
 from web.sesion import get
 from helpers.pedirInfo import read
 from helpers.gui import enter
