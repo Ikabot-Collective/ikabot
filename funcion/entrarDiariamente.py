@@ -25,6 +25,6 @@ def entrarDiariamente(s):
 			s.get()
 			time.sleep(24*60*60)
 	except:
-		msg = 'Ya no se entrará todos los días.\n{}'.format(traceback.format_exc())
+		msg = 'Error en:\n{}\nCausa:\n{}'.format(info, traceback.format_exc())
 		sendToBot(s, msg)
 		s.logout()

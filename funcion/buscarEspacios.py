@@ -69,6 +69,6 @@ def buscarEspacios(s):
 				ciudades_espacios_dict[idIsla] = (ciudades, espacios)
 			time.sleep(1*60*60)
 	except:
-		msg = 'Ya no se buscarán más espacios.\n{}'.format(traceback.format_exc())
+		msg = 'Error en:\n{}\nCausa:\n{}'.format(info, traceback.format_exc())
 		sendToBot(s, msg)
 		s.logout()
