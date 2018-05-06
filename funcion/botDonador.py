@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import time
+import traceback
 from config import *
 from helpers.botComm import *
 from helpers.pedirInfo import *
