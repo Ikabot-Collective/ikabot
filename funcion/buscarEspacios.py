@@ -3,6 +3,7 @@
 
 import time
 import traceback
+from config import urlIsla
 from helpers.botComm import *
 from helpers.gui import enter
 from helpers.signals import setInfoSignal
