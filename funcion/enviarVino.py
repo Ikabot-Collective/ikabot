@@ -1,6 +1,8 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import traceback
+from helpers.botComm import *
 from helpers.pedirInfo import *
 from helpers.signals import setInfoSignal
 from helpers.getJson import getCiudad
@@ -81,5 +83,11 @@ def enviarVino(s):
 		ciudadD = getCiudad(html)
 		info = info + '{} -> {}\nVino: {}\n'.format(ciudadO['cityName'], ciudadD['cityName'], addPuntos(vn))
 	setInfoSignal(s, info)
-	planearViajes(s, rutas)
-	s.logout()
+	try:
+		planearViajes(s, rutas)
+	except:
+		if telegramFileValido():
+			msg = 'Error en:\n{}\nCausa:\n{}'.format(info, traceback.format_exc())
+			sendToBot(s, msg)
+	finally:
+		s.logout()

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import time
+import traceback
 from config import *
 from helpers.botComm import *
 from helpers.pedirInfo import *
@@ -17,7 +18,7 @@ def botDonador(s):
 	print('¿Donar a aserraderos o a bienes de cambio? [a/b]')
 	rta = read(values=['a', 'A', 'b', 'B'])
 	tipo = 'resource' if rta.lower() == 'a' else 'tradegood'
-	print('Se donará compulsivamente cada día.')
+	print('Se donará todos los días.')
 	enter()
 
 	forkear(s)
@@ -41,6 +42,6 @@ def botDonador(s):
 				s.post(payloadPost={'islandId': idIsla, 'type': tipo, 'action': 'IslandScreen', 'function': 'donate', 'donation': madera, 'backgroundView': 'island', 'templateView': 'resource', 'actionRequest': s.token(), 'ajax': '1'})
 			time.sleep(24*60*60)
 	except:
-		msg = 'Ya no se donará.\n{}'.format(traceback.format_exc())
+		msg = 'Error en:\n{}\nCausa:\n{}'.format(info, traceback.format_exc())
 		sendToBot(s, msg)
 		s.logout()

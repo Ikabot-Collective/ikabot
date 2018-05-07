@@ -1,6 +1,6 @@
-## ikabot
+## ikabot ~ Ikariam Bot
 
-_Es un script escrito en python que otorga la misma y mucha más funcinoalidad que pagar una cuenta premium, sin gastar ambrosia._
+_Es un script escrito en python que otorga la misma y mucha más funcinoalidad que pagar una cuenta premium en ikariam, sin gastar ambrosia._
 
 ### Funcionalidades:
 
@@ -63,14 +63,24 @@ y con el comando `ikabot` podran ejecutar el script.
 Para que ikabot funcione debe estar instalado python3 y el modulo externo requests
 #### Python 3
 Probablemente se encuentre instalado por defecto en su sistema.
+
 https://www.python.org/download/releases/3.0/
+
+#### Pip
+Es una tool para instalar paquetes de python.
+Para instalarlo bajen _get-pip.py_ desde https://pip.pypa.io/en/stable/installing/ 
+y corran `python3 get-pip.py`
+
 #### Requests
 Se encarga de realizar los post, gets y el manejo de las cookies.
+Para instalarlo `pip3 install requests`
+
 http://docs.python-requests.org/en/master/
+
 
 ### Avanzado:
 
-Si existe un proceso de ikabot que identificamos con `ps aux | grep ika` podemos consesguir una descripción de lo que hace con `kill -SIGUSR1 <pid>`.
+Si existe un proceso de ikabot que identificamos con `ps aux | grep ikabot` podemos consesguir una descripción de lo que hace con `kill -SIGUSR1 <pid>`.
 
 ### Windows
 

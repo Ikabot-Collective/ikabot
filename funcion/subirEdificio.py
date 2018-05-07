@@ -3,7 +3,9 @@
 
 import time
 import re
+import traceback
 from config import *
+from helpers.botComm import *
 from helpers.pedirInfo import *
 from helpers.getJson import getCiudad
 from helpers.varios import addPuntos
@@ -116,6 +118,12 @@ def subirEdificios(s):
 	info = info + 'Ciudad: {}\nEdificio: {}'.format(ciudad['cityName'], ciudad['position'][edificios[0]]['name'])
 
 	setInfoSignal(s, info)
-	for edificio in edificios:
-		subirEdificio(s, idCiudad, edificio)
-	s.logout()
+	try:
+		for edificio in edificios:
+			subirEdificio(s, idCiudad, edificio)
+	except:
+		if telegramFileValido():
+			msg = 'Error en:\n{}\nCausa:\n{}'.format(info, traceback.format_exc())
+			sendToBot(s, msg)
+	finally:
+		s.logout()
