@@ -37,6 +37,6 @@ def alertarAtaques(s):
 				fueAvisado = False
 			time.sleep(15*60)
 	except:
-		msg = 'Ya no se alertarán más ataques.\n{}'.format(traceback.format_exc())
+		msg = 'Error en:\n{}\nCausa:\n{}'.format(info, traceback.format_exc())
 		sendToBot(s, msg)
 		s.logout()

@@ -1,6 +1,8 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import traceback
+from helpers.botComm import *
 from helpers.gui import *
 from helpers.pedirInfo import *
 from helpers.planearViajes import planearViajes
@@ -94,5 +96,11 @@ def menuRutaComercial(s):
 		info = info + '{} -> {}\nMadera: {} Vino: {} Marmol: {} Cristal: {} Azufre: {}\n'.format(ciudadO['cityName'], ciudadD['cityName'], addPuntos(md), addPuntos(vn), addPuntos(mr), addPuntos(cr), addPuntos(az))
 
 	setInfoSignal(s, info)
-	planearViajes(s, rutas)
-	s.logout()
+	try:
+		planearViajes(s, rutas)
+	except:
+		if telegramFileValido():
+			msg = 'Error en:\n{}\nCausa:\n{}'.format(info, traceback.format_exc())
+			sendToBot(s, msg)
+	finally:
+		s.logout()
