@@ -82,6 +82,25 @@ http://docs.python-requests.org/en/master/
 
 Si existe un proceso de ikabot que identificamos con `ps aux | grep ikabot` podemos consesguir una descripción de lo que hace con `kill -SIGUSR1 <pid>`.
 
+### Telegram
+
+Algunas funcionalidades (como alertar ataques) se comunican con usted mediante mensajes de Telegram.
+
+Los mensajes que le envia son solo visible por usted y nadie más.
+
+Para poder disfrutar de esta funcionalidad, son necesarios dos datos:
+
+1) El token del bot a utilizar
+
+	Si quiere utilizar el bot 'oficial' de ikabot busque con la lupa a @DaHackerBot, hablele y verá que se manda un /start.
+	Cuando el programa le pida que ingrese el token, use el siguiente: `409993506:AAFwjxfazzx6ZqYusbmDJiARBTl_Zyb_Ue4`.
+	Si quiere usar su propio bot, lo puede crear con las siguientes instrucciones: https://core.telegram.org/bots.
+2) Su chat_id
+
+	Este identificador es único de cada usuario y lo puede conocer hablandole por telegram a @get_id_bot (el que tiene un arco de foto).
+
+Cuando sean necesarios estos datos,(como al ingresar al item Alertar ataques en el menu) el programa se los pedirá y una vez ingresados, se guardaran en un archivo y no se volveran a pedir.
+
 ### Windows
 
 Por el momento no funciona en windows, aunque si se tiene windows 10 se lo puede ejecutar en el bash de ubuntu.
