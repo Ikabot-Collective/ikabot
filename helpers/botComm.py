@@ -28,13 +28,13 @@ def botValido(s):
 	else:
 		print('Debe proporcionar las credenciales válidas para comunicarse por telegram.')
 		print('Se requiere del token del bot a utilizar y de su chat_id')
-		print('El token se le proporciona al momento de crear el bot, para averiguar su chat_id, hablele por telegram a @get_id_bot')
+		print('Para más informacion sobre como obtenerlos vea al readme de https://github.com/santipcn/ikabot')
 		rta = read(msg='¿Porporcionará las credenciales ahora? [y/N]', values=['y','Y','n', 'N', ''])
 		if rta.lower() != 'y':
 			return False
 		else:
 			botToken = read(msg='Token del bot:')
-			chat_id = read(msg='Char_id:')
+			chat_id = read(msg='Chat_id:')
 			with open(config.telegramFile, 'w') as filehandler:
 				filehandler.write(botToken + '\n' + chat_id)
 			rand = random.randint(1000, 9999)
