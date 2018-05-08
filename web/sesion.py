@@ -5,7 +5,7 @@ import sys
 try:
 	import requests
 except ImportError:
-	sys.exit('Debe instalar el modulo de requests:\nsudo pip install requests')
+	sys.exit('Debe instalar el modulo de requests:\nsudo pip3 install requests')
 import os
 import time
 import re
