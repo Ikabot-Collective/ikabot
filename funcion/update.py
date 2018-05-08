@@ -13,5 +13,5 @@ def update(s):
 		print('Actualizando...\n')
 		print(out)
 		print('Listo.')
-		print('Reinicie el preceso para que los cambios surjan efecto.')
+		print('Reinicie el proceso para que los cambios surjan efecto.')
 	enter()
