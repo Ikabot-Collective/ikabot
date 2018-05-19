@@ -31,7 +31,8 @@ def menu(s):
 					entrarDiariamente, 
 					alertarAtaques, 
 					botDonador, 
-					update]
+					update
+					]
 	mnu="""
 (0)  Salir
 (1)  Lista de construcción
