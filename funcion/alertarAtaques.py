@@ -19,7 +19,7 @@ def alertarAtaques(s):
 	if s.padre is True:
 		return
 
-	info = '\nEspero por ataques cada 29 minutos\n'
+	info = '\nEspero por ataques cada 15 minutos\n'
 	setInfoSignal(s, info)
 	fueAvisado = False
 	try:
