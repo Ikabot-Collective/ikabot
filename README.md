@@ -54,7 +54,7 @@ Uno puede entrar en la cuenta sin problemas aun si hay un proceso que esta acced
 simplemente ejecuten
 
 	git clone https://github.com/santipcn/ikabot.git ~
-	sudo sh -c "echo \"python3 ~/ikabot" > /bin/ikabot" && sudo chmod +x /bin/ikabot
+	sudo sh -c "echo 'python3 ~/ikabot' > /bin/ikabot" && sudo chmod +x /bin/ikabot
 	
 y con el comando `ikabot` podran ejecutar el script.
 
