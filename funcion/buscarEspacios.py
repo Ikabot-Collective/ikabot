@@ -37,36 +37,36 @@ def buscarEspacios(s):
 						espacios += 1
 					else:
 						ciudades.append(city)
+
 				if idIsla in ciudades_espacios_dict:
-					lugaresAntes = ciudades_espacios_dict[idIsla][1]
+					espaciosAntes = ciudades_espacios_dict[idIsla][1]
 					ciudadesAntes = ciudades_espacios_dict[idIsla][0]
 					ciudadesAhora = isla['cities']
-					if lugaresAntes < espacios:
+
+					if espaciosAntes < espacios:
 						# alguien desaparecio
 						for cityAntes in ciudadesAntes:
-							encontro = False
+							encontrado = False
 							for cityAhora in ciudadesAhora:
 								if cityAhora['type'] != 'empty' and cityAhora['id'] == cityAntes['id']:
-									encontro = True
+									encontrado = True
 									break
-							if encontro is False:
-								desaparecio = cityAntes
-								break
-						msg = '{} desapareció en {} {}:{} {}'.format(desaparecio['Name'], tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
-						sendToBot(s, msg)
-					if lugaresAntes > espacios:
+							if encontrado is False:
+								msg = 'la ciudad {} del jugador {} desapareció en {} {}:{} {}'.format(cityAntes['name'], cityAntes['Name'], tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
+								sendToBot(s, msg)
+
+					if espaciosAntes > espacios:
 						# alguien fundo
 						for cityAhora in ciudadesAhora:
-							encontro = False
+							encontrado = False
 							for cityAntes in ciudadesAntes:
 								if cityAhora['type'] != 'empty' and cityAhora['id'] == cityAntes['id']:
-									encontro = True
+									encontrado = True
 									break
-							if encontro is False:
-								fundo = cityAhora
-								break
-						msg = '{} fundó en {} {}:{} {}'.format(fundo['Name'], tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
-						sendToBot(s, msg)
+							if encontrado is False:
+								msg = '{} fundó la ciudad {} en {} {}:{} {}'.format(cityAhora['Name'], cityAhora['name'], tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
+								sendToBot(s, msg)
+
 				ciudades_espacios_dict[idIsla] = (ciudades, espacios)
 			time.sleep(1*60*60)
 	except:
