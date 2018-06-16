@@ -41,14 +41,13 @@ def buscarEspacios(s):
 				if idIsla in ciudades_espacios_dict:
 					espaciosAntes = ciudades_espacios_dict[idIsla][1]
 					ciudadesAntes = ciudades_espacios_dict[idIsla][0]
-					ciudadesAhora = isla['cities']
 
 					if espaciosAntes < espacios:
 						# alguien desaparecio
 						for cityAntes in ciudadesAntes:
 							encontrado = False
-							for cityAhora in ciudadesAhora:
-								if cityAhora['type'] != 'empty' and cityAhora['id'] == cityAntes['id']:
+							for ciudad in ciudades:
+								if ciudad['id'] == cityAntes['id']:
 									encontrado = True
 									break
 							if encontrado is False:
@@ -57,10 +56,10 @@ def buscarEspacios(s):
 
 					if espaciosAntes > espacios:
 						# alguien fundo
-						for cityAhora in ciudadesAhora:
+						for ciudad in ciudades:
 							encontrado = False
 							for cityAntes in ciudadesAntes:
-								if cityAhora['type'] != 'empty' and cityAhora['id'] == cityAntes['id']:
+								if ciudad['id'] == cityAntes['id']:
 									encontrado = True
 									break
 							if encontrado is False:
