@@ -49,14 +49,21 @@ Cuando uno setea una accion, la misma se realiza en un proceso de fondo, el cual
 
 Uno puede entrar en la cuenta sin problemas aun si hay un proceso que esta accediendola periodicamente (subiendo un edificio, por ejemplo).
 
-### Instalación:
+### Instalar:
 
 simplemente ejecuten
 
-	git clone https://github.com/santipcn/ikabot.git ~
-	sudo sh -c "echo 'python3 ~/ikabot' > /bin/ikabot" && sudo chmod +x /bin/ikabot
+	sudo git clone https://github.com/santipcn/ikabot.git /opt/ikabot
+	sudo sh -c "echo 'python3 /opt/ikabot' > /bin/ikabot" && sudo chmod +x /bin/ikabot
 	
 y con el comando `ikabot` podran ejecutar el script.
+
+### Desinstalar
+
+simplemente ejecuten
+
+	sudo rm -rf /opt/ikabot
+	sudo rm /bin/ikabot
 
 ### Dependencias:
 
