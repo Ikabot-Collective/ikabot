@@ -58,7 +58,7 @@ simplemente ejecuten
 	
 y con el comando `ikabot` podran ejecutar el script.
 
-### Desinstalar
+### Desinstalar:
 
 simplemente ejecuten
 
@@ -111,7 +111,7 @@ Cuando sean necesarios estos datos,(como al ingresar al item _(8) Alertar ataque
 
 Si existe un proceso de ikabot que identificamos con `ps aux | grep ikabot` podemos consesguir una descripción de lo que hace con `kill -SIGUSR1 <pid>`.
 
-### Windows
+### Windows:
 
-Por el momento no funciona en windows, aunque si se tiene windows 10 se lo puede ejecutar en el bash de ubuntu.
+Por el momento no funciona en windows, aunque si se tiene windows 10, se lo puede ejecutar en el bash de ubuntu.
 
