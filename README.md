@@ -1,6 +1,6 @@
 ## ikabot ~ Ikariam Bot
 
-_Es un script escrito en python que otorga la misma y mucha más funcinoalidad que pagar una cuenta premium en ikariam, sin gastar ambrosia._
+_Es un script escrito en python que otorga la misma y mucha más funcinoalidad que una cuenta premium en ikariam, ¡sin gastar ambrosia!_
 
 ### Funcionalidades:
 
@@ -49,14 +49,21 @@ Cuando uno setea una accion, la misma se realiza en un proceso de fondo, el cual
 
 Uno puede entrar en la cuenta sin problemas aun si hay un proceso que esta accediendola periodicamente (subiendo un edificio, por ejemplo).
 
-### Instalación:
+### Instalar:
 
 simplemente ejecuten
 
-	git clone https://github.com/santipcn/ikabot.git ~
-	sudo sh -c "echo \"python3 ~/ikabot" > /bin/ikabot" && sudo chmod +x /bin/ikabot
+	sudo git clone https://github.com/santipcn/ikabot.git /opt/ikabot
+	sudo sh -c "echo 'python3 /opt/ikabot' > /bin/ikabot" && sudo chmod +x /bin/ikabot
 	
 y con el comando `ikabot` podran ejecutar el script.
+
+### Desinstalar:
+
+simplemente ejecuten
+
+	sudo rm -rf /opt/ikabot
+	sudo rm /bin/ikabot
 
 ### Dependencias:
 
@@ -104,7 +111,7 @@ Cuando sean necesarios estos datos,(como al ingresar al item _(8) Alertar ataque
 
 Si existe un proceso de ikabot que identificamos con `ps aux | grep ikabot` podemos consesguir una descripción de lo que hace con `kill -SIGUSR1 <pid>`.
 
-### Windows
+### Windows:
 
-Por el momento no funciona en windows, aunque si se tiene windows 10 se lo puede ejecutar en el bash de ubuntu.
+Por el momento no funciona en windows, aunque si se tiene windows 10, se lo puede ejecutar en el bash de ubuntu.
 
