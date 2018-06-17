@@ -42,29 +42,27 @@ def buscarEspacios(s):
 					espaciosAntes = ciudades_espacios_dict[idIsla][1]
 					ciudadesAntes = ciudades_espacios_dict[idIsla][0]
 
-					if espaciosAntes < espacios:
-						# alguien desaparecio
-						for cityAntes in ciudadesAntes:
-							encontrado = False
-							for ciudad in ciudades:
-								if ciudad['id'] == cityAntes['id']:
-									encontrado = True
-									break
-							if encontrado is False:
-								msg = 'la ciudad {} del jugador {} desapareció en {} {}:{} {}'.format(cityAntes['name'], cityAntes['Name'], tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
-								sendToBot(s, msg)
-
-					if espaciosAntes > espacios:
-						# alguien fundo
+					# alguien desaparecio
+					for cityAntes in ciudadesAntes:
+						encontrado = False
 						for ciudad in ciudades:
-							encontrado = False
-							for cityAntes in ciudadesAntes:
-								if ciudad['id'] == cityAntes['id']:
-									encontrado = True
-									break
-							if encontrado is False:
-								msg = '{} fundó la ciudad {} en {} {}:{} {}'.format(cityAhora['Name'], cityAhora['name'], tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
-								sendToBot(s, msg)
+							if ciudad['id'] == cityAntes['id']:
+								encontrado = True
+								break
+						if encontrado is False:
+							msg = 'la ciudad {} del jugador {} desapareció en {} {}:{} {}'.format(cityAntes['name'], cityAntes['Name'], tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
+							sendToBot(s, msg)
+
+					# alguien fundo
+					for ciudad in ciudades:
+						encontrado = False
+						for cityAntes in ciudadesAntes:
+							if ciudad['id'] == cityAntes['id']:
+								encontrado = True
+								break
+						if encontrado is False:
+							msg = '{} fundó {} en {} {}:{} {}'.format(cityAhora['Name'], cityAhora['name'], tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
+							sendToBot(s, msg)
 
 				ciudades_espacios_dict[idIsla] = (ciudades, espacios)
 			time.sleep(1*60*60)
