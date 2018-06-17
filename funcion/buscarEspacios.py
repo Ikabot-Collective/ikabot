@@ -24,23 +24,19 @@ def buscarEspacios(s):
 	info = '\nBusco espacios nuevos en las islas cada 1 hora\n'
 	setInfoSignal(s, info)
 	idIslas = getIdsdeIslas(s)
-	ciudades_espacios_dict = {}
+	isla_ciudades = {}
 	try:
 		while True:
 			for idIsla in idIslas:
 				html = s.get(urlIsla + idIsla)
 				isla = getIsla(html)
-				espacios = 0
 				ciudades = []
-				for city in isla['cities']:
-					if city['type'] == 'empty':
-						espacios += 1
-					else:
-						ciudades.append(city)
+				for ciudad in isla['cities']:
+					if ciudad['type'] != 'empty':
+						ciudades.append(ciudad)
 
-				if idIsla in ciudades_espacios_dict:
-					espaciosAntes = ciudades_espacios_dict[idIsla][1]
-					ciudadesAntes = ciudades_espacios_dict[idIsla][0]
+				if idIsla in isla_ciudades:
+					ciudadesAntes = isla_ciudades[idIsla]
 
 					# alguien desaparecio
 					for cityAntes in ciudadesAntes:
@@ -64,7 +60,7 @@ def buscarEspacios(s):
 							msg = '{} fundó {} en {} {}:{} {}'.format(cityAhora['Name'], cityAhora['name'], tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
 							sendToBot(s, msg)
 
-				ciudades_espacios_dict[idIsla] = (ciudades, espacios)
+				isla_ciudades[idIsla] = ciudades
 			time.sleep(1*60*60)
 	except:
 		msg = 'Error en:\n{}\nCausa:\n{}'.format(info, traceback.format_exc())
