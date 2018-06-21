@@ -21,22 +21,25 @@ def alertarAtaques(s):
 
 	info = '\nEspero por ataques cada 15 minutos\n'
 	setInfoSignal(s, info)
-	fueAvisado = False
 	try:
-		while True:
-			html = s.get()
-			idCiudad = re.search(r'currentCityId:\s(\d+),', html).group(1)
-			url = 'view=militaryAdvisor&oldView=city&oldBackgroundView=city&backgroundView=city&currentCityId={}&actionRequest={}&ajax=1'.format(idCiudad, s.token())
-			posted = s.post(url)
-			ataque = re.search(r'"military":{"link":.*?","cssclass":"normalalert"', posted)
-			if ataque is not None and fueAvisado is False:
-				msg = 'Te están por atacar !!'
-				sendToBot(s, msg)
-				fueAvisado = True
-			elif ataque is None and fueAvisado is True:
-				fueAvisado = False
-			time.sleep(15*60)
+		do_it(s)
 	except:
 		msg = 'Error en:\n{}\nCausa:\n{}'.format(info, traceback.format_exc())
 		sendToBot(s, msg)
 		s.logout()
+
+def do_it(s):
+	fueAvisado = False
+	while True:
+		html = s.get()
+		idCiudad = re.search(r'currentCityId:\s(\d+),', html).group(1)
+		url = 'view=militaryAdvisor&oldView=city&oldBackgroundView=city&backgroundView=city&currentCityId={}&actionRequest={}&ajax=1'.format(idCiudad, s.token())
+		posted = s.post(url)
+		ataque = re.search(r'"military":{"link":.*?","cssclass":"normalalert"', posted)
+		if ataque is not None and fueAvisado is False:
+			msg = '¡Te están por atacar!'
+			sendToBot(s, msg)
+			fueAvisado = True
+		elif ataque is None and fueAvisado is True:
+			fueAvisado = False
+		time.sleep(15*60)

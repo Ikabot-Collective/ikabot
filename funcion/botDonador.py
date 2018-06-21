@@ -34,14 +34,17 @@ def botDonador(s):
 		ciudad = getCiudad(html)
 		ciudades_dict[idCiudad] = ciudad['islandId']
 	try:
-		while True:
-			for idCiudad in idsCiudades:
-				html = s.get(urlCiudad + idCiudad)
-				madera = getRecursosDisponibles(html)[0]
-				idIsla = ciudades_dict[idCiudad]
-				s.post(payloadPost={'islandId': idIsla, 'type': tipo, 'action': 'IslandScreen', 'function': 'donate', 'donation': madera, 'backgroundView': 'island', 'templateView': 'resource', 'actionRequest': s.token(), 'ajax': '1'})
-			time.sleep(24*60*60)
+		do_it(s, idsCiudades, ciudades_dict)
 	except:
 		msg = 'Error en:\n{}\nCausa:\n{}'.format(info, traceback.format_exc())
 		sendToBot(s, msg)
 		s.logout()
+
+def do_it(s, tipo, idsCiudades, ciudades_dict):
+	while True:
+		for idCiudad in idsCiudades:
+			html = s.get(urlCiudad + idCiudad)
+			madera = getRecursosDisponibles(html)[0]
+			idIsla = ciudades_dict[idCiudad]
+			s.post(payloadPost={'islandId': idIsla, 'type': tipo, 'action': 'IslandScreen', 'function': 'donate', 'donation': madera, 'backgroundView': 'island', 'templateView': 'resource', 'actionRequest': s.token(), 'ajax': '1'})
+		time.sleep(24*60*60)

@@ -25,13 +25,13 @@ def buscarEspacios(s):
 	setInfoSignal(s, info)
 	idIslas = getIdsdeIslas(s)
 	try:
-		searchIslas(s, idIslas)
+		do_it(s, idIslas)
 	except:
 		msg = 'Error en:\n{}\nCausa:\n{}'.format(info, traceback.format_exc())
 		sendToBot(s, msg)
 		s.logout()
 
-def searchIslas(s, idIslas):
+def do_it(s, idIslas):
 	isla_ciudades = {}
 	while True:
 		for idIsla in idIslas:
