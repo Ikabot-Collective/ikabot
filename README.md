@@ -6,15 +6,15 @@ _Es un script escrito en python que otorga la misma y mucha más funcinoalidad q
 
 1) Lista de construcción
 
-	Uno puede configurar que el script suba N niveles de un edificio cualquiera.
+	El usuario selecciona un edificio, la cantidad de niveles a subir, _ikabot_ calcula si se cuenta con los recursos suficientes y se encarga de subir la cantidad de niveles seleccionada.
 	
 2) Enviar recursos 
 
-	Enviar cualquier cantidad de recursos de una ciudad a otra. Por ejemplo uno puede mandar medio millón de madera de la ciudad A a la ciudad B y el script se encargara de hacer los envios necesarios
+	Sirve para enviar cualquier cantidad de recursos de una ciudad a otra. No importa la cantidad de barcos que tenga, _ikabot_ realizara la cantidad de viajes que sean necesarios.
 
 3) Enviar vino
 
-	Envia una cantidad igual de vino a todas las ciudades. Esto se hace solo una vez, por ende se recomienda mandar tanto como se pueda. La maxima cantidad a enviar se calcula automaticamente.
+	Sirve para enviar vino desde las ciudades en vino, a las ciudades que no están en vino. La cantidad máxima a enviar es igual a la cantidad total de vino que hay almacenado en ciudades en vino, dividido por la cantidad de ciudades que no están en vino.
 
 4) Estado de la cuenta
 
@@ -26,16 +26,15 @@ _Es un script escrito en python que otorga la misma y mucha más funcinoalidad q
 	
 6) Buscar espacios nuevos
 
-	Esta funcionalidad le envia un mensaje por telegram a uno si la cantidad de espacios disponible en cualquiera de sus islas varia (aumentando o disminuyendo).
-	
-	Para poder configurarlo, hay que tener la aplicacion de telegram y crear un bot.
+	Esta funcionalidad avisa por telegram, si una ciudad desapareció o si alguien fundó en cualquiera de las islas en donde el usuario tiene al menos una ciudad fundada.
 	
 7) Entrar diariamente
 
 	Para aquellos que no quieren que pase ni un dia sin que su cuenta inicie sesion.
+	
 8) Alertar ataques
 
-	Nos alerta por telegram si nos van a atacar, de manera similar que con 5., se necesita configurar telegram.
+	Nos alerta por telegram si nos van a atacar.
 
 9) Bot donador
 
@@ -44,19 +43,18 @@ _Es un script escrito en python que otorga la misma y mucha más funcinoalidad q
 10) Actualizar IkaBot
 
 	Actualiza el programa haciendo un pull a este repositorio.
+	
 
-Cuando uno setea una accion, la misma se realiza en un proceso de fondo, el cual va a correr hasta que termine o hasta que la computadora se apague o se mate el proceso.
-
-Uno puede entrar en la cuenta sin problemas aun si hay un proceso que esta accediendola periodicamente (subiendo un edificio, por ejemplo).
+Cuando uno configura una acción, puede entrar y jugar ikariam sin problemas. El único inconveniente que puede llegar a tener, es que la sesión expire, esto es normal y si sucede simplemente vuelva a entrar.
 
 ### Instalar:
 
-simplemente ejecuten
+ejecutar:
 
 	sudo git clone https://github.com/santipcn/ikabot.git /opt/ikabot
 	sudo sh -c "echo 'python3 /opt/ikabot' > /bin/ikabot" && sudo chmod +x /bin/ikabot
 	
-y con el comando `ikabot` podran ejecutar el script.
+con el comando `ikabot` podran acceder al menu de acciones.
 
 ### Desinstalar:
 
@@ -67,18 +65,19 @@ simplemente ejecuten
 
 ### Dependencias:
 
-Para que ikabot funcione debe estar instalado python3 y el modulo externo requests
-#### Python 3
+Para que _ikabot_ funcione debe estar instalado python3 y el modulo externo requests
+
+#### - Python 3
 Probablemente se encuentre instalado por defecto en su sistema.
 
 https://www.python.org/download/releases/3.0/
 
-#### Pip
+#### - Pip
 Es una tool para instalar paquetes de python.
 Para instalarlo bajen _get-pip.py_ desde https://pip.pypa.io/en/stable/installing/ 
 y corran `python3 get-pip.py`
 
-#### Requests
+#### - Requests
 Se encarga de realizar los post, gets y el manejo de las cookies.
 Para instalarlo `pip3 install requests`
 
@@ -96,7 +95,7 @@ Para poder disfrutar de esta funcionalidad, son necesarios dos datos:
 
 	Si quiere utilizar el bot 'oficial' de ikabot, entre en Telegram y busque con la lupa a @DaHackerBot, háblele y verá que se manda un /start.
 	
-	Luego, cuando el programa le pida que ingrese el token del bot, use el siguiente: `409993506:AAFwjxfazzx6ZqYusbmDJiARBTl_Zyb_Ue4`.
+	Luego, cuando _ikabot_ le pida que ingrese el token del bot, use el siguiente: `409993506:AAFwjxfazzx6ZqYusbmDJiARBTl_Zyb_Ue4`.
 	
 	Si quiere usar su propio bot, lo puede crear con las siguientes instrucciones: https://core.telegram.org/bots.
 
