@@ -16,7 +16,7 @@ def setSignalsHandlers(s):
 		signal.signal(sgn, create_handler(s))
 
 def setInfoSignal(s, info): # el proceso explica su funcion por stdout
-	info = 'información del proceso {}\n{}\n{}'.format(os.getpid(), s.urlBase, s.username) + info
+	info = 'información del proceso {}:\n{}'.format(os.getpid(), info)
 	isValid = telegramFileValido()
 	def _sendInfo(signum, frame):
 		if isValid:
