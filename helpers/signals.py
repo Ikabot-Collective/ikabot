@@ -1,7 +1,9 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import os
 import signal
+from helpers.botComm import *
 
 def create_handler(s):
 	def _handler(signum, frame):
@@ -14,7 +16,9 @@ def setSignalsHandlers(s):
 		signal.signal(sgn, create_handler(s))
 
 def setInfoSignal(s, info): # el proceso explica su funcion por stdout
-	info = '{}\n{}'.format(s.urlBase, s.username) + info
-	def _printInfo(signum, frame):
-		print(info)
-	signal.signal(signal.SIGUSR1, _printInfo) # kill -SIGUSR1 pid
+	info = 'información del proceso {}\n{}\n{}'.format(os.getpid(), s.urlBase, s.username) + info
+	isValid = telegramFileValido()
+	def _sendInfo(signum, frame):
+		if isValid:
+			sendToBot(s, info)
+	signal.signal(signal.SIGUSR1, _sendInfo) # kill -SIGUSR1 pid
