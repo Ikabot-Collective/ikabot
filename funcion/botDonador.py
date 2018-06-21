@@ -34,7 +34,7 @@ def botDonador(s):
 		ciudad = getCiudad(html)
 		ciudades_dict[idCiudad] = ciudad['islandId']
 	try:
-		do_it(s, idsCiudades, ciudades_dict)
+		do_it(s, tipo, idsCiudades, ciudades_dict)
 	except:
 		msg = 'Error en:\n{}\nCausa:\n{}'.format(info, traceback.format_exc())
 		sendToBot(s, msg)
