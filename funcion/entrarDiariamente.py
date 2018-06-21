@@ -21,10 +21,13 @@ def entrarDiariamente(s):
 	info = '\nEntro diariamente\n'
 	setInfoSignal(s, info)
 	try:
-		while True:
-			s.get()
-			time.sleep(24*60*60)
+		do_it(s)
 	except:
 		msg = 'Error en:\n{}\nCausa:\n{}'.format(info, traceback.format_exc())
 		sendToBot(s, msg)
 		s.logout()
+
+def do_it(s):
+	while True:
+		s.get()
+		time.sleep(24*60*60)
