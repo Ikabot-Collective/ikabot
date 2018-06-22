@@ -41,11 +41,15 @@ def menuRutaComercial(s):
 				resto = (resto[0] - md, resto[1] - vn, resto[2] - mr, resto[3] - cr, resto[4] - az)
 		print('Madera {} Vino {} Marmol {} Cristal {} Azufre {}'.format(addPuntos(resto[0]), addPuntos(resto[1]), addPuntos(resto[2]), addPuntos(resto[3]), addPuntos(resto[4])))
 		print('Enviar:')
-		md = pedirValor('Madera: ', resto[0])
-		vn = pedirValor('Vino:   ', resto[1])
-		mr = pedirValor('Marmol: ', resto[2])
-		cr = pedirValor('Cristal:', resto[3])
-		az = pedirValor('Azufre: ', resto[4])
+		try:
+			md = pedirValor(' Madera:', resto[0])
+			vn = pedirValor('   Vino:', resto[1])
+			mr = pedirValor(' Marmol:', resto[2])
+			cr = pedirValor('Cristal:', resto[3])
+			az = pedirValor(' Azufre:', resto[4])
+		except KeyboardInterrupt:
+			idCiudadOrigen = None
+			continue
 		if md + vn + mr + cr + az == 0:
 			idCiudadOrigen = None
 			continue
