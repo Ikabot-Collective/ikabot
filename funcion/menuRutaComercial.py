@@ -26,7 +26,7 @@ def menuRutaComercial(s):
 			total = list(map(int, max))
 		banner()
 		print('Ciudad de destino')
-		idCiudadDestino = getIdCiudad(s)
+		idCiudadDestino = getIdCiudad(s, ajenas=True)
 		if idCiudadOrigen == idCiudadDestino:
 			continue
 		htmlD = s.get(urlCiudad + idCiudadDestino)
