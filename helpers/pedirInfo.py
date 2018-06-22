@@ -6,8 +6,8 @@ import re
 import json
 from config import *
 from decimal import *
-from helpers.getJson import getCiudad
-from helpers.gui import banner
+from helpers.getJson import *
+from helpers.gui import *
 
 getcontext().prec = 30
 
@@ -39,7 +39,7 @@ def read(min=None, max=None, digit=False, msg=prompt, values=None): # lee input 
 		return _invalido()
 	return leido
 
-def getIdCiudad(s):
+def getIdCiudad(s, ajenas=False):
 	(ids, ciudades) = getIdsDeCiudades(s)
 	maxNombre = 0
 	for unId in ids:
@@ -50,6 +50,8 @@ def getIdCiudad(s):
 	bienes = {'1': '(V)', '2': '(M)', '3': '(C)', '4': '(A)'}
 	prints = []
 	i = 0
+	if ajenas:
+		print(' 0: ciudad ajena')
 	for unId in ids:
 		i += 1
 		tradegood = ciudades[unId]['tradegood']
@@ -57,9 +59,46 @@ def getIdCiudad(s):
 		nombre = ciudades[unId]['name']
 		num = ' ' + str(i) if i < 10 else str(i)
 		print('{}: {}{}{}'.format(num, nombre, pad(nombre), bien))
-	eleccion = read(min=1, max=i)
+	if ajenas:
+		eleccion = read(min=0, max=i)
+	else:
+		eleccion = read(min=1, max=i)
+	if eleccion == 0:
+		return getIdCiudadAjena(s)
 	eleccion = int(eleccion) - 1
 	return ids[eleccion]
+
+def getIdCiudadAjena(s):
+	banner()
+	x = read(msg='coordenada x:', digit=True)
+	y = read(msg='coordenada y:', digit=True)
+	print('')
+	url = 'view=worldmap_iso&islandX={}&islandY={}&oldBackgroundView=island&islandWorldviewScale=1'.format(x, y)
+	html = s.get(url)
+	jsonIslas = re.search(r'jsonData = \'(.*?)\';', html).group(1)
+	jsonIslas = json.loads(jsonIslas, strict=False)
+	try:
+		idIsla = jsonIslas['data'][str(x)][str(y)][0]
+	except TypeError:
+		print('Coordenadas incorrectas')
+		enter()
+		banner()
+		return getIdCiudad(s, ajenas=True)
+	html = s.get(urlIsla + idIsla)
+	isla = getIsla(html)
+	opciones = []
+	i = 0
+	for ciudad in isla['cities']:
+		if ciudad['type'] == 'city' and ciudad['state'] != 'vacation' and ciudad['Name'] != s.username:
+			i += 1
+			print('{:d}: {} ({})'.format(i, ciudad['name'], ciudad['Name']))
+			opciones.append(ciudad)
+	if i == 0:
+		print('La isla está vacia')
+		enter()
+		return getIdCiudad(s, ajenas=True)
+	eleccion = read(min=1, max=i)
+	return opciones[eleccion - 1]['id']
 
 def getEdificios(s, idCiudad):
 	html = s.get(urlCiudad + idCiudad)
