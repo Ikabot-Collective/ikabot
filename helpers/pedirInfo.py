@@ -75,23 +75,30 @@ def getIdCiudadAjena(s):
 	print('')
 	url = 'view=worldmap_iso&islandX={}&islandY={}&oldBackgroundView=island&islandWorldviewScale=1'.format(x, y)
 	html = s.get(url)
-	jsonIslas = re.search(r'jsonData = \'(.*?)\';', html).group(1)
-	jsonIslas = json.loads(jsonIslas, strict=False)
 	try:
+		jsonIslas = re.search(r'jsonData = \'(.*?)\';', html).group(1)
+		jsonIslas = json.loads(jsonIslas, strict=False)
 		idIsla = jsonIslas['data'][str(x)][str(y)][0]
-	except TypeError:
+	except:
 		print('Coordenadas incorrectas')
 		enter()
 		banner()
 		return getIdCiudad(s, ajenas=True)
 	html = s.get(urlIsla + idIsla)
 	isla = getIsla(html)
-	opciones = []
-	i = 0
+	maxNombre = 0
 	for ciudad in isla['cities']:
-		if ciudad['type'] == 'city' and ciudad['state'] != 'vacation' and ciudad['Name'] != s.username:
+		if ciudad['type'] == 'city':
+			largo = len(ciudad['name'])
+			if largo > maxNombre:
+				maxNombre = largo
+	pad = lambda name: ' ' * (maxNombre - len(name) + 2)
+	i = 0
+	opciones = []
+	for ciudad in isla['cities']:
+		if ciudad['type'] == 'city' and ciudad['state'] == '' and ciudad['Name'] != s.username:
 			i += 1
-			print('{:d}: {} ({})'.format(i, ciudad['name'], ciudad['Name']))
+			print('{:d}: {}{}({})'.format(i, ciudad['name'], pad(ciudad['name']), ciudad['Name']))
 			opciones.append(ciudad)
 	if i == 0:
 		print('La isla está vacia')
