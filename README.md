@@ -10,7 +10,7 @@ _Es un script escrito en python que otorga la misma y mucha más funcinoalidad q
 	
 2) Enviar recursos 
 
-	Sirve para enviar cualquier cantidad de recursos de una ciudad a otra. No importa la cantidad de barcos que tenga, _ikabot_ realizara la cantidad de viajes que sean necesarios.
+	Sirve para enviar cualquier cantidad de recursos de una ciudad a otra. No importa la cantidad de barcos que tenga, _ikabot_ realizara la cantidad de viajes que sean necesarios. La ciudad de destino puede ser propia o de otros jugadores.
 
 3) Enviar vino
 
