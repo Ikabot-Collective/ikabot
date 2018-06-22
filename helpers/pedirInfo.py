@@ -102,7 +102,7 @@ def getIdCiudadAjena(s):
 			print('{}: {}{}({})'.format(num, ciudad['name'], pad(ciudad['name']), ciudad['Name']))
 			opciones.append(ciudad)
 	if i == 0:
-		print('La isla está vacia')
+		print('No hay ciudades donde enviar recursos en esta isla')
 		enter()
 		return getIdCiudad(s, ajenas=True)
 	eleccion = read(min=1, max=i)
