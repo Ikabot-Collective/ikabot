@@ -98,7 +98,8 @@ def getIdCiudadAjena(s):
 	for ciudad in isla['cities']:
 		if ciudad['type'] == 'city' and ciudad['state'] == '' and ciudad['Name'] != s.username:
 			i += 1
-			print('{:d}: {}{}({})'.format(i, ciudad['name'], pad(ciudad['name']), ciudad['Name']))
+			num = ' ' + str(i) if i < 10 else str(i)
+			print('{}: {}{}({})'.format(num, ciudad['name'], pad(ciudad['name']), ciudad['Name']))
 			opciones.append(ciudad)
 	if i == 0:
 		print('La isla está vacia')
