@@ -52,6 +52,8 @@ def getIdCiudad(s, ajenas=False):
 	i = 0
 	if ajenas:
 		print(' 0: ciudad ajena')
+	else:
+		print('')
 	for unId in ids:
 		i += 1
 		tradegood = ciudades[unId]['tradegood']
@@ -65,8 +67,8 @@ def getIdCiudad(s, ajenas=False):
 		eleccion = read(min=1, max=i)
 	if eleccion == 0:
 		return getIdCiudadAjena(s)
-	eleccion = int(eleccion) - 1
-	return ids[eleccion]
+	else:
+		return ids[eleccion - 1]
 
 def getIdCiudadAjena(s):
 	banner()
