@@ -78,11 +78,7 @@ def menuRutaComercial(s):
 			rta = read()
 			otroViaje = rta.lower() == 'y'
 			if otroViaje is True:
-				print('¿Misma ciudad de origen? [Y/n]')
-				rta = read()
-				ciudadDistinta = rta.lower() == 'n'
-				if ciudadDistinta is True:
-					idCiudadOrigen = None
+				idCiudadOrigen = None
 			else:
 				break
 
