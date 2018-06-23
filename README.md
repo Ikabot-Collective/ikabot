@@ -95,9 +95,9 @@ Para configurarlo necesitaremos simplemente ingresar dos datos:
 
 1) El token del bot a utilizar
 
-	Si quiere utilizar el bot 'oficial' de ikabot, entre en Telegram y busque con la lupa a @DaHackerBot, háblele y verá que se manda un /start.
+	Si quiere utilizar el bot 'oficial' de _ikabot_, entre en Telegram y busque con la lupa a @DaHackerBot, háblele y verá que se manda un /start. Una vez hecho esto puede cerrar Telegram.
 	
-	Luego, cuando _ikabot_ le peda que ingrese el token del bot, use el siguiente: `409993506:AAFwjxfazzx6ZqYusbmDJiARBTl_Zyb_Ue4`.
+	Luego, cuando _ikabot_ le pida que ingrese el token del bot, use el siguiente: `409993506:AAFwjxfazzx6ZqYusbmDJiARBTl_Zyb_Ue4`.
 	
 	Si quiere usar su propio bot, lo puede crear con las siguientes instrucciones: https://core.telegram.org/bots.
 
