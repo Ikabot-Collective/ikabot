@@ -65,7 +65,7 @@ simplemente ejecuten
 
 ### Dependencias:
 
-Para que _ikabot_ funcione debe estar instalado python3 y el modulo externo requests
+Para que _ikabot_ funcione debe estar instalado python3 y el modulo externo requests. Se debe correr sobre **Linux**, por el momento no funciona en **Windows**.
 
 #### - Python 3
 Probablemente se encuentre instalado por defecto en su sistema.
@@ -73,13 +73,13 @@ Probablemente se encuentre instalado por defecto en su sistema.
 https://www.python.org/download/releases/3.0/
 
 #### - Pip
-Es una tool para instalar paquetes de python.
-Para instalarlo bajen _get-pip.py_ desde https://pip.pypa.io/en/stable/installing/ 
-y corran `python3 get-pip.py`
+Es una herramienta para instalar paquetes de python.
+Para instalarlo hay que bajar el archivo _get-pip.py_ de https://pip.pypa.io/en/stable/installing/ 
+y correr `python3 get-pip.py`
 
 #### - Requests
 Se encarga de realizar los post, gets y el manejo de las cookies.
-Para instalarlo `pip3 install requests`
+Para instalarlo `sudo pip3 install requests`
 
 http://docs.python-requests.org/en/master/
 
