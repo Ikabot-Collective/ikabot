@@ -39,7 +39,7 @@ def read(min=None, max=None, digit=False, msg=prompt, values=None): # lee input 
 		return _invalido()
 	return leido
 
-def getIdCiudad(s, ajenas=False):
+def elegirCiudad(s, ajenas=False):
 	(ids, ciudades) = getIdsDeCiudades(s)
 	maxNombre = 0
 	for unId in ids:
@@ -66,11 +66,12 @@ def getIdCiudad(s, ajenas=False):
 	else:
 		eleccion = read(min=1, max=i)
 	if eleccion == 0:
-		return getIdCiudadAjena(s)
+		return elegirCiudadAjena(s)
 	else:
-		return ids[eleccion - 1]
+		html = s.get(urlCiudad + ids[eleccion -1])
+		return getCiudad(html)
 
-def getIdCiudadAjena(s):
+def elegirCiudadAjena(s):
 	banner()
 	x = read(msg='coordenada x:', digit=True)
 	y = read(msg='coordenada y:', digit=True)
@@ -85,7 +86,7 @@ def getIdCiudadAjena(s):
 		print('Coordenadas incorrectas')
 		enter()
 		banner()
-		return getIdCiudad(s, ajenas=True)
+		return elegirCiudad(s, ajenas=True)
 	html = s.get(urlIsla + idIsla)
 	isla = getIsla(html)
 	maxNombre = 0
@@ -106,9 +107,12 @@ def getIdCiudadAjena(s):
 	if i == 0:
 		print('No hay ciudades donde enviar recursos en esta isla')
 		enter()
-		return getIdCiudad(s, ajenas=True)
+		return elegirCiudad(s, ajenas=True)
 	eleccion = read(min=1, max=i)
-	return opciones[eleccion - 1]['id']
+	ciudad = opciones[eleccion - 1]
+	ciudad['islandId'] = isla['id']
+	ciudad['cityName'] = ciudad['name']
+	return ciudad
 
 def getEdificios(s, idCiudad):
 	html = s.get(urlCiudad + idCiudad)

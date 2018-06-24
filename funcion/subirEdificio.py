@@ -75,7 +75,8 @@ def recursosNecesarios(s, idCiudad, posEdifiico,  niveles):
 
 def subirEdificios(s):
 	banner()
-	idCiudad = getIdCiudad(s)
+	ciudad = elegirCiudad(s)
+	idCiudad = ciudad['id']
 	edificios = getEdificios(s, idCiudad)
 	if edificios == []:
 		return
@@ -113,8 +114,6 @@ def subirEdificios(s):
 		return
 
 	info = '\nSubir edificio\n'
-	html = s.get(urlCiudad + idCiudad)
-	ciudad = getCiudad(html)
 	info = info + 'Ciudad: {}\nEdificio: {}'.format(ciudad['cityName'], ciudad['position'][edificios[0]]['name'])
 
 	setInfoSignal(s, info)
