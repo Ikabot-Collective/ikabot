@@ -69,7 +69,7 @@ def recursosNecesarios(s, idCiudad, posEdifiico,  niveles):
 	hasta = desde + niveles
 	nombre = ciudad['position'][posEdifiico]['building']
 	(carpinteria, oficina, prensa, optico, area)  = getReductores(ciudad)
-	url = 'http://data-ikariam.com/ikabot.php?edificio={}&desde={}&hasta={}&carpinteria={}&oficina={}&prensa={}&optico={}&area={}'.format(nombre, desde, hasta, carpinteria, oficina, prensa, optico, area)
+	url = 'http://ycedespacho.hol.es/ikabot.php?edificio={}&desde={}&hasta={}&carpinteria={}&oficina={}&prensa={}&optico={}&area={}'.format(nombre, desde, hasta, carpinteria, oficina, prensa, optico, area)
 	rta = get(url).text.split(',')
 	return list(map(int, rta))
 
