@@ -13,9 +13,8 @@ def donar(s):
 	bienes = {'1': 'Viñedo', '2': 'Cantera', '3': 'Mina de cristal', '4': 'Mina de azufre'}
 	banner()
 
-	idCiudad = getIdCiudad(s)
-	html = s.get(urlCiudad + idCiudad)
-	ciudad = getCiudad(html)
+	ciudad = elegirCiudad(s)
+	html = ciudad['html']
 	banner()
 
 	madera = getRecursosDisponibles(html)[0]

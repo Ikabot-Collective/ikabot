@@ -13,7 +13,7 @@ def enviarBienes(s, idCiudadOrigen, idCiudadDestino, idIsla, md, vn, mr, cr, az,
 
 def planearViajes(s, rutas):
 	for ruta in rutas:
-		(idciudadOrigen, idCiudadDestino, idIsla, md, vn, mr, cr, az) = ruta
+		(ciudadOrigen, ciudadDestino, idIsla, md, vn, mr, cr, az) = ruta
 		barcosTotales = getBarcosTotales(s)
 		while (md + vn + mr + cr + az) > 0:
 			barcosDisp = esperarLlegada(s)
@@ -35,7 +35,7 @@ def planearViajes(s, rutas):
 			az -= azEnv
 			cantEnviada = mdEnv + vnEnv + mrEnv + crEnv + azEnv
 			barcos = int(math.ceil((Decimal(cantEnviada) / Decimal(500))))
-			enviarBienes(s, idciudadOrigen, idCiudadDestino, idIsla, mdEnv, vnEnv, mrEnv, crEnv, azEnv, barcos)
+			enviarBienes(s, ciudadOrigen['id'], ciudadDestino['id'], idIsla, mdEnv, vnEnv, mrEnv, crEnv, azEnv, barcos)
 
 def esperarLlegada(s):
 	barcos = getBarcosDisponibles(s)

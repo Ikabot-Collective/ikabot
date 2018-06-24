@@ -17,16 +17,18 @@ def enviarVino(s):
 	vinoTotal = 0
 	dict_idVino_diponible = {}
 	(idsCiudades, ciudades) = getIdsDeCiudades(s)
+	ciudadesVino = {}
 	for idCiudad in idsCiudades:
 		esVino =  ciudades[idCiudad]['tradegood'] == '1'
 		if esVino:
 			html = s.get(urlCiudad + idCiudad)
+			ciudad = getCiudad(html)
 			recursos = getRecursosDisponibles(html)
-			dict_idVino_diponible[idCiudad] = int(recursos[1]) - 1000 # dejo 1000 por las dudas
-			if dict_idVino_diponible[idCiudad] < 0:
-				dict_idVino_diponible[idCiudad] = 0
-			vinoTotal += dict_idVino_diponible[idCiudad]
-	aEnviar = len(ciudades) - len(dict_idVino_diponible)
+			disponible = int(recursos[1]) - 1000 # dejo 1000 por las dudas
+			ciudad['disponible'] = disponible if disponible > 0 else 0
+			vinoTotal += ciudad['disponible']
+			ciudadesVino[idCiudad] = ciudad
+	aEnviar = len(ciudades) - len(ciudadesVino)
 	vinoXciudad = int(vinoTotal / aEnviar)
 	maximo = addPuntos(vinoXciudad)
 
@@ -55,32 +57,28 @@ def enviarVino(s):
 
 	rutas = []
 	for idCiudadDestino in idsCiudades:
-		noEsVino =  ciudades[idCiudadDestino]['tradegood'] != '1'
-		if noEsVino:
+		if idCiudadDestino not in ciudadesVino:
 			htmlD = s.get(urlCiudad + idCiudadDestino)
 			ciudadD = getCiudad(htmlD)
 			idIsla = ciudadD['islandId']
 			faltante = cantidad
-			for idCiudadOrigen in dict_idVino_diponible:
+			for idCiudadOrigen in ciudadesVino:
 				if faltante == 0:
 					break
-				vinoDisponible = dict_idVino_diponible[idCiudadOrigen]
+				ciudadO = ciudadesVino[idCiudadOrigen]
+				vinoDisponible = ciudadO['disponible']
 				for ruta in rutas:
 					(origen, _, _, _, vn, _, _, _) = ruta
-					if origen == idCiudadOrigen:
+					if origen['id'] == idCiudadOrigen:
 						vinoDisponible -= vn
 				enviar = faltante if vinoDisponible > faltante else vinoDisponible
 				faltante -= enviar
-				ruta = (idCiudadOrigen, idCiudadDestino, idIsla, 0, enviar, 0, 0, 0)
+				ruta = (ciudadO, ciudadD, idIsla, 0, enviar, 0, 0, 0)
 				rutas.append(ruta)
 
 	info = '\nEnviar vino\n'
 	for ruta in rutas:
-		(idciudadOrigen, idCiudadDestino, idIsla, md, vn, mr, cr, az) = ruta
-		html = s.get(urlCiudad + idciudadOrigen)
-		ciudadO = getCiudad(html)
-		html = s.get(urlCiudad + idCiudadDestino)
-		ciudadD = getCiudad(html)
+		(ciudadO, ciudadD, idIsla, md, vn, mr, cr, az) = ruta
 		info = info + '{} -> {}\nVino: {}\n'.format(ciudadO['cityName'], ciudadD['cityName'], addPuntos(vn))
 	setInfoSignal(s, info)
 	try:

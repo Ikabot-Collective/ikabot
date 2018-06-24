@@ -83,4 +83,6 @@ def getCiudad(html):
 		nuevo = viejo.replace('"isBusy":false,', '"isBusy":true,')
 		ciudad = ciudad.replace(edificio[0], nuevo)
 
-	return json.loads(ciudad, strict=False)
+	ciudad = json.loads(ciudad, strict=False)
+	ciudad['html'] = html
+	return ciudad
