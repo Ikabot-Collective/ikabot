@@ -28,6 +28,9 @@ def menuRutaComercial(s):
 		ciudadD = elegirCiudad(s, ajenas=True)
 		idIsla = ciudadD['islandId']
 
+		if ciudadO['id'] == ciudadD['id']:
+			continue
+
 		banner()
 		print('Disponible:')
 		resto = total
