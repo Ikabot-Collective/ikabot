@@ -85,4 +85,5 @@ def getCiudad(html):
 
 	ciudad = json.loads(ciudad, strict=False)
 	ciudad['html'] = html
+	ciudad['propia'] = True
 	return ciudad

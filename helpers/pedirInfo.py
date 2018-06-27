@@ -112,6 +112,7 @@ def elegirCiudadAjena(s):
 	ciudad = opciones[eleccion - 1]
 	ciudad['islandId'] = isla['id']
 	ciudad['cityName'] = ciudad['name']
+	ciudad['propia'] = False
 	return ciudad
 
 def getEdificios(s, idCiudad):
