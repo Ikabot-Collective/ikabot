@@ -10,7 +10,7 @@ from helpers.signals import setInfoSignal
 from helpers.getJson import getCiudad
 from helpers.process import forkear
 from helpers.varios import addPuntos
-from helpers.recursos import getRecursosDisponibles
+from helpers.recursos import *
 
 def menuRutaComercial(s):
 	rutas = []
@@ -31,13 +31,39 @@ def menuRutaComercial(s):
 		if ciudadO['id'] == ciudadD['id']:
 			continue
 
-		banner()
-		print('Disponible:')
+		if ciudadD['propia']:
+			html = ciudadD['html']
+			mad, vin, mar, cri, azu = getRecursosDisponibles(html, num=True)
+			capacidad = getCapacidadDeAlmacenamiento(html)
+			capacidad = int(capacidad)
+			mad = capacidad - mad
+			vin = capacidad - vin
+			mar = capacidad - mar
+			cri = capacidad - cri
+			azu = capacidad - azu
+
 		resto = total
 		for ruta in rutas:
 			(origen, _, _, md, vn, mr, cr, az) = ruta
 			if origen['id'] == ciudadO['id']:
 				resto = (resto[0] - md, resto[1] - vn, resto[2] - mr, resto[3] - cr, resto[4] - az)
+
+		banner()
+		if ciudadD['propia']:
+			msg = ''
+			if resto[0] > mad:
+				msg += '{} más de madera\n'.format(addPuntos(mad))
+			if resto[1] > vin:
+				msg += '{} más de vino\n'.format(addPuntos(vin))
+			if resto[2] > mar:
+				msg += '{} más de marmol\n'.format(addPuntos(mar))
+			if resto[3] > cri:
+				msg += '{} más de cristal\n'.format(addPuntos(cri))
+			if resto[4] > azu:
+				msg += '{} más de azufre\n'.format(addPuntos(azu))
+			if msg:
+				print('Solo puede almacenar:\n' + msg)
+		print('Disponible:')
 		print('Madera {} Vino {} Marmol {} Cristal {} Azufre {}'.format(addPuntos(resto[0]), addPuntos(resto[1]), addPuntos(resto[2]), addPuntos(resto[3]), addPuntos(resto[4])))
 		print('Enviar:')
 		try:
