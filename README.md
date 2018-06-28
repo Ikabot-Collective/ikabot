@@ -53,9 +53,11 @@ Cuando uno configura una acción, al cerrar el puede entrar y jugar ikariam sin 
 
 ### Instalar
 
+Antes asegurarse de que cumplen con las Dependencias!
+
 ```
-sudo git clone https://github.com/santipcn/ikabot.git /opt/ikabot
-sudo sh -c "echo 'python3 /opt/ikabot' > /bin/ikabot" && sudo chmod +x /bin/ikabot
+sudo git clone https://github.com/santipcn/ikabot.git ~
+sudo sh -c "echo 'python3 ~/ikabot' > /bin/ikabot" && sudo chmod +x /bin/ikabot
 ```
 con el comando `ikabot` podran acceder al menu de acciones.
 
