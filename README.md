@@ -88,7 +88,7 @@ Se encarga de realizar los post, gets y el manejo de las cookies.
 
 Para ver si está instalado por defecto, correr  `pip3 list | grep requests`.
 
-Para instalarlo `sudo pip3 install requests`
+Para instalarlo `sudo python3 -m pip install requests`
 
 ### Telegram
 
