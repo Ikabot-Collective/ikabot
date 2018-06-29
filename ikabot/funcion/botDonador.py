@@ -3,14 +3,14 @@
 
 import time
 import traceback
-from config import *
-from helpers.botComm import *
-from helpers.pedirInfo import *
-from helpers.process import forkear
-from helpers.gui import enter
-from helpers.signals import setInfoSignal
-from helpers.getJson import getCiudad
-from helpers.recursos import getRecursosDisponibles
+from ikabot.config import *
+from ikabot.helpers.botComm import *
+from ikabot.helpers.pedirInfo import *
+from ikabot.helpers.process import forkear
+from ikabot.helpers.gui import enter
+from ikabot.helpers.signals import setInfoSignal
+from ikabot.helpers.getJson import getCiudad
+from ikabot.helpers.recursos import getRecursosDisponibles
 
 def botDonador(s):
 	if botValido(s) is False:

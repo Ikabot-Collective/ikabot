@@ -3,10 +3,10 @@
 
 import time
 import traceback
-from helpers.botComm import *
-from helpers.signals import setInfoSignal
-from helpers.process import forkear
-from helpers.gui import enter
+from ikabot.helpers.botComm import *
+from ikabot.helpers.signals import setInfoSignal
+from ikabot.helpers.process import forkear
+from ikabot.helpers.gui import enter
 
 def entrarDiariamente(s):
 	if botValido(s) is False:

@@ -3,7 +3,7 @@
 
 import getpass
 import os
-import config
+import ikabot.config
 
 def enter():
 	getpass.getpass('\n[Enter]')
