@@ -4,8 +4,8 @@
 import sys
 import re
 import json
+from decimal import *
 from ikabot.config import *
-from ikabot.decimal import *
 from ikabot.helpers.getJson import *
 from ikabot.helpers.gui import *
 
