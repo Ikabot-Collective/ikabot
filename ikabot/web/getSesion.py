@@ -3,10 +3,10 @@
 
 import re
 import getpass
-import config
-from web.sesion import *
-from helpers.pedirInfo import read
-from helpers.gui import banner
+import ikabot.config
+from ikabot.web.sesion import *
+from ikabot.helpers.pedirInfo import read
+from ikabot.helpers.gui import banner
 
 def getSesion():
 	banner()

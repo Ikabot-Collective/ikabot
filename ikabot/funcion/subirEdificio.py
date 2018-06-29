@@ -4,16 +4,16 @@
 import time
 import re
 import traceback
-from config import *
-from helpers.botComm import *
-from helpers.pedirInfo import *
-from helpers.getJson import getCiudad
-from helpers.varios import addPuntos
-from helpers.recursos import getRecursosDisponibles
-from helpers.signals import setInfoSignal
-from helpers.process import forkear
-from helpers.gui import banner
-from web.sesion import get
+from ikabot.config import *
+from ikabot.helpers.botComm import *
+from ikabot.helpers.pedirInfo import *
+from ikabot.helpers.getJson import getCiudad
+from ikabot.helpers.varios import addPuntos
+from ikabot.helpers.recursos import getRecursosDisponibles
+from ikabot.helpers.signals import setInfoSignal
+from ikabot.helpers.process import forkear
+from ikabot.helpers.gui import banner
+from ikabot.web.sesion import get
 
 def getTiempoDeConstruccion(html):
 	fin = re.search(r'"endUpgradeTime":(\d{10})', html)
