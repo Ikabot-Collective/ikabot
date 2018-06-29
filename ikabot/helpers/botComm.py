@@ -3,7 +3,7 @@
 
 import re
 import random
-import ikabot.config
+import ikabot.config as config
 from ikabot.web.sesion import get
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.gui import enter
