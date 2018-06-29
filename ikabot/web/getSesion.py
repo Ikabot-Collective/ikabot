@@ -3,7 +3,7 @@
 
 import re
 import getpass
-import ikabot.config
+import ikabot.config as config
 from ikabot.web.sesion import *
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.gui import banner
