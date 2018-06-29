@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
 	name="ikabot",
-	version="0.1",
+	version="0.1.6",
 	author="santipcn",
 	description="A bot for ikariam",
 	url="https://github.com/santipcn/ikabot",
@@ -10,10 +10,12 @@ setuptools.setup(
 	install_requires=[
 		  'requests',
 	],
+	entry_points = {
+		'console_scripts': ['ikabot=ikabot.command_line:main'],
+	},
 	classifiers=(
 		"Programming Language :: Python :: 3",
 		"License :: OSI Approved :: MIT License",
 		"Operating System :: POSIX :: Linux",
 	),
 )
-# https://packaging.python.org/tutorials/packaging-projects/
