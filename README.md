@@ -64,7 +64,6 @@ con el comando `ikabot` podran acceder al menu de acciones.
 
 ```
 sudo python3 -m pip uninstall ikabot
-
 ```
 ### Dependencias
 
