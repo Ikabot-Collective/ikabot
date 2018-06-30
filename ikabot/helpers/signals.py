@@ -3,7 +3,7 @@
 
 import os
 import signal
-from helpers.botComm import *
+from ikabot.helpers.botComm import *
 
 def create_handler(s):
 	def _handler(signum, frame):

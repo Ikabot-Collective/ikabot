@@ -3,10 +3,10 @@
 
 import re
 import random
-import config
-from web.sesion import get
-from helpers.pedirInfo import read
-from helpers.gui import enter
+import ikabot.config as config
+from ikabot.web.sesion import get
+from ikabot.helpers.pedirInfo import read
+from ikabot.helpers.gui import enter
 
 def sendToBot(s, msg, Token=False):
 	if Token is False:

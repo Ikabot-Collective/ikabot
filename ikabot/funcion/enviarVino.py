@@ -2,15 +2,15 @@
 # -*- coding: utf-8 -*-
 
 import traceback
-from helpers.botComm import *
-from helpers.pedirInfo import *
-from helpers.signals import setInfoSignal
-from helpers.getJson import getCiudad
-from helpers.planearViajes import planearViajes
-from helpers.recursos import getRecursosDisponibles
-from helpers.varios import addPuntos
-from helpers.process import forkear
-from helpers.gui import banner
+from ikabot.helpers.botComm import *
+from ikabot.helpers.pedirInfo import *
+from ikabot.helpers.signals import setInfoSignal
+from ikabot.helpers.getJson import getCiudad
+from ikabot.helpers.planearViajes import planearViajes
+from ikabot.helpers.recursos import getRecursosDisponibles
+from ikabot.helpers.varios import addPuntos
+from ikabot.helpers.process import forkear
+from ikabot.helpers.gui import banner
 
 def enviarVino(s):
 	banner()
