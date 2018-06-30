@@ -53,8 +53,6 @@ Cuando uno configura una acción, al cerrar el puede entrar y jugar ikariam sin 
 
 ### Instalar
 
-Antes asegurarse de que cumplen con las Dependencias!
-
 ```
 sudo python3 -m pip install ikabot
 ```
