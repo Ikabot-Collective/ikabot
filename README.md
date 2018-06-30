@@ -54,20 +54,18 @@ Cuando uno configura una acción, al cerrar el puede entrar y jugar ikariam sin 
 ### Instalar
 
 ```
-sudo git clone https://github.com/santipcn/ikabot.git /opt/ikabot
-sudo sh -c "echo 'python3 /opt/ikabot' > /bin/ikabot" && sudo chmod +x /bin/ikabot
+sudo python3 -m pip install ikabot
 ```
 con el comando `ikabot` podran acceder al menu de acciones.
 
 ### Desinstalar
 
 ```
-sudo rm -rf /opt/ikabot
-sudo rm /bin/ikabot
+sudo python3 -m pip uninstall ikabot
 ```
 ### Dependencias
 
-Para que _ikabot_ funcione debe estar instalado python3 y el modulo externo requests. Se debe correr sobre **Linux**, por el momento no funciona en **Windows**.
+Para que _ikabot_ funcione debe estar instalado python3 y pip. Se debe correr sobre **Linux**, por el momento no funciona en **Windows**.
 
 #### - Python 3
 Probablemente se encuentre instalado por defecto en su sistema.
@@ -82,13 +80,6 @@ Es una herramienta para instalar paquetes de python.
 Para ver si está instalado por defecto, correr  `pip3 -V`.
 
 Para instalarlo hay que bajar el archivo _get-pip.py_ de [aqui](https://pip.pypa.io/en/stable/installing/) y correr `python3 get-pip.py`.
-
-#### - Requests
-Se encarga de realizar los post, gets y el manejo de las cookies.
-
-Para ver si está instalado por defecto, correr  `pip3 list | grep requests`.
-
-Para instalarlo `sudo python3 -m pip install requests`
 
 ### Telegram
 

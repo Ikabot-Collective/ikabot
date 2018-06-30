@@ -2,22 +2,22 @@
 # -*- coding: utf-8 -*-
 
 import os
-from config import *
-from web.getSesion import getSesion
-from helpers.gui import *
-from helpers.pedirInfo import read
-from helpers.process import run
-from helpers.signals import setSignalsHandlers
-from funcion.subirEdificio import subirEdificios
-from funcion.menuRutaComercial import menuRutaComercial
-from funcion.enviarVino import enviarVino
-from funcion.getStatus import getStatus
-from funcion.donar import donar
-from funcion.buscarEspacios import buscarEspacios
-from funcion.entrarDiariamente import entrarDiariamente
-from funcion.alertarAtaques import alertarAtaques
-from funcion.botDonador import botDonador
-from funcion.update import update
+from ikabot.config import *
+from ikabot.web.getSesion import getSesion
+from ikabot.helpers.gui import *
+from ikabot.helpers.pedirInfo import read
+from ikabot.helpers.process import run
+from ikabot.helpers.signals import setSignalsHandlers
+from ikabot.funcion.subirEdificio import subirEdificios
+from ikabot.funcion.menuRutaComercial import menuRutaComercial
+from ikabot.funcion.enviarVino import enviarVino
+from ikabot.funcion.getStatus import getStatus
+from ikabot.funcion.donar import donar
+from ikabot.funcion.buscarEspacios import buscarEspacios
+from ikabot.funcion.entrarDiariamente import entrarDiariamente
+from ikabot.funcion.alertarAtaques import alertarAtaques
+from ikabot.funcion.botDonador import botDonador
+from ikabot.funcion.update import update
 
 def menu(s):
 	banner()

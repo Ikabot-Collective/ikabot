@@ -2,15 +2,15 @@
 # -*- coding: utf-8 -*-
 
 import traceback
-from helpers.botComm import *
-from helpers.gui import *
-from helpers.pedirInfo import *
-from helpers.planearViajes import planearViajes
-from helpers.signals import setInfoSignal
-from helpers.getJson import getCiudad
-from helpers.process import forkear
-from helpers.varios import addPuntos
-from helpers.recursos import *
+from ikabot.helpers.botComm import *
+from ikabot.helpers.gui import *
+from ikabot.helpers.pedirInfo import *
+from ikabot.helpers.planearViajes import planearViajes
+from ikabot.helpers.signals import setInfoSignal
+from ikabot.helpers.getJson import getCiudad
+from ikabot.helpers.process import forkear
+from ikabot.helpers.varios import addPuntos
+from ikabot.helpers.recursos import *
 
 def menuRutaComercial(s):
 	rutas = []

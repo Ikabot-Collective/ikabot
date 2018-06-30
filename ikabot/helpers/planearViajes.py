@@ -5,7 +5,7 @@ import re
 import time
 import math
 from decimal import *
-from helpers.naval import *
+from ikabot.helpers.naval import *
 
 def enviarBienes(s, idCiudadOrigen, idCiudadDestino, idIsla, md, vn, mr, cr, az, barcos):
 	s.post(payloadPost={'action': 'header', 'function': 'changeCurrentCity', 'actionRequest': s.token(), 'cityId': idCiudadOrigen, 'ajax': '1'}) 

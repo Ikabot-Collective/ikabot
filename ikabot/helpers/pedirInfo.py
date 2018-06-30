@@ -4,10 +4,10 @@
 import sys
 import re
 import json
-from config import *
 from decimal import *
-from helpers.getJson import *
-from helpers.gui import *
+from ikabot.config import *
+from ikabot.helpers.getJson import *
+from ikabot.helpers.gui import *
 
 getcontext().prec = 30
 

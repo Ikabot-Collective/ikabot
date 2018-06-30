@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 
 import re
-from config import *
-from helpers.pedirInfo import *
-from helpers.getJson import *
-from helpers.recursos import *
-from helpers.gui import *
-from helpers.varios import addPuntos
+from ikabot.config import *
+from ikabot.helpers.pedirInfo import *
+from ikabot.helpers.getJson import *
+from ikabot.helpers.recursos import *
+from ikabot.helpers.gui import *
+from ikabot.helpers.varios import addPuntos
 
 def donar(s):
 	bienes = {'1': 'Viñedo', '2': 'Cantera', '3': 'Mina de cristal', '4': 'Mina de azufre'}

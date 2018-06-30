@@ -12,9 +12,9 @@ import re
 import random
 import hashlib
 import parser
-from config import cookieFile
-from helpers.getJson import getCiudad
-from helpers.pedirInfo import read
+from ikabot.config import cookieFile
+from ikabot.helpers.getJson import getCiudad
+from ikabot.helpers.pedirInfo import read
 
 class Sesion:
 	def __init__(self, urlBase, payload, headers):
