@@ -3,13 +3,13 @@
 
 import time
 import traceback
-from config import *
-from helpers.botComm import *
-from helpers.gui import enter
-from helpers.signals import setInfoSignal
-from helpers.pedirInfo import getIdsdeIslas
-from helpers.getJson import getIsla
-from helpers.process import forkear
+from ikabot.config import *
+from ikabot.helpers.botComm import *
+from ikabot.helpers.gui import enter
+from ikabot.helpers.signals import setInfoSignal
+from ikabot.helpers.pedirInfo import getIdsdeIslas
+from ikabot.helpers.getJson import getIsla
+from ikabot.helpers.process import forkear
 
 def buscarEspacios(s):
 	if botValido(s) is False:
