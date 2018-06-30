@@ -18,7 +18,15 @@ def menuRutaComercial(s):
 
 		banner()
 		print('Ciudad de origen:')
-		ciudadO = elegirCiudad(s)
+		try:
+			ciudadO = elegirCiudad(s)
+		except KeyboardInterrupt:
+			if rutas:
+				print('¿Enviar viajes? [Y/n]')
+				rta = read(values=['y', 'Y', 'n', 'N', ''])
+				if rta.lower() != 'n':
+					break
+			return
 		html = ciudadO['html']
 		max = getRecursosDisponibles(html)
 		total = list(map(int, max))
