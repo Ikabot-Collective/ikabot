@@ -77,9 +77,17 @@ Si no esta instalado, visite la [pagina oficial](https://www.python.org/)
 #### - Pip
 Es una herramienta para instalar paquetes de python.
 
-Para ver si está instalado por defecto, correr  `pip3 -V`.
+Para ver si está instalado por defecto, correr  `python3 -m pip -V`.
 
-Para instalarlo hay que bajar el archivo _get-pip.py_ de [aqui](https://pip.pypa.io/en/stable/installing/) y correr `python3 get-pip.py`.
+Para instalarlo hay que bajar el archivo _get-pip.py_ de [esta página](https://pip.pypa.io/en/stable/installing/) y ejecutar `python3 get-pip.py`.
+
+O simplemente ejecutar:
+```
+curl https://bootstrap.pypa.io/get-pip.py
+sudo python3 get-pip.py
+rm get-pip.py
+```
+
 
 ### Telegram
 
