@@ -1,6 +1,6 @@
 ## ikabot ~ Ikariam Bot
 
-_Es un script escrito en python que otorga la misma y mucha más funcinoalidad que una cuenta premium en ikariam, ¡sin gastar ambrosia!_
+_Es un script escrito en python que otorga la misma y mucha más funcionalidad que una cuenta premium en ikariam, ¡sin gastar ambrosia!_
 
 ### Funcionalidades
 
@@ -56,7 +56,7 @@ Cuando uno configura una acción, al cerrar el puede entrar y jugar ikariam sin 
 ```
 sudo python3 -m pip install ikabot
 ```
-con el comando `ikabot` podran acceder al menu de acciones.
+con el comando `ikabot` se accede al menu de acciones.
 
 ### Desinstalar
 
