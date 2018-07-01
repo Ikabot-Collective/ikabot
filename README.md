@@ -65,7 +65,7 @@ sudo python3 -m pip uninstall ikabot
 ```
 ### Dependencias
 
-Para que _ikabot_ funcione debe estar instalado python3 y pip. Se debe correr sobre **Linux**, por el momento no funciona en **Windows**.
+Para poder instalar y usar _ikabot_ debe estar instalado python3 y pip. Se debe correr sobre **Linux**, por el momento no funciona en **Windows**.
 
 #### - Python 3
 Probablemente se encuentre instalado por defecto en su sistema.
@@ -87,7 +87,6 @@ curl https://bootstrap.pypa.io/get-pip.py
 sudo python3 get-pip.py
 rm get-pip.py
 ```
-
 
 ### Telegram
 
