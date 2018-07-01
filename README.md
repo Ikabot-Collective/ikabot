@@ -44,9 +44,9 @@ _Es un script escrito en python que otorga la misma y mucha más funcinoalidad q
 
 	Entra una vez al día y dona toda la madera disponible de todas las ciudades al bien de lujo o a los aserraderos.
 
-10. Actualizar IkaBot
+10. Actualizar Ikabot
 
-	Actualiza el programa haciendo un pull a este repositorio.
+	Actualiza _ikabot_ a su release más actual.
 	
 
 Cuando uno configura una acción, al cerrar el puede entrar y jugar ikariam sin problemas. El único inconveniente que puede llegar a tener, es que la sesión expire, esto es normal y si sucede simplemente vuelva a entrar.
