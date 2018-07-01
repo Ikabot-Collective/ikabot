@@ -64,20 +64,21 @@ def inicializar():
 	run('touch ' + cookieFile)
 	run('touch ' + telegramFile)
 
-def main():
+def start():
 	inicializar()
 	s = getSesion()
 	setSignalsHandlers(s)
 	try:
 		menu(s)
-	except:
-		raise
 	finally:
 		if os.fork() == 0:
 			s.logout()
 
-if __name__ == '__main__':
+def main():
 	try:
-		main()
+		start()
 	except KeyboardInterrupt:
 		clear()
+
+if __name__ == '__main__':
+	main()
