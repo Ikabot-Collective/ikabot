@@ -1,10 +1,15 @@
 import setuptools
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
 setuptools.setup(
 	name="ikabot",
 	version="0.1.12",
 	author="santipcn",
 	description="A bot for ikariam",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
 	url="https://github.com/santipcn/ikabot",
 	packages=setuptools.find_packages(),
 	install_requires=[
