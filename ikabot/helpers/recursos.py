@@ -12,3 +12,6 @@ def getRecursosDisponibles(html, num=False):
 
 def getCapacidadDeAlmacenamiento(html):
 	return re.search(r'maxResources:\s*JSON\.parse\(\'{\\"resource\\":(\d+),', html).group(1)
+
+def getConsumoDeVino(html):
+	return int(re.search(r'GlobalMenu_WineConsumption"\s*class="rightText">\s*(\d*)\s', html).group(1))
