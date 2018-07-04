@@ -44,7 +44,11 @@ _Ikabot es un programa escrito en python que otorga la misma y mucha más funcio
 
 	Entra una vez al día y dona toda la madera disponible de todas las ciudades al bien de lujo o a los aserraderos.
 
-10. Actualizar Ikabot
+10. Alertar poco vino
+
+	Avisa mediante Telegram cuando falta menos de N horas para que una ciudad se quede sin vino. La cantidad de horas las especifica el usuario.
+	
+11. Actualizar Ikabot
 
 	Actualiza _ikabot_ a su release más actual.
 	
