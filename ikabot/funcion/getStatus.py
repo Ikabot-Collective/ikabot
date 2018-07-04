@@ -9,16 +9,14 @@ from ikabot.helpers.varios import *
 from ikabot.helpers.naval import *
 from ikabot.helpers.recursos import *
 from ikabot.helpers.getJson import getCiudad
+from ikabot.helpers.pedirInfo import getIdsDeCiudades
 
 getcontext().prec = 30
 
 def getStatus(s):
 	banner()
 	tipoCiudad = [bcolors.ENDC, bcolors.HEADER, bcolors.STONE, bcolors.BLUE, bcolors.WARNING]
-	html = s.get()
-	ids = re.findall(r'city_(\d+)', html)
-	ids = set(ids)
-	ids = sorted(ids)
+	ids, ciudades = getIdsDeCiudades(s)
 	print('Barcos {:d}/{:d}'.format(getBarcosDisponibles(s), getBarcosTotales(s)))
 	for unId in ids:
 		html = s.get(urlCiudad + unId)
@@ -48,14 +46,7 @@ def getStatus(s):
 		else:
 			consumoXseg = Decimal(consumoXhr) / Decimal(3600)
 			segsRestantes = Decimal(int(max[1])) / Decimal(consumoXseg)
-			(dias, horas, minutos) = diasHorasMinutos(segsRestantes)
-			texto = ''
-			if dias > 0:
-				texto = str(dias) + 'D '
-			if horas > 0:
-				texto = texto + str(horas) + 'H '
-			if minutos > 0 and dias == 0:
-				texto = texto + str(minutos) + 'M '
+			texto = diasHorasMinutos(segsRestantes)
 			print('Hay vino para:\n{}'.format(texto))
 		for edificio in ciudad['position']:
 			if edificio['name'] == 'empty':
@@ -74,9 +65,6 @@ def getStatus(s):
 			print('lv:{}\t{}{}{}'.format(level, color, edificio['name'], bcolors.ENDC))
 		enter()
 		print('')
-
-def getConsumoDeVino(html):
-	return int(re.search(r'GlobalMenu_WineConsumption"\s*class="rightText">\s*(\d*)\s', html).group(1))
 
 def getProduccion(s, idCiudad):
 	prod = s.post(payloadPost={'action': 'header', 'function': 'changeCurrentCity', 'actionRequest': s.token(), 'cityId': idCiudad, 'ajax': '1'}) 

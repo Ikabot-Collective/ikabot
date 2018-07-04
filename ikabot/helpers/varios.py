@@ -14,4 +14,11 @@ def diasHorasMinutos(segundosTotales):
 	horas = int(segundosTotales / Decimal(3600))
 	segundosTotales -= horas * Decimal(3600)
 	minutos = int(segundosTotales / Decimal(60))
-	return (dias, horas, minutos)
+	texto = ''
+	if dias > 0:
+		texto = str(dias) + 'D '
+	if horas > 0:
+		texto = texto + str(horas) + 'H '
+	if minutos > 0 and dias == 0:
+		texto = texto + str(minutos) + 'M '
+	return texto

@@ -187,6 +187,7 @@ def getIdsDeCiudades(s):
 		for ciudad in ciudades:
 			ids.append(ciudad)
 	ids = sorted(ids)
+	# {'coords': '[x:y] ', 'id': idCiudad, 'tradegood': '..', 'name': 'nomberCiudad', 'relationship': 'ownCity'}
 	return (ids, ciudades)
 
 def getIdsdeIslas(s):

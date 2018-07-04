@@ -18,19 +18,21 @@ from ikabot.funcion.entrarDiariamente import entrarDiariamente
 from ikabot.funcion.alertarAtaques import alertarAtaques
 from ikabot.funcion.botDonador import botDonador
 from ikabot.funcion.update import update
+from ikabot.funcion.alertarPocoVino import alertarPocoVino
 
 def menu(s):
 	banner()
 	menu_actions = [
-					subirEdificios, 
-					menuRutaComercial, 
-					enviarVino, 
-					getStatus, 
-					donar, 
-					buscarEspacios, 
-					entrarDiariamente, 
-					alertarAtaques, 
-					botDonador, 
+					subirEdificios,
+					menuRutaComercial,
+					enviarVino,
+					getStatus,
+					donar,
+					buscarEspacios,
+					entrarDiariamente,
+					alertarAtaques,
+					botDonador,
+					alertarPocoVino,
 					update
 					]
 	mnu="""
@@ -44,7 +46,8 @@ def menu(s):
 (7)  Entrar diariamente
 (8)  Alertar ataques
 (9)  Bot donador
-(10) Actualizar Ikabot"""
+(10) Alertar poco vino
+(11) Actualizar Ikabot"""
 	print(mnu)
 	entradas = len(menu_actions)
 	eleccion = read(min=0, max=entradas)
