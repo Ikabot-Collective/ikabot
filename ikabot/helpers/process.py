@@ -8,7 +8,6 @@ def forkear(s):
 	newpid = os.fork()
 	if newpid != 0:
 		# padre
-		s.login()
 		newpid = str(newpid)
 		run('kill -SIGSTOP ' + newpid)
 		run('bg ' + newpid)
@@ -16,6 +15,7 @@ def forkear(s):
 	else:
 		# hijo
 		s.padre = False
+		s.login()
 
 def run(command):
 	return subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout
