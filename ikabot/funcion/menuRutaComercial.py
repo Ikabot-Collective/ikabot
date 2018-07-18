@@ -52,9 +52,15 @@ def menuRutaComercial(s):
 
 		resto = total
 		for ruta in rutas:
-			(origen, _, _, md, vn, mr, cr, az) = ruta
+			(origen, destino, _, md, vn, mr, cr, az) = ruta
 			if origen['id'] == ciudadO['id']:
 				resto = (resto[0] - md, resto[1] - vn, resto[2] - mr, resto[3] - cr, resto[4] - az)
+			if ciudadD['propia'] and destino['id'] == ciudadD['id']:
+				mad = mad - md
+				vin = vin - vn
+				mar = mar - mr
+				cri = cri - cr
+				azu = azu - az
 
 		banner()
 		if ciudadD['propia']:
