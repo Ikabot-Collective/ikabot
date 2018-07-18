@@ -6,8 +6,8 @@ import traceback
 from ikabot.config import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.pedirInfo import *
+from ikabot.helpers.gui import *
 from ikabot.helpers.process import forkear
-from ikabot.helpers.gui import enter
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.recursos import getRecursosDisponibles
@@ -16,19 +16,19 @@ def botDonador(s):
 	if botValido(s) is False:
 		return
 
+	banner()
 	(idsCiudades, ciudades) = getIdsDeCiudades(s)
 	ciudades_dict = {}
 	bienes = {'1': '(V)', '2': '(M)', '3': '(C)', '4': '(A)'}
 	for idCiudad in idsCiudades:
 		html = s.get(urlCiudad + idCiudad)
 		ciudad = getCiudad(html)
-		ciudades_dict[idCiudad]['isla'] = ciudad['islandId']
 		tradegood = ciudades[idCiudad]['tradegood']
 		bien = bienes[tradegood]
-		print('En la ciudad {} {}, ¿Desea donar al aserradero o al bien de cambio? [a/b]'.format(ciudad['name'], bien))
+		print('En la ciudad {} {}, ¿Desea donar al aserradero o al bien de cambio? [a/b]'.format(ciudad['cityName'], bien))
 		rta = read(values=['a', 'A', 'b', 'B'])
 		tipo = 'resource' if rta.lower() == 'a' else 'tradegood'
-		ciudades_dict[idCiudad]['tipo'] = tipo
+		ciudades_dict[idCiudad] = {'isla': ciudad['islandId'], 'tipo': tipo}
 
 	print('Se donará todos los días.')
 	enter()
