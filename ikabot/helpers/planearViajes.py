@@ -43,11 +43,10 @@ def esperarLlegada(s):
 	while barcos == 0:
 		html = s.get()
 		idCiudad = re.search(r'currentCityId:\s(\d+),', html).group(1)
-		url = 'view=militaryAdvisor&oldView=city&oldBackgroundView=city&backgroundView=city&currentCityId={}&actionRequest={}&ajax=1'.format(idCiudad, s.token())
+		url = 'view=merchantNavy&backgroundView=city&currentCityId={}&currentTab=tabSendTransporter&actionRequest={}&ajax=1'.format(idCiudad, s.token())
 		posted = s.post(url)
 		postdata = json.loads(posted, strict=False)
-		html = postdata[1][1][1]
-		eventos = re.findall(r'enddate: \'(\d+)\',\\n *currentdate: \'(\d+)\'', html)
+		eventos = re.findall(r'enddate: \'(\d+)\',\s*currentdate: \'(\d+)\',', postdata[1][1][1])
 		esperaMinima = 10000000
 		for evento in eventos:
 			tiempoRestante = int(evento[0]) - int(evento[1])
@@ -55,7 +54,5 @@ def esperarLlegada(s):
 				esperaMinima = tiempoRestante
 		if eventos:
 			time.sleep(esperaMinima)
-		else:
-			time.sleep(10 * 60)
 		barcos = getBarcosDisponibles(s)
 	return barcos
