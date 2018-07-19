@@ -4,6 +4,7 @@
 import re
 import time
 import math
+import json
 from decimal import *
 from ikabot.helpers.naval import *
 
@@ -44,7 +45,9 @@ def esperarLlegada(s):
 		idCiudad = re.search(r'currentCityId:\s(\d+),', html).group(1)
 		url = 'view=militaryAdvisor&oldView=city&oldBackgroundView=city&backgroundView=city&currentCityId={}&actionRequest={}&ajax=1'.format(idCiudad, s.token())
 		posted = s.post(url)
-		eventos = re.findall(r'"enddate":(\d+),"currentdate":(\d+)}', posted)
+		postdata = json.loads(posted, strict=False)
+		html = postdata[1][1][1]
+		eventos = re.findall(r'enddate: \'(\d+)\',\\n *currentdate: \'(\d+)\'', html)
 		esperaMinima = 10000000
 		for evento in eventos:
 			tiempoRestante = int(evento[0]) - int(evento[1])
@@ -52,5 +55,7 @@ def esperarLlegada(s):
 				esperaMinima = tiempoRestante
 		if eventos:
 			time.sleep(esperaMinima)
+		else:
+			time.sleep(10 * 60)
 		barcos = getBarcosDisponibles(s)
 	return barcos
