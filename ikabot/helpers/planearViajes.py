@@ -52,7 +52,7 @@ def esperarLlegada(s):
 			tiempoRestante = int(evento[0]) - int(evento[1])
 			if tiempoRestante < esperaMinima:
 				esperaMinima = tiempoRestante
-		if eventos:
+		if eventos and esperaMinima > 0:
 			time.sleep(esperaMinima)
 		barcos = getBarcosDisponibles(s)
 	return barcos
