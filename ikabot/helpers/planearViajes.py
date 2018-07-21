@@ -47,12 +47,14 @@ def esperarLlegada(s):
 		posted = s.post(url)
 		postdata = json.loads(posted, strict=False)
 		eventos = re.findall(r'enddate: \'(\d+)\',\s*currentdate: \'(\d+)\',', postdata[1][1][1])
-		esperaMinima = 10000000
+		esperaMinima = None
 		for evento in eventos:
 			tiempoRestante = int(evento[0]) - int(evento[1])
-			if tiempoRestante < esperaMinima:
+			if tiempoRestante < 0:
+				continue
+			if (esperaMinima and tiempoRestante < esperaMinima) or not esperaMinima:
 				esperaMinima = tiempoRestante
-		if eventos and esperaMinima > 0:
+		if esperaMinima:
 			time.sleep(esperaMinima)
 		barcos = getBarcosDisponibles(s)
 	return barcos
