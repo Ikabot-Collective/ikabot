@@ -4,9 +4,11 @@
 import time
 import traceback
 import re
+import json
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.process import forkear
 from ikabot.helpers.gui import enter
+from ikabot.helpers.varios import diasHorasMinutos
 from ikabot.helpers.botComm import *
 
 def alertarAtaques(s):
@@ -29,17 +31,37 @@ def alertarAtaques(s):
 		s.logout()
 
 def do_it(s):
-	fueAvisado = False
+	ataques = []
 	while True:
 		html = s.get()
 		idCiudad = re.search(r'currentCityId:\s(\d+),', html).group(1)
 		url = 'view=militaryAdvisor&oldView=city&oldBackgroundView=city&backgroundView=city&currentCityId={}&actionRequest={}&ajax=1'.format(idCiudad, s.token())
 		posted = s.post(url)
-		ataque = re.search(r'"military":{"link":.*?","cssclass":"normalalert"', posted)
-		if ataque is not None and fueAvisado is False:
-			msg = '¡Te están por atacar!'
-			sendToBot(s, msg)
-			fueAvisado = True
-		elif ataque is None and fueAvisado is True:
-			fueAvisado = False
-		time.sleep(15*60)
+		postdata = json.loads(posted, strict=False)
+		militaryMovements = postdata[1][1][2]['viewScriptParams']['militaryAndFleetMovements']
+		tiempoAhora = int(postdata[0][1]['time'])
+		eventos = []
+		for militaryMovement in militaryMovements:
+			if militaryMovement['isHostile']:
+				id = militaryMovement['event']['id']
+				eventos.append(id)
+				if id not in ataques:
+					ataques.append(id)
+					missionText = militaryMovement['event']['missionText']
+					origin = militaryMovement['origin']
+					target = militaryMovement['target']
+					cantidadTropas = militaryMovement['army']['amount']
+					cantidadFlotas = militaryMovement['fleet']['amount']
+					tiempoFaltante = int(militaryMovement['eventTime']) - tiempoAhora
+					msg  = '-- ALERTA --\n'
+					msg += missionText + '\n'
+					msg += 'de la ciudad {} de {}\n'.format(origin['name'], origin['avatarName'])
+					msg += 'a {}\n'.format(target['name'])
+					msg += '{} unidades\n'.format(cantidadTropas)
+					msg += '{} flotas\n'.format(cantidadFlotas)
+					msg += 'llegada en: {}'.format(diasHorasMinutos(tiempoFaltante))
+					sendToBot(s, msg)
+		for id in list(ataques):
+			if id not in eventos:
+				ataques.remove(id)
+		time.sleep(20 * 60)
