@@ -14,14 +14,14 @@ from ikabot.helpers.botComm import *
 def alertarAtaques(s):
 	if botValido(s) is False:
 		return
-	print('Se buscarán ataques cada 15 minutos.')
+	print('Se buscarán ataques cada 20 minutos.')
 	enter()
 
 	forkear(s)
 	if s.padre is True:
 		return
 
-	info = '\nEspero por ataques cada 15 minutos\n'
+	info = '\nEspero por ataques cada 20 minutos\n'
 	setInfoSignal(s, info)
 	try:
 		do_it(s)
