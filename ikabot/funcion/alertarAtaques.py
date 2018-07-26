@@ -14,14 +14,14 @@ from ikabot.helpers.botComm import *
 def alertarAtaques(s):
 	if botValido(s) is False:
 		return
-	print('Se buscarán ataques cada 15 minutos.')
+	print('Se buscarán ataques cada 20 minutos.')
 	enter()
 
 	forkear(s)
 	if s.padre is True:
 		return
 
-	info = '\nEspero por ataques cada 15 minutos\n'
+	info = '\nEspero por ataques cada 20 minutos\n'
 	setInfoSignal(s, info)
 	try:
 		do_it(s)
@@ -31,7 +31,7 @@ def alertarAtaques(s):
 		s.logout()
 
 def do_it(s):
-	ataques = []
+	conocidos = []
 	while True:
 		html = s.get()
 		idCiudad = re.search(r'currentCityId:\s(\d+),', html).group(1)
@@ -40,13 +40,13 @@ def do_it(s):
 		postdata = json.loads(posted, strict=False)
 		militaryMovements = postdata[1][1][2]['viewScriptParams']['militaryAndFleetMovements']
 		tiempoAhora = int(postdata[0][1]['time'])
-		eventos = []
+		actuales = []
 		for militaryMovement in militaryMovements:
 			if militaryMovement['isHostile']:
 				id = militaryMovement['event']['id']
-				eventos.append(id)
-				if id not in ataques:
-					ataques.append(id)
+				actuales.append(id)
+				if id not in conocidos:
+					conocidos.append(id)
 					missionText = militaryMovement['event']['missionText']
 					origin = militaryMovement['origin']
 					target = militaryMovement['target']
@@ -61,7 +61,7 @@ def do_it(s):
 					msg += '{} flotas\n'.format(cantidadFlotas)
 					msg += 'llegada en: {}'.format(diasHorasMinutos(tiempoFaltante))
 					sendToBot(s, msg)
-		for id in list(ataques):
-			if id not in eventos:
-				ataques.remove(id)
+		for id in list(conocidos):
+			if id not in actuales:
+				conocidos.remove(id)
 		time.sleep(20 * 60)

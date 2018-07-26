@@ -43,17 +43,17 @@ def esperarLlegada(s):
 	while barcos == 0:
 		html = s.get()
 		idCiudad = re.search(r'currentCityId:\s(\d+),', html).group(1)
-		url = 'view=merchantNavy&backgroundView=city&currentCityId={}&currentTab=tabSendTransporter&actionRequest={}&ajax=1'.format(idCiudad, s.token())
+		url = 'view=militaryAdvisor&oldView=city&oldBackgroundView=city&backgroundView=city&currentCityId={}&actionRequest={}&ajax=1'.format(idCiudad, s.token())
 		posted = s.post(url)
 		postdata = json.loads(posted, strict=False)
-		eventos = re.findall(r'enddate: \'(\d+)\',\s*currentdate: \'(\d+)\',', postdata[1][1][1])
+		militaryMovements = postdata[1][1][2]['viewScriptParams']['militaryAndFleetMovements']
+		tiempoAhora = int(postdata[0][1]['time'])
 		esperaMinima = None
-		for evento in eventos:
-			tiempoRestante = int(evento[0]) - int(evento[1])
-			if tiempoRestante < 0:
-				continue
-			if (esperaMinima and tiempoRestante < esperaMinima) or not esperaMinima:
-				esperaMinima = tiempoRestante
+		for militaryMovement in militaryMovements:
+			if militaryMovement['origin']['avatarName'] == s.username:
+				tiempoRestante = int(militaryMovement['eventTime']) - tiempoAhora
+				if (esperaMinima and tiempoRestante < esperaMinima) or not esperaMinima:
+					esperaMinima = tiempoRestante
 		if esperaMinima:
 			time.sleep(esperaMinima)
 		barcos = getBarcosDisponibles(s)
