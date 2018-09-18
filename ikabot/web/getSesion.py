@@ -29,9 +29,10 @@ def getSesion():
 		i += 1
 		print('({:d}) {}'.format(i, mundo[1]))
 	mundo = read(msg='Mundo:', min=1, max=len(mundos))
-	config.infoUser += ', Mundo:{}'.format(mundos[mundo - 1][1])
-	urlBase = 'https://s{:d}-{}.ikariam.gameforge.com/index.php?'.format(mundo, srv)
-	uni_url = 's{:d}-{}.ikariam.gameforge.com'.format(mundo, srv)
+	mundo = mundos[mundo - 1]
+	config.infoUser += ', Mundo:{}'.format(mundo[1])
+	urlBase = 'https://s{}-{}.ikariam.gameforge.com/index.php?'.format(mundo[0], srv)
+	uni_url = 's{}-{}.ikariam.gameforge.com'.format(mundo[0], srv)
 	banner()
 	usuario = read(msg='Usuario:')
 	password = getpass.getpass('Contraseña:')
