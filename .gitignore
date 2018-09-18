@@ -1,10 +1,4 @@
 
-build/
-dist/
-ikabot.egg-info/
-
-*.txt
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

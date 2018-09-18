@@ -64,8 +64,12 @@ def inicializar():
 	path = os.path.abspath(__file__)
 	path = os.path.dirname(path)
 	os.chdir(path)
-	run('touch ' + cookieFile)
-	run('touch ' + telegramFile)
+	if not os.path.isfile(cookieFile):
+		open(cookieFile, 'w')
+		os.chmod(cookieFile, 0o666)
+	if not os.path.isfile(telegramFile):
+		open(telegramFile, 'w')
+		os.chmod(telegramFile, 0o666)
 
 def start():
 	inicializar()
