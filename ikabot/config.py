@@ -2,8 +2,8 @@
 ids = None
 ciudades = None
 infoUser = ''
-cookieFile = '.cookies.txt'
-telegramFile = '.telegram.txt'
+cookieFile = '/tmp/.cookies.txt'
+telegramFile = '/tmp/.telegram.txt'
 urlCiudad = 'view=city&cityId='
 urlIsla = 'view=island&islandId='
 prompt = ' >>  '
