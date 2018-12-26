@@ -10,11 +10,11 @@ import os
 import time
 import re
 import random
-import hashlib
 import parser
 from ikabot.config import cookieFile
 from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.pedirInfo import read
+from ikabot.helpers.aesCipher import *
 
 class Sesion:
 	def __init__(self, urlBase, payload, headers):
@@ -22,32 +22,12 @@ class Sesion:
 		self.urlBase = urlBase
 		self.payload = payload
 		self.username = payload['name']
-		self.password = payload['password']
+		self.cipher = AESCipher(payload['password'])
 		data = re.search(r'https://(s\d+)-(\w+)', urlBase)
 		self.mundo = data.group(1)
 		self.servidor = data.group(2)
 		self.headers = headers
-		self.sha = self.__hashPasswd()
-		if self.__passwordEsValida():
-			self.__getCookie()
-		else:
-			sys.exit('Usuario o contrasenia incorrecta')
-
-	def __hashPasswd(self):
-		sha = hashlib.sha256()
-		sha.update(self.servidor.encode('utf-8') + b'0')
-		sha.update(self.mundo.encode('utf-8') + b'0')
-		sha.update(self.username.encode('utf-8') + b'0')
-		sha.update(self.password.encode('utf-8'))
-		return sha.hexdigest()
-
-	def __passwordEsValida(self):
-		sha = self.__getFileInfo()[0]
-		if sha:
-			sha = sha.group(4)
-			return sha == self.__hashPasswd()
-		else:
-			return True # es el primero
+		self.__getCookie()
 
 	def __logout(self, html):
 		if html is not None:
@@ -68,7 +48,9 @@ class Sesion:
 		lines = text.splitlines()
 		if primero is True:
 			cookie_dict = dict(self.s.cookies.items())
-			entrada = self.servidor + ' ' + self.mundo + ' ' + self.username + ' 1 ' + cookie_dict['PHPSESSID'] + ' ' + cookie_dict['ikariam'] + ' ' + self.sha
+			plaintext = cookie_dict['PHPSESSID'] + ' ' + cookie_dict['ikariam']
+			ciphertext = self.cipher.encrypt(plaintext)
+			entrada = self.servidor + ' ' + self.mundo + ' ' + self.username + ' 1 ' + ciphertext
 			newTextFile = ''
 			for line in lines:
 				if self.__isMyCookie(line) is False:
@@ -95,12 +77,12 @@ class Sesion:
 				else:
 					if salida is True:
 						if sesionesActivas > 1:
-							newline = self.servidor + ' ' + self.mundo + ' ' + self.username + ' ' + str(sesionesActivas - 1) + ' ' + fileInfo.group(2) + ' ' + fileInfo.group(3) + ' ' + self.sha
+							newline = self.servidor + ' ' + self.mundo + ' ' + self.username + ' ' + str(sesionesActivas - 1) + ' ' + fileInfo.group(2)
 							newTextFile += newline + '\n'
 						else:
 							self.__logout(html)
 					elif nuevo is True:
-						newline = self.servidor + ' ' + self.mundo + ' ' + self.username + ' ' + str(sesionesActivas + 1) + ' ' + fileInfo.group(2) + ' ' + fileInfo.group(3) + ' ' + self.sha
+						newline = self.servidor + ' ' + self.mundo + ' ' + self.username + ' ' + str(sesionesActivas + 1) + ' ' + fileInfo.group(2)
 						newTextFile += newline + '\n'
 		with open(cookieFile, 'w') as filehandler:
 			filehandler.write(newTextFile)
@@ -108,7 +90,12 @@ class Sesion:
 	def __getCookie(self):
 		fileInfo = self.__getFileInfo()[0]
 		if fileInfo:
-			cookie_dict = {'PHPSESSID': fileInfo.group(2), 'ikariam': fileInfo.group(3), 'ikariam_loginMode': '0'}
+			ciphertext = fileInfo.group(2)
+			plaintext = self.cipher.decrypt(ciphertext)
+			if plaintext == '':
+				sys.exit('Usuario o contrasenia incorrecta')
+			cookie1, cookie2 = plaintext.split(' ')
+			cookie_dict = {'PHPSESSID': cookie1, 'ikariam': cookie2, 'ikariam_loginMode': '0'}
 			self.s = requests.Session()
 			requests.cookies.cookiejar_from_dict(cookie_dict, cookiejar=self.s.cookies, overwrite=True)
 			self.__updateCookieFile(nuevo=True)
@@ -140,10 +127,10 @@ class Sesion:
 		if self.__sesionActiva() is False:
 			self.__getCookie()
 
-	def __getFileInfo(self): # 1 num de sesiones 2 cookie1 3 cookie2 4 sha
+	def __getFileInfo(self): # 1 num de sesiones 2 ciphertext
 		with open(cookieFile, 'r') as filehandler:
 			text = filehandler.read()
-		regex = re.escape(self.servidor) + r' ' + re.escape(self.mundo) + r' ' + re.escape(self.username) + r' (\d+) ([\w\d]+) ([\w\d_]+) ([\w\d]+)'
+		regex = re.escape(self.servidor) + r' ' + re.escape(self.mundo) + r' ' + re.escape(self.username) + r' (\d+) (.+)'
 		return (re.search(regex, text), text)
 
 	def __sesionActiva(self):
