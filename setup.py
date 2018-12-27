@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
 	name="ikabot",
-	version="0.8.1",
+	version="0.8.2",
 	author="santipcn",
 	description="A bot for ikariam",
 	long_description=long_description,
@@ -14,7 +14,7 @@ setuptools.setup(
 	packages=setuptools.find_packages(),
 	install_requires=[
 		  'requests',
-		  'Crypto'
+		  'pycryptodome'
 	],
 	entry_points = {
 		'console_scripts': ['ikabot=ikabot.command_line:main'],

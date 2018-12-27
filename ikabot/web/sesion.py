@@ -91,8 +91,9 @@ class Sesion:
 		fileInfo = self.__getFileInfo()[0]
 		if fileInfo:
 			ciphertext = fileInfo.group(2)
-			plaintext = self.cipher.decrypt(ciphertext)
-			if plaintext == '':
+			try:
+				plaintext = self.cipher.decrypt(ciphertext)
+			except ValueError as e:
 				sys.exit('Usuario o contrasenia incorrecta')
 			cookie1, cookie2 = plaintext.split(' ')
 			cookie_dict = {'PHPSESSID': cookie1, 'ikariam': cookie2, 'ikariam_loginMode': '0'}
