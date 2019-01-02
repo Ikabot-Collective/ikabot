@@ -136,13 +136,15 @@ class Sesion:
 
 	def __sesionActiva(self):
 		fileInfo = self.__getFileInfo()[0]
-		if fileInfo is None:
-			return False
-		else:
+		if fileInfo:
+			ciphertext = fileInfo.group(2)
 			try:
-				return fileInfo.group(2) == self.s.cookies['PHPSESSID']
+				plaintext = self.cipher.decrypt(ciphertext)
+				cookie = plaintext.split(' ')[0]
+				return cookie == self.s.cookies['PHPSESSID']
 			except KeyError:
-				return False
+				pass
+		return False
 
 	def token(self):
 		html = self.get()
