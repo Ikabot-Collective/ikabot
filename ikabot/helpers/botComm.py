@@ -4,20 +4,20 @@
 import re
 import random
 import ikabot.config as config
-from ikabot.web.sesion import get
+from ikabot.web.sesion import telegramGet
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.gui import enter
 
 def sendToBot(s, msg, Token=False):
 	if Token is False:
 		msg = '{}\n{}'.format(config.infoUser, msg)
-	with open(config.telegramFile, 'r') as filehandler:
+	with open(config.telegramFile, 'r', os.O_NONBLOCK) as filehandler:
 		text = filehandler.read()
 		(botToken, chatId) = text.splitlines()
-		get('https://api.telegram.org/bot{}/sendMessage'.format(botToken), params={'chat_id': chatId, 'text': msg})
+		telegramGet('https://api.telegram.org/bot{}/sendMessage'.format(botToken), params={'chat_id': chatId, 'text': msg})
 
 def telegramFileValido():
-	with open(config.telegramFile, 'r') as filehandler:
+	with open(config.telegramFile, 'r', os.O_NONBLOCK) as filehandler:
 		text = filehandler.read()
 	rta = re.search(r'\d{6,}:[A-Za-z0-9_-]{34,}\n\d{8,9}', text)
 	return rta is not None
@@ -35,13 +35,14 @@ def botValido(s):
 		else:
 			botToken = read(msg='Token del bot:')
 			chat_id = read(msg='Chat_id:')
-			with open(config.telegramFile, 'w') as filehandler:
+			with open(config.telegramFile, 'w', os.O_NONBLOCK) as filehandler:
 				filehandler.write(botToken + '\n' + chat_id)
+				filehandler.flush()
 			rand = random.randint(1000, 9999)
 			sendToBot(s, 'El token a ingresar es:{:d}'.format(rand), Token=True)
 			rta = read(msg='Se envio un mensaje por telegram, ¿lo recibió? [Y/n]', values=['y','Y','n', 'N', ''])
 			if rta.lower() == 'n':
-				with open(config.telegramFile, 'w') as file:
+				with open(config.telegramFile, 'w', os.O_NONBLOCK) as file:
 					pass
 				print('Revíse las credenciales y vuelva a proveerlas.')
 				enter()
@@ -49,7 +50,7 @@ def botValido(s):
 			else:
 				recibido = read(msg='Ingrese el token recibido mediante telegram:', digit=True)
 				if rand != recibido:
-					with open(config.telegramFile, 'w') as file:
+					with open(config.telegramFile, 'w', os.O_NONBLOCK) as file:
 						pass
 					print('El token es incorrecto')
 					enter()
