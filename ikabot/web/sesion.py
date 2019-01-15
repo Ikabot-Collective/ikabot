@@ -150,10 +150,8 @@ class Sesion:
 		html = self.get()
 		return re.search(r'actionRequest"?:\s*"(.*?)"', html).group(1)
 
-	def get(self, url=None):
+	def get(self, url=''):
 		self.__checkCookie()
-		if url is None:
-			url = ''
 		url = self.urlBase + url
 		while True:
 			try:
@@ -165,12 +163,9 @@ class Sesion:
 			except requests.exceptions.ConnectionError:
 				time.sleep(5 * 60)
 
-	def post(self, url=None, payloadPost=None):
+	def post(self, url='', payloadPost={}):
 		self.__checkCookie()
-		if url is None:
-			url = ''
 		url = self.urlBase + url
-		payloadPost = payloadPost or {}
 		while True:
 			try:
 				html = self.s.post(url, data=payloadPost, headers=self.headers).text
