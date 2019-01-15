@@ -84,8 +84,9 @@ class Sesion:
 					elif nuevo is True:
 						newline = self.servidor + ' ' + self.mundo + ' ' + self.username + ' ' + str(sesionesActivas + 1) + ' ' + fileInfo.group(2)
 						newTextFile += newline + '\n'
-		with open(cookieFile, 'w') as filehandler:
+		with open(cookieFile, 'w', os.O_NONBLOCK) as filehandler:
 			filehandler.write(newTextFile)
+			filehandler.flush()
 
 	def __getCookie(self):
 		fileInfo = self.__getFileInfo()[0]
@@ -129,7 +130,7 @@ class Sesion:
 			self.__getCookie()
 
 	def __getFileInfo(self): # 1 num de sesiones 2 ciphertext
-		with open(cookieFile, 'r') as filehandler:
+		with open(cookieFile, 'r', os.O_NONBLOCK) as filehandler:
 			text = filehandler.read()
 		regex = re.escape(self.servidor) + r' ' + re.escape(self.mundo) + r' ' + re.escape(self.username) + r' (\d+) (.+)'
 		return (re.search(regex, text), text)
@@ -183,3 +184,12 @@ class Sesion:
 		self.__updateCookieFile(salida=True)
 		if self.padre is False:
 			os._exit(0)
+
+def telegramGet(url, params=None):
+	try:
+		if params:
+			return requests.get(url, params=params)
+		else:
+			return requests.get(url)
+	except requests.exceptions.ConnectionError:
+		sys.exit('Fallo la conexion a internet')
