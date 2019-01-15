@@ -4,7 +4,7 @@
 import re
 import random
 import ikabot.config as config
-from ikabot.web.sesion import telegramGet
+from ikabot.web.sesion import normal_get
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.gui import enter
 
@@ -14,7 +14,7 @@ def sendToBot(s, msg, Token=False):
 	with open(config.telegramFile, 'r', os.O_NONBLOCK) as filehandler:
 		text = filehandler.read()
 		(botToken, chatId) = text.splitlines()
-		telegramGet('https://api.telegram.org/bot{}/sendMessage'.format(botToken), params={'chat_id': chatId, 'text': msg})
+		normal_get('https://api.telegram.org/bot{}/sendMessage'.format(botToken), params={'chat_id': chatId, 'text': msg})
 
 def telegramFileValido():
 	with open(config.telegramFile, 'r', os.O_NONBLOCK) as filehandler:

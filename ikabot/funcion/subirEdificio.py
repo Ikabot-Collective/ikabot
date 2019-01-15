@@ -13,7 +13,7 @@ from ikabot.helpers.recursos import getRecursosDisponibles
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.process import forkear
 from ikabot.helpers.gui import banner
-from ikabot.web.sesion import get
+from ikabot.web.sesion import normal_get
 
 def getTiempoDeConstruccion(html):
 	fin = re.search(r'"endUpgradeTime":(\d{10})', html)
@@ -70,7 +70,7 @@ def recursosNecesarios(s, idCiudad, posEdifiico,  niveles):
 	nombre = ciudad['position'][posEdifiico]['building']
 	(carpinteria, oficina, prensa, optico, area)  = getReductores(ciudad)
 	url = 'http://ycedespacho.hol.es/ikabot.php?edificio={}&desde={}&hasta={}&carpinteria={}&oficina={}&prensa={}&optico={}&area={}'.format(nombre, desde, hasta, carpinteria, oficina, prensa, optico, area)
-	rta = get(url).text.split(',')
+	rta = normal_get(url).text.split(',')
 	return list(map(int, rta))
 
 def subirEdificios(s):
