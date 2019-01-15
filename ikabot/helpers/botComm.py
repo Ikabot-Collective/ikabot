@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import re
+import os
 import random
 import ikabot.config as config
 from ikabot.web.sesion import normal_get
