@@ -183,12 +183,3 @@ class Sesion:
 		self.__updateCookieFile(salida=True)
 		if self.padre is False:
 			os._exit(0)
-
-def get(url, params=None):
-	try:
-		if params:
-			return requests.get(url, params=params)
-		else:
-			return requests.get(url)
-	except requests.exceptions.ConnectionError:
-		sys.exit('Fallo la conexion a internet')
