@@ -185,7 +185,7 @@ class Sesion:
 		if self.padre is False:
 			os._exit(0)
 
-def telegramGet(url, params=None):
+def normal_get(url, params=None):
 	try:
 		if params:
 			return requests.get(url, params=params)

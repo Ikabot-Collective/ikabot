@@ -10,7 +10,7 @@ from ikabot.helpers.gui import banner
 
 def getSesion():
 	banner()
-	html = get('https://es.ikariam.gameforge.com/?').text
+	html = normal_get('https://es.ikariam.gameforge.com/?').text
 	servidores = re.findall(r'<a href="(?:https:)?//(\w{2})\.ikariam\.gameforge\.com/\?kid=[\d\w-]*" target="_top" rel="nofollow" class="mmoflag mmo_\w{2}">(.+)</a>', html)
 	i = 0
 	for server in servidores:
