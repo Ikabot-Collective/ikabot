@@ -21,7 +21,7 @@ def getSesion():
 	config.infoUser = 'Servidor:{}'.format(servidores[servidor-1][1])
 	banner()
 	if srv != 'es':
-		html = get('https://{}.ikariam.gameforge.com/?'.format(srv)).text
+		html = normal_get('https://{}.ikariam.gameforge.com/?'.format(srv)).text
 	html = re.search(r'registerServer[\s\S]*registerServerServerInfo', html).group()
 	mundos = re.findall(r'mobileUrl="s(\d{1,2})-\w{2}\.ikariam\.gameforge\.com"\s*?cookieName=""\s*>\s*(\w+)\s*</option>', html)
 	i = 0
