@@ -66,10 +66,10 @@ def inicializar():
 	os.chdir(path)
 	if not os.path.isfile(cookieFile):
 		open(cookieFile, 'w')
-		os.chmod(cookieFile, 0o666)
+		os.chmod(cookieFile, 0o600)
 	if not os.path.isfile(telegramFile):
 		open(telegramFile, 'w')
-		os.chmod(telegramFile, 0o666)
+		os.chmod(telegramFile, 0o600)
 
 def start():
 	inicializar()
