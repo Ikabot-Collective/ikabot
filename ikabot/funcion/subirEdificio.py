@@ -37,8 +37,9 @@ def subirEdificio(s, idCiudad, posicion):
 	ciudad = esperarConstruccion(s, idCiudad)
 	edificio = ciudad['position'][posicion]
 
-	if edificio['isMaxLevel'] is True or edificio['canUpgrade'] is False:
-		return
+	if edificio['canUpgrade'] is False:
+		msg = 'No se pudo terminar de subir el edificio por falta de recursos.'
+		raise Exception(msg)
 
 	url = 'action=CityScreen&function=upgradeBuilding&actionRequest={}&cityId={}&position={:d}&level={}&backgroundView=city&templateView={}&ajax=1'.format(s.token(), idCiudad, posicion, edificio['level'], edificio['building'])
 	s.post(url)
