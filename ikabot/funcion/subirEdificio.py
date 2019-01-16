@@ -121,8 +121,7 @@ def subirEdificios(s):
 		for edificio in edificios:
 			subirEdificio(s, idCiudad, edificio)
 	except:
-		if telegramFileValido():
-			msg = 'Error en:\n{}\nCausa:\n{}'.format(info, traceback.format_exc())
-			sendToBot(s, msg)
+		msg = 'Error en:\n{}\nCausa:\n{}'.format(info, traceback.format_exc())
+		sendToBot(s, msg)
 	finally:
 		s.logout()

@@ -25,6 +25,7 @@ def entrarDiariamente(s):
 	except:
 		msg = 'Error en:\n{}\nCausa:\n{}'.format(info, traceback.format_exc())
 		sendToBot(s, msg)
+	finally:
 		s.logout()
 
 def do_it(s):

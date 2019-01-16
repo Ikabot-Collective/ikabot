@@ -14,14 +14,16 @@ def sendToBot(s, msg, Token=False):
 		msg = '{}\n{}'.format(config.infoUser, msg)
 	with open(config.telegramFile, 'r', os.O_NONBLOCK) as filehandler:
 		text = filehandler.read()
-		(botToken, chatId) = text.splitlines()
-		normal_get('https://api.telegram.org/bot{}/sendMessage'.format(botToken), params={'chat_id': chatId, 'text': msg})
+		valid = re.search(r'\d{6,}:[A-Za-z0-9_-]{34,}\n\d{8,9}', text)
+		if valid is not None:
+			(botToken, chatId) = text.splitlines()
+			normal_get('https://api.telegram.org/bot{}/sendMessage'.format(botToken), params={'chat_id': chatId, 'text': msg})
 
 def telegramFileValido():
 	with open(config.telegramFile, 'r', os.O_NONBLOCK) as filehandler:
 		text = filehandler.read()
-	rta = re.search(r'\d{6,}:[A-Za-z0-9_-]{34,}\n\d{8,9}', text)
-	return rta is not None
+	valid = re.search(r'\d{6,}:[A-Za-z0-9_-]{34,}\n\d{8,9}', text)
+	return valid is not None
 
 def botValido(s):
 	if telegramFileValido():

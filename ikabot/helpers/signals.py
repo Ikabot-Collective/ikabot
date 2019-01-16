@@ -17,8 +17,6 @@ def setSignalsHandlers(s):
 
 def setInfoSignal(s, info): # el proceso explica su funcion por stdout
 	info = 'información del proceso {}:\n{}'.format(os.getpid(), info)
-	isValid = telegramFileValido()
 	def _sendInfo(signum, frame):
-		if isValid:
-			sendToBot(s, info)
+		sendToBot(s, info)
 	signal.signal(signal.SIGUSR1, _sendInfo) # kill -SIGUSR1 pid
