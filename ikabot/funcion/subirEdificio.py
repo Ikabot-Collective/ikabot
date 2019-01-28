@@ -43,6 +43,13 @@ def subirEdificio(s, idCiudad, posicion):
 
 	url = 'action=CityScreen&function=upgradeBuilding&actionRequest={}&cityId={}&position={:d}&level={}&backgroundView=city&templateView={}&ajax=1'.format(s.token(), idCiudad, posicion, edificio['level'], edificio['building'])
 	s.post(url)
+	html = s.get(urlCiudad + idCiudad)
+	slp = getTiempoDeConstruccion(html)
+	if slp == 0:
+		msg  = 'El edificio no se amplió\n'
+		msg += url + '\n'
+		msg += str(edificio)
+		raise Exception(msg)
 
 def getReductores(ciudad):
 	(carpinteria, oficina, prensa, optico, area) = (0, 0, 0, 0, 0)
