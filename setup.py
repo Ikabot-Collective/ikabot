@@ -6,11 +6,11 @@ with open("README.md", "r") as fh:
 setuptools.setup(
 	name="ikabot",
 	version="1.1",
-	author="santipcn",
+	author="physics-sp",
 	description="A bot for ikariam",
 	long_description=long_description,
 	long_description_content_type="text/markdown",
-	url="https://github.com/santipcn/ikabot",
+	url="https://github.com/physics-sp/ikabot",
 	packages=setuptools.find_packages(),
 	install_requires=[
 		  'requests',
