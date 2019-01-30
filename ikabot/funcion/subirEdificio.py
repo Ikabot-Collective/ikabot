@@ -43,12 +43,24 @@ def subirEdificio(s, idCiudad, posicion):
 
 	url = 'action=CityScreen&function=upgradeBuilding&actionRequest={}&cityId={}&position={:d}&level={}&backgroundView=city&templateView={}&ajax=1'.format(s.token(), idCiudad, posicion, edificio['level'], edificio['building'])
 	s.post(url)
+
 	html = s.get(urlCiudad + idCiudad)
-	slp = getTiempoDeConstruccion(html)
-	if slp == 0:
+	fin = re.search(r'"endUpgradeTime":(\d{10})', html)
+	if fin is None:
 		msg  = 'El edificio no se amplió\n'
 		msg += url + '\n'
 		msg += str(edificio)
+		raise Exception(msg)
+	inicio = re.search(r'serverTime:\s"(\d{10})', html)
+	espera = int(fin.group(1)) - int(inicio.group(1))
+	if espera > 0:
+		msg = 'Espero {:d} segundos para subir {} del lv {} al siguiente'.format(espera, edificio['building'], edificio['level'])
+		sendToBot(s, msg)
+	elif espera == 0:
+		msg = 'Espero ¡0! segundos para subir {} del lv {} al siguiente'.format(edificio['building'], edificio['level'])
+		sendToBot(s, msg)
+	else:
+		msg = 'Espera negativa de {:d} segundos para subir {} del lv {} al siguiente'.format(espera*-1, edificio['building'], edificio['level'])
 		raise Exception(msg)
 
 def getReductores(ciudad):
