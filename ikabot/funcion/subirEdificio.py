@@ -41,7 +41,7 @@ def subirEdificio(s, idCiudad, posicion):
 		msg = 'No se pudo terminar de subir el edificio por falta de recursos.'
 		raise Exception(msg)
 
-	url = 'action=CityScreen&function=upgradeBuilding&actionRequest={}&cityId={}&position={:d}&level={}&backgroundView=city&templateView={}&ajax=1'.format(s.token(), idCiudad, posicion, edificio['level'], edificio['building'])
+	url = 'action=CityScreen&function=upgradeBuilding&actionRequest={}&cityId={}&position={:d}&level={}&activeTab=tabSendTransporter&backgroundView=city&currentCityId={}&templateView={}&ajax=1'.format(s.token(), idCiudad, posicion, edificio['level'], idCiudad, edificio['building'])
 	s.post(url)
 
 	html = s.get(urlCiudad + idCiudad)
@@ -61,6 +61,9 @@ def subirEdificio(s, idCiudad, posicion):
 		sendToBot(s, msg)
 	else:
 		msg = 'Espera negativa de {:d} segundos para subir {} del lv {} al siguiente'.format(espera*-1, edificio['building'], edificio['level'])
+		fd = open('negativeWaitError', 'a')
+		fd.write(msg + '\n'*2 + html + '*'*20  + '\n'*5)
+		fd.close()
 		raise Exception(msg)
 
 def getReductores(ciudad):
@@ -83,8 +86,9 @@ def getReductores(ciudad):
 def recursosNecesarios(s, idCiudad, posEdifiico,  niveles):
 	html = s.get(urlCiudad + idCiudad)
 	ciudad = getCiudad(html)
-	desde = int(ciudad['position'][posEdifiico]['level'])
-	if ciudad['position'][posEdifiico]['isBusy']:
+	edificio = ciudad['position'][posEdifiico]
+	desde = int(edificio['level'])
+	if edificio['isBusy']:
 		desde += 1
 	hasta = desde + niveles
 	nombre = ciudad['position'][posEdifiico]['building']
