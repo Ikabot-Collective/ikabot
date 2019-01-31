@@ -53,14 +53,15 @@ def subirEdificio(s, idCiudad, posicion):
 		raise Exception(msg)
 	inicio = re.search(r'serverTime:\s"(\d{10})', html)
 	espera = int(fin.group(1)) - int(inicio.group(1))
+	msg = ciudad['cityName'] + ': '
 	if espera > 0:
-		msg = 'Espero {:d} segundos para subir {} del lv {} al siguiente'.format(espera, edificio['building'], edificio['level'])
+		msg += 'Espero {:d} segundos para subir {} del lv {} al siguiente'.format(espera, edificio['name'], edificio['level'])
 		sendToBot(s, msg)
 	elif espera == 0:
-		msg = 'Espero ¡0! segundos para subir {} del lv {} al siguiente'.format(edificio['building'], edificio['level'])
+		msg += 'Espero ¡0! segundos para subir {} del lv {} al siguiente'.format(edificio['name'], edificio['level'])
 		sendToBot(s, msg)
 	else:
-		msg = 'Espera negativa de {:d} segundos para subir {} del lv {} al siguiente'.format(espera*-1, edificio['building'], edificio['level'])
+		msg += 'Espera negativa de {:d} segundos para subir {} del lv {} al siguiente'.format(espera*-1, edificio['name'], edificio['level'])
 		fd = open('negativeWaitError', 'a')
 		fd.write(msg + '\n'*2 + html + '*'*20  + '\n'*5)
 		fd.close()
