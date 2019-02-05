@@ -48,7 +48,7 @@ def subirEdificio(s, idCiudad, posicion, nivelesASubir):
 		s.post(url)
 
 		html = s.get(urlCiudad + idCiudad)
-		ciudad = geteCiudad(html)
+		ciudad = getCiudad(html)
 		edificio = ciudad['position'][posicion]
 		if edificio['isBusy'] is False:
 			msg  = 'El edificio no se amplió\n'
