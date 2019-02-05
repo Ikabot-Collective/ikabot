@@ -33,39 +33,45 @@ def esperarConstruccion(s, idCiudad):
 		time.sleep(slp + 5)
 	return getCiudad(html)
 
-def subirEdificio(s, idCiudad, posicion):
-	ciudad = esperarConstruccion(s, idCiudad)
-	edificio = ciudad['position'][posicion]
+def subirEdificio(s, idCiudad, posicion, nivelesASubir):
 
-	if edificio['canUpgrade'] is False:
-		msg = 'No se pudo terminar de subir el edificio por falta de recursos.'
-		raise Exception(msg)
+	for i in range(nivelesASubir):
+		ciudad = esperarConstruccion(s, idCiudad)
+		edificio = ciudad['position'][posicion]
 
-	url = 'action=CityScreen&function=upgradeBuilding&actionRequest={}&cityId={}&position={:d}&level={}&activeTab=tabSendTransporter&backgroundView=city&currentCityId={}&templateView={}&ajax=1'.format(s.token(), idCiudad, posicion, edificio['level'], idCiudad, edificio['building'])
-	s.post(url)
+		if edificio['canUpgrade'] is False:
+			msg  = 'No se pudo terminar de subir el edificio por falta de recursos.'
+			msg += 'Faltaron subir {:d} niveles'.format(nivelesASubir - i)
+			raise Exception(msg)
 
-	html = s.get(urlCiudad + idCiudad)
-	fin = re.search(r'"endUpgradeTime":(\d{10})', html)
-	if fin is None:
-		msg  = 'El edificio no se amplió\n'
-		msg += url + '\n'
-		msg += str(edificio)
-		raise Exception(msg)
-	inicio = re.search(r'serverTime:\s"(\d{10})', html)
-	espera = int(fin.group(1)) - int(inicio.group(1))
-	msg = ciudad['cityName'] + ': '
-	if espera > 0:
-		msg += 'Espero {:d} segundos para subir {} del lv {} al siguiente'.format(espera, edificio['name'], edificio['level'])
-		sendToBot(s, msg)
-	elif espera == 0:
-		msg += 'Espero ¡0! segundos para subir {} del lv {} al siguiente'.format(edificio['name'], edificio['level'])
-		sendToBot(s, msg)
-	else:
-		msg += 'Espera negativa de {:d} segundos para subir {} del lv {} al siguiente'.format(espera*-1, edificio['name'], edificio['level'])
-		fd = open('negativeWaitError', 'a')
-		fd.write(msg + '\n'*2 + html + '*'*20  + '\n'*5)
-		fd.close()
-		raise Exception(msg)
+		url = 'action=CityScreen&function=upgradeBuilding&actionRequest={}&cityId={}&position={:d}&level={}&activeTab=tabSendTransporter&backgroundView=city&currentCityId={}&templateView={}&ajax=1'.format(s.token(), idCiudad, posicion, edificio['level'], idCiudad, edificio['building'])
+		s.post(url)
+
+		html = s.get(urlCiudad + idCiudad)
+		ciudad = geteCiudad(html)
+		edificio = ciudad['position'][posicion]
+		if edificio['isBusy'] is False:
+			msg  = 'El edificio no se amplió\n'
+			msg += url + '\n'
+			msg += str(edificio)
+			raise Exception(msg)
+
+		# for debug
+		inicio = re.search(r'serverTime:\s"(\d{10})', html)
+		espera = int(fin.group(1)) - int(inicio.group(1))
+		msg = ciudad['cityName'] + ': '
+		if espera > 0:
+			msg += 'Espero {:d} segundos para subir {} al nivel {:d}'.format(espera, edificio['name'], int(edificio['level']) + 2)
+			sendToBot(s, msg)
+		elif espera == 0:
+			msg += 'Espero ¡0! segundos para subir {} al nivel {:d}'.format(edificio['name'], int(edificio['level']) + 2)
+			sendToBot(s, msg)
+		else:
+			msg += 'Espera negativa de {:d} segundos para subir {} al nivel {:d}'.format(espera*-1, edificio['name'], int(edificio['level']) + 2)
+			fd = open('/tmp/negativeWaitError', 'a')
+			fd.write(msg + '\n'*2 + html + '*'*20  + '\n'*5)
+			fd.close()
+			raise Exception(msg)
 
 def getReductores(ciudad):
 	(carpinteria, oficina, prensa, optico, area) = (0, 0, 0, 0, 0)
@@ -84,15 +90,8 @@ def getReductores(ciudad):
 				area = lv
 	return (carpinteria, oficina, prensa, optico, area)
 
-def recursosNecesarios(s, idCiudad, posEdifiico,  niveles):
-	html = s.get(urlCiudad + idCiudad)
-	ciudad = getCiudad(html)
-	edificio = ciudad['position'][posEdifiico]
-	desde = int(edificio['level'])
-	if edificio['isBusy']:
-		desde += 1
-	hasta = desde + niveles
-	nombre = ciudad['position'][posEdifiico]['building']
+def recursosNecesarios(s, ciudad, edificio, desde, hasta):
+	nombre = edificio['building']
 	(carpinteria, oficina, prensa, optico, area)  = getReductores(ciudad)
 	url = 'http://ycedespacho.hol.es/ikabot.php?edificio={}&desde={}&hasta={}&carpinteria={}&oficina={}&prensa={}&optico={}&area={}'.format(nombre, desde, hasta, carpinteria, oficina, prensa, optico, area)
 	rta = normal_get(url).text.split(',')
@@ -105,8 +104,17 @@ def subirEdificios(s):
 	edificios = getEdificios(s, idCiudad)
 	if edificios == []:
 		return
+	posEdificio = edificios[0]
+	niveles = len(edificios)
+	html = s.get(urlCiudad + idCiudad)
+	ciudad = getCiudad(html)
+	edificio = ciudad['position'][posEdificio]
+	desde = int(edificio['level'])
+	if edificio['isBusy']:
+		desde += 1
+	hasta = desde + niveles
 	try:
-		(madera, vino, marmol, cristal, azufre) = recursosNecesarios(s, idCiudad, edificios[0], len(edificios))
+		(madera, vino, marmol, cristal, azufre) = recursosNecesarios(s, ciudad, edificio, desde, hasta)
 		assert madera != 0
 		html = s.get(urlCiudad + idCiudad)
 		(maderaDisp, vinoDisp, marmolDisp, cristalDisp, azufreDisp) = getRecursosDisponibles(html, num=True)
@@ -139,12 +147,11 @@ def subirEdificios(s):
 		return
 
 	info = '\nSubir edificio\n'
-	info = info + 'Ciudad: {}\nEdificio: {}'.format(ciudad['cityName'], ciudad['position'][edificios[0]]['name'])
+	info = info + 'Ciudad: {}\nEdificio: {}.Desde {:d}, hasta {:d}'.format(ciudad['cityName'], edificio['name'], desde, hasta)
 
 	setInfoSignal(s, info)
 	try:
-		for edificio in edificios:
-			subirEdificio(s, idCiudad, edificio)
+		subirEdificio(s, idCiudad, posEdificio, niveles)
 	except:
 		msg = 'Error en:\n{}\nCausa:\n{}'.format(info, traceback.format_exc())
 		sendToBot(s, msg)
