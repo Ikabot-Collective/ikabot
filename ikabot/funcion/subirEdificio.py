@@ -15,28 +15,46 @@ from ikabot.helpers.process import forkear
 from ikabot.helpers.gui import banner
 from ikabot.web.sesion import normal_get
 
-def getTiempoDeConstruccion(html):
+def getTiempoDeConstruccion(s, html, posicion):
+	ciudad = getCiudad(html)
+	edificio = ciudad['position'][posicion]
 	fin = re.search(r'"endUpgradeTime":(\d{10})', html)
 	if fin is None:
+		msg += 'No espero nada para que {} suba al nivel {:d}'.format(edificio['name'], int(edificio['level']))
+		sendToBot(s, msg)
 		return 0
 	inicio = re.search(r'serverTime:\s"(\d{10})', html)
 	espera = int(fin.group(1)) - int(inicio.group(1))
+	msg = ciudad['cityName'] + ': '
+	if espera > 0:
+		msg += 'Espero {:d} segundos para que {} suba al nivel {:d}'.format(espera, edificio['name'], int(edificio['level']) + 1)
+		sendToBot(s, msg)
+	elif espera == 0:
+		msg += 'Espero ¡0! segundos para subir {} suba al nivel {:d}'.format(edificio['name'], int(edificio['level']) + 1)
+		sendToBot(s, msg)
+	else:
+		msg += 'Espera negativa de {:d} segundos que {} suba al nivel {:d}'.format(espera*-1, edificio['name'], int(edificio['level']) + 1)
+		fd = open('/tmp/negativeWaitError', 'a')
+		fd.write(msg + '\n'*2 + html + '*'*20  + '\n'*5)
+		fd.close()
+		raise Exception(msg)
+
 	if espera < 0:
 		espera = 5
 	return espera
 
-def esperarConstruccion(s, idCiudad):
+def esperarConstruccion(s, idCiudad, posicion):
 	slp = 1
 	while slp > 0:
 		html = s.get(urlCiudad + idCiudad)
-		slp = getTiempoDeConstruccion(html)
+		slp = getTiempoDeConstruccion(s, html, posicion)
 		time.sleep(slp + 5)
 	return getCiudad(html)
 
 def subirEdificio(s, idCiudad, posicion, nivelesASubir):
 
 	for i in range(nivelesASubir):
-		ciudad = esperarConstruccion(s, idCiudad)
+		ciudad = esperarConstruccion(s, idCiudad, posicion)
 		edificio = ciudad['position'][posicion]
 
 		if edificio['canUpgrade'] is False:
@@ -54,23 +72,6 @@ def subirEdificio(s, idCiudad, posicion, nivelesASubir):
 			msg  = 'El edificio no se amplió\n'
 			msg += url + '\n'
 			msg += str(edificio)
-			raise Exception(msg)
-
-		# for debug
-		inicio = re.search(r'serverTime:\s"(\d{10})', html)
-		espera = int(fin.group(1)) - int(inicio.group(1))
-		msg = ciudad['cityName'] + ': '
-		if espera > 0:
-			msg += 'Espero {:d} segundos para subir {} al nivel {:d}'.format(espera, edificio['name'], int(edificio['level']) + 2)
-			sendToBot(s, msg)
-		elif espera == 0:
-			msg += 'Espero ¡0! segundos para subir {} al nivel {:d}'.format(edificio['name'], int(edificio['level']) + 2)
-			sendToBot(s, msg)
-		else:
-			msg += 'Espera negativa de {:d} segundos para subir {} al nivel {:d}'.format(espera*-1, edificio['name'], int(edificio['level']) + 2)
-			fd = open('/tmp/negativeWaitError', 'a')
-			fd.write(msg + '\n'*2 + html + '*'*20  + '\n'*5)
-			fd.close()
 			raise Exception(msg)
 
 def getReductores(ciudad):
