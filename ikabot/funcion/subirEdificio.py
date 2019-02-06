@@ -18,6 +18,7 @@ from ikabot.web.sesion import normal_get
 def getTiempoDeConstruccion(s, html, posicion):
 	ciudad = getCiudad(html)
 	edificio = ciudad['position'][posicion]
+	msg = ciudad['cityName'] + ': '
 	fin = re.search(r'"endUpgradeTime":(\d{10})', html)
 	if fin is None:
 		msg += 'No espero nada para que {} suba al nivel {:d}'.format(edificio['name'], int(edificio['level']))
@@ -25,7 +26,6 @@ def getTiempoDeConstruccion(s, html, posicion):
 		return 0
 	inicio = re.search(r'serverTime:\s"(\d{10})', html)
 	espera = int(fin.group(1)) - int(inicio.group(1))
-	msg = ciudad['cityName'] + ': '
 	if espera > 0:
 		msg += 'Espero {:d} segundos para que {} suba al nivel {:d}'.format(espera, edificio['name'], int(edificio['level']) + 1)
 		sendToBot(s, msg)
