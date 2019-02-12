@@ -9,6 +9,10 @@ from ikabot.web.sesion import normal_get
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.gui import enter
 
+def sendToBotDebug(s, msg, debugON):
+	if debugON:
+		sendToBot(s, msg)
+
 def sendToBot(s, msg, Token=False):
 	if Token is False:
 		msg = '{}\n{}'.format(config.infoUser, msg)
