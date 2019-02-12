@@ -37,7 +37,7 @@ def getTiempoDeConstruccion(s, html, posicion):
 		fd = open('/tmp/negativeWaitError', 'a')
 		fd.write(msg + '\n'*2 + html + '*'*20  + '\n'*5)
 		fd.close()
-		raise Exception(msg)
+		sendToBot(s, msg)
 
 	if espera < 0:
 		espera = 5
@@ -60,7 +60,8 @@ def subirEdificio(s, idCiudad, posicion, nivelesASubir):
 		if edificio['canUpgrade'] is False:
 			msg  = 'No se pudo terminar de subir el edificio por falta de recursos.'
 			msg += 'Faltaron subir {:d} niveles'.format(nivelesASubir - i)
-			raise Exception(msg)
+			sendToBot(s, msg)
+			return
 
 		url = 'action=CityScreen&function=upgradeBuilding&actionRequest={}&cityId={}&position={:d}&level={}&activeTab=tabSendTransporter&backgroundView=city&currentCityId={}&templateView={}&ajax=1'.format(s.token(), idCiudad, posicion, edificio['level'], idCiudad, edificio['building'])
 		s.post(url)
@@ -72,7 +73,8 @@ def subirEdificio(s, idCiudad, posicion, nivelesASubir):
 			msg  = 'El edificio no se amplió\n'
 			msg += url + '\n'
 			msg += str(edificio)
-			raise Exception(msg)
+			sendToBot(s, msg)
+			return
 
 def getReductores(ciudad):
 	(carpinteria, oficina, prensa, optico, area) = (0, 0, 0, 0, 0)
