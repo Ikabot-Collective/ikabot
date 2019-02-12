@@ -22,22 +22,22 @@ def getTiempoDeConstruccion(s, html, posicion):
 	fin = re.search(r'"endUpgradeTime":(\d{10})', html)
 	if fin is None:
 		msg += 'No espero nada para que {} suba al nivel {:d}'.format(edificio['name'], int(edificio['level']))
-		sendToBot(s, msg)
+		sendToBotDebug(s, msg, debugON_subirEdificio)
 		return 0
 	inicio = re.search(r'serverTime:\s"(\d{10})', html)
 	espera = int(fin.group(1)) - int(inicio.group(1))
 	if espera > 0:
 		msg += 'Espero {:d} segundos para que {} suba al nivel {:d}'.format(espera, edificio['name'], int(edificio['level']) + 1)
-		sendToBot(s, msg)
+		sendToBotDebug(s, msg, debugON_subirEdificio)
 	elif espera == 0:
 		msg += 'Espero ¡0! segundos para subir {} suba al nivel {:d}'.format(edificio['name'], int(edificio['level']) + 1)
-		sendToBot(s, msg)
+		sendToBotDebug(s, msg, debugON_subirEdificio)
 	else:
 		msg += 'Espera negativa de {:d} segundos que {} suba al nivel {:d}'.format(espera*-1, edificio['name'], int(edificio['level']) + 1)
 		fd = open('/tmp/negativeWaitError', 'a')
 		fd.write(msg + '\n'*2 + html + '*'*20  + '\n'*5)
 		fd.close()
-		sendToBot(s, msg)
+		sendToBotDebug(s, msg, debugON_subirEdificio)
 
 	if espera < 0:
 		espera = 5
@@ -53,13 +53,13 @@ def esperarConstruccion(s, idCiudad, posicion):
 
 def subirEdificio(s, idCiudad, posicion, nivelesASubir):
 
-	for i in range(nivelesASubir):
+	for lv in range(nivelesASubir):
 		ciudad = esperarConstruccion(s, idCiudad, posicion)
 		edificio = ciudad['position'][posicion]
 
 		if edificio['canUpgrade'] is False:
 			msg  = 'No se pudo terminar de subir el edificio por falta de recursos.'
-			msg += 'Faltaron subir {:d} niveles'.format(nivelesASubir - i)
+			msg += 'Faltaron subir {:d} niveles'.format(nivelesASubir - lv)
 			sendToBot(s, msg)
 			return
 
