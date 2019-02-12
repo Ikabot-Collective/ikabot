@@ -9,6 +9,7 @@ urlCiudad = 'view=city&cityId='
 urlIsla = 'view=island&islandId='
 prompt = ' >>  '
 tipoDeBien = ['Madera', 'Vino', 'Marmol', 'Cristal', 'Azufre']
+ConnectionError_wait = 5 * 60
 debugON_alertarAtaques    = False
 debugON_alertarPocoVino   = False
 debugON_botDonador        = False
