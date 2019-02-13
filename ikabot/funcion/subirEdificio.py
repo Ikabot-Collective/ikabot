@@ -15,39 +15,29 @@ from ikabot.helpers.process import forkear
 from ikabot.helpers.gui import banner
 from ikabot.web.sesion import normal_get
 
-def getTiempoDeConstruccion(s, html, posicion):
+def getTiempoDeConstruccion(html, posicion):
 	ciudad = getCiudad(html)
 	edificio = ciudad['position'][posicion]
-	msg = ciudad['cityName'] + ': '
-	fin = re.search(r'"endUpgradeTime":(\d{10})', html)
-	if fin is None:
-		msg += 'No espero nada para que {} suba al nivel {:d}'.format(edificio['name'], int(edificio['level']))
+	hora_fin = re.search(r'"endUpgradeTime":(\d{10})', html)
+	if hora_fin is None:
+		msg = '{}: No espero nada para que {} suba al nivel {:d}'.format(ciudad['cityName'], edificio['name'], int(edificio['level']))
 		sendToBotDebug(msg, debugON_subirEdificio)
 		return 0
-	inicio = re.search(r'serverTime:\s"(\d{10})', html)
-	espera = int(fin.group(1)) - int(inicio.group(1))
-	if espera > 0:
-		msg += 'Espero {:d} segundos para que {} suba al nivel {:d}'.format(espera, edificio['name'], int(edificio['level']) + 1)
-		sendToBotDebug(msg, debugON_subirEdificio)
-	elif espera == 0:
-		msg += 'Espero ¡0! segundos para subir {} suba al nivel {:d}'.format(edificio['name'], int(edificio['level']) + 1)
-		sendToBotDebug(msg, debugON_subirEdificio)
-	else:
-		msg += 'Espera negativa de {:d} segundos que {} suba al nivel {:d}'.format(espera*-1, edificio['name'], int(edificio['level']) + 1)
-		fd = open('/tmp/negativeWaitError', 'a')
-		fd.write(msg + '\n'*2 + html + '*'*20  + '\n'*5)
-		fd.close()
-		sendToBotDebug(msg, debugON_subirEdificio)
 
-	if espera < 0:
-		espera = 5
+	hora_actual = int( time.time() )
+	hora_fin    = int( hora_fin.group(1) )
+	espera      = hora_fin - hora_actual
+
+	msg = '{}: Espero {:d} segundos para que {} suba al nivel {:d}'.format(ciudad['cityName'], espera, edificio['name'], int(edificio['level']) + 1)
+	sendToBotDebug(msg, debugON_subirEdificio)
+
 	return espera
 
 def esperarConstruccion(s, idCiudad, posicion):
 	slp = 1
 	while slp > 0:
 		html = s.get(urlCiudad + idCiudad)
-		slp = getTiempoDeConstruccion(s, html, posicion)
+		slp = getTiempoDeConstruccion(html, posicion)
 		time.sleep(slp + 5)
 	return getCiudad(html)
 
