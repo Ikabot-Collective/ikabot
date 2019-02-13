@@ -128,15 +128,15 @@ def menuRutaComercial(s):
 	try:
 		msg  = 'Comienzo a enviar recursos:\n'
 		msg += info
-		sendToBotDebug(s, msg, debugON_menuRutaComercial)
+		sendToBotDebug(msg, debugON_menuRutaComercial)
 
 		planearViajes(s, rutas)
 
 		msg  = 'Termino de enviar recursos:\n'
 		msg += info
-		sendToBotDebug(s, msg, debugON_menuRutaComercial)
+		sendToBotDebug(msg, debugON_menuRutaComercial)
 	except:
 		msg = 'Error en:\n{}\nCausa:\n{}'.format(info, traceback.format_exc())
-		sendToBot(s, msg)
+		sendToBot(msg)
 	finally:
 		s.logout()

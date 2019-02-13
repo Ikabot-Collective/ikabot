@@ -22,22 +22,22 @@ def getTiempoDeConstruccion(s, html, posicion):
 	fin = re.search(r'"endUpgradeTime":(\d{10})', html)
 	if fin is None:
 		msg += 'No espero nada para que {} suba al nivel {:d}'.format(edificio['name'], int(edificio['level']))
-		sendToBotDebug(s, msg, debugON_subirEdificio)
+		sendToBotDebug(msg, debugON_subirEdificio)
 		return 0
 	inicio = re.search(r'serverTime:\s"(\d{10})', html)
 	espera = int(fin.group(1)) - int(inicio.group(1))
 	if espera > 0:
 		msg += 'Espero {:d} segundos para que {} suba al nivel {:d}'.format(espera, edificio['name'], int(edificio['level']) + 1)
-		sendToBotDebug(s, msg, debugON_subirEdificio)
+		sendToBotDebug(msg, debugON_subirEdificio)
 	elif espera == 0:
 		msg += 'Espero ¡0! segundos para subir {} suba al nivel {:d}'.format(edificio['name'], int(edificio['level']) + 1)
-		sendToBotDebug(s, msg, debugON_subirEdificio)
+		sendToBotDebug(msg, debugON_subirEdificio)
 	else:
 		msg += 'Espera negativa de {:d} segundos que {} suba al nivel {:d}'.format(espera*-1, edificio['name'], int(edificio['level']) + 1)
 		fd = open('/tmp/negativeWaitError', 'a')
 		fd.write(msg + '\n'*2 + html + '*'*20  + '\n'*5)
 		fd.close()
-		sendToBotDebug(s, msg, debugON_subirEdificio)
+		sendToBotDebug(msg, debugON_subirEdificio)
 
 	if espera < 0:
 		espera = 5
@@ -60,7 +60,7 @@ def subirEdificio(s, idCiudad, posicion, nivelesASubir):
 		if edificio['canUpgrade'] is False:
 			msg  = 'No se pudo terminar de subir el edificio por falta de recursos.'
 			msg += 'Faltaron subir {:d} niveles'.format(nivelesASubir - lv)
-			sendToBot(s, msg)
+			sendToBot(msg)
 			return
 
 		url = 'action=CityScreen&function=upgradeBuilding&actionRequest={}&cityId={}&position={:d}&level={}&activeTab=tabSendTransporter&backgroundView=city&currentCityId={}&templateView={}&ajax=1'.format(s.token(), idCiudad, posicion, edificio['level'], idCiudad, edificio['building'])
@@ -73,7 +73,7 @@ def subirEdificio(s, idCiudad, posicion, nivelesASubir):
 			msg  = 'El edificio no se amplió\n'
 			msg += url + '\n'
 			msg += str(edificio)
-			sendToBot(s, msg)
+			sendToBot(msg)
 			return
 
 def getReductores(ciudad):
@@ -157,6 +157,6 @@ def subirEdificios(s):
 		subirEdificio(s, idCiudad, posEdificio, niveles)
 	except:
 		msg = 'Error en:\n{}\nCausa:\n{}'.format(info, traceback.format_exc())
-		sendToBot(s, msg)
+		sendToBot(msg)
 	finally:
 		s.logout()

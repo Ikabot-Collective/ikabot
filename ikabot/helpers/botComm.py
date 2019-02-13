@@ -5,15 +5,15 @@ import re
 import os
 import random
 import ikabot.config as config
-from ikabot.web.sesion import normal_get
+import ikabot.web.sesion
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.gui import enter
 
-def sendToBotDebug(s, msg, debugON):
+def sendToBotDebug(msg, debugON):
 	if debugON:
-		sendToBot(s, msg)
+		sendToBot(msg)
 
-def sendToBot(s, msg, Token=False):
+def sendToBot(msg, Token=False):
 	if Token is False:
 		msg = '{}\n{}'.format(config.infoUser, msg)
 	with open(config.telegramFile, 'r', os.O_NONBLOCK) as filehandler:
@@ -46,7 +46,8 @@ def botValido(s):
 				filehandler.write(botToken + '\n' + chat_id)
 				filehandler.flush()
 			rand = random.randint(1000, 9999)
-			sendToBot(s, 'El token a ingresar es:{:d}'.format(rand), Token=True)
+			msg = 'El token a ingresar es:{:d}'.format(rand)
+			sendToBot(msg, Token=True)
 			rta = read(msg='Se envio un mensaje por telegram, ¿lo recibió? [Y/n]', values=['y','Y','n', 'N', ''])
 			if rta.lower() == 'n':
 				with open(config.telegramFile, 'w', os.O_NONBLOCK) as file:
