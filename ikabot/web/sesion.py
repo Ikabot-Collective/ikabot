@@ -13,6 +13,7 @@ import random
 import parser
 from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.pedirInfo import read
+from ikabot.helpers.botComm import sendToBotDebug
 from ikabot.helpers.aesCipher import *
 from ikabot.config import *
 
