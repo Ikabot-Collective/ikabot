@@ -11,10 +11,10 @@ import time
 import re
 import random
 import parser
-from ikabot.config import cookieFile
 from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.aesCipher import *
+from ikabot.config import *
 
 class Sesion:
 	def __init__(self, urlBase, payload, headers):
