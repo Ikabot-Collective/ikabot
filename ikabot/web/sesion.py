@@ -52,7 +52,7 @@ class Sesion:
 			msg += 'Nuevo'
 		else:
 			msg += 'Salida'
-		sendToBotDebug(s, msg, debugON_session)
+		sendToBotDebug(msg, debugON_session)
 
 		(fileInfo, text) = self.__getFileInfo()
 		lines = text.splitlines()
@@ -102,7 +102,7 @@ class Sesion:
 		fileInfo = self.__getFileInfo()[0]
 		if fileInfo:
 			msg = 'actualizo cookie usando el archivo de cookies'
-			sendToBotDebug(s, msg, debugON_session)
+			sendToBotDebug(msg, debugON_session)
 			ciphertext = fileInfo.group(2)
 			try:
 				plaintext = self.cipher.decrypt(ciphertext)
@@ -115,7 +115,7 @@ class Sesion:
 			self.__updateCookieFile(nuevo=True)
 		else:
 			msg = 'La sesión se venció, renovando sesión'
-			sendToBotDebug(s, msg, debugON_session)
+			sendToBotDebug(msg, debugON_session)
 			self.__login()
 
 	def __login(self):
