@@ -5,7 +5,7 @@ import re
 import os
 import random
 import ikabot.config as config
-import ikabot.web.sesion
+import ikabot.web.sesion as sesion
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.gui import enter
 
@@ -21,7 +21,7 @@ def sendToBot(msg, Token=False):
 		valid = re.search(r'\d{6,}:[A-Za-z0-9_-]{34,}\n\d{8,9}', text)
 		if valid is not None:
 			(botToken, chatId) = text.splitlines()
-			normal_get('https://api.telegram.org/bot{}/sendMessage'.format(botToken), params={'chat_id': chatId, 'text': msg})
+			sesion.normal_get('https://api.telegram.org/bot{}/sendMessage'.format(botToken), params={'chat_id': chatId, 'text': msg})
 
 def telegramFileValido():
 	with open(config.telegramFile, 'r', os.O_NONBLOCK) as filehandler:
