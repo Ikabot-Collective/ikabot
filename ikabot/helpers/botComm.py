@@ -35,7 +35,7 @@ def botValido(s):
 	else:
 		print('Debe proporcionar las credenciales válidas para comunicarse por telegram.')
 		print('Se requiere del token del bot a utilizar y de su chat_id')
-		print('Para más informacion sobre como obtenerlos vea al readme de https://github.com/santipcn/ikabot')
+		print('Para más informacion sobre como obtenerlos vea al readme de https://github.com/physics-sp/ikabot')
 		rta = read(msg='¿Porporcionará las credenciales ahora? [y/N]', values=['y','Y','n', 'N', ''])
 		if rta.lower() != 'y':
 			return False
