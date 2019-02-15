@@ -61,9 +61,7 @@ def menu(s):
 		clear()
 
 def inicializar():
-	path = os.path.abspath(__file__)
-	path = os.path.dirname(path)
-	os.chdir(path)
+	os.chdir(os.getenv("HOME"))
 	if not os.path.isfile(cookieFile):
 		open(cookieFile, 'w')
 		os.chmod(cookieFile, 0o600)
