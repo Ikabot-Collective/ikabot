@@ -85,6 +85,6 @@ def enviarVino(s):
 		planearViajes(s, rutas)
 	except:
 		msg = 'Error en:\n{}\nCausa:\n{}'.format(info, traceback.format_exc())
-		sendToBot(s, msg)
+		sendToBot(msg)
 	finally:
 		s.logout()
