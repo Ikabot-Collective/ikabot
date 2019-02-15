@@ -28,7 +28,7 @@ def buscarEspacios(s):
 		do_it(s, idIslas)
 	except:
 		msg = 'Error en:\n{}\nCausa:\n{}'.format(info, traceback.format_exc())
-		sendToBot(s, msg)
+		sendToBot(msg)
 	finally:
 		s.logout()
 
@@ -55,7 +55,7 @@ def do_it(s, idIslas):
 							break
 					if encontrado is False:
 						msg = 'la ciudad {} del jugador {} desapareció en {} {}:{} {}'.format(cityAntes['name'], cityAntes['Name'], tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
-						sendToBot(s, msg)
+						sendToBot(msg)
 
 				# alguien fundo
 				for ciudad in ciudades:
@@ -66,7 +66,7 @@ def do_it(s, idIslas):
 							break
 					if encontrado is False:
 						msg = '{} fundó {} en {} {}:{} {}'.format(ciudad['Name'], ciudad['name'], tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
-						sendToBot(s, msg)
+						sendToBot(msg)
 
 			isla_ciudades[idIsla] = ciudades
 		time.sleep(1*60*60)

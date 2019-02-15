@@ -45,6 +45,15 @@ class Sesion:
 		return 'index.php?logout' in html
 
 	def __updateCookieFile(self, primero=False, nuevo=False, salida=False):
+		msg = 'Actualizo el archivo de cookies:\n'
+		if primero:
+			msg += 'Primero'
+		elif nuevo:
+			msg += 'Nuevo'
+		else:
+			msg += 'Salida'
+		sendToBotDebug(msg, debugON_session)
+
 		(fileInfo, text) = self.__getFileInfo()
 		lines = text.splitlines()
 		if primero is True:
@@ -92,6 +101,8 @@ class Sesion:
 	def __getCookie(self):
 		fileInfo = self.__getFileInfo()[0]
 		if fileInfo:
+			msg = 'actualizo cookie usando el archivo de cookies'
+			sendToBotDebug(msg, debugON_session)
 			ciphertext = fileInfo.group(2)
 			try:
 				plaintext = self.cipher.decrypt(ciphertext)
@@ -103,6 +114,8 @@ class Sesion:
 			requests.cookies.cookiejar_from_dict(cookie_dict, cookiejar=self.s.cookies, overwrite=True)
 			self.__updateCookieFile(nuevo=True)
 		else:
+			msg = 'La sesión se venció, renovando sesión'
+			sendToBotDebug(msg, debugON_session)
 			self.__login()
 
 	def __login(self):
@@ -163,7 +176,7 @@ class Sesion:
 			except AssertionError:
 				self.__expiroLaSesion()
 			except requests.exceptions.ConnectionError:
-				time.sleep(5 * 60)
+				time.sleep(ConnectionError_wait)
 
 	def post(self, url='', payloadPost={}):
 		self.__checkCookie()
@@ -176,7 +189,7 @@ class Sesion:
 			except AssertionError:
 				self.__expiroLaSesion()
 			except requests.exceptions.ConnectionError:
-				time.sleep(5 * 60)
+				time.sleep(ConnectionError_wait)
 
 	def login(self):
 		self.__updateCookieFile(nuevo=True)

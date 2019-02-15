@@ -15,53 +15,56 @@ from ikabot.helpers.process import forkear
 from ikabot.helpers.gui import banner
 from ikabot.web.sesion import normal_get
 
-def getTiempoDeConstruccion(html):
-	fin = re.search(r'"endUpgradeTime":(\d{10})', html)
-	if fin is None:
+def getTiempoDeConstruccion(html, posicion):
+	ciudad = getCiudad(html)
+	edificio = ciudad['position'][posicion]
+	hora_fin = re.search(r'"endUpgradeTime":(\d{10})', html)
+	if hora_fin is None:
+		msg = '{}: No espero nada para que {} suba al nivel {:d}'.format(ciudad['cityName'], edificio['name'], int(edificio['level']))
+		sendToBotDebug(msg, debugON_subirEdificio)
 		return 0
-	inicio = re.search(r'serverTime:\s"(\d{10})', html)
-	espera = int(fin.group(1)) - int(inicio.group(1))
-	if espera < 0:
-		espera = 5
+
+	hora_actual = int( time.time() )
+	hora_fin    = int( hora_fin.group(1) )
+	espera      = hora_fin - hora_actual
+
+	msg = '{}: Espero {:d} segundos para que {} suba al nivel {:d}'.format(ciudad['cityName'], espera, edificio['name'], int(edificio['level']) + 1)
+	sendToBotDebug(msg, debugON_subirEdificio)
+
 	return espera
 
-def esperarConstruccion(s, idCiudad):
+def esperarConstruccion(s, idCiudad, posicion):
 	slp = 1
 	while slp > 0:
 		html = s.get(urlCiudad + idCiudad)
-		slp = getTiempoDeConstruccion(html)
+		slp = getTiempoDeConstruccion(html, posicion)
 		time.sleep(slp + 5)
 	return getCiudad(html)
 
-def subirEdificio(s, idCiudad, posicion):
-	ciudad = esperarConstruccion(s, idCiudad)
-	edificio = ciudad['position'][posicion]
+def subirEdificio(s, idCiudad, posicion, nivelesASubir):
 
-	if edificio['canUpgrade'] is False:
-		msg = 'No se pudo terminar de subir el edificio por falta de recursos.'
-		raise Exception(msg)
+	for lv in range(nivelesASubir):
+		ciudad = esperarConstruccion(s, idCiudad, posicion)
+		edificio = ciudad['position'][posicion]
 
-	url = 'action=CityScreen&function=upgradeBuilding&actionRequest={}&cityId={}&position={:d}&level={}&backgroundView=city&templateView={}&ajax=1'.format(s.token(), idCiudad, posicion, edificio['level'], edificio['building'])
-	s.post(url)
+		if edificio['canUpgrade'] is False:
+			msg  = 'No se pudo terminar de subir el edificio por falta de recursos.'
+			msg += 'Faltaron subir {:d} niveles'.format(nivelesASubir - lv)
+			sendToBot(msg)
+			return
 
-	html = s.get(urlCiudad + idCiudad)
-	fin = re.search(r'"endUpgradeTime":(\d{10})', html)
-	if fin is None:
-		msg  = 'El edificio no se amplió\n'
-		msg += url + '\n'
-		msg += str(edificio)
-		raise Exception(msg)
-	inicio = re.search(r'serverTime:\s"(\d{10})', html)
-	espera = int(fin.group(1)) - int(inicio.group(1))
-	if espera > 0:
-		msg = 'Espero {:d} segundos para subir {} del lv {} al siguiente'.format(espera, edificio['building'], edificio['level'])
-		sendToBot(s, msg)
-	elif espera == 0:
-		msg = 'Espero ¡0! segundos para subir {} del lv {} al siguiente'.format(edificio['building'], edificio['level'])
-		sendToBot(s, msg)
-	else:
-		msg = 'Espera negativa de {:d} segundos para subir {} del lv {} al siguiente'.format(espera*-1, edificio['building'], edificio['level'])
-		raise Exception(msg)
+		url = 'action=CityScreen&function=upgradeBuilding&actionRequest={}&cityId={}&position={:d}&level={}&activeTab=tabSendTransporter&backgroundView=city&currentCityId={}&templateView={}&ajax=1'.format(s.token(), idCiudad, posicion, edificio['level'], idCiudad, edificio['building'])
+		s.post(url)
+
+		html = s.get(urlCiudad + idCiudad)
+		ciudad = getCiudad(html)
+		edificio = ciudad['position'][posicion]
+		if edificio['isBusy'] is False:
+			msg  = 'El edificio no se amplió\n'
+			msg += url + '\n'
+			msg += str(edificio)
+			sendToBot(msg)
+			return
 
 def getReductores(ciudad):
 	(carpinteria, oficina, prensa, optico, area) = (0, 0, 0, 0, 0)
@@ -80,14 +83,8 @@ def getReductores(ciudad):
 				area = lv
 	return (carpinteria, oficina, prensa, optico, area)
 
-def recursosNecesarios(s, idCiudad, posEdifiico,  niveles):
-	html = s.get(urlCiudad + idCiudad)
-	ciudad = getCiudad(html)
-	desde = int(ciudad['position'][posEdifiico]['level'])
-	if ciudad['position'][posEdifiico]['isBusy']:
-		desde += 1
-	hasta = desde + niveles
-	nombre = ciudad['position'][posEdifiico]['building']
+def recursosNecesarios(s, ciudad, edificio, desde, hasta):
+	nombre = edificio['building']
 	(carpinteria, oficina, prensa, optico, area)  = getReductores(ciudad)
 	url = 'http://ycedespacho.hol.es/ikabot.php?edificio={}&desde={}&hasta={}&carpinteria={}&oficina={}&prensa={}&optico={}&area={}'.format(nombre, desde, hasta, carpinteria, oficina, prensa, optico, area)
 	rta = normal_get(url).text.split(',')
@@ -100,8 +97,17 @@ def subirEdificios(s):
 	edificios = getEdificios(s, idCiudad)
 	if edificios == []:
 		return
+	posEdificio = edificios[0]
+	niveles = len(edificios)
+	html = s.get(urlCiudad + idCiudad)
+	ciudad = getCiudad(html)
+	edificio = ciudad['position'][posEdificio]
+	desde = int(edificio['level'])
+	if edificio['isBusy']:
+		desde += 1
+	hasta = desde + niveles
 	try:
-		(madera, vino, marmol, cristal, azufre) = recursosNecesarios(s, idCiudad, edificios[0], len(edificios))
+		(madera, vino, marmol, cristal, azufre) = recursosNecesarios(s, ciudad, edificio, desde, hasta)
 		assert madera != 0
 		html = s.get(urlCiudad + idCiudad)
 		(maderaDisp, vinoDisp, marmolDisp, cristalDisp, azufreDisp) = getRecursosDisponibles(html, num=True)
@@ -134,14 +140,13 @@ def subirEdificios(s):
 		return
 
 	info = '\nSubir edificio\n'
-	info = info + 'Ciudad: {}\nEdificio: {}'.format(ciudad['cityName'], ciudad['position'][edificios[0]]['name'])
+	info = info + 'Ciudad: {}\nEdificio: {}.Desde {:d}, hasta {:d}'.format(ciudad['cityName'], edificio['name'], desde, hasta)
 
 	setInfoSignal(s, info)
 	try:
-		for edificio in edificios:
-			subirEdificio(s, idCiudad, edificio)
+		subirEdificio(s, idCiudad, posEdificio, niveles)
 	except:
 		msg = 'Error en:\n{}\nCausa:\n{}'.format(info, traceback.format_exc())
-		sendToBot(s, msg)
+		sendToBot(msg)
 	finally:
 		s.logout()

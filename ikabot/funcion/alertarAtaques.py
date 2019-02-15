@@ -27,7 +27,7 @@ def alertarAtaques(s):
 		do_it(s)
 	except:
 		msg = 'Error en:\n{}\nCausa:\n{}'.format(info, traceback.format_exc())
-		sendToBot(s, msg)
+		sendToBot(msg)
 	finally:
 		s.logout()
 
@@ -61,7 +61,7 @@ def do_it(s):
 					msg += '{} unidades\n'.format(cantidadTropas)
 					msg += '{} flotas\n'.format(cantidadFlotas)
 					msg += 'llegada en: {}'.format(diasHorasMinutos(tiempoFaltante))
-					sendToBot(s, msg)
+					sendToBot(msg)
 		for id in list(conocidos):
 			if id not in actuales:
 				conocidos.remove(id)

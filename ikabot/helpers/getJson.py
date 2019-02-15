@@ -83,6 +83,7 @@ def getCiudad(html):
 		nuevo = viejo.replace('"isBusy":false,', '"isBusy":true,')
 		ciudad = ciudad.replace(edificio[0], nuevo)
 
+	# {'cityName': '', 'id': 'idCiudad', 'phase': 5, 'isCapital': True|False, 'Id': 'idJugador', 'Name': 'nombreJugador', 'islandId': 'idIsla', 'islandName': 'NombreIsla', 'x': 'Coordx', 'y': 'Coordy', 'underConstruction': -1, 'endUpgradeTime': -1, 'startUpgradeTime': -1, 'position': [{'name': 'nombreEdificio', 'level': 'nivel', 'isBusy': True|False, 'canUpgrade': True|False, 'isMaxLevel': True|False, 'building': 'nombreEnIngles'}, ...]}
 	ciudad = json.loads(ciudad, strict=False)
 	ciudad['html'] = html
 	ciudad['propia'] = True
