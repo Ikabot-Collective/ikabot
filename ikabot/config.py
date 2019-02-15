@@ -1,10 +1,9 @@
-import getpass
 
 ids = None
 ciudades = None
 infoUser = ''
-cookieFile = '~/.cookies_of_{}.txt'.format(getpass.getuser())
-telegramFile = '~/.telegram_of_{}.txt'.format(getpass.getuser())
+cookieFile = '.cookies.txt'
+telegramFile = '.telegram.txt'
 urlCiudad = 'view=city&cityId='
 urlIsla = 'view=island&islandId='
 prompt = ' >>  '
@@ -19,3 +18,4 @@ debugON_enviarVino        = False
 debugON_menuRutaComercial = False
 debugON_subirEdificio     = False
 debugON_session           = False
+
