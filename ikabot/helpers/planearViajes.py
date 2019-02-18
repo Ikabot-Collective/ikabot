@@ -6,8 +6,8 @@ import time
 import math
 import json
 from decimal import *
+from ikabot.helpers.varios import esperar
 from ikabot.helpers.naval import *
-
 def enviarBienes(s, idCiudadOrigen, idCiudadDestino, idIsla, md, vn, mr, cr, az, barcos):
 	s.post(payloadPost={'action': 'header', 'function': 'changeCurrentCity', 'actionRequest': s.token(), 'cityId': idCiudadOrigen, 'ajax': '1'}) 
 	s.post(payloadPost={'action': 'transportOperations', 'function': 'loadTransportersWithFreight', 'destinationCityId': idCiudadDestino, 'islandId': idIsla, 'oldView': '', 'position': '', 'avatar2Name': '', 'city2Name': '', 'type': '', 'activeTab': '', 'premiumTransporter': '0', 'minusPlusValue': '500', 'cargo_resource': md, 'cargo_tradegood1': vn, 'cargo_tradegood2': mr, 'cargo_tradegood3': cr, 'cargo_tradegood4': az, 'capacity': '5', 'max_capacity': '5', 'jetPropulsion': '0', 'transporters': barcos, 'backgroundView': 'city', 'currentCityId': idCiudadOrigen, 'templateView': 'transport', 'currentTab': 'tabSendTransporter', 'actionRequest': s.token(), 'ajax': '1'})
@@ -55,6 +55,6 @@ def esperarLlegada(s):
 				if (esperaMinima and tiempoRestante < esperaMinima) or not esperaMinima:
 					esperaMinima = tiempoRestante
 		if esperaMinima:
-			time.sleep(esperaMinima)
+			esperar(esperaMinima)
 		barcos = getBarcosDisponibles(s)
 	return barcos
