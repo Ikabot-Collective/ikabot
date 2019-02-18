@@ -1,8 +1,9 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from decimal import *
 import time
+from decimal import *
+from ikabot.helpers.botComm import *
 
 getcontext().prec = 30
 
@@ -25,11 +26,13 @@ def diasHorasMinutos(segundosTotales):
 	return texto
 
 def esperar(segundos):
-	ratio = 0.6
+	ratio = (1 + 5 ** 0.5) / 2 - 1
 	comienzo = time.time()
 	fin = comienzo + segundos
 	restantes = segundos
 	while restantes > 0:
 		time.sleep(restantes * ratio)
 		restantes = fin - time.time()
+	msg = 'esperé {:d} segundos, y me pasé {:f}'.format(segundos, time.time() - fin)
+	sendToBot(msg)
 	return

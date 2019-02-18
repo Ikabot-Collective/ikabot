@@ -7,8 +7,8 @@ import traceback
 from ikabot.config import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.pedirInfo import *
+from ikabot.helpers.varios import *
 from ikabot.helpers.getJson import getCiudad
-from ikabot.helpers.varios import addPuntos
 from ikabot.helpers.recursos import getRecursosDisponibles
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.process import forkear
@@ -38,7 +38,7 @@ def esperarConstruccion(s, idCiudad, posicion):
 	while slp > 0:
 		html = s.get(urlCiudad + idCiudad)
 		slp = getTiempoDeConstruccion(html, posicion)
-		time.sleep(slp + 5)
+		esperar(slp + 5)
 	return getCiudad(html)
 
 def subirEdificio(s, idCiudad, posicion, nivelesASubir):
