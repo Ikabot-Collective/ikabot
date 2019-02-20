@@ -33,6 +33,4 @@ def esperar(segundos):
 	while restantes > 0:
 		time.sleep(restantes * ratio)
 		restantes = fin - time.time()
-	msg = 'esperé {:d} segundos, y me pasé {:f}'.format(segundos, time.time() - fin)
-	sendToBot(msg)
 	return
