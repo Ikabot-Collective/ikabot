@@ -31,14 +31,14 @@ def getTiempoDeConstruccion(html, posicion):
 	msg = '{}: Espero {:d} segundos para que {} suba al nivel {:d}'.format(ciudad['cityName'], espera, edificio['name'], int(edificio['level']) + 1)
 	sendToBotDebug(msg, debugON_subirEdificio)
 
-	return espera
+	return espera + 3
 
 def esperarConstruccion(s, idCiudad, posicion):
 	slp = 1
 	while slp > 0:
 		html = s.get(urlCiudad + idCiudad)
 		slp = getTiempoDeConstruccion(html, posicion)
-		esperar(slp + 5)
+		esperar(slp)
 	return getCiudad(html)
 
 def subirEdificio(s, idCiudad, posicion, nivelesASubir):
