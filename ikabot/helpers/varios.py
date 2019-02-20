@@ -3,7 +3,6 @@
 
 import time
 from decimal import *
-from ikabot.helpers.botComm import *
 
 getcontext().prec = 30
 
