@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import time
 from decimal import *
 
 getcontext().prec = 30
@@ -22,3 +23,13 @@ def diasHorasMinutos(segundosTotales):
 	if minutos > 0 and dias == 0:
 		texto = texto + str(minutos) + 'M '
 	return texto
+
+def esperar(segundos):
+	ratio = (1 + 5 ** 0.5) / 2 - 1
+	comienzo = time.time()
+	fin = comienzo + segundos
+	restantes = segundos
+	while restantes > 0:
+		time.sleep(restantes * ratio)
+		restantes = fin - time.time()
+	return
