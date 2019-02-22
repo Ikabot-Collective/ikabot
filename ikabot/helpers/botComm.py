@@ -15,7 +15,7 @@ def sendToBotDebug(msg, debugON):
 
 def sendToBot(msg, Token=False):
 	if Token is False:
-		msg = '{}\n{}'.format(config.infoUser, msg)
+		msg = 'pid:{}\n{}\n{}'.format(os.getpid(), config.infoUser, msg)
 	with open(config.telegramFile, 'r', os.O_NONBLOCK) as filehandler:
 		text = filehandler.read()
 		valid = re.search(r'\d{6,}:[A-Za-z0-9_-]{34,}\n\d{8,9}', text)
