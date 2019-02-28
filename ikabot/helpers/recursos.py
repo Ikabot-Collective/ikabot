@@ -10,8 +10,11 @@ def getRecursosDisponibles(html, num=False):
 	else:
 		return [recursos.group(1), recursos.group(3), recursos.group(2), recursos.group(5), recursos.group(4)]
 
-def getCapacidadDeAlmacenamiento(html):
-	return re.search(r'maxResources:\s*JSON\.parse\(\'{\\"resource\\":(\d+),', html).group(1)
+def getCapacidadDeAlmacenamiento(html, num=False):
+	almacenamiento = re.search(r'maxResources:\s*JSON\.parse\(\'{\\"resource\\":(\d+),', html).group(1)
+	if num:
+		almacenamiento = int(almacenamiento)
+	return almacenamiento 
 
 def getConsumoDeVino(html):
 	return int(re.search(r'GlobalMenu_WineConsumption"\s*class="rightText">\s*(\d*)\s', html).group(1))
