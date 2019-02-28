@@ -47,8 +47,12 @@ _Ikabot es un programa escrito en python que otorga la misma y mucha más funcio
 10. Alertar poco vino
 
 	Avisa mediante Telegram cuando falta menos de N horas para que una ciudad se quede sin vino. La cantidad de horas las especifica el usuario.
-	
-11. Actualizar Ikabot
+
+11. Comprar Recursos
+
+	Permite elegir qué tipo de recurso comprar y qué cantidad y compra automaticamente a las distintas ofertas de la más barata a la más cara.
+
+12. Actualizar Ikabot
 
 	Actualiza _ikabot_ a su release más actual.
 	
