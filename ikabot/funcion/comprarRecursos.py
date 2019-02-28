@@ -5,6 +5,7 @@ import json
 import re
 from ikabot.helpers.gui import enter, banner
 from ikabot.helpers.getJson import getCiudad
+from ikabot.helpers.varios import addPuntos
 from ikabot.helpers.pedirInfo import getIdsDeCiudades, read
 from ikabot.config import *
 
@@ -40,20 +41,22 @@ def getStoreHtml(s, ciudad):
 
 def obtenerOfertas(s, ciudad):
 	html = getStoreHtml(s, ciudad)
-	hits = re.findall(r'short_text80">(.*?) *<br/>(.*?)\s *</td>\s *<td>(\d+)</td>\s *<td>(.*?)/td>\s *<td><img src="skin/resources/icon_(\w+)\.png[\s\S]*?href="\?view=takeOffer&destinationCityId=(\d+)&oldView=branchOffice&activeTab=bargain&cityId=(\d+)&position=(\d+)&type=(\d+)&resource=(\w+)"', html)
+
+	hits = re.findall(r'short_text80">(.*?) *<br/>\((.*?)\)\s *</td>\s *<td>(\d+)</td>\s *<td>(.*?)/td>\s *<td><img src="skin/resources/icon_(\w+)\.png[\s\S]*?white-space:nowrap;">(\d+)\s[\s\S]*?href="\?view=takeOffer&destinationCityId=(\d+)&oldView=branchOffice&activeTab=bargain&cityId=(\d+)&position=(\d+)&type=(\d+)&resource=(\w+)"', html)
 	ofertas = []
 	for hit in hits:
 		oferta = {
 		'ciudadDestino': hit[0],
 		'jugadorAComprar' : hit[1],
-		'bienesXminuto': hit[2],
-		'cantidadDisponible': hit[3],
+		'bienesXminuto': int(hit[2]),
+		'cantidadDisponible': int(hit[3].replace(',', '').replace('<', '')),
 		'tipo': hit[4],
-		'destinationCityId': hit[5],
-		'cityId': hit[6],
-		'position': hit[7],
-		'type': hit[8],
-		'resource': hit[9]
+		'precio': int(hit[5]),
+		'destinationCityId': hit[6],
+		'cityId': hit[7],
+		'position': hit[8],
+		'type': hit[9],
+		'resource': hit[10]
 		}
 		ofertas.append(oferta)
 	return ofertas
@@ -88,9 +91,24 @@ def comprarRecursos(s):
 	banner()
 
 	ofertas = obtenerOfertas(s, ciudadOrigen)
+
+	precio_total   = 0
+	cantidad_total = 0
 	for oferta in ofertas:
-		print(oferta)
+		cantidad = oferta['cantidadDisponible']
+		unidad   = oferta['precio']
+		costo    = cantidad * unidad
+		print('cantidad :{}'.format(addPuntos(cantidad)))
+		print('precio   :{:d}'.format(unidad))
+		print('costo    :{}'.format(addPuntos(costo)))
 		print('')
+		precio_total += costo
+		cantidad_total += cantidad
+	print('Total disponible para comprar: {}, por {}\n'.format(addPuntos(cantidad_total), addPuntos(precio_total)))
+	cantidadAComprar = read(msg='¿Cuánta cantidad comprar? ', min=0, max=cantidad_total)
+	if cantidadAComprar == 0:
+		return
+
 	enter()
 	return
 
