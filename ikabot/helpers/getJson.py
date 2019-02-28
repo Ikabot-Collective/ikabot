@@ -74,7 +74,7 @@ def getCiudad(html):
 	ciudad = borrar(ciudad, remove)
 
 	for elem in ['sea', 'land', 'shore', 'wall']:
-		ciudad = ciudad.replace('"building":"buildingGround {}"'.format(elem),'"name":"empty"')
+		ciudad = ciudad.replace('"building":"buildingGround {}"'.format(elem),'"name":"empty","building":"empty"')
 	ciudad = ciudad.replace('"isBusy":true,','"isBusy":false,')
 
 	ampliando = re.findall(r'(("name":"[\w\s\\]*","level":"\d*","isBusy":false,"canUpgrade":\w*,"isMaxLevel":\w*,"building":"\w*?)\sconstructionSite","(?:completed|countdownText|buildingimg).*?)}',ciudad)
