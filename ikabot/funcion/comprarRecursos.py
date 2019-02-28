@@ -1,18 +1,24 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import traceback
 import json
+import math
 import re
 from decimal import *
+from ikabot.helpers.process import forkear
+from ikabot.helpers.varios import addPuntos
 from ikabot.helpers.gui import enter, banner
 from ikabot.helpers.getJson import getCiudad
-from ikabot.helpers.varios import addPuntos
+from ikabot.helpers.signals import setInfoSignal
+from ikabot.helpers.planearViajes import esperarLlegada
 from ikabot.helpers.pedirInfo import getIdsDeCiudades, read
 from ikabot.config import *
+from ikabot.helpers.botComm import *
 
 def asignarRecursoBuscado(s, ciudad, recurso=None):
 	if recurso is None:
-		print('Qué tipo de recurso quiere comprar?')
+		print('¿Qué tipo de recurso quiere comprar?')
 		for indice, bien in enumerate(tipoDeBien):
 			print('({:d}) {}'.format(indice+1, bien))
 		recurso = read(min=1, max=5) - 1
@@ -88,12 +94,12 @@ def comprarRecursos(s):
 		enter()
 		return
 
-	ciudadOrigen = ciudades_comerciales[0] # por ahora solo uso la primera ciudad
+	ciudad = ciudades_comerciales[0] # por ahora solo uso la primera ciudad
 
-	recurso = asignarRecursoBuscado(s, ciudadOrigen)
+	recurso = asignarRecursoBuscado(s, ciudad)
 	banner()
 
-	ofertas = obtenerOfertas(s, ciudadOrigen)
+	ofertas = obtenerOfertas(s, ciudad)
 
 	if len(ofertas) == 0:
 		print('No se encontraron ofertas.')
@@ -117,6 +123,7 @@ def comprarRecursos(s):
 		return
 
 	print('Se comprará {}'.format(addPuntos(cantidadAComprar)))
+	# pedir confirmacion, aclarar cuanto va a costar, cuanto oro se tiene y el porcentaje
 	enter()
 
 	forkear(s)
@@ -162,6 +169,8 @@ def buy(s, ciudad, oferta, cantidad):
 	'ajax': 1
 	}
 	rta = s.post(payloadPost=data)
+	msg = 'Compro: {:d} a {} de {}'.format(cantidad, oferta['ciudadDestino'], oferta['jugadorAComprar'])
+	sendToBot(msg)
 
 def do_it(s, ciudad, ofertas, cantidadAComprar, recurso):
 	while cantidadAComprar > 0:
@@ -172,11 +181,10 @@ def do_it(s, ciudad, ofertas, cantidadAComprar, recurso):
 		for oferta in ofertas:
 			if aComprar == 0:
 				break
-			if oferta['cantidad'] == 0:
+			if oferta['cantidadDisponible'] == 0:
 				continue
-			comprar = aComprar if oferta['cantidad'] > aComprar else oferta['cantidad']
+			comprar = aComprar if oferta['cantidadDisponible'] > aComprar else oferta['cantidadDisponible']
 			aComprar -= comprar
 			cantidadAComprar -= comprar
-			oferta['cantidad'] -= comprar
+			oferta['cantidadDisponible'] -= comprar
 			buy(s, ciudad, oferta, comprar)
-

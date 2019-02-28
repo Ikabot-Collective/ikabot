@@ -13,9 +13,7 @@ getcontext().prec = 30
 
 def read(min=None, max=None, digit=False, msg=prompt, values=None): # lee input del usuario
 	def _invalido():
-		sys.stdout.write('\033[F\r') # Cursor up one line
-		blank = ' ' * len(str(leido) + msg)
-		sys.stdout.write('\r' + blank + '\r')
+		print('\033[1A\033[K', end="") # Borro linea
 		return read(min, max, digit, msg, values)
 
 	try:
