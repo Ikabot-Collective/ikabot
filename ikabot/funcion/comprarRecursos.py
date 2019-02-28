@@ -3,33 +3,95 @@
 
 import json
 import re
+from ikabot.helpers.gui import enter, banner
+from ikabot.helpers.getJson import getCiudad
+from ikabot.helpers.pedirInfo import getIdsDeCiudades, read
+from ikabot.config import *
 
-def asignarRecursoBuscado():
+def asignarRecursoBuscado(s, ciudad, recurso):
+	for pos, edificio in enumerate(ciudad['position']):
+		if edificio['building'] == 'branchOffice':
+			posicion = pos
+			break
 	data = {
-	'cityId': 9999,
-	'position': 9999,
+	'cityId': ciudad['id'],
+	'position': posicion,
 	'view': 'branchOffice',
 	'activeTab': 'bargain',
-	'type': 999,
-	'searchResource': 999,
-	'range': 999,
+	'type': 9999999,
+	'searchResource': recurso,
+	'range': 9999999,
 	'backgroundView' : 'city',
-	'currentCityId': 9999,
-	'templateView': 'branchOffice'
-	'actionRequest': 999,
+	'currentCityId': ciudad['id'],
+	'templateView': 'branchOffice',
+	'actionRequest': s.token(),
 	'ajax': 1
 	}
 	rta = s.post(payloadPost=data)
 
-def obtenerOfertas(s):
-	url = 'view=branchOffice&cityId={}&position={}&currentCityId={}&backgroundView=city&actionRequest={}&ajax=1'
+def getStoreHtml(s, ciudad):
+	url = 'view=branchOffice&cityId={}&position={}&currentCityId={}&backgroundView=city&actionRequest={}&ajax=1'.format(ciudad['id'], ciudad['pos'], ciudad['id'], s.token())
 	data = s.post(url)
 	json_data = json.loads(data, strict=False)
-	html = json_data[1][1][1]
-	hits = re.findall(r'short_text80\\">(.*?) *<br\/>(.*?)\\n *<\/td>\\n *<td>(\d+)<\/td>\\n *<td>(.*?)\/td>\\n *<td><img src=\\"skin\/resources\/icon_(\w+).png.*?href=\\"\?view=takeOffer&destinationCityId=(\d+)&oldView=branchOffice&activeTab=bargain&cityId=(\d+)&position=(\d+)&type=(\d+)&resource=(\d+)\\"', html)
+	return json_data[1][1][1]
 
+def obtenerOfertas(s, ciudad):
+	html = getStoreHtml(s, ciudad)
+	hits = re.findall(r'short_text80\\">(.*?) *<br\/>(.*?)\\n *<\/td>\\n *<td>(\d+)<\/td>\\n *<td>(.*?)\/td>\\n *<td><img src=\\"skin\/resources\/icon_(\w+).png.*?href=\\"\?view=takeOffer&destinationCityId=(\d+)&oldView=branchOffice&activeTab=bargain&cityId=(\d+)&position=(\d+)&type=(\d+)&resource=(\d+)\\"', html)
+	ofertas = []
+	for hit in hits:
+		oferta = {
+		'ciudadDestino': hit[0],
+		'jugadorAComprar' : hit[1],
+		'bienesXminuto': hit[2],
+		'cantidadDisponible': hit[3],
+		'tipo': hit[4],
+		'destinationCityId': hit[5],
+		'cityId': hit[6],
+		'position': hit[7],
+		'type': hit[8],
+		'resource': hit[9]
+		}
+		ofertas.append(oferta)
+	return ofertas
 
 def comprarRecursos(s):
+	banner()
+
+	ids = getIdsDeCiudades(s)[0]
+	ciudades_comerciales = []
+	for idCiudad in ids:
+		html = s.get(urlCiudad + idCiudad)
+		ciudad = getCiudad(html)
+		esComercial = False
+		for pos, edificio in enumerate(ciudad['position']):
+			if edificio['building'] == 'branchOffice':
+				ciudad['pos'] = pos
+				html = getStoreHtml(s, ciudad)
+				rangos = re.findall(r'<option.*?>(\d+)<\/option>', html)
+				ciudad['rango'] = max(rangos)
+				ciudades_comerciales.append(ciudad)
+				break
+
+	if len(ciudades_comerciales) == 0:
+		print('No hay una Tienda contruida')
+		enter()
+		return
+
+	ciudadOrigen = ciudades_comerciales[0] # por ahora solo uso la primera ciudad
+
+	print('Qué tipo de recurso quiere comprar?')
+	for indice, bien in enumerate(tipoDeBien):
+		print('({:d}) {}'.format(indice+1, bien))
+	recurso = read(min=1, max=5)
+
+	print(ciudad['pos'])
+	print(ciudad['rango'])
+	enter()
+
+	asignarRecursoBuscado(s, ciudadOrigen, recurso)
+
+
 	data = {
 	'action': 'transportOperations',
 	'function': 'buyGoodsAtAnotherBranchOffice',
@@ -53,7 +115,7 @@ def comprarRecursos(s):
 	'currentCityId': 99999,
 	'templateView': 'takeOffer',
 	'currentTab': 'bargain',
-	'actionRequest': 'c271e036907bd35ce35bc4e0e2a7ce1e',
+	'actionRequest': s.token(),
 	'ajax': 1
 	}
-
+	rta = s.post(payloadPost=data)
