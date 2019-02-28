@@ -164,7 +164,7 @@ def comprarRecursos(s):
 	if s.padre is True:
 		return
 
-	info = '\ninfo sobre el proceso\n'
+	info = '\nCompro {} de {} para {}\n'.format(addPuntos(cantidadAComprar), tipoDeBien[numRecurso - 1], ciudad['cityName'])
 	setInfoSignal(s, info)
 	try:
 		do_it(s, ciudad, ofertas, cantidadAComprar, recurso)
@@ -202,7 +202,7 @@ def buy(s, ciudad, oferta, cantidad):
 	'actionRequest': s.token(),
 	'ajax': 1
 	}
-	rta = s.post(payloadPost=data)
+	s.post(payloadPost=data)
 
 def do_it(s, ciudad, ofertas, cantidadAComprar, recurso):
 	while cantidadAComprar > 0:
