@@ -70,6 +70,24 @@ def obtenerOfertas(s, ciudad):
 		ofertas.append(oferta)
 	return ofertas
 
+def calcularCosto(ofertas, cantidadAComprar):
+	costoTotal = 0
+	for oferta in ofertas:
+		if cantidadAComprar == 0:
+			break
+		comprar = oferta['cantidadDisponible'] if oferta['cantidadDisponible'] < cantidadAComprar else cantidadAComprar
+		cantidadAComprar -= comprar
+		costoTotal += comprar * oferta['precio']
+	return costoTotal
+
+def getOro(s, ciudad):
+	url = 'view=finances&backgroundView=city&currentCityId={}&templateView=finances&actionRequest={}&ajax=1'.format(ciudad['id'], s.token())
+	data = s.post(url)
+	json_data = json.loads(data, strict=False)
+	oro = json_data[0][1]['headerData']['gold']
+	return int(oro.split('.')[0])
+
+
 def comprarRecursos(s):
 	banner()
 
@@ -122,8 +140,16 @@ def comprarRecursos(s):
 	if cantidadAComprar == 0:
 		return
 
+	oro = getOro(s, ciudad)
+	costoTotal = calcularCosto(ofertas, cantidadAComprar)
+
+	print('\nOro actual : {}.\nCosto total: {}.\nOro final  : {}.'. format(addPuntos(oro), addPuntos(costoTotal), addPuntos(oro - costoTotal)))
+	print('¿Proceder? [Y/n]')
+	rta = read(values=['y', 'Y', 'n', 'N', ''])
+	if rta.lower() == 'n':
+		return
+
 	print('Se comprará {}'.format(addPuntos(cantidadAComprar)))
-	# pedir confirmacion, aclarar cuanto va a costar, cuanto oro se tiene y el porcentaje
 	enter()
 
 	forkear(s)
@@ -169,8 +195,6 @@ def buy(s, ciudad, oferta, cantidad):
 	'ajax': 1
 	}
 	rta = s.post(payloadPost=data)
-	msg = 'Compro: {:d} a {} de {}'.format(cantidad, oferta['ciudadDestino'], oferta['jugadorAComprar'])
-	sendToBot(msg)
 
 def do_it(s, ciudad, ofertas, cantidadAComprar, recurso):
 	while cantidadAComprar > 0:
