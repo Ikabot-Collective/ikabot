@@ -17,15 +17,14 @@ from ikabot.config import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.recursos import *
 
-def asignarRecursoBuscado(s, ciudad, recurso=None):
-	if recurso is None:
-		print('¿Qué tipo de recurso quiere comprar?')
-		for indice, bien in enumerate(tipoDeBien):
-			print('({:d}) {}'.format(indice+1, bien))
-		eleccion = read(min=1, max=5)
-		recurso = eleccion - 1
-		if recurso == 0:
-			recurso = 'resource'
+def asignarRecursoBuscado(s, ciudad):
+	print('¿Qué recurso quiere comprar?')
+	for indice, bien in enumerate(tipoDeBien):
+		print('({:d}) {}'.format(indice+1, bien))
+	eleccion = read(min=1, max=5)
+	recurso = eleccion - 1
+	if recurso == 0:
+		recurso = 'resource'
 	data = {
 	'cityId': ciudad['id'],
 	'position': ciudad['pos'],
@@ -52,7 +51,6 @@ def getStoreHtml(s, ciudad):
 
 def obtenerOfertas(s, ciudad):
 	html = getStoreHtml(s, ciudad)
-
 	hits = re.findall(r'short_text80">(.*?) *<br/>\((.*?)\)\s *</td>\s *<td>(\d+)</td>\s *<td>(.*?)/td>\s *<td><img src="skin/resources/icon_(\w+)\.png[\s\S]*?white-space:nowrap;">(\d+)\s[\s\S]*?href="\?view=takeOffer&destinationCityId=(\d+)&oldView=branchOffice&activeTab=bargain&cityId=(\d+)&position=(\d+)&type=(\d+)&resource=(\w+)"', html)
 	ofertas = []
 	for hit in hits:
@@ -89,26 +87,26 @@ def getOro(s, ciudad):
 	oro = json_data[0][1]['headerData']['gold']
 	return int(oro.split('.')[0])
 
-
-def comprarRecursos(s):
-	banner()
-
+def getCiudadesComerciales(s):
 	ids = getIdsDeCiudades(s)[0]
 	ciudades_comerciales = []
 	for idCiudad in ids:
 		html = s.get(urlCiudad + idCiudad)
 		ciudad = getCiudad(html)
-		esComercial = False
 		for pos, edificio in enumerate(ciudad['position']):
 			if edificio['building'] == 'branchOffice':
 				ciudad['pos'] = pos
 				html = getStoreHtml(s, ciudad)
 				rangos = re.findall(r'<option.*?>(\d+)</option>', html)
 				ciudad['rango'] = max(rangos)
-
 				ciudades_comerciales.append(ciudad)
 				break
+	return ciudades_comerciales
 
+def comprarRecursos(s):
+	banner()
+
+	ciudades_comerciales = getCiudadesComerciales(s)
 	if len(ciudades_comerciales) == 0:
 		print('No hay una Tienda contruida')
 		enter()
@@ -120,7 +118,6 @@ def comprarRecursos(s):
 	banner()
 
 	ofertas = obtenerOfertas(s, ciudad)
-
 	if len(ofertas) == 0:
 		print('No se encontraron ofertas.')
 		return
