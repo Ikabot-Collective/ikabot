@@ -15,13 +15,15 @@ from ikabot.helpers.planearViajes import esperarLlegada
 from ikabot.helpers.pedirInfo import getIdsDeCiudades, read
 from ikabot.config import *
 from ikabot.helpers.botComm import *
+from ikabot.helpers.recursos import *
 
 def asignarRecursoBuscado(s, ciudad, recurso=None):
 	if recurso is None:
 		print('¿Qué tipo de recurso quiere comprar?')
 		for indice, bien in enumerate(tipoDeBien):
 			print('({:d}) {}'.format(indice+1, bien))
-		recurso = read(min=1, max=5) - 1
+		eleccion = read(min=1, max=5)
+		recurso = eleccion - 1
 		if recurso == 0:
 			recurso = 'resource'
 	data = {
@@ -40,7 +42,7 @@ def asignarRecursoBuscado(s, ciudad, recurso=None):
 	'ajax': 1
 	}
 	rta = s.post(payloadPost=data)
-	return recurso
+	return eleccion, recurso
 
 def getStoreHtml(s, ciudad):
 	url = 'view=branchOffice&cityId={}&position={:d}&currentCityId={}&backgroundView=city&actionRequest={}&ajax=1'.format(ciudad['id'], ciudad['pos'], ciudad['id'], s.token())
@@ -114,7 +116,7 @@ def comprarRecursos(s):
 
 	ciudad = ciudades_comerciales[0] # por ahora solo uso la primera ciudad
 
-	recurso = asignarRecursoBuscado(s, ciudad)
+	numRecurso, recurso = asignarRecursoBuscado(s, ciudad)
 	banner()
 
 	ofertas = obtenerOfertas(s, ciudad)
@@ -135,7 +137,16 @@ def comprarRecursos(s):
 		print('')
 		precio_total += costo
 		cantidad_total += cantidad
-	print('Total disponible para comprar: {}, por {}\n'.format(addPuntos(cantidad_total), addPuntos(precio_total)))
+
+	ocupado = getRecursosDisponibles(ciudad['html'], num=True)[numRecurso - 1]
+	capacidad = getCapacidadDeAlmacenamiento(ciudad['html'], num=True)
+	disponible = capacidad - ocupado
+
+	print('Total disponible para comprar: {}, por {}'.format(addPuntos(cantidad_total), addPuntos(precio_total)))
+	if disponible < cantidad_total:
+		print('Solo se puede comprar {} por falta de almacenamiento.'.format(addPuntos(disponible)))
+		cantidad_total = disponible
+	print('')
 	cantidadAComprar = read(msg='¿Cuánta cantidad comprar? ', min=0, max=cantidad_total)
 	if cantidadAComprar == 0:
 		return
