@@ -8,36 +8,39 @@ from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.pedirInfo import getIdsDeCiudades, read
 from ikabot.config import *
 
-def asignarRecursoBuscado(s, ciudad, recurso):
-	for pos, edificio in enumerate(ciudad['position']):
-		if edificio['building'] == 'branchOffice':
-			posicion = pos
-			break
+def asignarRecursoBuscado(s, ciudad):
+	print('Qué tipo de recurso quiere comprar?')
+	for indice, bien in enumerate(tipoDeBien):
+		print('({:d}) {}'.format(indice+1, bien))
+	recurso = read(min=1, max=5) - 1
+	if recurso == 0:
+		recurso = 'resource'
 	data = {
 	'cityId': ciudad['id'],
-	'position': posicion,
+	'position': ciudad['pos'],
 	'view': 'branchOffice',
 	'activeTab': 'bargain',
-	'type': 9999999,
+	'type': 444,
 	'searchResource': recurso,
-	'range': 9999999,
+	'range': ciudad['rango'],
 	'backgroundView' : 'city',
 	'currentCityId': ciudad['id'],
 	'templateView': 'branchOffice',
+	'currentTab': 'bargain',
 	'actionRequest': s.token(),
 	'ajax': 1
 	}
 	rta = s.post(payloadPost=data)
 
 def getStoreHtml(s, ciudad):
-	url = 'view=branchOffice&cityId={}&position={}&currentCityId={}&backgroundView=city&actionRequest={}&ajax=1'.format(ciudad['id'], ciudad['pos'], ciudad['id'], s.token())
+	url = 'view=branchOffice&cityId={}&position={:d}&currentCityId={}&backgroundView=city&actionRequest={}&ajax=1'.format(ciudad['id'], ciudad['pos'], ciudad['id'], s.token())
 	data = s.post(url)
 	json_data = json.loads(data, strict=False)
 	return json_data[1][1][1]
 
 def obtenerOfertas(s, ciudad):
 	html = getStoreHtml(s, ciudad)
-	hits = re.findall(r'short_text80\\">(.*?) *<br\/>(.*?)\\n *<\/td>\\n *<td>(\d+)<\/td>\\n *<td>(.*?)\/td>\\n *<td><img src=\\"skin\/resources\/icon_(\w+).png.*?href=\\"\?view=takeOffer&destinationCityId=(\d+)&oldView=branchOffice&activeTab=bargain&cityId=(\d+)&position=(\d+)&type=(\d+)&resource=(\d+)\\"', html)
+	hits = re.findall(r'short_text80">(.*?) *<br/>(.*?)\s *</td>\s *<td>(\d+)</td>\s *<td>(.*?)/td>\s *<td><img src="skin/resources/icon_(\w+)\.png[\s\S]*?href="\?view=takeOffer&destinationCityId=(\d+)&oldView=branchOffice&activeTab=bargain&cityId=(\d+)&position=(\d+)&type=(\d+)&resource=(\w+)"', html)
 	ofertas = []
 	for hit in hits:
 		oferta = {
@@ -68,8 +71,9 @@ def comprarRecursos(s):
 			if edificio['building'] == 'branchOffice':
 				ciudad['pos'] = pos
 				html = getStoreHtml(s, ciudad)
-				rangos = re.findall(r'<option.*?>(\d+)<\/option>', html)
+				rangos = re.findall(r'<option.*?>(\d+)</option>', html)
 				ciudad['rango'] = max(rangos)
+
 				ciudades_comerciales.append(ciudad)
 				break
 
@@ -80,16 +84,15 @@ def comprarRecursos(s):
 
 	ciudadOrigen = ciudades_comerciales[0] # por ahora solo uso la primera ciudad
 
-	print('Qué tipo de recurso quiere comprar?')
-	for indice, bien in enumerate(tipoDeBien):
-		print('({:d}) {}'.format(indice+1, bien))
-	recurso = read(min=1, max=5)
+	asignarRecursoBuscado(s, ciudadOrigen)
+	banner()
 
-	print(ciudad['pos'])
-	print(ciudad['rango'])
+	ofertas = obtenerOfertas(s, ciudadOrigen)
+	for oferta in ofertas:
+		print(oferta)
+		print('')
 	enter()
-
-	asignarRecursoBuscado(s, ciudadOrigen, recurso)
+	return
 
 
 	data = {
