@@ -47,7 +47,7 @@ def enviarVino(s):
 
 	print('\nPor enviar {} de vino a cada ciudad'.format(addPuntos(cantidad)))
 	print('¿Proceder? [Y/n]')
-	rta = read()
+	rta = read(values=['y', 'Y', 'n', 'N', ''])
 	if rta.lower() == 'n':
 		return
 

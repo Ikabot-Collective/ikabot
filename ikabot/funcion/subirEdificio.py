@@ -124,13 +124,13 @@ def subirEdificios(s):
 			if azufreDisp < azufre:
 				print('{} de azufre'.format(addPuntos(azufre - azufreDisp)))
 			print('¿Proceder de todos modos? [Y/n]')
-			rta = read()
+			rta = read(values=['y', 'Y', 'n', 'N', ''])
 			if rta.lower() == 'n':
 				return
 		else:
 			print('\nTiene materiales suficientes')
 			print('¿Proceder? [Y/n]')
-			rta = read()
+			rta = read(values=['y', 'Y', 'n', 'N', ''])
 			if rta.lower() == 'n':
 				return
 	except AssertionError:
