@@ -126,7 +126,7 @@ def comprarRecursos(s):
 	info = '\ninfo sobre el proceso\n'
 	setInfoSignal(s, info)
 	try:
-		do_it(s, ciudad, cantidadAComprar, recurso)
+		do_it(s, ciudad, ofertas, cantidadAComprar, recurso)
 	except:
 		msg = 'Error en:\n{}\nCausa:\n{}'.format(info, traceback.format_exc())
 		sendToBot(msg)
@@ -163,21 +163,20 @@ def buy(s, ciudad, oferta, cantidad):
 	}
 	rta = s.post(payloadPost=data)
 
-def do_it(s, ciudad, cantidadAComprar, recurso):
-	restante = cantidadAComprar
-
-	while restante > 0:
+def do_it(s, ciudad, ofertas, cantidadAComprar, recurso):
+	while cantidadAComprar > 0:
 		barcosDisp = esperarLlegada(s)
 		capacidad  = barcosDisp * 500
-		aComprar = capacidad if capacidad < restante else restante
+		aComprar = capacidad if capacidad < cantidadAComprar else cantidadAComprar
 
-		asignarRecursoBuscado(s, ciudad, recurso)
-		ofertas = obtenerOfertas(s, ciudad)
 		for oferta in ofertas:
 			if aComprar == 0:
 				break
-			comprar = aComprar if oferta['cantidad'] >= aComprar else oferta['cantidad']
+			if oferta['cantidad'] == 0:
+				continue
+			comprar = aComprar if oferta['cantidad'] > aComprar else oferta['cantidad']
 			aComprar -= comprar
-			restante -= comprar
+			cantidadAComprar -= comprar
+			oferta['cantidad'] -= comprar
 			buy(s, ciudad, oferta, comprar)
 
