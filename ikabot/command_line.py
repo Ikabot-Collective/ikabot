@@ -19,6 +19,7 @@ from ikabot.funcion.alertarAtaques import alertarAtaques
 from ikabot.funcion.botDonador import botDonador
 from ikabot.funcion.update import update
 from ikabot.funcion.alertarPocoVino import alertarPocoVino
+from ikabot.funcion.comprarRecursos import comprarRecursos
 
 def menu(s):
 	banner()
@@ -33,6 +34,7 @@ def menu(s):
 					alertarAtaques,
 					botDonador,
 					alertarPocoVino,
+					comprarRecursos,
 					update
 					]
 	mnu="""
@@ -47,7 +49,8 @@ def menu(s):
 (8)  Alertar ataques
 (9)  Bot donador
 (10) Alertar poco vino
-(11) Actualizar Ikabot"""
+(11) Comprar recursos
+(12) Actualizar Ikabot"""
 	print(mnu)
 	entradas = len(menu_actions)
 	eleccion = read(min=0, max=entradas)
