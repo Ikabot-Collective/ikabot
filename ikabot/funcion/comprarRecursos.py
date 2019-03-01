@@ -167,7 +167,7 @@ def comprarRecursos(s):
 	info = '\nCompro {} de {} para {}\n'.format(addPuntos(cantidadAComprar), tipoDeBien[numRecurso - 1], ciudad['cityName'])
 	setInfoSignal(s, info)
 	try:
-		do_it(s, ciudad, ofertas, cantidadAComprar, recurso)
+		do_it(s, ciudad, ofertas, cantidadAComprar)
 	except:
 		msg = 'Error en:\n{}\nCausa:\n{}'.format(info, traceback.format_exc())
 		sendToBot(msg)
@@ -204,19 +204,18 @@ def buy(s, ciudad, oferta, cantidad):
 	}
 	s.post(payloadPost=data)
 
-def do_it(s, ciudad, ofertas, cantidadAComprar, recurso):
-	while cantidadAComprar > 0:
-		barcosDisp = esperarLlegada(s)
-		capacidad  = barcosDisp * 500
-		aComprar = capacidad if capacidad < cantidadAComprar else cantidadAComprar
-
+def do_it(s, ciudad, ofertas, cantidadAComprar):
+	while True:
 		for oferta in ofertas:
-			if aComprar == 0:
-				break
+			if cantidadAComprar == 0:
+				return
 			if oferta['cantidadDisponible'] == 0:
 				continue
-			comprar = aComprar if oferta['cantidadDisponible'] > aComprar else oferta['cantidadDisponible']
-			aComprar -= comprar
-			cantidadAComprar -= comprar
-			oferta['cantidadDisponible'] -= comprar
-			buy(s, ciudad, oferta, comprar)
+			barcosDisp = esperarLlegada(s)
+			capacidad  = barcosDisp * 500
+			comprable_max = capacidad if capacidad < cantidadAComprar else cantidadAComprar
+			compra = comprable_max if oferta['cantidadDisponible'] > comprable_max else oferta['cantidadDisponible']
+			cantidadAComprar -= compra
+			oferta['cantidadDisponible'] -= compra
+			buy(s, ciudad, oferta, compra)
+			break # vuelvo a empezar desde el principio
