@@ -176,7 +176,7 @@ def comprarRecursos(s):
 
 def buy(s, ciudad, oferta, cantidad):
 	barcos = int(math.ceil((Decimal(cantidad) / Decimal(500))))
-	data = {
+	data_dict = {
 	'action': 'transportOperations',
 	'function': 'buyGoodsAtAnotherBranchOffice',
 	'cityId': oferta['cityId'],
@@ -185,12 +185,10 @@ def buy(s, ciudad, oferta, cantidad):
 	'position': ciudad['pos'],
 	'avatar2Name': oferta['jugadorAComprar'],
 	'city2Name': oferta['ciudadDestino'],
-	'type': 444,
+	'type': int(oferta['type']),
 	'activeTab': 'bargain',
 	'transportDisplayPrice': 0,
 	'premiumTransporter': 0,
-	'tradegood3Price': oferta['precio'],
-	'cargo_tradegood3': cantidad,
 	'capacity': 5,
 	'max_capacity': 5,
 	'jetPropulsion': 0,
@@ -202,7 +200,23 @@ def buy(s, ciudad, oferta, cantidad):
 	'actionRequest': s.token(),
 	'ajax': 1
 	}
-	s.post(payloadPost=data)
+	url = 'view=takeOffer&destinationCityId={}&oldView=branchOffice&activeTab=bargain&cityId={}&position={}&type={}&resource={}&backgroundView=city&currentCityId={}&templateView=branchOffice&actionRequest={}&ajax=1'.format(oferta['destinationCityId'], oferta['cityId'], oferta['position'], oferta['type'], oferta['resource'], oferta['cityId'], s.token())
+	data = s.post(url)
+	html = json.loads(data, strict=False)[1][1][1]
+	hits = re.findall(r'"tradegood(\d)Price"\s*value="(\d+)', html)
+	for hit in hits:
+		data_dict['tradegood{}Price'.format(hit[0])] = int(hit[1])
+		data_dict['cargo_tradegood{}'.format(hit[0])] = 0
+	hit = re.search(r'"resourcePrice"\s*value="(\d+)', html)
+	if hit:
+		data_dict['resourcePrice'] = int(hit.group(1))
+		data_dict['cargo_resource'] = 0
+	resource = oferta['resource']
+	if resource == 'resource':
+		data_dict['cargo_resource'] = cantidad
+	else:
+		data_dict['cargo_tradegood{}'.format(resource)] = cantidad
+	s.post(payloadPost=data_dict)
 	msg = 'Compro {} a {} de {}'.format(addPuntos(cantidad), oferta['ciudadDestino'], oferta['jugadorAComprar'])
 	sendToBotDebug(msg, debugON_comprarRecursos)
 
