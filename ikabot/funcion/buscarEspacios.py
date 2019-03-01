@@ -39,32 +39,26 @@ def do_it(s, idIslas):
 			html = s.get(urlIsla + idIsla)
 			isla = getIsla(html)
 			ciudades = []
-			for ciudad in isla['cities']:
-				if ciudad['type'] != 'empty':
-					ciudades.append(ciudad)
+			ciudades = [ciudad for ciudad in isla['cities'] if ciudad['type'] != 'empty']
 
 			if idIsla in isla_ciudades:
 				ciudadesAntes = isla_ciudades[idIsla]
 
 				# alguien desaparecio
 				for cityAntes in ciudadesAntes:
-					encontrado = False
 					for ciudad in ciudades:
 						if ciudad['id'] == cityAntes['id']:
-							encontrado = True
 							break
-					if encontrado is False:
+					else:
 						msg = 'la ciudad {} del jugador {} desapareció en {} {}:{} {}'.format(cityAntes['name'], cityAntes['Name'], tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
 						sendToBot(msg)
 
 				# alguien fundo
 				for ciudad in ciudades:
-					encontrado = False
 					for cityAntes in ciudadesAntes:
 						if ciudad['id'] == cityAntes['id']:
-							encontrado = True
 							break
-					if encontrado is False:
+					else:
 						msg = '{} fundó {} en {} {}:{} {}'.format(ciudad['Name'], ciudad['name'], tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
 						sendToBot(msg)
 
