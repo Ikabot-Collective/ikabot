@@ -18,4 +18,4 @@ debugON_enviarVino        = False
 debugON_menuRutaComercial = False
 debugON_subirEdificio     = False
 debugON_session           = False
-
+debugON_comprarRecursos   = False

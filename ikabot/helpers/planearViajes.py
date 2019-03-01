@@ -48,13 +48,12 @@ def esperarLlegada(s):
 		postdata = json.loads(posted, strict=False)
 		militaryMovements = postdata[1][1][2]['viewScriptParams']['militaryAndFleetMovements']
 		tiempoAhora = int(postdata[0][1]['time'])
-		esperaMinima = None
+		tiemposDeEspera = []
 		for militaryMovement in militaryMovements:
-			if militaryMovement['origin']['avatarName'] == s.username:
+			if militaryMovement['isOwnArmyOrFleet']:
 				tiempoRestante = int(militaryMovement['eventTime']) - tiempoAhora
-				if (esperaMinima and tiempoRestante < esperaMinima) or not esperaMinima:
-					esperaMinima = tiempoRestante
-		if esperaMinima:
-			esperar(esperaMinima)
+				tiemposDeEspera.append(tiempoRestante)
+		if tiemposDeEspera:
+			esperar( min(tiemposDeEspera) )
 		barcos = getBarcosDisponibles(s)
 	return barcos

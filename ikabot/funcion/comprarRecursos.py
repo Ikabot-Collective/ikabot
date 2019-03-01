@@ -203,6 +203,8 @@ def buy(s, ciudad, oferta, cantidad):
 	'ajax': 1
 	}
 	s.post(payloadPost=data)
+	msg = 'Compro {} a {} de {}'.format(addPuntos(cantidad), oferta['ciudadDestino'], oferta['jugadorAComprar'])
+	sendToBotDebug(msg, debugON_comprarRecursos)
 
 def do_it(s, ciudad, ofertas, cantidadAComprar):
 	while True:
