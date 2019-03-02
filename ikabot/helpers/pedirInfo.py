@@ -172,7 +172,7 @@ def pedirValor(text, max):
 		var = 0
 	return int(var)
 
-def getIdsDeCiudades(s):
+def getIdsDeCiudades(s, own=False):
 	global ciudades
 	global ids
 	if ids is None or ciudades is None:
@@ -181,12 +181,20 @@ def getIdsDeCiudades(s):
 		ciudades = ciudades.replace('\\', '')
 		ciudades = ciudades.replace('city_', '')
 		ciudades = json.loads(ciudades, strict=False)
-		ids = []
-		for ciudad in ciudades:
-			ids.append(ciudad)
-	ids = sorted(ids)
-	# {'coords': '[x:y] ', 'id': idCiudad, 'tradegood': '..', 'name': 'nomberCiudad', 'relationship': 'ownCity'}
-	return (ids, ciudades)
+
+		ids = [ciudad for ciudad in ciudades]
+		ids = sorted(ids)
+
+	# {'coords': '[x:y] ', 'id': idCiudad, 'tradegood': '..', 'name': 'nomberCiudad', 'relationship': 'ownCity'|'occupiedCities'|..}
+	if own:
+		ids_own   = [ciudad for ciudad in ciudades if ciudades[ciudad]['relationship'] == 'ownCity']
+		ids_other = [ciudad for ciudad in ciudades if ciudades[ciudad]['relationship'] != 'ownCity']
+		ciudades_own = ciudades.copy()
+		for id in ids_other:
+			del ciudades_own[id]
+		return (ids_own, ciudades_own)
+	else:
+		return (ids, ciudades)
 
 def getIdsdeIslas(s):
 	(idsCiudades, ciudades) = getIdsDeCiudades(s)
