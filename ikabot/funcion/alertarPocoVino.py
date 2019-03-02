@@ -38,7 +38,7 @@ def alertarPocoVino(s):
 		s.logout()
 
 def do_it(s, horas):
-	ids, ciudades = getIdsDeCiudades(s)
+	ids, ciudades = getIdsDeCiudades(s, own=True)
 	for city in ciudades:
 		ciudades[city]['avisado'] = False
 
