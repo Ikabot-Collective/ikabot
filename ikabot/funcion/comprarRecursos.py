@@ -1,10 +1,11 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import traceback
-import json
-import math
 import re
+import math
+import json
+import gettext
+import traceback
 from decimal import *
 from ikabot.helpers.process import forkear
 from ikabot.helpers.varios import addPuntos
@@ -16,6 +17,12 @@ from ikabot.helpers.pedirInfo import getIdsDeCiudades, read
 from ikabot.config import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.recursos import *
+
+t = gettext.translation('comprarRecursos', 
+                        'locale', 
+                        languages=idiomas,
+                        fallback=True)
+_ = t.gettext
 
 def asignarRecursoBuscado(s, ciudad):
 	print(_('¿Qué recurso quiere comprar?'))

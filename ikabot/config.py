@@ -1,3 +1,15 @@
+import locale
+import gettext
+
+entorno_usu = locale.setlocale(locale.LC_ALL, '')
+idiomas = [entorno_usu]
+
+t = gettext.translation('config', 
+                        'locale', 
+                        languages=idiomas,
+                        fallback=True)
+_ = t.gettext
+
 
 ids = None
 ciudades = None

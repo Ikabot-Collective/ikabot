@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import re
+import gettext
 from decimal import *
 from ikabot.config import *
 from ikabot.helpers.gui import *
@@ -10,6 +11,12 @@ from ikabot.helpers.naval import *
 from ikabot.helpers.recursos import *
 from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.pedirInfo import getIdsDeCiudades
+
+t = gettext.translation('getStatus', 
+                        'locale', 
+                        languages=idiomas,
+                        fallback=True)
+_ = t.gettext
 
 getcontext().prec = 30
 

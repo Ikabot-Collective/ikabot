@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import time
+import gettext
 import traceback
 from ikabot.config import *
 from ikabot.helpers.botComm import *
@@ -11,6 +12,12 @@ from ikabot.helpers.process import forkear
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.recursos import getRecursosDisponibles
+
+t = gettext.translation('botDonador', 
+                        'locale', 
+                        languages=idiomas,
+                        fallback=True)
+_ = t.gettext
 
 def botDonador(s):
 	if botValido(s) is False:
