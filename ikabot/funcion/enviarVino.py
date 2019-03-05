@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import gettext
 import traceback
 from ikabot.helpers.botComm import *
 from ikabot.helpers.pedirInfo import *
@@ -11,6 +12,12 @@ from ikabot.helpers.recursos import getRecursosDisponibles
 from ikabot.helpers.varios import addPuntos
 from ikabot.helpers.process import forkear
 from ikabot.helpers.gui import banner
+
+t = gettext.translation('enviarVino', 
+                        'locale', 
+                        languages=idiomas,
+                        fallback=True)
+_ = t.gettext
 
 def enviarVino(s):
 	banner()

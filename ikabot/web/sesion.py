@@ -2,10 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import sys
-try:
-	import requests
-except ImportError:
-	sys.exit(_('Debe instalar el modulo de requests:\nsudo pip3 install requests'))
 import os
 import time
 import re
@@ -16,6 +12,18 @@ from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.botComm import sendToBotDebug
 from ikabot.helpers.aesCipher import *
 from ikabot.config import *
+import gettext
+
+t = gettext.translation('update', 
+                        'locale', 
+                        languages=idiomas,
+                        fallback=True)
+_ = t.gettext
+
+try:
+	import requests
+except ImportError:
+	sys.exit(_('Debe instalar el modulo de requests:\nsudo pip3 install requests'))
 
 class Sesion:
 	def __init__(self, urlBase, payload, headers):

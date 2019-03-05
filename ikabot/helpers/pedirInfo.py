@@ -1,13 +1,20 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import sys
 import re
+import sys
 import json
+import gettext
 from decimal import *
 from ikabot.config import *
 from ikabot.helpers.getJson import *
 from ikabot.helpers.gui import *
+
+t = gettext.translation('pedirInfo', 
+                        'locale', 
+                        languages=idiomas,
+                        fallback=True)
+_ = t.gettext
 
 getcontext().prec = 30
 

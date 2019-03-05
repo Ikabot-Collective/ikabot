@@ -2,12 +2,19 @@
 # -*- coding: utf-8 -*-
 
 import re
+import gettext
 from ikabot.config import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.getJson import *
 from ikabot.helpers.recursos import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.varios import addPuntos
+
+t = gettext.translation('donar', 
+                        'locale', 
+                        languages=idiomas,
+                        fallback=True)
+_ = t.gettext
 
 def donar(s):
 	bienes = {'1': _('Viñedo'), '2': _('Cantera'), '3': _('Mina de cristal'), '4': _('Mina de azufre')}

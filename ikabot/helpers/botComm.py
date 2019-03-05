@@ -4,10 +4,18 @@
 import re
 import os
 import random
+import gettext
 import ikabot.config as config
 import ikabot.web.sesion
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.gui import enter
+from ikabot.config import *
+
+t = gettext.translation('botComm', 
+                        'locale', 
+                        languages=idiomas,
+                        fallback=True)
+_ = t.gettext
 
 def sendToBotDebug(msg, debugON):
 	if debugON:

@@ -1,8 +1,9 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import time
 import re
+import time
+import gettext
 import traceback
 from ikabot.config import *
 from ikabot.helpers.botComm import *
@@ -14,6 +15,12 @@ from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.process import forkear
 from ikabot.helpers.gui import banner
 from ikabot.web.sesion import normal_get
+
+t = gettext.translation('subirEdificio', 
+                        'locale', 
+                        languages=idiomas,
+                        fallback=True)
+_ = t.gettext
 
 def getTiempoDeConstruccion(html, posicion):
 	ciudad = getCiudad(html)

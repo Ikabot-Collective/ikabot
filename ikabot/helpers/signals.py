@@ -4,6 +4,13 @@
 import os
 import signal
 from ikabot.helpers.botComm import *
+import gettext
+
+t = gettext.translation('signals', 
+                        'locale', 
+                        languages=idiomas,
+                        fallback=True)
+_ = t.gettext
 
 def create_handler(s):
 	def _handler(signum, frame):

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import gettext
 from ikabot.config import *
 from ikabot.web.getSesion import getSesion
 from ikabot.helpers.gui import *
@@ -21,6 +22,13 @@ from ikabot.funcion.update import update
 from ikabot.funcion.alertarPocoVino import alertarPocoVino
 from ikabot.funcion.comprarRecursos import comprarRecursos
 
+
+t = gettext.translation('command_line', 
+                        'locale', 
+                        languages=idiomas,
+                        fallback=True)
+_ = t.gettext
+
 def menu(s):
 	banner()
 	menu_actions = [
@@ -37,21 +45,19 @@ def menu(s):
 					comprarRecursos,
 					update
 					]
-	mnu=_("""
-(0)  Salir
-(1)  Lista de construcción
-(2)  Enviar recursos
-(3)  Enviar vino
-(4)  Estado de la cuenta
-(5)  Donar
-(6)  Buscar espacios nuevos
-(7)  Entrar diariamente
-(8)  Alertar ataques
-(9)  Bot donador
-(10) Alertar poco vino
-(11) Comprar recursos
-(12) Actualizar Ikabot""")
-	print(mnu)
+	print(_('(0)  Salir'))
+	print(_('(1)  Lista de construcción'))
+	print(_('(2)  Enviar recursos'))
+	print(_('(3)  Enviar vino'))
+	print(_('(4)  Estado de la cuenta'))
+	print(_('(5)  Donar'))
+	print(_('(6)  Buscar espacios nuevos'))
+	print(_('(7)  Entrar diariamente'))
+	print(_('(8)  Alertar ataques'))
+	print(_('(9)  Bot donador'))
+	print(_('(10) Alertar poco vino'))
+	print(_('(11) Comprar recursos'))
+	print(_('(12) Actualizar Ikabot'))
 	entradas = len(menu_actions)
 	eleccion = read(min=0, max=entradas)
 	if eleccion != 0:

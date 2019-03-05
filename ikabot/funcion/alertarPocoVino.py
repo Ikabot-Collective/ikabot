@@ -1,9 +1,10 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import re
 import time
 import traceback
-import re
+import gettext
 from decimal import *
 from ikabot.config import *
 from ikabot.helpers.signals import setInfoSignal
@@ -13,6 +14,13 @@ from ikabot.helpers.pedirInfo import getIdsDeCiudades
 from ikabot.helpers.varios import diasHorasMinutos
 from ikabot.helpers.recursos import *
 from ikabot.helpers.botComm import *
+
+
+t = gettext.translation('alertarPocoVino', 
+                        'locale', 
+                        languages=idiomas,
+                        fallback=True)
+_ = t.gettext
 
 getcontext().prec = 30
 
