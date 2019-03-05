@@ -7,7 +7,7 @@ telegramFile = '.telegram.txt'
 urlCiudad = 'view=city&cityId='
 urlIsla = 'view=island&islandId='
 prompt = ' >>  '
-tipoDeBien = ['Madera', 'Vino', 'Marmol', 'Cristal', 'Azufre']
+tipoDeBien = [_('Madera'), _('Vino'), _('Marmol'), _('Cristal'), _('Azufre')]
 ConnectionError_wait = 5 * 60
 debugON_alertarAtaques    = False
 debugON_alertarPocoVino   = False

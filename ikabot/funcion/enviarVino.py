@@ -42,11 +42,11 @@ def enviarVino(s):
 		maximo = maximo[:-2] + '00'
 	elif vinoXciudad > 10:
 		maximo = maximo[:-1] + '0'
-	print('Se puede enviar como máximo {} a cada ciudad'.format(maximo))
-	cantidad = read(msg='¿Cuanto vino enviar a cada ciudad?:', min=0, max=vinoXciudad)
+	print(_('Se puede enviar como máximo {} a cada ciudad').format(maximo))
+	cantidad = read(msg=_('¿Cuanto vino enviar a cada ciudad?:'), min=0, max=vinoXciudad)
 
-	print('\nPor enviar {} de vino a cada ciudad'.format(addPuntos(cantidad)))
-	print('¿Proceder? [Y/n]')
+	print(_('\nPor enviar {} de vino a cada ciudad').format(addPuntos(cantidad)))
+	print(_('¿Proceder? [Y/n]'))
 	rta = read(values=['y', 'Y', 'n', 'N', ''])
 	if rta.lower() == 'n':
 		return
@@ -76,15 +76,15 @@ def enviarVino(s):
 				ruta = (ciudadO, ciudadD, idIsla, 0, enviar, 0, 0, 0)
 				rutas.append(ruta)
 
-	info = '\nEnviar vino\n'
+	info = _('\nEnviar vino\n')
 	for ruta in rutas:
 		(ciudadO, ciudadD, idIsla, md, vn, mr, cr, az) = ruta
-		info = info + '{} -> {}\nVino: {}\n'.format(ciudadO['cityName'], ciudadD['cityName'], addPuntos(vn))
+		info = info + _('{} -> {}\nVino: {}\n').format(ciudadO['cityName'], ciudadD['cityName'], addPuntos(vn))
 	setInfoSignal(s, info)
 	try:
 		planearViajes(s, rutas)
 	except:
-		msg = 'Error en:\n{}\nCausa:\n{}'.format(info, traceback.format_exc())
+		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
 		sendToBot(msg)
 	finally:
 		s.logout()

@@ -5,7 +5,7 @@ import sys
 try:
 	import requests
 except ImportError:
-	sys.exit('Debe instalar el modulo de requests:\nsudo pip3 install requests')
+	sys.exit(_('Debe instalar el modulo de requests:\nsudo pip3 install requests'))
 import os
 import time
 import re
@@ -45,13 +45,13 @@ class Sesion:
 		return 'index.php?logout' in html
 
 	def __updateCookieFile(self, primero=False, nuevo=False, salida=False):
-		msg = 'Actualizo el archivo de cookies:\n'
+		msg = _('Actualizo el archivo de cookies:\n')
 		if primero:
-			msg += 'Primero'
+			msg += _('Primero')
 		elif nuevo:
-			msg += 'Nuevo'
+			msg += _('Nuevo')
 		else:
-			msg += 'Salida'
+			msg += _('Salida')
 		sendToBotDebug(msg, debugON_session)
 
 		(fileInfo, text) = self.__getFileInfo()
@@ -101,20 +101,20 @@ class Sesion:
 	def __getCookie(self):
 		fileInfo = self.__getFileInfo()[0]
 		if fileInfo:
-			msg = 'actualizo cookie usando el archivo de cookies'
+			msg = _('actualizo cookie usando el archivo de cookies')
 			sendToBotDebug(msg, debugON_session)
 			ciphertext = fileInfo.group(2)
 			try:
 				plaintext = self.cipher.decrypt(ciphertext)
 			except ValueError as e:
-				sys.exit('Usuario o contrasenia incorrecta')
+				sys.exit(_('Usuario o contrasenia incorrecta'))
 			cookie1, cookie2 = plaintext.split(' ')
 			cookie_dict = {'PHPSESSID': cookie1, 'ikariam': cookie2, 'ikariam_loginMode': '0'}
 			self.s = requests.Session()
 			requests.cookies.cookiejar_from_dict(cookie_dict, cookiejar=self.s.cookies, overwrite=True)
 			self.__updateCookieFile(nuevo=True)
 		else:
-			msg = 'La sesión se venció, renovando sesión'
+			msg = _('La sesión se venció, renovando sesión')
 			sendToBotDebug(msg, debugON_session)
 			self.__login()
 
@@ -122,7 +122,7 @@ class Sesion:
 		self.s = requests.Session() # s es la sesion de conexion
 		html = self.s.post(self.urlBase + 'action=loginAvatar&function=login', data=self.payload, headers=self.headers).text
 		if self.__isExpired(html):
-			sys.exit('Usuario o contrasenia incorrecta')
+			sys.exit(_('Usuario o contrasenia incorrecta'))
 		self.__updateCookieFile(primero=True)
 
 	def __backoff(self):
@@ -206,4 +206,4 @@ def normal_get(url, params=None):
 		else:
 			return requests.get(url)
 	except requests.exceptions.ConnectionError:
-		sys.exit('Fallo la conexion a internet')
+		sys.exit(_('Fallo la conexion a internet'))
