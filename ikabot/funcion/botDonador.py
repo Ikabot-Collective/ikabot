@@ -25,24 +25,24 @@ def botDonador(s):
 		ciudad = getCiudad(html)
 		tradegood = ciudades[idCiudad]['tradegood']
 		bien = bienes[tradegood]
-		print('En la ciudad {} {}, ¿Desea donar al aserradero o al bien de cambio? [a/b]'.format(ciudad['cityName'], bien))
+		print(_('En la ciudad {} {}, ¿Desea donar al aserradero o al bien de cambio? [a/b]').format(ciudad['cityName'], bien))
 		rta = read(values=['a', 'A', 'b', 'B'])
 		tipo = 'resource' if rta.lower() == 'a' else 'tradegood'
 		ciudades_dict[idCiudad] = {'isla': ciudad['islandId'], 'tipo': tipo}
 
-	print('Se donará todos los días.')
+	print(_('Se donará todos los días.'))
 	enter()
 
 	forkear(s)
 	if s.padre is True:
 		return
 
-	info = '\nDono todos los días\n'
+	info = _('\nDono todos los días\n')
 	setInfoSignal(s, info)
 	try:
 		do_it(s, idsCiudades, ciudades_dict)
 	except:
-		msg = 'Error en:\n{}\nCausa:\n{}'.format(info, traceback.format_exc())
+		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
 		sendToBot(msg)
 	finally:
 		s.logout()
@@ -55,6 +55,6 @@ def do_it(s, idsCiudades, ciudades_dict):
 			idIsla = ciudades_dict[idCiudad]['isla']
 			tipo = ciudades_dict[idCiudad]['tipo']
 			s.post(payloadPost={'islandId': idIsla, 'type': tipo, 'action': 'IslandScreen', 'function': 'donate', 'donation': madera, 'backgroundView': 'island', 'templateView': 'resource', 'actionRequest': s.token(), 'ajax': '1'})
-		msg = 'Done automaticamente.'
+		msg = _('Doné automaticamente.')
 		sendToBotDebug(msg, debugON_botDonador)
 		time.sleep(24*60*60)

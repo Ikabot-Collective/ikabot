@@ -20,7 +20,7 @@ def getTiempoDeConstruccion(html, posicion):
 	edificio = ciudad['position'][posicion]
 	hora_fin = re.search(r'"endUpgradeTime":(\d{10})', html)
 	if hora_fin is None:
-		msg = '{}: No espero nada para que {} suba al nivel {:d}'.format(ciudad['cityName'], edificio['name'], int(edificio['level']))
+		msg = _('{}: No espero nada para que {} suba al nivel {:d}').format(ciudad['cityName'], edificio['name'], int(edificio['level']))
 		sendToBotDebug(msg, debugON_subirEdificio)
 		return 0
 
@@ -28,7 +28,7 @@ def getTiempoDeConstruccion(html, posicion):
 	hora_fin    = int( hora_fin.group(1) )
 	espera      = hora_fin - hora_actual
 
-	msg = '{}: Espero {:d} segundos para que {} suba al nivel {:d}'.format(ciudad['cityName'], espera, edificio['name'], int(edificio['level']) + 1)
+	msg = _('{}: Espero {:d} segundos para que {} suba al nivel {:d}').format(ciudad['cityName'], espera, edificio['name'], int(edificio['level']) + 1)
 	sendToBotDebug(msg, debugON_subirEdificio)
 
 	return espera + 3
@@ -48,8 +48,8 @@ def subirEdificio(s, idCiudad, posicion, nivelesASubir):
 		edificio = ciudad['position'][posicion]
 
 		if edificio['canUpgrade'] is False:
-			msg  = 'No se pudo terminar de subir el edificio por falta de recursos.'
-			msg += 'Faltaron subir {:d} niveles'.format(nivelesASubir - lv)
+			msg  = _('No se pudo terminar de subir el edificio por falta de recursos.')
+			msg += _('Faltaron subir {:d} niveles').format(nivelesASubir - lv)
 			sendToBot(msg)
 			return
 
@@ -60,7 +60,7 @@ def subirEdificio(s, idCiudad, posicion, nivelesASubir):
 		ciudad = getCiudad(html)
 		edificio = ciudad['position'][posicion]
 		if edificio['isBusy'] is False:
-			msg  = 'El edificio no se amplió\n'
+			msg  = _('El edificio no se amplió\n')
 			msg += url + '\n'
 			msg += str(edificio)
 			sendToBot(msg)
@@ -123,13 +123,13 @@ def subirEdificios(s):
 				print('{} de cristal'.format(addPuntos(cristal - cristalDisp)))
 			if azufreDisp < azufre:
 				print('{} de azufre'.format(addPuntos(azufre - azufreDisp)))
-			print('¿Proceder de todos modos? [Y/n]')
+			print(_('¿Proceder de todos modos? [Y/n]'))
 			rta = read(values=['y', 'Y', 'n', 'N', ''])
 			if rta.lower() == 'n':
 				return
 		else:
-			print('\nTiene materiales suficientes')
-			print('¿Proceder? [Y/n]')
+			print(_('\nTiene materiales suficientes'))
+			print(_('¿Proceder? [Y/n]'))
 			rta = read(values=['y', 'Y', 'n', 'N', ''])
 			if rta.lower() == 'n':
 				return
@@ -139,14 +139,14 @@ def subirEdificios(s):
 	if s.padre is True:
 		return
 
-	info = '\nSubir edificio\n'
+	info = _('\nSubir edificio\n')
 	info = info + 'Ciudad: {}\nEdificio: {}.Desde {:d}, hasta {:d}'.format(ciudad['cityName'], edificio['name'], desde, hasta)
 
 	setInfoSignal(s, info)
 	try:
 		subirEdificio(s, idCiudad, posEdificio, niveles)
 	except:
-		msg = 'Error en:\n{}\nCausa:\n{}'.format(info, traceback.format_exc())
+		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
 		sendToBot(msg)
 	finally:
 		s.logout()

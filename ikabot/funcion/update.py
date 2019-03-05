@@ -7,11 +7,11 @@ from ikabot.helpers.gui import *
 def update(s):
 	out = run('python3 -m pip install --upgrade ikabot').read().decode("utf-8") 
 	if 'up-to-date' in out:
-		print('\nEstá actualizado')
+		print(_('\nEstá actualizado'))
 	else:
 		clear()
-		print('Actualizando...\n')
+		print(_('Actualizando...\n'))
 		print(out)
-		print('Listo.')
-		print('Reinicie ikabot para que los cambios surjan efecto.')
+		print(_('Listo.'))
+		print(_('Reinicie ikabot para que los cambios surjan efecto.'))
 	enter()

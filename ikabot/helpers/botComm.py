@@ -33,37 +33,37 @@ def botValido(s):
 	if telegramFileValido():
 		return True
 	else:
-		print('Debe proporcionar las credenciales válidas para comunicarse por telegram.')
-		print('Se requiere del token del bot a utilizar y de su chat_id')
-		print('Para más informacion sobre como obtenerlos vea al readme de https://github.com/physics-sp/ikabot')
-		rta = read(msg='¿Porporcionará las credenciales ahora? [y/N]', values=['y','Y','n', 'N', ''])
+		print(_('Debe proporcionar las credenciales válidas para comunicarse por telegram.'))
+		print(_('Se requiere del token del bot a utilizar y de su chat_id'))
+		print(_('Para más informacion sobre como obtenerlos vea al readme de https://github.com/physics-sp/ikabot'))
+		rta = read(msg=_('¿Porporcionará las credenciales ahora? [y/N]'), values=['y','Y','n', 'N', ''])
 		if rta.lower() != 'y':
 			return False
 		else:
-			botToken = read(msg='Token del bot:')
-			chat_id = read(msg='Chat_id:')
+			botToken = read(msg=_('Token del bot:'))
+			chat_id = read(msg=_('Chat_id:'))
 			with open(config.telegramFile, 'w', os.O_NONBLOCK) as filehandler:
 				filehandler.write(botToken + '\n' + chat_id)
 				filehandler.flush()
 			rand = random.randint(1000, 9999)
-			msg = 'El token a ingresar es:{:d}'.format(rand)
+			msg = _('El token a ingresar es:{:d}').format(rand)
 			sendToBot(msg, Token=True)
-			rta = read(msg='Se envio un mensaje por telegram, ¿lo recibió? [Y/n]', values=['y','Y','n', 'N', ''])
+			rta = read(msg=_('Se envio un mensaje por telegram, ¿lo recibió? [Y/n]'), values=['y','Y','n', 'N', ''])
 			if rta.lower() == 'n':
 				with open(config.telegramFile, 'w', os.O_NONBLOCK) as file:
 					pass
-				print('Revíse las credenciales y vuelva a proveerlas.')
+				print(_('Revíse las credenciales y vuelva a proveerlas.'))
 				enter()
 				return False
 			else:
-				recibido = read(msg='Ingrese el token recibido mediante telegram:', digit=True)
+				recibido = read(msg=_('Ingrese el token recibido mediante telegram:'), digit=True)
 				if rand != recibido:
 					with open(config.telegramFile, 'w', os.O_NONBLOCK) as file:
 						pass
-					print('El token es incorrecto')
+					print(_('El token es incorrecto'))
 					enter()
 					return False
 				else:
-					print('El token es correcto.')
+					print(_('El token es correcto.'))
 					enter()
 					return True

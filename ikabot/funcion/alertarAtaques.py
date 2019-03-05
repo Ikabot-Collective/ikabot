@@ -14,19 +14,19 @@ from ikabot.helpers.botComm import *
 def alertarAtaques(s):
 	if botValido(s) is False:
 		return
-	print('Se buscarán ataques cada 20 minutos.')
+	print(_('Se buscarán ataques cada 20 minutos.'))
 	enter()
 
 	forkear(s)
 	if s.padre is True:
 		return
 
-	info = '\nEspero por ataques cada 20 minutos\n'
+	info = _('\nEspero por ataques cada 20 minutos\n')
 	setInfoSignal(s, info)
 	try:
 		do_it(s)
 	except:
-		msg = 'Error en:\n{}\nCausa:\n{}'.format(info, traceback.format_exc())
+		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
 		sendToBot(msg)
 	finally:
 		s.logout()
@@ -54,13 +54,13 @@ def do_it(s):
 					cantidadTropas = militaryMovement['army']['amount']
 					cantidadFlotas = militaryMovement['fleet']['amount']
 					tiempoFaltante = int(militaryMovement['eventTime']) - tiempoAhora
-					msg  = '-- ALERTA --\n'
+					msg  = _('-- ALERTA --\n')
 					msg += missionText + '\n'
-					msg += 'de la ciudad {} de {}\n'.format(origin['name'], origin['avatarName'])
-					msg += 'a {}\n'.format(target['name'])
-					msg += '{} unidades\n'.format(cantidadTropas)
-					msg += '{} flotas\n'.format(cantidadFlotas)
-					msg += 'llegada en: {}'.format(diasHorasMinutos(tiempoFaltante))
+					msg += _('de la ciudad {} de {}\n').format(origin['name'], origin['avatarName'])
+					msg += _('a {}\n').format(target['name'])
+					msg += _('{} unidades\n').format(cantidadTropas)
+					msg += _('{} flotas\n').format(cantidadFlotas)
+					msg += _('llegada en: {}').format(diasHorasMinutos(tiempoFaltante))
 					sendToBot(msg)
 		for id in list(conocidos):
 			if id not in actuales:

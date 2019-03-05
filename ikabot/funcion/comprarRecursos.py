@@ -18,7 +18,7 @@ from ikabot.helpers.botComm import *
 from ikabot.helpers.recursos import *
 
 def asignarRecursoBuscado(s, ciudad):
-	print('¿Qué recurso quiere comprar?')
+	print(_('¿Qué recurso quiere comprar?'))
 	for indice, bien in enumerate(tipoDeBien):
 		print('({:d}) {}'.format(indice+1, bien))
 	eleccion = read(min=1, max=5)
@@ -108,7 +108,7 @@ def comprarRecursos(s):
 
 	ciudades_comerciales = getCiudadesComerciales(s)
 	if len(ciudades_comerciales) == 0:
-		print('No hay una Tienda contruida')
+		print(_('No hay una Tienda contruida'))
 		enter()
 		return
 
@@ -119,7 +119,7 @@ def comprarRecursos(s):
 
 	ofertas = obtenerOfertas(s, ciudad)
 	if len(ofertas) == 0:
-		print('No se encontraron ofertas.')
+		print(_('No se encontraron ofertas.'))
 		return
 
 	precio_total   = 0
@@ -128,10 +128,10 @@ def comprarRecursos(s):
 		cantidad = oferta['cantidadDisponible']
 		unidad   = oferta['precio']
 		costo    = cantidad * unidad
-		print('cantidad :{}'.format(addPuntos(cantidad)))
-		print('precio   :{:d}'.format(unidad))
-		print('costo    :{}'.format(addPuntos(costo)))
-		print('')
+		print(_('cantidad :{}').format(addPuntos(cantidad)))
+		print(_('precio   :{:d}').format(unidad))
+		print(_('costo    :{}').format(addPuntos(costo)))
+		print(_(''))
 		precio_total += costo
 		cantidad_total += cantidad
 
@@ -139,37 +139,37 @@ def comprarRecursos(s):
 	capacidad = getCapacidadDeAlmacenamiento(ciudad['html'], num=True)
 	disponible = capacidad - ocupado
 
-	print('Total disponible para comprar: {}, por {}'.format(addPuntos(cantidad_total), addPuntos(precio_total)))
+	print(_('Total disponible para comprar: {}, por {}').format(addPuntos(cantidad_total), addPuntos(precio_total)))
 	if disponible < cantidad_total:
-		print('Solo se puede comprar {} por falta de almacenamiento.'.format(addPuntos(disponible)))
+		print(_('Solo se puede comprar {} por falta de almacenamiento.').format(addPuntos(disponible)))
 		cantidad_total = disponible
 	print('')
-	cantidadAComprar = read(msg='¿Cuánta cantidad comprar? ', min=0, max=cantidad_total)
+	cantidadAComprar = read(msg=_('¿Cuánta cantidad comprar? '), min=0, max=cantidad_total)
 	if cantidadAComprar == 0:
 		return
 
 	oro = getOro(s, ciudad)
 	costoTotal = calcularCosto(ofertas, cantidadAComprar)
 
-	print('\nOro actual : {}.\nCosto total: {}.\nOro final  : {}.'. format(addPuntos(oro), addPuntos(costoTotal), addPuntos(oro - costoTotal)))
-	print('¿Proceder? [Y/n]')
+	print(_('\nOro actual : {}.\nCosto total: {}.\nOro final  : {}.'). format(addPuntos(oro), addPuntos(costoTotal), addPuntos(oro - costoTotal)))
+	print(_('¿Proceder? [Y/n]'))
 	rta = read(values=['y', 'Y', 'n', 'N', ''])
 	if rta.lower() == 'n':
 		return
 
-	print('Se comprará {}'.format(addPuntos(cantidadAComprar)))
+	print(_('Se comprará {}').format(addPuntos(cantidadAComprar)))
 	enter()
 
 	forkear(s)
 	if s.padre is True:
 		return
 
-	info = '\nCompro {} de {} para {}\n'.format(addPuntos(cantidadAComprar), tipoDeBien[numRecurso - 1], ciudad['cityName'])
+	info = _('\nCompro {} de {} para {}\n').format(addPuntos(cantidadAComprar), tipoDeBien[numRecurso - 1], ciudad['cityName'])
 	setInfoSignal(s, info)
 	try:
 		do_it(s, ciudad, ofertas, cantidadAComprar)
 	except:
-		msg = 'Error en:\n{}\nCausa:\n{}'.format(info, traceback.format_exc())
+		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
 		sendToBot(msg)
 	finally:
 		s.logout()
@@ -217,7 +217,7 @@ def buy(s, ciudad, oferta, cantidad):
 	else:
 		data_dict['cargo_tradegood{}'.format(resource)] = cantidad
 	s.post(payloadPost=data_dict)
-	msg = 'Compro {} a {} de {}'.format(addPuntos(cantidad), oferta['ciudadDestino'], oferta['jugadorAComprar'])
+	msg = _('Compro {} a {} de {}').format(addPuntos(cantidad), oferta['ciudadDestino'], oferta['jugadorAComprar'])
 	sendToBotDebug(msg, debugON_comprarRecursos)
 
 def do_it(s, ciudad, ofertas, cantidadAComprar):

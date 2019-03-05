@@ -37,7 +37,7 @@ def menu(s):
 					comprarRecursos,
 					update
 					]
-	mnu="""
+	mnu=_("""
 (0)  Salir
 (1)  Lista de construcción
 (2)  Enviar recursos
@@ -50,7 +50,7 @@ def menu(s):
 (9)  Bot donador
 (10) Alertar poco vino
 (11) Comprar recursos
-(12) Actualizar Ikabot"""
+(12) Actualizar Ikabot""")
 	print(mnu)
 	entradas = len(menu_actions)
 	eleccion = read(min=0, max=entradas)
