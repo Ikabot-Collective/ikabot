@@ -38,7 +38,7 @@ def read(min=None, max=None, digit=False, msg=prompt, values=None): # lee input 
 	return leido
 
 def elegirCiudad(s, ajenas=False):
-	(ids, ciudades) = getIdsDeCiudades(s)
+	(ids, ciudades) = getIdsDeCiudades(s, own=True)
 	maxNombre = 0
 	for unId in ids:
 		largo = len(ciudades[unId]['name'])
