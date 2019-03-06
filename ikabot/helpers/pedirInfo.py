@@ -38,7 +38,7 @@ def read(min=None, max=None, digit=False, msg=prompt, values=None): # lee input 
 	return leido
 
 def elegirCiudad(s, ajenas=False):
-	(ids, ciudades) = getIdsDeCiudades(s, own=True)
+	(ids, ciudades) = getIdsDeCiudades(s)
 	maxNombre = 0
 	for unId in ids:
 		largo = len(ciudades[unId]['name'])
@@ -172,7 +172,7 @@ def pedirValor(text, max):
 		var = 0
 	return int(var)
 
-def getIdsDeCiudades(s, own=False):
+def getIdsDeCiudades(s, all=False):
 	global ciudades
 	global ids
 	if ids is None or ciudades is None:
@@ -186,7 +186,7 @@ def getIdsDeCiudades(s, own=False):
 		ids = sorted(ids)
 
 	# {'coords': '[x:y] ', 'id': idCiudad, 'tradegood': '..', 'name': 'nomberCiudad', 'relationship': 'ownCity'|'occupiedCities'|..}
-	if own:
+	if all is False:
 		ids_own   = [ciudad for ciudad in ciudades if ciudades[ciudad]['relationship'] == 'ownCity']
 		ids_other = [ciudad for ciudad in ciudades if ciudades[ciudad]['relationship'] != 'ownCity']
 		ciudades_own = ciudades.copy()
