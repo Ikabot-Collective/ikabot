@@ -41,8 +41,11 @@ class Sesion:
 		string = self.servidor + ' ' + self.mundo + ' ' + self.username + ' '
 		return string in line
 
+	def __isInVacation(self, html):
+		return 'nologin_umod' in html
+
 	def __isExpired(self, html):
-		return 'index.php?logout' in html
+		return 'errorLoggedOut' in html
 
 	def __updateCookieFile(self, primero=False, nuevo=False, salida=False):
 		msg = 'Actualizo el archivo de cookies:\n'
@@ -121,8 +124,20 @@ class Sesion:
 	def __login(self):
 		self.s = requests.Session() # s es la sesion de conexion
 		html = self.s.post(self.urlBase + 'action=loginAvatar&function=login', data=self.payload, headers=self.headers).text
+		if self.__isInVacation(html):
+			msg = 'La cuenta entró en modo vacaciones'
+			if self.padre:
+				print(msg)
+			else:
+				sendToBot(msg)
+			sys.exit(0)
 		if self.__isExpired(html):
-			sys.exit('Usuario o contrasenia incorrecta')
+			msg = 'Usuario o contrasenia incorrecta'
+			if self.padre:
+				print(msg)
+			else:
+				sendToBot(msg)
+			sys.exit(0)
 		self.__updateCookieFile(primero=True)
 
 	def __backoff(self):
