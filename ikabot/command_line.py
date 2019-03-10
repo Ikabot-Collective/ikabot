@@ -24,9 +24,11 @@ from ikabot.funcion.comprarRecursos import comprarRecursos
 
 
 t = gettext.translation('command_line', 
-                        'locale', 
+                        localedir, 
                         languages=idiomas,
                         fallback=True)
+print(localedir)
+input()
 _ = t.gettext
 
 def menu(s):
