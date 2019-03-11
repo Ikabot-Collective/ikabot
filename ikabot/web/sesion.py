@@ -45,7 +45,7 @@ class Sesion:
 		return 'nologin_umod' in html
 
 	def __isExpired(self, html):
-		return 'errorLoggedOut' in html
+		return 'index.php?logout' in html
 
 	def __updateCookieFile(self, primero=False, nuevo=False, salida=False):
 		msg = 'Actualizo el archivo de cookies:\n'
