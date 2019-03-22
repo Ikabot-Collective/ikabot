@@ -130,14 +130,13 @@ class Sesion:
 				print(msg)
 			else:
 				sendToBot(msg)
-			sys.exit(0)
+			os._exit(0)
 		if self.__isExpired(html):
-			msg = 'Usuario o contrasenia incorrecta'
 			if self.padre:
+				msg = 'Usuario o contrasenia incorrecta'
 				print(msg)
-			else:
-				sendToBot(msg)
-			sys.exit(0)
+				os._exit(0)
+			sys.exit()
 		self.__updateCookieFile(primero=True)
 
 	def __backoff(self):
