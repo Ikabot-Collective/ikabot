@@ -109,8 +109,13 @@ class Sesion:
 			ciphertext = fileInfo.group(2)
 			try:
 				plaintext = self.cipher.decrypt(ciphertext)
-			except ValueError as e:
-				sys.exit('Usuario o contrasenia incorrecta')
+			except ValueError:
+				msg = 'MAC check ERROR, ciphertext corrompido.'
+				if self.padre:
+					print(msg)
+				else:
+					sendToBot(msg)
+				os._exit(0)
 			cookie1, cookie2 = plaintext.split(' ')
 			cookie_dict = {'PHPSESSID': cookie1, 'ikariam': cookie2, 'ikariam_loginMode': '0'}
 			self.s = requests.Session()
@@ -136,7 +141,7 @@ class Sesion:
 				msg = 'Usuario o contrasenia incorrecta'
 				print(msg)
 				os._exit(0)
-			sys.exit()
+			raise Exception('No se pudo iniciar sesión')
 		self.__updateCookieFile(primero=True)
 
 	def __backoff(self):
@@ -148,14 +153,20 @@ class Sesion:
 		if self.__sesionActiva():
 			try:
 				self.__login()
-			except SystemExit:
+			except Exception:
 				self.__expiroLaSesion()
 		else:
-			self.__getCookie()
+			try:
+				self.__getCookie()
+			except Exception:
+				self.__expiroLaSesion()
 
 	def __checkCookie(self):
 		if self.__sesionActiva() is False:
-			self.__getCookie()
+			try:
+				self.__getCookie()
+			except Exception:
+				self.__expiroLaSesion()
 
 	def __getFileInfo(self): # 1 num de sesiones 2 ciphertext
 		with open(cookieFile, 'r', os.O_NONBLOCK) as filehandler:
@@ -171,6 +182,13 @@ class Sesion:
 				plaintext = self.cipher.decrypt(ciphertext)
 				cookie = plaintext.split(' ')[0]
 				return cookie == self.s.cookies['PHPSESSID']
+			except ValueError:
+				msg = 'MAC check ERROR, ciphertext corrompido.'
+				if self.padre:
+					print(msg)
+				else:
+					sendToBot(msg)
+				os._exit(0)
 			except KeyError:
 				pass
 		return False
