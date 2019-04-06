@@ -110,11 +110,10 @@ class Sesion:
 			try:
 				plaintext = self.cipher.decrypt(ciphertext)
 			except ValueError:
-				msg = 'MAC check ERROR, ciphertext corrompido.'
 				if self.padre:
-					print(msg)
+					print('Usuario o contrasenia incorrecta')
 				else:
-					sendToBot(msg)
+					sendToBot('MAC check ERROR, ciphertext corrompido.')
 				os._exit(0)
 			cookie1, cookie2 = plaintext.split(' ')
 			cookie_dict = {'PHPSESSID': cookie1, 'ikariam': cookie2, 'ikariam_loginMode': '0'}
