@@ -48,19 +48,24 @@ def subirEdificio(s, idCiudad, posicion, nivelesASubir):
 		edificio = ciudad['position'][posicion]
 
 		if edificio['canUpgrade'] is False:
-			msg  = 'No se pudo terminar de subir el edificio por falta de recursos.'
+			msg  = 'No se pudo terminar de subir el edificio {} por falta de recursos.'.format(edificio['name'])
 			msg += 'Faltaron subir {:d} niveles'.format(nivelesASubir - lv)
 			sendToBot(msg)
 			return
 
-		url = 'action=CityScreen&function=upgradeBuilding&actionRequest={}&cityId={}&position={:d}&level={}&activeTab=tabSendTransporter&backgroundView=city&currentCityId={}&templateView={}&ajax=1'.format(s.token(), idCiudad, posicion, edificio['level'], idCiudad, edificio['building'])
-		s.post(url)
+		for i in range(3):
+			url = 'action=CityScreen&function=upgradeBuilding&actionRequest={}&cityId={}&position={:d}&level={}&activeTab=tabSendTransporter&backgroundView=city&currentCityId={}&templateView={}&ajax=1'.format(s.token(), idCiudad, posicion, edificio['level'], idCiudad, edificio['building'])
+			s.post(url)
+			html = s.get(urlCiudad + idCiudad)
+			ciudad = getCiudad(html)
+			edificio = ciudad['position'][posicion]
+			if edificio['isBusy']:
+				break
+			else:
+				continue
 
-		html = s.get(urlCiudad + idCiudad)
-		ciudad = getCiudad(html)
-		edificio = ciudad['position'][posicion]
 		if edificio['isBusy'] is False:
-			msg  = 'El edificio no se amplió\n'
+			msg  = 'El edificio {} no se amplió después de tres intentos\n'.format(edificio['name'])
 			msg += url + '\n'
 			msg += str(edificio)
 			sendToBot(msg)
