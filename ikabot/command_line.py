@@ -27,8 +27,7 @@ t = gettext.translation('command_line',
                         localedir, 
                         languages=idiomas,
                         fallback=True)
-print(localedir)
-input()
+
 _ = t.gettext
 
 def menu(s):
