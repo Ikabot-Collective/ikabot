@@ -19,7 +19,7 @@ from ikabot.helpers.botComm import *
 from ikabot.helpers.recursos import *
 
 t = gettext.translation('comprarRecursos', 
-                        'locale', 
+                        localedir, 
                         languages=idiomas,
                         fallback=True)
 _ = t.gettext

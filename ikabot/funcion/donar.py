@@ -11,7 +11,7 @@ from ikabot.helpers.gui import *
 from ikabot.helpers.varios import addPuntos
 
 t = gettext.translation('donar', 
-                        'locale', 
+                        localedir, 
                         languages=idiomas,
                         fallback=True)
 _ = t.gettext

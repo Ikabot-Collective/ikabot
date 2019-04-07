@@ -17,7 +17,7 @@ from ikabot.helpers.gui import banner
 from ikabot.web.sesion import normal_get
 
 t = gettext.translation('subirEdificio', 
-                        'locale', 
+                        localedir, 
                         languages=idiomas,
                         fallback=True)
 _ = t.gettext
