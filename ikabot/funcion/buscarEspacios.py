@@ -13,7 +13,7 @@ from ikabot.helpers.getJson import getIsla
 from ikabot.helpers.process import forkear
 
 t = gettext.translation('buscarEspacios', 
-                        'locale', 
+                        localedir, 
                         languages=idiomas,
                         fallback=True)
 _ = t.gettext

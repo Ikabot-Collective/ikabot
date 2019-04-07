@@ -11,7 +11,7 @@ from ikabot.helpers.process import forkear
 from ikabot.helpers.gui import enter
 
 t = gettext.translation('entrarDiariamente', 
-                        'locale', 
+                        localedir, 
                         languages=idiomas,
                         fallback=True)
 _ = t.gettext

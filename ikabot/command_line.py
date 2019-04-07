@@ -23,12 +23,12 @@ from ikabot.funcion.alertarPocoVino import alertarPocoVino
 from ikabot.funcion.comprarRecursos import comprarRecursos
 
 
-t = gettext.translation('command_line', 
-                        localedir, 
-                        languages=idiomas,
-                        fallback=True)
-
-_ = t.gettext
+#t = gettext.translation('command_line', 
+#                        localedir, 
+#                        languages=idiomas,
+#                        fallback=True)
+#
+#_ = t.gettext
 
 def menu(s):
 	banner()

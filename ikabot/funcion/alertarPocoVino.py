@@ -16,8 +16,8 @@ from ikabot.helpers.recursos import *
 from ikabot.helpers.botComm import *
 
 
-t = gettext.translation('alertarPocoVino', 
-                        'locale', 
+t = gettext.translation('alertarPocoVino',
+                        localedir,
                         languages=idiomas,
                         fallback=True)
 _ = t.gettext

@@ -5,11 +5,18 @@ import time
 import traceback
 import re
 import json
+from ikabot.config import *
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.process import forkear
 from ikabot.helpers.gui import enter
 from ikabot.helpers.varios import diasHorasMinutos
 from ikabot.helpers.botComm import *
+
+t = gettext.translation('alertarAtaques',
+                        localedir,
+                        languages=idiomas,
+                        fallback=True)
+_ = t.gettext
 
 def alertarAtaques(s):
 	if botValido(s) is False:

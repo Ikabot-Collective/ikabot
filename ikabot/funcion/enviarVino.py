@@ -14,7 +14,7 @@ from ikabot.helpers.process import forkear
 from ikabot.helpers.gui import banner
 
 t = gettext.translation('enviarVino', 
-                        'locale', 
+                        localedir, 
                         languages=idiomas,
                         fallback=True)
 _ = t.gettext

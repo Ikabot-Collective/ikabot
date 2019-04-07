@@ -13,7 +13,7 @@ from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.pedirInfo import getIdsDeCiudades
 
 t = gettext.translation('getStatus', 
-                        'locale', 
+                        localedir, 
                         languages=idiomas,
                         fallback=True)
 _ = t.gettext

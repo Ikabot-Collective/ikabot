@@ -14,7 +14,7 @@ from ikabot.helpers.varios import addPuntos
 from ikabot.helpers.recursos import *
 
 t = gettext.translation('menuRutaComercial', 
-                        'locale', 
+                        localedir, 
                         languages=idiomas,
                         fallback=True)
 _ = t.gettext

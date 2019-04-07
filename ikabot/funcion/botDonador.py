@@ -14,7 +14,7 @@ from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.recursos import getRecursosDisponibles
 
 t = gettext.translation('botDonador', 
-                        'locale', 
+                        localedir, 
                         languages=idiomas,
                         fallback=True)
 _ = t.gettext

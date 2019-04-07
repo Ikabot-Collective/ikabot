@@ -7,7 +7,7 @@ from ikabot.helpers.gui import *
 from ikabot.config import *
 
 t = gettext.translation('update', 
-                        'locale', 
+                        localedir, 
                         languages=idiomas,
                         fallback=True)
 _ = t.gettext
