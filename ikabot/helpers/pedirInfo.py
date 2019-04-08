@@ -175,7 +175,7 @@ def pedirValor(text, max):
 def getIdsDeCiudades(s, all=False):
 	global ciudades
 	global ids
-	if ids is None or ciudades is None:
+	if ids is None or ciudades is None or s.padre is False:
 		html = s.get()
 		ciudades = re.search(r'relatedCityData:\sJSON\.parse\(\'(.+?),\\"additionalInfo', html).group(1) + '}'
 		ciudades = ciudades.replace('\\', '')
