@@ -26,10 +26,10 @@ def sendToBot(msg, Token=False):
 		msg = 'pid:{}\n{}\n{}'.format(os.getpid(), config.infoUser, msg)
 	with open(config.telegramFile, 'r', os.O_NONBLOCK) as filehandler:
 		text = filehandler.read()
-		valid = re.search(r'\d{6,}:[A-Za-z0-9_-]{34,}\n\d{8,9}', text)
-		if valid is not None:
-			(botToken, chatId) = text.splitlines()
-			ikabot.web.sesion.normal_get('https://api.telegram.org/bot{}/sendMessage'.format(botToken), params={'chat_id': chatId, 'text': msg})
+	valid = re.search(r'\d{6,}:[A-Za-z0-9_-]{34,}\n\d{8,9}', text)
+	if valid is not None:
+		(botToken, chatId) = text.splitlines()
+		ikabot.web.sesion.normal_get('https://api.telegram.org/bot{}/sendMessage'.format(botToken), params={'chat_id': chatId, 'text': msg})
 
 def telegramFileValido():
 	with open(config.telegramFile, 'r', os.O_NONBLOCK) as filehandler:
