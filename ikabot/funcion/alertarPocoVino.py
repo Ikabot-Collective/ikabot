@@ -51,7 +51,7 @@ def do_it(s, horas):
 		ids, ciudades = getIdsDeCiudades(s)
 		for city in ciudades:
 			if 'avisado' not in ciudades[city]:
-			ciudades[city]['avisado'] = False
+				ciudades[city]['avisado'] = False
 
 		for city in ciudades:
 			if ciudades[city]['tradegood'] == '1':
