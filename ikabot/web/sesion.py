@@ -117,6 +117,7 @@ class Sesion:
 			ciphertext = fileInfo.group(2)
 			try:
 				plaintext = self.cipher.decrypt(ciphertext)
+			except ValueError:
 				if self.padre:
 					print(_('Usuario o contrasenia incorrecta'))
 				else:
