@@ -1,9 +1,10 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import re
 import time
 import traceback
-import re
+import gettext
 from decimal import *
 from ikabot.config import *
 from ikabot.helpers.signals import setInfoSignal
@@ -14,25 +15,32 @@ from ikabot.helpers.varios import diasHorasMinutos
 from ikabot.helpers.recursos import *
 from ikabot.helpers.botComm import *
 
+
+t = gettext.translation('alertarPocoVino',
+                        localedir,
+                        languages=idiomas,
+                        fallback=True)
+_ = t.gettext
+
 getcontext().prec = 30
 
 def alertarPocoVino(s):
 	if botValido(s) is False:
 		return
-	horas = read(msg='¿Cuántas horas deben quedar hasta que se acabe el vino en una ciudad para que es dé aviso?: ',min=1)
-	print('Se avisará cuando el vino se acabe en {:d} horas en alguna ciudad.'.format(horas))
+	horas = read(msg=_('¿Cuántas horas deben quedar hasta que se acabe el vino en una ciudad para que es dé aviso?: '),min=1)
+	print(_('Se avisará cuando el vino se acabe en {:d} horas en alguna ciudad.').format(horas))
 	enter()
 
 	forkear(s)
 	if s.padre is True:
 		return
 
-	info = '\nAviso si el vino se acaba en {:d} horas\n'.format(horas)
+	info = _('\nAviso si el vino se acaba en {:d} horas\n').format(horas)
 	setInfoSignal(s, info)
 	try:
 		do_it(s, horas)
 	except:
-		msg = 'Error en:\n{}\nCausa:\n{}'.format(info, traceback.format_exc())
+		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
 		sendToBot(msg)
 	finally:
 		s.logout()
@@ -56,7 +64,7 @@ def do_it(s, horas):
 			max = getRecursosDisponibles(html)
 			if consumoXseg == 0:
 				if ciudades[city]['avisado'] is False:
-					msg = 'La ciudad {} no esta consumiendo vino!'.format(ciudades[city]['name'])
+					msg = _('La ciudad {} no esta consumiendo vino!').format(ciudades[city]['name'])
 					sendToBot(msg)
 					ciudades[city]['avisado'] = True
 				continue
@@ -65,7 +73,7 @@ def do_it(s, horas):
 			if segsRestantes < horas*60*60:
 				if ciudades[city]['avisado'] is False:
 					tiempoRestante = diasHorasMinutos(segsRestantes)
-					msg = 'En {} se acabará el vino en {}'.format(tiempoRestante, ciudades[city]['name'])
+					msg = _('En {} se acabará el vino en {}').format(tiempoRestante, ciudades[city]['name'])
 					sendToBot(msg)
 					ciudades[city]['avisado'] = True
 			else:

@@ -1,13 +1,20 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import sys
 import re
+import sys
 import json
+import gettext
 from decimal import *
 from ikabot.config import *
 from ikabot.helpers.getJson import *
 from ikabot.helpers.gui import *
+
+t = gettext.translation('pedirInfo', 
+                        localedir, 
+                        languages=idiomas,
+                        fallback=True)
+_ = t.gettext
 
 getcontext().prec = 30
 
@@ -49,7 +56,7 @@ def elegirCiudad(s, ajenas=False):
 	prints = []
 	i = 0
 	if ajenas:
-		print(' 0: ciudad ajena')
+		print(_(' 0: ciudad ajena'))
 	else:
 		print('')
 	for unId in ids:
@@ -81,7 +88,7 @@ def elegirCiudadAjena(s):
 		jsonIslas = json.loads(jsonIslas, strict=False)
 		idIsla = jsonIslas['data'][str(x)][str(y)][0]
 	except:
-		print('Coordenadas incorrectas')
+		print(_('Coordenadas incorrectas'))
 		enter()
 		banner()
 		return elegirCiudad(s, ajenas=True)
@@ -103,7 +110,7 @@ def elegirCiudadAjena(s):
 			print('{}: {}{}({})'.format(num, ciudad['name'], pad(ciudad['name']), ciudad['Name']))
 			opciones.append(ciudad)
 	if i == 0:
-		print('No hay ciudades donde enviar recursos en esta isla')
+		print(_('No hay ciudades donde enviar recursos en esta isla'))
 		enter()
 		return elegirCiudad(s, ajenas=True)
 	eleccion = read(min=1, max=i)
@@ -120,7 +127,7 @@ def getEdificios(s, idCiudad):
 	pos = -1
 	prints = []
 	posiciones = []
-	prints.append('(0)\t\tsalir')
+	prints.append(_('(0)\t\tsalir'))
 	posiciones.append(None)
 	for posicion in ciudad['position']:
 		pos += 1
@@ -131,7 +138,7 @@ def getEdificios(s, idCiudad):
 				level = ' ' + level
 			if posicion['isBusy']:
 				level = level + '+'
-			prints.append('(' + str(i) + ')' + '\tlv:' + level + '\t' + posicion['name'])
+			prints.append(_('({:d})\tlv:{}\t{}').format(i, level, posicion['name']))
 			posiciones.append(pos)
 	eleccion = menuEdificios(prints, ciudad, posiciones)
 	return eleccion
@@ -151,10 +158,10 @@ def menuEdificios(prints, ciudad, posiciones):
 		nivelActual += 1
 
 	banner()
-	print('edificio:{}'.format(ciudad['position'][posicion]['name']))
-	print('nivel actual:{}'.format(nivelActual))
+	print(_('edificio:{}').format(ciudad['position'][posicion]['name']))
+	print(_('nivel actual:{}').format(nivelActual))
 
-	nivelFinal = read(min=nivelActual, msg='subir al nivel:')
+	nivelFinal = read(min=nivelActual, msg=_('subir al nivel:'))
 
 	niveles = nivelFinal - nivelActual
 	rta = []

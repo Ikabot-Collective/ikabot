@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import time
+import gettext
 import traceback
 from ikabot.config import *
 from ikabot.helpers.botComm import *
@@ -12,22 +13,28 @@ from ikabot.helpers.pedirInfo import getIdsdeIslas
 from ikabot.helpers.getJson import getIsla
 from ikabot.helpers.process import forkear
 
+t = gettext.translation('buscarEspacios', 
+                        localedir, 
+                        languages=idiomas,
+                        fallback=True)
+_ = t.gettext
+
 def buscarEspacios(s):
 	if botValido(s) is False:
 		return
-	print('Se buscarán espacios nuevos cada hora.')
+	print(_('Se buscarán espacios nuevos cada hora.'))
 	enter()
 
 	forkear(s)
 	if s.padre is True:
 		return
 
-	info = '\nBusco espacios nuevos en las islas cada 1 hora\n'
+	info = _('\nBusco espacios nuevos en las islas cada 1 hora\n')
 	setInfoSignal(s, info)
 	try:
 		do_it(s)
 	except:
-		msg = 'Error en:\n{}\nCausa:\n{}'.format(info, traceback.format_exc())
+		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
 		sendToBot(msg)
 	finally:
 		s.logout()
@@ -50,7 +57,7 @@ def do_it(s):
 						if ciudad['id'] == cityAntes['id']:
 							break
 					else:
-						msg = 'la ciudad {} del jugador {} desapareció en {} {}:{} {}'.format(cityAntes['name'], cityAntes['Name'], tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
+						msg = _('la ciudad {} del jugador {} desapareció en {} {}:{} {}').format(cityAntes['name'], cityAntes['Name'], tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
 						sendToBot(msg)
 
 				# alguien fundo
@@ -59,7 +66,7 @@ def do_it(s):
 						if ciudad['id'] == cityAntes['id']:
 							break
 					else:
-						msg = '{} fundó {} en {} {}:{} {}'.format(ciudad['Name'], ciudad['name'], tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
+						msg = _('{} fundó {} en {} {}:{} {}').format(ciudad['Name'], ciudad['name'], tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
 						sendToBot(msg)
 
 			isla_ciudades[idIsla] = ciudades.copy()

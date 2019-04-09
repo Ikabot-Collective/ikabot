@@ -1,0 +1,49 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2019-04-09 13:02-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: ../../../helpers/pedirInfo.py:59
+msgid " 0: ciudad ajena"
+msgstr " 0: foreign city"
+
+#: ../../../helpers/pedirInfo.py:91
+msgid "Coordenadas incorrectas"
+msgstr "Incorrect coordinates"
+
+#: ../../../helpers/pedirInfo.py:113
+msgid "No hay ciudades donde enviar recursos en esta isla"
+msgstr "There are no cities where to send resources on this island"
+
+#: ../../../helpers/pedirInfo.py:130
+msgid "(0)\t\tsalir"
+msgstr "(0)\t\texit"
+
+#: ../../../helpers/pedirInfo.py:141
+msgid "({:d})\tlv:{}\t{}"
+msgstr "({:d})\tlv:{}\t{}"
+
+#: ../../../helpers/pedirInfo.py:161
+msgid "edificio:{}"
+msgstr "building:{}"
+
+#: ../../../helpers/pedirInfo.py:162
+msgid "nivel actual:{}"
+msgstr "current level:{}"
+
+#: ../../../helpers/pedirInfo.py:164
+msgid "subir al nivel:"
+msgstr "increase to level:"
+

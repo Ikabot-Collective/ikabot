@@ -1,0 +1,64 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2019-04-09 07:57-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: ../../../funcion/enviarVino.py:52
+msgid "Se puede enviar como máximo {} a cada ciudad"
+msgstr "You can send {} at max to each city"
+
+#: ../../../funcion/enviarVino.py:53
+msgid "¿Cuanto vino enviar a cada ciudad?:"
+msgstr "How much wine do you wish to send to each city?"
+
+#: ../../../funcion/enviarVino.py:55
+msgid ""
+"\n"
+"Por enviar {} de vino a cada ciudad"
+msgstr ""
+"\n"
+"I will send {} of wine to each city"
+
+#: ../../../funcion/enviarVino.py:56
+msgid "¿Proceder? [Y/n]"
+msgstr "Proceed? [Y/n]"
+
+#: ../../../funcion/enviarVino.py:86
+msgid ""
+"\n"
+"Enviar vino\n"
+msgstr ""
+"\n"
+"Send wine\n"
+
+#: ../../../funcion/enviarVino.py:89
+msgid ""
+"{} -> {}\n"
+"Vino: {}\n"
+msgstr ""
+"{} -> {}\n"
+"Wine: {}\n"
+
+#: ../../../funcion/enviarVino.py:94
+msgid ""
+"Error en:\n"
+"{}\n"
+"Causa:\n"
+"{}"
+msgstr ""
+"Error in:\n"
+"{}\n"
+"Cause:\n"
+"{}"

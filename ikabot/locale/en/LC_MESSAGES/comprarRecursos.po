@@ -1,0 +1,97 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2019-04-09 08:40-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: ../../../funcion/comprarRecursos.py:28
+msgid "¿Qué recurso quiere comprar?"
+msgstr "Which resource do you want to buy?"
+
+#: ../../../funcion/comprarRecursos.py:118
+msgid "No hay una Tienda contruida"
+msgstr "There is no store build"
+
+#: ../../../funcion/comprarRecursos.py:129
+msgid "No se encontraron ofertas."
+msgstr "There were no offers found"
+
+#: ../../../funcion/comprarRecursos.py:138
+msgid "cantidad :{}"
+msgstr "amount :{}"
+
+#: ../../../funcion/comprarRecursos.py:139
+msgid "precio   :{:d}"
+msgstr "price    :{:d}"
+
+#: ../../../funcion/comprarRecursos.py:140
+msgid "costo    :{}"
+msgstr "cost     :{}"
+
+#: ../../../funcion/comprarRecursos.py:149
+msgid "Total disponible para comprar: {}, por {}"
+msgstr "Total amount available to purchase: {}, for {}"
+
+#: ../../../funcion/comprarRecursos.py:151
+msgid "Solo se puede comprar {} por falta de almacenamiento."
+msgstr "You just can buy {} due to storing capacity"
+
+#: ../../../funcion/comprarRecursos.py:154
+msgid "¿Cuánta cantidad comprar? "
+msgstr "How much do you want to buy?"
+
+#: ../../../funcion/comprarRecursos.py:161
+msgid ""
+"\n"
+"Oro actual : {}.\n"
+"Costo total: {}.\n"
+"Oro final  : {}."
+msgstr ""
+"\n"
+"Current gold: {}.\n"
+"Total cost  : {}.\n"
+"Final gold  : {}."
+
+#: ../../../funcion/comprarRecursos.py:162
+msgid "¿Proceder? [Y/n]"
+msgstr "Proceed? [Y/n]"
+
+#: ../../../funcion/comprarRecursos.py:167
+msgid "Se comprará {}"
+msgstr "It will be purchased {}"
+
+#: ../../../funcion/comprarRecursos.py:174
+msgid ""
+"\n"
+"Compro {} de {} para {}\n"
+msgstr ""
+"\n"
+"I will buy {} from {} to {}\n"
+
+#: ../../../funcion/comprarRecursos.py:179
+msgid ""
+"Error en:\n"
+"{}\n"
+"Causa:\n"
+"{}"
+msgstr ""
+"Error in:\n"
+"{}\n"
+"Cause:\n"
+"{}"
+
+#: ../../../funcion/comprarRecursos.py:227
+msgid "Compro {} a {} de {}"
+msgstr "I buy {} to {} from {}"
+
