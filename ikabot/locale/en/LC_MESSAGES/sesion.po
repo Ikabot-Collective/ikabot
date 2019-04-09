@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2019-04-09 12:52-0300\n"
+"POT-Creation-Date: 2019-04-09 13:35-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,37 +23,41 @@ msgstr ""
 "You must install the requests module:\n"
 "sudo pip3 install requests"
 
-#: ../../../web/sesion.py:56
+#: ../../../web/sesion.py:59
 msgid ""
 "Actualizo el archivo de cookies:\n"
 msgstr ""
 "Updating the cookie file:\n"
 
-#: ../../../web/sesion.py:58
+#: ../../../web/sesion.py:61
 msgid "Primero"
 msgstr "First"
 
-#: ../../../web/sesion.py:60
+#: ../../../web/sesion.py:63
 msgid "Nuevo"
 msgstr "New"
 
-#: ../../../web/sesion.py:62
+#: ../../../web/sesion.py:65
 msgid "Salida"
 msgstr "Out"
 
-#: ../../../web/sesion.py:112
+#: ../../../web/sesion.py:115
 msgid "actualizo cookie usando el archivo de cookies"
 msgstr "Updating cookie using cookie file"
 
-#: ../../../web/sesion.py:118 ../../../web/sesion.py:133
+#: ../../../web/sesion.py:121 ../../../web/sesion.py:147
 msgid "Usuario o contrasenia incorrecta"
 msgstr "Wrong user name or wrong password"
 
-#: ../../../web/sesion.py:125
+#: ../../../web/sesion.py:123
+msgid "MAC check ERROR, ciphertext corrompido."
+msgstr "MAC check ERROR, ciphertext corrupt."
+
+#: ../../../web/sesion.py:131
 msgid "La sesión se venció, renovando sesión"
 msgstr "The session expired, renovating"
 
-#: ../../../web/sesion.py:217
+#: ../../../web/sesion.py:244
 msgid "Fallo la conexion a internet"
 msgstr "Internet connection failed"
 
