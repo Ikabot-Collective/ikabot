@@ -138,7 +138,7 @@ def comprarRecursos(s):
 		print(_('cantidad :{}').format(addPuntos(cantidad)))
 		print(_('precio   :{:d}').format(unidad))
 		print(_('costo    :{}').format(addPuntos(costo)))
-		print(_(''))
+		print('')
 		precio_total += costo
 		cantidad_total += cantidad
 
