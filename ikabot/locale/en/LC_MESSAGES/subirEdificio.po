@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2019-04-09 07:57-0300\n"
+"POT-Creation-Date: 2019-04-09 13:29-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -24,23 +24,30 @@ msgid "{}: Espero {:d} segundos para que {} suba al nivel {:d}"
 msgstr "{}: I wait {:d} seconds so that {} gets to the level {:d}"
 
 #: ../../../funcion/subirEdificio.py:58
-msgid "No se pudo terminar de subir el edificio por falta de recursos."
+msgid "No se pudo terminar de subir el edificio {} por falta de recursos."
 msgstr "The building could not be completed due to lack of resources."
 
 #: ../../../funcion/subirEdificio.py:59
 msgid "Faltaron subir {:d} niveles"
 msgstr "Missed {:d} levels"
 
-#: ../../../funcion/subirEdificio.py:70
+#: ../../../funcion/subirEdificio.py:75
 msgid ""
 "El edificio no se amplió\n"
-msgstr "The building was not extended\n"
+msgstr ""
+"The building was not extended\n"
 
-#: ../../../funcion/subirEdificio.py:133
+#: ../../../funcion/subirEdificio.py:76
+msgid ""
+"El edificio {} no se amplió después de tres intentos\n"
+msgstr ""
+"The building {} was not extended after three tries\n"
+
+#: ../../../funcion/subirEdificio.py:139
 msgid "¿Proceder de todos modos? [Y/n]"
 msgstr "Proceed anyway? [Y/n]"
 
-#: ../../../funcion/subirEdificio.py:138
+#: ../../../funcion/subirEdificio.py:144
 msgid ""
 "\n"
 "Tiene materiales suficientes"
@@ -48,11 +55,11 @@ msgstr ""
 "\n"
 "You have enough materials"
 
-#: ../../../funcion/subirEdificio.py:139
+#: ../../../funcion/subirEdificio.py:145
 msgid "¿Proceder? [Y/n]"
 msgstr "Proceed? [Y/n]"
 
-#: ../../../funcion/subirEdificio.py:149
+#: ../../../funcion/subirEdificio.py:155
 msgid ""
 "\n"
 "Subir edificio\n"
@@ -60,7 +67,7 @@ msgstr ""
 "\n"
 "Upload building\n"
 
-#: ../../../funcion/subirEdificio.py:156
+#: ../../../funcion/subirEdificio.py:162
 msgid ""
 "Error en:\n"
 "{}\n"
