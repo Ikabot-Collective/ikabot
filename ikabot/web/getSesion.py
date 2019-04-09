@@ -10,7 +10,7 @@ from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.gui import banner
 
 t = gettext.translation('getSesion', 
-                        'locale', 
+                        localedir, 
                         languages=idiomas,
                         fallback=True)
 _ = t.gettext

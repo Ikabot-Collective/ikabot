@@ -1,0 +1,59 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2019-04-09 12:52-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: ../../../web/sesion.py:26
+msgid ""
+"Debe instalar el modulo de requests:\n"
+"sudo pip3 install requests"
+msgstr ""
+"You must install the requests module:\n"
+"sudo pip3 install requests"
+
+#: ../../../web/sesion.py:56
+msgid ""
+"Actualizo el archivo de cookies:\n"
+msgstr ""
+"Updating the cookie file:\n"
+
+#: ../../../web/sesion.py:58
+msgid "Primero"
+msgstr "First"
+
+#: ../../../web/sesion.py:60
+msgid "Nuevo"
+msgstr "New"
+
+#: ../../../web/sesion.py:62
+msgid "Salida"
+msgstr "Out"
+
+#: ../../../web/sesion.py:112
+msgid "actualizo cookie usando el archivo de cookies"
+msgstr "Updating cookie using cookie file"
+
+#: ../../../web/sesion.py:118 ../../../web/sesion.py:133
+msgid "Usuario o contrasenia incorrecta"
+msgstr "Wrong user name or wrong password"
+
+#: ../../../web/sesion.py:125
+msgid "La sesión se venció, renovando sesión"
+msgstr "The session expired, renovating"
+
+#: ../../../web/sesion.py:217
+msgid "Fallo la conexion a internet"
+msgstr "Internet connection failed"
+

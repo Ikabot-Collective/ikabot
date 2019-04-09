@@ -12,7 +12,7 @@ from ikabot.helpers.gui import enter
 from ikabot.config import *
 
 t = gettext.translation('botComm', 
-                        'locale', 
+                        localedir, 
                         languages=idiomas,
                         fallback=True)
 _ = t.gettext

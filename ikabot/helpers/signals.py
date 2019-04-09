@@ -3,11 +3,11 @@
 
 import os
 import signal
-from ikabot.helpers.botComm import *
 import gettext
+from ikabot.helpers.botComm import *
 
 t = gettext.translation('signals', 
-                        'locale', 
+                        localedir, 
                         languages=idiomas,
                         fallback=True)
 _ = t.gettext

@@ -11,7 +11,7 @@ from ikabot.helpers.getJson import *
 from ikabot.helpers.gui import *
 
 t = gettext.translation('pedirInfo', 
-                        'locale', 
+                        localedir, 
                         languages=idiomas,
                         fallback=True)
 _ = t.gettext
