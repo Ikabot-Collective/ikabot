@@ -4,10 +4,11 @@ import gettext
 
 local = locale.setlocale(locale.LC_ALL, '')
 if 'es_' in local:
-	idiomas = ['en']
+	idiomas = ['es']
 else:
 	idiomas = ['en']
-localedir = 'locale'
+
+localedir = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'locale')
 t = gettext.translation('config', 
                         localedir, 
                         languages=idiomas,
