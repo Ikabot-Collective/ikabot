@@ -1,0 +1,39 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2019-04-09 07:58-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: ../../../funcion/update.py:18
+msgid ""
+"\n"
+"Está actualizado"
+msgstr ""
+"\n"
+"It's updated"
+
+#: ../../../funcion/update.py:21
+msgid ""
+"Actualizando...\n"
+msgstr ""
+"Updating...\n"
+
+#: ../../../funcion/update.py:23
+msgid "Listo."
+msgstr "Ready."
+
+#: ../../../funcion/update.py:24
+msgid "Reinicie ikabot para que los cambios surjan efecto."
+msgstr "Restart ikabot for changes to take effect."
+

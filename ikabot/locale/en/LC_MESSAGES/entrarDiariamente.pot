@@ -1,0 +1,40 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2019-04-09 07:56-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: ../../../funcion/entrarDiariamente.py:22
+msgid "Se entrará todos los días automaticamente."
+msgstr "I will enter every day"
+
+#: ../../../funcion/entrarDiariamente.py:29
+msgid ""
+"\n"
+"Entro diariamente\n"
+msgstr ""
+"\n"
+"I enter every day\n"
+
+#: ../../../funcion/entrarDiariamente.py:34
+msgid ""
+"Error en:\n"
+"{}\n"
+"Causa:\n"
+"{}"
+msgstr ""
+"Error in:\n"
+"{}\n"
+"Cause:\n"
+"{}"

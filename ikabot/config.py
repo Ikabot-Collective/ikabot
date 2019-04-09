@@ -4,7 +4,7 @@ import gettext
 
 local = locale.setlocale(locale.LC_ALL, '')
 if 'es_' in local:
-	idiomas = ['es']
+	idiomas = ['en']
 else:
 	idiomas = ['en']
 localedir = 'locale'

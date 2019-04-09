@@ -33,8 +33,8 @@ def botDonador(s):
 		tradegood = ciudades[idCiudad]['tradegood']
 		bien = bienes[tradegood]
 		print(_('En la ciudad {} {}, ¿Desea donar al aserradero o al bien de cambio? [a/b]').format(ciudad['cityName'], bien))
-		rta = read(values=['a', 'A', 'b', 'B'])
-		tipo = 'resource' if rta.lower() == 'a' else 'tradegood'
+		rta = read(values=[_('a'), _('A'), _('b'), _('B')])
+		tipo = 'resource' if rta.lower() == _('a') else 'tradegood'
 		ciudades_dict[idCiudad] = {'isla': ciudad['islandId'], 'tipo': tipo}
 
 	print(_('Se donará todos los días.'))

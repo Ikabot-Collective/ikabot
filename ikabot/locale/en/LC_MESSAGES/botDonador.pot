@@ -1,0 +1,65 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2019-04-09 08:21-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: ../../../funcion/botDonador.py:35
+msgid "En la ciudad {} {}, ¿Desea donar al aserradero o al bien de cambio? [a/b]"
+msgstr "In the city {} {}, Do you wish to donate to the forest or the trading good? [f/t]"
+
+#: ../../../funcion/botDonador.py:36
+msgid "A"
+msgstr "F"
+
+#: ../../../funcion/botDonador.py:36
+msgid "B"
+msgstr "T"
+
+#: ../../../funcion/botDonador.py:36
+msgid "b"
+msgstr "t"
+
+#: ../../../funcion/botDonador.py:36 ../../../funcion/botDonador.py:37
+msgid "a"
+msgstr "f"
+
+#: ../../../funcion/botDonador.py:40
+msgid "Se donará todos los días."
+msgstr "I will donate every day."
+
+#: ../../../funcion/botDonador.py:47
+msgid ""
+"\n"
+"Dono todos los días\n"
+msgstr ""
+"\n"
+"I donate every day\n"
+
+#: ../../../funcion/botDonador.py:52
+msgid ""
+"Error en:\n"
+"{}\n"
+"Causa:\n"
+"{}"
+msgstr ""
+"Error in:\n"
+"{}\n"
+"Cause:\n"
+"{}"
+
+#: ../../../funcion/botDonador.py:65
+msgid "Doné automaticamente."
+msgstr "I donated automatically"
+

@@ -1,0 +1,65 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2019-04-09 07:57-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: ../../../funcion/getStatus.py:27
+msgid "Barcos {:d}/{:d}"
+msgstr "Ships {:d}/{:d}"
+
+#: ../../../funcion/getStatus.py:41
+msgid "Almacenamiento:"
+msgstr "Storage:"
+
+#: ../../../funcion/getStatus.py:43
+msgid "Recursos:"
+msgstr "Resources:"
+
+#: ../../../funcion/getStatus.py:44
+msgid "Madera {1}{2}{0} Vino {3}{4}{0} Marmol {5}{6}{0} Cristal {7}{8}{0} Azufre {9}{10}{0}"
+msgstr "Wood {1}{2}{0} Wine {3}{4}{0} Marble {5}{6}{0} Cristal {7}{8}{0} Sulfur {9}{10}{0}"
+
+#: ../../../funcion/getStatus.py:47
+msgid "Producción:"
+msgstr "Production:"
+
+#: ../../../funcion/getStatus.py:48
+msgid "Madera:{} {}:{}"
+msgstr "Wood:{} {}:{}"
+
+#: ../../../funcion/getStatus.py:50
+msgid "{}{}No se consume vino!{}"
+msgstr "{}{}Does not consume wine!{}"
+
+#: ../../../funcion/getStatus.py:52
+msgid ""
+"Hay vino para:\n"
+"∞"
+msgstr ""
+"There is wine for:\n"
+"∞"
+
+#: ../../../funcion/getStatus.py:57
+msgid ""
+"Hay vino para:\n"
+"{}"
+msgstr ""
+"There is wine for:\n"
+"{}"
+
+#: ../../../funcion/getStatus.py:72
+msgid "lv:{}\t{}{}{}"
+msgstr "lv:{}\t{}{}{}"
+
