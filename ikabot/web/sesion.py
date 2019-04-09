@@ -14,8 +14,8 @@ from ikabot.helpers.aesCipher import *
 from ikabot.config import *
 import gettext
 
-t = gettext.translation('update', 
-                        'locale', 
+t = gettext.translation('sesion', 
+                        localedir, 
                         languages=idiomas,
                         fallback=True)
 _ = t.gettext
