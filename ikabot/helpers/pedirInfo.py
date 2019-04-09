@@ -179,10 +179,10 @@ def pedirValor(text, max):
 		var = 0
 	return int(var)
 
-def getIdsDeCiudades(s, own=False):
+def getIdsDeCiudades(s, all=False):
 	global ciudades
 	global ids
-	if ids is None or ciudades is None:
+	if ids is None or ciudades is None or s.padre is False:
 		html = s.get()
 		ciudades = re.search(r'relatedCityData:\sJSON\.parse\(\'(.+?),\\"additionalInfo', html).group(1) + '}'
 		ciudades = ciudades.replace('\\', '')
@@ -193,7 +193,7 @@ def getIdsDeCiudades(s, own=False):
 		ids = sorted(ids)
 
 	# {'coords': '[x:y] ', 'id': idCiudad, 'tradegood': '..', 'name': 'nomberCiudad', 'relationship': 'ownCity'|'occupiedCities'|..}
-	if own:
+	if all is False:
 		ids_own   = [ciudad for ciudad in ciudades if ciudades[ciudad]['relationship'] == 'ownCity']
 		ids_other = [ciudad for ciudad in ciudades if ciudades[ciudad]['relationship'] != 'ownCity']
 		ciudades_own = ciudades.copy()
