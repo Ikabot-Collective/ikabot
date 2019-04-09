@@ -3,10 +3,17 @@
 
 import getpass
 import os
+import gettext
 import ikabot.config as config
 
+t = gettext.translation('gui', 
+                        config.localedir, 
+                        languages=config.idiomas,
+                        fallback=True)
+_ = t.gettext
+
 def enter():
-	getpass.getpass('\n[Enter]')
+	getpass.getpass(_('\n[Enter]'))
 
 def clear():
 	os.system('clear')

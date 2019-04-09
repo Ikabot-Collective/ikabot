@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import re
+import gettext
 from decimal import *
 from ikabot.config import *
 from ikabot.helpers.gui import *
@@ -11,13 +12,19 @@ from ikabot.helpers.recursos import *
 from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.pedirInfo import getIdsDeCiudades
 
+t = gettext.translation('getStatus', 
+                        localedir, 
+                        languages=idiomas,
+                        fallback=True)
+_ = t.gettext
+
 getcontext().prec = 30
 
 def getStatus(s):
 	banner()
 	tipoCiudad = [bcolors.ENDC, bcolors.HEADER, bcolors.STONE, bcolors.BLUE, bcolors.WARNING]
 	ids, ciudades = getIdsDeCiudades(s)
-	print('Barcos {:d}/{:d}'.format(getBarcosDisponibles(s), getBarcosTotales(s)))
+	print(_('Barcos {:d}/{:d}').format(getBarcosDisponibles(s), getBarcosTotales(s)))
 	for unId in ids:
 		html = s.get(urlCiudad + unId)
 		ciudad = getCiudad(html)
@@ -31,23 +38,23 @@ def getStatus(s):
 				crecursos.append(bcolors.RED)
 			else:
 				crecursos.append(bcolors.ENDC)
-		print('Almacenamiento:')
+		print(_('Almacenamiento:'))
 		print(addPuntos(capacidadDeAlmacenamiento))
-		print('Recursos:')
-		print('Madera {1}{2}{0} Vino {3}{4}{0} Marmol {5}{6}{0} Cristal {7}{8}{0} Azufre {9}{10}{0}'.format(bcolors.ENDC, crecursos[0], addPuntos(max[0]), crecursos[1], addPuntos(max[1]), crecursos[2], addPuntos(max[2]), crecursos[3], addPuntos(max[3]), crecursos[4], addPuntos(max[4])))
+		print(_('Recursos:'))
+		print(_('Madera {1}{2}{0} Vino {3}{4}{0} Marmol {5}{6}{0} Cristal {7}{8}{0} Azufre {9}{10}{0}').format(bcolors.ENDC, crecursos[0], addPuntos(max[0]), crecursos[1], addPuntos(max[1]), crecursos[2], addPuntos(max[2]), crecursos[3], addPuntos(max[3]), crecursos[4], addPuntos(max[4])))
 		consumoXhr = getConsumoDeVino(html)
 		tipo = tipoDeBien[typeGood]
-		print('Producción:')
-		print('Madera:{} {}:{}'.format(addPuntos(wood*3600), tipo, addPuntos(good*3600)))
+		print(_('Producción:'))
+		print(_('Madera:{} {}:{}').format(addPuntos(wood*3600), tipo, addPuntos(good*3600)))
 		if consumoXhr == 0:
-			print('{}{}No se consume vino!{}'.format(bcolors.RED, bcolors.BOLD, bcolors.ENDC))
+			print(_('{}{}No se consume vino!{}').format(bcolors.RED, bcolors.BOLD, bcolors.ENDC))
 		elif typeGood == 1 and (good*3600) > consumoXhr:
-			print('Hay vino para:\n∞')
+			print(_('Hay vino para:\n∞'))
 		else:
 			consumoXseg = Decimal(consumoXhr) / Decimal(3600)
 			segsRestantes = Decimal(int(max[1])) / Decimal(consumoXseg)
 			texto = diasHorasMinutos(segsRestantes)
-			print('Hay vino para:\n{}'.format(texto))
+			print(_('Hay vino para:\n{}').format(texto))
 		for edificio in ciudad['position']:
 			if edificio['name'] == 'empty':
 				continue
@@ -62,7 +69,7 @@ def getStatus(s):
 				level = ' ' + level
 			if edificio['isBusy'] is True:
 				level = level + '+'
-			print('lv:{}\t{}{}{}'.format(level, color, edificio['name'], bcolors.ENDC))
+			print(_('lv:{}\t{}{}{}').format(level, color, edificio['name'], bcolors.ENDC))
 		enter()
 		print('')
 

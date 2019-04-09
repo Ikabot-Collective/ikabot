@@ -1,0 +1,74 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2019-04-09 07:57-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: ../../../funcion/subirEdificio.py:30
+msgid "{}: No espero nada para que {} suba al nivel {:d}"
+msgstr "{}: I don't wait anything so that {} gets to the level {:d}"
+
+#: ../../../funcion/subirEdificio.py:38
+msgid "{}: Espero {:d} segundos para que {} suba al nivel {:d}"
+msgstr "{}: I wait {:d} seconds so that {} gets to the level {:d}"
+
+#: ../../../funcion/subirEdificio.py:58
+msgid "No se pudo terminar de subir el edificio por falta de recursos."
+msgstr "The building could not be completed due to lack of resources."
+
+#: ../../../funcion/subirEdificio.py:59
+msgid "Faltaron subir {:d} niveles"
+msgstr "Missed {:d} levels"
+
+#: ../../../funcion/subirEdificio.py:70
+msgid ""
+"El edificio no se amplió\n"
+msgstr "The building was not extended\n"
+
+#: ../../../funcion/subirEdificio.py:133
+msgid "¿Proceder de todos modos? [Y/n]"
+msgstr "Proceed anyway? [Y/n]"
+
+#: ../../../funcion/subirEdificio.py:138
+msgid ""
+"\n"
+"Tiene materiales suficientes"
+msgstr ""
+"\n"
+"You have enough materials"
+
+#: ../../../funcion/subirEdificio.py:139
+msgid "¿Proceder? [Y/n]"
+msgstr "Proceed? [Y/n]"
+
+#: ../../../funcion/subirEdificio.py:149
+msgid ""
+"\n"
+"Subir edificio\n"
+msgstr ""
+"\n"
+"Upload building\n"
+
+#: ../../../funcion/subirEdificio.py:156
+msgid ""
+"Error en:\n"
+"{}\n"
+"Causa:\n"
+"{}"
+msgstr ""
+"Error in:\n"
+"{}\n"
+"Cause:\n"
+"{}"
+

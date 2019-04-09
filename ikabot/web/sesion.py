@@ -2,10 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import sys
-try:
-	import requests
-except ImportError:
-	sys.exit('Debe instalar el modulo de requests:\nsudo pip3 install requests')
 import os
 import time
 import re
@@ -16,6 +12,18 @@ from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.botComm import *
 from ikabot.helpers.aesCipher import *
 from ikabot.config import *
+import gettext
+
+t = gettext.translation('sesion', 
+                        localedir, 
+                        languages=idiomas,
+                        fallback=True)
+_ = t.gettext
+
+try:
+	import requests
+except ImportError:
+	sys.exit(_('Debe instalar el modulo de requests:\nsudo pip3 install requests'))
 
 class Sesion:
 	def __init__(self, urlBase, payload, headers):
@@ -48,13 +56,13 @@ class Sesion:
 		return 'index.php?logout' in html
 
 	def __updateCookieFile(self, primero=False, nuevo=False, salida=False):
-		msg = 'Actualizo el archivo de cookies:\n'
+		msg = _('Actualizo el archivo de cookies:\n')
 		if primero:
-			msg += 'Primero'
+			msg += _('Primero')
 		elif nuevo:
-			msg += 'Nuevo'
+			msg += _('Nuevo')
 		else:
-			msg += 'Salida'
+			msg += _('Salida')
 		sendToBotDebug(msg, debugON_session)
 
 		(fileInfo, text) = self.__getFileInfo()
@@ -104,16 +112,15 @@ class Sesion:
 	def __getCookie(self):
 		fileInfo = self.__getFileInfo()[0]
 		if fileInfo:
-			msg = 'actualizo cookie usando el archivo de cookies'
+			msg = _('actualizo cookie usando el archivo de cookies')
 			sendToBotDebug(msg, debugON_session)
 			ciphertext = fileInfo.group(2)
 			try:
 				plaintext = self.cipher.decrypt(ciphertext)
-			except ValueError:
 				if self.padre:
-					print('Usuario o contrasenia incorrecta')
+					print(_('Usuario o contrasenia incorrecta'))
 				else:
-					sendToBot('MAC check ERROR, ciphertext corrompido.')
+					sendToBot(_('MAC check ERROR, ciphertext corrompido.'))
 				os._exit(0)
 			cookie1, cookie2 = plaintext.split(' ')
 			cookie_dict = {'PHPSESSID': cookie1, 'ikariam': cookie2, 'ikariam_loginMode': '0'}
@@ -121,7 +128,7 @@ class Sesion:
 			requests.cookies.cookiejar_from_dict(cookie_dict, cookiejar=self.s.cookies, overwrite=True)
 			self.__updateCookieFile(nuevo=True)
 		else:
-			msg = 'La sesión se venció, renovando sesión'
+			msg = _('La sesión se venció, renovando sesión')
 			sendToBotDebug(msg, debugON_session)
 			self.__login()
 
@@ -137,7 +144,7 @@ class Sesion:
 			os._exit(0)
 		if self.__isExpired(html):
 			if self.padre:
-				msg = 'Usuario o contrasenia incorrecta'
+				msg = _('Usuario o contrasenia incorrecta')
 				print(msg)
 				os._exit(0)
 			raise Exception('No se pudo iniciar sesión')
@@ -234,4 +241,4 @@ def normal_get(url, params={}):
 	try:
 		return requests.get(url, params=params)
 	except requests.exceptions.ConnectionError:
-		sys.exit('Fallo la conexion a internet')
+		sys.exit(_('Fallo la conexion a internet'))

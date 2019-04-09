@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import gettext
 import traceback
 from ikabot.helpers.botComm import *
 from ikabot.helpers.gui import *
@@ -12,17 +13,23 @@ from ikabot.helpers.process import forkear
 from ikabot.helpers.varios import addPuntos
 from ikabot.helpers.recursos import *
 
+t = gettext.translation('menuRutaComercial', 
+                        localedir, 
+                        languages=idiomas,
+                        fallback=True)
+_ = t.gettext
+
 def menuRutaComercial(s):
 	rutas = []
 	while True:
 
 		banner()
-		print('Ciudad de origen:')
+		print(_('Ciudad de origen:'))
 		try:
 			ciudadO = elegirCiudad(s)
 		except KeyboardInterrupt:
 			if rutas:
-				print('¿Enviar viajes? [Y/n]')
+				print(_('¿Enviar viajes? [Y/n]'))
 				rta = read(values=['y', 'Y', 'n', 'N', ''])
 				if rta.lower() != 'n':
 					break
@@ -32,7 +39,7 @@ def menuRutaComercial(s):
 		total = list(map(int, max))
 
 		banner()
-		print('Ciudad de destino')
+		print(_('Ciudad de destino'))
 		ciudadD = elegirCiudad(s, ajenas=True)
 		idIsla = ciudadD['islandId']
 
@@ -66,20 +73,20 @@ def menuRutaComercial(s):
 		if ciudadD['propia']:
 			msg = ''
 			if resto[0] > mad:
-				msg += '{} más de madera\n'.format(addPuntos(mad))
+				msg += _('{} más de madera\n').format(addPuntos(mad))
 			if resto[1] > vin:
-				msg += '{} más de vino\n'.format(addPuntos(vin))
+				msg += _('{} más de vino\n').format(addPuntos(vin))
 			if resto[2] > mar:
-				msg += '{} más de marmol\n'.format(addPuntos(mar))
+				msg += _('{} más de marmol\n').format(addPuntos(mar))
 			if resto[3] > cri:
-				msg += '{} más de cristal\n'.format(addPuntos(cri))
+				msg += _('{} más de cristal\n').format(addPuntos(cri))
 			if resto[4] > azu:
-				msg += '{} más de azufre\n'.format(addPuntos(azu))
+				msg += _('{} más de azufre\n').format(addPuntos(azu))
 			if msg:
-				print('Solo puede almacenar:\n' + msg)
-		print('Disponible:')
-		print('Madera {} Vino {} Marmol {} Cristal {} Azufre {}'.format(addPuntos(resto[0]), addPuntos(resto[1]), addPuntos(resto[2]), addPuntos(resto[3]), addPuntos(resto[4])))
-		print('Enviar:')
+				print(_('Solo puede almacenar:\n{}').format(msg))
+		print(_('Disponible:'))
+		print(_('Madera {} Vino {} Marmol {} Cristal {} Azufre {}').format(addPuntos(resto[0]), addPuntos(resto[1]), addPuntos(resto[2]), addPuntos(resto[3]), addPuntos(resto[4])))
+		print(_('Enviar:'))
 		try:
 			md = pedirValor(' Madera:', resto[0])
 			vn = pedirValor('   Vino:', resto[1])
@@ -92,25 +99,25 @@ def menuRutaComercial(s):
 			continue
 
 		banner()
-		print('Por enviar de {} a {}'.format(ciudadO['cityName'], ciudadD['cityName']))
+		print(_('Por enviar de {} a {}').format(ciudadO['cityName'], ciudadD['cityName']))
 		enviado = ''
 		if md:
-			enviado += 'Madera:{} '.format(addPuntos(md))
+			enviado += _('Madera:{} ').format(addPuntos(md))
 		if vn:
-			enviado += 'Vino:{} '.format(addPuntos(vn))
+			enviado += _('Vino:{} ').format(addPuntos(vn))
 		if mr:
-			enviado += 'Marmol:{} '.format(addPuntos(mr))
+			enviado += _('Marmol:{} ').format(addPuntos(mr))
 		if cr:
-			enviado += 'Cristal:{} '.format(addPuntos(cr))
+			enviado += _('Cristal:{} ').format(addPuntos(cr))
 		if az:
-			enviado += 'Azufre:{}'.format(addPuntos(az))
+			enviado += _('Azufre:{}').format(addPuntos(az))
 		print(enviado)
-		print('¿Proceder? [Y/n]')
+		print(_('¿Proceder? [Y/n]'))
 		rta = read(values=['y', 'Y', 'n', 'N', ''])
 		if rta.lower() != 'n':
 			ruta = (ciudadO, ciudadD, idIsla, md, vn, mr, cr, az)
 			rutas.append(ruta)
-			print('¿Realizar otro envio? [y/N]')
+			print(_('¿Realizar otro envio? [y/N]'))
 			rta = read(values=['y', 'Y', 'n', 'N', ''])
 			if rta.lower() != 'y':
 				break
@@ -119,24 +126,24 @@ def menuRutaComercial(s):
 	if s.padre is True:
 		return
 
-	info = '\nRuta comercial\n'
+	info = _('\nRuta comercial\n')
 	for ruta in rutas:
 		(ciudadO, ciudadD, idIsla, md, vn, mr, cr, az) = ruta
-		info = info + '{} -> {}\nMadera: {} Vino: {} Marmol: {} Cristal: {} Azufre: {}\n'.format(ciudadO['cityName'], ciudadD['cityName'], addPuntos(md), addPuntos(vn), addPuntos(mr), addPuntos(cr), addPuntos(az))
+		info = info + _('{} -> {}\nMadera: {} Vino: {} Marmol: {} Cristal: {} Azufre: {}\n').format(ciudadO['cityName'], ciudadD['cityName'], addPuntos(md), addPuntos(vn), addPuntos(mr), addPuntos(cr), addPuntos(az))
 
 	setInfoSignal(s, info)
 	try:
-		msg  = 'Comienzo a enviar recursos:\n'
+		msg  = _('Comienzo a enviar recursos:\n')
 		msg += info
 		sendToBotDebug(msg, debugON_menuRutaComercial)
 
 		planearViajes(s, rutas)
 
-		msg  = 'Termino de enviar recursos:\n'
+		msg  = _('Termino de enviar recursos:\n')
 		msg += info
 		sendToBotDebug(msg, debugON_menuRutaComercial)
 	except:
-		msg = 'Error en:\n{}\nCausa:\n{}'.format(info, traceback.format_exc())
+		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
 		sendToBot(msg)
 	finally:
 		s.logout()

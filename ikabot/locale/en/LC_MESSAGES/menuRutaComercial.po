@@ -1,0 +1,151 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2019-04-09 07:57-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: ../../../funcion/menuRutaComercial.py:27
+msgid "Ciudad de origen:"
+msgstr "Origin city:"
+
+#: ../../../funcion/menuRutaComercial.py:32
+msgid "¿Enviar viajes? [Y/n]"
+msgstr "Send shipment? [Y/n]"
+
+#: ../../../funcion/menuRutaComercial.py:42
+msgid "Ciudad de destino"
+msgstr "Destination city"
+
+#: ../../../funcion/menuRutaComercial.py:76
+msgid ""
+"{} más de madera\n"
+msgstr ""
+"{} more wood\n"
+
+#: ../../../funcion/menuRutaComercial.py:78
+msgid ""
+"{} más de vino\n"
+msgstr ""
+"{} more wine\n"
+
+#: ../../../funcion/menuRutaComercial.py:80
+msgid ""
+"{} más de marmol\n"
+msgstr ""
+"{} more marble\n"
+
+#: ../../../funcion/menuRutaComercial.py:82
+msgid ""
+"{} más de cristal\n"
+msgstr ""
+"{} more cristal\n"
+
+#: ../../../funcion/menuRutaComercial.py:84
+msgid ""
+"{} más de azufre\n"
+msgstr ""
+"{} more sulfur\n"
+
+#: ../../../funcion/menuRutaComercial.py:86
+msgid ""
+"Solo puede almacenar:\n"
+"{}"
+msgstr ""
+"You can store just:\n"
+"{}"
+
+#: ../../../funcion/menuRutaComercial.py:87
+msgid "Disponible:"
+msgstr "Available:"
+
+#: ../../../funcion/menuRutaComercial.py:88
+msgid "Madera {} Vino {} Marmol {} Cristal {} Azufre {}"
+msgstr "Wood {} Wine {} Marbel {} Cristal {} Sulfur {}"
+
+#: ../../../funcion/menuRutaComercial.py:89
+msgid "Enviar:"
+msgstr "Send:"
+
+#: ../../../funcion/menuRutaComercial.py:102
+msgid "Por enviar de {} a {}"
+msgstr "About to send from {} to {}"
+
+#: ../../../funcion/menuRutaComercial.py:105
+msgid "Madera:{} "
+msgstr "Wood:{}   "
+
+#: ../../../funcion/menuRutaComercial.py:107
+msgid "Vino:{} "
+msgstr "Wine:{} "
+
+#: ../../../funcion/menuRutaComercial.py:109
+msgid "Marmol:{} "
+msgstr "Marble:{} "
+
+#: ../../../funcion/menuRutaComercial.py:111
+msgid "Cristal:{} "
+msgstr "Cristal:{} "
+
+#: ../../../funcion/menuRutaComercial.py:113
+msgid "Azufre:{}"
+msgstr "Sulfur{} "
+
+#: ../../../funcion/menuRutaComercial.py:115
+msgid "¿Proceder? [Y/n]"
+msgstr "Proceed? [Y/n]"
+
+#: ../../../funcion/menuRutaComercial.py:120
+msgid "¿Realizar otro envio? [y/N]"
+msgstr "Create another shipment? [y/N]"
+
+#: ../../../funcion/menuRutaComercial.py:129
+msgid ""
+"\n"
+"Ruta comercial\n"
+msgstr ""
+"\n"
+"Comercial rute\n"
+
+#: ../../../funcion/menuRutaComercial.py:132
+msgid ""
+"{} -> {}\n"
+"Madera: {} Vino: {} Marmol: {} Cristal: {} Azufre: {}\n"
+msgstr ""
+"{} -> {}\n"
+"Wood: {} Wine: {} Marble: {} Cristal: {} Sulfur: {}\n"
+
+#: ../../../funcion/menuRutaComercial.py:136
+msgid ""
+"Comienzo a enviar recursos:\n"
+msgstr ""
+"Start to send the resources:\n"
+
+#: ../../../funcion/menuRutaComercial.py:142
+msgid ""
+"Termino de enviar recursos:\n"
+msgstr ""
+"End to send the resources:\n"
+
+#: ../../../funcion/menuRutaComercial.py:146
+msgid ""
+"Error en:\n"
+"{}\n"
+"Causa:\n"
+"{}"
+msgstr ""
+"Error in:\n"
+"{}\n"
+"Cause:\n"
+"{}"
+

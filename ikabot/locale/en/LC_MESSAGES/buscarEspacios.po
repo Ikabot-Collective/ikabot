@@ -1,0 +1,49 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2019-04-09 07:56-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: ../../../funcion/buscarEspacios.py:24
+msgid "Se buscarán espacios nuevos cada hora."
+msgstr "I will search for new spaces each hour."
+
+#: ../../../funcion/buscarEspacios.py:31
+msgid ""
+"\n"
+"Busco espacios nuevos en las islas cada 1 hora\n"
+msgstr ""
+"\n"
+"I search for new spaces each hour\n"
+
+#: ../../../funcion/buscarEspacios.py:37
+msgid ""
+"Error en:\n"
+"{}\n"
+"Causa:\n"
+"{}"
+msgstr ""
+"Error in:\n"
+"{}\n"
+"Cause:\n"
+"{}"
+
+#: ../../../funcion/buscarEspacios.py:60
+msgid "la ciudad {} del jugador {} desapareció en {} {}:{} {}"
+msgstr "the city {} of the player {} disappeared in {} {}:{}{} {}"
+
+#: ../../../funcion/buscarEspacios.py:69
+msgid "{} fundó {} en {} {}:{} {}"
+msgstr "{} founded in {} {}:{} {}"
+

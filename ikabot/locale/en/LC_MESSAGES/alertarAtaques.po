@@ -1,0 +1,74 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2019-04-09 08:02-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: ../../../funcion/alertarAtaques.py:24
+msgid "Se buscarán ataques cada 20 minutos."
+msgstr "I will check for attacks every 20 minutes"
+
+#: ../../../funcion/alertarAtaques.py:31
+msgid ""
+"\n"
+"Espero por ataques cada 20 minutos\n"
+msgstr ""
+"\n"
+"I check for attacks every 20 minutes\n"
+
+#: ../../../funcion/alertarAtaques.py:36
+msgid ""
+"Error en:\n"
+"{}\n"
+"Causa:\n"
+"{}"
+msgstr ""
+"Error in:\n"
+"{}\n"
+"Cause:\n"
+"{}"
+
+#: ../../../funcion/alertarAtaques.py:64
+msgid ""
+"-- ALERTA --\n"
+msgstr "-- ALERT --\n"
+
+#: ../../../funcion/alertarAtaques.py:66
+msgid ""
+"de la ciudad {} de {}\n"
+msgstr ""
+"from the city {} of {}\n"
+
+#: ../../../funcion/alertarAtaques.py:67
+msgid ""
+"a {}\n"
+msgstr ""
+"to {}\n"
+
+#: ../../../funcion/alertarAtaques.py:68
+msgid ""
+"{} unidades\n"
+msgstr ""
+"{} units\n"
+
+#: ../../../funcion/alertarAtaques.py:69
+msgid ""
+"{} flotas\n"
+msgstr ""
+"{} fleet\n"
+
+#: ../../../funcion/alertarAtaques.py:70
+msgid "llegada en: {}"
+msgstr "arrival in: {}"
+
