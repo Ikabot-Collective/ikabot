@@ -14,13 +14,13 @@ from ikabot.helpers.process import forkear
 from ikabot.helpers.varios import addPuntos
 from ikabot.helpers.recursos import *
 
-t = gettext.translation('menuRutaComercial', 
-                        localedir, 
-                        languages=idiomas,
-                        fallback=True)
-_ = t.gettext
 
 def menuRutaComercial(s):
+	t = gettext.translation('menuRutaComercial', 
+	                        localedir, 
+	                        languages=idiomas,
+	                        fallback=True)
+	_ = t.gettext
 	rutas = []
 	while True:
 

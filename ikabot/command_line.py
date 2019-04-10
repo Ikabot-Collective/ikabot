@@ -22,7 +22,6 @@ from ikabot.funcion.update import update
 from ikabot.funcion.alertarPocoVino import alertarPocoVino
 from ikabot.funcion.comprarRecursos import comprarRecursos
 
-
 t = gettext.translation('command_line', 
                         localedir, 
                         languages=idiomas,
