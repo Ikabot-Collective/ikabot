@@ -3,6 +3,7 @@
 
 import gettext
 import traceback
+from ikabot.config import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.signals import setInfoSignal
