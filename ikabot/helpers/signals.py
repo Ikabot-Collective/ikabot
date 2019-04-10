@@ -4,6 +4,7 @@
 import os
 import signal
 import gettext
+from ikabot.config import *
 from ikabot.helpers.botComm import *
 
 t = gettext.translation('signals', 
