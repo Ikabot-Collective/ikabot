@@ -14,13 +14,13 @@ from ikabot.helpers.varios import addPuntos
 from ikabot.helpers.process import forkear
 from ikabot.helpers.gui import banner
 
-t = gettext.translation('enviarVino', 
-                        localedir, 
-                        languages=idiomas,
-                        fallback=True)
-_ = t.gettext
 
 def enviarVino(s):
+	t = gettext.translation('enviarVino', 
+	                        localedir, 
+	                        languages=idiomas,
+	                        fallback=True)
+	_ = t.gettext
 	banner()
 	vinoTotal = 0
 	dict_idVino_diponible = {}
@@ -76,7 +76,7 @@ def enviarVino(s):
 				ciudadO = ciudadesVino[idCiudadOrigen]
 				vinoDisponible = ciudadO['disponible']
 				for ruta in rutas:
-					(origen, _, _, _, vn, _, _, _) = ruta
+					(origen, __, __, __, vn, __, __, __) = ruta
 					if origen['id'] == idCiudadOrigen:
 						vinoDisponible -= vn
 				enviar = faltante if vinoDisponible > faltante else vinoDisponible
