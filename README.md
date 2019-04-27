@@ -1,95 +1,95 @@
 ## ikabot ~ Ikariam Bot
 
-_Ikabot es un programa escrito en python que otorga la misma y mucha más funcionalidad que una cuenta premium en ikariam, ¡sin gastar ambrosia!_
+_Ikabot is a program written in python that grants the same and much more functionality than a premium account in ikariam, without spending ambrosia!_
 
-### Funcionalidades
+### Features
 
-0. Salir
+0. Exit
 
-	Cierra el menu principal, volviendo a la consola normal. También se puede usar `ctrl-c`. Al cerrar _ikabot_, todas las acciones que configuramos siguen corriendo en el fondo. Podemos listarlas con `ps aux | grep ikabot`.
+	Closes the main menu, returning to the normal console. You can also use `ctrl-c`. When closing _ikabot_, all the actions that you configured will continue running in the background. You can list them with `ps aux | grep ikabot`.
 
-1. Lista de construcción
+1. Construction list
 
-	El usuario selecciona un edificio, la cantidad de niveles a subir, _ikabot_ calcula si se cuenta con los recursos suficientes y se encarga de subir la cantidad de niveles seleccionada.
+	The user selects a building, the number of levels to upload, _ikabot_ calculates if it has enough resources and uploads the selected number of levels.
 	
-2. Enviar recursos 
+2. Send resources
+ 
+	It sends any amount of resources from one city to another. It doesn't matter how many boats you have, _ikabot_ will send all the trips that are necessary. The destination city can be own by the user or by another one.
 
-	Sirve para enviar cualquier cantidad de recursos de una ciudad a otra. No importa la cantidad de barcos que tenga, _ikabot_ realizara la cantidad de viajes que sean necesarios. La ciudad de destino puede ser propia o de otros jugadores.
+3. Send wine
 
-3. Enviar vino
+	It sends wine from cities in wine, to cities that are not in wine. The maximum amount to send is equal to the total amount of wine that is stored in cities in wine, divided by the number of cities that are not in wine.
 
-	Sirve para enviar vino desde las ciudades en vino, a las ciudades que no están en vino. La cantidad máxima a enviar es igual a la cantidad total de vino que hay almacenado en ciudades en vino, dividido por la cantidad de ciudades que no están en vino.
+4. Account status
 
-4. Estado de la cuenta
-
-	Muestra informacion como niveles de los edificios, tiempo hasta que se acabe el vino, recursos entre otras cosas de todas las ciudades.
+	It shows information such as levels of the buildings, time until the wine runs out, resources among other things from all the cities.
 	
-5. Donar
+5. Donate
 
-	Le permite a uno donar.
+	It allows one to donate.
 	
-6. Buscar espacios nuevos
+6. Search for new spaces
 
-	Esta funcionalidad avisa por telegram, si una ciudad desapareció o si alguien fundó en cualquiera de las islas en donde el usuario tiene al menos una ciudad fundada.
+	This functionality alerts by telegram, if a city disappears or if someone founded in any of the islands where the user has at least one city founded.
 	
-7. Entrar diariamente
+7. Login daily
 
-	Para aquellos que no quieren que pase ni un dia sin que su cuenta inicie sesion.
+	For those who do not want to spend a day without their account login.
 	
-8. Alertar ataques
+8. Alert attacks
 
-	Nos alerta por telegram si nos van a atacar.
+	It alerts by telegram if you are going to be attacked.
 
-9. Bot donador
+9. Donate automatically
 
-	Entra una vez al día y dona toda la madera disponible de todas las ciudades al bien de lujo o a los aserraderos.
+	It enters once a day and donate all available wood from all cities to the luxury good or the forest.
 
-10. Alertar poco vino
+10. Alert wine running out
 
-	Avisa mediante Telegram cuando falta menos de N horas para que una ciudad se quede sin vino. La cantidad de horas las especifica el usuario.
+	It warns by Telegram when less than N hours are needed for a city to run out of wine. The number of hours is specified by the user.
 
-11. Comprar Recursos
+11. Buy resources
 
-	Permite elegir qué tipo de recurso comprar y qué cantidad y compra automaticamente a las distintas ofertas de la más barata a la más cara.
+	It allows you to choose what type of resource to buy and what quantity. It automatically purchases the different offers from the cheapest to the most expensive.
 
-12. Actualizar Ikabot
+12. Update Ikabot
 
-	Actualiza _ikabot_ a su release más actual.
+	It updates _ikabot_
 	
 
-Cuando uno configura una acción, al cerrar el puede entrar y jugar ikariam sin problemas. El único inconveniente que puede llegar a tener, es que la sesión expire, esto es normal y si sucede simplemente vuelva a entrar.
+When you set an action in _ikabot_, you can enter and play ikariam without any problems. The only drawback that you may have is that the session expires, this is normal and if it happens simply re-enter.
 
-### Instalar
+### Install
 
 ```
 sudo python3 -m pip install ikabot
 ```
-con el comando `ikabot` se accede al menu de acciones.
+with the `ikabot` command you access the main menu.
 
-### Desinstalar
+### Uninstall
 
 ```
 sudo python3 -m pip uninstall ikabot
 ```
-### Dependencias
+### Dependencies
 
-Para poder instalar y usar _ikabot_ debe estar instalado python3 y pip. Se debe correr sobre **Linux**, por el momento no funciona en **Windows**.
+In order to install and use _ikabot_, python3 and pip must be installed. It must be run on **Linux**, it does not work on **Windows**.
 
 #### - Python 3
-Probablemente se encuentre instalado por defecto en su sistema.
+It is probably installed by default in your system.
 
-Para ver si está instalado por defecto, correr  `python3 --version`.
+To check if it is installed by default, just run `python3 --version`.
 
-Si no esta instalado, visite la [pagina oficial](https://www.python.org/) 
+If it is not installed, visit the [official website](https://www.python.org/) 
 
 #### - Pip
-Es una herramienta para instalar paquetes de python.
+It is a tool to install python packages.
 
-Para ver si está instalado por defecto, correr  `python3 -m pip -V`.
+To check if it is installed by default, just run `python3 -m pip -V`.
 
-Para instalarlo hay que bajar el archivo _get-pip.py_ de [esta página](https://pip.pypa.io/en/stable/installing/) y ejecutar `python3 get-pip.py`.
+To install it, you must download the _get-pip.py_ file from [this page](https://pip.pypa.io/en/stable/installing/) and run `python3 get-pip.py`.
 
-O simplemente ejecutar:
+Or just excecute:
 ```
 curl https://bootstrap.pypa.io/get-pip.py
 sudo python3 get-pip.py
@@ -98,34 +98,34 @@ rm get-pip.py
 
 ### Telegram
 
-Algunas funcionalidades (como alertar ataques) se comunican con usted mediante mensajes de Telegram.
+Some features (such as alerting attacks) communicate with you via Telegram messages.
 
-Los mensajes que le envia son visibles por usted y nadie más.
+This messages are visible to you and nobody else.
 
-Configurarlo es altamente recomendable, ya que le permite a uno disfrutar de toda la funcionalidad de _ikabot_.
+Setting this up is highly recommended, since it allows one to enjoy all the functionality of _ikabot_.
 
 Para configurarlo necesitaremos simplemente ingresar dos datos:
+To configure this, you simply need to enter two pieces of information:
 
-1) El token del bot a utilizar
+1) The token of the bot you are going to use
 
-	Si quiere utilizar el bot 'oficial' de _ikabot_, entre en Telegram y busque con la lupa a @DaHackerBot, háblele y verá que se manda un /start. Una vez hecho esto puede cerrar Telegram.
+	If you want to use the 'official' bot of _ikabot_, enter Telegram and search with the magnifying glass @DaHackerBot, talk to it and you will see that a /start is sent. Once this is done you can close Telegram.
 	
-	Luego, cuando _ikabot_ le pida que ingrese el token del bot, use el siguiente: `409993506:AAFwjxfazzx6ZqYusbmDJiARBTl_Zyb_Ue4`.
+	Then, when _ikabot_ asks you to enter the bot's token, use the following: `409993506: AAFwjxfazzx6ZqYusbmDJiARBTl_Zyb_Ue4`.
 	
-	Si quiere usar su propio bot, lo puede crear con las siguientes instrucciones: https://core.telegram.org/bots.
+	If you want to use your own bot, you can create it with the following instructions: https://core.telegram.org/bots.
 
-2) Su chat_id
+2) Your chat_id
 
-	Este identificador es único de cada usuario de Telegram y lo puede conocer hablandole por telegram a @get_id_bot (el que tiene un arco de foto).
+	This identifier is unique to each Telegram user and you can get it by talking by telegram to @get_id_bot (the one with the bow in the photo).
 
-Cuando quiera usar una funcionalidad que requiera de Telegram, como al ingresar al item _(8) Alertar ataques_ en el menu, _ikabot_ se le pedirá el token del bot y su chat_id. Una vez ingresados, se guardaran en un archivo y no se volverán a pedir.
+When you want to use a functionality that requires Telegram, such as _Alert attacks_, _ikabot_ will ask you for the bot's token and your chat_id. Once entered, they will be saved in a file and will not be asked again.
 
 
-### Avanzado
+### Advanced
 
-Si existe un proceso de ikabot que identificamos con `ps aux | grep ikabot`, podemos consesguir una descripción de lo que hace con `kill -SIGUSR1 <pid>`. La descripción le llegará mediante telegram.
+If there is a ikabot process that we identified with `ps aux | grep ikabot`, we can get a description of what it does with `kill -SIGUSR1 <pid>`. The description will arrive via Telegram.
 
 ### Windows
 
-Por el momento no funciona en windows, aunque si se tiene windows 10, se lo puede ejecutar en el bash de ubuntu.
-
+_Ikabot_ does not work in Windows, although in the future it might work in the Ubuntu bash of Windows 10.
