@@ -18,7 +18,7 @@ _Ikabot is a program written in python that grants the iqual and even more funct
 
 3. Send wine
 
-	It sends wine from cities in wine, to cities that are not in wine. The maximum amount to send is equal to the total amount of wine that is stored in cities in wine, divided by the number of cities that are not in wine.
+	It sends wine from cities in wine, to cities that are not. The maximum amount you could send is equal to the total amount of wine that is stored in cities in wine, divided by the number of cities that are not in wine.
 
 4. Account status
 
@@ -26,11 +26,11 @@ _Ikabot is a program written in python that grants the iqual and even more funct
 	
 5. Donate
 
-	It allows one to donate.
+	It allows you to donate.
 	
 6. Search for new spaces
 
-	This functionality alerts by telegram, if a city disappears or if someone founded in any of the islands where the user has at least one city founded.
+	This functionality alerts by telegram, if a city disappears or if someone founds in any of the islands where the user has at least one city.
 	
 7. Login daily
 
@@ -42,7 +42,7 @@ _Ikabot is a program written in python that grants the iqual and even more funct
 
 9. Donate automatically
 
-	It enters once a day and donate all available wood from all cities to the luxury good or the forest.
+	It enters once a day and donateS all the available wood from all cities to the luxury good or the forest.
 
 10. Alert wine running out
 
