@@ -46,7 +46,7 @@ _Ikabot is a program written in python that grants the iqual and even more funct
 
 10. Alert wine running out
 
-	It warns by Telegram when less than N hours are needed for a city to run out of wine. The number of hours is specified by the user.
+	It warns you by Telegram when less than N hours are needed for a city to run out of wine. The number of hours is specified by the user.
 
 11. Buy resources
 
