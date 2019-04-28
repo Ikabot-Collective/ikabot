@@ -1,6 +1,6 @@
 ## ikabot ~ Ikariam Bot
 
-_Ikabot is a program written in python that grants the iqual and even more functionality than a premium account in ikariam, without spending ambrosia!_
+_Ikabot is a program written in python that grants iqual and even more functionality than a premium account in ikariam, without spending ambrosia!_
 
 ### Features
 
