@@ -124,7 +124,7 @@ When you want to use a functionality that requires Telegram, such as _Alert atta
 
 ### Advanced
 
-If there is a ikabot process that we identified with `ps aux | grep ikabot`, we can get a description of what it does with `kill -SIGUSR1 <pid>`. The description will arrive via Telegram.
+If there is an ikabot process that we identified with `ps aux | grep ikabot`, we can get a description of what it does with `kill -SIGUSR1 <pid>`. The description will arrive via Telegram.
 
 ### Windows
 
