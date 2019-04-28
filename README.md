@@ -1,6 +1,6 @@
 ## ikabot ~ Ikariam Bot
 
-_Ikabot is a program written in python that grants the same and much more functionality than a premium account in ikariam, without spending ambrosia!_
+_Ikabot is a program written in python that grants the iqual and even more functionality than a premium account in ikariam, without spending ambrosia!_
 
 ### Features
 
@@ -14,7 +14,7 @@ _Ikabot is a program written in python that grants the same and much more functi
 	
 2. Send resources
  
-	It sends any amount of resources from one city to another. It doesn't matter how many boats you have, _ikabot_ will send all the trips that are necessary. The destination city can be own by the user or by another one.
+	It sends unlimited amount of resources from one city to another. It doesn't matter how many boats you have, _ikabot_ will send all the trips that were necessary. The destination city can be own by the user or by other.
 
 3. Send wine
 
