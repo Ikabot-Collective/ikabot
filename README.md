@@ -98,14 +98,14 @@ rm get-pip.py
 
 ### Telegram
 
-Some features (such as alerting attacks) communicate with you via Telegram messages.
+Some features (such as alerting attacks) are communicated to you via Telegram messages.
 
-This messages are visible to you and nobody else.
+This messages are only visible for you.
 
-Setting this up is highly recommended, since it allows one to enjoy all the functionality of _ikabot_.
+Setting this up is highly recommended, since it allows you to enjoy all the functionality of _ikabot_.
 
 Para configurarlo necesitaremos simplemente ingresar dos datos:
-To configure this, you simply need to enter two pieces of information:
+To configure this, you just need to enter two pieces of information:
 
 1) The token of the bot you are going to use
 
