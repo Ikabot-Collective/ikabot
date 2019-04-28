@@ -50,14 +50,14 @@ _Ikabot is a program written in python that grants the iqual and even more funct
 
 11. Buy resources
 
-	It allows you to choose what type of resource to buy and what quantity. It automatically purchases the different offers from the cheapest to the most expensive.
+	It allows you to choose what type of resource to buy and how much. It automatically purchases the different offers from the cheapest to the most expensive.
 
 12. Update Ikabot
 
 	It updates _ikabot_
 	
 
-When you set an action in _ikabot_, you can enter and play ikariam without any problems. The only drawback that you may have is that the session expires, this is normal and if it happens simply re-enter.
+When you set an action in _ikabot_, you can enter and play ikariam without any problems. The only drawback that you may have is that the session expires, this is normal and if it happens just re-enter.
 
 ### Install
 
