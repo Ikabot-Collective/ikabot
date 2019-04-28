@@ -71,7 +71,7 @@ with the `ikabot` command you access the main menu.
 ```
 sudo python3 -m pip uninstall ikabot
 ```
-### Dependencies
+### Requirements
 
 In order to install and use _ikabot_, python3 and pip must be installed. It must be run on **Linux**, it does not work on **Windows**.
 
