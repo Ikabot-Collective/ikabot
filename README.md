@@ -26,7 +26,7 @@ _Ikabot is a program written in python that grants iqual and even more functiona
 	
 5. Donate
 
-	It allows you to donate.
+	It allows you to donate (WOW!).
 	
 6. Search for new spaces
 
