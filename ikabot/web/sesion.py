@@ -38,14 +38,21 @@ class Sesion:
 		self.mundo = data.group(1)
 		self.servidor = data.group(2)
 		self.headers = headers
+		self.alexaCook = self.__genCookie()
 		self.__getCookie()
+
+	def __genRand(self):
+		return hex(random.randint(0, 65535))[2:]
+
+	def __genCookie(self):
+		return self.__genRand() + self.__genRand() + hex(int(round(time.time() * 1000)))[2:] + self.__genRand() + self.__genRand()
 
 	def __logout(self, html):
 		if html is not None:
 			idCiudad = getCiudad(html)['id']
 			token = re.search(r'actionRequest"?:\s*"(.*?)"', html).group(1)
 			urlLogout = 'action=logoutAvatar&function=logout&sideBarExt=undefined&startPageShown=1&detectedDevice=1&cityId={0}&backgroundView=city&currentCityId={0}&actionRequest={1}'.format(idCiudad, token)
-			self.s.get(self.urlBase + urlLogout, headers=self.headers)
+			self.s.get(self.urlBase + urlLogout)
 
 	def __isMyCookie(self, line):
 		string = self.servidor + ' ' + self.mundo + ' ' + self.username + ' '
@@ -90,7 +97,7 @@ class Sesion:
 			newTextFile = ''
 
 			if salida is True and sesionesActivas == 1:
-				html = self.s.get(self.urlBase, headers=self.headers).text
+				html = self.s.get(self.urlBase).text
 				if self.__isExpired(html):
 					html = None
 
@@ -127,6 +134,9 @@ class Sesion:
 				os._exit(0)
 			cookie_dict = ast.literal_eval(plaintext)
 			self.s = requests.Session()
+			self.s.headers.clear()
+			self.s.headers.update(self.headers)
+			self.s.cookies.update({'__asc': self.alexaCook, '__auc': self.alexaCook})
 			requests.cookies.cookiejar_from_dict(cookie_dict, cookiejar=self.s.cookies, overwrite=True)
 			self.__updateCookieFile(nuevo=True)
 		else:
@@ -136,7 +146,10 @@ class Sesion:
 
 	def __login(self):
 		self.s = requests.Session() # s es la sesion de conexion
-		html = self.s.post(self.urlBase + 'action=loginAvatar&function=login', data=self.payload, headers=self.headers).text
+		self.s.headers.clear()
+		self.s.headers.update(self.headers)
+		self.s.cookies.update({'__asc': self.alexaCook, '__auc': self.alexaCook})
+		html = self.s.post(self.urlBase + 'action=loginAvatar&function=login', data=self.payload).text
 		if self.__isInVacation(html):
 			msg = 'La cuenta entró en modo vacaciones'
 			if self.padre:
@@ -210,7 +223,7 @@ class Sesion:
 		url = self.urlBase + url
 		while True:
 			try:
-				html = self.s.get(url, headers=self.headers).text
+				html = self.s.get(url).text
 				assert self.__isExpired(html) is False
 				return html
 			except AssertionError:
@@ -223,7 +236,7 @@ class Sesion:
 		url = self.urlBase + url
 		while True:
 			try:
-				html = self.s.post(url, data=payloadPost, headers=self.headers).text
+				html = self.s.post(url, data=payloadPost).text
 				assert self.__isExpired(html) is False
 				return html
 			except AssertionError:
