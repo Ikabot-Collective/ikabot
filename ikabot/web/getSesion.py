@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import re
+import time
+import random
 import gettext
 import getpass
 import ikabot.config as config
@@ -47,3 +49,9 @@ def getSesion():
 	payload = {'uni_url': uni_url, 'name': usuario, 'password': password, 'pwat_uid': '', 'pwat_checksum': '' ,'startPageShown' : '1' , 'detectedDevice' : '1' , 'kid':''}
 	config.infoUser += _(', Jugador:{}').format(usuario)
 	return Sesion(urlBase, payload, headers)
+
+def genRand():
+	return hex(random.randint(0, 65535))[2:]
+
+def genCookie():
+	return genRand() + genRand() + hex(int(round(time.time() * 1000)))[2:] + genRand() + genRand()
