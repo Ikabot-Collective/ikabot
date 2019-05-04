@@ -1,10 +1,12 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import sys
-import os
-import time
 import re
+import os
+import ast
+import sys
+import json
+import time
 import random
 import parser
 from ikabot.helpers.getJson import getCiudad
@@ -69,7 +71,7 @@ class Sesion:
 		lines = text.splitlines()
 		if primero is True:
 			cookie_dict = dict(self.s.cookies.items())
-			plaintext = cookie_dict['PHPSESSID'] + ' ' + cookie_dict['ikariam']
+			plaintext = json.dumps(cookie_dict)
 			ciphertext = self.cipher.encrypt(plaintext)
 			entrada = self.servidor + ' ' + self.mundo + ' ' + self.username + ' 1 ' + ciphertext
 			newTextFile = ''
@@ -123,8 +125,7 @@ class Sesion:
 				else:
 					sendToBot(_('MAC check ERROR, ciphertext corrompido.'))
 				os._exit(0)
-			cookie1, cookie2 = plaintext.split(' ')
-			cookie_dict = {'PHPSESSID': cookie1, 'ikariam': cookie2, 'ikariam_loginMode': '0'}
+			cookie_dict = ast.literal_eval(plaintext)
 			self.s = requests.Session()
 			requests.cookies.cookiejar_from_dict(cookie_dict, cookiejar=self.s.cookies, overwrite=True)
 			self.__updateCookieFile(nuevo=True)
@@ -187,8 +188,8 @@ class Sesion:
 			ciphertext = fileInfo.group(2)
 			try:
 				plaintext = self.cipher.decrypt(ciphertext)
-				cookie = plaintext.split(' ')[0]
-				return cookie == self.s.cookies['PHPSESSID']
+				cookie_dict = ast.literal_eval(plaintext)
+				cookie_dict['PHPSESSID'] == self.s.cookies['PHPSESSID']
 			except ValueError:
 				msg = 'MAC check ERROR, ciphertext corrompido.'
 				if self.padre:
