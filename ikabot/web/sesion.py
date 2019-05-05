@@ -39,6 +39,7 @@ class Sesion:
 		self.servidor = data.group(2)
 		self.headers = headers
 		self.alexaCook = self.__genCookie()
+		self.gameforgeCook = self.__getGameforgeCookie()
 		self.__getCookie()
 
 	def __genRand(self):
@@ -46,6 +47,15 @@ class Sesion:
 
 	def __genCookie(self):
 		return self.__genRand() + self.__genRand() + hex(int(round(time.time() * 1000)))[2:] + self.__genRand() + self.__genRand()
+
+	def __getGameforgeCookie(self):
+		headers = {'Host': 'pixelzirkus.gameforge.com', 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:66.0) Gecko/20100101 Firefox/66.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Encoding': 'gzip, deflate', 'Content-Type': 'application/x-www-form-urlencoded', 'DNT': '1', 'Connection': 'close', 'Upgrade-Insecure-Requests': '1'}
+		cookies = {'__asc': self.alexaCook, '__auc': self.alexaCook}
+		fp_eval_id = self.__genRand() + self.__genRand() + '-' + self.__genRand() + '-' + self.__genRand() + '-' + self.__genRand() + '-' + self.__genRand() + self.__genRand() + self.__genRand()
+		page = self.urlBase.replace(self.mundo + '-', '').replace('index.php?', '')
+		data = {'location': 'VISIT', 'product': 'ikariam', 'language': self.servidor, 'server-id': '1', 'replacement_kid': '', 'fp_eval_id': fp_eval_id, 'page': page,'referrer': '', 'fingerprint': '1820081159', 'fp_exec_time': '3.00'}
+		r = requests.post('https://pixelzirkus.gameforge.com/do/simple', headers=headers, cookies=cookies, data=data)
+		return r.cookies['pc_idt']
 
 	def __logout(self, html):
 		if html is not None:
@@ -136,7 +146,6 @@ class Sesion:
 			self.s = requests.Session()
 			self.s.headers.clear()
 			self.s.headers.update(self.headers)
-			self.s.cookies.update({'__asc': self.alexaCook, '__auc': self.alexaCook})
 			requests.cookies.cookiejar_from_dict(cookie_dict, cookiejar=self.s.cookies, overwrite=True)
 			self.__updateCookieFile(nuevo=True)
 		else:
@@ -148,7 +157,7 @@ class Sesion:
 		self.s = requests.Session() # s es la sesion de conexion
 		self.s.headers.clear()
 		self.s.headers.update(self.headers)
-		self.s.cookies.update({'__asc': self.alexaCook, '__auc': self.alexaCook})
+		self.s.cookies.update({'__asc': self.alexaCook, '__auc': self.alexaCook, 'pc_idt': self.gameforgeCook})
 		html = self.s.post(self.urlBase + 'action=loginAvatar&function=login', data=self.payload).text
 		if self.__isInVacation(html):
 			msg = 'La cuenta entró en modo vacaciones'
