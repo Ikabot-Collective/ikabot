@@ -211,7 +211,7 @@ class Sesion:
 			try:
 				plaintext = self.cipher.decrypt(ciphertext)
 				cookie_dict = ast.literal_eval(plaintext)
-				cookie_dict['PHPSESSID'] == self.s.cookies['PHPSESSID']
+				return cookie_dict['PHPSESSID'] == self.s.cookies['PHPSESSID']
 			except ValueError:
 				msg = 'MAC check ERROR, ciphertext corrompido.'
 				if self.padre:
