@@ -7,8 +7,10 @@ from Crypto.Cipher import AES
 
 class AESCipher:
 
-	def __init__( self, key ):
-		self.key = hashlib.sha256(key.encode('utf-8')).digest()
+	def __init__( self, creds ):
+		self.key = hashlib.sha256( creds['name'].encode('utf-8') + creds['password'].encode('utf-8') ).digest()
+		for i in range(0xfff):
+			self.key = hashlib.sha256( self.key ).digest()
 
 	def encrypt( self, plaintext ):
 		cipher          = AES.new(self.key, AES.MODE_EAX)

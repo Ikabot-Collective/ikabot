@@ -33,7 +33,7 @@ class Sesion:
 		self.urlBase = urlBase
 		self.payload = payload
 		self.username = payload['name']
-		self.cipher = AESCipher(payload['password'])
+		self.cipher = AESCipher(payload)
 		data = re.search(r'https://(s\d+)-(\w+)', urlBase)
 		self.mundo = data.group(1)
 		self.servidor = data.group(2)
