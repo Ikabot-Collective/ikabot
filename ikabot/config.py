@@ -19,8 +19,8 @@ _ = t.gettext
 ids = None
 ciudades = None
 infoUser = ''
-cookieFile = '.cookies.txt'
-telegramFile = '.telegram.txt'
+cookieFile = '.cookies.ika'
+telegramFile = '.telegram.ika'
 urlCiudad = 'view=city&cityId='
 urlIsla = 'view=island&islandId='
 prompt = ' >>  '
