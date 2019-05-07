@@ -105,7 +105,7 @@ def getCiudadesComerciales(s):
 				ciudad['pos'] = pos
 				html = getStoreHtml(s, ciudad)
 				rangos = re.findall(r'<option.*?>(\d+)</option>', html)
-				ciudad['rango'] = max(rangos)
+				ciudad['rango'] = int(rangos[-1])
 				ciudades_comerciales.append(ciudad)
 				break
 	return ciudades_comerciales
