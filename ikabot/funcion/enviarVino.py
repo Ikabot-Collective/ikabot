@@ -40,18 +40,14 @@ def enviarVino(s):
 	vinoXciudad = int(vinoTotal / aEnviar)
 	maximo = addPuntos(vinoXciudad)
 
-	if vinoXciudad > 100000:
-		maximo = maximo[:-6] + '00.000'
-	elif vinoXciudad > 10000:
-		maximo = maximo[:-5] + '0.000'
-	elif vinoXciudad > 1000:
+	if vinoXciudad > 1000:
 		maximo = maximo[:-3] + '000'
-	elif vinoXciudad > 100:
-		maximo = maximo[:-2] + '00'
-	elif vinoXciudad > 10:
-		maximo = maximo[:-1] + '0'
+
 	print(_('Se puede enviar como máximo {} a cada ciudad').format(maximo))
 	cantidad = read(msg=_('¿Cuanto vino enviar a cada ciudad?:'), min=0, max=vinoXciudad)
+
+	if cantidad == 0:
+		return
 
 	print(_('\nPor enviar {} de vino a cada ciudad').format(addPuntos(cantidad)))
 	print(_('¿Proceder? [Y/n]'))
