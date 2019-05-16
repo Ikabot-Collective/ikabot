@@ -13,6 +13,12 @@ t = gettext.translation('signals',
                         fallback=True)
 _ = t.gettext
 
+def do_nothing(signal, frame):
+	pass
+
+def deactivate_sigint():
+	signal.signal(signal.SIGINT, do_nothing)
+
 def create_handler(s):
 	def _handler(signum, frame):
 		raise Exception(_('Señal recibida número {:d}').format(signum))

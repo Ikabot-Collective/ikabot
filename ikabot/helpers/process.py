@@ -3,6 +3,7 @@
 
 import os
 import subprocess
+from ikabot.helpers.signals import deactivate_sigint
 
 def forkear(s):
 	newpid = os.fork()
@@ -15,6 +16,7 @@ def forkear(s):
 	else:
 		# hijo
 		s.padre = False
+		deactivate_sigint()
 		s.login()
 
 def run(command):
