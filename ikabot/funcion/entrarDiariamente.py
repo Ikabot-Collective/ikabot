@@ -17,8 +17,6 @@ t = gettext.translation('entrarDiariamente',
 _ = t.gettext
 
 def entrarDiariamente(s):
-	if botValido(s) is False:
-		return
 	print(_('Se entrará todos los días automaticamente.'))
 	enter()
 
