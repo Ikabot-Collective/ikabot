@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2019-04-09 13:29-0300\n"
+"POT-Creation-Date: 2019-05-22 19:21-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -24,10 +24,24 @@ msgid "{}: Espero {:d} segundos para que {} suba al nivel {:d}"
 msgstr "{}: I wait {:d} seconds so that {} gets to the level {:d}"
 
 #: ../../../funcion/subirEdificio.py:58
-msgid "No se pudo terminar de subir el edificio {} por falta de recursos."
-msgstr "The building could not be completed due to lack of resources."
+msgid ""
+"Ciudad:{}\n"
+msgstr ""
+"City:{}\n"
 
 #: ../../../funcion/subirEdificio.py:59
+msgid ""
+"Edificio:{}\n"
+msgstr ""
+"Building:{}\n"
+
+#: ../../../funcion/subirEdificio.py:60
+msgid ""
+"No se pudo terminar de subir el edificio por falta de recursos.\n"
+msgstr ""
+"The building could not be completed due to lack of resources.\n"
+
+#: ../../../funcion/subirEdificio.py:61
 msgid "Faltaron subir {:d} niveles"
 msgstr "Missed {:d} levels"
 

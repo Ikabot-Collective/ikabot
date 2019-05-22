@@ -55,7 +55,9 @@ def subirEdificio(s, idCiudad, posicion, nivelesASubir):
 		edificio = ciudad['position'][posicion]
 
 		if edificio['canUpgrade'] is False:
-			msg  = _('No se pudo terminar de subir el edificio {} por falta de recursos.').format(edificio['name'])
+			msg  = _('Ciudad:{}\n').format(ciudad['cityName'])
+			msg += _('Edificio:{}\n').format(edificio['name'])
+			msg += _('No se pudo terminar de subir el edificio por falta de recursos.\n')
 			msg += _('Faltaron subir {:d} niveles').format(nivelesASubir - lv)
 			sendToBot(msg)
 			return
@@ -68,8 +70,6 @@ def subirEdificio(s, idCiudad, posicion, nivelesASubir):
 			edificio = ciudad['position'][posicion]
 			if edificio['isBusy']:
 				break
-			else:
-				continue
 
 		if edificio['isBusy'] is False:
 			msg  = _('El edificio no se amplió\n')
