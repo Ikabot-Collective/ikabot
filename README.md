@@ -54,7 +54,7 @@ _Ikabot is a program written in python that grants iqual and even more functiona
 
 12. Update Ikabot
 
-	It updates _ikabot_
+	It tells you how to update _ikabot_
 	
 
 When you set an action in _ikabot_, you can enter and play ikariam without any problems. The only drawback that you may have is that the session expires, this is normal and if it happens just re-enter.
