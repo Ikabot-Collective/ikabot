@@ -20,9 +20,6 @@ t = gettext.translation('botDonador',
 _ = t.gettext
 
 def botDonador(s):
-	if botValido(s) is False:
-		return
-
 	banner()
 	(idsCiudades, ciudades) = getIdsDeCiudades(s)
 	ciudades_dict = {}
