@@ -13,13 +13,6 @@ t = gettext.translation('update',
 _ = t.gettext
 
 def update(s):
-	out = run('python3 -m pip install --upgrade ikabot').read().decode("utf-8") 
-	if 'up-to-date' in out:
-		print(_('\nEstá actualizado'))
-	else:
-		clear()
-		print(_('Actualizando...\n'))
-		print(out)
-		print(_('Listo.'))
-		print(_('Reinicie ikabot para que los cambios surjan efecto.'))
+	print(_('Para actualizar ikabot correr:'))
+	print('sudo python3 -m pip install --upgrade ikabot')
 	enter()

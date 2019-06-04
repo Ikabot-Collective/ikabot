@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2019-04-09 07:58-0300\n"
+"POT-Creation-Date: 2019-05-22 19:45-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,25 +15,7 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: ../../../funcion/update.py:18
-msgid ""
-"\n"
-"Está actualizado"
-msgstr ""
-"\n"
-"It's updated"
-
-#: ../../../funcion/update.py:21
-msgid ""
-"Actualizando...\n"
-msgstr ""
-"Updating...\n"
-
-#: ../../../funcion/update.py:23
-msgid "Listo."
-msgstr "Ready."
-
-#: ../../../funcion/update.py:24
-msgid "Reinicie ikabot para que los cambios surjan efecto."
-msgstr "Restart ikabot for changes to take effect."
+#: ../../../funcion/update.py:16
+msgid "Para actualizar ikabot correr:"
+msgstr "To update ikabot run:"
 
