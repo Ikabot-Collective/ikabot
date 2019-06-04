@@ -89,11 +89,11 @@ def menuRutaComercial(s):
 		print(_('Madera {} Vino {} Marmol {} Cristal {} Azufre {}').format(addPuntos(resto[0]), addPuntos(resto[1]), addPuntos(resto[2]), addPuntos(resto[3]), addPuntos(resto[4])))
 		print(_('Enviar:'))
 		try:
-			md = pedirValor(' Madera:', resto[0])
-			vn = pedirValor('   Vino:', resto[1])
-			mr = pedirValor(' Marmol:', resto[2])
-			cr = pedirValor('Cristal:', resto[3])
-			az = pedirValor(' Azufre:', resto[4])
+			md = pedirValor(_(' Madera:'), resto[0])
+			vn = pedirValor(_('   Vino:'), resto[1])
+			mr = pedirValor(_(' Marmol:'), resto[2])
+			cr = pedirValor(_('Cristal:'), resto[3])
+			az = pedirValor(_(' Azufre:'), resto[4])
 		except KeyboardInterrupt:
 			continue
 		if md + vn + mr + cr + az == 0:

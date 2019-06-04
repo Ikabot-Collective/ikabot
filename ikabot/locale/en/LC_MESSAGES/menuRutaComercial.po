@@ -79,7 +79,7 @@ msgstr "Send:"
 
 #: ../../../funcion/menuRutaComercial.py:92
 msgid " Madera:"
-msgstr "  Wood:"
+msgstr "   Wood:"
 
 #: ../../../funcion/menuRutaComercial.py:93
 msgid "   Vino:"
