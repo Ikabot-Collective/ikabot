@@ -48,31 +48,38 @@ def read(min=None, max=None, digit=False, msg=prompt, values=None, empty=False):
 	return leido
 
 def elegirCiudad(s, ajenas=False):
+	global menuCiudades
 	(ids, ciudades) = getIdsDeCiudades(s)
-	maxNombre = 0
-	for unId in ids:
-		largo = len(ciudades[unId]['name'])
-		if largo > maxNombre:
-			maxNombre = largo
-	pad = lambda name: ' ' * (maxNombre - len(name) + 2)
-	bienes = {'1': '(V)', '2': '(M)', '3': '(C)', '4': '(A)'}
-	prints = []
-	i = 0
+	if menuCiudades == '':
+		maxNombre = 0
+		for unId in ids:
+			largo = len(ciudades[unId]['name'])
+			if largo > maxNombre:
+				maxNombre = largo
+		pad = lambda name: ' ' * (maxNombre - len(name) + 2)
+		bienes = {'1': '(V)', '2': '(M)', '3': '(C)', '4': '(A)'}
+		prints = []
+		i = 0
+		if ajenas:
+			print(_(' 0: ciudad ajena'))
+		else:
+			print('')
+		for unId in ids:
+			i += 1
+			tradegood = ciudades[unId]['tradegood']
+			bien = bienes[tradegood]
+			nombre = ciudades[unId]['name']
+			num = ' ' + str(i) if i < 10 else str(i)
+			menuCiudades += '{}: {}{}{}\n'.format(num, nombre, pad(nombre), bien)
+		menuCiudades = menuCiudades[:-1]
 	if ajenas:
 		print(_(' 0: ciudad ajena'))
-	else:
-		print('')
-	for unId in ids:
-		i += 1
-		tradegood = ciudades[unId]['tradegood']
-		bien = bienes[tradegood]
-		nombre = ciudades[unId]['name']
-		num = ' ' + str(i) if i < 10 else str(i)
-		print('{}: {}{}{}'.format(num, nombre, pad(nombre), bien))
+	print(menuCiudades)
+
 	if ajenas:
-		eleccion = read(min=0, max=i)
+		eleccion = read(min=0, max=len(ids))
 	else:
-		eleccion = read(min=1, max=i)
+		eleccion = read(min=1, max=len(ids))
 	if eleccion == 0:
 		return elegirCiudadAjena(s)
 	else:
