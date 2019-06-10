@@ -18,6 +18,7 @@ _ = t.gettext
 
 ids = None
 ciudades = None
+menuCiudades = ''
 infoUser = ''
 cookieFile = '.cookies.ika'
 telegramFile = '.telegram.ika'
