@@ -18,7 +18,7 @@ _ = t.gettext
 
 getcontext().prec = 30
 
-def read(min=None, max=None, digit=False, msg=prompt, values=None): # lee input del usuario
+def read(min=None, max=None, digit=False, msg=prompt, values=None, empty=False): # lee input del usuario
 	def _invalido():
 		print('\033[1A\033[K', end="") # Borro linea
 		return read(min, max, digit, msg, values)
@@ -27,6 +27,9 @@ def read(min=None, max=None, digit=False, msg=prompt, values=None): # lee input 
 		leido = input(msg)
 	except EOFError:
 		return _invalido()
+
+	if leido == '' and empty is True:
+		return leido
 
 	if digit is True or min is not None or max is not None:
 		if leido.isdigit() is False:
@@ -170,14 +173,10 @@ def menuEdificios(prints, ciudad, posiciones):
 	return rta
 
 def pedirValor(text, max):
-	vals = list()
-	for n in range(0, max+1):
-		vals.append(str(n))
-	vals.append('')
-	var = read(msg=text, values=vals)
+	var = read(msg=text, min=0, max=max, empty=True)
 	if var == '':
 		var = 0
-	return int(var)
+	return var
 
 def getIdsDeCiudades(s, all=False):
 	global ciudades
