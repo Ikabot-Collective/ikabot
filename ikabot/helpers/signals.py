@@ -17,6 +17,7 @@ def do_nothing(signal, frame):
 	pass
 
 def deactivate_sigint():
+	signal.signal(signal.SIGHUP, do_nothing)
 	signal.signal(signal.SIGINT, do_nothing)
 
 def create_handler(s):
@@ -25,7 +26,7 @@ def create_handler(s):
 	return _handler
 
 def setSignalsHandlers(s):
-	signals = [signal.SIGHUP, signal.SIGQUIT, signal.SIGABRT, signal.SIGTERM]
+	signals = [signal.SIGQUIT, signal.SIGABRT, signal.SIGTERM]
 	for sgn in signals:
 		signal.signal(sgn, create_handler(s))
 
