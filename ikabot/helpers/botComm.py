@@ -3,6 +3,7 @@
 
 import re
 import os
+import json
 import random
 import gettext
 import ikabot.config as config
@@ -36,6 +37,19 @@ def telegramFileValido():
 		text = filehandler.read()
 	valid = re.search(r'\d{6,}:[A-Za-z0-9_-]{34,}\n\d{8,9}', text)
 	return valid is not None
+
+def getUserResponse():
+	with open(config.telegramFile, 'r', os.O_NONBLOCK) as filehandler:
+		text = filehandler.read()
+	valid = re.search(r'\d{6,}:[A-Za-z0-9_-]{34,}\n\d{8,9}', text)
+	if valid is not None:
+		(botToken, chatId) = text.splitlines()
+		updates = ikabot.web.sesion.normal_get('https://api.telegram.org/bot{}/getUpdates'.format(botToken)).text
+		updates = json.loads(updates, strict=False)
+		if updates['ok'] is False:
+			return []
+		updates = updates['result']
+		return [update['message']['text'] for update in updates if update['message']['chat']['id'] == int(chatId)]
 
 def botValido(s):
 	if telegramFileValido():
