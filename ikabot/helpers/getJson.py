@@ -24,9 +24,6 @@ def getIsla(html):
 
 	remove = []
 
-	sub = re.search(r'(,"wonderName":".+?),"cities', isla).group(1)
-	remove.append(sub)
-
 	sub = re.search(r',"type":\d', isla).group()
 	remove.append(sub)
 
@@ -49,7 +46,7 @@ def getIsla(html):
 	remove.append(',"viewAble":1')
 	remove.append(',"viewAble":2')
 	isla = borrar(isla, remove)
-	# {"id":idIsla,"name":nombreIsla,"x":,"y":,"good":numeroBien,"woodLv":,"goodLv":,"wonder":numeroWonder,"wonderLv":"5","cities":[{"type":"city","name":cityName,"id":cityId,"level":lvIntendencia,"Id":playerId,"Name":playerName,"AllyId":,"AllyTag":,"state":"vacation"},...}}
+	# {"id":idIsla,"name":nombreIsla,"x":,"y":,"good":numeroBien,"woodLv":,"goodLv":,"wonder":numeroWonder, "wonderName": "nombreDelMilagro","wonderLv":"5","cities":[{"type":"city","name":cityName,"id":cityId,"level":lvIntendencia,"Id":playerId,"Name":playerName,"AllyId":,"AllyTag":,"state":"vacation"},...}}
 	return json.loads(isla, strict=False)
 
 def getCiudad(html):
