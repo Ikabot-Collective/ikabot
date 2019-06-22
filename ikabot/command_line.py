@@ -21,6 +21,7 @@ from ikabot.funcion.botDonador import botDonador
 from ikabot.funcion.update import update
 from ikabot.funcion.alertarPocoVino import alertarPocoVino
 from ikabot.funcion.comprarRecursos import comprarRecursos
+from ikabot.funcion.modoVacaciones import modoVacaciones
 
 t = gettext.translation('command_line', 
                         localedir, 
@@ -42,6 +43,7 @@ def menu(s):
 					botDonador,
 					alertarPocoVino,
 					comprarRecursos,
+					modoVacaciones,
 					update
 					]
 	print(_('(0)  Salir'))
@@ -56,7 +58,8 @@ def menu(s):
 	print(_('(9)  Bot donador'))
 	print(_('(10) Alertar poco vino'))
 	print(_('(11) Comprar recursos'))
-	print(_('(12) Actualizar Ikabot'))
+	print(_('(12) Activar modo vacaciones'))
+	print(_('(13) Actualizar Ikabot'))
 	entradas = len(menu_actions)
 	eleccion = read(min=0, max=entradas)
 	if eleccion != 0:
