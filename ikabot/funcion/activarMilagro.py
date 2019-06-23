@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
+import json
 import gettext
 from ikabot.config import *
 from ikabot.helpers.gui import *
@@ -40,7 +41,7 @@ def obtenerMilagrosDisponibles(s):
 			for isla in islas:
 				if isla['id'] == ciudad['islandId']:
 					isla['activable'] = True
-					isla['city'] = ciudad
+					isla['ciudad'] = ciudad
 					break
 
 	return [ isla for isla in islas if isla['activable'] ]
@@ -49,21 +50,28 @@ def activarMilagro(s):
 	banner()
 
 	islas = obtenerMilagrosDisponibles(s)
-	print('¿Qué milagro quiere activar?')
+	print(_('¿Qué milagro quiere activar?'))
 	i = 0
-	print('(0) Salir')
+	print(_('(0) Salir'))
 	for isla in islas:
 		i += 1
 		print('({:d}) {}'.format(i, isla['wonderName']))
 	index = read(min=0, max=i)
-	isla = islas[index]
+	if index == 0:
+		return
+	isla = islas[index - 1]
 
-	print('\nSe activará el milagro {}'.format(isla['wonderName']))
-	print('¿Proceder? [Y/n]')
+	print(_('\nSe activará el milagro {}'.format(isla['wonderName'])))
+	print(_('¿Proceder? [Y/n]'))
 	rta = read(values=['y', 'Y', 'n', 'N', ''])
 	if rta.lower() == 'n':
 		return
+
 	params = {'action': 'CityScreen', 'cityId': isla['ciudad']['id'], 'function': 'activateWonder', 'position': isla['ciudad']['pos'], 'backgroundView': 'city', 'currentCityId': isla['ciudad']['id'], 'templateView': 'temple', 'actionRequest': s.token(), 'ajax': '1'}
-	#s.post()
-	input()
-	exit()
+	rta = s.post(params=params)
+	rta = json.loads(rta, strict=False)
+	if rta[1][1][0] == 'error':
+		print(_('No se pudo activar el milagro {}.').format(isla['wonderName']))
+	else:
+		print(_('Se activó el milagro {}.').format(isla['wonderName']))
+	enter()
