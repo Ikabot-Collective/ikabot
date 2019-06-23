@@ -22,23 +22,22 @@ def obtenerMilagrosDisponibles(s):
 		html = s.get(urlIsla + idIsla)
 		isla = getIsla(html)
 		isla['activable'] = False
-		if isla['wonder'] not in [ isla['wonder'] for isla in islas ]:
-			islas.append(isla)
+		islas.append(isla)
 
 	ids, citys = getIdsDeCiudades(s)
-	ciudadesReligiosas = []
-	for idCiudad in ids:
-		html = s.get(urlCiudad + idCiudad)
+	for ciudad in citys:
+		city = citys[ciudad]
+		wonder = [ isla['wonder'] for isla in islas if city['coords'] == '[{}:{}] '.format(isla['x'], isla['y']) ][0]
+		if wonder in [ isla['wonder'] for isla in islas if isla['activable'] ]:
+			continue
+		html = s.get(urlCiudad + str(city['id']))
 		ciudad = getCiudad(html)
-		if ciudad['islandId'] in [ isla['id'] for isla in islas ]:
-			if ciudad['islandId'] not in [ ciudad['islandId'] for ciudad in ciudadesReligiosas ]:
-				if 'temple' in [ edificio['building'] for edificio in ciudad['position'] ]:
-					ciudadesReligiosas.append(ciudad)
-					for isla in islas:
-						if isla['id'] == ciudad['islandId']:
-							isla['activable'] = True
-							isla['city'] = ciudad
-							break
+		if 'temple' in [ edificio['building'] for edificio in ciudad['position'] ]:
+			for isla in islas:
+				if isla['id'] == ciudad['islandId']:
+					isla['activable'] = True
+					isla['city'] = ciudad
+					break
 
 	return [ isla for isla in islas if isla['activable'] ]
 
