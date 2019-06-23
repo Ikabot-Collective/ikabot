@@ -34,7 +34,7 @@ class Sesion:
 		self.payload = payload
 		self.username = payload['name']
 		self.cipher = AESCipher(payload)
-		data = re.search(r'https://(s\d+)-(\w+)', urlBase)
+		data = re.search(r'https?://(s\d+)-(\w+)', urlBase)
 		self.mundo = data.group(1)
 		self.servidor = data.group(2)
 		self.headers = headers
@@ -144,6 +144,7 @@ class Sesion:
 				os._exit(0)
 			cookie_dict = ast.literal_eval(plaintext)
 			self.s = requests.Session()
+			self.s.proxies = proxyDict
 			self.s.headers.clear()
 			self.s.headers.update(self.headers)
 			requests.cookies.cookiejar_from_dict(cookie_dict, cookiejar=self.s.cookies, overwrite=True)
@@ -155,6 +156,7 @@ class Sesion:
 
 	def __login(self):
 		self.s = requests.Session() # s es la sesion de conexion
+		self.s.proxies = proxyDict
 		self.s.headers.clear()
 		self.s.headers.update(self.headers)
 		self.s.cookies.update({'__asc': self.alexaCook, '__auc': self.alexaCook, 'pc_idt': self.gameforgeCook})
@@ -227,26 +229,28 @@ class Sesion:
 		html = self.get()
 		return re.search(r'actionRequest"?:\s*"(.*?)"', html).group(1)
 
-	def get(self, url=''):
+	def get(self, url='', params={}, ignoreExpire=False):
 		self.__checkCookie()
 		url = self.urlBase + url
 		while True:
 			try:
-				html = self.s.get(url).text
-				assert self.__isExpired(html) is False
+				html = self.s.get(url, params=params).text
+				if ignoreExpire is False:
+					assert self.__isExpired(html) is False
 				return html
 			except AssertionError:
 				self.__expiroLaSesion()
 			except requests.exceptions.ConnectionError:
 				time.sleep(ConnectionError_wait)
 
-	def post(self, url='', payloadPost={}):
+	def post(self, url='', payloadPost={}, params={}, ignoreExpire=False):
 		self.__checkCookie()
 		url = self.urlBase + url
 		while True:
 			try:
-				html = self.s.post(url, data=payloadPost).text
-				assert self.__isExpired(html) is False
+				html = self.s.post(url, data=payloadPost, params=params).text
+				if ignoreExpire is False:
+					assert self.__isExpired(html) is False
 				return html
 			except AssertionError:
 				self.__expiroLaSesion()
