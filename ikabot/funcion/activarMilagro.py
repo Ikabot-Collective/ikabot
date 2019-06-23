@@ -22,33 +22,34 @@ def obtenerMilagrosDisponibles(s):
 		html = s.get(urlIsla + idIsla)
 		isla = getIsla(html)
 		isla['activable'] = False
-		islas.append(isla)
+		if isla['wonder'] not in [ isla['wonder'] for isla in islas ]:
+			islas.append(isla)
 
 	ids, citys = getIdsDeCiudades(s)
 	ciudadesReligiosas = []
 	for idCiudad in ids:
 		html = s.get(urlCiudad + idCiudad)
 		ciudad = getCiudad(html)
-		for edificio in ciudad['position']:
-			if edificio['building'] == 'temple':
-				ciudadesReligiosas.append(ciudad)
-				for isla in islas:
-					if isla['id'] == ciudad['islandId']:
-						isla['activable'] = True
-						break
-				break
-	wonders = [ isla['wonder'] for isla in islas if isla['activable'] ]
-	return list(dict.fromkeys( wonders ))
+		if ciudad['islandId'] in [ isla['id'] for isla in islas ]:
+			if ciudad['islandId'] not in [ ciudad['islandId'] for ciudad in ciudadesReligiosas ]:
+				if 'temple' in [ edificio['building'] for edificio in ciudad['position'] ]:
+					ciudadesReligiosas.append(ciudad)
+					for isla in islas:
+						if isla['id'] == ciudad['islandId']:
+							isla['activable'] = True
+							isla['city'] = ciudad
+							break
+
+	return [ isla for isla in islas if isla['activable'] ]
 
 def activarMilagro(s):
 	banner()
 
-	milagros = obtenerMilagrosDisponibles(s)
-	nombres_milagros = {'8': 'Coloso'}
+	islas = obtenerMilagrosDisponibles(s)
 	i = 1
 	print('(0) Salir')
-	for milagro in milagros:
-		print('({:d}) {}'.format(i, nombres_milagros[milagro]))
+	for isla in islas:
+		print('({:d}) {}'.format(i, isla['wonderName']))
 		i += 1
 	input()
 	exit()
