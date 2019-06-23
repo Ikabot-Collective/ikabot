@@ -13,6 +13,13 @@ t = gettext.translation('modoVacaciones',
                         fallback=True)
 _ = t.gettext
 
+def activarModoVacaciones(s)
+	html = s.get()
+	ciudad = getCiudad(html)
+
+	data = {'action': 'Options', 'function': 'activateVacationMode', 'actionRequest': s.token(), 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'options_umod_confirm'}
+	s.post(params=data, ignoreExpire=True)
+
 def modoVacaciones(s):
 	banner()
 	print(_('¿Activar modo vacaciones? [Y/n]'))
@@ -20,11 +27,8 @@ def modoVacaciones(s):
 	if rta.lower() == 'n':
 		return
 
-	html = s.get()
-	ciudad = getCiudad(html)
-
-	data = {'action': 'Options', 'function': 'activateVacationMode', 'actionRequest': s.token(), 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'options_umod_confirm'}
-	s.post(params=data, ignoreExpire=True)
+	activarModoVacaciones(s)
+	
 	print(_('Se activo el modo vacaciones.'))
 	enter()
 	clear()
