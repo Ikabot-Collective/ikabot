@@ -16,6 +16,11 @@ t = gettext.translation('config',
 _ = t.gettext
 
 
+http_proxy  = "http://127.0.0.1:8080"
+https_proxy = "https://127.0.0.1:8080"
+proxyDict = {"http": http_proxy, "https": https_proxy}
+proxyDict = {}
+secure_traffic = True
 ids = None
 ciudades = None
 menuCiudades = ''

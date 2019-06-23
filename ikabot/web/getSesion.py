@@ -38,7 +38,9 @@ def getSesion():
 	mundo = read(msg=_('Mundo:'), min=1, max=len(mundos))
 	mundo = mundos[mundo - 1]
 	config.infoUser += _(', Mundo:{}').format(mundo[1])
-	urlBase = 'https://s{}-{}.ikariam.gameforge.com/index.php?'.format(mundo[0], srv)
+	urlBase = 'http://s{}-{}.ikariam.gameforge.com/index.php?'.format(mundo[0], srv)
+	if secure_traffic:
+		urlBase.replace('http', 'https')
 	uni_url = 's{}-{}.ikariam.gameforge.com'.format(mundo[0], srv)
 	banner()
 	usuario = read(msg=_('Usuario:'))
