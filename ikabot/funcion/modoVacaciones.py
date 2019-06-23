@@ -13,7 +13,7 @@ t = gettext.translation('modoVacaciones',
                         fallback=True)
 _ = t.gettext
 
-def activarModoVacaciones(s)
+def activarModoVacaciones(s):
 	html = s.get()
 	ciudad = getCiudad(html)
 
@@ -28,7 +28,7 @@ def modoVacaciones(s):
 		return
 
 	activarModoVacaciones(s)
-	
+
 	print(_('Se activo el modo vacaciones.'))
 	enter()
 	clear()
