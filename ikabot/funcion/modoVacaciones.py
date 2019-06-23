@@ -22,7 +22,10 @@ def modoVacaciones(s):
 
 	html = s.get()
 	ciudad = getCiudad(html)
-	data = {'view': 'options_umod_confirm', 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'options', 'actionRequest': s.token(), 'ajax': '1'}
-	s.post(payloadPost=data)
+
+	data = {'action': 'Options', 'function': 'activateVacationMode', 'actionRequest': s.token(), 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'options_umod_confirm'}
+	s.post(params=data, ignoreExpire=True)
 	print(_('Se activo el modo vacaciones.'))
 	enter()
+	clear()
+	exit()
