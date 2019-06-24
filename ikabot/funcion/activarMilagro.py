@@ -50,6 +50,10 @@ def activarMilagro(s):
 	banner()
 
 	islas = obtenerMilagrosDisponibles(s)
+	if islas == []:
+		print(_('No existen milagros disponibles.'))
+		enter()
+		return
 	print(_('¿Qué milagro quiere activar?'))
 	i = 0
 	print(_('(0) Salir'))
@@ -61,7 +65,7 @@ def activarMilagro(s):
 		return
 	isla = islas[index - 1]
 
-	print(_('\nSe activará el milagro {}'.format(isla['wonderName'])))
+	print(_('\nSe activará el milagro {}').format(isla['wonderName']))
 	print(_('¿Proceder? [Y/n]'))
 	rta = read(values=['y', 'Y', 'n', 'N', ''])
 	if rta.lower() == 'n':
