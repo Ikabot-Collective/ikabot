@@ -55,9 +55,7 @@ def getStatus(s):
 			segsRestantes = Decimal(int(max[1])) / Decimal(consumoXseg)
 			texto = diasHorasMinutos(segsRestantes)
 			print(_('Hay vino para:\n{}').format(texto))
-		for edificio in ciudad['position']:
-			if edificio['name'] == 'empty':
-				continue
+		for edificio in [ edificio for edificio in ciudad['position'] if edificio['name'] != 'empty' ]:
 			if edificio['isMaxLevel'] is True:
 				color = bcolors.BLACK
 			elif edificio['canUpgrade'] is True:
