@@ -74,6 +74,13 @@ def planearEntrenamientos(s, ciudad, entrenamientos):
 				maderaDisp -= tropa['costs']['wood'] * tropa['entrenar']
 				azufreDisp -= tropa['costs']['sulfur'] * tropa['entrenar']
 				ciudadanosDisp -= tropa['costs']['citizens'] * tropa['entrenar']
+			total = 0
+			for tropa in entrenamiento:
+				total += tropa['entrenar']
+			if total == 0:
+				msg = 'No se pudo terminar de entrenar tropas por falta de recursos.'
+				sendToBot(msg)
+				return
 			entrenar(s, ciudad, entrenamiento)
 
 def entrenarTropas(s):
@@ -148,7 +155,7 @@ def entrenarTropas(s):
 	try:
 		planearEntrenamientos(s, ciudad, entrenamientos)
 	except:
-		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
+		msg = 'Error en:\n{}\nCausa:\n{}'.format(info, traceback.format_exc())
 		sendToBot(msg)
 	finally:
 		s.logout()
