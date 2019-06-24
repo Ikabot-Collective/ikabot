@@ -4,11 +4,16 @@
 import re
 import json
 import gettext
+import traceback
 from ikabot.config import *
 from ikabot.helpers.gui import *
-from ikabot.helpers.varios import esperar
+from ikabot.helpers.botComm import *
 from ikabot.helpers.pedirInfo import *
+from ikabot.helpers.varios import esperar
+from ikabot.helpers.process import forkear
 from ikabot.helpers.varios import addPuntos
+from ikabot.helpers.signals import setInfoSignal
+
 t = gettext.translation('entrenarTropas',
                         localedir,
                         languages=idiomas,
@@ -16,7 +21,9 @@ t = gettext.translation('entrenarTropas',
 _ = t.gettext
 
 def entrenar(s, ciudad, entrenamiento):
-	payload = {'301': '0', '302': '0', '303': '1', '304': '0', '305': '0', '306': '0', '307': '0', '308': '0', '309': '0', '310': '0', '311': '0', '312': '0', '313': '0', '315': '0', 'action': 'CityScreen', 'function': 'buildUnits', 'actionRequest': s.token(), 'cityId': ciudad['id'], 'position': pos, 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'barracks', 'ajax': '1'}
+	payload = {'action': 'CityScreen', 'function': 'buildUnits', 'actionRequest': s.token(), 'cityId': ciudad['id'], 'position': pos, 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'barracks', 'ajax': '1'}
+	for tropa in entrenamiento:
+		payload[ tropa['unit_type_id'] ] = tropa['entrenar']
 	#s.post(payloadPost=payload)
 
 def esperarEntrenamiento(s, ciudad):
@@ -27,6 +34,7 @@ def esperarEntrenamiento(s, ciudad):
 	segundos = re.search(r'\'buildProgress\', (\d+),', html)
 	if segundos:
 		segundos = segundos.group(1)
+		segundos = segundos - data[0][1]['time']
 		esperar(segundos + 5)
 
 def planearEntrenamientos(s, ciudad, entrenamientos):
@@ -37,35 +45,36 @@ def planearEntrenamientos(s, ciudad, entrenamientos):
 				total += tropa['cantidad']
 		if total == 0:
 			return
-	for entrenamiento in entrenamientos:
-		esperarEntrenamiento(s, ciudad)
-		html = s.get(urlCiudad + ciudad['id'])
-		ciudadanosDisp = re.search(r'js_GlobalMenu_citizens">(.*?)</span>', html).group(1)
-		ciudadanosDisp = int(ciudadanosDisp.replace(',', ''))
-		recursos = getRecursosDisponibles(html, num=True)
-		maderaDisp = recursos[0]
-		azufreDisp = recursos[4]
-		for tropa in entrenamiento:
 
-			limitante = maderaDisp // tropa['costs']['wood']
-			if limitante < tropa['cantidad']:
-				tropa['entrenar'] = limitante
-			else:
-				tropa['entrenar'] = tropa['cantidad']
+		for entrenamiento in entrenamientos:
+			esperarEntrenamiento(s, ciudad)
+			html = s.get(urlCiudad + ciudad['id'])
+			ciudadanosDisp = re.search(r'js_GlobalMenu_citizens">(.*?)</span>', html).group(1)
+			ciudadanosDisp = int(ciudadanosDisp.replace(',', ''))
+			recursos = getRecursosDisponibles(html, num=True)
+			maderaDisp = recursos[0]
+			azufreDisp = recursos[4]
+			for tropa in entrenamiento:
 
-			limitante = azufreDisp // tropa['costs']['sulfur']
-			if limitante < tropa['entrenar']:
-				tropa['entrenar'] = limitante
+				limitante = maderaDisp // tropa['costs']['wood']
+				if limitante < tropa['cantidad']:
+					tropa['entrenar'] = limitante
+				else:
+					tropa['entrenar'] = tropa['cantidad']
 
-			limitante = ciudadanosDisp // tropa['costs']['citizens']
-			if limitante < tropa['entrenar']:
-				tropa['entrenar'] = limitante
+				limitante = azufreDisp // tropa['costs']['sulfur']
+				if limitante < tropa['entrenar']:
+					tropa['entrenar'] = limitante
 
-			tropa['cantidad'] -= tropa['entrenar']
-			maderaDisp -= tropa['costs']['wood'] * tropa['entrenar']
-			azufreDisp -= tropa['costs']['sulfur'] * tropa['entrenar']
-			ciudadanosDisp -= tropa['costs']['citizens'] * tropa['entrenar']
-		entrenar(s, ciudad, entrenamiento)
+				limitante = ciudadanosDisp // tropa['costs']['citizens']
+				if limitante < tropa['entrenar']:
+					tropa['entrenar'] = limitante
+
+				tropa['cantidad'] -= tropa['entrenar']
+				maderaDisp -= tropa['costs']['wood'] * tropa['entrenar']
+				azufreDisp -= tropa['costs']['sulfur'] * tropa['entrenar']
+				ciudadanosDisp -= tropa['costs']['citizens'] * tropa['entrenar']
+			entrenar(s, ciudad, entrenamiento)
 
 def entrenarTropas(s):
 	banner()
@@ -130,6 +139,16 @@ def entrenarTropas(s):
 		else:
 			break
 
-	planearEntrenamientos(s, ciudad, entrenamientos)
-	exit(input())
+	forkear(s)
+	if s.padre is True:
+		return
 
+	info = '\nEntreno tropas en {}\n'.format(ciudad['cityName'])
+	setInfoSignal(s, info)
+	try:
+		planearEntrenamientos(s, ciudad, entrenamientos)
+	except:
+		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
+		sendToBot(msg)
+	finally:
+		s.logout()
