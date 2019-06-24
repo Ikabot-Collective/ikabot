@@ -13,6 +13,7 @@ from ikabot.helpers.varios import esperar
 from ikabot.helpers.process import forkear
 from ikabot.helpers.varios import addPuntos
 from ikabot.helpers.signals import setInfoSignal
+from ikabot.helpers.recursos import getRecursosDisponibles
 
 t = gettext.translation('entrenarTropas',
                         localedir,
@@ -20,22 +21,29 @@ t = gettext.translation('entrenarTropas',
                         fallback=True)
 _ = t.gettext
 
-def entrenar(s, ciudad, entrenamiento):
-	payload = {'action': 'CityScreen', 'function': 'buildUnits', 'actionRequest': s.token(), 'cityId': ciudad['id'], 'position': pos, 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'barracks', 'ajax': '1'}
-	for tropa in entrenamiento:
-		payload[ tropa['unit_type_id'] ] = tropa['entrenar']
-	#s.post(payloadPost=payload)
-
-def esperarEntrenamiento(s, ciudad):
+def getCuartelInfo(s, ciudad):
 	params = {'view': 'barracks', 'cityId': ciudad['id'], 'position': ciudad['pos'], 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'actionRequest': s.token(), 'ajax': '1'}
 	data = s.post(params=params)
-	data = json.loads(data, strict=False)
+	return json.loads(data, strict=False)
+
+def entrenar(s, ciudad, entrenamiento):
+	payload = {'action': 'CityScreen', 'function': 'buildUnits', 'actionRequest': s.token(), 'cityId': ciudad['id'], 'position': ciudad['pos'], 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'barracks', 'ajax': '1'}
+	for tropa in entrenamiento:
+		payload[ tropa['unit_type_id'] ] = tropa['entrenar']
+	s.post(payloadPost=payload)
+
+def esperarEntrenamiento(s, ciudad):
+	data = getCuartelInfo(s, ciudad)
 	html = data[1][1][1]
 	segundos = re.search(r'\'buildProgress\', (\d+),', html)
 	if segundos:
 		segundos = segundos.group(1)
 		segundos = segundos - data[0][1]['time']
 		esperar(segundos + 5)
+
+def getCiudadanosDisponibles(html):
+	ciudadanosDisp = re.search(r'js_GlobalMenu_citizens">(.*?)</span>', html).group(1)
+	return int(ciudadanosDisp.replace(',', ''))
 
 def planearEntrenamientos(s, ciudad, entrenamientos):
 	while True:
@@ -49,31 +57,62 @@ def planearEntrenamientos(s, ciudad, entrenamientos):
 		for entrenamiento in entrenamientos:
 			esperarEntrenamiento(s, ciudad)
 			html = s.get(urlCiudad + ciudad['id'])
-			ciudadanosDisp = re.search(r'js_GlobalMenu_citizens">(.*?)</span>', html).group(1)
-			ciudadanosDisp = int(ciudadanosDisp.replace(',', ''))
+			ciudadanosDisp = getCiudadanosDisponibles(html)
 			recursos = getRecursosDisponibles(html, num=True)
-			maderaDisp = recursos[0]
-			azufreDisp = recursos[4]
+			maderaDisp  = recursos[0]
+			vinoDisp    = recursos[1]
+			marmolDisp  = recursos[2]
+			cristalDisp = recursos[3]
+			azufreDisp  = recursos[4]
 			for tropa in entrenamiento:
 
-				limitante = maderaDisp // tropa['costs']['wood']
-				if limitante < tropa['cantidad']:
-					tropa['entrenar'] = limitante
-				else:
-					tropa['entrenar'] = tropa['cantidad']
+				tropa['entrenar'] = tropa['cantidad']
 
-				limitante = azufreDisp // tropa['costs']['sulfur']
-				if limitante < tropa['entrenar']:
-					tropa['entrenar'] = limitante
+				if 'wood' in tropa['costs']:
+					limitante = maderaDisp // tropa['costs']['wood']
+					if limitante < tropa['entrenar']:
+						tropa['entrenar'] = limitante
 
-				limitante = ciudadanosDisp // tropa['costs']['citizens']
-				if limitante < tropa['entrenar']:
-					tropa['entrenar'] = limitante
+				if 'wine' in tropa['costs']:
+					limitante = vinoDisp // tropa['costs']['wine']
+					if limitante < tropa['entrenar']:
+						tropa['entrenar'] = limitante
+
+				if 'marble' in ['costs']:
+					limitante = marmolDisp // tropa['costs']['marble']
+					if limitante < tropa['entrenar']:
+						tropa['entrenar'] = limitante
+
+				if 'cristal' in ['costs']:
+					limitante = cristalDisp // tropa['costs']['cristal']
+					if limitante < tropa['entrenar']:
+						tropa['entrenar'] = limitante
+
+				if 'sulfur' in tropa['costs']:
+					limitante = azufreDisp // tropa['costs']['sulfur']
+					if limitante < tropa['entrenar']:
+						tropa['entrenar'] = limitante
+
+				if 'citizens' in tropa['costs']:
+					limitante = ciudadanosDisp // tropa['costs']['citizens']
+					if limitante < tropa['entrenar']:
+						tropa['entrenar'] = limitante
+
+				if 'wood' in tropa['costs']:
+					maderaDisp -= tropa['costs']['wood'] * tropa['entrenar']
+				if 'wine' in tropa['costs']:
+					vinoDisp -= tropa['costs']['wine'] * tropa['entrenar']
+				if 'marble' in tropa['costs']:
+					marmolDisp -= tropa['costs']['marble'] * tropa['entrenar']
+				if 'cristal' in ['costs']:
+					cristalDisp -= tropa['costs']['cristal'] * tropa['entrenar']
+				if 'sulfur' in tropa['costs']:
+					azufreDisp -= tropa['costs']['sulfur'] * tropa['entrenar']
+				if 'citizens' in tropa['costs']:
+					ciudadanosDisp -= tropa['costs']['citizens'] * tropa['entrenar']
 
 				tropa['cantidad'] -= tropa['entrenar']
-				maderaDisp -= tropa['costs']['wood'] * tropa['entrenar']
-				azufreDisp -= tropa['costs']['sulfur'] * tropa['entrenar']
-				ciudadanosDisp -= tropa['costs']['citizens'] * tropa['entrenar']
+
 			total = 0
 			for tropa in entrenamiento:
 				total += tropa['entrenar']
@@ -89,13 +128,10 @@ def entrenarTropas(s):
 	ciudad = elegirCiudad(s)
 	for i in range(len(ciudad['position'])):
 		if ciudad['position'][i]['building'] == 'barracks':
-			pos = str(i)
-			ciudad['pos'] = pos
+			ciudad['pos'] = str(i)
 			break
 
-	params = {'view': 'barracks', 'cityId': ciudad['id'], 'position': ciudad['pos'], 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'actionRequest': s.token(), 'ajax': '1'}
-	data = s.post(params=params)
-	data = json.loads(data, strict=False)
+	data = getCuartelInfo(s, ciudad)
 	unidades_info = data[2][1]
 
 	banner()
@@ -134,7 +170,7 @@ def entrenarTropas(s):
 		print('\nProceder? [Y/n]')
 		rta = read(values=['y', 'Y', 'n', 'N', ''])
 		if rta.lower() == 'n':
-			break # ?
+			return
 
 		entrenamientos.append(unidades)
 
@@ -145,6 +181,9 @@ def entrenarTropas(s):
 			continue
 		else:
 			break
+
+	print('\nSe entrenarán las tropas seleccionadas.')
+	enter()
 
 	forkear(s)
 	if s.padre is True:
