@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2019-06-23 18:42-0300\n"
+"POT-Creation-Date: 2019-06-23 21:04-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,23 +15,35 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: ../../../funcion/activarMilagro.py:53
+#: ../../../funcion/activarMilagro.py:54
+msgid "No existen milagros disponibles."
+msgstr "There are no miracles available."
+
+#: ../../../funcion/activarMilagro.py:57
 msgid "¿Qué milagro quiere activar?"
 msgstr "Which miracle do you want to activate?"
 
-#: ../../../funcion/activarMilagro.py:55
+#: ../../../funcion/activarMilagro.py:59
 msgid "(0) Salir"
 msgstr "(0) Exit"
 
-#: ../../../funcion/activarMilagro.py:65
+#: ../../../funcion/activarMilagro.py:68
+msgid ""
+"\n"
+"Se activará el milagro {}"
+msgstr ""
+"\n"
+"The miracle {} will be activated"
+
+#: ../../../funcion/activarMilagro.py:69
 msgid "¿Proceder? [Y/n]"
 msgstr "Proceed? [Y/n]"
 
-#: ../../../funcion/activarMilagro.py:74
+#: ../../../funcion/activarMilagro.py:78
 msgid "No se pudo activar el milagro {}."
 msgstr "The miracle {} could not be activated."
 
-#: ../../../funcion/activarMilagro.py:76
+#: ../../../funcion/activarMilagro.py:80
 msgid "Se activó el milagro {}."
 msgstr "The miracle {} was activated."
 
