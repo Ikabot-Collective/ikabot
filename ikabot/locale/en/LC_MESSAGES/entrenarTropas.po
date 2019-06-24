@@ -1,0 +1,109 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2019-06-24 20:03-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: ../../../funcion/entrenarTropas.py:121
+msgid "No se pudo terminar de entrenar tropas por falta de recursos."
+msgstr "It was not possible to finish training troops due to lack of resources."
+
+#: ../../../funcion/entrenarTropas.py:139
+msgid "¿En qué ciudad quiere entrenar las tropas?"
+msgstr "In what city do you want to train the troops?"
+
+#: ../../../funcion/entrenarTropas.py:168
+msgid ""
+"\n"
+"Costo total:"
+msgstr ""
+"\n"
+"Total cost:"
+
+#: ../../../funcion/entrenarTropas.py:197
+msgid "     Madera: {}"
+msgstr "       Wood: {}"
+
+#: ../../../funcion/entrenarTropas.py:199
+msgid "       Vino: {}"
+msgstr "       Wine: {}"
+
+#: ../../../funcion/entrenarTropas.py:201
+msgid "     Marmol: {}"
+msgstr "     Marble: {}"
+
+#: ../../../funcion/entrenarTropas.py:203
+msgid "    Cristal: {}"
+msgstr "    Cristal: {}"
+
+#: ../../../funcion/entrenarTropas.py:205
+msgid "     Azufre: {}"
+msgstr "     Sulfur: {}"
+
+#: ../../../funcion/entrenarTropas.py:207
+msgid " Ciudadanos: {}"
+msgstr "   Citizens: {}"
+
+#: ../../../funcion/entrenarTropas.py:209
+msgid "Manutención: {}"
+msgstr "Maintenance: {}"
+
+#: ../../../funcion/entrenarTropas.py:211
+msgid "   Duración: {}"
+msgstr "   Duration: {}"
+
+#: ../../../funcion/entrenarTropas.py:213
+msgid ""
+"\n"
+"Proceder? [Y/n]"
+msgstr ""
+"\n"
+"Proceed? [Y/n]"
+
+#: ../../../funcion/entrenarTropas.py:220
+msgid ""
+"\n"
+"¿Quiere entrenar más tropas al terminar? [y/N]"
+msgstr ""
+"\n"
+"Do you want to train more troops when you finish? [y/N]"
+
+#: ../../../funcion/entrenarTropas.py:228
+msgid ""
+"\n"
+"Se entrenarán las tropas seleccionadas."
+msgstr ""
+"\n"
+"The selected troops will be trained."
+
+#: ../../../funcion/entrenarTropas.py:235
+msgid ""
+"\n"
+"Entreno tropas en {}\n"
+msgstr ""
+"\n"
+"I train troops in {}\n"
+
+#: ../../../funcion/entrenarTropas.py:240
+msgid ""
+"Error en:\n"
+"{}\n"
+"Causa:\n"
+"{}"
+msgstr ""
+"Error in:\n"
+"{}\n"
+"Cause:\n"
+"{}"
+

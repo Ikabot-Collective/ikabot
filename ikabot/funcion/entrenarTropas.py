@@ -9,7 +9,7 @@ from ikabot.config import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.pedirInfo import *
-from ikabot.helpers.varios import esperar
+from ikabot.helpers.varios import *
 from ikabot.helpers.process import forkear
 from ikabot.helpers.varios import addPuntos
 from ikabot.helpers.signals import setInfoSignal
@@ -38,7 +38,7 @@ def esperarEntrenamiento(s, ciudad):
 	segundos = re.search(r'\'buildProgress\', (\d+),', html)
 	if segundos:
 		segundos = segundos.group(1)
-		segundos = segundos - data[0][1]['time']
+		segundos = int(segundos) - data[0][1]['time']
 		esperar(segundos + 5)
 
 def getCiudadanosDisponibles(html):
@@ -64,6 +64,7 @@ def planearEntrenamientos(s, ciudad, entrenamientos):
 			marmolDisp  = recursos[2]
 			cristalDisp = recursos[3]
 			azufreDisp  = recursos[4]
+
 			for tropa in entrenamiento:
 
 				tropa['entrenar'] = tropa['cantidad']
@@ -117,15 +118,28 @@ def planearEntrenamientos(s, ciudad, entrenamientos):
 			for tropa in entrenamiento:
 				total += tropa['entrenar']
 			if total == 0:
-				msg = 'No se pudo terminar de entrenar tropas por falta de recursos.'
+				msg = _('No se pudo terminar de entrenar tropas por falta de recursos.')
 				sendToBot(msg)
 				return
 			entrenar(s, ciudad, entrenamiento)
 
+def generateTroops(unidades_info):
+	i = 1
+	unidades = []
+	while 'js_barracksSlider{:d}'.format(i) in unidades_info:
+		# {"identifier":"phalanx","unit_type_id":303,"costs":{"citizens":1,"wood":27,"sulfur":30,"upkeep":3,"completiontime":71.169695412658},"local_name":"Hoplita"}
+		info = unidades_info['js_barracksSlider{:d}'.format(i)]['slider']['control_data']
+		info = json.loads(info, strict=False)
+		unidades.append(info)
+		i += 1
+	return unidades
+
 def entrenarTropas(s):
 	banner()
-	print('¿En qué ciudad quiere entrenar las tropas?')
+	print(_('¿En qué ciudad quiere entrenar las tropas?'))
 	ciudad = elegirCiudad(s)
+	banner()
+
 	for i in range(len(ciudad['position'])):
 		if ciudad['position'][i]['building'] == 'barracks':
 			ciudad['pos'] = str(i)
@@ -133,68 +147,97 @@ def entrenarTropas(s):
 
 	data = getCuartelInfo(s, ciudad)
 	unidades_info = data[2][1]
-
-	banner()
-	i = 1
-	unidades = []
+	unidades = generateTroops(unidades_info)
+	
 	maxSize = 0
-	while 'js_barracksSlider{:d}'.format(i) in unidades_info:
-		# {"identifier":"phalanx","unit_type_id":303,"costs":{"citizens":1,"wood":27,"sulfur":30,"upkeep":3,"completiontime":71.169695412658},"local_name":"Hoplita"}
-		info = unidades_info['js_barracksSlider{:d}'.format(i)]['slider']['control_data']
-		info = json.loads(info, strict=False)
-		if maxSize < len(info['local_name']):
-			maxSize = len(info['local_name'])
-		unidades.append(info)
-		i += 1
+	for unidad in unidades:
+		if maxSize < len(unidad['local_name']):
+			maxSize = len(unidad['local_name'])
 
 	entrenamientos = []
 	while True:
+		unidades = generateTroops(unidades_info)
 		print('Entrenar:')
 		for unidad in unidades:
 			cantidad = read(msg='{}{}:'.format(' '*(maxSize-len(unidad['local_name'])), unidad['local_name']), min=0, empty=True)
 			if cantidad == '':
 				cantidad = 0
+			assert 'cantidad' not in unidad
 			unidad['cantidad'] = cantidad
 
-		print('\nCosto total:')
-		costo = {'ciudadanos': 0, 'madera': 0, 'azufre': 0}
+		print(_('\nCosto total:'))
+		costo = {'madera': 0, 'vino': 0, 'marmol': 0, 'cristal': 0, 'azufre': 0, 'ciudadanos': 0, 'manuntencion': 0, 'tiempo': 0}
 		for unidad in unidades:
-			costo['ciudadanos'] += unidad['costs']['citizens'] * unidad['cantidad']
-			costo['madera'] += unidad['costs']['wood'] * unidad['cantidad']
+
+			if 'wood' in unidad['costs']:
+				costo['madera'] += unidad['costs']['wood'] * unidad['cantidad']
+
+			if 'wine' in unidad['costs']:
+				costo['vino'] += unidad['costs']['wine'] * unidad['cantidad']
+
+			if 'marble' in unidad['costs']:
+				costo['marmol'] += unidad['costs']['marble'] * unidad['cantidad']
+
+			if 'cristal' in unidad['costs']:
+				costo['cristal'] += unidad['costs']['cristal'] * unidad['cantidad']
+
 			if 'sulfur' in unidad['costs']:
 				costo['azufre'] += unidad['costs']['sulfur'] * unidad['cantidad']
-		print('Ciudadanos: {}'.format(addPuntos(costo['ciudadanos'])))
-		print('    Madera: {}'.format(addPuntos(costo['madera'])))
-		print('    Azufre: {}'.format(addPuntos(costo['azufre'])))
 
-		print('\nProceder? [Y/n]')
+			if 'citizens' in unidad['costs']:
+				costo['ciudadanos'] += unidad['costs']['citizens'] * unidad['cantidad']
+			
+			if 'upkeep' in unidad['costs']:
+				costo['manuntencion'] += unidad['costs']['upkeep'] * unidad['cantidad']
+
+			if 'completiontime' in unidad['costs']:
+				costo['tiempo'] += unidad['costs']['completiontime'] * unidad['cantidad']
+
+		if costo['madera']:
+			print(_('     Madera: {}').format(addPuntos(costo['madera'])))
+		if costo['vino']:
+			print(_('       Vino: {}').format(addPuntos(costo['vino'])))
+		if costo['marmol']:
+			print(_('     Marmol: {}').format(addPuntos(costo['marmol'])))
+		if costo['cristal']:
+			print(_('    Cristal: {}').format(addPuntos(costo['cristal'])))
+		if costo['azufre']:
+			print(_('     Azufre: {}').format(addPuntos(costo['azufre'])))
+		if costo['ciudadanos']:
+			print(_(' Ciudadanos: {}').format(addPuntos(costo['ciudadanos'])))
+		if costo['manuntencion']:
+			print(_('Manutención: {}').format(addPuntos(costo['manuntencion'])))
+		if costo['tiempo']:
+			print(_('   Duración: {}').format(diasHorasMinutos(int(costo['tiempo']))))
+
+		print(_('\nProceder? [Y/n]'))
 		rta = read(values=['y', 'Y', 'n', 'N', ''])
 		if rta.lower() == 'n':
 			return
 
 		entrenamientos.append(unidades)
 
-		print('\n¿Quiere entrenar más tropas al terminar? [y/N]')
+		print(_('\n¿Quiere entrenar más tropas al terminar? [y/N]'))
 		rta = read(values=['y', 'Y', 'n', 'N', ''])
 		if rta.lower() == 'y':
-			print('')
+			banner()
 			continue
 		else:
 			break
 
-	print('\nSe entrenarán las tropas seleccionadas.')
+	print(_('\nSe entrenarán las tropas seleccionadas.'))
 	enter()
 
 	forkear(s)
 	if s.padre is True:
 		return
 
-	info = '\nEntreno tropas en {}\n'.format(ciudad['cityName'])
+	info = _('\nEntreno tropas en {}\n').format(ciudad['cityName'])
 	setInfoSignal(s, info)
 	try:
 		planearEntrenamientos(s, ciudad, entrenamientos)
 	except:
-		msg = 'Error en:\n{}\nCausa:\n{}'.format(info, traceback.format_exc())
+		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
 		sendToBot(msg)
 	finally:
 		s.logout()
