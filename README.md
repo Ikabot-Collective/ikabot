@@ -60,6 +60,10 @@ _Ikabot is a program written in python that grants iqual and even more functiona
 
 	It allows you to activate any miracle you have available.
 
+14. Train troops
+
+	It allows you to easily create large amounts of troops in one city. If there are not enough resources to train all of them, it will train all the troops it can and when it finishes it will try to train the rest.
+
 14. Update Ikabot
 
 	It tells you how to update _ikabot_
