@@ -52,7 +52,15 @@ _Ikabot is a program written in python that grants iqual and even more functiona
 
 	It allows you to choose what type of resource to buy and how much. It automatically purchases the different offers from the cheapest to the most expensive.
 
-12. Update Ikabot
+12. Activate Vacation Mode
+
+	Sets the account in vacation mode and closes _ikabot_.
+
+13. Activate miracle
+
+	It allows you to activate any miracle you have available.
+
+14. Update Ikabot
 
 	It tells you how to update _ikabot_
 	
