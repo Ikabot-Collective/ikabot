@@ -81,19 +81,18 @@ def subirEdificio(s, idCiudad, posicion, nivelesASubir):
 
 def getReductores(ciudad):
 	(carpinteria, oficina, prensa, optico, area) = (0, 0, 0, 0, 0)
-	for edificio in ciudad['position']:
-		if edificio['name'] != 'empty':
-			lv = int(edificio['level'])
-			if edificio['building'] == 'carpentering':
-				carpinteria = lv
-			elif edificio['building'] == 'architect':
-				oficina = lv
-			elif edificio['building'] == 'vineyard':
-				prensa = lv
-			elif edificio['building'] == 'optician':
-				optico = lv
-			elif edificio['building'] == 'fireworker':
-				area = lv
+	for edificio in [ edificio for edificio in ciudad['position'] if edificio['name'] != 'empty' ]:
+		lv = int(edificio['level'])
+		if edificio['building'] == 'carpentering':
+			carpinteria = lv
+		elif edificio['building'] == 'architect':
+			oficina = lv
+		elif edificio['building'] == 'vineyard':
+			prensa = lv
+		elif edificio['building'] == 'optician':
+			optico = lv
+		elif edificio['building'] == 'fireworker':
+			area = lv
 	return (carpinteria, oficina, prensa, optico, area)
 
 def recursosNecesarios(s, ciudad, edificio, desde, hasta):

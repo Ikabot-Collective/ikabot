@@ -60,25 +60,24 @@ def enviarVino(s):
 		return
 
 	rutas = []
-	for idCiudadDestino in idsCiudades:
-		if idCiudadDestino not in ciudadesVino:
-			htmlD = s.get(urlCiudad + idCiudadDestino)
-			ciudadD = getCiudad(htmlD)
-			idIsla = ciudadD['islandId']
-			faltante = cantidad
-			for idCiudadOrigen in ciudadesVino:
-				if faltante == 0:
-					break
-				ciudadO = ciudadesVino[idCiudadOrigen]
-				vinoDisponible = ciudadO['disponible']
-				for ruta in rutas:
-					(origen, __, __, __, vn, __, __, __) = ruta
-					if origen['id'] == idCiudadOrigen:
-						vinoDisponible -= vn
-				enviar = faltante if vinoDisponible > faltante else vinoDisponible
-				faltante -= enviar
-				ruta = (ciudadO, ciudadD, idIsla, 0, enviar, 0, 0, 0)
-				rutas.append(ruta)
+	for idCiudadDestino in [ idCity for idCity in idsCiudades if idCity not in ciudadesVino ]:
+		htmlD = s.get(urlCiudad + idCiudadDestino)
+		ciudadD = getCiudad(htmlD)
+		idIsla = ciudadD['islandId']
+		faltante = cantidad
+		for idCiudadOrigen in ciudadesVino:
+			if faltante == 0:
+				break
+			ciudadO = ciudadesVino[idCiudadOrigen]
+			vinoDisponible = ciudadO['disponible']
+			for ruta in rutas:
+				(origen, __, __, __, vn, __, __, __) = ruta
+				if origen['id'] == idCiudadOrigen:
+					vinoDisponible -= vn
+			enviar = faltante if vinoDisponible > faltante else vinoDisponible
+			faltante -= enviar
+			ruta = (ciudadO, ciudadD, idIsla, 0, enviar, 0, 0, 0)
+			rutas.append(ruta)
 
 	info = _('\nEnviar vino\n')
 	for ruta in rutas:
