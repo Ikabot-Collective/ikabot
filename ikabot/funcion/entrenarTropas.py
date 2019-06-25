@@ -162,7 +162,6 @@ def entrenarTropas(s):
 			cantidad = read(msg='{}{}:'.format(' '*(maxSize-len(unidad['local_name'])), unidad['local_name']), min=0, empty=True)
 			if cantidad == '':
 				cantidad = 0
-			assert 'cantidad' not in unidad
 			unidad['cantidad'] = cantidad
 
 		print(_('\nCosto total:'))
