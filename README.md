@@ -62,7 +62,7 @@ _Ikabot is a program written in python that grants iqual and even more functiona
 
 14. Train troops
 
-	It allows you to easily create large amounts of troops in one city. If there are not enough resources to train all of them, it will train all the troops it can and when it finishes it will try to train the rest. It also allows you to build your army in multiple small parts so that you can use it as fast as possible.
+	It allows you to easily create large amounts of troops in one city. If there are not enough resources to train all of them, it will train all the troops it can and when it finishes it will try to train the rest. It also allows you to build your army in multiple small steps so that you can use it as fast as possible.
 
 14. Update Ikabot
 
