@@ -73,27 +73,22 @@ def planearEntrenamientos(s, ciudad, entrenamientos):
 					limitante = maderaDisp // tropa['costs']['wood']
 					if limitante < tropa['entrenar']:
 						tropa['entrenar'] = limitante
-
 				if 'wine' in tropa['costs']:
 					limitante = vinoDisp // tropa['costs']['wine']
 					if limitante < tropa['entrenar']:
 						tropa['entrenar'] = limitante
-
 				if 'marble' in ['costs']:
 					limitante = marmolDisp // tropa['costs']['marble']
 					if limitante < tropa['entrenar']:
 						tropa['entrenar'] = limitante
-
 				if 'cristal' in ['costs']:
 					limitante = cristalDisp // tropa['costs']['cristal']
 					if limitante < tropa['entrenar']:
 						tropa['entrenar'] = limitante
-
 				if 'sulfur' in tropa['costs']:
 					limitante = azufreDisp // tropa['costs']['sulfur']
 					if limitante < tropa['entrenar']:
 						tropa['entrenar'] = limitante
-
 				if 'citizens' in tropa['costs']:
 					limitante = ciudadanosDisp // tropa['costs']['citizens']
 					if limitante < tropa['entrenar']:
@@ -148,7 +143,7 @@ def entrenarTropas(s):
 	data = getCuartelInfo(s, ciudad)
 	unidades_info = data[2][1]
 	unidades = generateTroops(unidades_info)
-	
+
 	maxSize = 0
 	for unidad in unidades:
 		if maxSize < len(unidad['local_name']):
@@ -170,25 +165,18 @@ def entrenarTropas(s):
 
 			if 'wood' in unidad['costs']:
 				costo['madera'] += unidad['costs']['wood'] * unidad['cantidad']
-
 			if 'wine' in unidad['costs']:
 				costo['vino'] += unidad['costs']['wine'] * unidad['cantidad']
-
 			if 'marble' in unidad['costs']:
 				costo['marmol'] += unidad['costs']['marble'] * unidad['cantidad']
-
 			if 'cristal' in unidad['costs']:
 				costo['cristal'] += unidad['costs']['cristal'] * unidad['cantidad']
-
 			if 'sulfur' in unidad['costs']:
 				costo['azufre'] += unidad['costs']['sulfur'] * unidad['cantidad']
-
 			if 'citizens' in unidad['costs']:
 				costo['ciudadanos'] += unidad['costs']['citizens'] * unidad['cantidad']
-			
 			if 'upkeep' in unidad['costs']:
 				costo['manuntencion'] += unidad['costs']['upkeep'] * unidad['cantidad']
-
 			if 'completiontime' in unidad['costs']:
 				costo['tiempo'] += unidad['costs']['completiontime'] * unidad['cantidad']
 
