@@ -157,7 +157,7 @@ def entrenarTropas(s):
 	entrenamientos = []
 	while True:
 		unidades = generateTroops(unidades_info)
-		print('Entrenar:')
+		print(_('Entrenar:'))
 		for unidad in unidades:
 			cantidad = read(msg='{}{}:'.format(' '*(maxSize-len(unidad['local_name'])), unidad['local_name']), min=0, empty=True)
 			if cantidad == '':
@@ -224,6 +224,54 @@ def entrenarTropas(s):
 			continue
 		else:
 			break
+
+	recursos   = getRecursosDisponibles( ciudad['html'], num=True )
+	ciudadanos = getCiudadanosDisponibles( ciudad['html'] )
+	sobrante               = {}
+	sobrante['madera']     = recursos[0]
+	sobrante['vino']       = recursos[1]
+	sobrante['marmol']     = recursos[2]
+	sobrante['cristal']    = recursos[3]
+	sobrante['azufre']     = recursos[4]
+	sobrante['ciudadanos'] = ciudadanos
+
+	for entrenamiento in entrenamientos:
+		for unidad in entrenamiento:
+
+			if 'wood' in unidad['costs']:
+				sobrante['madera'] -= unidad['costs']['wood'] * unidad['cantidad']
+			if 'wine' in unidad['costs']:
+				sobrante['vino'] -= unidad['costs']['wine'] * unidad['cantidad']
+			if 'marble' in unidad['costs']:
+				sobrante['marmol'] -= unidad['costs']['marble'] * unidad['cantidad']
+			if 'cristal' in unidad['costs']:
+				sobrante['cristal'] -= unidad['costs']['cristal'] * unidad['cantidad']
+			if 'sulfur' in unidad['costs']:
+				sobrante['azufre'] -= unidad['costs']['sulfur'] * unidad['cantidad']
+			if 'citizens' in unidad['costs']:
+				sobrante['ciudadanos'] -= unidad['costs']['citizens'] * unidad['cantidad']
+
+	falta = [ elem for elem in sobrante if sobrante[elem] < 0 ] != []
+
+	if falta:
+		print(_('\nNo hay suficientes recursos:'))
+		if sobrante['madera'] < 0:
+			print(_('    Madera:{}').format(addPuntos(sobrante['madera']*-1)))
+		if sobrante['vino'] < 0:
+			print(_('      Vino:{}').format(addPuntos(sobrante['vino']*-1)))
+		if sobrante['marmol'] < 0:
+			print(_('    Marmol:{}').format(addPuntos(sobrante['marmol']*-1)))
+		if sobrante['cristal'] < 0:
+			print(_('   Cristal:{}').format(addPuntos(sobrante['cristal']*-1)))
+		if sobrante['azufre'] < 0:
+			print(_('    Azufre:{}').format(addPuntos(sobrante['azufre']*-1)))
+		if sobrante['ciudadanos'] < 0:
+			print(_('Ciudadanos:{}').format(addPuntos(sobrante['ciudadanos']*-1)))
+
+		print(_('\n¿Proceder de todos modos? [Y/n]'))
+		rta = read(values=['y', 'Y', 'n', 'N', ''])
+		if rta.lower() == 'n':
+			return
 
 	print(_('\nSe entrenarán las tropas seleccionadas.'))
 	enter()
