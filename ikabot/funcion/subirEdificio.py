@@ -5,16 +5,18 @@ import re
 import time
 import gettext
 import traceback
+import threading
 from ikabot.config import *
-from ikabot.helpers.botComm import *
-from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.varios import *
-from ikabot.helpers.getJson import getCiudad
-from ikabot.helpers.recursos import getRecursosDisponibles
-from ikabot.helpers.signals import setInfoSignal
-from ikabot.helpers.process import forkear
+from ikabot.helpers.botComm import *
 from ikabot.helpers.gui import banner
+from ikabot.helpers.pedirInfo import *
 from ikabot.web.sesion import normal_get
+from ikabot.helpers.process import forkear
+from ikabot.helpers.getJson import getCiudad
+from ikabot.helpers.signals import setInfoSignal
+from ikabot.helpers.planearViajes import planearViajes
+from ikabot.helpers.recursos import getRecursosDisponibles
 
 t = gettext.translation('subirEdificio', 
                         localedir, 
@@ -102,6 +104,62 @@ def recursosNecesarios(s, ciudad, edificio, desde, hasta):
 	rta = normal_get(url).text.split(',')
 	return list(map(int, rta))
 
+def planearAbastecimiento(s, destino, origenes, faltantes):
+	rutas = []
+	html = s.get(urlCiudad + destino)
+	ciudadD = getCiudad(html)
+	for i in range(5):
+		faltante = faltantes[i]
+		if faltante <= 0:
+			continue
+		for origen in origenes[i]:
+			if faltante == 0:
+				break
+			html = s.get(urlCiudad + origen)
+			ciudadO = getCiudad(html)
+			disp = getRecursosDisponibles(html, num=True)[i]
+			mandar = disp if disp < faltante else faltante
+			faltante -= mandar
+			if i == 0:
+				ruta = (ciudadO, ciudadD, ciudadD['islandId'], mandar, 0, 0, 0, 0)
+			elif i == 1:
+				ruta = (ciudadO, ciudadD, ciudadD['islandId'], 0, mandar, 0, 0, 0)
+			elif i == 2:
+				ruta = (ciudadO, ciudadD, ciudadD['islandId'], 0, 0, mandar, 0, 0)
+			elif i == 3:
+				ruta = (ciudadO, ciudadD, ciudadD['islandId'], 0, 0, 0, mandar, 0)
+			else:
+				ruta = (ciudadO, ciudadD, ciudadD['islandId'], 0, 0, 0, 0, mandar)
+			rutas.append(ruta)
+	planearViajes(s, rutas)
+
+def menuEdificios(s, ids, cities, idCiudad, bien):
+	banner()
+	print(_('¿De qué ciudades obtener {}?').format(bien))
+	rta = []
+	tradegood = [_('V'), 'M', 'C', _('A')]
+	for id in [ id for id in ids if id != idCiudad ]:
+		trade = tradegood[ int( cities[id]['tradegood'] ) - 1 ]
+		opcion = '{} ({}) [Y/n]:'.format(cities[id]['name'], trade)
+		eleccion = read(msg=opcion, values=['Y', 'y', 'N', 'n', ''])
+		if eleccion.lower() == 'n':
+			continue
+		rta.append(id)
+	return rta
+
+def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante):
+	idss, cities = getIdsDeCiudades(s)
+	origenes = {}
+	for i in range(5):
+		if faltante[i] <= 0:
+			continue
+		bien = tipoDeBien[i]
+		ids = menuEdificios(s, idss, cities, idCiudad, bien)
+		origenes[i] = ids
+	t = threading.Thread(target=planearAbastecimiento, args=(s, idCiudad, origenes, faltante))
+	t.start()
+	input()
+
 def subirEdificios(s):
 	banner()
 	ciudad = elegirCiudad(s)
@@ -135,10 +193,17 @@ def subirEdificios(s):
 				print('{} de cristal'.format(addPuntos(cristal - cristalDisp)))
 			if azufreDisp < azufre:
 				print('{} de azufre'.format(addPuntos(azufre - azufreDisp)))
-			print(_('¿Proceder de todos modos? [Y/n]'))
+
+			print(_('Transportar los recursos automaticamente? [Y/n]'))
 			rta = read(values=['y', 'Y', 'n', 'N', ''])
 			if rta.lower() == 'n':
-				return
+				print(_('¿Proceder de todos modos? [Y/n]'))
+				rta = read(values=['y', 'Y', 'n', 'N', ''])
+				if rta.lower() == 'n':
+					return
+			else:
+				faltante = [madera - maderaDisp, vino - vinoDisp, marmol - marmolDisp, cristal - cristalDisp, azufre - azufreDisp]
+				obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante)
 		else:
 			print(_('\nTiene materiales suficientes'))
 			print(_('¿Proceder? [Y/n]'))
