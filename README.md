@@ -16,9 +16,9 @@ _Ikabot is a program written in python that grants iqual and even more functiona
  
 	It sends unlimited amount of resources from one city to another. It doesn't matter how many boats you have, _ikabot_ will send all the trips that were necessary. The destination city can be own by the user or by other.
 
-3. Send wine
+3. Distribute resource
 
-	It sends wine from cities in wine, to cities that are not. The maximum amount you could send is equal to the total amount of wine that is stored in cities in wine, divided by the number of cities that are not in wine.
+	It sends whatever resource you choose from the cities that produce it to cities that do not. The same amount is sent to all cities, unless a city has little free storage space. (Very useful to send wine)
 
 4. Account status
 
