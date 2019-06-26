@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2019-06-24 20:03-0300\n"
+"POT-Creation-Date: 2019-06-25 23:23-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,6 +22,10 @@ msgstr "It was not possible to finish training troops due to lack of resources."
 #: ../../../funcion/entrenarTropas.py:139
 msgid "¿En qué ciudad quiere entrenar las tropas?"
 msgstr "In what city do you want to train the troops?"
+
+#: ../../../funcion/entrenarTropas.py:160
+msgid "Entrenar:"
+msgstr "Train:"
 
 #: ../../../funcion/entrenarTropas.py:168
 msgid ""
@@ -79,7 +83,47 @@ msgstr ""
 "\n"
 "Do you want to train more troops when you finish? [y/N]"
 
-#: ../../../funcion/entrenarTropas.py:228
+#: ../../../funcion/entrenarTropas.py:257
+msgid ""
+"\n"
+"No hay suficientes recursos:"
+msgstr ""
+"\n"
+"There are not enough resources:"
+
+#: ../../../funcion/entrenarTropas.py:259
+msgid "    Madera:{}"
+msgstr "    Wood:{}"
+
+#: ../../../funcion/entrenarTropas.py:261
+msgid "      Vino:{}"
+msgstr "    Wine:{}"
+
+#: ../../../funcion/entrenarTropas.py:263
+msgid "    Marmol:{}"
+msgstr "  Marble:{}"
+
+#: ../../../funcion/entrenarTropas.py:265
+msgid "   Cristal:{}"
+msgstr " Cristal:{}"
+
+#: ../../../funcion/entrenarTropas.py:267
+msgid "    Azufre:{}"
+msgstr "  Sulfur:{}"
+
+#: ../../../funcion/entrenarTropas.py:269
+msgid "Ciudadanos:{}"
+msgstr "Citizens:{}"
+
+#: ../../../funcion/entrenarTropas.py:271
+msgid ""
+"\n"
+"¿Proceder de todos modos? [Y/n]"
+msgstr ""
+"\n"
+"Proceed anyway? [Y/n]"
+
+#: ../../../funcion/entrenarTropas.py:276
 msgid ""
 "\n"
 "Se entrenarán las tropas seleccionadas."
@@ -87,7 +131,7 @@ msgstr ""
 "\n"
 "The selected troops will be trained."
 
-#: ../../../funcion/entrenarTropas.py:235
+#: ../../../funcion/entrenarTropas.py:283
 msgid ""
 "\n"
 "Entreno tropas en {}\n"
@@ -95,7 +139,7 @@ msgstr ""
 "\n"
 "I train troops in {}\n"
 
-#: ../../../funcion/entrenarTropas.py:240
+#: ../../../funcion/entrenarTropas.py:288
 msgid ""
 "Error en:\n"
 "{}\n"
