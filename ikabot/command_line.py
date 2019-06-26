@@ -11,7 +11,7 @@ from ikabot.helpers.process import run
 from ikabot.helpers.signals import setSignalsHandlers
 from ikabot.funcion.subirEdificio import subirEdificios
 from ikabot.funcion.menuRutaComercial import menuRutaComercial
-from ikabot.funcion.enviarVino import enviarVino
+from ikabot.funcion.repartirRecurso import repartirRecurso
 from ikabot.funcion.getStatus import getStatus
 from ikabot.funcion.donar import donar
 from ikabot.funcion.buscarEspacios import buscarEspacios
@@ -36,7 +36,7 @@ def menu(s):
 	menu_actions = [
 					subirEdificios,
 					menuRutaComercial,
-					enviarVino,
+					repartirRecurso,
 					getStatus,
 					donar,
 					buscarEspacios,
@@ -53,7 +53,7 @@ def menu(s):
 	print(_('(0)  Salir'))
 	print(_('(1)  Lista de construcción'))
 	print(_('(2)  Enviar recursos'))
-	print(_('(3)  Enviar vino'))
+	print(_('(3)  Repartir recurso'))
 	print(_('(4)  Estado de la cuenta'))
 	print(_('(5)  Donar'))
 	print(_('(6)  Buscar espacios nuevos'))

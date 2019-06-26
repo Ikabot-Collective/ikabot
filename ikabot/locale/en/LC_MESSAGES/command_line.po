@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2019-06-24 19:08-0300\n"
+"POT-Creation-Date: 2019-06-26 12:38-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -28,8 +28,8 @@ msgid "(2)  Enviar recursos"
 msgstr "(2)  Send resources"
 
 #: ../../../command_line.py:56
-msgid "(3)  Enviar vino"
-msgstr "(3)  Send wine"
+msgid "(3)  Repartir recurso"
+msgstr "(3)  Distribute resource"
 
 #: ../../../command_line.py:57
 msgid "(4)  Estado de la cuenta"

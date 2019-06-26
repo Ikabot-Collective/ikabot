@@ -1,0 +1,85 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2019-06-26 12:34-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: ../../../funcion/repartirRecurso.py:27
+msgid "¿Qué recurso quiere repartir?"
+msgstr "What resource do you want to distribute?"
+
+#: ../../../funcion/repartirRecurso.py:28
+msgid "(1) Vino"
+msgstr "(1) Wine"
+
+#: ../../../funcion/repartirRecurso.py:29
+msgid "(2) Marmol"
+msgstr "(2) Marble"
+
+#: ../../../funcion/repartirRecurso.py:30
+msgid "(3) Cristal"
+msgstr "(3) Cristal"
+
+#: ../../../funcion/repartirRecurso.py:31
+msgid "(4) Azufre"
+msgstr "(4) Sulfur"
+
+#: ../../../funcion/repartirRecurso.py:55
+msgid "Se puede enviar como máximo {} a cada ciudad"
+msgstr "You can send {} at max to each city"
+
+#: ../../../funcion/repartirRecurso.py:56
+msgid "¿Cuanto enviar a cada ciudad?:"
+msgstr "How much do you wish to send to each city?:"
+
+#: ../../../funcion/repartirRecurso.py:61
+msgid ""
+"\n"
+"Por enviar {} a cada ciudad"
+msgstr ""
+"\n"
+"I will send {} to each city"
+
+#: ../../../funcion/repartirRecurso.py:62
+msgid "¿Proceder? [Y/n]"
+msgstr "Proceed? [Y/n]"
+
+#: ../../../funcion/repartirRecurso.py:107
+msgid ""
+"\n"
+"Repartir recurso\n"
+msgstr ""
+"\n"
+"Distribute resource\n"
+
+#: ../../../funcion/repartirRecurso.py:111
+msgid ""
+"{} -> {}\n"
+"{}: {}\n"
+msgstr ""
+"{} -> {}\n"
+"{}: {}\n"
+
+#: ../../../funcion/repartirRecurso.py:116
+msgid ""
+"Error en:\n"
+"{}\n"
+"Causa:\n"
+"{}"
+msgstr ""
+"Error in:\n"
+"{}\n"
+"Cause:\n"
+"{}"
+
