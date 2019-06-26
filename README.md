@@ -116,7 +116,6 @@ This messages are only visible for you.
 
 Setting this up is highly recommended, since it allows you to enjoy all the functionality of _ikabot_.
 
-Para configurarlo necesitaremos simplemente ingresar dos datos:
 To configure this, you just need to enter two pieces of information:
 
 1) The token of the bot you are going to use
@@ -133,6 +132,7 @@ To configure this, you just need to enter two pieces of information:
 
 When you want to use a functionality that requires Telegram, such as _Alert attacks_, _ikabot_ will ask you for the bot's token and your chat_id. Once entered, they will be saved in a file and will not be asked again.
 
+**If you are concerned about privacy, set up your own bot, so that nobody has the bot's token**
 
 ### Advanced
 
