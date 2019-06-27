@@ -149,9 +149,13 @@ def menuEdificios(s, ids, cities, idCiudad, bien):
 	print(_('¿De qué ciudades obtener {}?').format(bien))
 	rta = []
 	tradegood = [_('V'), 'M', 'C', _('A')]
+	maxName = 0
+	for name in [ cities[city]['name'] for city in cities if cities[city]['id'] != idCiudad ]:
+		if len(name) > maxName:
+			maxName = len(name)
 	for id in [ id for id in ids if id != idCiudad ]:
 		trade = tradegood[ int( cities[id]['tradegood'] ) - 1 ]
-		opcion = '{} ({}) [Y/n]:'.format(cities[id]['name'], trade)
+		opcion = '{}{} ({}) [Y/n]:'.format(' ' * (maxName - len(cities[id]['name'])), cities[id]['name'], trade)
 		eleccion = read(msg=opcion, values=['Y', 'y', 'N', 'n', ''])
 		if eleccion.lower() == 'n':
 			continue
@@ -167,9 +171,9 @@ def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante):
 		bien = tipoDeBien[i]
 		ids = menuEdificios(s, idss, cities, idCiudad, bien)
 		origenes[i] = ids
+
 	t = threading.Thread(target=planearAbastecimiento, args=(s, idCiudad, origenes, faltante))
 	t.start()
-	input()
 
 def subirEdificios(s):
 	banner()
