@@ -10,7 +10,7 @@ _Ikabot is a program written in python that grants iqual and even more functiona
 
 1. Construction list
 
-	The user selects a building, the number of levels to upload, _ikabot_ calculates if it has enough resources and uploads the selected number of levels.
+	The user selects a building, the number of levels to upload, _ikabot_ calculates if it has enough resources and uploads the selected number of levels. If you don't have enough resources, it can send them automatically from the cities that you specify.
 	
 2. Send resources
  
