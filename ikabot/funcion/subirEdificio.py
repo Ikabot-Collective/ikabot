@@ -13,9 +13,9 @@ from ikabot.helpers.gui import banner
 from ikabot.helpers.pedirInfo import *
 from ikabot.web.sesion import normal_get
 from ikabot.helpers.process import forkear
+from ikabot.helpers.planearViajes import *
 from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.signals import setInfoSignal
-from ikabot.helpers.planearViajes import planearViajes
 from ikabot.helpers.recursos import getRecursosDisponibles
 
 t = gettext.translation('subirEdificio', 
@@ -50,11 +50,22 @@ def esperarConstruccion(s, idCiudad, posicion):
 		esperar(slp)
 	return getCiudad(html)
 
-def subirEdificio(s, idCiudad, posicion, nivelesASubir):
+def subirEdificio(s, idCiudad, posicion, nivelesASubir, esperarRecursos):
 
 	for lv in range(nivelesASubir):
 		ciudad = esperarConstruccion(s, idCiudad, posicion)
 		edificio = ciudad['position'][posicion]
+
+		if edificio['canUpgrade'] is False and esperarRecursos:
+			while edificio['canUpgrade'] is False:
+				segundos = obtenerMinimoTiempoDeEspera(s)
+				if segundos == 0:
+					break
+				else:
+					esperar(segundos)
+				html = s.get(urlCiudad + idCiudad)
+				ciudad = getCiudad(html)
+				edificio = ciudad['position'][posicion]
 
 		if edificio['canUpgrade'] is False:
 			msg  = _('Ciudad:{}\n').format(ciudad['cityName'])
@@ -162,6 +173,7 @@ def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante):
 
 def subirEdificios(s):
 	banner()
+	esperarRecursos = False
 	ciudad = elegirCiudad(s)
 	idCiudad = ciudad['id']
 	edificios = getEdificios(s, idCiudad)
@@ -202,6 +214,7 @@ def subirEdificios(s):
 				if rta.lower() == 'n':
 					return
 			else:
+				esperarRecursos = True
 				faltante = [madera - maderaDisp, vino - vinoDisp, marmol - marmolDisp, cristal - cristalDisp, azufre - azufreDisp]
 				obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante)
 		else:
@@ -221,7 +234,7 @@ def subirEdificios(s):
 
 	setInfoSignal(s, info)
 	try:
-		subirEdificio(s, idCiudad, posEdificio, niveles)
+		subirEdificio(s, idCiudad, posEdificio, niveles, esperarRecursos)
 	except:
 		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
 		sendToBot(msg)
