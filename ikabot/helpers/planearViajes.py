@@ -47,10 +47,9 @@ def obtenerMinimoTiempoDeEspera(s):
 	militaryMovements = postdata[1][1][2]['viewScriptParams']['militaryAndFleetMovements']
 	tiempoAhora = int(postdata[0][1]['time'])
 	tiemposDeEspera = []
-	for militaryMovement in militaryMovements:
-		if militaryMovement['isOwnArmyOrFleet']:
-			tiempoRestante = int(militaryMovement['eventTime']) - tiempoAhora
-			tiemposDeEspera.append(tiempoRestante)
+	for militaryMovement in [ mv for mv in militaryMovements if mv['isOwnArmyOrFleet'] ]:
+		tiempoRestante = int(militaryMovement['eventTime']) - tiempoAhora
+		tiemposDeEspera.append(tiempoRestante)
 	if tiemposDeEspera:
 		return min(tiemposDeEspera)
 	else:
