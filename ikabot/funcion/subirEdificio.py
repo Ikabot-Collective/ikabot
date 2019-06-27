@@ -5,7 +5,6 @@ import re
 import time
 import gettext
 import traceback
-import threading
 from ikabot.config import *
 from ikabot.helpers.varios import *
 from ikabot.helpers.botComm import *
@@ -172,8 +171,13 @@ def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante):
 		ids = menuEdificios(s, idss, cities, idCiudad, bien)
 		origenes[i] = ids
 
-	t = threading.Thread(target=planearAbastecimiento, args=(s, idCiudad, origenes, faltante))
-	t.start()
+	forkear(s)
+	if s.padre is True:
+		return
+	else:
+		planearAbastecimiento(s, idCiudad, origenes, faltante)
+		s.logout()
+		exit()
 
 def subirEdificios(s):
 	banner()
