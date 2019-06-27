@@ -38,22 +38,28 @@ def planearViajes(s, rutas):
 			barcos = int(math.ceil((Decimal(cantEnviada) / Decimal(500))))
 			enviarBienes(s, ciudadOrigen['id'], ciudadDestino['id'], idIsla, mdEnv, vnEnv, mrEnv, crEnv, azEnv, barcos)
 
+def obtenerMinimoTiempoDeEspera(s):
+	html = s.get()
+	idCiudad = re.search(r'currentCityId:\s(\d+),', html).group(1)
+	url = 'view=militaryAdvisor&oldView=city&oldBackgroundView=city&backgroundView=city&currentCityId={}&actionRequest={}&ajax=1'.format(idCiudad, s.token())
+	posted = s.post(url)
+	postdata = json.loads(posted, strict=False)
+	militaryMovements = postdata[1][1][2]['viewScriptParams']['militaryAndFleetMovements']
+	tiempoAhora = int(postdata[0][1]['time'])
+	tiemposDeEspera = []
+	for militaryMovement in militaryMovements:
+		if militaryMovement['isOwnArmyOrFleet']:
+			tiempoRestante = int(militaryMovement['eventTime']) - tiempoAhora
+			tiemposDeEspera.append(tiempoRestante)
+	if tiemposDeEspera:
+		return min(tiemposDeEspera)
+	else:
+		return 0
+
 def esperarLlegada(s):
 	barcos = getBarcosDisponibles(s)
 	while barcos == 0:
-		html = s.get()
-		idCiudad = re.search(r'currentCityId:\s(\d+),', html).group(1)
-		url = 'view=militaryAdvisor&oldView=city&oldBackgroundView=city&backgroundView=city&currentCityId={}&actionRequest={}&ajax=1'.format(idCiudad, s.token())
-		posted = s.post(url)
-		postdata = json.loads(posted, strict=False)
-		militaryMovements = postdata[1][1][2]['viewScriptParams']['militaryAndFleetMovements']
-		tiempoAhora = int(postdata[0][1]['time'])
-		tiemposDeEspera = []
-		for militaryMovement in militaryMovements:
-			if militaryMovement['isOwnArmyOrFleet']:
-				tiempoRestante = int(militaryMovement['eventTime']) - tiempoAhora
-				tiemposDeEspera.append(tiempoRestante)
-		if tiemposDeEspera:
-			esperar( min(tiemposDeEspera) )
+		minTiempoDeEspera = obtenerMinimoTiempoDeEspera(s)
+		esperar( minTiempoDeEspera )
 		barcos = getBarcosDisponibles(s)
 	return barcos
