@@ -242,6 +242,8 @@ def subirEdificios(s):
 
 	setInfoSignal(s, info)
 	try:
+		if esperarRecursos:
+			time.sleep(60) # tiempo para que envie los recursos
 		subirEdificio(s, idCiudad, posEdificio, niveles, esperarRecursos)
 	except:
 		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
