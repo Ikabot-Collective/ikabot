@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2019-04-09 08:21-0300\n"
+"POT-Creation-Date: 2019-06-27 20:33-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,31 +15,39 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: ../../../funcion/botDonador.py:35
-msgid "En la ciudad {} {}, ¿Desea donar al aserradero o al bien de cambio? [a/b]"
-msgstr "In the city {} {}, Do you wish to donate to the forest or the trading good? [f/t]"
+#: ../../../funcion/botDonador.py:26
+msgid "(A)"
+msgstr "(S)"
 
-#: ../../../funcion/botDonador.py:36
+#: ../../../funcion/botDonador.py:26
+msgid "(V)"
+msgstr "(W)"
+
+#: ../../../funcion/botDonador.py:32
+msgid "En la ciudad {} {}, ¿Desea donar al aserradero, al bien de cambio o a nada? [a/b/n]"
+msgstr "In the city {} {}, Do you wish to donate to the forest, to the trading good or neither? [f/t/n]"
+
+#: ../../../funcion/botDonador.py:33
 msgid "A"
 msgstr "F"
 
-#: ../../../funcion/botDonador.py:36
+#: ../../../funcion/botDonador.py:33
 msgid "B"
 msgstr "T"
 
-#: ../../../funcion/botDonador.py:36
-msgid "b"
-msgstr "t"
-
-#: ../../../funcion/botDonador.py:36 ../../../funcion/botDonador.py:37
+#: ../../../funcion/botDonador.py:33 ../../../funcion/botDonador.py:34
 msgid "a"
 msgstr "f"
 
-#: ../../../funcion/botDonador.py:40
+#: ../../../funcion/botDonador.py:33 ../../../funcion/botDonador.py:36
+msgid "b"
+msgstr "t"
+
+#: ../../../funcion/botDonador.py:42
 msgid "Se donará todos los días."
 msgstr "I will donate every day."
 
-#: ../../../funcion/botDonador.py:47
+#: ../../../funcion/botDonador.py:49
 msgid ""
 "\n"
 "Dono todos los días\n"
@@ -47,7 +55,7 @@ msgstr ""
 "\n"
 "I donate every day\n"
 
-#: ../../../funcion/botDonador.py:52
+#: ../../../funcion/botDonador.py:54
 msgid ""
 "Error en:\n"
 "{}\n"
@@ -59,7 +67,7 @@ msgstr ""
 "Cause:\n"
 "{}"
 
-#: ../../../funcion/botDonador.py:65
+#: ../../../funcion/botDonador.py:68
 msgid "Doné automaticamente."
-msgstr "I donated automatically"
+msgstr "I donated automatically."
 
