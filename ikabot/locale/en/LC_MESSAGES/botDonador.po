@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2019-06-27 20:33-0300\n"
+"POT-Creation-Date: 2019-06-27 20:47-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,31 +23,31 @@ msgstr "(S)"
 msgid "(V)"
 msgstr "(W)"
 
-#: ../../../funcion/botDonador.py:32
-msgid "En la ciudad {} {}, ¿Desea donar al aserradero, al bien de cambio o a nada? [a/b/n]"
+#: ../../../funcion/botDonador.py:30
+msgid "En la ciudad {} {}, ¿Desea donar al aserradero, al bien de cambio o a ninguno? [a/b/n]"
 msgstr "In the city {} {}, Do you wish to donate to the forest, to the trading good or neither? [f/t/n]"
 
-#: ../../../funcion/botDonador.py:33
+#: ../../../funcion/botDonador.py:31
 msgid "A"
 msgstr "F"
 
-#: ../../../funcion/botDonador.py:33
+#: ../../../funcion/botDonador.py:31
 msgid "B"
 msgstr "T"
 
-#: ../../../funcion/botDonador.py:33 ../../../funcion/botDonador.py:34
+#: ../../../funcion/botDonador.py:31 ../../../funcion/botDonador.py:32
 msgid "a"
 msgstr "f"
 
-#: ../../../funcion/botDonador.py:33 ../../../funcion/botDonador.py:36
+#: ../../../funcion/botDonador.py:31 ../../../funcion/botDonador.py:34
 msgid "b"
 msgstr "t"
 
-#: ../../../funcion/botDonador.py:42
+#: ../../../funcion/botDonador.py:40
 msgid "Se donará todos los días."
 msgstr "I will donate every day."
 
-#: ../../../funcion/botDonador.py:49
+#: ../../../funcion/botDonador.py:47
 msgid ""
 "\n"
 "Dono todos los días\n"
@@ -55,7 +55,7 @@ msgstr ""
 "\n"
 "I donate every day\n"
 
-#: ../../../funcion/botDonador.py:54
+#: ../../../funcion/botDonador.py:52
 msgid ""
 "Error en:\n"
 "{}\n"
@@ -67,7 +67,7 @@ msgstr ""
 "Cause:\n"
 "{}"
 
-#: ../../../funcion/botDonador.py:68
+#: ../../../funcion/botDonador.py:70
 msgid "Doné automaticamente."
 msgstr "I donated automatically."
 

@@ -25,11 +25,9 @@ def botDonador(s):
 	ciudades_dict = {}
 	bienes = {'1': _('(V)'), '2': '(M)', '3': '(C)', '4': _('(A)')}
 	for idCiudad in idsCiudades:
-		html = s.get(urlCiudad + idCiudad)
-		ciudad = getCiudad(html)
 		tradegood = ciudades[idCiudad]['tradegood']
 		bien = bienes[tradegood]
-		print(_('En la ciudad {} {}, ¿Desea donar al aserradero, al bien de cambio o a nada? [a/b/n]').format(ciudad['cityName'], bien))
+		print(_('En la ciudad {} {}, ¿Desea donar al aserradero, al bien de cambio o a ninguno? [a/b/n]').format(ciudades[idCiudad]['name'], bien))
 		rta = read(values=[_('a'), _('A'), _('b'), _('B'), 'n', 'N'])
 		if rta.lower() == _('a'):
 			tipo = 'resource'
@@ -37,7 +35,7 @@ def botDonador(s):
 			tipo = 'tradegood'
 		else:
 			tipo = None
-		ciudades_dict[idCiudad] = {'isla': ciudad['islandId'], 'tipo': tipo}
+		ciudades_dict[idCiudad] = {'tipo': tipo}
 
 	print(_('Se donará todos los días.'))
 	enter()
@@ -57,6 +55,10 @@ def botDonador(s):
 		s.logout()
 
 def do_it(s, idsCiudades, ciudades_dict):
+	for idCiudad in idsCiudades:
+		html = s.get(urlCiudad + idCiudad)
+		ciudad = getCiudad(html)
+		ciudades_dict[idCiudad]['isla'] = ciudad['islandId']
 	while True:
 		for idCiudad in idsCiudades:
 			html = s.get(urlCiudad + idCiudad)
