@@ -210,7 +210,7 @@ def subirEdificios(s):
 			if azufreDisp < azufre:
 				print('{} de azufre'.format(addPuntos(azufre - azufreDisp)))
 
-			print(_('Transportar los recursos automaticamente? [Y/n]'))
+			print(_('¿Transportar los recursos automáticamente? [Y/n]'))
 			rta = read(values=['y', 'Y', 'n', 'N', ''])
 			if rta.lower() == 'n':
 				print(_('¿Proceder de todos modos? [Y/n]'))
