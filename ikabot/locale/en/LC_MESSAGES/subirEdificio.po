@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2019-06-26 21:14-0300\n"
+"POT-Creation-Date: 2019-06-26 22:45-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,69 +15,85 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: ../../../funcion/subirEdificio.py:32
+#: ../../../funcion/subirEdificio.py:31
 msgid "{}: No espero nada para que {} suba al nivel {:d}"
 msgstr "{}: I don't wait anything so that {} gets to the level {:d}"
 
-#: ../../../funcion/subirEdificio.py:40
+#: ../../../funcion/subirEdificio.py:39
 msgid "{}: Espero {:d} segundos para que {} suba al nivel {:d}"
 msgstr "{}: I wait {:d} seconds so that {} gets to the level {:d}"
 
-#: ../../../funcion/subirEdificio.py:71
+#: ../../../funcion/subirEdificio.py:70
 msgid ""
 "Ciudad:{}\n"
 msgstr ""
 "City:{}\n"
 
-#: ../../../funcion/subirEdificio.py:72
+#: ../../../funcion/subirEdificio.py:71
 msgid ""
 "Edificio:{}\n"
 msgstr ""
 "Building:{}\n"
 
-#: ../../../funcion/subirEdificio.py:73
+#: ../../../funcion/subirEdificio.py:72
 msgid ""
 "No se pudo terminar de subir el edificio por falta de recursos.\n"
 msgstr ""
 "The building could not be completed due to lack of resources.\n"
 
-#: ../../../funcion/subirEdificio.py:74
+#: ../../../funcion/subirEdificio.py:73
 msgid "Faltaron subir {:d} niveles"
 msgstr "Missed {:d} levels"
 
-#: ../../../funcion/subirEdificio.py:88
+#: ../../../funcion/subirEdificio.py:87
 msgid ""
 "El edificio no se amplió\n"
 msgstr ""
 "The building was not extended\n"
 
-#: ../../../funcion/subirEdificio.py:89
+#: ../../../funcion/subirEdificio.py:88
 msgid ""
 "El edificio {} no se amplió después de tres intentos\n"
 msgstr ""
 "The building {} was not extended after three tries\n"
 
-#: ../../../funcion/subirEdificio.py:149
+#: ../../../funcion/subirEdificio.py:148
 msgid "¿De qué ciudades obtener {}?"
 msgstr "From what cities obtain {}?"
 
-#: ../../../funcion/subirEdificio.py:151
+#: ../../../funcion/subirEdificio.py:150
 msgid "A"
 msgstr "S"
 
-#: ../../../funcion/subirEdificio.py:151
+#: ../../../funcion/subirEdificio.py:150
 msgid "V"
 msgstr "W"
 
-#: ../../../funcion/subirEdificio.py:213
+#: ../../../funcion/subirEdificio.py:174
+msgid ""
+"\n"
+"Se enviarán los recursos y se ampliará el edificio."
+msgstr ""
+"\n"
+"Resources will be sent and the building will be expanded."
+
+#: ../../../funcion/subirEdificio.py:208
+msgid ""
+"\n"
+"Falta:"
+msgstr ""
+"\n"
+"Missing:"
+
+#: ../../../funcion/subirEdificio.py:220
 msgid "¿Transportar los recursos automáticamente? [Y/n]"
 msgstr "Automatically transport resources? [Y/n]"
 
-#: ../../../funcion/subirEdificio.py:216
+#: ../../../funcion/subirEdificio.py:223
 msgid "¿Proceder de todos modos? [Y/n]"
 msgstr "Proceed anyway? [Y/n]"
 
-#: ../../../funcion/subirEdificio.py:225
+#: ../../../funcion/subirEdificio.py:232
 msgid ""
 "\n"
 "Tiene materiales suficientes"
@@ -85,11 +101,11 @@ msgstr ""
 "\n"
 "You have enough materials"
 
-#: ../../../funcion/subirEdificio.py:226
+#: ../../../funcion/subirEdificio.py:233
 msgid "¿Proceder? [Y/n]"
 msgstr "Proceed? [Y/n]"
 
-#: ../../../funcion/subirEdificio.py:236
+#: ../../../funcion/subirEdificio.py:243
 msgid ""
 "\n"
 "Subir edificio\n"
@@ -97,7 +113,7 @@ msgstr ""
 "\n"
 "Upgrade building\n"
 
-#: ../../../funcion/subirEdificio.py:243
+#: ../../../funcion/subirEdificio.py:252
 msgid ""
 "Error en:\n"
 "{}\n"

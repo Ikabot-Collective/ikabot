@@ -6,9 +6,9 @@ import time
 import gettext
 import traceback
 from ikabot.config import *
+from ikabot.helpers.gui import *
 from ikabot.helpers.varios import *
 from ikabot.helpers.botComm import *
-from ikabot.helpers.gui import banner
 from ikabot.helpers.pedirInfo import *
 from ikabot.web.sesion import normal_get
 from ikabot.helpers.process import forkear
@@ -171,6 +171,9 @@ def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante):
 		ids = menuEdificios(s, idss, cities, idCiudad, bien)
 		origenes[i] = ids
 
+	print(_('\nSe enviarán los recursos y se ampliará el edificio.'))
+	enter()
+
 	forkear(s)
 	if s.padre is True:
 		return
@@ -202,7 +205,7 @@ def subirEdificios(s):
 		html = s.get(urlCiudad + idCiudad)
 		(maderaDisp, vinoDisp, marmolDisp, cristalDisp, azufreDisp) = getRecursosDisponibles(html, num=True)
 		if maderaDisp < madera or vinoDisp < vino or marmolDisp < marmol or cristalDisp < cristal or azufreDisp < azufre:
-			print('\nFalta:')
+			print(_('\nFalta:'))
 			if maderaDisp < madera:
 				print('{} de madera'.format(addPuntos(madera - maderaDisp)))
 			if vinoDisp < vino:
