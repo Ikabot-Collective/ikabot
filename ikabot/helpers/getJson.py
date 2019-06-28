@@ -1,8 +1,9 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import json
 import re
+import json
+from ikabot.helpers.recursos import *
 
 def borrar(texto, ocurrencias):
 	for ocurrencia in ocurrencias:
@@ -84,4 +85,6 @@ def getCiudad(html):
 	ciudad = json.loads(ciudad, strict=False)
 	ciudad['html'] = html
 	ciudad['propia'] = True
+	ciudad['recursos'] = getRecursosDisponibles(html, num=True)
+	ciudad['capacidad'] = getCapacidadDeAlmacenamiento(html, num=True)
 	return ciudad
