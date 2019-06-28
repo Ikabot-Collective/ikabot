@@ -158,6 +158,8 @@ def menuEdificios(s, ids, cities, idCiudad, bienNombre, bienIndex, faltante):
 		html = s.get(urlCiudad + id)
 		ciudad = getCiudad(html)
 		disponible = ciudad['recursos'][bienIndex]
+		if disponible == 0:
+			continue
 		opcion = '{}{} ({}): {} [Y/n]:'.format(' ' * (maxName - len(cities[id]['name'])), cities[id]['name'], trade, addPuntos(disponible))
 		eleccion = read(msg=opcion, values=['Y', 'y', 'N', 'n', ''])
 		if eleccion.lower() == 'n':
