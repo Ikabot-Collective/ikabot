@@ -143,22 +143,33 @@ def planearAbastecimiento(s, destino, origenes, faltantes):
 			rutas.append(ruta)
 	planearViajes(s, rutas)
 
-def menuEdificios(s, ids, cities, idCiudad, bien):
+def menuEdificios(s, ids, cities, idCiudad, bienNombre, bienIndex, faltante):
 	banner()
-	print(_('¿De qué ciudades obtener {}?').format(bien))
+	print(_('¿De qué ciudades obtener {}?').format(bienNombre))
 	rta = []
 	tradegood = [_('V'), 'M', 'C', _('A')]
 	maxName = 0
 	for name in [ cities[city]['name'] for city in cities if cities[city]['id'] != idCiudad ]:
 		if len(name) > maxName:
 			maxName = len(name)
+	total = 0
 	for id in [ id for id in ids if id != idCiudad ]:
 		trade = tradegood[ int( cities[id]['tradegood'] ) - 1 ]
-		opcion = '{}{} ({}) [Y/n]:'.format(' ' * (maxName - len(cities[id]['name'])), cities[id]['name'], trade)
+		html = s.get(urlCiudad + id)
+		ciudad = getCiudad(html)
+		disponible = ciudad['recursos'][bienIndex]
+		opcion = '{}{} ({}): {} [Y/n]:'.format(' ' * (maxName - len(cities[id]['name'])), cities[id]['name'], trade, addPuntos(disponible))
 		eleccion = read(msg=opcion, values=['Y', 'y', 'N', 'n', ''])
 		if eleccion.lower() == 'n':
 			continue
+		total += disponible
 		rta.append(id)
+	if total < faltante:
+		print(_('\nNo hay recursos suficientes.'))
+		print(_('¿Proceder de todos modos? [Y/n]'))
+		rta = read(values=['y', 'Y', 'n', 'N', ''])
+		if rta.lower() == 'n':
+			return None
 	return rta
 
 def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante):
@@ -168,7 +179,9 @@ def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante):
 		if faltante[i] <= 0:
 			continue
 		bien = tipoDeBien[i]
-		ids = menuEdificios(s, idss, cities, idCiudad, bien)
+		ids = menuEdificios(s, idss, cities, idCiudad, bien, i, faltante[i])
+		if ids == None:
+			return None
 		origenes[i] = ids
 
 	print(_('\nSe enviarán los recursos y se ampliará el edificio.'))
@@ -227,7 +240,9 @@ def subirEdificios(s):
 			else:
 				esperarRecursos = True
 				faltante = [madera - maderaDisp, vino - vinoDisp, marmol - marmolDisp, cristal - cristalDisp, azufre - azufreDisp]
-				obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante)
+				rtdo = obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante)
+				if rtdo == None:
+					return
 		else:
 			print(_('\nTiene materiales suficientes'))
 			print(_('¿Proceder? [Y/n]'))
