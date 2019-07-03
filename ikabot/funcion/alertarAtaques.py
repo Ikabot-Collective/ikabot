@@ -45,7 +45,6 @@ def respondToAttack(s):
 	while True:
 		time.sleep(60 * 3)
 		responses = getUserResponse()
-		responses = [ resp for resp in responses if str(os.getpid()) in resp ]
 		for response in responses:
 			rta = re.search(r'(\d+):?\s*(\d+)', response)
 			if rta:
