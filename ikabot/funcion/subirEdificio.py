@@ -191,7 +191,7 @@ def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante):
 
 	forkear(s)
 	if s.padre is True:
-		return
+		return True
 	else:
 		planearAbastecimiento(s, idCiudad, origenes, faltante)
 		s.logout()
@@ -256,7 +256,6 @@ def subirEdificios(s):
 	forkear(s)
 	if s.padre is True:
 		return
-
 	info = _('\nSubir edificio\n')
 	info = info + 'Ciudad: {}\nEdificio: {}.Desde {:d}, hasta {:d}'.format(ciudad['cityName'], edificio['name'], desde, hasta)
 
