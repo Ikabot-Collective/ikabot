@@ -47,9 +47,12 @@ def respondToAttack(s):
 		responses = getUserResponse()
 		responses = [ resp for resp in responses if str(os.getpid()) in resp ]
 		for response in responses:
-			rta = re.search(r'\d+:?\s*(\d+)', response)
+			rta = re.search(r'(\d+):?\s*(\d+)', response)
 			if rta:
-				accion 	= rta.group(1)
+				obj = rta.group(1)
+				if int(obj) != os.getpid():
+					continue
+				accion 	= rta.group(2)
 			else:
 				continue
 			s.padre = True
