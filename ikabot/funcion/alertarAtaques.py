@@ -47,17 +47,32 @@ def respondToAttack(s):
 		responses = getUserResponse()
 		responses = [ resp for resp in responses if str(os.getpid()) in resp ]
 		for response in responses:
-			accion = re.search(r'\d+:?\s*(\d+)', response).group(1)
-			if accion == 1:
-				# mv
-				activarModoVacaciones(s)
+			rta = re.search(r'\d+:?\s*(\d+)', response)
+			if rta:
+				accion 	= rta.group(1)
+			else:
+				continue
+			s.padre = True
+			forkear(s)
+			if s.padre is True:
+				s.padre = False
+				continue
+			else:
+				if accion == 1:
+					# mv
+					activarModoVacaciones(s)
+				elif accion == 2:
+					pass
+				elif accion == 3:
+					pass
+				else:
+					sendToBot(_('Comando inváliido: {:d}').format(int(accion)))
+				s.logout()
 				exit()
-			elif accion == 2:
-				pass
 
 def do_it(s):
 	conocidos = []
-	t = threading.Thread(target=respondToAttack, args=(s))
+	t = threading.Thread(target=respondToAttack, args=(s,))
 	t.start()
 	while True:
 		html = s.get()
