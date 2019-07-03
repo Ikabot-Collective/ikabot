@@ -170,8 +170,8 @@ def menuEdificios(s, ids, cities, idCiudad, bienNombre, bienIndex, faltante):
 	if total < faltante:
 		print(_('\nNo hay recursos suficientes.'))
 		print(_('¿Proceder de todos modos? [Y/n]'))
-		rta = read(values=['y', 'Y', 'n', 'N', ''])
-		if rta.lower() == 'n':
+		choise = read(values=['y', 'Y', 'n', 'N', ''])
+		if choise.lower() == 'n':
 			return None
 	return rta
 
