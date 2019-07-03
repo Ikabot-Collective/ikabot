@@ -48,10 +48,10 @@ def respondToAttack(s):
 		for response in responses:
 			rta = re.search(r'(\d+):?\s*(\d+)', response)
 			if rta:
-				obj = rta.group(1)
-				if int(obj) != os.getpid():
+				obj = int(rta.group(1))
+				if obj != os.getpid():
 					continue
-				accion 	= rta.group(2)
+				accion 	= int(rta.group(2))
 			else:
 				continue
 			s.padre = True
@@ -63,12 +63,8 @@ def respondToAttack(s):
 				if accion == 1:
 					# mv
 					activarModoVacaciones(s)
-				elif accion == 2:
-					pass
-				elif accion == 3:
-					pass
 				else:
-					sendToBot(_('Comando inváliido: {:d}').format(int(accion)))
+					sendToBot(_('Comando inválido: {:d}').format(accion))
 				s.logout()
 				exit()
 
