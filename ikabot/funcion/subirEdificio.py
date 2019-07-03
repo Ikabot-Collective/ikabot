@@ -57,6 +57,7 @@ def subirEdificio(s, idCiudad, posicion, nivelesASubir, esperarRecursos):
 
 		if edificio['canUpgrade'] is False and esperarRecursos:
 			while edificio['canUpgrade'] is False:
+				time.sleep(60) # tiempo para que se envien los recursos
 				segundos = obtenerMinimoTiempoDeEspera(s)
 				if segundos == 0:
 					break
@@ -261,8 +262,6 @@ def subirEdificios(s):
 
 	setInfoSignal(s, info)
 	try:
-		if esperarRecursos:
-			time.sleep(60) # tiempo para que envie los recursos
 		subirEdificio(s, idCiudad, posEdificio, niveles, esperarRecursos)
 	except:
 		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
