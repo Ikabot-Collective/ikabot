@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
 	name="ikabot",
-	version="4.8.9",
+	version="5.0.0",
 	author="physics-sp",
 	description="A bot for ikariam",
 	long_description=long_description,

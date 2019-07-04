@@ -98,7 +98,9 @@ def do_it(s):
 				msg += _('a {}\n').format(target['name'])
 				msg += _('{} unidades\n').format(cantidadTropas)
 				msg += _('{} flotas\n').format(cantidadFlotas)
-				msg += _('llegada en: {}').format(diasHorasMinutos(tiempoFaltante))
+				msg += _('llegada en: {}\n').format(diasHorasMinutos(tiempoFaltante))
+				msg += _('Si quiere poner la cuenta en modo vacaciones envíe:\n')
+				msg += _('{:d}:1').format(os.getpid())
 				sendToBot(msg)
 
 		for id in list(conocidos):
