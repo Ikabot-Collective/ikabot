@@ -46,6 +46,11 @@ def obtenerMilagrosDisponibles(s):
 
 	return [ isla for isla in islas if isla['activable'] ]
 
+def activarMilagroImpl(s, isla):
+	params = {'action': 'CityScreen', 'cityId': isla['ciudad']['id'], 'function': 'activateWonder', 'position': isla['ciudad']['pos'], 'backgroundView': 'city', 'currentCityId': isla['ciudad']['id'], 'templateView': 'temple', 'actionRequest': s.token(), 'ajax': '1'}
+	rta = s.post(params=params)
+	return json.loads(rta, strict=False)
+
 def activarMilagro(s):
 	banner()
 
@@ -71,9 +76,8 @@ def activarMilagro(s):
 	if rta.lower() == 'n':
 		return
 
-	params = {'action': 'CityScreen', 'cityId': isla['ciudad']['id'], 'function': 'activateWonder', 'position': isla['ciudad']['pos'], 'backgroundView': 'city', 'currentCityId': isla['ciudad']['id'], 'templateView': 'temple', 'actionRequest': s.token(), 'ajax': '1'}
-	rta = s.post(params=params)
-	rta = json.loads(rta, strict=False)
+	rta = activarMilagroImpl(s, isla)
+
 	if rta[1][1][0] == 'error':
 		print(_('No se pudo activar el milagro {}.').format(isla['wonderName']))
 	else:
