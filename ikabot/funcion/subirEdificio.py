@@ -24,7 +24,7 @@ t = gettext.translation('subirEdificio',
 _ = t.gettext
 
 enviarRecursos = True
-subirEdificio = True
+ampliar = True
 
 def getTiempoDeConstruccion(html, posicion):
 	ciudad = getCiudad(html)
@@ -172,18 +172,18 @@ def menuEdificios(s, ids, cities, idCiudad, bienNombre, bienIndex, faltante):
 		rta.append(id)
 	if total < faltante:
 		global enviarRecursos
-		global subirEdificio
+		global ampliar
 		print(_('\nNo hay recursos suficientes.'))
 		if enviarRecursos:
 			print(_('\n¿Enviar los recursos de todos modos? [Y/n]'))
 			choise = read(values=['y', 'Y', 'n', 'N', ''])
 			if choise.lower() == 'n':
 				enviarRecursos = False
-		if subirEdificio:
+		if ampliar:
 			print(_('\n¿Intentar aumentar el edificio de todos modos? [y/N]'))
 			choise = read(values=['y', 'Y', 'n', 'N', ''])
 			if choise.lower() == 'n' or choise == '':
-				subirEdificio = False
+				ampliar = False
 	return rta
 
 def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante):
@@ -194,7 +194,7 @@ def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante):
 			continue
 		bien = tipoDeBien[i]
 		ids = menuEdificios(s, idss, cities, idCiudad, bien, i, faltante[i])
-		if enviarRecursos is False and subirEdificio:
+		if enviarRecursos is False and ampliar:
 			print(_('\nSe intentará ampliar el edificio.'))
 			enter()
 			return
@@ -202,7 +202,7 @@ def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante):
 			return
 		origenes[i] = ids
 
-	if subirEdificio:
+	if ampliar:
 		print(_('\nSe enviarán los recursos y se intentará ampliar el edificio.'))
 	else:
 		print(_('\nSe enviarán los recursos.'))
@@ -218,9 +218,9 @@ def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante):
 		exit()
 
 def subirEdificios(s):
-	global subirEdificio
+	global ampliar
 	global enviarRecursos
-	subirEdificio = True
+	ampliar = True
 	enviarRecursos = True
 
 	banner()
@@ -284,7 +284,7 @@ def subirEdificios(s):
 
 	setInfoSignal(s, info)
 	try:
-		if subirEdificio:
+		if ampliar:
 			subirEdificio(s, idCiudad, posEdificio, niveles, esperarRecursos)
 	except:
 		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
