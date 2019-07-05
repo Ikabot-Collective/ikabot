@@ -23,6 +23,9 @@ t = gettext.translation('subirEdificio',
                         fallback=True)
 _ = t.gettext
 
+enviarRecursos = True
+subirEdificio = True
+
 def getTiempoDeConstruccion(html, posicion):
 	ciudad = getCiudad(html)
 	edificio = ciudad['position'][posicion]
@@ -168,11 +171,19 @@ def menuEdificios(s, ids, cities, idCiudad, bienNombre, bienIndex, faltante):
 		total += disponible
 		rta.append(id)
 	if total < faltante:
+		global enviarRecursos
+		global subirEdificio
 		print(_('\nNo hay recursos suficientes.'))
-		print(_('¿Proceder de todos modos? [Y/n]'))
-		choise = read(values=['y', 'Y', 'n', 'N', ''])
-		if choise.lower() == 'n':
-			return None
+		if enviarRecursos:
+			print(_('\n¿Enviar los recursos de todos modos? [Y/n]'))
+			choise = read(values=['y', 'Y', 'n', 'N', ''])
+			if choise.lower() == 'n':
+				enviarRecursos = False
+		if subirEdificio:
+			print(_('\n¿Intentar aumentar el edificio de todos modos? [y/N]'))
+			choise = read(values=['y', 'Y', 'n', 'N', ''])
+			if choise.lower() == 'n' or choise == '':
+				subirEdificio = False
 	return rta
 
 def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante):
@@ -183,11 +194,19 @@ def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante):
 			continue
 		bien = tipoDeBien[i]
 		ids = menuEdificios(s, idss, cities, idCiudad, bien, i, faltante[i])
-		if ids == None:
-			return None
+		if enviarRecursos is False and subirEdificio:
+			print(_('\nSe intentará ampliar el edificio.'))
+			enter()
+			return
+		elif enviarRecursos is False:
+			return
 		origenes[i] = ids
 
-	print(_('\nSe enviarán los recursos y se ampliará el edificio.'))
+	if subirEdificio:
+		print(_('\nSe enviarán los recursos y se intentará ampliar el edificio.'))
+	else:
+		print(_('\nSe enviarán los recursos.'))
+
 	enter()
 
 	forkear(s)
@@ -199,6 +218,11 @@ def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante):
 		exit()
 
 def subirEdificios(s):
+	global subirEdificio
+	global enviarRecursos
+	subirEdificio = True
+	enviarRecursos = True
+
 	banner()
 	esperarRecursos = False
 	ciudad = elegirCiudad(s)
@@ -243,9 +267,7 @@ def subirEdificios(s):
 			else:
 				esperarRecursos = True
 				faltante = [madera - maderaDisp, vino - vinoDisp, marmol - marmolDisp, cristal - cristalDisp, azufre - azufreDisp]
-				rtdo = obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante)
-				if rtdo == None:
-					return
+				obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante)
 		else:
 			print(_('\nTiene materiales suficientes'))
 			print(_('¿Proceder? [Y/n]'))
@@ -262,7 +284,8 @@ def subirEdificios(s):
 
 	setInfoSignal(s, info)
 	try:
-		subirEdificio(s, idCiudad, posEdificio, niveles, esperarRecursos)
+		if subirEdificio:
+			subirEdificio(s, idCiudad, posEdificio, niveles, esperarRecursos)
 	except:
 		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
 		sendToBot(msg)
