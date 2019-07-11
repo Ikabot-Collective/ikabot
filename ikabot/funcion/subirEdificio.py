@@ -62,13 +62,13 @@ def subirEdificio(s, idCiudad, posicion, nivelesASubir, esperarRecursos):
 			while edificio['canUpgrade'] is False:
 				time.sleep(60) # tiempo para que se envien los recursos
 				segundos = obtenerMinimoTiempoDeEspera(s)
+				html = s.get(urlCiudad + idCiudad)
+				ciudad = getCiudad(html)
+				edificio = ciudad['position'][posicion]
 				if segundos == 0:
 					break
 				else:
 					esperar(segundos)
-				html = s.get(urlCiudad + idCiudad)
-				ciudad = getCiudad(html)
-				edificio = ciudad['position'][posicion]
 
 		if edificio['canUpgrade'] is False:
 			msg  = _('Ciudad:{}\n').format(ciudad['cityName'])
