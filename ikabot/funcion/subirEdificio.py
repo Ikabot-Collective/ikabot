@@ -170,6 +170,8 @@ def menuEdificios(s, ids, cities, idCiudad, bienNombre, bienIndex, faltante):
 			continue
 		total += disponible
 		rta.append(id)
+		if total >= faltante:
+			return rta
 	if total < faltante:
 		global enviarRecursos
 		global ampliar
