@@ -1,14 +1,10 @@
 import setuptools
 
-with open("README.md", "r") as fh:
-	long_description = fh.read()
-
 setuptools.setup(
 	name="ikabot",
 	version="5.1.3",
 	author="physics-sp",
 	description="A bot for ikariam",
-	long_description=long_description,
 	long_description_content_type="text/markdown",
 	url="https://github.com/physics-sp/ikabot",
 	include_package_data=True,
@@ -26,3 +22,4 @@ setuptools.setup(
 		"Operating System :: POSIX :: Linux",
 	),
 )
+
