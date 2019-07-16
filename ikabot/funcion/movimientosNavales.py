@@ -40,13 +40,13 @@ def movimientosNavales(s):
 
 	for movement in movements:
 
+		color = ''
 		if movement['isHostile']:
-			color = bcolors.RED
+			color = bcolors.RED + bcolors.BOLD
 		elif movement['isOwnArmyOrFleet']:
-			color = bcolors.BLUE
+			color = bcolors.BLUE + bcolors.BOLD
 		elif movement['isSameAlliance']:
-			color = bcolors.GREEN
-		color += bcolors.BOLD
+			color = bcolors.GREEN + bcolors.BOLD
 
 		origen  = '{} ({})'.format(movement['origin']['name'], movement['origin']['avatarName'])
 		destino = '{} ({})'.format(movement['target']['name'], movement['target']['avatarName'])
