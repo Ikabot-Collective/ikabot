@@ -24,6 +24,7 @@ from ikabot.funcion.comprarRecursos import comprarRecursos
 from ikabot.funcion.modoVacaciones import modoVacaciones
 from ikabot.funcion.activarMilagro import activarMilagro
 from ikabot.funcion.entrenarTropas import entrenarTropas
+from ikabot.funcion.movimientosNavales import movimientosNavales
 
 t = gettext.translation('command_line', 
                         localedir, 
@@ -48,6 +49,7 @@ def menu(s):
 					modoVacaciones,
 					activarMilagro,
 					entrenarTropas,
+					movimientosNavales,
 					update
 					]
 	print(_('(0)  Salir'))
@@ -65,7 +67,8 @@ def menu(s):
 	print(_('(12) Activar modo vacaciones'))
 	print(_('(13) Activar milagro'))
 	print(_('(14) Entrenar tropas'))
-	print(_('(15) Actualizar Ikabot'))
+	print(_('(15) Ver movimientos'))
+	print(_('(16) Actualizar Ikabot'))
 	entradas = len(menu_actions)
 	eleccion = read(min=0, max=entradas)
 	if eleccion != 0:
