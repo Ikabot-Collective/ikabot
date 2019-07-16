@@ -22,7 +22,7 @@ def diasHorasMinutos(segundosTotales):
 		texto = texto + str(horas) + 'H '
 	if minutos > 0 and dias == 0:
 		texto = texto + str(minutos) + 'M '
-	return texto
+	return texto[:-1]
 
 def esperar(segundos):
 	ratio = (1 + 5 ** 0.5) / 2 - 1
