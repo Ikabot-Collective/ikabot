@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2019-07-16 18:27-0300\n"
+"POT-Creation-Date: 2019-07-16 18:51-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -62,4 +62,8 @@ msgstr "wine"
 #: ../../../funcion/movimientosNavales.py:79
 msgid "{} de {}"
 msgstr "{} of {}"
+
+#: ../../../funcion/movimientosNavales.py:81
+msgid "{:d} Barcos"
+msgstr "{:d} Ships"
 
