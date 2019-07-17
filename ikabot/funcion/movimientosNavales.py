@@ -69,7 +69,7 @@ def movimientosNavales(s):
 					flotas += int(mov['amount'])
 			print(_('Tropas:{}\nFlotas:{}\nBarcos:{}').format(addPuntos(tropas), addPuntos(flotas), addPuntos(barcos)))
 		else:
-			bien = {'wood': _('madera'), 'wine': _('vino'), 'marble': _('marmol'), 'cristal': _('cristal'), 'sulfur': _('azufre')}
+			bien = {'wood': _('madera'), 'wine': _('vino'), 'marble': _('marmol'), 'glass': _('cristal'), 'sulfur': _('azufre')}
 			cargaTotal = 0
 			for resource in movement['resources']:
 				cantidad = resource['amount']
