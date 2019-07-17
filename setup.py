@@ -2,10 +2,9 @@ import setuptools
 
 setuptools.setup(
 	name="ikabot",
-	version="5.2.2",
+	version="5.2.3",
 	author="physics-sp",
 	description="A bot for ikariam",
-	long_description_content_type="text/markdown",
 	url="https://github.com/physics-sp/ikabot",
 	include_package_data=True,
 	packages=setuptools.find_packages(),
