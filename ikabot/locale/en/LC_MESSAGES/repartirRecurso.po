@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2019-06-26 12:34-0300\n"
+"POT-Creation-Date: 2019-07-21 18:39-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -36,26 +36,46 @@ msgid "(4) Azufre"
 msgstr "(4) Sulfur"
 
 #: ../../../funcion/repartirRecurso.py:55
-msgid "Se puede enviar como máximo {} a cada ciudad"
-msgstr "You can send {} at max to each city"
+msgid ""
+"\n"
+"No hay recursos para enviar."
+msgstr ""
+"\n"
+"There are no resources to send."
 
-#: ../../../funcion/repartirRecurso.py:56
+#: ../../../funcion/repartirRecurso.py:59
+msgid ""
+"\n"
+"No hay espacio disponible para enviar recursos."
+msgstr ""
+"\n"
+"There is no space available to send resources."
+
+#: ../../../funcion/repartirRecurso.py:74
+msgid ""
+"\n"
+"Se puede enviar como máximo {} a cada ciudad"
+msgstr ""
+"\n"
+"A maximum of {} can be sent to each city"
+
+#: ../../../funcion/repartirRecurso.py:75
 msgid "¿Cuanto enviar a cada ciudad?:"
 msgstr "How much do you wish to send to each city?:"
 
-#: ../../../funcion/repartirRecurso.py:61
+#: ../../../funcion/repartirRecurso.py:80
 msgid ""
 "\n"
 "Por enviar {} a cada ciudad"
 msgstr ""
 "\n"
-"I will send {} to each city"
+"{} will be sent to each city"
 
-#: ../../../funcion/repartirRecurso.py:62
+#: ../../../funcion/repartirRecurso.py:81
 msgid "¿Proceder? [Y/n]"
 msgstr "Proceed? [Y/n]"
 
-#: ../../../funcion/repartirRecurso.py:107
+#: ../../../funcion/repartirRecurso.py:123
 msgid ""
 "\n"
 "Repartir recurso\n"
@@ -63,7 +83,7 @@ msgstr ""
 "\n"
 "Distribute resource\n"
 
-#: ../../../funcion/repartirRecurso.py:111
+#: ../../../funcion/repartirRecurso.py:127
 msgid ""
 "{} -> {}\n"
 "{}: {}\n"
@@ -71,7 +91,7 @@ msgstr ""
 "{} -> {}\n"
 "{}: {}\n"
 
-#: ../../../funcion/repartirRecurso.py:116
+#: ../../../funcion/repartirRecurso.py:132
 msgid ""
 "Error en:\n"
 "{}\n"
