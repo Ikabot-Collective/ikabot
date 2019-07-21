@@ -35,24 +35,43 @@ def repartirRecurso(s):
 	dict_idVino_diponible = {}
 	(idsCiudades, ciudades) = getIdsDeCiudades(s)
 	ciudadesOrigen = {}
+	ciudadesDestino = {}
 	for idCiudad in idsCiudades:
 		esTarget =  ciudades[idCiudad]['tradegood'] == str(recurso)
 		if esTarget:
 			html = s.get(urlCiudad + idCiudad)
 			ciudad = getCiudad(html)
-			recursos = getRecursosDisponibles(html)
-			disponible = int(recursos[recurso]) - 1000 # dejo 1000 por las dudas
-			ciudad['disponible'] = disponible if disponible > 0 else 0
+			ciudad['disponible'] = ciudad['recursos'][recurso]
 			recursoTotal += ciudad['disponible']
 			ciudadesOrigen[idCiudad] = ciudad
-	aEnviar = len(ciudades) - len(ciudadesOrigen)
-	recursoXciudad = int(recursoTotal / aEnviar)
+		else:
+			html = s.get(urlCiudad + idCiudad)
+			ciudad = getCiudad(html)
+			ciudad['disponible'] = ciudad['capacidad'] - ciudad['recursos'][recurso]
+			if ciudad['disponible'] > 0:
+				ciudadesDestino[idCiudad] = ciudad
+
+	if recursoTotal == 0:
+		print(_('\nNo hay recursos para enviar.'))
+		enter()
+		return
+	if len(ciudadesDestino) == 0:
+		print(_('\nNo hay espacio disponible para enviar recursos.'))
+		enter()
+		return
+
+	recursoXciudad = recursoTotal // len(ciudadesDestino)
+	disponibles = [ ciudadesDestino[city]['disponible'] for city in ciudadesDestino ]
+	totalDisponible = sum( disponibles )
+	maxDisponible = max( disponibles )
+	if recursoTotal > totalDisponible:
+		recursoXciudad = maxDisponible
 	maximo = addPuntos(recursoXciudad)
 
 	if recursoXciudad > 1000:
 		maximo = maximo[:-3] + '000'
 
-	print(_('Se puede enviar como máximo {} a cada ciudad').format(maximo))
+	print(_('\nSe puede enviar como máximo {} a cada ciudad').format(maximo))
 	cantidad = read(msg=_('¿Cuanto enviar a cada ciudad?:'), min=0, max=recursoXciudad)
 
 	if cantidad == 0:
@@ -69,9 +88,8 @@ def repartirRecurso(s):
 		return
 
 	rutas = []
-	for idCiudadDestino in [ idCity for idCity in idsCiudades if idCity not in ciudadesOrigen ]:
-		htmlD = s.get(urlCiudad + idCiudadDestino)
-		ciudadD = getCiudad(htmlD)
+	for idCiudad in ciudadesDestino:
+		ciudadD = ciudadesDestino[idCiudad]
 		idIsla = ciudadD['islandId']
 		faltante = cantidad
 		for idCiudadOrigen in ciudadesOrigen:
@@ -85,9 +103,7 @@ def repartirRecurso(s):
 				if origen['id'] == idCiudadOrigen:
 					recursoDisponible -= rec
 			enviar = faltante if recursoDisponible > faltante else recursoDisponible
-			ocupado   = getRecursosDisponibles(ciudadD['html'], num=True)[recurso]
-			capacidad = getCapacidadDeAlmacenamiento(ciudadD['html'], num=True)
-			disponible = capacidad - ocupado
+			disponible = ciudadD['disponible']
 			if disponible < enviar:
 				faltante = 0
 				enviar = disponible
