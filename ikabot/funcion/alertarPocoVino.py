@@ -61,14 +61,14 @@ def do_it(s, horas):
 			html = s.get(urlCiudad + id)
 			consumoXhr = getConsumoDeVino(html)
 			consumoXseg = Decimal(consumoXhr) / Decimal(3600)
-			max = getRecursosDisponibles(html)
+			vinoDisp = getRecursosDisponibles(html, num=True)[1]
 			if consumoXseg == 0:
 				if ciudades[city]['avisado'] is False:
 					msg = _('La ciudad {} no esta consumiendo vino!').format(ciudades[city]['name'])
 					sendToBot(msg)
 					ciudades[city]['avisado'] = True
 				continue
-			segsRestantes = Decimal(int(max[1])) / Decimal(consumoXseg)
+			segsRestantes = Decimal(vinoDisp) / Decimal(consumoXseg)
 
 			if segsRestantes < horas*60*60:
 				if ciudades[city]['avisado'] is False:

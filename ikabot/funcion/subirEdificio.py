@@ -131,7 +131,7 @@ def planearAbastecimiento(s, destino, origenes, faltantes):
 				break
 			html = s.get(urlCiudad + origen)
 			ciudadO = getCiudad(html)
-			disp = getRecursosDisponibles(html, num=True)[i]
+			disp = ciudadO['recursos'][i]
 			mandar = disp if disp < faltante else faltante
 			faltante -= mandar
 			if i == 0:

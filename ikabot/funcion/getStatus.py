@@ -30,8 +30,8 @@ def getStatus(s):
 		ciudad = getCiudad(html)
 		(wood, good, typeGood) = getProduccion(s, unId)
 		print('\033[1m' + tipoCiudad[int(typeGood)] + ciudad['cityName'] + tipoCiudad[0])
-		max = getRecursosDisponibles(html)
-		capacidadDeAlmacenamiento = getCapacidadDeAlmacenamiento(html)
+		max = ciudad['recursos']
+		capacidadDeAlmacenamiento = ciudad['capacidad']
 		crecursos = []
 		for i in range(0,5):
 			if max[i] == capacidadDeAlmacenamiento:
@@ -52,7 +52,7 @@ def getStatus(s):
 			print(_('Hay vino para:\n∞'))
 		else:
 			consumoXseg = Decimal(consumoXhr) / Decimal(3600)
-			segsRestantes = Decimal(int(max[1])) / Decimal(consumoXseg)
+			segsRestantes = Decimal(max[1]) / Decimal(consumoXseg)
 			texto = diasHorasMinutos(segsRestantes)
 			print(_('Hay vino para:\n{}').format(texto))
 		for edificio in [ edificio for edificio in ciudad['position'] if edificio['name'] != 'empty' ]:

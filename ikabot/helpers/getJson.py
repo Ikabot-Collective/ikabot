@@ -47,8 +47,12 @@ def getIsla(html):
 	remove.append(',"viewAble":1')
 	remove.append(',"viewAble":2')
 	isla = borrar(isla, remove)
+
 	# {"id":idIsla,"name":nombreIsla,"x":,"y":,"good":numeroBien,"woodLv":,"goodLv":,"wonder":numeroWonder, "wonderName": "nombreDelMilagro","wonderLv":"5","cities":[{"type":"city","name":cityName,"id":cityId,"level":lvIntendencia,"Id":playerId,"Name":playerName,"AllyId":,"AllyTag":,"state":"vacation"},...}}
-	return json.loads(isla, strict=False)
+	isla = json.loads(isla, strict=False)
+	tipo = re.search(r'"tradegood":"(\d)"', html).group(1)
+	isla['tipo'] = tipo
+	return isla
 
 def getCiudad(html):
 	ciudad = re.search(r'"updateBackgroundData",([\s\S]*?),"(?:beachboys|spiesInside)', html).group(1) + '}'
@@ -83,8 +87,9 @@ def getCiudad(html):
 
 	# {'cityName': '', 'id': 'idCiudad', 'phase': 5, 'isCapital': True|False, 'Id': 'idJugador', 'Name': 'nombreJugador', 'islandId': 'idIsla', 'islandName': 'NombreIsla', 'x': 'Coordx', 'y': 'Coordy', 'underConstruction': -1, 'endUpgradeTime': -1, 'startUpgradeTime': -1, 'position': [{'name': 'nombreEdificio', 'level': 'nivel', 'isBusy': True|False, 'canUpgrade': True|False, 'isMaxLevel': True|False, 'building': 'nombreEnIngles'}, ...]}
 	ciudad = json.loads(ciudad, strict=False)
-	ciudad['html'] = html
 	ciudad['propia'] = True
 	ciudad['recursos'] = getRecursosDisponibles(html, num=True)
-	ciudad['capacidad'] = getCapacidadDeAlmacenamiento(html, num=True)
+	ciudad['capacidad'] = getCapacidadDeAlmacenamiento(html)
+	ciudad['ciudadanosDisp'] = getCiudadanosDisponibles(html)
+	ciudad['consumo'] = getConsumoDeVino(html)
 	return ciudad

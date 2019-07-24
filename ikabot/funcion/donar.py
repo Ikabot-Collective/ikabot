@@ -21,17 +21,16 @@ def donar(s):
 	banner()
 
 	ciudad = elegirCiudad(s)
-	html = ciudad['html']
 	banner()
 
-	madera = getRecursosDisponibles(html)[0]
-	almacenamiento = getCapacidadDeAlmacenamiento(html)
+	madera = ciudad['recursos'][0]
+	almacenamiento = ciudad['capacidad']
 
 	idIsla = ciudad['islandId']
 	html = s.get(urlIsla + idIsla)
 	isla = getIsla(html)
 
-	tipo = re.search(r'"tradegood":"(\d)"', html).group(1)
+	tipo = isla['tipo']
 	bien = bienes[tipo]
 
 	urlAserradero = 'view=resource&type=resource&islandId={0}&backgroundView=island&currentIslandId={0}&actionRequest={1}&ajax=1'.format(idIsla, s.token())
@@ -58,7 +57,7 @@ def donar(s):
 
 	tipo = tipo[tipoDonacion - 1]
 
-	cantidad = read(min=0, max=int(madera), msg=_('Cantidad:'))
+	cantidad = read(min=0, max=madera, msg=_('Cantidad:'))
 	s.post(payloadPost={'islandId': idIsla, 'type': tipo, 'action': 'IslandScreen', 'function': 'donate', 'donation': cantidad, 'backgroundView': 'island', 'templateView': 'resource', 'actionRequest': s.token(), 'ajax': '1'})
 
 def printEstadoMina(s, url, bien):

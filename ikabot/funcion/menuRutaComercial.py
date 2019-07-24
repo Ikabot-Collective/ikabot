@@ -35,9 +35,6 @@ def menuRutaComercial(s):
 				if rta.lower() != 'n':
 					break
 			return
-		html = ciudadO['html']
-		max = getRecursosDisponibles(html)
-		total = list(map(int, max))
 
 		banner()
 		print(_('Ciudad de destino'))
@@ -48,17 +45,15 @@ def menuRutaComercial(s):
 			continue
 
 		if ciudadD['propia']:
-			html = ciudadD['html']
-			mad, vin, mar, cri, azu = getRecursosDisponibles(html, num=True)
-			capacidad = getCapacidadDeAlmacenamiento(html)
-			capacidad = int(capacidad)
+			mad, vin, mar, cri, azu = ciudadD['recursos']
+			capacidad = ciudadD['capacidad']
 			mad = capacidad - mad
 			vin = capacidad - vin
 			mar = capacidad - mar
 			cri = capacidad - cri
 			azu = capacidad - azu
 
-		resto = total
+		resto = ciudadO['recursos']
 		for ruta in rutas:
 			(origen, destino, __, md, vn, mr, cr, az) = ruta
 			if origen['id'] == ciudadO['id']:
