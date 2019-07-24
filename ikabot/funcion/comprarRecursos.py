@@ -142,8 +142,8 @@ def comprarRecursos(s):
 		precio_total += costo
 		cantidad_total += cantidad
 
-	ocupado = getRecursosDisponibles(ciudad['html'], num=True)[numRecurso - 1]
-	capacidad = getCapacidadDeAlmacenamiento(ciudad['html'], num=True)
+	ocupado = ciudad['recursos'][numRecurso - 1]
+	capacidad = ciudad['capacidad']
 	disponible = capacidad - ocupado
 
 	print(_('Total disponible para comprar: {}, por {}').format(addPuntos(cantidad_total), addPuntos(precio_total)))

@@ -12,6 +12,7 @@ from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.varios import *
 from ikabot.helpers.process import forkear
 from ikabot.helpers.varios import addPuntos
+from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.recursos import getRecursosDisponibles
 
@@ -57,8 +58,9 @@ def planearEntrenamientos(s, ciudad, entrenamientos):
 		for entrenamiento in entrenamientos:
 			esperarEntrenamiento(s, ciudad)
 			html = s.get(urlCiudad + ciudad['id'])
-			ciudadanosDisp = getCiudadanosDisponibles(html)
-			recursos = getRecursosDisponibles(html, num=True)
+			city = getCiudad(html)
+			ciudadanosDisp = city['ciudadanosDisp']
+			recursos = city['recursos']
 			maderaDisp  = recursos[0]
 			vinoDisp    = recursos[1]
 			marmolDisp  = recursos[2]
@@ -212,8 +214,8 @@ def entrenarTropas(s):
 		else:
 			break
 
-	recursos   = getRecursosDisponibles( ciudad['html'], num=True )
-	ciudadanos = getCiudadanosDisponibles( ciudad['html'] )
+	recursos   = ciudad['recursos']
+	ciudadanos = ciudad['ciudadanosDisp']
 	sobrante               = {}
 	sobrante['madera']     = recursos[0]
 	sobrante['vino']       = recursos[1]
