@@ -42,7 +42,7 @@ def getStatus(s):
 		print(addPuntos(capacidadDeAlmacenamiento))
 		print(_('Recursos:'))
 		print(_('Madera {1}{2}{0} Vino {3}{4}{0} Marmol {5}{6}{0} Cristal {7}{8}{0} Azufre {9}{10}{0}').format(bcolors.ENDC, crecursos[0], addPuntos(max[0]), crecursos[1], addPuntos(max[1]), crecursos[2], addPuntos(max[2]), crecursos[3], addPuntos(max[3]), crecursos[4], addPuntos(max[4])))
-		consumoXhr = getConsumoDeVino(html)
+		consumoXhr = ciudad['consumo']
 		tipo = tipoDeBien[typeGood]
 		print(_('Producción:'))
 		print(_('Madera:{} {}:{}').format(addPuntos(wood*3600), tipo, addPuntos(good*3600)))
