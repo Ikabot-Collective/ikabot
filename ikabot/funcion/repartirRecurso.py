@@ -68,9 +68,6 @@ def repartirRecurso(s):
 		recursoXciudad = maxDisponible
 	maximo = addPuntos(recursoXciudad)
 
-	if recursoXciudad > 1000:
-		maximo = maximo[:-3] + '000'
-
 	print(_('\nSe puede enviar como máximo {} a cada ciudad').format(maximo))
 	cantidad = read(msg=_('¿Cuanto enviar a cada ciudad?:'), min=0, max=recursoXciudad)
 
