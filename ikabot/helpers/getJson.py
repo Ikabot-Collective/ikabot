@@ -101,7 +101,7 @@ def getCiudad(html):
 	ciudad['ciudadanosDisp'] = getCiudadanosDisponibles(html)
 	ciudad['consumo'] = getConsumoDeVino(html)
 	ciudad['enventa'] = enVenta(html)
-	ciudad['disponible'] = []
+	ciudad['libre'] = []
 	for i in range(5):
-		ciudad['disponible'].append( ciudad['capacidad'] - ciudad['recursos'][i] - ciudad['enventa'][i] )
+		ciudad['libre'].append( ciudad['capacidad'] - ciudad['recursos'][i] - ciudad['enventa'][i] )
 	return ciudad
