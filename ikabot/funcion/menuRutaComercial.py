@@ -45,13 +45,11 @@ def menuRutaComercial(s):
 			continue
 
 		if ciudadD['propia']:
-			mad, vin, mar, cri, azu = ciudadD['recursos']
-			capacidad = ciudadD['capacidad']
-			mad = capacidad - mad
-			vin = capacidad - vin
-			mar = capacidad - mar
-			cri = capacidad - cri
-			azu = capacidad - azu
+			mad = ciudadD['disponible'][0]
+			vin = ciudadD['disponible'][1]
+			mar = ciudadD['disponible'][2]
+			cri = ciudadD['disponible'][3]
+			azu = ciudadD['disponible'][4]
 
 		resto = ciudadO['recursos']
 		for ruta in rutas:

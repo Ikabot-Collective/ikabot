@@ -14,6 +14,10 @@ def getCiudadanosDisponibles(html):
 	ciudadanosDisp = re.search(r'js_GlobalMenu_citizens">(.*?)</span>', html).group(1)
 	return int(ciudadanosDisp.replace(',', ''))
 
+def enVenta(html):
+	rta = re.search(r'branchOfficeResources: JSON\.parse\(\'{\\"resource\\":\\"(\d+)\\",\\"1\\":\\"(\d+)\\",\\"2\\":\\"(\d+)\\",\\"3\\":\\"(\d+)\\",\\"4\\":\\"(\d+)\\"}\'\)', html)
+	return [ int(rta.group(1)), int(rta.group(2)), int(rta.group(3)), int(rta.group(4)), int(rta.group(5))]
+
 def getIsla(html):
 	isla = re.search(r'\[\["updateBackgroundData",([\s\S]*?),"specialServerBadges', html).group(1) + '}'
 
@@ -96,4 +100,8 @@ def getCiudad(html):
 	ciudad['capacidad'] = getCapacidadDeAlmacenamiento(html)
 	ciudad['ciudadanosDisp'] = getCiudadanosDisponibles(html)
 	ciudad['consumo'] = getConsumoDeVino(html)
+	ciudad['enventa'] = enVenta(html)
+	ciudad['disponible'] = []
+	for i in range(5):
+		ciudad['disponible'].append( ciudad['capacidad'] - ciudad['recursos'][i] - ciudad['enventa'][i] )
 	return ciudad

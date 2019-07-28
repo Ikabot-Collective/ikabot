@@ -47,7 +47,7 @@ def repartirRecurso(s):
 		else:
 			html = s.get(urlCiudad + idCiudad)
 			ciudad = getCiudad(html)
-			ciudad['disponible'] = ciudad['capacidad'] - ciudad['recursos'][recurso]
+			ciudad['disponible'] = ciudad['disponible'][recurso]
 			if ciudad['disponible'] > 0:
 				ciudadesDestino[idCiudad] = ciudad
 

@@ -142,9 +142,7 @@ def comprarRecursos(s):
 		precio_total += costo
 		cantidad_total += cantidad
 
-	ocupado = ciudad['recursos'][numRecurso - 1]
-	capacidad = ciudad['capacidad']
-	disponible = capacidad - ocupado
+	disponible = ciudad['disponible'][numRecurso - 1]
 
 	print(_('Total disponible para comprar: {}, por {}').format(addPuntos(cantidad_total), addPuntos(precio_total)))
 	if disponible < cantidad_total:
