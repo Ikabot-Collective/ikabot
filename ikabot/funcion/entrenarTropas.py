@@ -42,10 +42,6 @@ def esperarEntrenamiento(s, ciudad):
 		segundos = int(segundos) - data[0][1]['time']
 		esperar(segundos + 5)
 
-def getCiudadanosDisponibles(html):
-	ciudadanosDisp = re.search(r'js_GlobalMenu_citizens">(.*?)</span>', html).group(1)
-	return int(ciudadanosDisp.replace(',', ''))
-
 def planearEntrenamientos(s, ciudad, entrenamientos):
 	while True:
 		total = 0

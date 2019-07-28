@@ -10,6 +10,10 @@ def borrar(texto, ocurrencias):
 		texto = texto.replace(ocurrencia, '')
 	return texto
 
+def getCiudadanosDisponibles(html):
+	ciudadanosDisp = re.search(r'js_GlobalMenu_citizens">(.*?)</span>', html).group(1)
+	return int(ciudadanosDisp.replace(',', ''))
+
 def getIsla(html):
 	isla = re.search(r'\[\["updateBackgroundData",([\s\S]*?),"specialServerBadges', html).group(1) + '}'
 
