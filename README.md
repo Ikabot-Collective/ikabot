@@ -64,7 +64,11 @@ _Ikabot is a program written in python that grants iqual and even more functiona
 
 	It allows you to easily create large amounts of troops in one city. If there are not enough resources to train all of them, it will train all the troops it can and when it finishes it will try to train the rest. It also allows you to build your army in multiple small steps so that you can use it as fast as possible.
 
-14. Update Ikabot
+15. See movements
+
+	Let's you see movements coming to/from your cities. This includes attacks, transports, etc.
+
+16. Update Ikabot
 
 	It tells you how to update _ikabot_
 	
