@@ -88,6 +88,7 @@ class Sesion:
 		banner()
 
 		resp = self.s.get('https://lobby.ikariam.gameforge.com/api/users/me/loginLink?id={}&server[language]={}&server[number]={}'.format(self.account['id'], server, mundo)).text
+		self.s.cookies.__delitem__('PHPSESSID')
 		resp = json.loads(resp, strict=False)
 		if 'url' not in resp:
 			exit('Error')
@@ -97,7 +98,6 @@ class Sesion:
 			exit('Error')
 		self.urlBase = match.group(0)
 		self.host = self.urlBase.split('//')[1].split('/index')[0]
-		print(self.s.cookies)
 		self.headers = {'Host': self.host, 'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/es_ES/accounts', 'Upgrade-Insecure-Requests': '1'}
 		self.s.headers.clear()
 		self.s.headers.update(self.headers)
@@ -279,7 +279,7 @@ class Sesion:
 			try:
 				plaintext = self.cipher.decrypt(ciphertext)
 				cookie_dict = ast.literal_eval(plaintext)
-				return cookie_dict['PHPSESSID'] == self.s.cookies.get('PHPSESSID', domain=self.host)
+				return cookie_dict['PHPSESSID'] == self.s.cookies['PHPSESSID']
 			except ValueError:
 				msg = 'MAC check ERROR, ciphertext corrompido.'
 				if self.padre:
