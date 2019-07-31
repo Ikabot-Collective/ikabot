@@ -72,6 +72,22 @@ class Sesion:
 		self.servidor = self.account['server']['language']
 		self.mundo    = str(self.account['server']['number'])
 
+		self.headers = {'Host': 'pixelzirkus.gameforge.com', 'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'Content-Type': 'application/x-www-form-urlencoded', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/es_ES', 'Upgrade-Insecure-Requests': '1'}
+		self.s.headers.clear()
+		self.s.headers.update(self.headers)
+
+		fp_eval_id = self.__fp_eval_id()
+		data = {'product': 'ikariam', 'server_id': '1', 'language': 'es', 'location': 'VISIT', 'replacement_kid': '', 'fp_eval_id': fp_eval_id, 'page': 'https%%3A%%2F%%2Flobby.ikariam.gameforge.com%%2Fes_ES', 'referrer': '', 'fingerprint': '344808920', 'fp_exec_time': '1.00'}
+		req = self.s.post('https://pixelzirkus.gameforge.com/do/simple', data=data)
+		print(self.s.cookies)
+		assert req.status_code == 200
+
+		data = {'product': 'ikariam', 'server_id': '1', 'language': 'es', 'location': 'fp_eval', 'replacement_kid': '', 'fp_eval_id': self.__fp_eval_id(), 'fingerprint': '344808920', 'fp2_config_id': '1', 'page': 'https%%3A%%2F%%2Flobby.ikariam.gameforge.com%%2Fes_ES', 'referrer': '', 'fp2_value': '6b28817d7585d24cdd53bda231eb310f', 'fp2_exec_time': '264.00'}
+		req = self.s.post('https://pixelzirkus.gameforge.com/do/simple', data=data)
+		print(self.s.cookies)
+		assert req.status_code == 200
+		exit(input())
+
 		resp = self.s.get('https://lobby.ikariam.gameforge.com/api/users/me/loginLink?id={}&server[language]={}&server[number]={}'.format(self.account['id'], server, mundo)).text
 		resp = json.loads(resp, strict=False)
 		if 'url' not in resp:
@@ -81,12 +97,18 @@ class Sesion:
 		if match is None:
 			exit('Error')
 		self.urlBase = match.group(0)
-		host = self.urlBase.split('//')[1].split('.com')[0]
+		#host = self.urlBase.split('//')[1].split('.com')[0]
+		print(host)
+		print(self.s.cookies)
 		self.headers = {'Host': host, 'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/es_ES/accounts', 'Upgrade-Insecure-Requests': '1'}
 		self.s.headers.clear()
 		self.s.headers.update(self.headers)
-
+		url = url.replace('https://' + host + '.com', 'http://127.0.0.1')
+		print(url)
 		req = self.s.get(url)
+		#print(req.text)
+		assert req.status_code == 302
+		exit(input())
 		self.cipher = AESCipher(self.username, self.password)
 		self.__updateCookieFile(primero=True)
 
@@ -96,10 +118,13 @@ class Sesion:
 	def __genCookie(self):
 		return self.__genRand() + self.__genRand() + hex(int(round(time.time() * 1000)))[2:] + self.__genRand() + self.__genRand()
 
+	def __fp_eval_id(self):
+		return self.__genRand() + self.__genRand() + '-' + self.__genRand() + '-' + self.__genRand() + '-' + self.__genRand() + '-' + self.__genRand() + self.__genRand() + self.__genRand()
+
 	def __getGameforgeCookie(self):
 		headers = {'Host': 'pixelzirkus.gameforge.com', 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:66.0) Gecko/20100101 Firefox/66.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Encoding': 'gzip, deflate', 'Content-Type': 'application/x-www-form-urlencoded', 'DNT': '1', 'Connection': 'close', 'Upgrade-Insecure-Requests': '1'}
 		cookies = {'__asc': self.alexaCook, '__auc': self.alexaCook}
-		fp_eval_id = self.__genRand() + self.__genRand() + '-' + self.__genRand() + '-' + self.__genRand() + '-' + self.__genRand() + '-' + self.__genRand() + self.__genRand() + self.__genRand()
+		fp_eval_id = __fp_eval_id()
 		page = self.urlBase.replace(self.mundo + '-', '').replace('index.php?', '')
 		data = {'location': 'VISIT', 'product': 'ikariam', 'language': self.servidor, 'server-id': '1', 'replacement_kid': '', 'fp_eval_id': fp_eval_id, 'page': page,'referrer': '', 'fingerprint': '1820081159', 'fp_exec_time': '3.00'}
 		r = requests.post('https://pixelzirkus.gameforge.com/do/simple', headers=headers, cookies=cookies, data=data)
