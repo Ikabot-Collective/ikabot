@@ -33,11 +33,6 @@ class Sesion:
 	def __init__(self):
 		self.padre = True
 		self.__loginFirst()
-		#data = re.search(r'https?://(s\d+)-(\w+)', urlBase)
-		#self.headers = {'Host': 'lobby.ikariam.gameforge.com', 'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0','Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Encoding':'gzip, deflate, br', 'Content-Type': 'application/json', 'Referer': 'https://lobby.ikariam.gameforge.com/es_ES', 'DNT': '1', 'Connection': 'keep-alive', 'Upgrade-Insecure-Requests': '1'}
-		#self.alexaCook = self.__genCookie()
-		#self.gameforgeCook = self.__getGameforgeCookie()
-		#self.__getCookie()
 
 	def __loginFirst(self):
 		banner()
@@ -58,12 +53,10 @@ class Sesion:
 			exit('Error') # fix
 		me = self.s.get('https://lobby.ikariam.gameforge.com/api/users/me').text
 		me = json.loads(me, strict=False)
-		# {'id': 1805, 'userId': 1805, 'gameforgeAccountId': '130afa74-272b-4807-bc53-62e687529e8d', 'validated': True, 'portable': True, 'unlinkedAccounts': False, 'migrationRequired': False, 'email': 'santiago.pecin@protonmail.com', 'unportableName': 'santiagopecin'}
 		if me['validated'] is False:
 			exit('Error')
 		accounts = self.s.get('https://lobby.ikariam.gameforge.com/api/users/me/accounts').text
 		accounts = json.loads(accounts, strict=False)
-		# [{'server': {'language': 'ar', 'number': 1}, 'id': 281624, 'gameAccountId': 281624, 'name': 'arias', 'lastPlayed': '2019-07-31T14:11:12+0200', 'lastLogin': None, 'blocked': False, 'bannedUntil': None, 'bannedReason': '', 'details': [{'type': 'literal', 'title': 'myAccounts.rank', 'value': '314'}, {'type': 'localized', 'title': 'myAccounts.status', 'value': 'playerStatus.active'}], 'sitting': {'shared': False, 'endTime': None, 'cooldownTime': None}, 'trading': {'trading': False, 'cooldownTime': None}}, {'server': {'language': 'es', 'number': 2}, 'id': 408696, 'gameAccountId': 408696, 'name': 'arias', 'lastPlayed': '2019-07-31T02:57:10+0200', 'lastLogin': None, 'blocked': False, 'bannedUntil': None, 'bannedReason': 'Mabelle: \tCambio de dueño ilegal (1) ', 'details': [{'type': 'literal', 'title': 'myAccounts.rank', 'value': '632'}, {'type': 'localized', 'title': 'myAccounts.status', 'value': 'playerStatus.active'}], 'sitting': {'shared': False, 'endTime': None, 'cooldownTime': None}, 'trading': {'trading': False, 'cooldownTime': None}}, {'server': {'language': 'es', 'number': 1}, 'id': 656711, 'gameAccountId': 656711, 'name': 'physics', 'lastPlayed': '2019-07-31T15:17:23+0200', 'lastLogin': '2019-07-31T13:16:58+0000', 'blocked': False, 'bannedUntil': None, 'bannedReason': '', 'details': [{'type': 'literal', 'title': 'myAccounts.rank', 'value': '440'}, {'type': 'localized', 'title': 'myAccounts.status', 'value': 'playerStatus.active'}], 'sitting': {'shared': False, 'endTime': None, 'cooldownTime': None}, 'trading': {'trading': False, 'cooldownTime': None}}]
 		servers = self.s.get('https://lobby.ikariam.gameforge.com/api/servers').text
 		servers = json.loads(servers, strict=False)
 		i = 0
@@ -73,8 +66,7 @@ class Sesion:
 			world = [ srv['name'] for srv in servers if srv['language'] == server and srv['number'] == mundo ][0]
 			i += 1
 			print('({:d}) {} [{} - {}]'.format(i, account['name'], server, world))
-		#num = read(msg=_("Cuenta:"), min=1, max=i)
-		num = 3
+		num = read(msg=_("Cuenta:"), min=1, max=i)
 		self.account  = [ account for account in accounts if account['blocked'] is False ][num - 1]
 		self.username = self.account['name']
 		self.servidor = self.account['server']['language']
