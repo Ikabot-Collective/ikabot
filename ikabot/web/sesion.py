@@ -36,10 +36,25 @@ class Sesion:
 
 	def __loginFirst(self):
 		banner()
+
 		self.mail = read(msg=_('Mail:'))
 		self.password = getpass.getpass(_('Contraseña:'))
+
+		banner()
+
 		self.s = requests.Session()
 		self.s.proxies = proxyDict
+
+		self.headers = {'Host': 'pixelzirkus.gameforge.com', 'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'Content-Type': 'application/x-www-form-urlencoded', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/es_ES/', 'Upgrade-Insecure-Requests': '1'}
+		self.s.headers.clear()
+		self.s.headers.update(self.headers)
+
+		fp_eval_id = self.__fp_eval_id()
+		data = {'product': 'ikariam', 'server_id': '1', 'language': 'es', 'location': 'fp_eval', 'replacement_kid': '', 'fp_eval_id': self.__fp_eval_id(), 'fingerprint': '1666238048', 'fp2_config_id': '1', 'page': 'https%3A%2F%2Flobby.ikariam.gameforge.com%2Fes_ES', 'referrer': '', 'fp2_value': '6b28817d7585d24cdd53bda231eb310f', 'fp2_exec_time': '264.00'}
+		req = self.s.post('https://pixelzirkus.gameforge.com/do/simple', data=data)
+		assert req.status_code == 200
+
+
 		self.headers = {'Host': 'lobby.ikariam.gameforge.com', 'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0', 'Accept-Language': 'en-US,en;q=0.5','Accept':'application/json', 'Accept-Encoding':'gzip, deflate, br', 'Content-Type': 'application/json', 'Referer': 'https://lobby.ikariam.gameforge.com/es_ES', 'Origin': 'https://lobby.ikariam.gameforge.com', 'DNT': '1', 'Connection': 'close'}
 		self.s.headers.clear()
 		self.s.headers.update(self.headers)
@@ -51,14 +66,12 @@ class Sesion:
 		rta = json.loads(rta, strict=False)
 		if rta['migrationRequired'] is not False:
 			exit('Error') # fix
-		me = self.s.get('https://lobby.ikariam.gameforge.com/api/users/me').text
-		me = json.loads(me, strict=False)
-		if me['validated'] is False:
-			exit('Error')
+
 		accounts = self.s.get('https://lobby.ikariam.gameforge.com/api/users/me/accounts').text
 		accounts = json.loads(accounts, strict=False)
 		servers = self.s.get('https://lobby.ikariam.gameforge.com/api/servers').text
 		servers = json.loads(servers, strict=False)
+
 		i = 0
 		for account in [ account for account in accounts if account['blocked'] is False ]:
 			server = account['server']['language']
@@ -72,21 +85,7 @@ class Sesion:
 		self.servidor = self.account['server']['language']
 		self.mundo    = str(self.account['server']['number'])
 
-		self.headers = {'Host': 'pixelzirkus.gameforge.com', 'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'Content-Type': 'application/x-www-form-urlencoded', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/es_ES', 'Upgrade-Insecure-Requests': '1'}
-		self.s.headers.clear()
-		self.s.headers.update(self.headers)
-
-		fp_eval_id = self.__fp_eval_id()
-		data = {'product': 'ikariam', 'server_id': '1', 'language': 'es', 'location': 'VISIT', 'replacement_kid': '', 'fp_eval_id': fp_eval_id, 'page': 'https%%3A%%2F%%2Flobby.ikariam.gameforge.com%%2Fes_ES', 'referrer': '', 'fingerprint': '344808920', 'fp_exec_time': '1.00'}
-		req = self.s.post('https://pixelzirkus.gameforge.com/do/simple', data=data)
-		print(self.s.cookies)
-		assert req.status_code == 200
-
-		data = {'product': 'ikariam', 'server_id': '1', 'language': 'es', 'location': 'fp_eval', 'replacement_kid': '', 'fp_eval_id': self.__fp_eval_id(), 'fingerprint': '344808920', 'fp2_config_id': '1', 'page': 'https%%3A%%2F%%2Flobby.ikariam.gameforge.com%%2Fes_ES', 'referrer': '', 'fp2_value': '6b28817d7585d24cdd53bda231eb310f', 'fp2_exec_time': '264.00'}
-		req = self.s.post('https://pixelzirkus.gameforge.com/do/simple', data=data)
-		print(self.s.cookies)
-		assert req.status_code == 200
-		exit(input())
+		banner()
 
 		resp = self.s.get('https://lobby.ikariam.gameforge.com/api/users/me/loginLink?id={}&server[language]={}&server[number]={}'.format(self.account['id'], server, mundo)).text
 		resp = json.loads(resp, strict=False)
@@ -97,18 +96,12 @@ class Sesion:
 		if match is None:
 			exit('Error')
 		self.urlBase = match.group(0)
-		#host = self.urlBase.split('//')[1].split('.com')[0]
-		print(host)
+		self.host = self.urlBase.split('//')[1].split('/index')[0]
 		print(self.s.cookies)
-		self.headers = {'Host': host, 'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/es_ES/accounts', 'Upgrade-Insecure-Requests': '1'}
+		self.headers = {'Host': self.host, 'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/es_ES/accounts', 'Upgrade-Insecure-Requests': '1'}
 		self.s.headers.clear()
 		self.s.headers.update(self.headers)
-		url = url.replace('https://' + host + '.com', 'http://127.0.0.1')
-		print(url)
 		req = self.s.get(url)
-		#print(req.text)
-		assert req.status_code == 302
-		exit(input())
 		self.cipher = AESCipher(self.username, self.password)
 		self.__updateCookieFile(primero=True)
 
@@ -286,7 +279,7 @@ class Sesion:
 			try:
 				plaintext = self.cipher.decrypt(ciphertext)
 				cookie_dict = ast.literal_eval(plaintext)
-				return cookie_dict['PHPSESSID'] == self.s.cookies['PHPSESSID']
+				return cookie_dict['PHPSESSID'] == self.s.cookies.get('PHPSESSID', domain=self.host)
 			except ValueError:
 				msg = 'MAC check ERROR, ciphertext corrompido.'
 				if self.padre:
