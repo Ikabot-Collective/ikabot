@@ -7,14 +7,16 @@ import ast
 import sys
 import json
 import time
-import random
 import parser
-from ikabot.helpers.getJson import getCiudad
-from ikabot.helpers.pedirInfo import read
-from ikabot.helpers.botComm import *
-from ikabot.helpers.aesCipher import *
-from ikabot.config import *
+import random
+import getpass
 import gettext
+from ikabot.config import *
+from ikabot.helpers.botComm import *
+from ikabot.helpers.gui import banner
+from ikabot.helpers.aesCipher import *
+from ikabot.helpers.pedirInfo import read
+from ikabot.helpers.getJson import getCiudad
 
 t = gettext.translation('sesion', 
                         localedir, 
@@ -28,19 +30,73 @@ except ImportError:
 	sys.exit(_('Debe instalar el modulo de requests:\nsudo pip3 install requests'))
 
 class Sesion:
-	def __init__(self, urlBase, payload, headers):
+	def __init__(self):
 		self.padre = True
-		self.urlBase = urlBase
-		self.payload = payload
-		self.username = payload['name']
-		self.cipher = AESCipher(payload)
-		data = re.search(r'https?://(s\d+)-(\w+)', urlBase)
-		self.mundo = data.group(1)
-		self.servidor = data.group(2)
-		self.headers = headers
-		self.alexaCook = self.__genCookie()
-		self.gameforgeCook = self.__getGameforgeCookie()
-		self.__getCookie()
+		self.__loginFirst()
+		#data = re.search(r'https?://(s\d+)-(\w+)', urlBase)
+		#self.headers = {'Host': 'lobby.ikariam.gameforge.com', 'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0','Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Encoding':'gzip, deflate, br', 'Content-Type': 'application/json', 'Referer': 'https://lobby.ikariam.gameforge.com/es_ES', 'DNT': '1', 'Connection': 'keep-alive', 'Upgrade-Insecure-Requests': '1'}
+		#self.alexaCook = self.__genCookie()
+		#self.gameforgeCook = self.__getGameforgeCookie()
+		#self.__getCookie()
+
+	def __loginFirst(self):
+		banner()
+		self.mail = read(msg=_('Mail:'))
+		self.password = getpass.getpass(_('Contraseña:'))
+		self.s = requests.Session()
+		self.s.proxies = proxyDict
+		self.headers = {'Host': 'lobby.ikariam.gameforge.com', 'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0', 'Accept-Language': 'en-US,en;q=0.5','Accept':'application/json', 'Accept-Encoding':'gzip, deflate, br', 'Content-Type': 'application/json', 'Referer': 'https://lobby.ikariam.gameforge.com/es_ES', 'Origin': 'https://lobby.ikariam.gameforge.com', 'DNT': '1', 'Connection': 'close'}
+		self.s.headers.clear()
+		self.s.headers.update(self.headers)
+		data = '{{"credentials":{{"email":"{}","password":"{}"}},"language":"es","kid":"","autoLogin":"false"}}'.format(self.mail, self.password)
+		r = self.s.post('https://lobby.ikariam.gameforge.com/api/users', data=data)
+		if r.status_code == 400:
+			exit(_('Mail o contraseña incorrecta'))
+		rta = r.text
+		rta = json.loads(rta, strict=False)
+		if rta['migrationRequired'] is not False:
+			exit('Error') # fix
+		me = self.s.get('https://lobby.ikariam.gameforge.com/api/users/me').text
+		me = json.loads(me, strict=False)
+		# {'id': 1805, 'userId': 1805, 'gameforgeAccountId': '130afa74-272b-4807-bc53-62e687529e8d', 'validated': True, 'portable': True, 'unlinkedAccounts': False, 'migrationRequired': False, 'email': 'santiago.pecin@protonmail.com', 'unportableName': 'santiagopecin'}
+		if me['validated'] is False:
+			exit('Error')
+		accounts = self.s.get('https://lobby.ikariam.gameforge.com/api/users/me/accounts').text
+		accounts = json.loads(accounts, strict=False)
+		# [{'server': {'language': 'ar', 'number': 1}, 'id': 281624, 'gameAccountId': 281624, 'name': 'arias', 'lastPlayed': '2019-07-31T14:11:12+0200', 'lastLogin': None, 'blocked': False, 'bannedUntil': None, 'bannedReason': '', 'details': [{'type': 'literal', 'title': 'myAccounts.rank', 'value': '314'}, {'type': 'localized', 'title': 'myAccounts.status', 'value': 'playerStatus.active'}], 'sitting': {'shared': False, 'endTime': None, 'cooldownTime': None}, 'trading': {'trading': False, 'cooldownTime': None}}, {'server': {'language': 'es', 'number': 2}, 'id': 408696, 'gameAccountId': 408696, 'name': 'arias', 'lastPlayed': '2019-07-31T02:57:10+0200', 'lastLogin': None, 'blocked': False, 'bannedUntil': None, 'bannedReason': 'Mabelle: \tCambio de dueño ilegal (1) ', 'details': [{'type': 'literal', 'title': 'myAccounts.rank', 'value': '632'}, {'type': 'localized', 'title': 'myAccounts.status', 'value': 'playerStatus.active'}], 'sitting': {'shared': False, 'endTime': None, 'cooldownTime': None}, 'trading': {'trading': False, 'cooldownTime': None}}, {'server': {'language': 'es', 'number': 1}, 'id': 656711, 'gameAccountId': 656711, 'name': 'physics', 'lastPlayed': '2019-07-31T15:17:23+0200', 'lastLogin': '2019-07-31T13:16:58+0000', 'blocked': False, 'bannedUntil': None, 'bannedReason': '', 'details': [{'type': 'literal', 'title': 'myAccounts.rank', 'value': '440'}, {'type': 'localized', 'title': 'myAccounts.status', 'value': 'playerStatus.active'}], 'sitting': {'shared': False, 'endTime': None, 'cooldownTime': None}, 'trading': {'trading': False, 'cooldownTime': None}}]
+		servers = self.s.get('https://lobby.ikariam.gameforge.com/api/servers').text
+		servers = json.loads(servers, strict=False)
+		i = 0
+		for account in [ account for account in accounts if account['blocked'] is False ]:
+			server = account['server']['language']
+			mundo = account['server']['number']
+			world = [ srv['name'] for srv in servers if srv['language'] == server and srv['number'] == mundo ][0]
+			i += 1
+			print('({:d}) {} [{} - {}]'.format(i, account['name'], server, world))
+		#num = read(msg=_("Cuenta:"), min=1, max=i)
+		num = 3
+		self.account  = [ account for account in accounts if account['blocked'] is False ][num - 1]
+		self.username = self.account['name']
+		self.servidor = self.account['server']['language']
+		self.mundo    = str(self.account['server']['number'])
+
+		resp = self.s.get('https://lobby.ikariam.gameforge.com/api/users/me/loginLink?id={}&server[language]={}&server[number]={}'.format(self.account['id'], server, mundo)).text
+		resp = json.loads(resp, strict=False)
+		if 'url' not in resp:
+			exit('Error')
+		url = resp['url']
+		match = re.search(r'https://s\d+-\w{2}\.ikariam\.gameforge\.com/index\.php\?', url)
+		if match is None:
+			exit('Error')
+		self.urlBase = match.group(0)
+		host = self.urlBase.split('//')[1].split('.com')[0]
+		self.headers = {'Host': host, 'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/es_ES/accounts', 'Upgrade-Insecure-Requests': '1'}
+		self.s.headers.clear()
+		self.s.headers.update(self.headers)
+
+		req = self.s.get(url)
+		self.cipher = AESCipher(self.username, self.password)
+		self.__updateCookieFile(primero=True)
 
 	def __genRand(self):
 		return hex(random.randint(0, 65535))[2:]
@@ -268,5 +324,11 @@ class Sesion:
 def normal_get(url, params={}):
 	try:
 		return requests.get(url, params=params)
+	except requests.exceptions.ConnectionError:
+		sys.exit(_('Fallo la conexion a internet'))
+
+def normal_post(url, data={}, params={}):
+	try:
+		return requests.post(url, data=data, params=params)
 	except requests.exceptions.ConnectionError:
 		sys.exit(_('Fallo la conexion a internet'))
