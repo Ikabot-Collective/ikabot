@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2019-04-09 13:35-0300\n"
+"POT-Creation-Date: 2019-07-31 21:41-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,49 +15,77 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: ../../../web/sesion.py:26
-msgid ""
-"Debe instalar el modulo de requests:\n"
-"sudo pip3 install requests"
-msgstr ""
-"You must install the requests module:\n"
-"sudo pip3 install requests"
-
-#: ../../../web/sesion.py:59
+#: ../../../web/sesion.py:71
 msgid ""
 "Actualizo el archivo de cookies:\n"
 msgstr ""
 "Updating the cookie file:\n"
 
-#: ../../../web/sesion.py:61
+#: ../../../web/sesion.py:73
 msgid "Primero"
 msgstr "First"
 
-#: ../../../web/sesion.py:63
+#: ../../../web/sesion.py:75
 msgid "Nuevo"
 msgstr "New"
 
-#: ../../../web/sesion.py:65
+#: ../../../web/sesion.py:77
 msgid "Salida"
 msgstr "Out"
 
-#: ../../../web/sesion.py:115
+#: ../../../web/sesion.py:127
 msgid "actualizo cookie usando el archivo de cookies"
 msgstr "Updating cookie using cookie file"
 
-#: ../../../web/sesion.py:121 ../../../web/sesion.py:147
-msgid "Usuario o contrasenia incorrecta"
-msgstr "Wrong user name or wrong password"
+#: ../../../web/sesion.py:134 ../../../web/sesion.py:234
+msgid "Mail o contrasenia incorrecta"
+msgstr "Wrong email or wrong password"
 
-#: ../../../web/sesion.py:123
+#: ../../../web/sesion.py:136
 msgid "MAC check ERROR, ciphertext corrompido."
 msgstr "MAC check ERROR, ciphertext corrupt."
 
-#: ../../../web/sesion.py:131
+#: ../../../web/sesion.py:146
 msgid "La sesión se venció, renovando sesión"
 msgstr "The session expired, renovating"
 
-#: ../../../web/sesion.py:244
+#: ../../../web/sesion.py:154
+msgid "Mail:"
+msgstr "Mail:"
+
+#: ../../../web/sesion.py:155
+msgid "Contraseña:"
+msgstr "Password:"
+
+#: ../../../web/sesion.py:175
+msgid ""
+"Mail o contraseña incorrecta\n"
+msgstr ""
+"Wrong email or wrong password\n"
+
+#: ../../../web/sesion.py:186
+msgid ""
+"¿Con qué cuenta quiere iniciar sesión?\n"
+msgstr ""
+"With which account do you want to log in?\n"
+
+#: ../../../web/sesion.py:203
+msgid "Servidor:{}"
+msgstr "Server:{}"
+
+#: ../../../web/sesion.py:204
+msgid ", Mundo:{}"
+msgstr ", World:{}"
+
+#: ../../../web/sesion.py:205
+msgid ", Jugador:{}"
+msgstr ", Player:{}"
+
+#: ../../../web/sesion.py:226
+msgid "La cuenta entró en modo vacaciones"
+msgstr "The account went into vacation mode"
+
+#: ../../../web/sesion.py:335 ../../../web/sesion.py:341
 msgid "Fallo la conexion a internet"
 msgstr "Internet connection failed"
 

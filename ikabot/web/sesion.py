@@ -11,6 +11,7 @@ import parser
 import random
 import getpass
 import gettext
+import requests
 from ikabot.config import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.gui import banner
@@ -24,86 +25,12 @@ t = gettext.translation('sesion',
                         fallback=True)
 _ = t.gettext
 
-try:
-	import requests
-except ImportError:
-	sys.exit(_('Debe instalar el modulo de requests:\nsudo pip3 install requests'))
 
 class Sesion:
 	def __init__(self):
 		self.padre = True
-		self.__loginFirst()
-
-	def __loginFirst(self):
-		banner()
-
-		self.mail = read(msg=_('Mail:'))
-		self.password = getpass.getpass(_('Contraseña:'))
-
-		banner()
-
-		self.s = requests.Session()
-		self.s.proxies = proxyDict
-
-		self.headers = {'Host': 'pixelzirkus.gameforge.com', 'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'Content-Type': 'application/x-www-form-urlencoded', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/es_ES/', 'Upgrade-Insecure-Requests': '1'}
-		self.s.headers.clear()
-		self.s.headers.update(self.headers)
-
-		fp_eval_id = self.__fp_eval_id()
-		data = {'product': 'ikariam', 'server_id': '1', 'language': 'es', 'location': 'fp_eval', 'replacement_kid': '', 'fp_eval_id': self.__fp_eval_id(), 'fingerprint': '1666238048', 'fp2_config_id': '1', 'page': 'https%3A%2F%2Flobby.ikariam.gameforge.com%2Fes_ES', 'referrer': '', 'fp2_value': '6b28817d7585d24cdd53bda231eb310f', 'fp2_exec_time': '264.00'}
-		req = self.s.post('https://pixelzirkus.gameforge.com/do/simple', data=data)
-		assert req.status_code == 200
-
-
-		self.headers = {'Host': 'lobby.ikariam.gameforge.com', 'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0', 'Accept-Language': 'en-US,en;q=0.5','Accept':'application/json', 'Accept-Encoding':'gzip, deflate, br', 'Content-Type': 'application/json', 'Referer': 'https://lobby.ikariam.gameforge.com/es_ES', 'Origin': 'https://lobby.ikariam.gameforge.com', 'DNT': '1', 'Connection': 'close'}
-		self.s.headers.clear()
-		self.s.headers.update(self.headers)
-		data = '{{"credentials":{{"email":"{}","password":"{}"}},"language":"es","kid":"","autoLogin":"false"}}'.format(self.mail, self.password)
-		r = self.s.post('https://lobby.ikariam.gameforge.com/api/users', data=data)
-		if r.status_code == 400:
-			exit(_('Mail o contraseña incorrecta'))
-		rta = r.text
-		rta = json.loads(rta, strict=False)
-		if rta['migrationRequired'] is not False:
-			exit('Error') # fix
-
-		accounts = self.s.get('https://lobby.ikariam.gameforge.com/api/users/me/accounts').text
-		accounts = json.loads(accounts, strict=False)
-		servers = self.s.get('https://lobby.ikariam.gameforge.com/api/servers').text
-		servers = json.loads(servers, strict=False)
-
-		i = 0
-		for account in [ account for account in accounts if account['blocked'] is False ]:
-			server = account['server']['language']
-			mundo = account['server']['number']
-			world = [ srv['name'] for srv in servers if srv['language'] == server and srv['number'] == mundo ][0]
-			i += 1
-			print('({:d}) {} [{} - {}]'.format(i, account['name'], server, world))
-		num = read(msg=_("Cuenta:"), min=1, max=i)
-		self.account  = [ account for account in accounts if account['blocked'] is False ][num - 1]
-		self.username = self.account['name']
-		self.servidor = self.account['server']['language']
-		self.mundo    = str(self.account['server']['number'])
-
-		banner()
-
-		resp = self.s.get('https://lobby.ikariam.gameforge.com/api/users/me/loginLink?id={}&server[language]={}&server[number]={}'.format(self.account['id'], server, mundo)).text
-		self.s.cookies.__delitem__('PHPSESSID')
-		resp = json.loads(resp, strict=False)
-		if 'url' not in resp:
-			exit('Error')
-		url = resp['url']
-		match = re.search(r'https://s\d+-\w{2}\.ikariam\.gameforge\.com/index\.php\?', url)
-		if match is None:
-			exit('Error')
-		self.urlBase = match.group(0)
-		self.host = self.urlBase.split('//')[1].split('/index')[0]
-		self.headers = {'Host': self.host, 'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/es_ES/accounts', 'Upgrade-Insecure-Requests': '1'}
-		self.s.headers.clear()
-		self.s.headers.update(self.headers)
-		req = self.s.get(url)
-		self.cipher = AESCipher(self.username, self.password)
-		self.__updateCookieFile(primero=True)
+		self.logged = False
+		self.__login()
 
 	def __genRand(self):
 		return hex(random.randint(0, 65535))[2:]
@@ -204,7 +131,7 @@ class Sesion:
 				plaintext = self.cipher.decrypt(ciphertext)
 			except ValueError:
 				if self.padre:
-					print(_('Usuario o contrasenia incorrecta'))
+					print(_('Mail o contrasenia incorrecta'))
 				else:
 					sendToBot(_('MAC check ERROR, ciphertext corrompido.'))
 				os._exit(0)
@@ -221,14 +148,82 @@ class Sesion:
 			self.__login()
 
 	def __login(self):
-		self.s = requests.Session() # s es la sesion de conexion
+		if not self.logged:
+			banner()
+
+			self.mail = read(msg=_('Mail:'))
+			self.password = getpass.getpass(_('Contraseña:'))
+
+			banner()
+
+		self.s = requests.Session()
 		self.s.proxies = proxyDict
+
+		self.headers = {'Host': 'pixelzirkus.gameforge.com', 'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'Content-Type': 'application/x-www-form-urlencoded', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/es_ES/', 'Upgrade-Insecure-Requests': '1'}
 		self.s.headers.clear()
 		self.s.headers.update(self.headers)
-		self.s.cookies.update({'__asc': self.alexaCook, '__auc': self.alexaCook, 'pc_idt': self.gameforgeCook})
-		html = self.s.post(self.urlBase + 'action=loginAvatar&function=login', data=self.payload).text
+		fp_eval_id = self.__fp_eval_id()
+		data = {'product': 'ikariam', 'server_id': '1', 'language': 'es', 'location': 'fp_eval', 'replacement_kid': '', 'fp_eval_id': self.__fp_eval_id(), 'fingerprint': '1666238048', 'fp2_config_id': '1', 'page': 'https%3A%2F%2Flobby.ikariam.gameforge.com%2Fes_ES', 'referrer': '', 'fp2_value': '6b28817d7585d24cdd53bda231eb310f', 'fp2_exec_time': '264.00'}
+		self.s.post('https://pixelzirkus.gameforge.com/do/simple', data=data)
+
+		self.headers = {'Host': 'lobby.ikariam.gameforge.com', 'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0', 'Accept-Language': 'en-US,en;q=0.5','Accept':'application/json', 'Accept-Encoding':'gzip, deflate, br', 'Content-Type': 'application/json', 'Referer': 'https://lobby.ikariam.gameforge.com/es_ES', 'Origin': 'https://lobby.ikariam.gameforge.com', 'DNT': '1', 'Connection': 'close'}
+		self.s.headers.clear()
+		self.s.headers.update(self.headers)
+		data = '{{"credentials":{{"email":"{}","password":"{}"}},"language":"es","kid":"","autoLogin":"false"}}'.format(self.mail, self.password)
+		r = self.s.post('https://lobby.ikariam.gameforge.com/api/users', data=data)
+		if r.status_code == 400:
+			exit(_('Mail o contraseña incorrecta\n'))
+
+		if not self.logged:
+			accounts = self.s.get('https://lobby.ikariam.gameforge.com/api/users/me/accounts').text
+			accounts = json.loads(accounts, strict=False)
+			servers = self.s.get('https://lobby.ikariam.gameforge.com/api/servers').text
+			servers = json.loads(servers, strict=False)
+
+			if len([ account for account in accounts if account['blocked'] is False ]) == 1:
+				self.account  = [ account for account in accounts if account['blocked'] is False ][0]
+			else:
+				print(_('¿Con qué cuenta quiere iniciar sesión?\n'))
+
+				max_name = max( [ len(account['name']) for account in accounts if account['blocked'] is False ] )
+				i = 0
+				for account in [ account for account in accounts if account['blocked'] is False ]:
+					server = account['server']['language']
+					mundo = account['server']['number']
+					world = [ srv['name'] for srv in servers if srv['language'] == server and srv['number'] == mundo ][0]
+					i += 1
+					pad = ' ' * (max_name - len(account['name']))
+					print('({:d}) {}{} [{} - {}]'.format(i, account['name'], pad, server, world))
+				num = read(min=1, max=i)
+				self.account  = [ account for account in accounts if account['blocked'] is False ][num - 1]
+			self.username = self.account['name']
+			self.servidor = self.account['server']['language']
+			self.mundo    = str(self.account['server']['number'])
+			self.word     = [ srv['name'] for srv in servers if srv['language'] == self.servidor and srv['number'] == int(self.mundo) ][0]
+			config.infoUser = _('Servidor:{}').format(self.servidor)
+			config.infoUser += _(', Mundo:{}').format(self.word)
+			config.infoUser += _(', Jugador:{}').format(self.username)
+			banner()
+
+		resp = self.s.get('https://lobby.ikariam.gameforge.com/api/users/me/loginLink?id={}&server[language]={}&server[number]={}'.format(self.account['id'], self.servidor, self.mundo)).text
+		self.s.cookies.__delitem__('PHPSESSID')
+		resp = json.loads(resp, strict=False)
+		if 'url' not in resp:
+			exit('Error')
+		url = resp['url']
+		match = re.search(r'https://s\d+-\w{2}\.ikariam\.gameforge\.com/index\.php\?', url)
+		if match is None:
+			exit('Error')
+
+		self.urlBase = match.group(0)
+		self.host = self.urlBase.split('//')[1].split('/index')[0]
+		self.headers = {'Host': self.host, 'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Encoding': 'gzip, deflate', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/es_ES/accounts', 'DNT': '1', 'Connection': 'close', 'Upgrade-Insecure-Requests': '1'}
+		self.s.headers.clear()
+		self.s.headers.update(self.headers)
+		html = self.s.get(url).text
+
 		if self.__isInVacation(html):
-			msg = 'La cuenta entró en modo vacaciones'
+			msg = _('La cuenta entró en modo vacaciones')
 			if self.padre:
 				print(msg)
 			else:
@@ -236,11 +231,13 @@ class Sesion:
 			os._exit(0)
 		if self.__isExpired(html):
 			if self.padre:
-				msg = _('Usuario o contrasenia incorrecta')
+				msg = _('Mail o contrasenia incorrecta')
 				print(msg)
 				os._exit(0)
 			raise Exception('No se pudo iniciar sesión')
+		self.cipher = AESCipher(self.mail, self.username, self.password)
 		self.__updateCookieFile(primero=True)
+		self.logged = True
 
 	def __backoff(self):
 		if self.padre is False:

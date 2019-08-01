@@ -4,7 +4,7 @@
 import os
 import gettext
 from ikabot.config import *
-from ikabot.web.getSesion import getSesion
+from ikabot.web.sesion import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.process import run
@@ -91,7 +91,7 @@ def inicializar():
 
 def start():
 	inicializar()
-	s = getSesion()
+	s = Sesion()
 	setSignalsHandlers(s)
 	try:
 		menu(s)
