@@ -306,9 +306,12 @@ class Sesion:
 			except requests.exceptions.ConnectionError:
 				time.sleep(ConnectionError_wait)
 
-	def post(self, url='', payloadPost={}, params={}, ignoreExpire=False):
+	def post(self, url='', payloadPost={}, params={}, ignoreExpire=False, noIndex=False):
 		self.__checkCookie()
-		url = self.urlBase + url
+		if noIndex:
+			url = self.urlBase.replace('index.php', '') + url
+		else:
+			url = self.urlBase + url
 		while True:
 			try:
 				html = self.s.post(url, data=payloadPost, params=params).text

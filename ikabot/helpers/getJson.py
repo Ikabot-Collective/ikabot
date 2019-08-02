@@ -87,7 +87,7 @@ def getCiudad(html):
 	ciudad = borrar(ciudad, remove)
 
 	for elem in ['sea', 'land', 'shore', 'wall']:
-		ciudad = ciudad.replace('"building":"buildingGround {}"'.format(elem),'"name":"empty","building":"empty"')
+		ciudad = ciudad.replace('"building":"buildingGround {}"'.format(elem),'"name":"empty","building":"empty","type":"{}"'.format(elem))
 	ciudad = ciudad.replace('"isBusy":true,','"isBusy":false,')
 
 	ampliando = re.findall(r'(("name":"[\w\s\\]*","level":"\d*","isBusy":false,"canUpgrade":\w*,"isMaxLevel":\w*,"building":"\w*?)\sconstructionSite","(?:completed|countdownText|buildingimg).*?)}',ciudad)
@@ -96,7 +96,6 @@ def getCiudad(html):
 		nuevo = viejo.replace('"isBusy":false,', '"isBusy":true,')
 		ciudad = ciudad.replace(edificio[0], nuevo)
 
-	# {'cityName': '', 'id': 'idCiudad', 'phase': 5, 'isCapital': True|False, 'Id': 'idJugador', 'Name': 'nombreJugador', 'islandId': 'idIsla', 'islandName': 'NombreIsla', 'x': 'Coordx', 'y': 'Coordy', 'underConstruction': -1, 'endUpgradeTime': -1, 'startUpgradeTime': -1, 'position': [{'name': 'nombreEdificio', 'level': 'nivel', 'isBusy': True|False, 'canUpgrade': True|False, 'isMaxLevel': True|False, 'building': 'nombreEnIngles'}, ...]}
 	ciudad = json.loads(ciudad, strict=False)
 	ciudad['propia'] = True
 	ciudad['recursos'] = getRecursosDisponibles(html, num=True)
@@ -107,4 +106,10 @@ def getCiudad(html):
 	ciudad['libre'] = []
 	for i in range(5):
 		ciudad['libre'].append( ciudad['capacidad'] - ciudad['recursos'][i] - ciudad['enventa'][i] )
+
+	i = 0
+	for edificio in ciudad['position']:
+		edificio['position'] = i
+		i += 1
+	# {'cityName': '', 'id': 'idCiudad', 'phase': 5, 'isCapital': True|False, 'Id': 'idJugador', 'Name': 'nombreJugador', 'islandId': 'idIsla', 'islandName': 'NombreIsla', 'x': 'Coordx', 'y': 'Coordy', 'underConstruction': -1, 'endUpgradeTime': -1, 'startUpgradeTime': -1, 'position': [{'name': 'nombreEdificio', 'position': num, 'level': 'nivel', 'isBusy': True|False, 'canUpgrade': True|False, 'isMaxLevel': True|False, 'building': 'nombreEnIngles'}, ...]}
 	return ciudad
