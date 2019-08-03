@@ -1,0 +1,37 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2019-08-03 17:48-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: ../../../funcion/construirEdificio.py:19
+msgid "Ciudad donde construir:"
+msgstr "City where to build:"
+
+#: ../../../funcion/construirEdificio.py:43
+msgid "No se puede construir ningún edificio"
+msgstr "No building can be built"
+
+#: ../../../funcion/construirEdificio.py:47
+msgid ""
+"¿Qué edificio quiere construir?\n"
+msgstr ""
+"What building do you want to build?\n"
+
+#: ../../../funcion/construirEdificio.py:60
+msgid ""
+"¿En qué posición quiere contruir?\n"
+msgstr ""
+"In what position do you want to build?\n"
+
