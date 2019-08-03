@@ -15,6 +15,7 @@ t = gettext.translation('construirEdificio',
 _ = t.gettext
 
 def construirEdificio(s):
+	banner()
 
 	print(_('Ciudad donde construir:'))
 	ciudad = elegirCiudad(s)
@@ -28,8 +29,6 @@ def construirEdificio(s):
 		espacios_tipo = [ espacio for espacio in espacios if espacio['type'] == tipo ]
 		if len(espacios_tipo) > 0:
 			params = {'view': 'buildingGround', 'cityId': ciudad['id'], 'position': espacios_tipo[0]['position'], 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'actionRequest': s.token(), 'ajax': '1'}
-			print(tipo)
-			print(espacios_tipo[0])
 			resp = s.post(params=params, noIndex=True)
 			resp = json.loads(resp, strict=False)[1][1]
 			if resp == '':
