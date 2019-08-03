@@ -5,20 +5,8 @@ import re
 import json
 import gettext
 from ikabot.config import *
+from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import *
-from ikabot.helpers.gui import banner
-#import math
-#import traceback
-#from decimal import *
-#from ikabot.helpers.process import forkear
-#from ikabot.helpers.varios import addPuntos
-#from ikabot.helpers.gui import enter, banner
-#from ikabot.helpers.getJson import getCiudad
-#from ikabot.helpers.signals import setInfoSignal
-#from ikabot.helpers.planearViajes import esperarLlegada
-#from ikabot.helpers.pedirInfo import getIdsDeCiudades, read
-#from ikabot.helpers.botComm import *
-#from ikabot.helpers.recursos import *
 
 t = gettext.translation('construirEdificio', 
                         localedir, 
@@ -28,7 +16,7 @@ _ = t.gettext
 
 def construirEdificio(s):
 
-	print(_('Ciudad donde contruir:'))
+	print(_('Ciudad donde construir:'))
 	ciudad = elegirCiudad(s)
 	banner()
 
@@ -40,11 +28,21 @@ def construirEdificio(s):
 		espacios_tipo = [ espacio for espacio in espacios if espacio['type'] == tipo ]
 		if len(espacios_tipo) > 0:
 			params = {'view': 'buildingGround', 'cityId': ciudad['id'], 'position': espacios_tipo[0]['position'], 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'actionRequest': s.token(), 'ajax': '1'}
+			print(tipo)
+			print(espacios_tipo[0])
 			resp = s.post(params=params, noIndex=True)
-			html = json.loads(resp, strict=False)[1][1][1]
+			resp = json.loads(resp, strict=False)[1][1]
+			if resp == '':
+				continue
+			html = resp[1]
 			matches = re.findall(r'<li class="building (.+?)">\s*<div class="buildinginfo">\s*<div title="(.+?)"\s*class="buildingimg .+?"\s*onclick="ajaxHandlerCall\(\'.*?buildingId=(\d+)&', html)
 			for match in matches:
 				edificios.append({'building': match[0], 'name': match[1], 'buildingId': match[2], 'type': tipo})
+
+	if len(edificios) == 0:
+		print(_('No se puede construir ningún edificio'))
+		enter()
+		return
 
 	print(_('¿Qué edificio quiere construir?\n'))
 	i = 0
@@ -68,6 +66,7 @@ def construirEdificio(s):
 		opcion = opciones[rta - 1]
 		banner()
 	params = {'action': 'CityScreen', 'function': 'build', 'cityId': ciudad['id'], 'position': opcion['position'], 'building': edificio['buildingId'], 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'buildingGround', 'actionRequest': s.token(), 'ajax': '1'}
-	s.post(params=params, noIndex=True)
-	exit(input())
-
+	resp = s.post(params=params, noIndex=True)
+	msg = json.loads(resp, strict=False)[3][1][0]['text']
+	print(msg)
+	enter()
