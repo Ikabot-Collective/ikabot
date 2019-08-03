@@ -66,37 +66,28 @@ def getIsla(html):
 	return isla
 
 def getCiudad(html):
-	ciudad = re.search(r'"updateBackgroundData",([\s\S]*?),"(?:beachboys|spiesInside)', html).group(1) + '}'
 
-	ciudad = ciudad.replace(',"owner', ',"')
-	ciudad = ciudad.replace('islandXCoord','x')
-	ciudad = ciudad.replace('islandYCoord','y')
-	ciudad = '{"cityName"' + ciudad[len('{"name"'):]
-
-	remove = []
-
-	sub = re.search(r',"buildingSpeedupActive":\d', ciudad)
-	remove.append(sub.group())
-
-	sub = re.search(r',"showPirateFortressBackground":\d', ciudad)
-	remove.append(sub.group())
-
-	sub = re.search(r',"showPirateFortressShip":\d', ciudad)
-	remove.append(sub.group())
-
-	ciudad = borrar(ciudad, remove)
-
-	for elem in ['sea', 'land', 'shore', 'wall']:
-		ciudad = ciudad.replace('"building":"buildingGround {}"'.format(elem),'"name":"empty","building":"empty","type":"{}"'.format(elem))
-	ciudad = ciudad.replace('"isBusy":true,','"isBusy":false,')
-
-	ampliando = re.findall(r'(("name":"[\w\s\\]*","level":"\d*","isBusy":false,"canUpgrade":\w*,"isMaxLevel":\w*,"building":"\w*?)\sconstructionSite","(?:completed|countdownText|buildingimg).*?)}',ciudad)
-	for edificio in ampliando:
-		viejo = edificio[1]+'"'
-		nuevo = viejo.replace('"isBusy":false,', '"isBusy":true,')
-		ciudad = ciudad.replace(edificio[0], nuevo)
-
+	#ciudad = re.search(r'ikariam\.getClass\(ajax\.Responder, (\[\[[\s\S]*?\]\]\));', html).group(1)
+	ciudad = re.search(r'"updateBackgroundData",\s?([\s\S]*?)\],\["updateTemplateData"', html).group(1)
 	ciudad = json.loads(ciudad, strict=False)
+	
+	ciudad['Id'] = ciudad.pop('ownerId')
+	ciudad['Name'] = ciudad.pop('ownerName')
+	ciudad['x'] = ciudad.pop('islandXCoord')
+	ciudad['y'] = ciudad.pop('islandYCoord')
+
+	i = 0
+	for position in ciudad['position']:
+		position['position'] = i
+		i += 1
+		if 'constructionSite' in position['building']:
+			position['isBusy'] = True
+			position['building'] = position['building'][:-17]
+		elif 'buildingGround ' in position['building']:
+			position['name'] = 'empty'
+			position['type'] = position['building'].split(' ')[-1]
+			position['building'] = 'empty'
+
 	ciudad['propia'] = True
 	ciudad['recursos'] = getRecursosDisponibles(html, num=True)
 	ciudad['capacidad'] = getCapacidadDeAlmacenamiento(html)
@@ -107,9 +98,5 @@ def getCiudad(html):
 	for i in range(5):
 		ciudad['libre'].append( ciudad['capacidad'] - ciudad['recursos'][i] - ciudad['enventa'][i] )
 
-	i = 0
-	for edificio in ciudad['position']:
-		edificio['position'] = i
-		i += 1
 	# {'cityName': '', 'id': 'idCiudad', 'phase': 5, 'isCapital': True|False, 'Id': 'idJugador', 'Name': 'nombreJugador', 'islandId': 'idIsla', 'islandName': 'NombreIsla', 'x': 'Coordx', 'y': 'Coordy', 'underConstruction': -1, 'endUpgradeTime': -1, 'startUpgradeTime': -1, 'position': [{'name': 'nombreEdificio', 'position': num, 'level': 'nivel', 'isBusy': True|False, 'canUpgrade': True|False, 'isMaxLevel': True|False, 'building': 'nombreEnIngles'}, ...]}
 	return ciudad
