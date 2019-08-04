@@ -67,14 +67,14 @@ def getIsla(html):
 
 def getCiudad(html):
 
-	#ciudad = re.search(r'ikariam\.getClass\(ajax\.Responder, (\[\[[\s\S]*?\]\]\));', html).group(1)
 	ciudad = re.search(r'"updateBackgroundData",\s?([\s\S]*?)\],\["updateTemplateData"', html).group(1)
 	ciudad = json.loads(ciudad, strict=False)
-	
+
 	ciudad['Id'] = ciudad.pop('ownerId')
 	ciudad['Name'] = ciudad.pop('ownerName')
 	ciudad['x'] = ciudad.pop('islandXCoord')
 	ciudad['y'] = ciudad.pop('islandYCoord')
+	ciudad['cityName'] = ciudad['name']
 
 	i = 0
 	for position in ciudad['position']:
@@ -98,5 +98,4 @@ def getCiudad(html):
 	for i in range(5):
 		ciudad['libre'].append( ciudad['capacidad'] - ciudad['recursos'][i] - ciudad['enventa'][i] )
 
-	# {'cityName': '', 'id': 'idCiudad', 'phase': 5, 'isCapital': True|False, 'Id': 'idJugador', 'Name': 'nombreJugador', 'islandId': 'idIsla', 'islandName': 'NombreIsla', 'x': 'Coordx', 'y': 'Coordy', 'underConstruction': -1, 'endUpgradeTime': -1, 'startUpgradeTime': -1, 'position': [{'name': 'nombreEdificio', 'position': num, 'level': 'nivel', 'isBusy': True|False, 'canUpgrade': True|False, 'isMaxLevel': True|False, 'building': 'nombreEnIngles'}, ...]}
 	return ciudad
