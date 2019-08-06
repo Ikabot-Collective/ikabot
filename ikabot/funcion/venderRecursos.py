@@ -12,14 +12,6 @@ from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.process import forkear
 from ikabot.helpers.varios import addPuntos
 from ikabot.helpers.signals import setInfoSignal
-#import re
-#import math
-#import json
-#from decimal import *
-#from ikabot.helpers.getJson import getCiudad
-#from ikabot.helpers.signals import setInfoSignal
-#from ikabot.helpers.planearViajes import esperarLlegada
-#from ikabot.helpers.recursos import *
 
 t = gettext.translation('venderRecursos', 
                         localedir, 
@@ -53,7 +45,7 @@ def venderRecursos(s):
 	html = getStoreInfo(s, ciudad)
 	cap_venta = getCapacidadDeVenta(html)
 	recurso_disp = ciudad['recursos'][recurso]
-	print(_('¿Cuánto quiere vender? [max = {:d}]'.format(recurso_disp)))
+	print(_('¿Cuánto quiere vender? [max = {:d}]').format(recurso_disp))
 	vender = read(min=0, max=recurso_disp)
 	if vender == 0:
 		return
@@ -67,9 +59,9 @@ def venderRecursos(s):
 	print(_('\nSe venderá {} de {} a {}: {}').format(addPuntos(vender), tipoDeBien[recurso], addPuntos(precio), addPuntos(precio * vender)))
 	enter()
 
-	#forkear(s)
-	#if s.padre is True:
-	#	return
+	forkear(s)
+	if s.padre is True:
+		return
 
 	info = _('\nVendo {} de {}\n').format(addPuntos(vender), tipoDeBien[recurso])
 	setInfoSignal(s, info)
@@ -92,14 +84,20 @@ def venderRecurso(s, sell, recurso, precio, ciudad):
 	s.post(payloadPost=payloadPost)
 
 def do_it(s, porVender, precio, recurso, cap_venta, ciudad):
+	total = porVender
+	html = getStoreInfo(s, ciudad)
+	enVenta = vendiendo(html)[recurso]
+	porVender += enVenta
 	while True:
 		html = getStoreInfo(s, ciudad)
-		enVenta = re.findall(r'<input type="text" class="textfield"\s*size="\d+"\s*name=".*?"\s*id=".*?"\s*value="(\d+)"', html)[recurso]
+		enVenta = vendiendo(html)[recurso]
 		if enVenta < cap_venta:
 			espacio = cap_venta - enVenta
 			sell = porVender if espacio > porVender else espacio
 			porVender -= sell
 			venderRecurso(s, sell, recurso, precio, ciudad)
 			if porVender == 0:
+				msg = _('Se vendieron {} de {} a {:d}').format(addPuntos(total), tipoDeBien[recurso], precio)
+				sendToBot(msg)
 				break
 		time.sleep(60 * 2)

@@ -1,0 +1,69 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2019-08-06 13:45-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: ../../../funcion/venderRecursos.py:30
+msgid "¿Qué recurso quiere vender?"
+msgstr "Which resource do you want to sell?"
+
+#: ../../../funcion/venderRecursos.py:39
+msgid "No hay una Tienda contruida"
+msgstr "There is no store build"
+
+#: ../../../funcion/venderRecursos.py:48
+msgid "¿Cuánto quiere vender? [max = {:d}]"
+msgstr "How much do you want to sell? [max = {:d}]"
+
+#: ../../../funcion/venderRecursos.py:56
+msgid ""
+"\n"
+"¿A qué precio? [min = {:d}, max = {:d}]"
+msgstr ""
+"\n"
+"At what price? [min = {:d}, max = {:d}]"
+
+#: ../../../funcion/venderRecursos.py:59
+msgid ""
+"\n"
+"Se venderá {} de {} a {}: {}"
+msgstr ""
+"\n"
+"There will be sold {} of {} at {} each: {}"
+
+#: ../../../funcion/venderRecursos.py:66
+msgid ""
+"\n"
+"Vendo {} de {}\n"
+msgstr ""
+"\n"
+"I sell {} of {}\n"
+
+#: ../../../funcion/venderRecursos.py:71
+msgid ""
+"Error en:\n"
+"{}\n"
+"Causa:\n"
+"{}"
+msgstr ""
+"Error in:\n"
+"{}\n"
+"Cause:\n"
+"{}"
+
+#: ../../../funcion/venderRecursos.py:100
+msgid "Se vendieron {} de {} a {:d}"
+msgstr "{} of {} were sold at {} each"
+
