@@ -17,6 +17,7 @@ from ikabot.helpers.pedirInfo import getIdsDeCiudades, read
 from ikabot.config import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.recursos import *
+from ikabot.helpers.tienda import *
 
 t = gettext.translation('comprarRecursos', 
                         localedir, 
@@ -49,12 +50,6 @@ def asignarRecursoBuscado(s, ciudad):
 	}
 	rta = s.post(payloadPost=data)
 	return eleccion, recurso
-
-def getStoreHtml(s, ciudad):
-	url = 'view=branchOffice&cityId={}&position={:d}&currentCityId={}&backgroundView=city&actionRequest={}&ajax=1'.format(ciudad['id'], ciudad['pos'], ciudad['id'], s.token())
-	data = s.post(url)
-	json_data = json.loads(data, strict=False)
-	return json_data[1][1][1]
 
 def obtenerOfertas(s, ciudad):
 	html = getStoreHtml(s, ciudad)
@@ -93,22 +88,6 @@ def getOro(s, ciudad):
 	json_data = json.loads(data, strict=False)
 	oro = json_data[0][1]['headerData']['gold']
 	return int(oro.split('.')[0])
-
-def getCiudadesComerciales(s):
-	ids = getIdsDeCiudades(s)[0]
-	ciudades_comerciales = []
-	for idCiudad in ids:
-		html = s.get(urlCiudad + idCiudad)
-		ciudad = getCiudad(html)
-		for pos, edificio in enumerate(ciudad['position']):
-			if edificio['building'] == 'branchOffice':
-				ciudad['pos'] = pos
-				html = getStoreHtml(s, ciudad)
-				rangos = re.findall(r'<option.*?>(\d+)</option>', html)
-				ciudad['rango'] = int(rangos[-1])
-				ciudades_comerciales.append(ciudad)
-				break
-	return ciudades_comerciales
 
 def comprarRecursos(s):
 	banner()
