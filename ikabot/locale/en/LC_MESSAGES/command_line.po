@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2019-08-03 17:52-0300\n"
+"POT-Creation-Date: 2019-08-06 13:52-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,75 +15,79 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: ../../../command_line.py:57
+#: ../../../command_line.py:59
 msgid "(0)  Salir"
 msgstr "(0)  Exit"
 
-#: ../../../command_line.py:58
+#: ../../../command_line.py:60
 msgid "(1)  Lista de construcción"
 msgstr "(1)  Construction list"
 
-#: ../../../command_line.py:59
+#: ../../../command_line.py:61
 msgid "(2)  Enviar recursos"
 msgstr "(2)  Send resources"
 
-#: ../../../command_line.py:60
+#: ../../../command_line.py:62
 msgid "(3)  Repartir recurso"
 msgstr "(3)  Distribute resource"
 
-#: ../../../command_line.py:61
+#: ../../../command_line.py:63
 msgid "(4)  Estado de la cuenta"
 msgstr "(4)  Account status"
 
-#: ../../../command_line.py:62
+#: ../../../command_line.py:64
 msgid "(5)  Donar"
 msgstr "(5)  Donate"
 
-#: ../../../command_line.py:63
+#: ../../../command_line.py:65
 msgid "(6)  Buscar espacios nuevos"
 msgstr "(6)  Search for new spaces"
 
-#: ../../../command_line.py:64
+#: ../../../command_line.py:66
 msgid "(7)  Entrar diariamente"
 msgstr "(7)  Login daily"
 
-#: ../../../command_line.py:65
+#: ../../../command_line.py:67
 msgid "(8)  Alertar ataques"
 msgstr "(8)  Alert attacks"
 
-#: ../../../command_line.py:66
+#: ../../../command_line.py:68
 msgid "(9)  Bot donador"
 msgstr "(9)  Donate automatically"
 
-#: ../../../command_line.py:67
+#: ../../../command_line.py:69
 msgid "(10) Alertar poco vino"
 msgstr "(10) Alert wine running out"
 
-#: ../../../command_line.py:68
+#: ../../../command_line.py:70
 msgid "(11) Comprar recursos"
 msgstr "(11) Buy resources"
 
-#: ../../../command_line.py:69
-msgid "(12) Activar modo vacaciones"
-msgstr "(12) Activate vacation mode"
-
-#: ../../../command_line.py:70
-msgid "(13) Activar milagro"
-msgstr "(13) Activate miracle"
-
 #: ../../../command_line.py:71
-msgid "(14) Entrenar tropas"
-msgstr "(14) Train troops"
+msgid "(12) Vender recursos"
+msgstr "(12) Sell resources"
 
 #: ../../../command_line.py:72
-msgid "(15) Ver movimientos"
-msgstr "(15) See movements"
+msgid "(13) Activar modo vacaciones"
+msgstr "(13) Activate vacation mode"
 
 #: ../../../command_line.py:73
-msgid "(16) Construir edificio"
-msgstr "(16) Construct building"
+msgid "(14) Activar milagro"
+msgstr "(14) Activate miracle"
 
 #: ../../../command_line.py:74
-msgid "(17) Actualizar Ikabot"
-msgstr "(17) Update Ikabot"
+msgid "(15) Entrenar tropas"
+msgstr "(15) Train troops"
+
+#: ../../../command_line.py:75
+msgid "(16) Ver movimientos"
+msgstr "(16) See movements"
+
+#: ../../../command_line.py:76
+msgid "(17) Construir edificio"
+msgstr "(17) Construct building"
+
+#: ../../../command_line.py:77
+msgid "(18) Actualizar Ikabot"
+msgstr "(18) Update Ikabot"
 
