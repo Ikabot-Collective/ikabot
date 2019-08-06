@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2019-08-06 13:45-0300\n"
+"POT-Creation-Date: 2019-08-06 14:43-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -24,8 +24,8 @@ msgid "No hay una Tienda contruida"
 msgstr "There is no store build"
 
 #: ../../../funcion/venderRecursos.py:48
-msgid "¿Cuánto quiere vender? [max = {:d}]"
-msgstr "How much do you want to sell? [max = {:d}]"
+msgid "¿Cuánto quiere vender? [max = {}]"
+msgstr "How much do you want to sell? [max = {}]"
 
 #: ../../../funcion/venderRecursos.py:56
 msgid ""
@@ -63,7 +63,7 @@ msgstr ""
 "Cause:\n"
 "{}"
 
-#: ../../../funcion/venderRecursos.py:100
+#: ../../../funcion/venderRecursos.py:106
 msgid "Se vendieron {} de {} a {:d}"
 msgstr "{} of {} were sold at {} each"
 

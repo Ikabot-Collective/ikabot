@@ -45,7 +45,7 @@ def venderRecursos(s):
 	html = getStoreInfo(s, ciudad)
 	cap_venta = getCapacidadDeVenta(html)
 	recurso_disp = ciudad['recursos'][recurso]
-	print(_('¿Cuánto quiere vender? [max = {:d}]').format(recurso_disp))
+	print(_('¿Cuánto quiere vender? [max = {}]').format(addPuntos(recurso_disp)))
 	vender = read(min=0, max=recurso_disp)
 	if vender == 0:
 		return
@@ -86,18 +86,24 @@ def venderRecurso(s, sell, recurso, precio, ciudad):
 def do_it(s, porVender, precio, recurso, cap_venta, ciudad):
 	total = porVender
 	html = getStoreInfo(s, ciudad)
-	enVenta = vendiendo(html)[recurso]
-	porVender += enVenta
+	enVenta_inicial = vendiendo(html)[recurso]
 	while True:
 		html = getStoreInfo(s, ciudad)
 		enVenta = vendiendo(html)[recurso]
-		if enVenta < cap_venta:
+		if enVenta < getCapacidadDeVenta(html):
 			espacio = cap_venta - enVenta
-			sell = porVender if espacio > porVender else espacio
-			porVender -= sell
-			venderRecurso(s, sell, recurso, precio, ciudad)
+			ofertar = porVender if espacio > porVender else espacio
+			porVender -= ofertar
+			nuevaVenta = enVenta + ofertar
+			venderRecurso(s, nuevaVenta, recurso, precio, ciudad)
 			if porVender == 0:
-				msg = _('Se vendieron {} de {} a {:d}').format(addPuntos(total), tipoDeBien[recurso], precio)
-				sendToBot(msg)
 				break
+		time.sleep(60 * 2)
+	while True:
+		html = getStoreInfo(s, ciudad)
+		enVenta = vendiendo(html)[recurso]
+		if enVenta <= enVenta_inicial:
+			msg = _('Se vendieron {} de {} a {:d}').format(addPuntos(total), tipoDeBien[recurso], precio)
+			sendToBot(msg)
+			return
 		time.sleep(60 * 2)
