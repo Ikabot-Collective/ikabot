@@ -51,24 +51,28 @@ _Ikabot is a program written in python that grants iqual and even more functiona
 11. Buy resources
 
 	It allows you to choose what type of resource to buy and how much. It automatically purchases the different offers from the cheapest to the most expensive.
+	
+12. Sell resources
 
-12. Activate Vacation Mode
+	It allows you to choose what type of resource to sell and how much. It does not matter how much storage your store has, it automatically updates the offers as pĺayers buy from you. When it sells all the resources, it let's you know via Telegram.
+
+13. Activate Vacation Mode
 
 	Sets the account in vacation mode and closes _ikabot_.
 
-13. Activate miracle
+14. Activate miracle
 
 	It allows you to activate any miracle you have available.
 
-14. Train troops
+15. Train troops
 
 	It allows you to easily create large amounts of troops in one city. If there are not enough resources to train all of them, it will train all the troops it can and when it finishes it will try to train the rest. It also allows you to build your army in multiple small steps so that you can use it as fast as possible.
 
-15. See movements
+16. See movements
 
 	Let's you see movements coming to/from your cities. This includes attacks, transports, etc.
 
-16. Update Ikabot
+17. Update Ikabot
 
 	It tells you how to update _ikabot_
 	
