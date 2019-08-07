@@ -112,7 +112,7 @@ def do_it(s, porVender, precio, recurso, cap_venta, ciudad):
 			venderRecurso(s, nuevaVenta, recurso, precio, ciudad)
 			if porVender == 0:
 				break
-		time.sleep(60 * 2)
+		time.sleep(60 * 60 *  2)
 	while True:
 		html = getStoreInfo(s, ciudad)
 		enVenta = vendiendo(html)[recurso]
@@ -120,4 +120,4 @@ def do_it(s, porVender, precio, recurso, cap_venta, ciudad):
 			msg = _('Se vendieron {} de {} a {:d}').format(addPuntos(total), tipoDeBien[recurso], precio)
 			sendToBot(msg)
 			return
-		time.sleep(60 * 2)
+		time.sleep(60 * 60 *  2)
