@@ -49,7 +49,7 @@ def venderRecursos(s):
 	print(_('¿Qué recurso quiere vender?'))
 	for indice, bien in enumerate(tipoDeBien):
 		print('({:d}) {}'.format(indice+1, bien))
-	eleccion = read(min=1, max=5)
+	eleccion = read(min=1, max=len(tipoDeBien))
 	recurso = eleccion - 1
 	banner()
 
@@ -60,12 +60,14 @@ def venderRecursos(s):
 	vender = read(min=0, max=recurso_disp)
 	if vender == 0:
 		return
+	banner()
 
 	precio_max, precio_min = re.findall(r'\'upper\': (\d+),\s*\'lower\': (\d+)', html)[recurso]
 	precio_max = int(precio_max)
 	precio_min = int(precio_min)
 	print(_('\n¿A qué precio? [min = {:d}, max = {:d}]').format(precio_min, precio_max))
 	precio = read(min=precio_min, max=precio_max)
+	banner()
 
 	print(_('\nSe venderá {} de {} a {}: {}').format(addPuntos(vender), tipoDeBien[recurso], addPuntos(precio), addPuntos(precio * vender)))
 	print(_('\n¿Proceder? [Y/n]'))
