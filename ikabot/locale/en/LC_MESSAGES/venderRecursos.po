@@ -63,7 +63,7 @@ msgid ""
 "Vendo {} de {} en {}\n"
 msgstr ""
 "\n"
-"I sell {} of {}\n"
+"I sell {} of {} in {}\n"
 
 #: ../../../funcion/venderRecursos.py:85
 msgid ""
