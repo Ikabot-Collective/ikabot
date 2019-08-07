@@ -89,6 +89,13 @@ def getOro(s, ciudad):
 	oro = json_data[0][1]['headerData']['gold']
 	return int(oro.split('.')[0])
 
+def elegirCiudadComercial(ciudades_comerciales):
+	print(_('¿Desde cuál ciudad quiere comprar recursos?\n'))
+	for i, ciudad in enumerate(ciudades_comerciales):
+		print('({:d}) {}'.format(i + 1, ciudad['name']))
+	ind = read(min=1, max=len(ciudades_comerciales))
+	return ciudades_comerciales[ind - 1]
+
 def comprarRecursos(s):
 	banner()
 
@@ -98,7 +105,11 @@ def comprarRecursos(s):
 		enter()
 		return
 
-	ciudad = ciudades_comerciales[0] # por ahora solo uso la primera ciudad
+	if len(ciudades_comerciales) == 1:
+		ciudad = ciudades_comerciales[0]
+	else:
+		ciudad = elegirCiudadComercial(ciudades_comerciales)
+		banner()
 
 	numRecurso, recurso = asignarRecursoBuscado(s, ciudad)
 	banner()
