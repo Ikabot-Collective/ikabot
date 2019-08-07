@@ -24,14 +24,14 @@ def getStoreInfo(s, ciudad):
 	resp = s.post(params=params, noIndex=True)
 	return json.loads(resp, strict=False)[1][1][1]
 
-def venderRecursos(s):
-	banner()
+def elegirCiudadComercial(ciudades_comerciales):
+	print(_('¿En cuál ciudad quiere vender recursos?\n'))
+	for i, ciudad in enumerate(ciudades_comerciales):
+		print('({:d}) {}'.format(i + 1, ciudad['name']))
+	ind = read(min=1, max=len(ciudades_comerciales))
+	return ciudades_comerciales[ind - 1]
 
-	print(_('¿Qué recurso quiere vender?'))
-	for indice, bien in enumerate(tipoDeBien):
-		print('({:d}) {}'.format(indice+1, bien))
-	eleccion = read(min=1, max=5)
-	recurso = eleccion - 1
+def venderRecursos(s):
 	banner()
 
 	ciudades_comerciales = getCiudadesComerciales(s)
@@ -40,7 +40,18 @@ def venderRecursos(s):
 		enter()
 		return
 
-	ciudad = ciudades_comerciales[0] # por ahora solo uso la primera ciudad
+	if len(ciudades_comerciales) == 1:
+		ciudad = ciudades_comerciales[0]
+	else:
+		ciudad = elegirCiudadComercial(ciudades_comerciales)
+		banner()
+
+	print(_('¿Qué recurso quiere vender?'))
+	for indice, bien in enumerate(tipoDeBien):
+		print('({:d}) {}'.format(indice+1, bien))
+	eleccion = read(min=1, max=5)
+	recurso = eleccion - 1
+	banner()
 
 	html = getStoreInfo(s, ciudad)
 	cap_venta = getCapacidadDeVenta(html)
@@ -57,13 +68,16 @@ def venderRecursos(s):
 	precio = read(min=precio_min, max=precio_max)
 
 	print(_('\nSe venderá {} de {} a {}: {}').format(addPuntos(vender), tipoDeBien[recurso], addPuntos(precio), addPuntos(precio * vender)))
-	enter()
+	print(_('\n¿Proceder? [Y/n]'))
+	rta = read(values=['y', 'Y', 'n', 'N', ''])
+	if rta.lower() == 'n':
+		return
 
 	forkear(s)
 	if s.padre is True:
 		return
 
-	info = _('\nVendo {} de {}\n').format(addPuntos(vender), tipoDeBien[recurso])
+	info = _('\nVendo {} de {} en {}\n').format(addPuntos(vender), tipoDeBien[recurso], ciudad['name'])
 	setInfoSignal(s, info)
 	try:
 		do_it(s, vender, precio, recurso, cap_venta, ciudad)
