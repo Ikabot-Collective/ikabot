@@ -336,9 +336,3 @@ def normal_get(url, params={}):
 		return requests.get(url, params=params)
 	except requests.exceptions.ConnectionError:
 		sys.exit(_('Fallo la conexion a internet'))
-
-def normal_post(url, data={}, params={}):
-	try:
-		return requests.post(url, data=data, params=params)
-	except requests.exceptions.ConnectionError:
-		sys.exit(_('Fallo la conexion a internet'))
