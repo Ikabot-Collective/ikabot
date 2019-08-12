@@ -12,7 +12,7 @@ def borrar(texto, ocurrencias):
 
 def getCiudadanosDisponibles(html):
 	ciudadanosDisp = re.search(r'js_GlobalMenu_citizens">(.*?)</span>', html).group(1)
-	return int(ciudadanosDisp.replace(',', ''))
+	return int(ciudadanosDisp.replace(',', '').replace('.', ''))
 
 def enVenta(html):
 	rta = re.search(r'branchOfficeResources: JSON\.parse\(\'{\\"resource\\":\\"(\d+)\\",\\"1\\":\\"(\d+)\\",\\"2\\":\\"(\d+)\\",\\"3\\":\\"(\d+)\\",\\"4\\":\\"(\d+)\\"}\'\)', html)
