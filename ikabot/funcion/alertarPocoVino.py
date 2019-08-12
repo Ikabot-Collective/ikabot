@@ -46,9 +46,12 @@ def alertarPocoVino(s):
 		s.logout()
 
 def do_it(s, horas):
+	ids, ciudades = getIdsDeCiudades(s)
 	while True:
+		ids, ciudades_new = getIdsDeCiudades(s)
+		if len(ciudades_new) != len(ciudades):
+			ciudades = ciudades_new
 
-		ids, ciudades = getIdsDeCiudades(s)
 		for city in ciudades:
 			if 'avisado' not in ciudades[city]:
 				ciudades[city]['avisado'] = False
