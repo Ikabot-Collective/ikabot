@@ -53,6 +53,42 @@ def venderRecursos(s):
 	recurso = eleccion - 1
 	banner()
 
+	data = {'cityId': ciudad['id'], 'position': ciudad['pos'], 'view': 'branchOffice', 'activeTab': 'bargain', 'type': '333', 'searchResource': str(recurso), 'range': ciudad['rango'], 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'branchOffice', 'currentTab': 'bargain', 'actionRequest': s.token(), 'ajax': '1'}
+	resp = s.post(payloadPost=data)
+	html = json.loads(resp, strict=False)[1][1][1]
+	matches = re.findall(r'<td class="short_text80">(.*?)\s*<br/>\((.*?)\)\s*</td>\s*<td>(.*?)</td>\s*.*\s*.*\s*.*\s*<td style="white-space:nowrap;">(\d+) .*\s*.*\s*<td>(\d+)<', html)
+
+	cantidades = [ match[2] for match in matches ]
+	max_venta = 0
+	profit    = 0
+	for match in matches:
+		city, user, cant, precio, dist = match
+		cantidad = cant.replace(',', '').replace('.', '')
+		cantidad = int(cantidad)
+		max_venta += cantidad
+		profit += cantidad * int(precio)
+
+	disp_venta = ciudad['recursos'][recurso]
+	vender = disp_venta if disp_venta < max_venta else max_venta
+
+	print(_('\n¿Cuánto quiere vender? [max = {}]').format(addPuntos(vender)))
+	vender = read(min=0, max=vender)
+
+	faltaComprar = vender
+	profit    = 0
+	for match in matches:
+		city, user, cant, precio, dist = match
+		cantidad = cant.replace(',', '').replace('.', '')
+		cantidad = int(cantidad)
+		compra = cantidad if cantidad < faltaComprar else faltaComprar
+		faltaComprar -= compra
+		profit += compra * int(precio)
+	print(_('\n¿Vender {} de {} por un total de {}? [Y/n]').format(addPuntos(vender), tipoDeBien[recurso], addPuntos(profit)))
+	rta = read(values=['y', 'Y', 'n', 'N', ''])
+	if rta.lower() == 'n':
+		return
+	exit(input())
+
 	html = getStoreInfo(s, ciudad)
 	cap_venta = getCapacidadDeVenta(html)
 	recurso_disp = ciudad['recursos'][recurso]
