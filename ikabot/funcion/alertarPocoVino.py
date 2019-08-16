@@ -9,7 +9,7 @@ from decimal import *
 from ikabot.config import *
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.process import forkear
-from ikabot.helpers.gui import enter
+from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import getIdsDeCiudades
 from ikabot.helpers.varios import diasHorasMinutos
 from ikabot.helpers.recursos import *
@@ -27,6 +27,7 @@ getcontext().prec = 30
 def alertarPocoVino(s):
 	if botValido(s) is False:
 		return
+	banner()
 	horas = read(msg=_('¿Cuántas horas deben quedar hasta que se acabe el vino en una ciudad para que es dé aviso?: '),min=1)
 	print(_('Se avisará cuando el vino se acabe en {:d} horas en alguna ciudad.').format(horas))
 	enter()
@@ -46,9 +47,12 @@ def alertarPocoVino(s):
 		s.logout()
 
 def do_it(s, horas):
+	ids, ciudades = getIdsDeCiudades(s)
 	while True:
+		ids, ciudades_new = getIdsDeCiudades(s)
+		if len(ciudades_new) != len(ciudades):
+			ciudades = ciudades_new
 
-		ids, ciudades = getIdsDeCiudades(s)
 		for city in ciudades:
 			if 'avisado' not in ciudades[city]:
 				ciudades[city]['avisado'] = False
