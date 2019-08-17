@@ -2,8 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import time
+import math
 import gettext
 import traceback
+from decimal import *
 from ikabot.config import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.tienda import *
@@ -56,13 +58,13 @@ def venderRecursos(s):
 	data = {'cityId': ciudad['id'], 'position': ciudad['pos'], 'view': 'branchOffice', 'activeTab': 'bargain', 'type': '333', 'searchResource': str(recurso), 'range': ciudad['rango'], 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'branchOffice', 'currentTab': 'bargain', 'actionRequest': s.token(), 'ajax': '1'}
 	resp = s.post(payloadPost=data)
 	html = json.loads(resp, strict=False)[1][1][1]
-	matches = re.findall(r'<td class="short_text80">(.*?)\s*<br/>\((.*?)\)\s*</td>\s*<td>(.*?)</td>\s*.*\s*.*\s*.*\s*<td style="white-space:nowrap;">(\d+) .*\s*.*\s*<td>(\d+)<', html)
+	matches = re.findall(r'destinationCityId=(\d+)[\s\S]*?<td class="short_text80">(.*?)\s*<br/>\((.*?)\)\s*</td>\s*<td>(.*?)</td>[\s\S]*?<td style="white-space:nowrap;">(\d+)[\s\S]*<td>(\d+)<', html)
 
 	cantidades = [ match[2] for match in matches ]
 	max_venta = 0
 	profit    = 0
 	for match in matches:
-		city, user, cant, precio, dist = match
+		idDestino, city, user, cant, precio, dist = match
 		cantidad = cant.replace(',', '').replace('.', '')
 		cantidad = int(cantidad)
 		max_venta += cantidad
@@ -74,19 +76,35 @@ def venderRecursos(s):
 	print(_('\n¿Cuánto quiere vender? [max = {}]').format(addPuntos(vender)))
 	vender = read(min=0, max=vender)
 
-	faltaComprar = vender
+	faltaVender = vender
 	profit    = 0
 	for match in matches:
 		city, user, cant, precio, dist = match
 		cantidad = cant.replace(',', '').replace('.', '')
 		cantidad = int(cantidad)
-		compra = cantidad if cantidad < faltaComprar else faltaComprar
-		faltaComprar -= compra
+		compra = cantidad if cantidad < faltaVender else faltaVender
+		faltaVender -= compra
 		profit += compra * int(precio)
 	print(_('\n¿Vender {} de {} por un total de {}? [Y/n]').format(addPuntos(vender), tipoDeBien[recurso], addPuntos(profit)))
 	rta = read(values=['y', 'Y', 'n', 'N', ''])
 	if rta.lower() == 'n':
 		return
+
+	forkear(s)
+	if s.padre is True:
+		return
+
+	info = _('\nVendo {} de {} en {}\n').format(addPuntos(vender), tipoDeBien[recurso], ciudad['name'])
+	setInfoSignal(s, info)
+	try:
+		do_it(s, vender,  matches, recurso, ciudad)
+	except:
+		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
+		sendToBot(msg)
+	finally:
+		s.logout()
+
+
 	exit(input())
 
 	html = getStoreInfo(s, ciudad)
@@ -135,7 +153,24 @@ def venderRecurso(s, sell, recurso, precio, ciudad):
 		payloadPost['tradegood{:d}Price'.format(recurso)] = str(precio)
 	s.post(payloadPost=payloadPost)
 
-def do_it(s, porVender, precio, recurso, cap_venta, ciudad):
+def do_it(s, porVender, precio, recurso, ciudad):
+	for match in matches:
+		idDestino, city, user, cant, precio, dist = match
+		cantidad = cant.replace(',', '').replace('.', '')
+		cantidad = int(cantidad)
+		compra = cantidad if cantidad < faltaComprar else faltaComprar
+		porVender -= compra
+		barcos_usados = int(math.ceil((Decimal(compra) / Decimal(500))))
+		data = {'action': 'transportOperations', 'function': 'sellGoodsAtAnotherBranchOffice', 'cityId': ciudad['id'], 'destinationCityId': idDestino, 'oldView': 'branchOffice', 'position': ciudad['pos'], 'avatar2Name': user, 'city2Name': city, 'type': '333', 'activeTab': 'bargain', 'transportDisplayPrice': '0', 'premiumTransporter': '0', 'capacity': '5', 'max_capacity': '5', 'jetPropulsion': '0', 'transporters': str(barcos_usados), 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'takeOffer', 'currentTab': 'bargain', 'actionRequest': s.token(), 'ajax': '1'}
+		if recurso == 0:
+			data['resource'] = str(precio)
+			data['resourcePrice'] = str(compra)
+		else:
+			data['tradegood{:d}Price'.format(recurso)] = str(precio)
+			data['cargo_tradegood4{:d}'.format(recurso)] = str(compra)
+		s.post(payloadPost=data)
+
+def do_it2(s, porVender, precio, recurso, cap_venta, ciudad):
 	total = porVender
 	html = getStoreInfo(s, ciudad)
 	enVenta_inicial = vendiendo(html)[recurso]
