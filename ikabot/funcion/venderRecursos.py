@@ -59,9 +59,8 @@ def venderRecursos(s):
 	data = {'cityId': ciudad['id'], 'position': ciudad['pos'], 'view': 'branchOffice', 'activeTab': 'bargain', 'type': '333', 'searchResource': str(recurso), 'range': ciudad['rango'], 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'branchOffice', 'currentTab': 'bargain', 'actionRequest': s.token(), 'ajax': '1'}
 	resp = s.post(payloadPost=data)
 	html = json.loads(resp, strict=False)[1][1][1]
-	matches = re.findall(r'destinationCityId=(\d+)[\s\S]*?<td class="short_text80">(.*?)\s*<br/>\((.*?)\)\s*</td>\s*<td>(.*?)</td>[\s\S]*?<td style="white-space:nowrap;">(\d+)[\s\S]*<td>(\d+)<', html)
+	matches = re.findall(r'destinationCityId=(\d+)&oldView=branchOffice&activeTab=bargain&cityId=\d+&position=\d+&type=\d+&resource=\d+"><img\s*src=".*?</td>\s*</tr>\s*<tr class=".*?" title="">\s*<td class=".*?">(\S*)\s*<br/>\((.*?)\)\s*</td>\s*<td>(.*?)</td>\s*<td><img src=".*?"\s*alt=".*?"\s*title=".*?"/></td>\s*<td style="white-space:nowrap;">(\d+)\s*<img src=".*?"\s*class=".*?"/>.*?</td>\s*<td>(\d+)<', html)
 
-	cantidades = [ match[2] for match in matches ]
 	max_venta = 0
 	profit    = 0
 	for match in matches:
