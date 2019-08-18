@@ -209,7 +209,7 @@ class Sesion:
 		self.s.cookies.__delitem__('PHPSESSID')
 		resp = json.loads(resp, strict=False)
 		if 'url' not in resp:
-			exit('Error')
+			exit(resp)
 		url = resp['url']
 		match = re.search(r'https://s\d+-\w{2}\.ikariam\.gameforge\.com/index\.php\?', url)
 		if match is None:
