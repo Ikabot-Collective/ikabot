@@ -59,12 +59,12 @@ def venderRecursos(s):
 	data = {'cityId': ciudad['id'], 'position': ciudad['pos'], 'view': 'branchOffice', 'activeTab': 'bargain', 'type': '333', 'searchResource': str(recurso), 'range': ciudad['rango'], 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'branchOffice', 'currentTab': 'bargain', 'actionRequest': s.token(), 'ajax': '1'}
 	resp = s.post(payloadPost=data)
 	html = json.loads(resp, strict=False)[1][1][1]
-	matches = re.findall(r'destinationCityId=(\d+)&oldView=branchOffice&activeTab=bargain&cityId=\d+&position=\d+&type=\d+&resource=\d+"><img\s*src=".*?</td>\s*</tr>\s*<tr class=".*?" title="">\s*<td class=".*?">(\S*)\s*<br/>\((.*?)\)\s*</td>\s*<td>(.*?)</td>\s*<td><img src=".*?"\s*alt=".*?"\s*title=".*?"/></td>\s*<td style="white-space:nowrap;">(\d+)\s*<img src=".*?"\s*class=".*?"/>.*?</td>\s*<td>(\d+)<', html)
+	matches = re.findall(r'<td class=".*?">(\S*)\s*<br/>\((.*?)\)\s*</td>\s*<td>(.*?)</td>\s*<td><img src=".*?"\s*alt=".*?"\s*title=".*?"/></td>\s*<td style="white-space:nowrap;">(\d+)\s*<img src=".*?"\s*class=".*?"/>.*?</td>\s*<td>(\d+)</td>\s*<td><a onclick="ajaxHandlerCall\(this\.href\);return false;"\s*href="\?view=takeOffer&destinationCityId=(\d+)&', html)
 
 	max_venta = 0
 	profit    = 0
 	for match in matches:
-		idDestino, city, user, cant, precio, dist = match
+		city, user, cant, precio, dist, idDestino = match
 		cantidad = cant.replace(',', '').replace('.', '')
 		cantidad = int(cantidad)
 		max_venta += cantidad
@@ -79,7 +79,7 @@ def venderRecursos(s):
 	faltaVender = vender
 	profit    = 0
 	for match in matches:
-		idDestino, city, user, cant, precio, dist = match
+		city, user, cant, precio, dist, idDestino = match
 		cantidad = cant.replace(',', '').replace('.', '')
 		cantidad = int(cantidad)
 		compra = cantidad if cantidad < faltaVender else faltaVender
@@ -106,7 +106,7 @@ def venderRecursos(s):
 
 def do_it(s, porVender, ofertas, recurso, ciudad):
 	for oferta in ofertas:
-		idDestino, city, user, cant, precio, dist = oferta
+		city, user, cant, precio, dist, idDestino = oferta
 		quiereComprar = cant.replace(',', '').replace('.', '')
 		quiereComprar = int(quiereComprar)
 		while True:
@@ -125,7 +125,7 @@ def do_it(s, porVender, ofertas, recurso, ciudad):
 				data['resourcePrice'] = str(cant_venta)
 			else:
 				data['tradegood{:d}Price'.format(recurso)] = str(precio)
-				data['cargo_tradegood4{:d}'.format(recurso)] = str(cant_venta)
+				data['cargo_tradegood{:d}'.format(recurso)] = str(cant_venta)
 			s.post(payloadPost=data)
 
 			if porVender == 0:
