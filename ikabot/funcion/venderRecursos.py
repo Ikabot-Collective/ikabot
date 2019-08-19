@@ -121,6 +121,8 @@ def do_it(s, porVender, ofertas, recurso, ciudad):
 			else:
 				data['tradegood{:d}Price'.format(recurso)] = str(precio)
 				data['cargo_tradegood{:d}'.format(recurso)] = str(cant_venta)
+			msg = 'vendo {} a {} ({})'.format(addPuntos(cant_venta), city, user)
+			sendToBot(msg)
 			s.post(payloadPost=data)
 
 			if porVender == 0:
