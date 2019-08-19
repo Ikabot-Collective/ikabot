@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2019-08-06 22:53-0300\n"
+"POT-Creation-Date: 2019-08-18 21:13-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,49 +15,37 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: ../../../funcion/venderRecursos.py:28
+#: ../../../funcion/venderRecursos.py:26
 msgid ""
 "¿En cuál ciudad quiere vender recursos?\n"
 msgstr ""
 "In which city do you want to sell resources?\n"
 
-#: ../../../funcion/venderRecursos.py:39
+#: ../../../funcion/venderRecursos.py:37
 msgid "No hay una Tienda contruida"
 msgstr "There is no store build"
 
-#: ../../../funcion/venderRecursos.py:49
+#: ../../../funcion/venderRecursos.py:47
 msgid "¿Qué recurso quiere vender?"
 msgstr "Which resource do you want to sell?"
-
-#: ../../../funcion/venderRecursos.py:59
-msgid "¿Cuánto quiere vender? [max = {}]"
-msgstr "How much do you want to sell? [max = {}]"
-
-#: ../../../funcion/venderRecursos.py:67
-msgid ""
-"\n"
-"¿A qué precio? [min = {:d}, max = {:d}]"
-msgstr ""
-"\n"
-"At what price? [min = {:d}, max = {:d}]"
-
-#: ../../../funcion/venderRecursos.py:70
-msgid ""
-"\n"
-"Se venderá {} de {} a {}: {}"
-msgstr ""
-"\n"
-"There will be sold {} of {} at {} each: {}"
 
 #: ../../../funcion/venderRecursos.py:71
 msgid ""
 "\n"
-"¿Proceder? [Y/n]"
+"¿Cuánto quiere vender? [max = {}]"
 msgstr ""
 "\n"
-"Proceed? [Y/n]"
+"How much do you want to sell? [max = {}]"
 
-#: ../../../funcion/venderRecursos.py:80
+#: ../../../funcion/venderRecursos.py:83
+msgid ""
+"\n"
+"¿Vender {} de {} por un total de {}? [Y/n]"
+msgstr ""
+"\n"
+"Sell {} of {} for a total of {}? [Y/n]"
+
+#: ../../../funcion/venderRecursos.py:92
 msgid ""
 "\n"
 "Vendo {} de {} en {}\n"
@@ -65,7 +53,7 @@ msgstr ""
 "\n"
 "I sell {} of {} in {}\n"
 
-#: ../../../funcion/venderRecursos.py:85
+#: ../../../funcion/venderRecursos.py:97
 msgid ""
 "Error en:\n"
 "{}\n"
@@ -76,8 +64,4 @@ msgstr ""
 "{}\n"
 "Cause:\n"
 "{}"
-
-#: ../../../funcion/venderRecursos.py:120
-msgid "Se vendieron {} de {} a {:d}"
-msgstr "{} of {} were sold at {} each"
 
