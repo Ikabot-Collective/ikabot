@@ -22,11 +22,6 @@ t = gettext.translation('venderRecursos',
                         fallback=True)
 _ = t.gettext
 
-def getStoreInfo(s, ciudad):
-	params = {'view': 'branchOfficeOwnOffers', 'activeTab': 'tab_branchOfficeOwnOffers', 'cityId': ciudad['id'], 'position': ciudad['pos'], 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'branchOfficeOwnOffers', 'currentTab': 'tab_branchOfficeOwnOffers', 'actionRequest': s.token(), 'ajax': '1'}
-	resp = s.post(params=params, noIndex=True)
-	return json.loads(resp, strict=False)[1][1][1]
-
 def elegirCiudadComercial(ciudades_comerciales):
 	print(_('¿En cuál ciudad quiere vender recursos?\n'))
 	for i, ciudad in enumerate(ciudades_comerciales):
