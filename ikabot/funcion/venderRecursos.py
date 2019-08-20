@@ -42,14 +42,30 @@ def venderAOfertas(s, ciudad, recurso):
 	html = json.loads(resp, strict=False)[1][1][1]
 	matches = re.findall(r'<td class=".*?">(\S*)\s*<br/>\((.*?)\)\s*</td>\s*<td>(.*?)</td>\s*<td><img src=".*?"\s*alt=".*?"\s*title=".*?"/></td>\s*<td style="white-space:nowrap;">(\d+)\s*<img src=".*?"\s*class=".*?"/>.*?</td>\s*<td>(\d+)</td>\s*<td><a onclick="ajaxHandlerCall\(this\.href\);return false;"\s*href="\?view=takeOffer&destinationCityId=(\d+)&', html)
 
+	if len(matches) == 0:
+		print(_('No hay ofertas disponibles.'))
+		enter()
+		return
+
+	print(_('¿A cuáles ofertas le quiere vender?\n'))
+
+	ofertas = []
 	max_venta = 0
 	profit    = 0
 	for match in matches:
 		city, user, cant, precio, dist, idDestino = match
 		cantidad = cant.replace(',', '').replace('.', '')
 		cantidad = int(cantidad)
+		msg = _('{} ({}): {} a {} c/u ({} en total) [Y/n]').format(city, user, addPuntos(cantidad), precio, addPuntos(int(precio)*cantidad))
+		rta = read(msg=msg, values=['y', 'Y', 'n', 'N', ''])
+		if rta.lower() == 'n':
+			continue
+		ofertas.append(match)
 		max_venta += cantidad
 		profit += cantidad * int(precio)
+	banner()
+	if len(ofertas) == 0:
+		return
 
 	disp_venta = ciudad['recursos'][recurso]
 	vender = disp_venta if disp_venta < max_venta else max_venta
@@ -59,8 +75,8 @@ def venderAOfertas(s, ciudad, recurso):
 
 	faltaVender = vender
 	profit    = 0
-	for match in matches:
-		city, user, cant, precio, dist, idDestino = match
+	for oferta in ofertas:
+		city, user, cant, precio, dist, idDestino = oferta
 		cantidad = cant.replace(',', '').replace('.', '')
 		cantidad = int(cantidad)
 		compra = cantidad if cantidad < faltaVender else faltaVender
@@ -78,7 +94,7 @@ def venderAOfertas(s, ciudad, recurso):
 	info = _('\nVendo {} de {} en {}\n').format(addPuntos(vender), tipoDeBien[recurso], ciudad['name'])
 	setInfoSignal(s, info)
 	try:
-		do_it1(s, vender,  matches, recurso, ciudad)
+		do_it1(s, vender,  ofertas, recurso, ciudad)
 	except:
 		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
 		sendToBot(msg)
