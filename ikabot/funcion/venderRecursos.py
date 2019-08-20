@@ -29,26 +29,12 @@ def elegirCiudadComercial(ciudades_comerciales):
 	ind = read(min=1, max=len(ciudades_comerciales))
 	return ciudades_comerciales[ind - 1]
 
-def venderRecursos(s):
-	banner()
+def getStoreInfo(s, ciudad):
+	params = {'view': 'branchOfficeOwnOffers', 'activeTab': 'tab_branchOfficeOwnOffers', 'cityId': ciudad['id'], 'position': ciudad['pos'], 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'branchOfficeOwnOffers', 'currentTab': 'tab_branchOfficeOwnOffers', 'actionRequest': s.token(), 'ajax': '1'}
+	resp = s.post(params=params, noIndex=True)
+	return json.loads(resp, strict=False)[1][1][1]
 
-	ciudades_comerciales = getCiudadesComerciales(s)
-	if len(ciudades_comerciales) == 0:
-		print(_('No hay una Tienda contruida'))
-		enter()
-		return
-
-	if len(ciudades_comerciales) == 1:
-		ciudad = ciudades_comerciales[0]
-	else:
-		ciudad = elegirCiudadComercial(ciudades_comerciales)
-		banner()
-
-	print(_('¿Qué recurso quiere vender?'))
-	for indice, bien in enumerate(tipoDeBien):
-		print('({:d}) {}'.format(indice+1, bien))
-	eleccion = read(min=1, max=len(tipoDeBien))
-	recurso = eleccion - 1
+def venderAOfertas(s, ciudad, recurso):
 	banner()
 
 	data = {'cityId': ciudad['id'], 'position': ciudad['pos'], 'view': 'branchOffice', 'activeTab': 'bargain', 'type': '333', 'searchResource': str(recurso), 'range': ciudad['rango'], 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'branchOffice', 'currentTab': 'bargain', 'actionRequest': s.token(), 'ajax': '1'}
@@ -92,14 +78,78 @@ def venderRecursos(s):
 	info = _('\nVendo {} de {} en {}\n').format(addPuntos(vender), tipoDeBien[recurso], ciudad['name'])
 	setInfoSignal(s, info)
 	try:
-		do_it(s, vender,  matches, recurso, ciudad)
+		do_it1(s, vender,  matches, recurso, ciudad)
 	except:
 		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
 		sendToBot(msg)
 	finally:
 		s.logout()
 
-def do_it(s, porVender, ofertas, recurso, ciudad):
+def crearOferta(s, ciudad, recurso):
+	banner()
+
+	html = getStoreInfo(s, ciudad)
+	cap_venta = getCapacidadDeVenta(html)
+	recurso_disp = ciudad['recursos'][recurso]
+	print(_('¿Cuánto quiere vender? [max = {}]').format(addPuntos(recurso_disp)))
+	vender = read(min=0, max=recurso_disp)
+	if vender == 0:
+		return
+
+	precio_max, precio_min = re.findall(r'\'upper\': (\d+),\s*\'lower\': (\d+)', html)[recurso]
+	precio_max = int(precio_max)
+	precio_min = int(precio_min)
+	print(_('\n¿A qué precio? [min = {:d}, max = {:d}]').format(precio_min, precio_max))
+	precio = read(min=precio_min, max=precio_max)
+
+	print(_('\nSe venderá {} de {} a {}: {}').format(addPuntos(vender), tipoDeBien[recurso], addPuntos(precio), addPuntos(precio * vender)))
+	print(_('\n¿Proceder? [Y/n]'))
+	rta = read(values=['y', 'Y', 'n', 'N', ''])
+	if rta.lower() == 'n':
+		return
+
+	forkear(s)
+	if s.padre is True:
+		return
+
+	info = _('\nVendo {} de {} en {}\n').format(addPuntos(vender), tipoDeBien[recurso], ciudad['name'])
+	setInfoSignal(s, info)
+	try:
+		do_it2(s, vender, precio, recurso, cap_venta, ciudad)
+	except:
+		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
+		sendToBot(msg)
+	finally:
+		s.logout()
+
+def venderRecursos(s):
+	banner()
+
+	ciudades_comerciales = getCiudadesComerciales(s)
+	if len(ciudades_comerciales) == 0:
+		print(_('No hay una Tienda contruida'))
+		enter()
+		return
+
+	if len(ciudades_comerciales) == 1:
+		ciudad = ciudades_comerciales[0]
+	else:
+		ciudad = elegirCiudadComercial(ciudades_comerciales)
+		banner()
+
+	print(_('¿Qué recurso quiere vender?'))
+	for indice, bien in enumerate(tipoDeBien):
+		print('({:d}) {}'.format(indice+1, bien))
+	eleccion = read(min=1, max=len(tipoDeBien))
+	recurso = eleccion - 1
+	banner()
+
+	print(_('¿Quiere vender a ofertas existenes (1) o quiere hacer su propia oferta (2)?'))
+	rta = read(min=1, max=2)
+	[venderAOfertas, crearOferta][rta - 1](s, ciudad, recurso)
+
+
+def do_it1(s, porVender, ofertas, recurso, ciudad):
 	sendToBot('quiero vender: {}'.format(addPuntos(porVender)))
 	for oferta in ofertas:
 		city, user, cant, precio, dist, idDestino = oferta
@@ -134,3 +184,29 @@ def do_it(s, porVender, ofertas, recurso, ciudad):
 			if quiereComprar == 0:
 				sendToBot('quiereComprar == 0')
 				break
+
+def do_it2(s, porVender, precio, recurso, cap_venta, ciudad):
+	total = porVender
+	html = getStoreInfo(s, ciudad)
+	enVenta_inicial = vendiendo(html)[recurso]
+	while True:
+		html = getStoreInfo(s, ciudad)
+		enVenta = vendiendo(html)[recurso]
+		if enVenta < getCapacidadDeVenta(html):
+			espacio = cap_venta - enVenta
+			ofertar = porVender if espacio > porVender else espacio
+			porVender -= ofertar
+			nuevaVenta = enVenta + ofertar
+			venderRecurso(s, nuevaVenta, recurso, precio, ciudad)
+			if porVender == 0:
+				break
+		time.sleep(60 * 60 *  2)
+
+	while True:
+		html = getStoreInfo(s, ciudad)
+		enVenta = vendiendo(html)[recurso]
+		if enVenta <= enVenta_inicial:
+			msg = _('Se vendieron {} de {} a {:d}').format(addPuntos(total), tipoDeBien[recurso], precio)
+			sendToBot(msg)
+			return
+		time.sleep(60 * 60 *  2)
