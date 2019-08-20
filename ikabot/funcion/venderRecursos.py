@@ -100,12 +100,15 @@ def venderRecursos(s):
 		s.logout()
 
 def do_it(s, porVender, ofertas, recurso, ciudad):
+	sendToBot('quiero vender: {}'.format(addPuntos(porVender)))
 	for oferta in ofertas:
 		city, user, cant, precio, dist, idDestino = oferta
 		quiereComprar = cant.replace(',', '').replace('.', '')
 		quiereComprar = int(quiereComprar)
+		sendToBot('{} quiere comprar {}'.format(city, addPuntos(quiereComprar)))
 		while True:
 			barcos_disponibles = esperarLlegada(s)
+			sendToBot('{:d} barcos_disponibles'.format(barcos_disponibles))
 			cant_venta = quiereComprar if quiereComprar < porVender else porVender
 			barcos_necesarios = int(math.ceil((Decimal(cant_venta) / Decimal(500))))
 			barcos_usados = barcos_disponibles if barcos_disponibles < barcos_necesarios else barcos_necesarios
@@ -126,6 +129,8 @@ def do_it(s, porVender, ofertas, recurso, ciudad):
 			s.post(payloadPost=data)
 
 			if porVender == 0:
+				sendToBot('porVender == 0')
 				return
 			if quiereComprar == 0:
+				sendToBot('quiereComprar == 0')
 				break
