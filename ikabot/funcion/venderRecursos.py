@@ -34,13 +34,17 @@ def getStoreInfo(s, ciudad):
 	resp = s.post(params=params, noIndex=True)
 	return json.loads(resp, strict=False)[1][1][1]
 
-def venderAOfertas(s, ciudad, recurso):
-	banner()
 
+def getOfertas(s, ciudad, recurso):
 	data = {'cityId': ciudad['id'], 'position': ciudad['pos'], 'view': 'branchOffice', 'activeTab': 'bargain', 'type': '333', 'searchResource': str(recurso), 'range': ciudad['rango'], 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'branchOffice', 'currentTab': 'bargain', 'actionRequest': s.token(), 'ajax': '1'}
 	resp = s.post(payloadPost=data)
 	html = json.loads(resp, strict=False)[1][1][1]
-	matches = re.findall(r'<td class=".*?">(\S*)\s*<br/>\((.*?)\)\s*</td>\s*<td>(.*?)</td>\s*<td><img src=".*?"\s*alt=".*?"\s*title=".*?"/></td>\s*<td style="white-space:nowrap;">(\d+)\s*<img src=".*?"\s*class=".*?"/>.*?</td>\s*<td>(\d+)</td>\s*<td><a onclick="ajaxHandlerCall\(this\.href\);return false;"\s*href="\?view=takeOffer&destinationCityId=(\d+)&', html)
+	return re.findall(r'<td class=".*?">(\S*)\s*<br/>\((.*?)\)\s*</td>\s*<td>(.*?)</td>\s*<td><img src=".*?"\s*alt=".*?"\s*title=".*?"/></td>\s*<td style="white-space:nowrap;">(\d+)\s*<img src=".*?"\s*class=".*?"/>.*?</td>\s*<td>(\d+)</td>\s*<td><a onclick="ajaxHandlerCall\(this\.href\);return false;"\s*href="\?view=takeOffer&destinationCityId=(\d+)&', html)
+
+def venderAOfertas(s, ciudad, recurso):
+	banner()
+
+	matches = getOfertas(s, ciudad, recurso)
 
 	if len(matches) == 0:
 		print(_('No hay ofertas disponibles.'))
@@ -166,15 +170,25 @@ def venderRecursos(s):
 
 
 def do_it1(s, porVender, ofertas, recurso, ciudad):
-	sendToBot('quiero vender: {}'.format(addPuntos(porVender)))
+
 	for oferta in ofertas:
 		city, user, cant, precio, dist, idDestino = oferta
 		quiereComprar = cant.replace(',', '').replace('.', '')
 		quiereComprar = int(quiereComprar)
-		sendToBot('{} quiere comprar {}'.format(city, addPuntos(quiereComprar)))
 		while True:
 			barcos_disponibles = esperarLlegada(s)
-			sendToBot('{:d} barcos_disponibles'.format(barcos_disponibles))
+			ofertas_new = getOfertas(s, ciudad, recurso)
+			for oferta_new in ofertas_new:
+				city_new, user_new, cant_new, precio_new, dist_new, idDestino_new = oferta_new
+				if idDestino == idDestino_new and precio <= precio_new:
+					quiereComprar_new = cant_new.replace(',', '').replace('.', '')
+					quiereComprar_new = int(quiereComprar)
+					precio = precio_new # actualizo el precio de venta
+					if quiereComprar_new < quiereComprar:
+						quiereComprar = quiereComprar_new # actualizo la cantidad disponible para vender
+					break
+			else:
+				break
 			cant_venta = quiereComprar if quiereComprar < porVender else porVender
 			barcos_necesarios = int(math.ceil((Decimal(cant_venta) / Decimal(500))))
 			barcos_usados = barcos_disponibles if barcos_disponibles < barcos_necesarios else barcos_necesarios
@@ -213,7 +227,16 @@ def do_it2(s, porVender, precio, recurso, cap_venta, ciudad):
 			ofertar = porVender if espacio > porVender else espacio
 			porVender -= ofertar
 			nuevaVenta = enVenta + ofertar
-			venderRecurso(s, nuevaVenta, recurso, precio, ciudad)
+
+			payloadPost = {'cityId': ciudad['id'], 'position': ciudad['pos'], 'action': 'CityScreen', 'function': 'updateOffers', 'resourceTradeType': '444', 'resource': '0', 'resourcePrice': '10', 'tradegood1TradeType': '444', 'tradegood1': '0', 'tradegood1Price': '11', 'tradegood2TradeType': '444', 'tradegood2': '0', 'tradegood2Price': '12', 'tradegood3TradeType': '444', 'tradegood3': '0', 'tradegood3Price': '17', 'tradegood4TradeType': '444', 'tradegood4': '0', 'tradegood4Price': '5', 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'branchOfficeOwnOffers', 'currentTab': 'tab_branchOfficeOwnOffers', 'actionRequest': s.token(), 'ajax': '1'}
+			if recurso == 0:
+				payloadPost['resource'] = str(nuevaVenta)
+				payloadPost['resourcePrice'] = str(precio)
+			else:
+				payloadPost['tradegood{:d}'.format(recurso)] = str(nuevaVenta)
+				payloadPost['tradegood{:d}Price'.format(recurso)] = str(precio)
+			s.post(payloadPost=payloadPost)
+
 			if porVender == 0:
 				break
 		time.sleep(60 * 60 *  2)
