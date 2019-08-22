@@ -145,9 +145,9 @@ class Sesion:
 		else:
 			msg = _('La sesión se venció, renovando sesión')
 			sendToBotDebug(msg, debugON_session)
-			self.__login()
+			self.__login(3)
 
-	def __login(self):
+	def __login(self, retries=0):
 		if not self.logged:
 			banner()
 
@@ -209,7 +209,16 @@ class Sesion:
 		self.s.cookies.__delitem__('PHPSESSID')
 		resp = json.loads(resp, strict=False)
 		if 'url' not in resp:
-			exit(resp)
+			if retries > 0:
+				return self.__login(retries-1)
+			else:
+				msg = 'Login Error'
+				if self.padre:
+					print(msg)
+					exit()
+				else:
+					exit(msg)
+
 		url = resp['url']
 		match = re.search(r'https://s\d+-\w{2}\.ikariam\.gameforge\.com/index\.php\?', url)
 		if match is None:
@@ -247,7 +256,7 @@ class Sesion:
 		self.__backoff()
 		if self.__sesionActiva():
 			try:
-				self.__login()
+				self.__login(3)
 			except Exception:
 				self.__expiroLaSesion()
 		else:
