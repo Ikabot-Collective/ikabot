@@ -3,6 +3,7 @@
 
 import time
 import math
+import json
 import gettext
 import traceback
 from decimal import *
@@ -168,7 +169,6 @@ def venderRecursos(s):
 	rta = read(min=1, max=2)
 	[venderAOfertas, crearOferta][rta - 1](s, ciudad, recurso)
 
-
 def do_it1(s, porVender, ofertas, recurso, ciudad):
 
 	for oferta in ofertas:
@@ -177,18 +177,18 @@ def do_it1(s, porVender, ofertas, recurso, ciudad):
 		quiereComprar = int(quiereComprar)
 		while True:
 			barcos_disponibles = esperarLlegada(s)
-			ofertas_new = getOfertas(s, ciudad, recurso)
-			for oferta_new in ofertas_new:
-				city_new, user_new, cant_new, precio_new, dist_new, idDestino_new = oferta_new
-				if idDestino == idDestino_new and precio <= precio_new:
-					quiereComprar_new = cant_new.replace(',', '').replace('.', '')
-					quiereComprar_new = int(quiereComprar)
-					precio = precio_new # actualizo el precio de venta
-					if quiereComprar_new < quiereComprar:
-						quiereComprar = quiereComprar_new # actualizo la cantidad disponible para vender
-					break
-			else:
-				break
+			#ofertas_new = getOfertas(s, ciudad, recurso)
+			#for oferta_new in ofertas_new:
+			#	city_new, user_new, cant_new, precio_new, dist_new, idDestino_new = oferta_new
+			#	if idDestino == idDestino_new and precio <= precio_new:
+			#		quiereComprar_new = cant_new.replace(',', '').replace('.', '')
+			#		quiereComprar_new = int(quiereComprar)
+			#		precio = precio_new # actualizo el precio de venta
+			#		if quiereComprar_new < quiereComprar:
+			#			quiereComprar = quiereComprar_new # actualizo la cantidad disponible para vender
+			#		break
+			#else:
+			#	break
 			cant_venta = quiereComprar if quiereComprar < porVender else porVender
 			barcos_necesarios = int(math.ceil((Decimal(cant_venta) / Decimal(500))))
 			barcos_usados = barcos_disponibles if barcos_disponibles < barcos_necesarios else barcos_necesarios
@@ -206,7 +206,12 @@ def do_it1(s, porVender, ofertas, recurso, ciudad):
 				data['cargo_tradegood{:d}'.format(recurso)] = str(cant_venta)
 			msg = 'vendo {} a {} ({})'.format(addPuntos(cant_venta), city, user)
 			sendToBot(msg)
-			s.post(payloadPost=data)
+			resp = s.post(payloadPost=data)
+
+			resp = json.loads(resp, strict=False)[3]
+			if resp[0] == 'provideFeedback':
+				sendToBot( resp[1][0]['text'] )
+
 
 			if porVender == 0:
 				sendToBot('porVender == 0')
