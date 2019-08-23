@@ -301,9 +301,12 @@ class Sesion:
 		html = self.get()
 		return re.search(r'actionRequest"?:\s*"(.*?)"', html).group(1)
 
-	def get(self, url='', params={}, ignoreExpire=False):
+	def get(self, url='', params={}, ignoreExpire=False, noIndex=False):
 		self.__checkCookie()
-		url = self.urlBase + url
+		if noIndex:
+			url = self.urlBase.replace('index.php', '') + url
+		else:
+			url = self.urlBase + url
 		while True:
 			try:
 				html = self.s.get(url, params=params).text
