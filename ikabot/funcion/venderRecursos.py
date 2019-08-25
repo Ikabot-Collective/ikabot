@@ -195,10 +195,8 @@ def do_it1(s, porVender, ofertas, recurso, ciudad):
 			s.post(payloadPost=data)
 
 			if porVender == 0:
-				sendToBot('porVender == 0')
 				return
 			if quiereComprar == 0:
-				sendToBot('quiereComprar == 0')
 				break
 
 def do_it2(s, porVender, precio, recurso, cap_venta, ciudad):
