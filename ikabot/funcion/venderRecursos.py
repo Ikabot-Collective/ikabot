@@ -40,7 +40,7 @@ def getOfertas(s, ciudad, recurso):
 	data = {'cityId': ciudad['id'], 'position': ciudad['pos'], 'view': 'branchOffice', 'activeTab': 'bargain', 'type': '333', 'searchResource': str(recurso), 'range': ciudad['rango'], 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'branchOffice', 'currentTab': 'bargain', 'actionRequest': s.token(), 'ajax': '1'}
 	resp = s.post(payloadPost=data)
 	html = json.loads(resp, strict=False)[1][1][1]
-	return re.findall(r'<td class=".*?">(\S*)\s*<br/>\((.*?)\)\s*</td>\s*<td>(.*?)</td>\s*<td><img src=".*?"\s*alt=".*?"\s*title=".*?"/></td>\s*<td style="white-space:nowrap;">(\d+)\s*<img src=".*?"\s*class=".*?"/>.*?</td>\s*<td>(\d+)</td>\s*<td><a onclick="ajaxHandlerCall\(this\.href\);return false;"\s*href="\?view=takeOffer&destinationCityId=(\d+)&', html)
+	return re.findall(r'<td class=".*?">(.*?)<br/>\((.*?)\)\s*</td>\s*<td>(.*?)</td>\s*<td><img src=".*?"\s*alt=".*?"\s*title=".*?"/></td>\s*<td style="white-space:nowrap;">(\d+)\s*<img src=".*?"\s*class=".*?"/>.*?</td>\s*<td>(\d+)</td>\s*<td><a onclick="ajaxHandlerCall\(this\.href\);return false;"\s*href="\?view=takeOffer&destinationCityId=(\d+)&', html)
 
 def venderAOfertas(s, ciudad, recurso):
 	banner()
@@ -59,6 +59,7 @@ def venderAOfertas(s, ciudad, recurso):
 	profit    = 0
 	for match in matches:
 		city, user, cant, precio, dist, idDestino = match
+		city = city.strip()
 		cantidad = cant.replace(',', '').replace('.', '')
 		cantidad = int(cantidad)
 		msg = _('{} ({}): {} a {} c/u ({} en total) [Y/n]').format(city, user, addPuntos(cantidad), precio, addPuntos(int(precio)*cantidad))
@@ -82,6 +83,7 @@ def venderAOfertas(s, ciudad, recurso):
 	profit    = 0
 	for oferta in ofertas:
 		city, user, cant, precio, dist, idDestino = oferta
+		city = city.strip()
 		cantidad = cant.replace(',', '').replace('.', '')
 		cantidad = int(cantidad)
 		compra = cantidad if cantidad < faltaVender else faltaVender
@@ -172,6 +174,7 @@ def venderRecursos(s):
 def do_it1(s, porVender, ofertas, recurso, ciudad):
 	for oferta in ofertas:
 		city, user, cant, precio, dist, idDestino = oferta
+		city = city.strip()
 		quiereComprar = cant.replace(',', '').replace('.', '')
 		quiereComprar = int(quiereComprar)
 		while True:
