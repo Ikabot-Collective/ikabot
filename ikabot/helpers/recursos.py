@@ -15,7 +15,7 @@ def getCapacidadDeAlmacenamiento(html):
 	return int(almacenamiento)
 
 def getConsumoDeVino(html):
-	rta = re.search(r'GlobalMenu_WineConsumption"\s*class="rightText">\s*(\d*)\s', html)
+	rta = re.search(r'GlobalMenu_WineConsumption"\s*class="rightText">\s*(\d+)\s', html)
 	if rta:
 		return int(rta.group(1))
 	return 0

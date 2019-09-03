@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2019-04-09 07:57-0300\n"
+"POT-Creation-Date: 2019-09-03 10:16-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,31 +19,39 @@ msgstr ""
 msgid "Barcos {:d}/{:d}"
 msgstr "Ships {:d}/{:d}"
 
-#: ../../../funcion/getStatus.py:41
+#: ../../../funcion/getStatus.py:29
+msgid ""
+"\n"
+"¿De qué ciudad quiere ver el estado?"
+msgstr ""
+"\n"
+"Of which city do you want to see the state?"
+
+#: ../../../funcion/getStatus.py:43
 msgid "Almacenamiento:"
 msgstr "Storage:"
 
-#: ../../../funcion/getStatus.py:43
+#: ../../../funcion/getStatus.py:45
 msgid "Recursos:"
 msgstr "Resources:"
 
-#: ../../../funcion/getStatus.py:44
+#: ../../../funcion/getStatus.py:46
 msgid "Madera {1}{2}{0} Vino {3}{4}{0} Marmol {5}{6}{0} Cristal {7}{8}{0} Azufre {9}{10}{0}"
 msgstr "Wood {1}{2}{0} Wine {3}{4}{0} Marble {5}{6}{0} Cristal {7}{8}{0} Sulfur {9}{10}{0}"
 
-#: ../../../funcion/getStatus.py:47
+#: ../../../funcion/getStatus.py:49
 msgid "Producción:"
 msgstr "Production:"
 
-#: ../../../funcion/getStatus.py:48
+#: ../../../funcion/getStatus.py:50
 msgid "Madera:{} {}:{}"
 msgstr "Wood:{} {}:{}"
 
-#: ../../../funcion/getStatus.py:50
+#: ../../../funcion/getStatus.py:52
 msgid "{}{}No se consume vino!{}"
 msgstr "{}{}Does not consume wine!{}"
 
-#: ../../../funcion/getStatus.py:52
+#: ../../../funcion/getStatus.py:54
 msgid ""
 "Hay vino para:\n"
 "∞"
@@ -51,7 +59,7 @@ msgstr ""
 "There is wine for:\n"
 "∞"
 
-#: ../../../funcion/getStatus.py:57
+#: ../../../funcion/getStatus.py:59
 msgid ""
 "Hay vino para:\n"
 "{}"
