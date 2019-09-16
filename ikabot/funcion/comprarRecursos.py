@@ -60,7 +60,7 @@ def obtenerOfertas(s, ciudad):
 		'ciudadDestino': hit[0],
 		'jugadorAComprar' : hit[1],
 		'bienesXminuto': int(hit[2]),
-		'cantidadDisponible': int(hit[3].replace(',', '').replace('<', '')),
+		'cantidadDisponible': int(hit[3].replace(',', '').replace('.', '').replace('<', '')),
 		'tipo': hit[4],
 		'precio': int(hit[5]),
 		'destinationCityId': hit[6],
