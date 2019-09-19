@@ -66,7 +66,18 @@ def do_it(s, idsCiudades, ciudades_dict):
 			idIsla = ciudades_dict[idCiudad]['isla']
 			tipo = ciudades_dict[idCiudad]['tipo']
 			if tipo:
-				s.post(payloadPost={'islandId': idIsla, 'type': tipo, 'action': 'IslandScreen', 'function': 'donate', 'donation': madera, 'backgroundView': 'island', 'templateView': 'resource', 'actionRequest': s.token(), 'ajax': '1'})
+				#s.get('view=city&cityId={}'.format(idCiudad), noIndex=True)
+				#s.get(params={'view': 'island', 'oldBackgroundView': 'city', 'containerWidth': '1519px', 'containerHeight': '600px', 'worldviewWidth': '1519px', 'worldviewHeight': '554px', 'cityTop': '-143px', 'cityLeft': '-1869px', 'cityRight': '', 'cityWorldviewScale': '1'}, noIndex=True)
+				#s.post(payloadPost={"islandId": idIsla, "type": tipo, "action": "IslandScreen", "function": "donate", "donation": madera, "oldBackgroundView": "city", "containerWidth": "1536px", "containerHeight": "728px", "worldviewWidth": "1536px", "worldviewHeight": "682px", "cityTop": "-143px", "cityLeft": "-1869px", "cityWorldviewScale": "1", "backgroundView": "island", "currentIslandId": idIsla, "templateView": tipo, "actionRequest": s.token(), "ajax": "1"})
+				#s.get(urlIsla + idIsla)
+				#s.get(urlCiudad + idCiudad)
+
+				#s.post(payloadPost={'action': 'header', 'function': 'changeCurrentCity', 'actionRequest': s.token(), 'oldView': 'city', 'cityId': idCiudad, 'currentCityId': idCiudad, 'backgroundView': 'city', 'ajax': '1'})
+				url = 'view=tradegood&type={0}&islandId={1}&backgroundView=island&currentIslandId={1}&actionRequest={2}&ajax=1'.format(tipo, idIsla, s.token())
+				s.post(url)
+				s.post(payloadPost={'islandId': idIsla, 'type': tipo, 'action': 'IslandScreen', 'function': 'donate', 'donation': madera, 'backgroundView': 'island', 'templateView': tipo, 'actionRequest': s.token(), 'ajax': '1'})
 		msg = _('Doné automaticamente.')
 		sendToBotDebug(msg, debugON_botDonador)
+		sendToBotDebug(msg, True)
+		exit()
 		time.sleep(24*60*60)
