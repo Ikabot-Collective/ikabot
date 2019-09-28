@@ -67,15 +67,15 @@ def menuRutaComercial(s):
 		if ciudadD['propia']:
 			msg = ''
 			if resto[0] > mad:
-				msg += _('{} más de madera\n').format(addPuntos(mad))
+				msg += _('{} más de madera\n').format(addPuntos(mad if mad > 0 else 0))
 			if resto[1] > vin:
-				msg += _('{} más de vino\n').format(addPuntos(vin))
+				msg += _('{} más de vino\n').format(addPuntos(vin if vin > 0 else 0))
 			if resto[2] > mar:
-				msg += _('{} más de marmol\n').format(addPuntos(mar))
+				msg += _('{} más de marmol\n').format(addPuntos(mar if mar > 0 else 0))
 			if resto[3] > cri:
-				msg += _('{} más de cristal\n').format(addPuntos(cri))
+				msg += _('{} más de cristal\n').format(addPuntos(cri if cri > 0 else 0))
 			if resto[4] > azu:
-				msg += _('{} más de azufre\n').format(addPuntos(azu))
+				msg += _('{} más de azufre\n').format(addPuntos(azu if azu > 0 else 0))
 			if msg:
 				print(_('Solo puede almacenar:\n{}').format(msg))
 		print(_('Disponible:'))
