@@ -3,8 +3,11 @@
 
 import re
 import time
+import json
+import math
 import gettext
 import traceback
+from decimal import *
 from ikabot.config import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.varios import *
@@ -16,7 +19,6 @@ from ikabot.helpers.planearViajes import *
 from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.recursos import getRecursosDisponibles
-
 t = gettext.translation('subirEdificio', 
                         localedir, 
                         languages=idiomas,
@@ -112,10 +114,62 @@ def getReductores(ciudad):
 	return (carpinteria, oficina, prensa, optico, area)
 
 def recursosNecesarios(s, ciudad, edificio, desde, hasta):
-	nombre = edificio['building']
-	(carpinteria, oficina, prensa, optico, area)  = getReductores(ciudad)
-	url = 'http://ycedespacho.hol.es/ikabot.php?edificio={}&desde={}&hasta={}&carpinteria={}&oficina={}&prensa={}&optico={}&area={}'.format(nombre, desde, hasta, carpinteria, oficina, prensa, optico, area)
-	rta = normal_get(url).text.split(',')
+	url = 'view=buildingDetail&buildingId=0&helpId=1&backgroundView=city&currentCityId={}&templateView=ikipedia&actionRequest={}&ajax=1'.format(ciudad['id'], s.token())
+	rta = s.post(url)
+	rta = json.loads(rta, strict=False)
+	html = rta[1][1][1]
+
+	builingName = edificio['building']
+	match = re.search(rf'<div class="(?:selected)? button_building {builingName}"\s*onmouseover="\$\(this\)\.addClass\(\'hover\'\);" onmouseout="\$\(this\)\.removeClass\(\'hover\'\);"\s*onclick="ajaxHandlerCall\(\'\?(.*?)\'\);', html)
+	url = match.group(1)
+	url += 'backgroundView=city&currentCityId={}&templateView=buildingDetail&actionRequest={}&ajax=1'.format(ciudad['id'], s.token())
+	rta = s.post(url)
+	rta = json.loads(rta, strict=False)
+	html_costos = rta[1][1][1]
+
+	lv = int(edificio['level'])
+	lv = str(lv + 1)
+	match = re.search(rf'class="level">{lv}</td>\s*<td class="costs">(.*?)</td>', html_costos)
+	costo_total = match.group(1).replace(',', '').replace('.', '')
+	costo_total = int(costo_total)
+
+	url = 'view={0}&cityId={1}&position={2}&backgroundView=city&currentCityId={1}&actionRequest={3}&ajax=1'.format(edificio['building'], ciudad['id'], edificio['position'], s.token())
+	rta = s.post(url)
+	rta = json.loads(rta, strict=False)
+	html = rta[1][1][1]
+
+	match = re.search(r'class="wood .*?<span class="accesshint">.*?</span>(.*?)</li>', html)
+	costo_real = match.group(1).replace(',', '').replace('.', '')
+	costo_real = int(costo_real)
+
+	reduccion = Decimal(costo_real) / Decimal(costo_total)
+
+	matches = re.findall(r'<td class="level">\d+</td>(?:\s+<td class="costs">.*?</td>)+', html_costos)
+
+	reductores = getReductores(ciudad)
+	print('reductores')
+	print(reductores)
+
+	costos = [0,0,0,0,0]
+	for match in matches:
+		lv = re.search(r'"level">(\d+)</td>', match).group(1)
+		lv = int(lv)
+		if lv <= desde:
+			continue
+		costs = re.findall(r'<td class="costs">([\d,\.]*)</td>', match)
+		print(costs)
+		for i in range(len(costs)):
+			costo = costs[i]
+			costo = costo.replace(',', '').replace('.', '')
+			costo = int(costo)
+			reduccion = 100 - reductores[i]
+			reduccion = Decimal(reduccion) / Decimal(100)
+			costo *= reduccion
+			print(costo)
+			print(type(costo))
+			costos[i] += math.ceil(costo)
+
+	exit()
 	return list(map(int, rta))
 
 def planearAbastecimiento(s, destino, origenes, faltantes):
