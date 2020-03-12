@@ -127,50 +127,61 @@ def recursosNecesarios(s, ciudad, edificio, desde, hasta):
 	rta = json.loads(rta, strict=False)
 	html_costos = rta[1][1][1]
 
-	lv = int(edificio['level'])
-	lv = str(lv + 1)
-	match = re.search(rf'class="level">{lv}</td>\s*<td class="costs">(.*?)</td>', html_costos)
-	costo_total = match.group(1).replace(',', '').replace('.', '')
-	costo_total = int(costo_total)
-
-	url = 'view={0}&cityId={1}&position={2}&backgroundView=city&currentCityId={1}&actionRequest={3}&ajax=1'.format(edificio['building'], ciudad['id'], edificio['position'], s.token())
+	url = 'view=noViewChange&researchType=economy&backgroundView=city&currentCityId={}&templateView=researchAdvisor&actionRequest={}&ajax=1'.format(ciudad['id'], s.token())
 	rta = s.post(url)
 	rta = json.loads(rta, strict=False)
-	html = rta[1][1][1]
+	studies = rta[2][1]['new_js_params']
+	studies = json.loads(studies, strict=False)
+	studies = studies['currResearchType']
 
-	match = re.search(r'class="wood .*?<span class="accesshint">.*?</span>(.*?)</li>', html)
-	costo_real = match.group(1).replace(',', '').replace('.', '')
-	costo_real = int(costo_real)
+	reduccion_inv = 0
+	for study in studies:
+		link = studies[study]['aHref']
+		isExplored = studies[study]['liClass'] == 'explored'
 
-	reduccion = Decimal(costo_real) / Decimal(costo_total)
+		if '2020' in link and isExplored:
+			reduccion_inv += 2
+		elif '2060' in link and isExplored:
+			reduccion_inv += 4
+		elif '2100' in link and isExplored:
+			reduccion_inv += 8
+
+	reduccion_inv /= 100
+	reduccion_inv = 1 - reduccion_inv
+
+	reductores = getReductores(ciudad)
 
 	matches = re.findall(r'<td class="level">\d+</td>(?:\s+<td class="costs">.*?</td>)+', html_costos)
 
-	reductores = getReductores(ciudad)
-	print('reductores')
-	print(reductores)
-
 	costos = [0,0,0,0,0]
+	niveles_a_subir = 0
 	for match in matches:
 		lv = re.search(r'"level">(\d+)</td>', match).group(1)
 		lv = int(lv)
 		if lv <= desde:
 			continue
+		niveles_a_subir += 1
+
 		costs = re.findall(r'<td class="costs">([\d,\.]*)</td>', match)
-		print(costs)
 		for i in range(len(costs)):
 			costo = costs[i]
 			costo = costo.replace(',', '').replace('.', '')
 			costo = int(costo)
-			reduccion = 100 - reductores[i]
-			reduccion = Decimal(reduccion) / Decimal(100)
-			costo *= reduccion
-			print(costo)
-			print(type(costo))
-			costos[i] += math.ceil(costo)
 
-	exit()
-	return list(map(int, rta))
+			costo_real = Decimal(costo)
+			costo_original = Decimal(costo_real) / Decimal(reduccion_inv)
+			costo_real -= Decimal(costo_original) * (Decimal(reductores[i]) / Decimal(100))
+
+			costos[i] += math.ceil(costo_real)
+
+	if niveles_a_subir < hasta - desde:
+		print(_('Este edificio solo permite subir {:d} niveles más').format(niveles_a_subir))
+		msg = _('Subir {:d} niveles? [Y/n]:').format(niveles_a_subir)
+		eleccion = read(msg=msg, values=['Y', 'y', 'N', 'n', ''])
+		if eleccion.lower() == 'n':
+			raise Exception('Too many levels')
+
+	return costos
 
 def planearAbastecimiento(s, destino, origenes, faltantes):
 	rutas = []
@@ -297,41 +308,40 @@ def subirEdificios(s):
 	hasta = desde + niveles
 	try:
 		(madera, vino, marmol, cristal, azufre) = recursosNecesarios(s, ciudad, edificio, desde, hasta)
-		assert madera != 0
-		html = s.get(urlCiudad + idCiudad)
-		(maderaDisp, vinoDisp, marmolDisp, cristalDisp, azufreDisp) = getRecursosDisponibles(html, num=True)
-		if maderaDisp < madera or vinoDisp < vino or marmolDisp < marmol or cristalDisp < cristal or azufreDisp < azufre:
-			print(_('\nFalta:'))
-			if maderaDisp < madera:
-				print('{} de madera'.format(addPuntos(madera - maderaDisp)))
-			if vinoDisp < vino:
-				print('{} de vino'.format(addPuntos(vino - vinoDisp)))
-			if marmolDisp < marmol:
-				print('{} de marmol'.format(addPuntos(marmol - marmolDisp)))
-			if cristalDisp < cristal:
-				print('{} de cristal'.format(addPuntos(cristal - cristalDisp)))
-			if azufreDisp < azufre:
-				print('{} de azufre'.format(addPuntos(azufre - azufreDisp)))
+	except Exception:
+		return
+	html = s.get(urlCiudad + idCiudad)
+	(maderaDisp, vinoDisp, marmolDisp, cristalDisp, azufreDisp) = getRecursosDisponibles(html, num=True)
+	if maderaDisp < madera or vinoDisp < vino or marmolDisp < marmol or cristalDisp < cristal or azufreDisp < azufre:
+		print(_('\nFalta:'))
+		if maderaDisp < madera:
+			print('{} de madera'.format(addPuntos(madera - maderaDisp)))
+		if vinoDisp < vino:
+			print('{} de vino'.format(addPuntos(vino - vinoDisp)))
+		if marmolDisp < marmol:
+			print('{} de marmol'.format(addPuntos(marmol - marmolDisp)))
+		if cristalDisp < cristal:
+			print('{} de cristal'.format(addPuntos(cristal - cristalDisp)))
+		if azufreDisp < azufre:
+			print('{} de azufre'.format(addPuntos(azufre - azufreDisp)))
 
-			print(_('¿Transportar los recursos automáticamente? [Y/n]'))
-			rta = read(values=['y', 'Y', 'n', 'N', ''])
-			if rta.lower() == 'n':
-				print(_('¿Proceder de todos modos? [Y/n]'))
-				rta = read(values=['y', 'Y', 'n', 'N', ''])
-				if rta.lower() == 'n':
-					return
-			else:
-				esperarRecursos = True
-				faltante = [madera - maderaDisp, vino - vinoDisp, marmol - marmolDisp, cristal - cristalDisp, azufre - azufreDisp]
-				obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante)
-		else:
-			print(_('\nTiene materiales suficientes'))
-			print(_('¿Proceder? [Y/n]'))
+		print(_('¿Transportar los recursos automáticamente? [Y/n]'))
+		rta = read(values=['y', 'Y', 'n', 'N', ''])
+		if rta.lower() == 'n':
+			print(_('¿Proceder de todos modos? [Y/n]'))
 			rta = read(values=['y', 'Y', 'n', 'N', ''])
 			if rta.lower() == 'n':
 				return
-	except AssertionError:
-		pass
+		else:
+			esperarRecursos = True
+			faltante = [madera - maderaDisp, vino - vinoDisp, marmol - marmolDisp, cristal - cristalDisp, azufre - azufreDisp]
+			obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante)
+	else:
+		print(_('\nTiene materiales suficientes'))
+		print(_('¿Proceder? [Y/n]'))
+		rta = read(values=['y', 'Y', 'n', 'N', ''])
+		if rta.lower() == 'n':
+			return
 	forkear(s)
 	if s.padre is True:
 		return
