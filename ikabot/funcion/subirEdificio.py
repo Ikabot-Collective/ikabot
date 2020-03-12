@@ -153,17 +153,27 @@ def recursosNecesarios(s, ciudad, edificio, desde, hasta):
 
 	matches = re.findall(r'<td class="level">\d+</td>(?:\s+<td class="costs">.*?</td>)+', html_costos)
 
+	recursos_tipo = re.findall(r'<th class="costs"><img src="skin/resources/icon_(.*?)\.png"/></th>', html_costos)[:-1]
+	recurso_index = {'wood': 0, 'wine': 1, 'marble': 2, 'glass': 3, 'sulfur': 4}
+
 	costos = [0,0,0,0,0]
 	niveles_a_subir = 0
 	for match in matches:
 		lv = re.search(r'"level">(\d+)</td>', match).group(1)
 		lv = int(lv)
+
 		if lv <= desde:
 			continue
+		if lv > hasta:
+			break
+
 		niveles_a_subir += 1
 
 		costs = re.findall(r'<td class="costs">([\d,\.]*)</td>', match)
 		for i in range(len(costs)):
+			recurso = recursos_tipo[i]
+			index = recurso_index[recurso]
+
 			costo = costs[i]
 			costo = costo.replace(',', '').replace('.', '')
 			costo = int(costo)
@@ -172,7 +182,7 @@ def recursosNecesarios(s, ciudad, edificio, desde, hasta):
 			costo_original = Decimal(costo_real) / Decimal(reduccion_inv)
 			costo_real -= Decimal(costo_original) * (Decimal(reductores[i]) / Decimal(100))
 
-			costos[i] += math.ceil(costo_real)
+			costos[index] += math.ceil(costo_real)
 
 	if niveles_a_subir < hasta - desde:
 		print(_('Este edificio solo permite subir {:d} niveles más').format(niveles_a_subir))
