@@ -104,7 +104,7 @@ def venderAOfertas(s, ciudad, recurso):
 		do_it1(s, vender,  ofertas, recurso, ciudad)
 	except:
 		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
-		sendToBot(msg)
+		sendToBot(s, msg)
 	finally:
 		s.logout()
 
@@ -141,7 +141,7 @@ def crearOferta(s, ciudad, recurso):
 		do_it2(s, vender, precio, recurso, cap_venta, ciudad)
 	except:
 		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
-		sendToBot(msg)
+		sendToBot(s, msg)
 	finally:
 		s.logout()
 
@@ -233,6 +233,6 @@ def do_it2(s, porVender, precio, recurso, cap_venta, ciudad):
 		enVenta = vendiendo(html)[recurso]
 		if enVenta <= enVenta_inicial:
 			msg = _('Se vendieron {} de {} a {:d}').format(addPuntos(total), tipoDeBien[recurso], precio)
-			sendToBot(msg)
+			sendToBot(s, msg)
 			return
 		time.sleep(60 * 60 *  2)

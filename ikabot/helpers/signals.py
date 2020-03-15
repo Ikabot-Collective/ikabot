@@ -33,5 +33,5 @@ def setSignalsHandlers(s):
 def setInfoSignal(s, info): # el proceso explica su funcion por stdout
 	info = _('información del proceso {}:\n{}').format(os.getpid(), info)
 	def _sendInfo(signum, frame):
-		sendToBot(info)
+		sendToBot(s, info)
 	signal.signal(signal.SIGUSR1, _sendInfo) # kill -SIGUSR1 pid

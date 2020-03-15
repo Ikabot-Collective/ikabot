@@ -57,10 +57,6 @@ class Sesion:
 			urlLogout = 'action=logoutAvatar&function=logout&sideBarExt=undefined&startPageShown=1&detectedDevice=1&cityId={0}&backgroundView=city&currentCityId={0}&actionRequest={1}'.format(idCiudad, token)
 			self.s.get(self.urlBase + urlLogout)
 
-	def __isMyCookie(self, line):
-		string = self.servidor + ' ' + self.mundo + ' ' + self.username + ' '
-		return string in line
-
 	def __isInVacation(self, html):
 		return 'nologin_umod' in html
 
@@ -75,76 +71,46 @@ class Sesion:
 			msg += _('Nuevo')
 		else:
 			msg += _('Salida')
-		sendToBotDebug(msg, debugON_session)
+		sendToBotDebug(self, msg, debugON_session)
 
-		(fileInfo, text) = self.__getFileInfo()
-		lines = text.splitlines()
+		fileData = getFileData(self)
+
 		if primero is True:
 			cookie_dict = dict(self.s.cookies.items())
-			plaintext = json.dumps(cookie_dict)
-			ciphertext = self.cipher.encrypt(plaintext)
-			entrada = self.servidor + ' ' + self.mundo + ' ' + self.username + ' 1 ' + ciphertext
-			newTextFile = ''
-			for line in lines:
-				if self.__isMyCookie(line) is False:
-					newTextFile += line + '\n'
-			newTextFile += entrada + '\n'
-		else:
-			if fileInfo is None:
-				if nuevo is True:
-					self.__updateCookieFile(primero=True)
+			fileData['cookies'] = cookie_dict
+			fileData['num_sesiones'] = 1
+
+		elif nuevo is True:
+			try:
+				fileData['num_sesiones'] += 1
+			except KeyError:
+				fileData['num_sesiones'] = 1
+
+		elif salida is True:
+			try:
+				if fileData['num_sesiones'] == 1:
+					html = self.s.get(self.urlBase).text
+					if self.__isExpired(html) is False:
+						self.__logout(html)
+			except KeyError:
 				return
+			fileData['num_sesiones'] -= 1
 
-			oldline = fileInfo.group(0)
-			sesionesActivas = int(fileInfo.group(1))
-			newTextFile = ''
-
-			if salida is True and sesionesActivas == 1:
-				html = self.s.get(self.urlBase).text
-				if self.__isExpired(html):
-					html = None
-
-			for line in lines:
-				if line != oldline:
-					newTextFile += line + '\n'
-				else:
-					if salida is True:
-						if sesionesActivas > 1:
-							newline = self.servidor + ' ' + self.mundo + ' ' + self.username + ' ' + str(sesionesActivas - 1) + ' ' + fileInfo.group(2)
-							newTextFile += newline + '\n'
-						else:
-							self.__logout(html)
-					elif nuevo is True:
-						newline = self.servidor + ' ' + self.mundo + ' ' + self.username + ' ' + str(sesionesActivas + 1) + ' ' + fileInfo.group(2)
-						newTextFile += newline + '\n'
-		with open(cookieFile, 'w', os.O_NONBLOCK) as filehandler:
-			filehandler.write(newTextFile)
-			filehandler.flush()
+		setFileData(self, fileData)
 
 	def __getCookie(self):
-		fileInfo = self.__getFileInfo()[0]
-		if fileInfo:
-			msg = _('actualizo cookie usando el archivo de cookies')
-			sendToBotDebug(msg, debugON_session)
-			ciphertext = fileInfo.group(2)
-			try:
-				plaintext = self.cipher.decrypt(ciphertext)
-			except ValueError:
-				if self.padre:
-					print(_('Mail o contrasenia incorrecta'))
-				else:
-					sendToBot(_('MAC check ERROR, ciphertext corrompido.'))
-				os._exit(0)
-			cookie_dict = ast.literal_eval(plaintext)
+		fileData = getFileData(self)
+		try:
+			cookie_dict = fileData['cookies']
 			self.s = requests.Session()
 			self.s.proxies = proxyDict
 			self.s.headers.clear()
 			self.s.headers.update(self.headers)
 			requests.cookies.cookiejar_from_dict(cookie_dict, cookiejar=self.s.cookies, overwrite=True)
 			self.__updateCookieFile(nuevo=True)
-		else:
+		except KeyError:
 			msg = _('La sesión se venció, renovando sesión')
-			sendToBotDebug(msg, debugON_session)
+			sendToBotDebug(self, msg, debugON_session)
 			self.__login(3)
 
 	def __login(self, retries=0):
@@ -236,11 +202,11 @@ class Sesion:
 			if self.padre:
 				print(msg)
 			else:
-				sendToBot(msg)
+				sendToBot(self, msg)
 			os._exit(0)
 		if self.__isExpired(html):
 			if self.padre:
-				msg = _('Mail o contrasenia incorrecta')
+				msg = _('Mail o contraseña incorrecta')
 				print(msg)
 				os._exit(0)
 			raise Exception('No se pudo iniciar sesión')
@@ -272,30 +238,12 @@ class Sesion:
 			except Exception:
 				self.__expiroLaSesion()
 
-	def __getFileInfo(self): # 1 num de sesiones 2 ciphertext
-		with open(cookieFile, 'r', os.O_NONBLOCK) as filehandler:
-			text = filehandler.read()
-		regex = re.escape(self.servidor) + r' ' + re.escape(self.mundo) + r' ' + re.escape(self.username) + r' (\d+) (.+)'
-		return (re.search(regex, text), text)
-
 	def __sesionActiva(self):
-		fileInfo = self.__getFileInfo()[0]
-		if fileInfo:
-			ciphertext = fileInfo.group(2)
-			try:
-				plaintext = self.cipher.decrypt(ciphertext)
-				cookie_dict = ast.literal_eval(plaintext)
-				return cookie_dict['PHPSESSID'] == self.s.cookies['PHPSESSID']
-			except ValueError:
-				msg = 'MAC check ERROR, ciphertext corrompido.'
-				if self.padre:
-					print(msg)
-				else:
-					sendToBot(msg)
-				os._exit(0)
-			except KeyError:
-				pass
-		return False
+		fileData = getFileData(self)
+		try:
+			return self.s.cookies['PHPSESSID'] == fileData['cookies']['PHPSESSID']
+		except KeyError:
+			return False
 
 	def token(self):
 		html = self.get()

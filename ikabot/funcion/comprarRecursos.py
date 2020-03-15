@@ -165,7 +165,7 @@ def comprarRecursos(s):
 		do_it(s, ciudad, ofertas, cantidadAComprar)
 	except:
 		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
-		sendToBot(msg)
+		sendToBot(s, msg)
 	finally:
 		s.logout()
 
@@ -213,7 +213,7 @@ def buy(s, ciudad, oferta, cantidad):
 		data_dict['cargo_tradegood{}'.format(resource)] = cantidad
 	s.post(payloadPost=data_dict)
 	msg = _('Compro {} a {} de {}').format(addPuntos(cantidad), oferta['ciudadDestino'], oferta['jugadorAComprar'])
-	sendToBotDebug(msg, debugON_comprarRecursos)
+	sendToBotDebug(s, msg, debugON_comprarRecursos)
 
 def do_it(s, ciudad, ofertas, cantidadAComprar):
 	while True:
