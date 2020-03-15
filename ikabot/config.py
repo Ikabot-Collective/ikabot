@@ -25,7 +25,7 @@ ids = None
 ciudades = None
 menuCiudades = ''
 infoUser = ''
-ikaFile = '.data.ika'
+ikaFile = '.ikabot'
 urlCiudad = 'view=city&cityId='
 urlIsla = 'view=island&islandId='
 prompt = ' >>  '
