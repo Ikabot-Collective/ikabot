@@ -90,5 +90,5 @@ def setFileData(s, data):
 	newFile += entry_key + ' ' + ciphertext
 
 	with open(ikaFile, 'w', os.O_NONBLOCK) as filehandler:
-		filehandler.write(newFile)
+		filehandler.write(newFile.strip())
 		filehandler.flush()
