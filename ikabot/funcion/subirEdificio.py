@@ -28,7 +28,7 @@ _ = t.gettext
 enviarRecursos = True
 ampliar = True
 
-def getTiempoDeConstruccion(html, posicion):
+def getTiempoDeConstruccion(s, html, posicion):
 	ciudad = getCiudad(html)
 	edificio = ciudad['position'][posicion]
 	hora_fin = re.search(r'"endUpgradeTime":(\d{10})', html)
@@ -50,7 +50,7 @@ def esperarConstruccion(s, idCiudad, posicion):
 	slp = 1
 	while slp > 0:
 		html = s.get(urlCiudad + idCiudad)
-		slp = getTiempoDeConstruccion(html, posicion)
+		slp = getTiempoDeConstruccion(s, html, posicion)
 		esperar(slp)
 	return getCiudad(html)
 
