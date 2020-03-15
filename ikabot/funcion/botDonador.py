@@ -50,7 +50,7 @@ def botDonador(s):
 		do_it(s, idsCiudades, ciudades_dict)
 	except:
 		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
-		sendToBot(msg)
+		sendToBot(s, msg)
 	finally:
 		s.logout()
 
@@ -68,5 +68,5 @@ def do_it(s, idsCiudades, ciudades_dict):
 			if tipo:
 				s.post(payloadPost={'islandId': idIsla, 'type': tipo, 'action': 'IslandScreen', 'function': 'donate', 'donation': madera, 'backgroundView': 'island', 'templateView': tipo, 'actionRequest': s.token(), 'ajax': '1'})
 		msg = _('Doné automaticamente.')
-		sendToBotDebug(msg, debugON_botDonador)
+		sendToBotDebug(s, msg, debugON_botDonador)
 		time.sleep(24*60*60)

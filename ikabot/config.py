@@ -25,8 +25,7 @@ ids = None
 ciudades = None
 menuCiudades = ''
 infoUser = ''
-cookieFile = '.cookies.ika'
-telegramFile = '.telegram.ika'
+ikaFile = '.data.ika'
 urlCiudad = 'view=city&cityId='
 urlIsla = 'view=island&islandId='
 prompt = ' >>  '
