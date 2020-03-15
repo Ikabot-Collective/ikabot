@@ -17,7 +17,7 @@ _ = t.gettext
 class AESCipher:
 
 	def __init__( self, mail, username, password ):
-		self.key = hashlib.sha256( mail.encode('utf-8') + b'\x00' + username.encode('utf-8') + b'\x00' + password.encode('utf-8') ).digest()
+		self.key = hashlib.sha256( mail.encode('utf-8') + b'\x00' + password.encode('utf-8') ).digest()
 		for i in range(0xfff):
 			self.key = hashlib.sha256( self.key ).digest()
 
