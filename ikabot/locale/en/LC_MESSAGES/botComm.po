@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2019-04-09 13:07-0300\n"
+"POT-Creation-Date: 2020-03-14 22:04-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,51 +15,51 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: ../../../helpers/botComm.py:44
+#: ../../../helpers/botComm.py:60
 msgid "Debe proporcionar las credenciales válidas para comunicarse por telegram."
 msgstr "You must provide valid credentials to communicate by telegram."
 
-#: ../../../helpers/botComm.py:45
+#: ../../../helpers/botComm.py:61
 msgid "Se requiere del token del bot a utilizar y de su chat_id"
 msgstr "You require the token of the bot you are going to use and your chat_id"
 
-#: ../../../helpers/botComm.py:46
+#: ../../../helpers/botComm.py:62
 msgid "Para más informacion sobre como obtenerlos vea al readme de https://github.com/physics-sp/ikabot"
 msgstr "For more information about how to obtain them read the readme at https://github.com/physics-sp/ikabot"
 
-#: ../../../helpers/botComm.py:47
+#: ../../../helpers/botComm.py:63
 msgid "¿Porporcionará las credenciales ahora? [y/N]"
 msgstr "Will you provide the credentials now? [y/N]"
 
-#: ../../../helpers/botComm.py:51
+#: ../../../helpers/botComm.py:67
 msgid "Token del bot:"
 msgstr "Bot's token:"
 
-#: ../../../helpers/botComm.py:52
+#: ../../../helpers/botComm.py:68
 msgid "Chat_id:"
 msgstr "Chat_id:"
 
-#: ../../../helpers/botComm.py:57
+#: ../../../helpers/botComm.py:71
 msgid "El token a ingresar es:{:d}"
 msgstr "The token is:{:d}"
 
-#: ../../../helpers/botComm.py:59
+#: ../../../helpers/botComm.py:73
 msgid "Se envio un mensaje por telegram, ¿lo recibió? [Y/n]"
 msgstr "A message was sent by telegram, did you receive it? [Y/n]"
 
-#: ../../../helpers/botComm.py:63
+#: ../../../helpers/botComm.py:75
 msgid "Revíse las credenciales y vuelva a proveerlas."
 msgstr "Check the credentials and re-supply them."
 
-#: ../../../helpers/botComm.py:67
+#: ../../../helpers/botComm.py:79
 msgid "Ingrese el token recibido mediante telegram:"
-msgstr "Enter the received token by telegram:"
+msgstr "Enter the received token in telegram:"
 
-#: ../../../helpers/botComm.py:71
+#: ../../../helpers/botComm.py:81
 msgid "El token es incorrecto"
 msgstr "The token is incorrect"
 
-#: ../../../helpers/botComm.py:75
+#: ../../../helpers/botComm.py:89
 msgid "El token es correcto."
 msgstr "The token is correct"
 
