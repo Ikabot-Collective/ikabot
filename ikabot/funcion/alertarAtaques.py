@@ -44,7 +44,7 @@ def alertarAtaques(s):
 def respondToAttack(s):
 	while True:
 		time.sleep(60 * 3)
-		responses = getUserResponse()
+		responses = getUserResponse(s)
 		for response in responses:
 			rta = re.search(r'(\d+):?\s*(\d+)', response)
 			if rta:
