@@ -32,7 +32,7 @@ def sendToBot(s, msg, Token=False):
 	except KeyError:
 		pass
 
-def telegramCredsValidas():
+def telegramCredsValidas(s):
 	fileData = getFileData(s)
 	try:
 		a = fileData['telegram']['botToken']
@@ -54,7 +54,7 @@ def getUserResponse():
 		return []
 
 def botValido(s):
-	if telegramCredsValidas():
+	if telegramCredsValidas(s):
 		return True
 	else:
 		print(_('Debe proporcionar las credenciales válidas para comunicarse por telegram.'))
