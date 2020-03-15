@@ -42,7 +42,7 @@ def alertarPocoVino(s):
 		do_it(s, horas)
 	except:
 		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
-		sendToBot(msg)
+		sendToBot(s, msg)
 	finally:
 		s.logout()
 
@@ -69,7 +69,7 @@ def do_it(s, horas):
 			if consumoXseg == 0:
 				if ciudades[city]['avisado'] is False:
 					msg = _('La ciudad {} no esta consumiendo vino!').format(ciudades[city]['name'])
-					sendToBot(msg)
+					sendToBot(s, msg)
 					ciudades[city]['avisado'] = True
 				continue
 			segsRestantes = Decimal(vinoDisp) / Decimal(consumoXseg)
@@ -78,7 +78,7 @@ def do_it(s, horas):
 				if ciudades[city]['avisado'] is False:
 					tiempoRestante = diasHorasMinutos(segsRestantes)
 					msg = _('En {} se acabará el vino en {}').format(tiempoRestante, ciudades[city]['name'])
-					sendToBot(msg)
+					sendToBot(s, msg)
 					ciudades[city]['avisado'] = True
 			else:
 				ciudades[city]['avisado'] = False

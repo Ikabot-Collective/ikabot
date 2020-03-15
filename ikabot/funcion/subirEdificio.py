@@ -28,13 +28,13 @@ _ = t.gettext
 enviarRecursos = True
 ampliar = True
 
-def getTiempoDeConstruccion(html, posicion):
+def getTiempoDeConstruccion(s, html, posicion):
 	ciudad = getCiudad(html)
 	edificio = ciudad['position'][posicion]
 	hora_fin = re.search(r'"endUpgradeTime":(\d{10})', html)
 	if hora_fin is None:
 		msg = _('{}: No espero nada para que {} suba al nivel {:d}').format(ciudad['cityName'], edificio['name'], int(edificio['level']))
-		sendToBotDebug(msg, debugON_subirEdificio)
+		sendToBotDebug(s, msg, debugON_subirEdificio)
 		return 0
 
 	hora_actual = int( time.time() )
@@ -42,7 +42,7 @@ def getTiempoDeConstruccion(html, posicion):
 	espera      = hora_fin - hora_actual
 
 	msg = _('{}: Espero {:d} segundos para que {} suba al nivel {:d}').format(ciudad['cityName'], espera, edificio['name'], int(edificio['level']) + 1)
-	sendToBotDebug(msg, debugON_subirEdificio)
+	sendToBotDebug(s, msg, debugON_subirEdificio)
 
 	return espera + 3
 
@@ -50,7 +50,7 @@ def esperarConstruccion(s, idCiudad, posicion):
 	slp = 1
 	while slp > 0:
 		html = s.get(urlCiudad + idCiudad)
-		slp = getTiempoDeConstruccion(html, posicion)
+		slp = getTiempoDeConstruccion(s, html, posicion)
 		esperar(slp)
 	return getCiudad(html)
 
@@ -77,7 +77,7 @@ def subirEdificio(s, idCiudad, posicion, nivelesASubir, esperarRecursos):
 			msg += _('Edificio:{}\n').format(edificio['name'])
 			msg += _('No se pudo terminar de subir el edificio por falta de recursos.\n')
 			msg += _('Faltaron subir {:d} niveles').format(nivelesASubir - lv)
-			sendToBot(msg)
+			sendToBot(s, msg)
 			return
 
 		for i in range(3):
@@ -94,7 +94,7 @@ def subirEdificio(s, idCiudad, posicion, nivelesASubir, esperarRecursos):
 			msg  = _('El edificio {} no se amplió después de tres intentos\n').format(edificio['name'])
 			msg += url + '\n'
 			msg += str(edificio)
-			sendToBot(msg)
+			sendToBot(s, msg)
 			return
 
 def getReductores(ciudad):
@@ -151,10 +151,10 @@ def recursosNecesarios(s, ciudad, edificio, desde, hasta):
 
 	reductores = getReductores(ciudad)
 
-	matches = re.findall(r'<td class="level">\d+</td>(?:\s+<td class="costs">.*?</td>)+', html_costos)
-
 	recursos_tipo = re.findall(r'<th class="costs"><img src="skin/resources/icon_(.*?)\.png"/></th>', html_costos)[:-1]
 	recurso_index = {'wood': 0, 'wine': 1, 'marble': 2, 'glass': 3, 'sulfur': 4}
+
+	matches = re.findall(r'<td class="level">\d+</td>(?:\s+<td class="costs">.*?</td>)+', html_costos)
 
 	costos = [0,0,0,0,0]
 	niveles_a_subir = 0
@@ -364,6 +364,6 @@ def subirEdificios(s):
 			subirEdificio(s, idCiudad, posEdificio, niveles, esperarRecursos)
 	except:
 		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
-		sendToBot(msg)
+		sendToBot(s, msg)
 	finally:
 		s.logout()

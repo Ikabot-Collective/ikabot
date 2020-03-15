@@ -37,14 +37,14 @@ def alertarAtaques(s):
 		do_it(s)
 	except:
 		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
-		sendToBot(msg)
+		sendToBot(s, msg)
 	finally:
 		s.logout()
 
 def respondToAttack(s):
 	while True:
 		time.sleep(60 * 3)
-		responses = getUserResponse()
+		responses = getUserResponse(s)
 		for response in responses:
 			rta = re.search(r'(\d+):?\s*(\d+)', response)
 			if rta:
@@ -64,7 +64,7 @@ def respondToAttack(s):
 					# mv
 					activarModoVacaciones(s)
 				else:
-					sendToBot(_('Comando inválido: {:d}').format(accion))
+					sendToBot(s, _('Comando inválido: {:d}').format(accion))
 				s.logout()
 				exit()
 
@@ -101,7 +101,7 @@ def do_it(s):
 				msg += _('llegada en: {}\n').format(diasHorasMinutos(tiempoFaltante))
 				msg += _('Si quiere poner la cuenta en modo vacaciones envíe:\n')
 				msg += _('{:d}:1').format(os.getpid())
-				sendToBot(msg)
+				sendToBot(s, msg)
 
 		for id in list(conocidos):
 			if id not in actuales:
