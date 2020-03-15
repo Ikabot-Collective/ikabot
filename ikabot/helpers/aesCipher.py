@@ -43,8 +43,7 @@ def getFileData(s, all=False):
 	with open(ikaFile, 'r', os.O_NONBLOCK) as filehandler:
 		ciphertexts = filehandler.read()
 
-	ciphertexts = ciphertexts.split('\n')
-	for ciphertext in ciphertexts:
+	for ciphertext in ciphertexts.split('\n'):
 		if entry_key == ciphertext[:64]:
 			ciphertext = ciphertext[64:]
 			try:
