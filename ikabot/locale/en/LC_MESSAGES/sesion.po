@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2019-07-31 21:41-0300\n"
+"POT-Creation-Date: 2020-03-14 22:01-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,77 +15,69 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: ../../../web/sesion.py:71
+#: ../../../web/sesion.py:67
 msgid ""
 "Actualizo el archivo de cookies:\n"
 msgstr ""
 "Updating the cookie file:\n"
 
-#: ../../../web/sesion.py:73
+#: ../../../web/sesion.py:69
 msgid "Primero"
 msgstr "First"
 
-#: ../../../web/sesion.py:75
+#: ../../../web/sesion.py:71
 msgid "Nuevo"
 msgstr "New"
 
-#: ../../../web/sesion.py:77
+#: ../../../web/sesion.py:73
 msgid "Salida"
 msgstr "Out"
 
-#: ../../../web/sesion.py:127
-msgid "actualizo cookie usando el archivo de cookies"
+#: ../../../web/sesion.py:112
+msgid "La sesión se venció, renovando sesión"
 msgstr "Updating cookie using cookie file"
 
-#: ../../../web/sesion.py:134 ../../../web/sesion.py:234
-msgid "Mail o contrasenia incorrecta"
-msgstr "Wrong email or wrong password"
-
-#: ../../../web/sesion.py:136
-msgid "MAC check ERROR, ciphertext corrompido."
-msgstr "MAC check ERROR, ciphertext corrupt."
-
-#: ../../../web/sesion.py:146
-msgid "La sesión se venció, renovando sesión"
-msgstr "The session expired, renovating"
-
-#: ../../../web/sesion.py:154
+#: ../../../web/sesion.py:120
 msgid "Mail:"
 msgstr "Mail:"
 
-#: ../../../web/sesion.py:155
+#: ../../../web/sesion.py:121
 msgid "Contraseña:"
 msgstr "Password:"
 
-#: ../../../web/sesion.py:175
+#: ../../../web/sesion.py:141
 msgid ""
 "Mail o contraseña incorrecta\n"
 msgstr ""
-"Wrong email or wrong password\n"
+"Wrong email or password\n"
 
-#: ../../../web/sesion.py:186
+#: ../../../web/sesion.py:152
 msgid ""
 "¿Con qué cuenta quiere iniciar sesión?\n"
 msgstr ""
 "With which account do you want to log in?\n"
 
-#: ../../../web/sesion.py:203
+#: ../../../web/sesion.py:169
 msgid "Servidor:{}"
 msgstr "Server:{}"
 
-#: ../../../web/sesion.py:204
+#: ../../../web/sesion.py:170
 msgid ", Mundo:{}"
 msgstr ", World:{}"
 
-#: ../../../web/sesion.py:205
+#: ../../../web/sesion.py:171
 msgid ", Jugador:{}"
 msgstr ", Player:{}"
 
-#: ../../../web/sesion.py:226
+#: ../../../web/sesion.py:201
 msgid "La cuenta entró en modo vacaciones"
 msgstr "The account went into vacation mode"
 
-#: ../../../web/sesion.py:335 ../../../web/sesion.py:341
+#: ../../../web/sesion.py:209
+msgid "Mail o contraseña incorrecta"
+msgstr "Wrong email or password"
+
+#: ../../../web/sesion.py:298
 msgid "Fallo la conexion a internet"
 msgstr "Internet connection failed"
 
