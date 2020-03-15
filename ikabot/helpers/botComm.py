@@ -9,7 +9,7 @@ import gettext
 import ikabot.config as config
 import ikabot.web.sesion
 from ikabot.helpers.pedirInfo import read
-from ikabot.helpers.gui import enter
+from ikabot.helpers.gui import *
 from ikabot.config import *
 from ikabot.helpers.aesCipher import *
 
@@ -35,9 +35,7 @@ def sendToBot(s, msg, Token=False):
 def telegramCredsValidas(s):
 	fileData = getFileData(s)
 	try:
-		a = fileData['telegram']['botToken']
-		b = fileData['telegram']['chatId']
-		return True
+		return len(fileData['telegram']['botToken']) > 0 and len(fileData['telegram']['chatId']) > 0
 	except KeyError:
 		return False
 
@@ -57,6 +55,7 @@ def botValido(s):
 	if telegramCredsValidas(s):
 		return True
 	else:
+		banner()
 		print(_('Debe proporcionar las credenciales válidas para comunicarse por telegram.'))
 		print(_('Se requiere del token del bot a utilizar y de su chat_id'))
 		print(_('Para más informacion sobre como obtenerlos vea al readme de https://github.com/physics-sp/ikabot'))
@@ -67,11 +66,20 @@ def botValido(s):
 			botToken = read(msg=_('Token del bot:'))
 			chat_id = read(msg=_('Chat_id:'))
 
+			fileData = getFileData(s)
+			fileData['telegram'] = {}
+			fileData['telegram']['botToken'] = botToken.replace(' ', '')
+			fileData['telegram']['chatId'] = chat_id
+			setFileData(s, fileData)
+
 			rand = random.randint(1000, 9999)
 			msg = _('El token a ingresar es:{:d}').format(rand)
 			sendToBot(s, msg, Token=True)
 			rta = read(msg=_('Se envio un mensaje por telegram, ¿lo recibió? [Y/n]'), values=['y','Y','n', 'N', ''])
 			if rta.lower() == 'n':
+				fileData['telegram']['botToken'] = ''
+				fileData['telegram']['chatId'] = ''
+				setFileData(s, fileData)
 				print(_('Revíse las credenciales y vuelva a proveerlas.'))
 				enter()
 				return False
@@ -82,10 +90,6 @@ def botValido(s):
 					enter()
 					return False
 				else:
-					fileData = getFileData(s)
-					fileData['telegram']['botToken'] = botToken
-					fileData['telegram']['chatId'] = chat_id
-					setFileData(s, fileData)
 					print(_('El token es correcto.'))
 					enter()
 					return True
