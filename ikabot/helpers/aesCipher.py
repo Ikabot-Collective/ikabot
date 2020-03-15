@@ -64,12 +64,15 @@ def getFileData(s, all=False):
 	return {}
 
 def setFileData(s, data):
-	entry_key  = getEntryKey(s)
 	session_data = getFileData(s, True)
-	if len(session_data) == 0:
+
+	if s.username not in session_data:
 		session_data[s.username] = {}
+	if s.mundo not in session_data[s.username]:
 		session_data[s.username][s.mundo] = {}
+	if s.servidor not in session_data[s.username][s.mundo]:
 		session_data[s.username][s.mundo][s.servidor] = {}
+
 	session_data[s.username][s.mundo][s.servidor] = data
 
 	plaintext  = json.dumps(session_data)
@@ -78,6 +81,7 @@ def setFileData(s, data):
 	with open(ikaFile, 'r', os.O_NONBLOCK) as filehandler:
 		data = filehandler.read()
 
+	entry_key  = getEntryKey(s)
 	newFile = ''
 	for line in data.split('\n'):
 		if entry_key != line[:64]:
