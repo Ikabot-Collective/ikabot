@@ -10,7 +10,7 @@ setuptools.setup(
 	packages=setuptools.find_packages(),
 	install_requires=[
 		  'requests',
-		  'pycryptodome'
+		  'cryptography'
 	],
 	entry_points = {
 		'console_scripts': ['ikabot=ikabot.command_line:main'],

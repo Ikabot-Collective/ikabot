@@ -112,7 +112,7 @@ def planearEntrenamientos(s, ciudad, entrenamientos):
 				total += tropa['entrenar']
 			if total == 0:
 				msg = _('No se pudo terminar de entrenar tropas por falta de recursos.')
-				sendToBot(msg)
+				sendToBot(s, msg)
 				return
 			entrenar(s, ciudad, entrenamiento)
 
@@ -271,6 +271,6 @@ def entrenarTropas(s):
 		planearEntrenamientos(s, ciudad, entrenamientos)
 	except:
 		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
-		sendToBot(msg)
+		sendToBot(s, msg)
 	finally:
 		s.logout()
