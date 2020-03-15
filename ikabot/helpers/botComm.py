@@ -39,7 +39,7 @@ def telegramCredsValidas(s):
 	except KeyError:
 		return False
 
-def getUserResponse():
+def getUserResponse(s):
 	fileData = getFileData(s)
 	try:
 		updates = ikabot.web.sesion.normal_get('https://api.telegram.org/bot{}/getUpdates'.format(fileData['telegram']['botToken'])).text
