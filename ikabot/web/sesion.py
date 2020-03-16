@@ -101,6 +101,7 @@ class Sesion:
 	def __getCookie(self):
 		fileData = getFileData(self)
 		try:
+			assert fileData['num_sesiones'] > 0
 			cookie_dict = fileData['cookies']
 			self.s = requests.Session()
 			self.s.proxies = proxyDict
@@ -108,7 +109,7 @@ class Sesion:
 			self.s.headers.update(self.headers)
 			requests.cookies.cookiejar_from_dict(cookie_dict, cookiejar=self.s.cookies, overwrite=True)
 			self.__updateCookieFile(nuevo=True)
-		except KeyError:
+		except (KeyError, AssertionError):
 			msg = _('La sesión se venció, renovando sesión')
 			sendToBotDebug(self, msg, debugON_session)
 			self.__login(3)
