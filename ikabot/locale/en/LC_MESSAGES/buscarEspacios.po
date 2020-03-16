@@ -41,7 +41,7 @@ msgstr ""
 
 #: ../../../funcion/buscarEspacios.py:60
 msgid "la ciudad {} del jugador {} desapareció en {} {}:{} {}"
-msgstr "the city {} of the player {} disappeared in {} {}:{}{} {}"
+msgstr "the city {} of the player {} disappeared in {} {}:{} {}"
 
 #: ../../../funcion/buscarEspacios.py:69
 msgid "{} fundó {} en {} {}:{} {}"
