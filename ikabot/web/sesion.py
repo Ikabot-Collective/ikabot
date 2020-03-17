@@ -98,8 +98,9 @@ class Sesion:
 
 		setFileData(self, fileData)
 
-	def __getCookie(self):
-		fileData = getFileData(self)
+	def __getCookie(self, fileData=None):
+		if fileData is None:
+			fileData = getFileData(self)
 		try:
 			assert fileData['num_sesiones'] > 0
 			cookie_dict = fileData['cookies']
@@ -221,30 +222,40 @@ class Sesion:
 
 	def __expiroLaSesion(self):
 		self.__backoff()
-		if self.__sesionActiva():
+
+		fileData = getFileData(self)
+
+		try:
+			if fileData['num_sesiones'] > 0 and self.s.cookies['PHPSESSID'] != fileData['cookies']['PHPSESSID']:
+				self.__getCookie(fileData)
+			else:
+				try:
+					self.__login(3)
+				except Exception:
+					self.__expiroLaSesion()
+		except KeyError:
 			try:
 				self.__login(3)
 			except Exception:
 				self.__expiroLaSesion()
-		else:
-			try:
-				self.__getCookie()
-			except Exception:
-				self.__expiroLaSesion()
 
 	def __checkCookie(self):
-		if self.__sesionActiva() is False:
+		fileData = getFileData(self)
+
+		try:
+			if fileData['num_sesiones'] > 0:
+				if self.s.cookies['PHPSESSID'] != fileData['cookies']['PHPSESSID']:
+					self.__getCookie(fileData)
+			else:
+				try:
+					self.__login(3)
+				except Exception:
+					self.__expiroLaSesion()
+		except KeyError:
 			try:
-				self.__getCookie()
+				self.__login(3)
 			except Exception:
 				self.__expiroLaSesion()
-
-	def __sesionActiva(self):
-		fileData = getFileData(self)
-		try:
-			return self.s.cookies['PHPSESSID'] == fileData['cookies']['PHPSESSID']
-		except KeyError:
-			return False
 
 	def token(self):
 		html = self.get()
