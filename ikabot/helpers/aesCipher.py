@@ -86,8 +86,8 @@ def setFileData(s, data):
 	for line in data.split('\n'):
 		if entry_key != line[:64]:
 			newFile += line + '\n'
-
-	newFile += entry_key + ' ' + ciphertext
+		else:
+			newFile += entry_key + ' ' + ciphertext + '\n'
 
 	with open(ikaFile, 'w', os.O_NONBLOCK) as filehandler:
 		filehandler.write(newFile.strip())
