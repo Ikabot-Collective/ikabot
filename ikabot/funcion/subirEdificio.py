@@ -176,7 +176,7 @@ def recursosNecesarios(s, ciudad, edificio, desde, hasta):
 
 			costo = costs[i]
 			costo = costo.replace(',', '').replace('.', '')
-			costo = int(costo)
+			costo = 0 if costo == '' else int(costo)
 
 			costo_real = Decimal(costo)
 			costo_original = Decimal(costo_real) / Decimal(reduccion_inv)
@@ -189,7 +189,7 @@ def recursosNecesarios(s, ciudad, edificio, desde, hasta):
 		msg = _('Subir {:d} niveles? [Y/n]:').format(niveles_a_subir)
 		eleccion = read(msg=msg, values=['Y', 'y', 'N', 'n', ''])
 		if eleccion.lower() == 'n':
-			raise Exception('Too many levels')
+			return [-1,-1,-1,-1,-1]
 
 	return costos
 
@@ -316,9 +316,8 @@ def subirEdificios(s):
 	if edificio['isBusy']:
 		desde += 1
 	hasta = desde + niveles
-	try:
-		(madera, vino, marmol, cristal, azufre) = recursosNecesarios(s, ciudad, edificio, desde, hasta)
-	except Exception:
+	(madera, vino, marmol, cristal, azufre) = recursosNecesarios(s, ciudad, edificio, desde, hasta)
+	if madera == -1:
 		return
 	html = s.get(urlCiudad + idCiudad)
 	(maderaDisp, vinoDisp, marmolDisp, cristalDisp, azufreDisp) = getRecursosDisponibles(html, num=True)
