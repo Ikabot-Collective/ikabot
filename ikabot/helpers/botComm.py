@@ -11,7 +11,6 @@ import ikabot.web.sesion
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.gui import *
 from ikabot.config import *
-from ikabot.helpers.aesCipher import *
 
 t = gettext.translation('botComm', 
                         localedir, 
@@ -26,21 +25,21 @@ def sendToBotDebug(s ,msg, debugON):
 def sendToBot(s, msg, Token=False):
 	if Token is False:
 		msg = 'pid:{}\n{}\n{}'.format(os.getpid(), config.infoUser, msg)
-	fileData = getFileData(s)
+	fileData = s.getFileData()
 	try:
 		ikabot.web.sesion.normal_get('https://api.telegram.org/bot{}/sendMessage'.format(fileData['telegram']['botToken']), params={'chat_id': fileData['telegram']['chatId'], 'text': msg})
 	except KeyError:
 		pass
 
 def telegramCredsValidas(s):
-	fileData = getFileData(s)
+	fileData = s.getFileData()
 	try:
 		return len(fileData['telegram']['botToken']) > 0 and len(fileData['telegram']['chatId']) > 0
 	except KeyError:
 		return False
 
 def getUserResponse(s):
-	fileData = getFileData(s)
+	fileData = s.getFileData()
 	try:
 		updates = ikabot.web.sesion.normal_get('https://api.telegram.org/bot{}/getUpdates'.format(fileData['telegram']['botToken'])).text
 		updates = json.loads(updates, strict=False)
@@ -66,11 +65,11 @@ def botValido(s):
 			botToken = read(msg=_('Token del bot:'))
 			chat_id = read(msg=_('Chat_id:'))
 
-			fileData = getFileData(s)
+			fileData = s.getFileData()
 			fileData['telegram'] = {}
 			fileData['telegram']['botToken'] = botToken.replace(' ', '')
 			fileData['telegram']['chatId'] = chat_id
-			setFileData(s, fileData)
+			s.setFileData(fileData)
 
 			rand = random.randint(1000, 9999)
 			msg = _('El token a ingresar es:{:d}').format(rand)
@@ -79,7 +78,7 @@ def botValido(s):
 			if rta.lower() == 'n':
 				fileData['telegram']['botToken'] = ''
 				fileData['telegram']['chatId'] = ''
-				setFileData(s, fileData)
+				s.setFileData(fileData)
 				print(_('Revíse las credenciales y vuelva a proveerlas.'))
 				enter()
 				return False

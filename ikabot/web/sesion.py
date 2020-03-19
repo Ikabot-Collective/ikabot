@@ -73,7 +73,7 @@ class Sesion:
 			msg += _('Salida')
 		sendToBotDebug(self, msg, debugON_session)
 
-		fileData = getFileData(self)
+		fileData = self.getFileData()
 
 		if primero is True:
 			cookie_dict = dict(self.s.cookies.items())
@@ -96,11 +96,11 @@ class Sesion:
 				return
 			fileData['num_sesiones'] -= 1
 
-		setFileData(self, fileData)
+		self.setFileData(fileData)
 
 	def __getCookie(self, fileData=None):
 		if fileData is None:
-			fileData = getFileData(self)
+			fileData = self.getFileData()
 		try:
 			assert fileData['num_sesiones'] > 0
 			cookie_dict = fileData['cookies']
@@ -223,7 +223,7 @@ class Sesion:
 	def __expiroLaSesion(self):
 		self.__backoff()
 
-		fileData = getFileData(self)
+		fileData = self.getFileData()
 
 		try:
 			if fileData['num_sesiones'] > 0 and self.s.cookies['PHPSESSID'] != fileData['cookies']['PHPSESSID']:
@@ -240,7 +240,7 @@ class Sesion:
 				self.__expiroLaSesion()
 
 	def __checkCookie(self):
-		fileData = getFileData(self)
+		fileData = self.getFileData()
 
 		try:
 			if fileData['num_sesiones'] > 0:
@@ -302,6 +302,12 @@ class Sesion:
 		self.__updateCookieFile(salida=True)
 		if self.padre is False:
 			os._exit(0)
+
+	def setFileData(self, fileData):
+		self.cipher.setFileData(self, fileData)
+
+	def getFileData(self):
+		return self.cipher.getFileData(self)
 
 def normal_get(url, params={}):
 	try:

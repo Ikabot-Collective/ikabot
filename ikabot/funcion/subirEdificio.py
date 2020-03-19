@@ -127,24 +127,32 @@ def recursosNecesarios(s, ciudad, edificio, desde, hasta):
 	rta = json.loads(rta, strict=False)
 	html_costos = rta[1][1][1]
 
-	url = 'view=noViewChange&researchType=economy&backgroundView=city&currentCityId={}&templateView=researchAdvisor&actionRequest={}&ajax=1'.format(ciudad['id'], s.token())
-	rta = s.post(url)
-	rta = json.loads(rta, strict=False)
-	studies = rta[2][1]['new_js_params']
-	studies = json.loads(studies, strict=False)
-	studies = studies['currResearchType']
+	fileData = s.getFileData()
+	if 'reduccion_inv_max' in fileData:
+		reduccion_inv = 14
+	else:
+		url = 'view=noViewChange&researchType=economy&backgroundView=city&currentCityId={}&templateView=researchAdvisor&actionRequest={}&ajax=1'.format(ciudad['id'], s.token())
+		rta = s.post(url)
+		rta = json.loads(rta, strict=False)
+		studies = rta[2][1]['new_js_params']
+		studies = json.loads(studies, strict=False)
+		studies = studies['currResearchType']
 
-	reduccion_inv = 0
-	for study in studies:
-		link = studies[study]['aHref']
-		isExplored = studies[study]['liClass'] == 'explored'
+		reduccion_inv = 0
+		for study in studies:
+			link = studies[study]['aHref']
+			isExplored = studies[study]['liClass'] == 'explored'
 
-		if '2020' in link and isExplored:
-			reduccion_inv += 2
-		elif '2060' in link and isExplored:
-			reduccion_inv += 4
-		elif '2100' in link and isExplored:
-			reduccion_inv += 8
+			if '2020' in link and isExplored:
+				reduccion_inv += 2
+			elif '2060' in link and isExplored:
+				reduccion_inv += 4
+			elif '2100' in link and isExplored:
+				reduccion_inv += 8
+
+		if reduccion_inv == 14:
+			fileData['reduccion_inv_max'] = 1
+			s.setFileData(fileData)
 
 	reduccion_inv /= 100
 	reduccion_inv = 1 - reduccion_inv
