@@ -35,60 +35,60 @@ class AESCipher:
 		plaintext  = aesgcm.decrypt(nonce, ciphertext, None)
 		return plaintext.decode('utf-8')
 
-def getEntryKey(s):
-	return hashlib.sha256( 'ikabot'.encode('utf-8') + s.mail.encode('utf-8') ).hexdigest()
+	def getEntryKey(self, s):
+		return hashlib.sha256( 'ikabot'.encode('utf-8') + s.mail.encode('utf-8') ).hexdigest()
 
-def getFileData(s, all=False):
-	entry_key = getEntryKey(s)
-	with open(ikaFile, 'r', os.O_NONBLOCK) as filehandler:
-		ciphertexts = filehandler.read()
+	def getFileData(self, s, all=False):
+		entry_key = self.getEntryKey(s)
+		with open(ikaFile, 'r', os.O_NONBLOCK) as filehandler:
+			ciphertexts = filehandler.read()
 
-	for ciphertext in ciphertexts.split('\n'):
-		if entry_key == ciphertext[:64]:
-			ciphertext = ciphertext[64:]
-			try:
-				plaintext = s.cipher.decrypt(ciphertext)
-			except ValueError:
-				if s.padre:
-					print(_('Mail o contrasenia incorrecta'))
-				else:
-					sendToBot(s, _('MAC check ERROR, ciphertext corrompido.'))
-				os._exit(0)
-			data_dict = ast.literal_eval(plaintext)
-			if all is False:
+		for ciphertext in ciphertexts.split('\n'):
+			if entry_key == ciphertext[:64]:
+				ciphertext = ciphertext[64:]
 				try:
-					data_dict = data_dict[s.username][s.mundo][s.servidor]
-				except KeyError:
-					return {}
-			return data_dict
-	return {}
+					plaintext = self.decrypt(ciphertext)
+				except ValueError:
+					if s.padre:
+						print(_('Mail o contrasenia incorrecta'))
+					else:
+						sendToBot(s, _('MAC check ERROR, ciphertext corrompido.'))
+					os._exit(0)
+				data_dict = ast.literal_eval(plaintext)
+				if all is False:
+					try:
+						data_dict = data_dict[s.username][s.mundo][s.servidor]
+					except KeyError:
+						return {}
+				return data_dict
+		return {}
 
-def setFileData(s, data):
-	session_data = getFileData(s, True)
+	def setFileData(self, s, data):
+		session_data = self.getFileData(s, True)
 
-	if s.username not in session_data:
-		session_data[s.username] = {}
-	if s.mundo not in session_data[s.username]:
-		session_data[s.username][s.mundo] = {}
-	if s.servidor not in session_data[s.username][s.mundo]:
-		session_data[s.username][s.mundo][s.servidor] = {}
+		if s.username not in session_data:
+			session_data[s.username] = {}
+		if s.mundo not in session_data[s.username]:
+			session_data[s.username][s.mundo] = {}
+		if s.servidor not in session_data[s.username][s.mundo]:
+			session_data[s.username][s.mundo][s.servidor] = {}
 
-	session_data[s.username][s.mundo][s.servidor] = data
+		session_data[s.username][s.mundo][s.servidor] = data
 
-	plaintext  = json.dumps(session_data)
-	ciphertext = s.cipher.encrypt(plaintext)
+		plaintext  = json.dumps(session_data)
+		ciphertext = self.encrypt(plaintext)
 
-	with open(ikaFile, 'r', os.O_NONBLOCK) as filehandler:
-		data = filehandler.read()
+		with open(ikaFile, 'r', os.O_NONBLOCK) as filehandler:
+			data = filehandler.read()
 
-	entry_key  = getEntryKey(s)
-	newFile = ''
-	for line in data.split('\n'):
-		if entry_key != line[:64]:
-			newFile += line + '\n'
-		else:
-			newFile += entry_key + ' ' + ciphertext + '\n'
+		entry_key  = self.getEntryKey(s)
+		newFile = ''
+		newline = entry_key + ' ' + ciphertext
+		for line in data.split('\n'):
+			if entry_key != line[:64]:
+				newFile += line + '\n'
+		newFile += newline + '\n'
 
-	with open(ikaFile, 'w', os.O_NONBLOCK) as filehandler:
-		filehandler.write(newFile.strip())
-		filehandler.flush()
+		with open(ikaFile, 'w', os.O_NONBLOCK) as filehandler:
+			filehandler.write(newFile.strip())
+			filehandler.flush()
