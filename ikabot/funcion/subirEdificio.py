@@ -151,7 +151,7 @@ def recursosNecesarios(s, ciudad, edificio, desde, hasta):
 				reduccion_inv += 8
 
 		if reduccion_inv == 14:
-			fileData['reduccion_inv_max'] = 1
+			fileData['reduccion_inv_max'] = True
 			s.setFileData(fileData)
 
 	reduccion_inv /= 100
