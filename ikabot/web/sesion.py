@@ -3,11 +3,9 @@
 
 import re
 import os
-import ast
 import sys
 import json
 import time
-import parser
 import random
 import getpass
 import gettext

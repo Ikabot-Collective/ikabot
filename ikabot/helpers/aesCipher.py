@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import ast
 import json
 import base64
 import hashlib
@@ -54,7 +53,7 @@ class AESCipher:
 					else:
 						sendToBot(s, _('MAC check ERROR, ciphertext corrompido.'))
 					os._exit(0)
-				data_dict = ast.literal_eval(plaintext)
+				data_dict = json.loads(plaintext, strict=False)
 				if all is False:
 					try:
 						data_dict = data_dict[s.username][s.mundo][s.servidor]
