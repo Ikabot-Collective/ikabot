@@ -119,8 +119,8 @@ def recursosNecesarios(s, ciudad, edificio, desde, hasta):
 	rta = json.loads(rta, strict=False)
 	html = rta[1][1][1]
 
-	builingName = edificio['building']
-	match = re.search(rf'<div class="(?:selected)? button_building {builingName}"\s*onmouseover="\$\(this\)\.addClass\(\'hover\'\);" onmouseout="\$\(this\)\.removeClass\(\'hover\'\);"\s*onclick="ajaxHandlerCall\(\'\?(.*?)\'\);', html)
+	regex = r'<div class="(?:selected)? button_building '+ re.escape(edificio['building']) + r'"\s*onmouseover="\$\(this\)\.addClass\(\'hover\'\);" onmouseout="\$\(this\)\.removeClass\(\'hover\'\);"\s*onclick="ajaxHandlerCall\(\'\?(.*?)\'\);'
+	match = re.search(regex, html)
 	url = match.group(1)
 	url += 'backgroundView=city&currentCityId={}&templateView=buildingDetail&actionRequest={}&ajax=1'.format(ciudad['id'], s.token())
 	rta = s.post(url)
