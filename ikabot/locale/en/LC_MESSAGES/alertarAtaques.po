@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2019-07-04 15:11-0300\n"
+"POT-Creation-Date: 2020-04-09 18:11-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,19 +15,23 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: ../../../funcion/alertarAtaques.py:27
-msgid "Se buscarán ataques cada 20 minutos."
-msgstr "I will check for attacks every 20 minutes"
+#: ../../../funcion/alertarAtaques.py:29
+msgid "¿Cada cuántos minutos buscar ataques?(min:3, default: 20): "
+msgstr "How often should I search for attacks?(min:3, default: 20): "
 
-#: ../../../funcion/alertarAtaques.py:34
-msgid ""
-"\n"
-"Espero por ataques cada 20 minutos\n"
-msgstr ""
-"\n"
-"I check for attacks every 20 minutes\n"
+#: ../../../funcion/alertarAtaques.py:32
+msgid "Se buscarán ataques cada {} minutos."
+msgstr "I will check for attacks every {} minutes"
 
 #: ../../../funcion/alertarAtaques.py:39
+msgid ""
+"\n"
+"Espero por ataques cada {} minutos\n"
+msgstr ""
+"\n"
+"I check for attacks every {} minutes\n"
+
+#: ../../../funcion/alertarAtaques.py:44
 msgid ""
 "Error en:\n"
 "{}\n"
@@ -39,52 +43,53 @@ msgstr ""
 "Cause:\n"
 "{}"
 
-#: ../../../funcion/alertarAtaques.py:67
+#: ../../../funcion/alertarAtaques.py:72
 msgid "Comando inválido: {:d}"
 msgstr "Invalid command: {:d}"
 
-#: ../../../funcion/alertarAtaques.py:95
+#: ../../../funcion/alertarAtaques.py:100
 msgid ""
 "-- ALERTA --\n"
-msgstr "-- ALERT --\n"
+msgstr ""
+"-- ALERT --\n"
 
-#: ../../../funcion/alertarAtaques.py:97
+#: ../../../funcion/alertarAtaques.py:102
 msgid ""
 "de la ciudad {} de {}\n"
 msgstr ""
 "from the city {} of {}\n"
 
-#: ../../../funcion/alertarAtaques.py:98
+#: ../../../funcion/alertarAtaques.py:103
 msgid ""
 "a {}\n"
 msgstr ""
 "to {}\n"
 
-#: ../../../funcion/alertarAtaques.py:99
+#: ../../../funcion/alertarAtaques.py:104
 msgid ""
 "{} unidades\n"
 msgstr ""
 "{} units\n"
 
-#: ../../../funcion/alertarAtaques.py:100
+#: ../../../funcion/alertarAtaques.py:105
 msgid ""
 "{} flotas\n"
 msgstr ""
 "{} fleet\n"
 
-#: ../../../funcion/alertarAtaques.py:101
+#: ../../../funcion/alertarAtaques.py:106
 msgid ""
 "llegada en: {}\n"
 msgstr ""
 "arrival in: {}\n"
 
-#: ../../../funcion/alertarAtaques.py:102
+#: ../../../funcion/alertarAtaques.py:107
 msgid ""
 "Si quiere poner la cuenta en modo vacaciones envíe:\n"
 msgstr ""
 "If you want to put the account in vacation mode send:\n"
 
-#: ../../../funcion/alertarAtaques.py:103
+#: ../../../funcion/alertarAtaques.py:108
 msgid "{:d}:1"
 msgstr "{:d}:1"
 

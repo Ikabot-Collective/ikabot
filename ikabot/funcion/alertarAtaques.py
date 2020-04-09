@@ -24,17 +24,22 @@ _ = t.gettext
 def alertarAtaques(s):
 	if botValido(s) is False:
 		return
-	print(_('Se buscarán ataques cada 20 minutos.'))
+
+	banner()
+	minutos = read(msg=_('¿Cada cuántos minutos buscar ataques?(min:3, default: 20): '), min=3, empty=True)
+	if minutos == '':
+		minutos = 20
+	print(_('Se buscarán ataques cada {} minutos.').format(minutos))
 	enter()
 
 	forkear(s)
 	if s.padre is True:
 		return
 
-	info = _('\nEspero por ataques cada 20 minutos\n')
+	info = _('\nEspero por ataques cada {} minutos\n').format(minutos)
 	setInfoSignal(s, info)
 	try:
-		do_it(s)
+		do_it(s, minutos)
 	except:
 		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
 		sendToBot(s, msg)
@@ -68,7 +73,7 @@ def respondToAttack(s):
 				s.logout()
 				exit()
 
-def do_it(s):
+def do_it(s, minutos):
 	conocidos = []
 	t = threading.Thread(target=respondToAttack, args=(s,))
 	t.start()
@@ -106,4 +111,4 @@ def do_it(s):
 		for id in list(conocidos):
 			if id not in actuales:
 				conocidos.remove(id)
-		time.sleep(20 * 60)
+		time.sleep(minutos * 60)
