@@ -1,0 +1,153 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2020-04-09 22:45-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: ../../../funcion/entrenarFlotas.py:114
+msgid "No se pudo terminar de entrenar tropas por falta de recursos."
+msgstr "It was not possible to finish the training of fleets due to lack of resources."
+
+#: ../../../funcion/entrenarFlotas.py:132
+msgid "¿En qué ciudad quiere entrenar las flotas?"
+msgstr "In what city do you want to train the fleet?"
+
+#: ../../../funcion/entrenarFlotas.py:153
+msgid "Entrenar:"
+msgstr "Train:"
+
+#: ../../../funcion/entrenarFlotas.py:160
+msgid ""
+"\n"
+"Costo total:"
+msgstr ""
+"\n"
+"Total cost:"
+
+#: ../../../funcion/entrenarFlotas.py:182
+msgid "     Madera: {}"
+msgstr "       Wood: {}"
+
+#: ../../../funcion/entrenarFlotas.py:184
+msgid "       Vino: {}"
+msgstr "       Wine: {}"
+
+#: ../../../funcion/entrenarFlotas.py:186
+msgid "     Marmol: {}"
+msgstr "     Marble: {}"
+
+#: ../../../funcion/entrenarFlotas.py:188
+msgid "    Cristal: {}"
+msgstr "    Cristal: {}"
+
+#: ../../../funcion/entrenarFlotas.py:190
+msgid "     Azufre: {}"
+msgstr "     Sulfur: {}"
+
+#: ../../../funcion/entrenarFlotas.py:192
+msgid " Ciudadanos: {}"
+msgstr "   Citizens: {}"
+
+#: ../../../funcion/entrenarFlotas.py:194
+msgid "Manutención: {}"
+msgstr "Maintenance: {}"
+
+#: ../../../funcion/entrenarFlotas.py:196
+msgid "   Duración: {}"
+msgstr "   Duration: {}"
+
+#: ../../../funcion/entrenarFlotas.py:198
+msgid ""
+"\n"
+"Proceder? [Y/n]"
+msgstr ""
+"\n"
+"Proceed? [Y/n]"
+
+#: ../../../funcion/entrenarFlotas.py:205
+msgid ""
+"\n"
+"¿Quiere entrenar más tropas al terminar? [y/N]"
+msgstr ""
+"\n"
+"Do you want to train more fleets when you finish? [y/N]"
+
+#: ../../../funcion/entrenarFlotas.py:242
+msgid ""
+"\n"
+"No hay suficientes recursos:"
+msgstr ""
+"\n"
+"There are not enough resources:"
+
+#: ../../../funcion/entrenarFlotas.py:244
+msgid "    Madera:{}"
+msgstr "    Wood:{}"
+
+#: ../../../funcion/entrenarFlotas.py:246
+msgid "      Vino:{}"
+msgstr "    Wine:{}"
+
+#: ../../../funcion/entrenarFlotas.py:248
+msgid "    Marmol:{}"
+msgstr "  Marble:{}"
+
+#: ../../../funcion/entrenarFlotas.py:250
+msgid "   Cristal:{}"
+msgstr " Cristal:{}"
+
+#: ../../../funcion/entrenarFlotas.py:252
+msgid "    Azufre:{}"
+msgstr "  Sulfur:{}"
+
+#: ../../../funcion/entrenarFlotas.py:254
+msgid "Ciudadanos:{}"
+msgstr "Citizens:{}"
+
+#: ../../../funcion/entrenarFlotas.py:256
+msgid ""
+"\n"
+"¿Proceder de todos modos? [Y/n]"
+msgstr ""
+"\n"
+"Proceed anyway? [Y/n]"
+
+#: ../../../funcion/entrenarFlotas.py:261
+msgid ""
+"\n"
+"Se entrenarán las tropas seleccionadas."
+msgstr ""
+"\n"
+"The selected fleet will be trained."
+
+#: ../../../funcion/entrenarFlotas.py:268
+msgid ""
+"\n"
+"Entreno tropas en {}\n"
+msgstr ""
+"\n"
+"I train a fleet in {}\n"
+
+#: ../../../funcion/entrenarFlotas.py:273
+msgid ""
+"Error en:\n"
+"{}\n"
+"Causa:\n"
+"{}"
+msgstr ""
+"Error in:\n"
+"{}\n"
+"Cause:\n"
+"{}"
+
