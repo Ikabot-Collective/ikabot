@@ -24,6 +24,7 @@ from ikabot.funcion.comprarRecursos import comprarRecursos
 from ikabot.funcion.modoVacaciones import modoVacaciones
 from ikabot.funcion.activarMilagro import activarMilagro
 from ikabot.funcion.entrenarTropas import entrenarTropas
+from ikabot.funcion.entrenarFlotas import entrenarFlotas
 from ikabot.funcion.movimientosNavales import movimientosNavales
 from ikabot.funcion.construirEdificio import construirEdificio
 from ikabot.funcion.venderRecursos import venderRecursos
@@ -52,6 +53,7 @@ def menu(s):
 					modoVacaciones,
 					activarMilagro,
 					entrenarTropas,
+					entrenarFlotas,
 					movimientosNavales,
 					construirEdificio,
 					update
@@ -72,9 +74,10 @@ def menu(s):
 	print(_('(13) Activar modo vacaciones'))
 	print(_('(14) Activar milagro'))
 	print(_('(15) Entrenar tropas'))
-	print(_('(16) Ver movimientos'))
-	print(_('(17) Construir edificio'))
-	print(_('(18) Actualizar Ikabot'))
+	print(_('(16) Entrenar flotas'))
+	print(_('(17) Ver movimientos'))
+	print(_('(18) Construir edificio'))
+	print(_('(19) Actualizar Ikabot'))
 	entradas = len(menu_actions)
 	eleccion = read(min=0, max=entradas)
 	if eleccion != 0:
