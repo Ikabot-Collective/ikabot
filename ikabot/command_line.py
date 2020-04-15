@@ -67,7 +67,7 @@ def menu(s):
 	print(_('(6)  Buscar espacios nuevos'))
 	print(_('(7)  Entrar diariamente'))
 	print(_('(8)  Alertar ataques'))
-	print(_('(9)  Bot donador'))
+	print(_('(9)  Donar automaticamente'))
 	print(_('(10) Alertar poco vino'))
 	print(_('(11) Comprar recursos'))
 	print(_('(12) Vender recursos'))
