@@ -6,11 +6,11 @@ import os
 import json
 import random
 import gettext
-import ikabot.config as config
 import ikabot.web.sesion
-from ikabot.helpers.pedirInfo import read
-from ikabot.helpers.gui import *
 from ikabot.config import *
+import ikabot.config as config
+from ikabot.helpers.gui import *
+from ikabot.helpers.pedirInfo import read
 
 t = gettext.translation('botComm', 
                         localedir, 
@@ -62,6 +62,10 @@ def botValido(s):
 		if rta.lower() != 'y':
 			return False
 		else:
+			return cargarTelegram(s)
+
+def cargarTelegram(s):
+			banner()
 			botToken = read(msg=_('Token del bot:'))
 			chat_id = read(msg=_('Chat_id:'))
 
@@ -74,21 +78,25 @@ def botValido(s):
 			rand = random.randint(1000, 9999)
 			msg = _('El token a ingresar es:{:d}').format(rand)
 			sendToBot(s, msg, Token=True)
+
 			rta = read(msg=_('Se envio un mensaje por telegram, ¿lo recibió? [Y/n]'), values=['y','Y','n', 'N', ''])
 			if rta.lower() == 'n':
-				fileData['telegram']['botToken'] = ''
-				fileData['telegram']['chatId'] = ''
-				s.setFileData(fileData)
-				print(_('Revíse las credenciales y vuelva a proveerlas.'))
-				enter()
-				return False
+				valid = False
 			else:
 				recibido = read(msg=_('Ingrese el token recibido mediante telegram:'), digit=True)
 				if rand != recibido:
 					print(_('El token es incorrecto'))
-					enter()
-					return False
+					valid = False
 				else:
 					print(_('El token es correcto.'))
-					enter()
-					return True
+					valid = True
+
+			if valid is False:
+				fileData['telegram']['botToken'] = ''
+				fileData['telegram']['chatId'] = ''
+				s.setFileData(fileData)
+				print(_('Revíse las credenciales y vuelva a proveerlas.'))
+			else:
+				print(_('Los datos se guardaron.'))
+			enter()
+			return valid
