@@ -6,28 +6,29 @@ import gettext
 from ikabot.config import *
 from ikabot.web.sesion import *
 from ikabot.helpers.gui import *
-from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.process import run
+from ikabot.funcion.donar import donar
+from ikabot.funcion.update import update
+from ikabot.helpers.pedirInfo import read
+from ikabot.funcion.getStatus import getStatus
+from ikabot.funcion.botDonador import botDonador
+from ikabot.helpers.botComm import cargarTelegram
 from ikabot.helpers.signals import setSignalsHandlers
 from ikabot.funcion.subirEdificio import subirEdificios
-from ikabot.funcion.menuRutaComercial import menuRutaComercial
-from ikabot.funcion.repartirRecurso import repartirRecurso
-from ikabot.funcion.getStatus import getStatus
-from ikabot.funcion.donar import donar
 from ikabot.funcion.buscarEspacios import buscarEspacios
-from ikabot.funcion.entrarDiariamente import entrarDiariamente
 from ikabot.funcion.alertarAtaques import alertarAtaques
-from ikabot.funcion.botDonador import botDonador
-from ikabot.funcion.update import update
-from ikabot.funcion.alertarPocoVino import alertarPocoVino
-from ikabot.funcion.comprarRecursos import comprarRecursos
 from ikabot.funcion.modoVacaciones import modoVacaciones
 from ikabot.funcion.activarMilagro import activarMilagro
 from ikabot.funcion.entrenarTropas import entrenarTropas
 from ikabot.funcion.entrenarFlotas import entrenarFlotas
-from ikabot.funcion.movimientosNavales import movimientosNavales
-from ikabot.funcion.construirEdificio import construirEdificio
 from ikabot.funcion.venderRecursos import venderRecursos
+from ikabot.funcion.repartirRecurso import repartirRecurso
+from ikabot.funcion.alertarPocoVino import alertarPocoVino
+from ikabot.funcion.comprarRecursos import comprarRecursos
+from ikabot.funcion.entrarDiariamente import entrarDiariamente
+from ikabot.funcion.menuRutaComercial import menuRutaComercial
+from ikabot.funcion.construirEdificio import construirEdificio
+from ikabot.funcion.movimientosNavales import movimientosNavales
 
 t = gettext.translation('command_line', 
                         localedir, 
@@ -56,7 +57,8 @@ def menu(s):
 					entrenarFlotas,
 					movimientosNavales,
 					construirEdificio,
-					update
+					update,
+					cargarTelegram
 					]
 	print(_('(0)  Salir'))
 	print(_('(1)  Lista de construcción'))
@@ -78,6 +80,7 @@ def menu(s):
 	print(_('(17) Ver movimientos'))
 	print(_('(18) Construir edificio'))
 	print(_('(19) Actualizar Ikabot'))
+	print(_('(20) Actualizar datos de Telegram'))
 	entradas = len(menu_actions)
 	eleccion = read(min=0, max=entradas)
 	if eleccion != 0:
