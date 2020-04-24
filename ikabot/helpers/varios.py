@@ -10,6 +10,8 @@ def addPuntos(num):
 	return '{0:,}'.format(int(num)).replace(',','.')
 
 def diasHorasMinutos(segundosTotales):
+	if segundosTotales == 0:
+		return '0 s'
 	dias = int(segundosTotales / Decimal(86400))
 	segundosTotales -= dias * Decimal(86400)
 	horas = int(segundosTotales / Decimal(3600))

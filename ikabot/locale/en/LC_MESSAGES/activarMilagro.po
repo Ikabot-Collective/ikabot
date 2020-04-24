@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2019-06-23 21:04-0300\n"
+"POT-Creation-Date: 2020-04-24 20:37-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,19 +15,23 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: ../../../funcion/activarMilagro.py:54
-msgid "No existen milagros disponibles."
-msgstr "There are no miracles available."
-
-#: ../../../funcion/activarMilagro.py:57
+#: ../../../funcion/activarMilagro.py:74
 msgid "¿Qué milagro quiere activar?"
 msgstr "Which miracle do you want to activate?"
 
-#: ../../../funcion/activarMilagro.py:59
+#: ../../../funcion/activarMilagro.py:76
 msgid "(0) Salir"
 msgstr "(0) Exit"
 
-#: ../../../funcion/activarMilagro.py:68
+#: ../../../funcion/activarMilagro.py:82
+msgid "({:d}) {} (disponible en: {})"
+msgstr "({:d}) {} (available in: {})"
+
+#: ../../../funcion/activarMilagro.py:95
+msgid "No existen milagros disponibles."
+msgstr "There are no miracles available."
+
+#: ../../../funcion/activarMilagro.py:104
 msgid ""
 "\n"
 "Se activará el milagro {}"
@@ -35,15 +39,73 @@ msgstr ""
 "\n"
 "The miracle {} will be activated"
 
-#: ../../../funcion/activarMilagro.py:69
+#: ../../../funcion/activarMilagro.py:105
+#: ../../../funcion/activarMilagro.py:146
+#: ../../../funcion/activarMilagro.py:154
+#: ../../../funcion/activarMilagro.py:184
 msgid "¿Proceder? [Y/n]"
 msgstr "Proceed? [Y/n]"
 
-#: ../../../funcion/activarMilagro.py:78
+#: ../../../funcion/activarMilagro.py:113
+#: ../../../funcion/activarMilagro.py:220
 msgid "No se pudo activar el milagro {}."
 msgstr "The miracle {} could not be activated."
 
-#: ../../../funcion/activarMilagro.py:80
+#: ../../../funcion/activarMilagro.py:125
 msgid "Se activó el milagro {}."
 msgstr "The miracle {} was activated."
+
+#: ../../../funcion/activarMilagro.py:130
+#: ../../../funcion/activarMilagro.py:166
+msgid "¿Desea activarlo nuevamente al terminar? [y/N]"
+msgstr "Do you wish to activate it again when it is finished? [y/N]"
+
+#: ../../../funcion/activarMilagro.py:136
+#: ../../../funcion/activarMilagro.py:172
+msgid "¿Cuántas veces?: "
+msgstr "How many times?: "
+
+#: ../../../funcion/activarMilagro.py:144
+msgid "Terminará en:{}"
+msgstr "It will finish in:{}"
+
+#: ../../../funcion/activarMilagro.py:153
+msgid ""
+"\n"
+"Se activará el milagro {} en {}"
+msgstr ""
+"\n"
+"The miracle {} will be activated in {}"
+
+#: ../../../funcion/activarMilagro.py:161
+msgid ""
+"\n"
+"Se activará el milagro."
+msgstr ""
+"\n"
+"The mirable will be activated."
+
+#: ../../../funcion/activarMilagro.py:183
+msgid "No se puede calcular el momento de finalización."
+msgstr "It is not possible to calculate the time of finalization."
+
+#: ../../../funcion/activarMilagro.py:202
+msgid ""
+"\n"
+"Activo el milagro {} {:d} veces\n"
+msgstr ""
+"\n"
+"I activate the miracle {} {:d} times\n"
+
+#: ../../../funcion/activarMilagro.py:207
+msgid ""
+"Error en:\n"
+"{}\n"
+"Causa:\n"
+"{}"
+msgstr ""
+"Error in:\n"
+"{}\n"
+"Cause:\n"
+"{}"
 
