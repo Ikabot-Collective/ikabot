@@ -14,5 +14,5 @@ _ = t.gettext
 
 def update(s):
 	print(_('Para actualizar ikabot correr:'))
-	print('sudo python3 -m pip install --upgrade ikabot')
+	print('python3 -m pip install --user --upgrade ikabot')
 	enter()
