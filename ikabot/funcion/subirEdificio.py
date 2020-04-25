@@ -188,7 +188,7 @@ def recursosNecesarios(s, ciudad, edificio, desde, hasta):
 
 			costo_real = Decimal(costo)
 			costo_original = Decimal(costo_real) / Decimal(reduccion_inv)
-			costo_real -= Decimal(costo_original) * (Decimal(reductores[i]) / Decimal(100))
+			costo_real -= Decimal(costo_original) * (Decimal(reductores[index]) / Decimal(100))
 
 			costos[index] += math.ceil(costo_real)
 
