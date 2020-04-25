@@ -10,6 +10,7 @@ from ikabot.helpers.botComm import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.process import forkear
 from ikabot.helpers.getJson import getCiudad
+from ikabot.helpers.signals import setInfoSignal
 
 t = gettext.translation('activarMilagro',
                         localedir,
