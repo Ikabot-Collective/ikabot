@@ -71,7 +71,7 @@ def cargarTelegram(s):
 
 			fileData = s.getFileData()
 			fileData['telegram'] = {}
-			fileData['telegram']['botToken'] = botToken.replace(' ', '')
+			fileData['telegram']['botToken'] = botToken.replace(' ', '').replace('.', '')
 			fileData['telegram']['chatId'] = chat_id
 			s.setFileData(fileData)
 
