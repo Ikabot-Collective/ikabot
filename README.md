@@ -38,11 +38,11 @@ _Ikabot is a program written in python that grants iqual and even more functiona
 	
 8. Alert attacks
 
-	It alerts by telegram if you are going to be attacked.
+	It alerts by telegram if you are going to be attacked. You can configure how often _ikabot_ checks for incoming attacks.
 
 9. Donate automatically
 
-	It enters once a day and donateS all the available wood from all cities to the luxury good or the forest.
+	_Ikabot_ enters once a day and donates all the available wood from all cities to the luxury good or the forest.
 
 10. Alert wine running out
 
@@ -54,7 +54,7 @@ _Ikabot is a program written in python that grants iqual and even more functiona
 	
 12. Sell resources
 
-	It allows you to choose what type of resource to sell and how much. It does not matter how much storage your store has, it automatically updates the offers as pĺayers buy from you. When it sells all the resources, it let's you know via Telegram.
+	It allows you to choose what type of resource to sell and how much. It does not matter how much storage you have, it automatically updates the offers as pĺayers buy from you. When it sells all the resources, it let's you know via Telegram.
 
 13. Activate Vacation Mode
 
@@ -62,34 +62,45 @@ _Ikabot is a program written in python that grants iqual and even more functiona
 
 14. Activate miracle
 
-	It allows you to activate any miracle you have available.
+	It allows you to activate any miracle you have available N times in a row.
 
 15. Train troops
 
 	It allows you to easily create large amounts of troops in one city. If there are not enough resources to train all of them, it will train all the troops it can and when it finishes it will try to train the rest. It also allows you to build your army in multiple small steps so that you can use it as fast as possible.
+	
+16. Train fleet
 
-16. See movements
+	The same as before but with boats.
+
+17. See movements
 
 	Let's you see movements coming to/from your cities. This includes attacks, transports, etc.
 
-17. Update Ikabot
+18. Construct building
+
+	It allows you to contruct a building (WOW!, again).
+
+18. Update Ikabot
 
 	It tells you how to update _ikabot_
-	
+
+20. Update the Telegram data
+
+	It allows you to set or update your Telegram contact information.
 
 When you set an action in _ikabot_, you can enter and play ikariam without any problems. The only drawback that you may have is that the session expires, this is normal and if it happens just re-enter.
 
 ### Install
 
 ```
-sudo python3 -m pip install ikabot
+python3 -m pip install --user ikabot
 ```
 with the `ikabot` command you access the main menu.
 
 ### Uninstall
 
 ```
-sudo python3 -m pip uninstall ikabot
+python3 -m pip uninstall ikabot
 ```
 ### Requirements
 
