@@ -158,7 +158,7 @@ def activarMilagro(s):
 			return
 		wait_time = isla['available_in']
 		iterations = 1
-		
+
 		print(_('\nSe activará el milagro.'))
 		enter()
 		banner()
@@ -212,21 +212,27 @@ def activarMilagro(s):
 
 def do_it(s, isla, wait_time, iterations):
 
-	for i in range(iterations):
+	times_activated = 0
+	while times_activated < iterations:
 		esperar(wait_time + 5)
 
 		rta = activarMilagroImpl(s, isla)
 
 		if rta[1][1][0] == 'error':
-			msg = _('No se pudo activar el milagro {}.').format(isla['wonderName'])
+			#msg = _('No se pudo activar el milagro {}.').format(isla['wonderName'])
+			msg = 'Fallo la activacion de {}, sigo intentando.'.format(isla['wonderName'])
 			sendToBot(s, msg)
-			return
+		else:
+			times_activated += 1
 
 		data = rta[2][1]
 		for elem in data:
 			if 'countdown' in data[elem]:
 				enddate     = data[elem]['countdown']['enddate']
 				currentdate = data[elem]['countdown']['currentdate']
+				wait_time = enddate - currentdate
 				break
-
-		wait_time = enddate - currentdate
+		else:
+			wait_time = 10
+	msg = 'done! :)'
+	sendToBot(s, msg)
