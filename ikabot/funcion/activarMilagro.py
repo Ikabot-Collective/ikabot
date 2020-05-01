@@ -180,8 +180,8 @@ def activarMilagro(s):
 					break
 
 				iterations += 1
-
-				print(_('No se puede calcular el momento de finalización.'))
+				duration = wait_time * iterations
+				print(_('No se puede calcular el momento de finalización. (por lo menos: {}').format(diasHorasMinutos(duration)))
 				print(_('¿Proceder? [Y/n]'))
 
 				try:
@@ -219,9 +219,9 @@ def do_it(s, isla, wait_time, iterations):
 		rta = activarMilagroImpl(s, isla)
 
 		if rta[1][1][0] == 'error':
-			#msg = _('No se pudo activar el milagro {}.').format(isla['wonderName'])
-			msg = 'Fallo la activacion de {}, sigo intentando.'.format(isla['wonderName'])
+			msg = _('No se pudo activar el milagro {}.').format(isla['wonderName'])
 			sendToBot(s, msg)
+			return
 		else:
 			times_activated += 1
 
@@ -233,6 +233,4 @@ def do_it(s, isla, wait_time, iterations):
 				wait_time = enddate - currentdate
 				break
 		else:
-			wait_time = 10
-	msg = 'done! :)'
-	sendToBot(s, msg)
+			wait_time = 60
