@@ -131,7 +131,7 @@ def elegirCiudadAjena(s):
 	return ciudad
 
 def getEdificios(s, idCiudad):
-	html = s.get(urlCiudad + idCiudad)
+	html = s.get(urlCiudad + str(idCiudad))
 	ciudad = getCiudad(html)
 	i = 0
 	pos = -1
