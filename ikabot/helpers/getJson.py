@@ -89,6 +89,7 @@ def getCiudad(html):
 			position['type'] = position['building'].split(' ')[-1]
 			position['building'] = 'empty'
 
+	ciudad['id'] = str(ciudad['id'])
 	ciudad['propia'] = True
 	ciudad['recursos'] = getRecursosDisponibles(html, num=True)
 	ciudad['capacidad'] = getCapacidadDeAlmacenamiento(html)
