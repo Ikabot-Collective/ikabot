@@ -61,21 +61,36 @@ def repartirRecurso(s):
 		return
 
 	recursoXciudad = recursoTotal // len(ciudadesDestino)
-	disponibles = [ ciudadesDestino[city]['disponible'] for city in ciudadesDestino ]
-	totalDisponible = sum( disponibles )
-	maxDisponible = max( disponibles )
-	if recursoTotal > totalDisponible:
-		recursoXciudad = maxDisponible
-	maximo = addPuntos(recursoXciudad)
+	espacios_disponibles = [ ciudadesDestino[city]['disponible'] for city in ciudadesDestino ]
+	totalEspacioDisponible = sum( espacios_disponibles )
+	restanteAEnviar = min(recursoTotal, totalEspacioDisponible)
+	toSend = {}
 
-	print(_('\nSe puede enviar como máximo {} a cada ciudad').format(maximo))
-	cantidad = read(msg=_('¿Cuanto enviar a cada ciudad?:'), min=0, max=recursoXciudad)
+	while restanteAEnviar > 0:
+		len_prev = len(toSend)
+		for city in ciudadesDestino:
+			ciudad = ciudadesDestino[city]
+			if city not in toSend and ciudad['disponible'] < recursoXciudad:
+				toSend[city] = ciudad['disponible']
+				restanteAEnviar -= ciudad['disponible']
 
-	if cantidad == 0:
-		return
+		if len(toSend) == len_prev:
+			for city in ciudadesDestino:
+				if city not in toSend:
+					toSend[city] = recursoXciudad
+			break
 
-	print(_('\nPor enviar {} a cada ciudad').format(addPuntos(cantidad)))
-	print(_('¿Proceder? [Y/n]'))
+		espacios_disponibles = [ ciudadesDestino[city]['disponible'] for city in ciudadesDestino if city not in toSend ]
+		totalEspacioDisponible = sum( espacios_disponibles )
+		restanteAEnviar = min(restanteAEnviar, totalEspacioDisponible)
+		recursoXciudad = restanteAEnviar // len(espacios_disponibles)
+
+	banner()
+	print(_('\nSe enviará {} a:').format(tipoDeBien[recurso].lower()))
+	for city in toSend:
+		print('  {}: {}'.format(ciudadesDestino[city]['name'], addPuntos(toSend[city])))
+
+	print(_('\n¿Proceder? [Y/n]'))
 	rta = read(values=['y', 'Y', 'n', 'N', ''])
 	if rta.lower() == 'n':
 		return
@@ -88,7 +103,7 @@ def repartirRecurso(s):
 	for idCiudad in ciudadesDestino:
 		ciudadD = ciudadesDestino[idCiudad]
 		idIsla = ciudadD['islandId']
-		faltante = cantidad
+		faltante = toSend[idCiudad]
 		for idCiudadOrigen in ciudadesOrigen:
 			if faltante == 0:
 				break
@@ -121,7 +136,7 @@ def repartirRecurso(s):
 	for ruta in rutas:
 		(ciudadO, ciudadD, idIsla, md, vn, mr, cr, az) = ruta
 		rec = ruta[recurso + 3]
-		info = info + _('{} -> {}\n{}: {}\n').format(ciudadO['cityName'], ciudadD['cityName'], tipoDeBien[recurso], addPuntos(rec))
+		info = info + '{} -> {}\n{}: {}\n'.format(ciudadO['cityName'], ciudadD['cityName'], tipoDeBien[recurso], addPuntos(rec))
 	setInfoSignal(s, info)
 	try:
 		planearViajes(s, rutas)
