@@ -189,8 +189,8 @@ def do_it1(s, porVender, ofertas, recurso, ciudad):
 
 			data = {'action': 'transportOperations', 'function': 'sellGoodsAtAnotherBranchOffice', 'cityId': ciudad['id'], 'destinationCityId': idDestino, 'oldView': 'branchOffice', 'position': ciudad['pos'], 'avatar2Name': user, 'city2Name': city, 'type': '333', 'activeTab': 'bargain', 'transportDisplayPrice': '0', 'premiumTransporter': '0', 'capacity': '5', 'max_capacity': '5', 'jetPropulsion': '0', 'transporters': str(barcos_usados), 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'takeOffer', 'currentTab': 'bargain', 'actionRequest': s.token(), 'ajax': '1'}
 			if recurso == 0:
-				data['resource'] = str(precio)
-				data['resourcePrice'] = str(cant_venta)
+				data['cargo_resource'] = str(cant_venta)
+				data['resourcePrice'] = str(precio)
 			else:
 				data['tradegood{:d}Price'.format(recurso)] = str(precio)
 				data['cargo_tradegood{:d}'.format(recurso)] = str(cant_venta)
