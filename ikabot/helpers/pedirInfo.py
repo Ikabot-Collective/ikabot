@@ -71,8 +71,9 @@ def elegirCiudad(s, ajenas=False):
 			nombre = ciudades[unId]['name']
 			matches = re.findall(r'u[0-9a-f]{4}', nombre)
 			for match in matches:
-				nombre = nombre.replace(match, '\\' + match)
-			nombre = nombre.encode().decode('unicode-escape')
+				to_unicode = '\\' + match
+				to_unicode = to_unicode.encode().decode('unicode-escape')
+				nombre = nombre.replace(match, to_unicode)
 			num = ' ' + str(i) if i < 10 else str(i)
 			menuCiudades += '{}: {}{}{}\n'.format(num, nombre, pad(nombre), bien)
 		menuCiudades = menuCiudades[:-1]
