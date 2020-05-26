@@ -66,7 +66,7 @@ def menu(s):
 	print(_('(1)  Lista de construcción'))
 	print(_('(2)  Enviar recursos'))
 	print(_('(3)  Repartir recurso'))
-	print(_('(4)  Distribute resources evenly among all cities.'))
+	print(_('(4)  Distribute resources evenly among all cities'))
 	print(_('(5)  Estado de la cuenta'))
 	print(_('(6)  Donar'))
 	print(_('(7)  Buscar espacios nuevos'))
