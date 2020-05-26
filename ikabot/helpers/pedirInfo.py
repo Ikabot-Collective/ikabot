@@ -69,6 +69,10 @@ def elegirCiudad(s, ajenas=False):
 			tradegood = ciudades[unId]['tradegood']
 			bien = bienes[tradegood]
 			nombre = ciudades[unId]['name']
+			matches = re.findall(r'u[0-9a-f]{4}', nombre)
+			for match in matches:
+				nombre = nombre.replace(match, '\\' + match)
+			nombre = nombre.encode().decode('unicode-escape')
 			num = ' ' + str(i) if i < 10 else str(i)
 			menuCiudades += '{}: {}{}{}\n'.format(num, nombre, pad(nombre), bien)
 		menuCiudades = menuCiudades[:-1]
