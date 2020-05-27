@@ -56,6 +56,7 @@ def esperarConstruccion(s, idCiudad, posicion):
 		esperar(slp + 5)
 	html = s.get(urlCiudad + idCiudad)
 	ciudad = getCiudad(html)
+	edificio = ciudad['position'][posicion]
 	msg = _('{}: El edificio {} alcanzó el nivel {:d}.').format(ciudad['cityName'], edificio['name'], int(edificio['level']))
 	sendToBotDebug(s, msg, debugON_subirEdificio)
 	return ciudad
