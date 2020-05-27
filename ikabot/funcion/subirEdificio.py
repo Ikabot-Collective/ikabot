@@ -40,7 +40,7 @@ def getTiempoDeConstruccion(s, html, posicion):
 	hora_actual = int( time.time() )
 	hora_fin    = int( hora_fin.group(1) )
 	espera      = hora_fin - hora_actual
-	if espera < 0:
+	if espera <= 0:
 		espera = 0
 
 	msg = _('{}: Espero {:d} segundos para que {} suba al nivel {:d}').format(ciudad['cityName'], espera, edificio['name'], int(edificio['level']) + 1)
@@ -54,7 +54,11 @@ def esperarConstruccion(s, idCiudad, posicion):
 		html = s.get(urlCiudad + idCiudad)
 		slp = getTiempoDeConstruccion(s, html, posicion)
 		esperar(slp + 5)
-	return getCiudad(html)
+	html = s.get(urlCiudad + idCiudad)
+	ciudad = getCiudad(html)
+	msg = _('{}: El edificio {} alcanzó el nivel {:d}.').format(ciudad['cityName'], edificio['name'], int(edificio['level']))
+	sendToBotDebug(s, msg, debugON_subirEdificio)
+	return ciudad
 
 def subirEdificio(s, idCiudad, posicion, nivelesASubir, esperarRecursos):
 
@@ -98,6 +102,12 @@ def subirEdificio(s, idCiudad, posicion, nivelesASubir, esperarRecursos):
 			msg += str(edificio)
 			sendToBot(s, msg)
 			return
+
+		msg = _('{}: El edificio {} se esta ampliando al nivel {:d}.').format(ciudad['cityName'], edificio['name'], int(edificio['level'])+1)
+		sendToBotDebug(s, msg, debugON_subirEdificio)
+
+	msg = _('{}: El edificio {} terminó de ampliarse al nivel: {:d}.').format(ciudad['cityName'], edificio['name'], int(edificio['level'])+1)
+	sendToBotDebug(s, msg, debugON_subirEdificio)
 
 def getReductores(ciudad):
 	(carpinteria, oficina, prensa, optico, area) = (0, 0, 0, 0, 0)
