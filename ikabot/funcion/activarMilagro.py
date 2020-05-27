@@ -121,7 +121,7 @@ def activarMilagro(s):
 				enddate     = data[elem]['countdown']['enddate']
 				currentdate = data[elem]['countdown']['currentdate']
 				break
-		wait_time   = enddate - currentdate
+		wait_time = enddate - currentdate
 
 		print(_('Se activó el milagro {}.').format(isla['wonderName']))
 		enter()
@@ -138,7 +138,6 @@ def activarMilagro(s):
 
 			if iterations == 0:
 				return
-
 
 			duration = wait_time * iterations
 
@@ -214,6 +213,8 @@ def do_it(s, isla, wait_time, iterations):
 
 	times_activated = 0
 	while times_activated < iterations:
+		msg = _('Espero {:d} segundos para activar el milagro {}').format(wait_time, isla['wonderName'])
+		sendToBotDebug(s, msg, debugON_activarMilagro)
 		esperar(wait_time + 5)
 
 		rta = activarMilagroImpl(s, isla)
@@ -225,6 +226,9 @@ def do_it(s, isla, wait_time, iterations):
 		else:
 			times_activated += 1
 
+		msg = _('Milagro {} activado con exito').format(isla['wonderName'])
+		sendToBotDebug(s, msg, debugON_activarMilagro)
+
 		data = rta[2][1]
 		for elem in data:
 			if 'countdown' in data[elem]:
@@ -233,4 +237,6 @@ def do_it(s, isla, wait_time, iterations):
 				wait_time = enddate - currentdate
 				break
 		else:
+			msg = _('No se encontró el countdown para el milagro {}.\nEspero un minuto').format(isla['wonderName'])
+			sendToBotDebug(s, msg, debugON_activarMilagro)
 			wait_time = 60

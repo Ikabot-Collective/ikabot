@@ -41,3 +41,5 @@ debugON_menuRutaComercial = False
 debugON_subirEdificio     = False
 debugON_session           = False
 debugON_comprarRecursos   = False
+debugON_activarMilagro    = False
+
