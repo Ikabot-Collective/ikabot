@@ -1,0 +1,69 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2020-05-27 11:15-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: ../../../ikabot/funcion/distributeResourcesEvenly.py:27
+msgid "¿Qué recurso quiere distribuir?"
+msgstr "What resource do you want to distribute?"
+
+#: ../../../ikabot/funcion/distributeResourcesEvenly.py:28
+msgid "(0) Salir"
+msgstr "(0) Exit"
+
+#: ../../../ikabot/funcion/distributeResourcesEvenly.py:103
+msgid ""
+"\n"
+"Se realizarán los siguientes envios:\n"
+msgstr ""
+"\n"
+"The following routes will be executed:\n"
+
+#: ../../../ikabot/funcion/distributeResourcesEvenly.py:107
+msgid ""
+"\n"
+"Todas las ciuaddes tendrán al rededor de {} de {}"
+msgstr ""
+"\n"
+"All cities will have about {} of {}"
+
+#: ../../../ikabot/funcion/distributeResourcesEvenly.py:109
+msgid ""
+"\n"
+"¿Proceder? [Y/n]"
+msgstr ""
+"\n"
+"Proceed? [Y/n]"
+
+#: ../../../ikabot/funcion/distributeResourcesEvenly.py:118
+msgid ""
+"\n"
+"Distribuyo {} de forma uniforme entre todas las ciudades\n"
+msgstr ""
+"\n"
+"I distribute {} evenly among all cities\n"
+
+#: ../../../ikabot/funcion/distributeResourcesEvenly.py:124
+msgid ""
+"Error en:\n"
+"{}\n"
+"Causa:\n"
+"{}"
+msgstr ""
+"Error in:\n"
+"{}\n"
+"Cause:\n"
+"{}"
+
