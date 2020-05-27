@@ -20,71 +20,75 @@ _Ikabot is a program written in python that grants iqual and even more functiona
 
 	It sends whatever resource you choose from the cities that produce it to cities that do not. The same amount is sent to all cities, unless a city has little free storage space. (Very useful to send wine)
 
-4. Account status
+4. Distribute resource evenly
+
+	This function attempts to distribute all of a given type of resource evenly among all cities, regardless of if they're production cities or non-production cities.
+	
+5. Account status
 
 	It shows information such as levels of the buildings, time until the wine runs out, resources among other things from all the cities.
 	
-5. Donate
+6. Donate
 
 	It allows you to donate (WOW!).
 	
-6. Search for new spaces
+7. Search for new spaces
 
 	This functionality alerts by telegram, if a city disappears or if someone founds in any of the islands where the user has at least one city.
 	
-7. Login daily
+8. Login daily
 
 	For those who do not want to spend a day without their account login.
 	
-8. Alert attacks
+9. Alert attacks
 
 	It alerts by telegram if you are going to be attacked. You can configure how often _ikabot_ checks for incoming attacks.
 
-9. Donate automatically
+10. Donate automatically
 
 	_Ikabot_ enters once a day and donates all the available wood from all cities to the luxury good or the forest.
 
-10. Alert wine running out
+11. Alert wine running out
 
 	It warns you by Telegram when less than N hours are needed for a city to run out of wine. The number of hours is specified by the user.
 
-11. Buy resources
+12. Buy resources
 
 	It allows you to choose what type of resource to buy and how much. It automatically purchases the different offers from the cheapest to the most expensive.
 	
-12. Sell resources
+13. Sell resources
 
 	It allows you to choose what type of resource to sell and how much. It does not matter how much storage you have, it automatically updates the offers as pĺayers buy from you. When it sells all the resources, it let's you know via Telegram.
 
-13. Activate Vacation Mode
+14. Activate Vacation Mode
 
 	Sets the account in vacation mode and closes _ikabot_.
 
-14. Activate miracle
+15. Activate miracle
 
 	It allows you to activate any miracle you have available N times in a row.
 
-15. Train troops
+16. Train troops
 
 	It allows you to easily create large amounts of troops in one city. If there are not enough resources to train all of them, it will train all the troops it can and when it finishes it will try to train the rest. It also allows you to build your army in multiple small steps so that you can use it as fast as possible.
 	
-16. Train fleet
+17. Train fleet
 
 	The same as before but with boats.
 
-17. See movements
+18. See movements
 
 	Let's you see movements coming to/from your cities. This includes attacks, transports, etc.
 
-18. Construct building
+19. Construct building
 
 	It allows you to contruct a building (WOW!, again).
 
-18. Update Ikabot
+20. Update Ikabot
 
 	It tells you how to update _ikabot_
 
-20. Update the Telegram data
+21. Update the Telegram data
 
 	It allows you to set or update your Telegram contact information.
 

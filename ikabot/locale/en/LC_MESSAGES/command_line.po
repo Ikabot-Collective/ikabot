@@ -15,87 +15,87 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: ../../../command_line.py:63
+#: ../../../command_line.py:65
 msgid "(0)  Salir"
 msgstr "(0)  Exit"
 
-#: ../../../command_line.py:64
+#: ../../../command_line.py:66
 msgid "(1)  Lista de construcción"
 msgstr "(1)  Construction list"
 
-#: ../../../command_line.py:65
+#: ../../../command_line.py:67
 msgid "(2)  Enviar recursos"
 msgstr "(2)  Send resources"
 
-#: ../../../command_line.py:66
+#: ../../../command_line.py:68
 msgid "(3)  Repartir recurso"
 msgstr "(3)  Distribute resource"
 
-#: ../../../command_line.py:67
-msgid "(4)  Estado de la cuenta"
-msgstr "(4)  Account status"
-
-#: ../../../command_line.py:68
-msgid "(5)  Donar"
-msgstr "(5)  Donate"
-
-#: ../../../command_line.py:69
-msgid "(6)  Buscar espacios nuevos"
-msgstr "(6)  Search for new spaces"
-
 #: ../../../command_line.py:70
-msgid "(7)  Entrar diariamente"
-msgstr "(7)  Login daily"
+msgid "(5)  Estado de la cuenta"
+msgstr "(5)  Account status"
 
 #: ../../../command_line.py:71
-msgid "(8)  Alertar ataques"
-msgstr "(8)  Alert attacks"
+msgid "(6)  Donar"
+msgstr "(6)  Donate"
 
 #: ../../../command_line.py:72
-msgid "(9)  Donar automaticamente"
-msgstr "(9)  Donate automatically"
+msgid "(7)  Buscar espacios nuevos"
+msgstr "(7)  Search for new spaces"
 
 #: ../../../command_line.py:73
-msgid "(10) Alertar poco vino"
-msgstr "(10) Alert wine running out"
+msgid "(8)  Entrar diariamente"
+msgstr "(8)  Login daily"
 
 #: ../../../command_line.py:74
-msgid "(11) Comprar recursos"
-msgstr "(11) Buy resources"
+msgid "(9)  Alertar ataques"
+msgstr "(9)  Alert attacks"
 
 #: ../../../command_line.py:75
-msgid "(12) Vender recursos"
-msgstr "(12) Sell resources"
+msgid "(10)  Donar automaticamente"
+msgstr "(10)  Donate automatically"
 
 #: ../../../command_line.py:76
-msgid "(13) Activar modo vacaciones"
-msgstr "(13) Activate vacation mode"
+msgid "(11) Alertar poco vino"
+msgstr "(11) Alert wine running out"
 
 #: ../../../command_line.py:77
-msgid "(14) Activar milagro"
-msgstr "(14) Activate miracle"
+msgid "(12) Comprar recursos"
+msgstr "(12) Buy resources"
 
 #: ../../../command_line.py:78
-msgid "(15) Entrenar tropas"
-msgstr "(15) Train troops"
+msgid "(13) Vender recursos"
+msgstr "(13) Sell resources"
 
 #: ../../../command_line.py:79
-msgid "(16) Entrenar flotas"
-msgstr "(16) Train fleet"
+msgid "(14) Activar modo vacaciones"
+msgstr "(14) Activate vacation mode"
 
 #: ../../../command_line.py:80
-msgid "(17) Ver movimientos"
-msgstr "(17) See movements"
+msgid "(15) Activar milagro"
+msgstr "(15) Activate miracle"
 
 #: ../../../command_line.py:81
-msgid "(18) Construir edificio"
-msgstr "(18) Construct building"
+msgid "(16) Entrenar tropas"
+msgstr "(16) Train troops"
 
 #: ../../../command_line.py:82
-msgid "(19) Actualizar Ikabot"
-msgstr "(18) Update Ikabot"
+msgid "(17) Entrenar flotas"
+msgstr "(17) Train fleet"
 
 #: ../../../command_line.py:83
-msgid "(20) Actualizar datos de Telegram"
-msgstr "(20) Update the Telegram data"
+msgid "(18) Ver movimientos"
+msgstr "(18) See movements"
+
+#: ../../../command_line.py:84
+msgid "(19) Construir edificio"
+msgstr "(19) Construct building"
+
+#: ../../../command_line.py:85
+msgid "(20) Actualizar Ikabot"
+msgstr "(20) Update Ikabot"
+
+#: ../../../command_line.py:86
+msgid "(21) Actualizar datos de Telegram"
+msgstr "(21) Update the Telegram data"
 
