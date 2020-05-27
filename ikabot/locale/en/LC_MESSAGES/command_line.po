@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2020-04-23 20:07-0300\n"
+"POT-Creation-Date: 2020-05-27 15:47-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -28,8 +28,12 @@ msgid "(2)  Enviar recursos"
 msgstr "(2)  Send resources"
 
 #: ../../../command_line.py:68
-msgid "(3)  Repartir recurso"
-msgstr "(3)  Distribute resource"
+msgid "(3)  Distribuir recursos"
+msgstr "(3)  Distribute resources"
+
+#: ../../../command_line.py:69
+msgid "(4)  Distribuir recursos uniformemente"
+msgstr "(4)  Distribute resources evenly"
 
 #: ../../../command_line.py:70
 msgid "(5)  Estado de la cuenta"
@@ -52,7 +56,7 @@ msgid "(9)  Alertar ataques"
 msgstr "(9)  Alert attacks"
 
 #: ../../../command_line.py:75
-msgid "(10)  Donar automaticamente"
+msgid "(10) Donar automaticamente"
 msgstr "(10)  Donate automatically"
 
 #: ../../../command_line.py:76
