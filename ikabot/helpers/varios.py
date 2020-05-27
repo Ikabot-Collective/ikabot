@@ -27,6 +27,8 @@ def diasHorasMinutos(segundosTotales):
 	return texto[:-1]
 
 def esperar(segundos):
+	if segundos <= 0:
+		return
 	ratio = (1 + 5 ** 0.5) / 2 - 1
 	comienzo = time.time()
 	fin = comienzo + segundos
