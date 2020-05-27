@@ -202,34 +202,25 @@ def activarMilagro(s):
 	info = _('\nActivo el milagro {} {:d} veces\n').format(isla['wonderName'], iterations)
 	setInfoSignal(s, info)
 	try:
-		do_it(s, isla, wait_time, iterations)
+		do_it(s, isla, iterations)
 	except:
 		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
 		sendToBot(s, msg)
 	finally:
 		s.logout()
 
-def do_it(s, isla, wait_time, iterations):
 
-	times_activated = 0
-	while times_activated < iterations:
-		msg = _('Espero {:d} segundos para activar el milagro {}').format(wait_time, isla['wonderName'])
-		sendToBotDebug(s, msg, debugON_activarMilagro)
-		esperar(wait_time + 5)
+def wait_for_miracle(s, isla):
+	while True:
+		params = {"view": "temple", "cityId": isla['ciudad']['id'], "position": isla['ciudad']['pos'], "backgroundView": "city", "currentCityId": isla['ciudad']['id'], "actionRequest": s.token(), "ajax": "1"}
+		data = s.post(params=params)
+		data = json.loads(data, strict=False)
+		data = data[2][1]
 
-		rta = activarMilagroImpl(s, isla)
-
-		if rta[1][1][0] == 'error':
-			msg = _('No se pudo activar el milagro {}.').format(isla['wonderName'])
-			sendToBot(s, msg)
+		available =  data['js_WonderViewButton']['buttonState'] == 'enabled'
+		if available:
 			return
-		else:
-			times_activated += 1
 
-		msg = _('Milagro {} activado con exito').format(isla['wonderName'])
-		sendToBotDebug(s, msg, debugON_activarMilagro)
-
-		data = rta[2][1]
 		for elem in data:
 			if 'countdown' in data[elem]:
 				enddate     = data[elem]['countdown']['enddate']
@@ -237,6 +228,24 @@ def do_it(s, isla, wait_time, iterations):
 				wait_time = enddate - currentdate
 				break
 		else:
-			msg = _('No se encontró el countdown para el milagro {}.\nEspero un minuto').format(isla['wonderName'])
-			sendToBotDebug(s, msg, debugON_activarMilagro)
 			wait_time = 60
+
+		msg = _('Espero {:d} segundos para activar el milagro {}').format(wait_time, isla['wonderName'])
+		sendToBotDebug(s, msg, debugON_activarMilagro)
+		esperar(wait_time + 5)
+
+def do_it(s, isla, iterations):
+
+	for i in range(iterations):
+
+		wait_for_miracle(s, isla)
+
+		rta = activarMilagroImpl(s, isla)
+
+		if rta[1][1][0] == 'error':
+			msg = _('No se pudo activar el milagro {}.').format(isla['wonderName'])
+			sendToBot(s, msg)
+			return
+
+		msg = _('Milagro {} activado con exito').format(isla['wonderName'])
+		sendToBotDebug(s, msg, debugON_activarMilagro)
