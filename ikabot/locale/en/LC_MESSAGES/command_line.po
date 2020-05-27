@@ -57,7 +57,7 @@ msgstr "(9)  Alert attacks"
 
 #: ../../../command_line.py:75
 msgid "(10) Donar automaticamente"
-msgstr "(10)  Donate automatically"
+msgstr "(10) Donate automatically"
 
 #: ../../../command_line.py:76
 msgid "(11) Alertar poco vino"
