@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2020-05-22 01:36-0300\n"
+"POT-Creation-Date: 2020-05-27 22:20-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,22 +20,26 @@ msgid "¿Qué recurso quiere repartir?"
 msgstr "What resource do you want to distribute?"
 
 #: ../../../funcion/repartirRecurso.py:28
+msgid "(0) Salir"
+msgstr "(0) Exit"
+
+#: ../../../funcion/repartirRecurso.py:29
 msgid "(1) Vino"
 msgstr "(1) Wine"
 
-#: ../../../funcion/repartirRecurso.py:29
+#: ../../../funcion/repartirRecurso.py:30
 msgid "(2) Marmol"
 msgstr "(2) Marble"
 
-#: ../../../funcion/repartirRecurso.py:30
+#: ../../../funcion/repartirRecurso.py:31
 msgid "(3) Cristal"
 msgstr "(3) Cristal"
 
-#: ../../../funcion/repartirRecurso.py:31
+#: ../../../funcion/repartirRecurso.py:32
 msgid "(4) Azufre"
 msgstr "(4) Sulfur"
 
-#: ../../../funcion/repartirRecurso.py:55
+#: ../../../funcion/repartirRecurso.py:58
 msgid ""
 "\n"
 "No hay recursos para enviar."
@@ -43,7 +47,7 @@ msgstr ""
 "\n"
 "There are no resources to send."
 
-#: ../../../funcion/repartirRecurso.py:59
+#: ../../../funcion/repartirRecurso.py:62
 msgid ""
 "\n"
 "No hay espacio disponible para enviar recursos."
@@ -51,7 +55,7 @@ msgstr ""
 "\n"
 "There is no space available to send resources."
 
-#: ../../../funcion/repartirRecurso.py:89
+#: ../../../funcion/repartirRecurso.py:92
 msgid ""
 "\n"
 "Se enviará {} a:"
@@ -59,7 +63,7 @@ msgstr ""
 "\n"
 "{} will be sent to:"
 
-#: ../../../funcion/repartirRecurso.py:93
+#: ../../../funcion/repartirRecurso.py:96
 msgid ""
 "\n"
 "¿Proceder? [Y/n]"
@@ -67,7 +71,7 @@ msgstr ""
 "\n"
 "Proceed? [Y/n]"
 
-#: ../../../funcion/repartirRecurso.py:135
+#: ../../../funcion/repartirRecurso.py:138
 msgid ""
 "\n"
 "Repartir recurso\n"
@@ -75,7 +79,7 @@ msgstr ""
 "\n"
 "Distribute resource\n"
 
-#: ../../../funcion/repartirRecurso.py:144
+#: ../../../funcion/repartirRecurso.py:147
 msgid ""
 "Error en:\n"
 "{}\n"

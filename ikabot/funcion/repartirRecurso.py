@@ -25,11 +25,14 @@ def repartirRecurso(s):
 	banner()
 
 	print(_('¿Qué recurso quiere repartir?'))
+	print(_('(0) Salir'))
 	print(_('(1) Vino'))
 	print(_('(2) Marmol'))
 	print(_('(3) Cristal'))
 	print(_('(4) Azufre'))
-	recurso = read(min=1, max=4)
+	recurso = read(min=0, max=4)
+	if recurso == 0:
+		return
 
 	recursoTotal = 0
 	dict_idVino_diponible = {}
