@@ -216,10 +216,6 @@ def wait_for_miracle(s, isla):
 		data = json.loads(data, strict=False)
 		data = data[2][1]
 
-		available =  data['js_WonderViewButton']['buttonState'] == 'enabled'
-		if available:
-			return
-
 		for elem in data:
 			if 'countdown' in data[elem]:
 				enddate     = data[elem]['countdown']['enddate']
@@ -227,7 +223,11 @@ def wait_for_miracle(s, isla):
 				wait_time = enddate - currentdate
 				break
 		else:
-			wait_time = 60
+			available = data['js_WonderViewButton']['buttonState'] == 'enabled'
+			if available:
+				return
+			else:
+				wait_time = 60
 
 		msg = _('Espero {:d} segundos para activar el milagro {}').format(wait_time, isla['wonderName'])
 		sendToBotDebug(s, msg, debugON_activarMilagro)
