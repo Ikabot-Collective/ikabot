@@ -209,7 +209,6 @@ def activarMilagro(s):
 	finally:
 		s.logout()
 
-
 def wait_for_miracle(s, isla):
 	while True:
 		params = {"view": "temple", "cityId": isla['ciudad']['id'], "position": isla['ciudad']['pos'], "backgroundView": "city", "currentCityId": isla['ciudad']['id'], "actionRequest": s.token(), "ajax": "1"}
