@@ -16,11 +16,11 @@ _Ikabot is a program written in python that grants iqual and even more functiona
  
 	It sends unlimited amount of resources from one city to another. It doesn't matter how many boats you have, _ikabot_ will send all the trips that were necessary. The destination city can be own by the user or by other.
 
-3. Distribute resource
+3. Distribute resources
 
 	It sends whatever resource you choose from the cities that produce it to cities that do not. The same amount is sent to all cities, unless a city has little free storage space. (Very useful to send wine)
 
-4. Distribute resource evenly
+4. Distribute resources evenly
 
 	This function attempts to distribute all of a given type of resource evenly among all cities, regardless of if they're production cities or non-production cities.
 	
@@ -100,6 +100,15 @@ When you set an action in _ikabot_, you can enter and play ikariam without any p
 python3 -m pip install --user ikabot
 ```
 with the `ikabot` command you access the main menu.
+
+### Build from sources
+```
+git clone https://github.com/physics-sp/ikabot
+cd ikabot
+python3 setup.py sdist bdist_wheel
+python3 -m pip install dist/*.whl
+rm -rf build dist ikabot.egg-info
+```
 
 ### Uninstall
 
