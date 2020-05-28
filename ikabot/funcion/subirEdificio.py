@@ -67,7 +67,7 @@ def subirEdificio(s, idCiudad, posicion, nivelesASubir, esperarRecursos):
 		ciudad = esperarConstruccion(s, idCiudad, posicion)
 		edificio = ciudad['position'][posicion]
 
-		if edificio['canUpgrade'] is False and esperarRecursos:
+		if edificio['canUpgrade'] is False and esperarRecursos is True:
 			while edificio['canUpgrade'] is False:
 				time.sleep(60) # tiempo para que se envien los recursos
 				segundos = obtenerMinimoTiempoDeEspera(s)
@@ -76,8 +76,7 @@ def subirEdificio(s, idCiudad, posicion, nivelesASubir, esperarRecursos):
 				edificio = ciudad['position'][posicion]
 				if segundos == 0:
 					break
-				else:
-					esperar(segundos)
+				esperar(segundos)
 
 		if edificio['canUpgrade'] is False:
 			msg  = _('Ciudad:{}\n').format(ciudad['cityName'])
@@ -95,12 +94,8 @@ def subirEdificio(s, idCiudad, posicion, nivelesASubir, esperarRecursos):
 			edificio = ciudad['position'][posicion]
 			if edificio['isBusy']:
 				break
-
-		if edificio['isBusy'] is False:
-			msg  = _('El edificio no se amplió\n')
-			msg  = _('El edificio {} no se amplió después de tres intentos\n').format(edificio['name'])
-			msg += url + '\n'
-			msg += str(edificio)
+		else:
+			msg  = _('{}: El edificio {} no se amplió después de tres intentos\n').format(ciudad['cityName'], edificio['name'])
 			sendToBot(s, msg)
 			return
 
