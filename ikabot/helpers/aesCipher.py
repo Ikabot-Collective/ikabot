@@ -5,6 +5,7 @@ import json
 import base64
 import hashlib
 from ikabot.config import *
+from ikabot.helpers.botComm import *
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 t = gettext.translation('aesCipher',
@@ -54,12 +55,13 @@ class AESCipher:
 						sendToBot(s, _('MAC check ERROR, ciphertext corrompido.'))
 					os._exit(0)
 				data_dict = json.loads(plaintext, strict=False)
-				if all is False:
+				if all:
+					return data_dict
+				else:
 					try:
-						data_dict = data_dict[s.username][s.mundo][s.servidor]
+						return data_dict[s.username][s.mundo][s.servidor]
 					except KeyError:
 						return {}
-				return data_dict
 		return {}
 
 	def setFileData(self, s, data):
