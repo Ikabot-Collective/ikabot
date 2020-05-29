@@ -67,10 +67,9 @@ def distributeResourcesEvenly(s):
 	routes = []
 	
 	for originCityID in originCities: #iterate through all origin city ids
-		if originCities[originCityID] == 0:
-			continue
+
 		for destinationCityID in destinationCities: #iterate through all destination city ids
-			if destinationCities[destinationCityID] == 0:
+			if originCities[originCityID] == 0 or destinationCities[destinationCityID] == 0:
 				continue
 
 			if originCities[originCityID] > destinationCities[destinationCityID]: #if there's more resources above average in the origin city than resources below average in the destination city (origin city needs to have a surplus and destination city needs to have a deficit of resources for a route to be considered)
