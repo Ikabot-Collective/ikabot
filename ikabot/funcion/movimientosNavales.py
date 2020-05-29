@@ -5,6 +5,8 @@ import re
 import math
 import json
 import gettext
+import sys
+from ikabot.helpers.pedirInfo import read
 from decimal import *
 from ikabot.config import *
 from ikabot.helpers.gui import *
@@ -25,7 +27,8 @@ def esHostil(movement):
 			return True
 	return False
 
-def movimientosNavales(s):
+def movimientosNavales(s,e,fd):
+	sys.stdin = os.fdopen(fd)
 	banner()
 
 	print(_('Barcos {:d}/{:d}\n').format(getBarcosDisponibles(s), getBarcosTotales(s)))
@@ -79,5 +82,6 @@ def movimientosNavales(s):
 				print(_('{} de {}').format(cantidad, tipo))
 			barcos = int(math.ceil((Decimal(cargaTotal) / Decimal(500))))
 			print(_('{:d} Barcos').format(barcos))
-	enter()
+	read()
+	e.set()
 	return
