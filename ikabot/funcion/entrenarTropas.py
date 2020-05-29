@@ -127,7 +127,8 @@ def generateTroops(unidades_info):
 		i += 1
 	return unidades
 
-def entrenarTropas(s):
+def entrenarTropas(s,e,fd):
+	sys.stdin = os.fdopen(fd)
 	banner()
 	print(_('¿En qué ciudad quiere entrenar las flotas?'))
 	ciudad = elegirCiudad(s)
@@ -198,6 +199,7 @@ def entrenarTropas(s):
 		print(_('\nProceder? [Y/n]'))
 		rta = read(values=['y', 'Y', 'n', 'N', ''])
 		if rta.lower() == 'n':
+			e.set()
 			return
 
 		entrenamientos.append(unidades)
@@ -256,14 +258,17 @@ def entrenarTropas(s):
 		print(_('\n¿Proceder de todos modos? [Y/n]'))
 		rta = read(values=['y', 'Y', 'n', 'N', ''])
 		if rta.lower() == 'n':
+			e.set()
 			return
 
 	print(_('\nSe entrenarán las tropas seleccionadas.'))
-	enter()
+	read()
 
 	forkear(s)
 	if s.padre is True:
 		return
+	
+	e.set()
 
 	info = _('\nEntreno tropas en {}\n').format(ciudad['cityName'])
 	setInfoSignal(s, info)
