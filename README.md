@@ -1,9 +1,9 @@
 ## Cross-platform support
 
 This is branch will attempt to incorporate cross-platform support into Ikabot. Currently this protoype has been tested only on Windows 10 and is not very stable. Feature currently adapted to cross-platform support are:
-	1. Distribute resources evenly
-	2. Distribute resources
-	3. Account status
+1. Distribute resources evenly
+2. Distribute resources
+3. Account status
 
 ### Install on windows
 
