@@ -289,7 +289,7 @@ def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante):
 		ids = menuEdificios(s, idss, cities, idCiudad, bien, i, faltante[i])
 		if enviarRecursos is False and ampliar:
 			print(_('\nSe intentará ampliar el edificio.'))
-			enter()
+			read()
 			return
 		elif enviarRecursos is False:
 			return
@@ -300,9 +300,9 @@ def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante):
 	else:
 		print(_('\nSe enviarán los recursos.'))
 
-	enter()
+	read()
 
-	forkear(s)
+	forkear(s) #might cause trouble?
 	if s.padre is True:
 		return True
 	else:
@@ -310,7 +310,8 @@ def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante):
 		s.logout()
 		exit()
 
-def subirEdificios(s):
+def subirEdificios(s,e,fd):
+	sys.stdin = os.fdopen(fd)
 	global ampliar
 	global enviarRecursos
 	ampliar = True
@@ -322,6 +323,7 @@ def subirEdificios(s):
 	idCiudad = ciudad['id']
 	edificios = getEdificios(s, idCiudad)
 	if edificios == []:
+		e.set()
 		return
 	posEdificio = edificios[0]
 	niveles = len(edificios)
@@ -334,6 +336,7 @@ def subirEdificios(s):
 	hasta = desde + niveles
 	(madera, vino, marmol, cristal, azufre) = recursosNecesarios(s, ciudad, edificio, desde, hasta)
 	if madera == -1:
+		e.set()
 		return
 	html = s.get(urlCiudad + idCiudad)
 	(maderaDisp, vinoDisp, marmolDisp, cristalDisp, azufreDisp) = getRecursosDisponibles(html, num=True)
@@ -356,6 +359,7 @@ def subirEdificios(s):
 			print(_('¿Proceder de todos modos? [Y/n]'))
 			rta = read(values=['y', 'Y', 'n', 'N', ''])
 			if rta.lower() == 'n':
+				e.set()
 				return
 		else:
 			esperarRecursos = True
@@ -366,10 +370,14 @@ def subirEdificios(s):
 		print(_('¿Proceder? [Y/n]'))
 		rta = read(values=['y', 'Y', 'n', 'N', ''])
 		if rta.lower() == 'n':
+			e.set()
 			return
 	forkear(s)
 	if s.padre is True:
 		return
+	
+	e.set()
+
 	info = _('\nSubir edificio\n')
 	info = info + 'Ciudad: {}\nEdificio: {}.Desde {:d}, hasta {:d}'.format(ciudad['cityName'], edificio['name'], desde, hasta)
 
