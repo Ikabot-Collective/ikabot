@@ -20,7 +20,8 @@ t = gettext.translation('distributeResourcesEvenly',
                         fallback=True)
 _ = t.gettext
 
-def distributeResourcesEvenly(s):
+def distributeResourcesEvenly(s,e,fd):
+	sys.stdin = os.fdopen(fd) # give process access to terminal
 
 	banner() #displays the ascii art banner
 
@@ -30,6 +31,7 @@ def distributeResourcesEvenly(s):
 		print('({:d}) {}'.format(i+1, tipoDeBien[i]))
 	resource = read(min=0, max=5)
 	if resource == 0:
+		e.set() #give main process control before exiting
 		return
 	resource -= 1
 
@@ -77,6 +79,9 @@ def distributeResourcesEvenly(s):
 				toSend = destinationCities[destinationCityID] #number of resources to send is the number of resources below average in destination city
 			else:
 				toSend = originCities[originCityID] #send the amount of resources above average of the current origin city
+			
+			if toSend == 0:
+				continue
 
 			# ROUTE BLOCK
 			if resource == 0:
@@ -109,11 +114,13 @@ def distributeResourcesEvenly(s):
 	print(_('\n¿Proceder? [Y/n]'))
 	rta = read(values=['y', 'Y', 'n', 'N', ''])
 	if rta.lower() == 'n':
+		e.set() 
 		return
 
 	forkear(s) #forks the process.
 	if s.padre is True:
 		return
+	e.set() #this is where we give back control to main process
 
 	info = _('\nDistribuyo {} de forma uniforme entre todas las ciudades\n').format(tipoDeBien[resource])
 	setInfoSignal(s, info)
