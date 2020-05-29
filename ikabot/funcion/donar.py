@@ -16,7 +16,8 @@ t = gettext.translation('donar',
                         fallback=True)
 _ = t.gettext
 
-def donar(s):
+def donar(s,e,fd):
+	sys.stdin = os.fdopen(fd)
 	bienes = {'1': _('Viñedo'), '2': _('Cantera'), '3': _('Mina de cristal'), '4': _('Mina de azufre')}
 	banner()
 
@@ -59,6 +60,7 @@ def donar(s):
 
 	cantidad = read(min=0, max=madera, msg=_('Cantidad:'))
 	s.post(payloadPost={'islandId': idIsla, 'type': tipo, 'action': 'IslandScreen', 'function': 'donate', 'donation': cantidad, 'backgroundView': 'island', 'templateView': 'resource', 'actionRequest': s.token(), 'ajax': '1'})
+	e.set()
 
 def printEstadoMina(s, url, bien):
 	html = s.post(url)
