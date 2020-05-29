@@ -4,6 +4,7 @@
 import time
 import gettext
 import traceback
+import sys
 from ikabot.config import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.signals import setInfoSignal
@@ -16,13 +17,16 @@ t = gettext.translation('entrarDiariamente',
                         fallback=True)
 _ = t.gettext
 
-def entrarDiariamente(s):
+def entrarDiariamente(s,e,fd):
+	sys.stdin = os.fdopen(fd)
 	print(_('Se entrará todos los días automaticamente.'))
-	enter()
+	read()
 
 	forkear(s)
 	if s.padre is True:
 		return
+
+	e.set()
 
 	info = _('\nEntro diariamente\n')
 	setInfoSignal(s, info)
