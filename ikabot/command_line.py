@@ -3,6 +3,7 @@
 
 import os
 import gettext
+import multiprocessing
 from ikabot.config import *
 from ikabot.web.sesion import *
 from ikabot.helpers.gui import *
@@ -86,17 +87,27 @@ def menu(s):
 	print(_('(21) Actualizar datos de Telegram'))
 	entradas = len(menu_actions)
 	eleccion = read(min=0, max=entradas)
+	processes = {} #creates dict of processes. It will look like this {entrynumber : relatedprocess, entrynumber : relatedprocess ...}
+	events = {} #creates dict of events. It will look like this {entrynumber : relatedevent, entrynumber : relatedevent ...}
 	if eleccion != 0:
 		try:
-			menu_actions[eleccion - 1](s)
+			events.update({eleccion-1 : multiprocessing.Event()}) #inserts a new event into the dict
+			processes.update({eleccion-1 : multiprocessing.Process(target=menu_actions[eleccion-1], args=(s, events[eleccion-1], sys.stdin.fileno()))}) #inserts a new process into the dict. The process is passed s, the event that's made above and stdin so it can read from command line
+			processes[eleccion-1].start() #starts the process at the selected function
+			events[eleccion-1].wait() #waits for the process to fire the event that's been given to it. When it does  this process gets back control of the command line and asks user for more input
+#			menu_actions[eleccion - 1](s)
 		except KeyboardInterrupt:
 			pass
+
 		menu(s)
 	else:
 		clear()
 
 def inicializar():
-	os.chdir(os.getenv("HOME"))
+	try:
+		os.chdir(os.getenv("HOME"))
+	except TypeError:
+		os.chdir(os.getenv("HOMEPATH"))
 	if not os.path.isfile(ikaFile):
 		open(ikaFile, 'w')
 		os.chmod(ikaFile, 0o600)
@@ -108,8 +119,7 @@ def start():
 	try:
 		menu(s)
 	finally:
-		if os.fork() == 0:
-			s.logout()
+		s.logout()
 
 def main():
 	try:
