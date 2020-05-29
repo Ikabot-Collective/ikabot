@@ -71,7 +71,7 @@ def getStatus(s,e,fd):
 		if edificio['isBusy'] is True:
 			level = level + '+'
 		print(_('lv:{}\t{}{}{}').format(level, color, edificio['name'], bcolors.ENDC))
-	enter()
+	read()
 	print('')
 	e.set()
 
