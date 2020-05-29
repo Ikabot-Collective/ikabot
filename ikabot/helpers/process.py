@@ -6,11 +6,11 @@ import subprocess
 from ikabot.helpers.signals import deactivate_sigint
 
 def forkear(s):
-	newpid = os.fork()
+	newpid = 0 #this is because we're expecing to already be in the child process at this point
 	if newpid != 0:
 		# padre
 		newpid = str(newpid)
-		run('kill -SIGSTOP ' + newpid)
+		run('kill -SIGSTOP ' + newpid) 				#UNREACHABLE CODE, clean up later
 		run('bg ' + newpid)
 		run('disown ' + newpid)
 	else:
