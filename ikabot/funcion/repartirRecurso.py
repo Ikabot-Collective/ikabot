@@ -20,7 +20,8 @@ t = gettext.translation('repartirRecurso',
                         fallback=True)
 _ = t.gettext
 
-def repartirRecurso(s):
+def repartirRecurso(s,e,fd):
+	sys.stdin = os.fdopen(fd)
 
 	banner()
 
@@ -32,6 +33,7 @@ def repartirRecurso(s):
 	print(_('(4) Azufre'))
 	recurso = read(min=0, max=4)
 	if recurso == 0:
+		e.set() #give back control to main process
 		return
 
 	recursoTotal = 0
@@ -57,10 +59,12 @@ def repartirRecurso(s):
 	if recursoTotal == 0:
 		print(_('\nNo hay recursos para enviar.'))
 		enter()
+		e.set()
 		return
 	if len(ciudadesDestino) == 0:
 		print(_('\nNo hay espacio disponible para enviar recursos.'))
 		enter()
+		e.set()
 		return
 
 	recursoXciudad = recursoTotal // len(ciudadesDestino)
@@ -96,11 +100,13 @@ def repartirRecurso(s):
 	print(_('\n¿Proceder? [Y/n]'))
 	rta = read(values=['y', 'Y', 'n', 'N', ''])
 	if rta.lower() == 'n':
+		e.set()
 		return
 
 	forkear(s)
 	if s.padre is True:
 		return
+	e.set() #give main process control
 
 	rutas = []
 	for idCiudad in ciudadesDestino:
