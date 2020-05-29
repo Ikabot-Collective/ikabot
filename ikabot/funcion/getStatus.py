@@ -20,7 +20,8 @@ _ = t.gettext
 
 getcontext().prec = 30
 
-def getStatus(s):
+def getStatus(s,e,fd):
+	sys.stdin = os.fdopen(fd)
 	banner()
 	tipoCiudad = [bcolors.ENDC, bcolors.HEADER, bcolors.STONE, bcolors.BLUE, bcolors.WARNING]
 
@@ -72,6 +73,7 @@ def getStatus(s):
 		print(_('lv:{}\t{}{}{}').format(level, color, edificio['name'], bcolors.ENDC))
 	enter()
 	print('')
+	e.set()
 
 def getProduccion(s, idCiudad):
 	prod = s.post(payloadPost={'action': 'header', 'function': 'changeCurrentCity', 'actionRequest': s.token(), 'cityId': idCiudad, 'ajax': '1'}) 
