@@ -19,7 +19,8 @@ t = gettext.translation('botDonador',
                         fallback=True)
 _ = t.gettext
 
-def botDonador(s):
+def botDonador(s,e,fd):
+	sys.stdin = os.fdopen(fd)
 	banner()
 	(idsCiudades, ciudades) = getIdsDeCiudades(s)
 	ciudades_dict = {}
@@ -38,11 +39,13 @@ def botDonador(s):
 		ciudades_dict[idCiudad] = {'tipo': tipo}
 
 	print(_('Se donará todos los días.'))
-	enter()
+	read()
 
 	forkear(s)
 	if s.padre is True:
 		return
+	
+	e.set()
 
 	info = _('\nDono todos los días\n')
 	setInfoSignal(s, info)
