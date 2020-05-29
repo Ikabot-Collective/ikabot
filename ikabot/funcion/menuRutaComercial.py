@@ -15,7 +15,8 @@ from ikabot.helpers.varios import addPuntos
 from ikabot.helpers.recursos import *
 
 
-def menuRutaComercial(s):
+def menuRutaComercial(s,e,fd):
+	sys.stdin = os.fdopen(fd)
 	t = gettext.translation('menuRutaComercial', 
 	                        localedir, 
 	                        languages=idiomas,
@@ -34,6 +35,7 @@ def menuRutaComercial(s):
 				rta = read(values=['y', 'Y', 'n', 'N', ''])
 				if rta.lower() != 'n':
 					break
+			e.set()
 			return
 
 		banner()
@@ -119,6 +121,8 @@ def menuRutaComercial(s):
 	forkear(s)
 	if s.padre is True:
 		return
+	
+	e.set()
 
 	info = _('\nRuta comercial\n')
 	for ruta in rutas:
