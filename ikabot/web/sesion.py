@@ -69,7 +69,7 @@ class Sesion:
 			msg += _('Nuevo')
 		else:
 			msg += _('Salida')
-		sendToBotDebug(self, msg, debugON_session)
+#		sendToBotDebug(self, msg, debugON_session)
 
 		fileData = self.getFileData()
 
