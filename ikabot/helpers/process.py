@@ -16,6 +16,7 @@ def forkear(s):
 	else:
 		# hijo
 		s.padre = False
+		# if the environment is unix, then run commands to detach the current process and send to background
 		deactivate_sigint()
 		s.login()
 
