@@ -7,6 +7,7 @@ import time
 import json
 import traceback
 import threading
+import sys
 from ikabot.config import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.gui import enter
@@ -21,8 +22,10 @@ t = gettext.translation('alertarAtaques',
                         fallback=True)
 _ = t.gettext
 
-def alertarAtaques(s):
+def alertarAtaques(s,e,fd):
+	sys.stdin = os.fdopen(fd)
 	if botValido(s) is False:
+		e.set()
 		return
 
 	banner()
@@ -30,11 +33,13 @@ def alertarAtaques(s):
 	if minutos == '':
 		minutos = 20
 	print(_('Se buscarán ataques cada {} minutos.').format(minutos))
-	enter()
+	read()
 
 	forkear(s)
 	if s.padre is True:
 		return
+
+	e.set()
 
 	info = _('\nEspero por ataques cada {} minutos\n').format(minutos)
 	setInfoSignal(s, info)
@@ -60,14 +65,14 @@ def respondToAttack(s):
 			else:
 				continue
 			s.padre = True
-			forkear(s)
+			forkear(s) 
 			if s.padre is True:
 				s.padre = False
-				continue
+				continue 
 			else:
 				if accion == 1:
 					# mv
-					activarModoVacaciones(s)
+					activarModoVacaciones(s) #this will be called as s.padre will be false after forkear()
 				else:
 					sendToBot(s, _('Comando inválido: {:d}').format(accion))
 				s.logout()
