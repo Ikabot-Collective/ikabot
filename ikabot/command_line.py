@@ -89,15 +89,19 @@ def menu(s):
 	eleccion = read(min=0, max=entradas)
 	processes = {} #creates dict of processes. It will look like this {entrynumber : relatedprocess, entrynumber : relatedprocess ...}
 	events = {} #creates dict of events. It will look like this {entrynumber : relatedevent, entrynumber : relatedevent ...}
+
 	if eleccion != 0:
-		try:
-			events.update({eleccion-1 : multiprocessing.Event()}) #inserts a new event into the dict
-			processes.update({eleccion-1 : multiprocessing.Process(target=menu_actions[eleccion-1], args=(s, events[eleccion-1], sys.stdin.fileno()))}) #inserts a new process into the dict. The process is passed s, the event that's made above and stdin so it can read from command line
-			processes[eleccion-1].start() #starts the process at the selected function
-			events[eleccion-1].wait() #waits for the process to fire the event that's been given to it. When it does  this process gets back control of the command line and asks user for more input
-#			menu_actions[eleccion - 1](s)
-		except KeyboardInterrupt:
-			pass
+		if eleccion == 21: #this is needed for setting the bot data, bot data should not be set by a child process
+			menu_actions[20](s)
+		else:
+			try:
+				events.update({eleccion-1 : multiprocessing.Event()}) #inserts a new event into the dict
+				processes.update({eleccion-1 : multiprocessing.Process(target=menu_actions[eleccion-1], args=(s, events[eleccion-1], sys.stdin.fileno()))}) #inserts a new process into the dict. The process is passed s, the event that's made above and stdin so it can read from command line
+				processes[eleccion-1].start() #starts the process at the selected function
+				events[eleccion-1].wait() #waits for the process to fire the event that's been given to it. When it does  this process gets back control of the command line and asks user for more input
+#				menu_actions[eleccion - 1](s)
+			except KeyboardInterrupt:
+				pass
 
 		menu(s)
 	else:
