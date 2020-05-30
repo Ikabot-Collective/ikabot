@@ -6,6 +6,7 @@ import os
 import json
 import random
 import gettext
+import sys
 import ikabot.web.sesion
 from ikabot.config import *
 import ikabot.config as config
@@ -98,5 +99,5 @@ def cargarTelegram(s):
 				print(_('Revíse las credenciales y vuelva a proveerlas.'))
 			else:
 				print(_('Los datos se guardaron.'))
-			enter()
+			read()
 			return valid
