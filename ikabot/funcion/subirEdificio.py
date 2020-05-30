@@ -280,7 +280,8 @@ def menuEdificios(s, ids, cities, idCiudad, bienNombre, bienIndex, faltante):
 				ampliar = False
 	return rta
 
-def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante, e1):
+def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante, e1, fd):
+	sys.stdin = os.fdopen(fd)
 	idss, cities = getIdsDeCiudades(s)
 	origenes = {}
 	for i in range(5):
@@ -368,7 +369,7 @@ def subirEdificios(s,e,fd):
 			esperarRecursos = True
 			faltante = [madera - maderaDisp, vino - vinoDisp, marmol - marmolDisp, cristal - cristalDisp, azufre - azufreDisp]
 			e1 = multiprocessing.Event()
-			multiprocessing.Process(target=obtenerLosRecursos, args=(s, idCiudad, posEdificio, niveles, faltante, e1)).start()
+			multiprocessing.Process(target=obtenerLosRecursos, args=(s, idCiudad, posEdificio, niveles, faltante, e1, fd)).start()
 			e1.wait()
 	else:
 		print(_('\nTiene materiales suficientes'))
