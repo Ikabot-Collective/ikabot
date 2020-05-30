@@ -13,6 +13,9 @@ This is branch will attempt to incorporate cross-platform support into Ikabot. C
 10. Train fleet
 11. See movements
 12. Construct building
+13. Update the Telegram data
+14. Alert wine running out
+15. Search for new spaces
 
 ### Install on windows
 
