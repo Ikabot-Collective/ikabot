@@ -14,7 +14,7 @@ _ = t.gettext
 
 def enter():
 	if os.name == 'nt':
-		input(msg=_('\n[Enter]'))
+		input(_('\n[Enter]')) # TODO improve this
 	else:
 		getpass.getpass(_('\n[Enter]'))
 
