@@ -4,6 +4,7 @@
 import time
 import gettext
 import traceback
+import sys
 from ikabot.config import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.gui import enter
@@ -19,15 +20,19 @@ t = gettext.translation('buscarEspacios',
                         fallback=True)
 _ = t.gettext
 
-def buscarEspacios(s):
+def buscarEspacios(s,e,fd):
+	sys.stdin = os.fdopen(fd)
 	if botValido(s) is False:
+		e.set()
 		return
 	print(_('Se buscarán espacios nuevos cada hora.'))
-	enter()
+	read()
 
 	forkear(s)
 	if s.padre is True:
 		return
+
+	e.set()
 
 	info = _('\nBusco espacios nuevos en las islas cada 1 hora\n')
 	setInfoSignal(s, info)
