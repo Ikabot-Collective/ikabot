@@ -15,7 +15,13 @@ This is branch will attempt to incorporate cross-platform support into Ikabot. C
 12. Construct building
 13. Update the Telegram data
 14. Alert wine running out
-15. Search for new spaces
+15. Search for new spaces (needs testing)
+16. Alert attacks (needs testing)
+17. Buy resources
+18. Sell resources
+19. Activate vacation mode (needs testing)
+20. Activate miracle (needs testing)
+21. Update ikabot
 
 ### Install on windows
 
