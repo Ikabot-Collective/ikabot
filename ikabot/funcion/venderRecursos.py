@@ -46,14 +46,14 @@ def getOfertas(s, ciudad, recurso):
 	html = json.loads(resp, strict=False)[1][1][1]
 	return re.findall(r'<td class=".*?">(.*?)<br/>\((.*?)\)\s*</td>\s*<td>(.*?)</td>\s*<td><img src=".*?"\s*alt=".*?"\s*title=".*?"/></td>\s*<td style="white-space:nowrap;">(\d+)\s*<img src=".*?"\s*class=".*?"/>.*?</td>\s*<td>(\d+)</td>\s*<td><a onclick="ajaxHandlerCall\(this\.href\);return false;"\s*href="\?view=takeOffer&destinationCityId=(\d+)&', html)
 
-def venderAOfertas(s, ciudad, recurso):
+def venderAOfertas(s, ciudad, recurso, e):
 	banner()
 
 	matches = getOfertas(s, ciudad, recurso)
 
 	if len(matches) == 0:
 		print(_('No hay ofertas disponibles.'))
-		enter()
+		read()
 		return
 
 	print(_('¿A cuáles ofertas le quiere vender?\n'))
@@ -101,6 +101,8 @@ def venderAOfertas(s, ciudad, recurso):
 	forkear(s)
 	if s.padre is True:
 		return
+	
+	e.set()
 
 	info = _('\nVendo {} de {} en {}\n').format(addPuntos(vender), tipoDeBien[recurso], ciudad['name'])
 	setInfoSignal(s, info)
@@ -112,7 +114,7 @@ def venderAOfertas(s, ciudad, recurso):
 	finally:
 		s.logout()
 
-def crearOferta(s, ciudad, recurso):
+def crearOferta(s, ciudad, recurso, e):
 	banner()
 
 	html = getStoreInfo(s, ciudad)
@@ -139,6 +141,8 @@ def crearOferta(s, ciudad, recurso):
 	if s.padre is True:
 		return
 
+	e.set()
+
 	info = _('\nVendo {} de {} en {}\n').format(addPuntos(vender), tipoDeBien[recurso], ciudad['name'])
 	setInfoSignal(s, info)
 	try:
@@ -149,13 +153,15 @@ def crearOferta(s, ciudad, recurso):
 	finally:
 		s.logout()
 
-def venderRecursos(s):
+def venderRecursos(s,e,fd):
+	sys.stdin = os.fdopen(fd)
 	banner()
 
 	ciudades_comerciales = getCiudadesComerciales(s)
 	if len(ciudades_comerciales) == 0:
 		print(_('No hay una Tienda contruida'))
-		enter()
+		read()
+		e.set()
 		return
 
 	if len(ciudades_comerciales) == 1:
@@ -173,7 +179,8 @@ def venderRecursos(s):
 
 	print(_('¿Quiere vender a ofertas existenes (1) o quiere hacer su propia oferta (2)?'))
 	rta = read(min=1, max=2)
-	[venderAOfertas, crearOferta][rta - 1](s, ciudad, recurso)
+	[venderAOfertas, crearOferta][rta - 1](s, ciudad, recurso, e)
+	e.set()
 
 def do_it1(s, porVender, ofertas, recurso, ciudad):
 	for oferta in ofertas:
