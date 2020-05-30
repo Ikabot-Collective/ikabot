@@ -1,3 +1,26 @@
+## Cross-platform support
+
+This is branch will attempt to incorporate cross-platform support into Ikabot. Currently this protoype has been tested only on Windows 10 and is not very stable. Feature currently adapted to cross-platform support are:
+1. Distribute resources evenly
+2. Distribute resources
+3. Account status
+
+### Install on windows
+
+Prerequisites to install this program on Windows are Python 3 and Pip. You can download Python 3 from the Windows App Store.
+Pip should already come pre-installed on Windows when you install Python 3 from the App Store. If it's not, you can use the instructions provided in this file.
+
+Install Ikabot:
+
+1. Download this repository as an archive
+2. Extract it in a directory of your choice
+3. Navigate into the ikabot directory where the setup.py file is located
+4. Press Shift + Right mouse button on an empty space inside the folder, then press Open PowerShell window here
+5. Type in `pip install -e .`
+6. To run Ikabot simpy open a command prompt or use PowerShell and type in `python -m ikabot`
+7. Enjoy!
+
+
 ## ikabot ~ Ikariam Bot
 
 _Ikabot is a program written in python that grants iqual and even more functionality than a premium account in ikariam, without spending ambrosia!_
