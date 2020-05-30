@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import gettext
+import sys
 from ikabot.config import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import read
@@ -20,16 +21,19 @@ def activarModoVacaciones(s):
 	data = {'action': 'Options', 'function': 'activateVacationMode', 'actionRequest': s.token(), 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'options_umod_confirm'}
 	s.post(params=data, ignoreExpire=True)
 
-def modoVacaciones(s):
+def modoVacaciones(s,e,fd):
+	sys.stdin = os.fdopen(fd)
 	banner()
 	print(_('¿Activar modo vacaciones? [Y/n]'))
 	rta = read(values=['y', 'Y', 'n', 'N', ''])
 	if rta.lower() == 'n':
+		e.set()
 		return
 
 	activarModoVacaciones(s)
 
 	print(_('Se activo el modo vacaciones.'))
-	enter()
+	read()
+	e.set()
 	clear()
 	exit()
