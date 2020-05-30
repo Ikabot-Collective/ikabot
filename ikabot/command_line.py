@@ -107,6 +107,7 @@ def menu(s):
 		menu(s)
 	else:
 		clear()
+		os._exit(0)
 
 def inicializar():
 	try:
