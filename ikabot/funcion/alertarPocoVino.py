@@ -24,17 +24,21 @@ _ = t.gettext
 
 getcontext().prec = 30
 
-def alertarPocoVino(s):
+def alertarPocoVino(s,e,fd):
+	sys.stdin = os.fdopen(fd)
 	if botValido(s) is False:
+		e.set()
 		return
 	banner()
 	horas = read(msg=_('¿Cuántas horas deben quedar hasta que se acabe el vino en una ciudad para que es dé aviso?: '),min=1)
 	print(_('Se avisará cuando el vino se acabe en {:d} horas en alguna ciudad.').format(horas))
-	enter()
+	read()
 
 	forkear(s)
 	if s.padre is True:
 		return
+
+	e.set()
 
 	info = _('\nAviso si el vino se acaba en {:d} horas\n').format(horas)
 	setInfoSignal(s, info)
