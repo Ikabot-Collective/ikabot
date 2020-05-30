@@ -39,6 +39,7 @@ t = gettext.translation('command_line',
 _ = t.gettext
 
 def menu(s):
+#	multiprocessing.Process(target=checkForUpdate).start() #checkForUpdate will check for updates on the PYPI page of ikabot and will print to stdout if there's an update available
 	banner()
 	menu_actions = [
 					subirEdificios,
