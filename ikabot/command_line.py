@@ -89,7 +89,8 @@ def menu(s):
 	print(_('(19) Construir edificio'))
 	print(_('(20) Actualizar Ikabot'))
 	print(_('(21) Actualizar datos de Telegram'))
-	print('Running tasks are:')
+	if len(processlist) > 0:
+		print('Running tasks are:')
 	for process in processlist:
 		print(str(process.pid) + '    ' + str(process.name))
 		
