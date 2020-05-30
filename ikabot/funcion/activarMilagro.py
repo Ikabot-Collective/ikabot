@@ -3,6 +3,7 @@
 
 import json
 import gettext
+import traceback
 from ikabot.config import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.varios import *
@@ -88,17 +89,20 @@ def elegir_isla(islas):
 	isla = islas[index - 1]
 	return isla
 
-def activarMilagro(s):
+def activarMilagro(s,e,fd):
+	sys.stdin = os.fdopen(fd)
 	banner()
 
 	islas = obtenerMilagrosDisponibles(s)
 	if islas == []:
 		print(_('No existen milagros disponibles.'))
-		enter()
+		read()
+		e.set()
 		return
 
 	isla = elegir_isla(islas)
 	if isla is None:
+		e.set()
 		return
 
 	if isla['available']:
@@ -106,13 +110,15 @@ def activarMilagro(s):
 		print(_('¿Proceder? [Y/n]'))
 		r = read(values=['y', 'Y', 'n', 'N', ''])
 		if r.lower() == 'n':
+			e.set()
 			return
 
 		rta = activarMilagroImpl(s, isla)
 
 		if rta[1][1][0] == 'error':
 			print(_('No se pudo activar el milagro {}.').format(isla['wonderName']))
-			enter()
+			read()
+			e.set()
 			return
 
 		data = rta[2][1]
@@ -124,7 +130,7 @@ def activarMilagro(s):
 		wait_time = enddate - currentdate
 
 		print(_('Se activó el milagro {}.').format(isla['wonderName']))
-		enter()
+		read()
 		banner()
 
 		while True:
@@ -132,11 +138,13 @@ def activarMilagro(s):
 
 			r = read(values=['y', 'Y', 'n', 'N', ''])
 			if r.lower() != 'y':
+				e.set()
 				return
 
 			iterations = read(msg=_('¿Cuántas veces?: '), digit=True, min=0)
 
 			if iterations == 0:
+				e.set()
 				return
 
 			duration = wait_time * iterations
@@ -154,12 +162,13 @@ def activarMilagro(s):
 		print(_('¿Proceder? [Y/n]'))
 		rta = read(values=['y', 'Y', 'n', 'N', ''])
 		if rta.lower() == 'n':
+			e.set()
 			return
 		wait_time = isla['available_in']
 		iterations = 1
 
 		print(_('\nSe activará el milagro.'))
-		enter()
+		read()
 		banner()
 
 		while True:
@@ -198,6 +207,8 @@ def activarMilagro(s):
 	forkear(s)
 	if s.padre is True:
 		return
+	
+	e.set()
 
 	info = _('\nActivo el milagro {} {:d} veces\n').format(isla['wonderName'], iterations)
 	setInfoSignal(s, info)
