@@ -96,13 +96,15 @@ def elegirCiudadComercial(ciudades_comerciales):
 	ind = read(min=1, max=len(ciudades_comerciales))
 	return ciudades_comerciales[ind - 1]
 
-def comprarRecursos(s):
+def comprarRecursos(s,e,fd):
+	sys.stdin = os.fdopen(fd)
 	banner()
 
 	ciudades_comerciales = getCiudadesComerciales(s)
 	if len(ciudades_comerciales) == 0:
 		print(_('No hay una Tienda contruida'))
-		enter()
+		read()
+		e.set()
 		return
 
 	if len(ciudades_comerciales) == 1:
@@ -117,6 +119,7 @@ def comprarRecursos(s):
 	ofertas = obtenerOfertas(s, ciudad)
 	if len(ofertas) == 0:
 		print(_('No se encontraron ofertas.'))
+		e.set()
 		return
 
 	precio_total   = 0
@@ -141,6 +144,7 @@ def comprarRecursos(s):
 	print('')
 	cantidadAComprar = read(msg=_('¿Cuánta cantidad comprar? '), min=0, max=cantidad_total)
 	if cantidadAComprar == 0:
+		e.set()
 		return
 
 	oro = getOro(s, ciudad)
@@ -150,14 +154,17 @@ def comprarRecursos(s):
 	print(_('¿Proceder? [Y/n]'))
 	rta = read(values=['y', 'Y', 'n', 'N', ''])
 	if rta.lower() == 'n':
+		e.set()
 		return
 
 	print(_('Se comprará {}').format(addPuntos(cantidadAComprar)))
-	enter()
+	read()
 
 	forkear(s)
 	if s.padre is True:
 		return
+
+	e.set()
 
 	info = _('\nCompro {} de {} para {}\n').format(addPuntos(cantidadAComprar), tipoDeBien[numRecurso - 1], ciudad['cityName'])
 	setInfoSignal(s, info)
