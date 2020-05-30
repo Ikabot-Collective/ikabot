@@ -7,6 +7,7 @@ import json
 import math
 import gettext
 import traceback
+import multiprocessing
 from decimal import *
 from ikabot.config import *
 from ikabot.helpers.gui import *
@@ -364,7 +365,7 @@ def subirEdificios(s,e,fd):
 		else:
 			esperarRecursos = True
 			faltante = [madera - maderaDisp, vino - vinoDisp, marmol - marmolDisp, cristal - cristalDisp, azufre - azufreDisp]
-			obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante)
+			multiprocessing.Process(target=obtenerLosRecursos, args=(s, idCiudad, posEdificio, niveles, faltante)).start()
 	else:
 		print(_('\nTiene materiales suficientes'))
 		print(_('¿Proceder? [Y/n]'))
