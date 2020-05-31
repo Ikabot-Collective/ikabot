@@ -38,7 +38,6 @@ t = gettext.translation('command_line',
                         fallback=True)
 _ = t.gettext
 processlist = []
-unix = False
 
 def menu(s):
 #	multiprocessing.Process(target=checkForUpdate).start() #checkForUpdate will check for updates on the PYPI page of ikabot and will print to stdout if there's an update available
@@ -76,7 +75,7 @@ def menu(s):
 					update,
 					cargarTelegram
 					]
-	if unix:
+	if not isWindows:
 		print(_('(0)  Send all current processes to background and exit'))
 	print(_('(1)  Lista de construcción'))
 	print(_('(2)  Enviar recursos'))
@@ -119,11 +118,10 @@ def menu(s):
 		os._exit(0) #kills the process which executes this statement, but it does not kill it's child processes (unix only)
 
 def inicializar():
-	try:
-		os.chdir(os.getenv("HOME"))
-		unix = True
-	except TypeError:
+	if isWindows:
 		os.chdir(os.getenv("HOMEPATH"))
+	else:
+		os.chdir(os.getenv("HOME"))
 	if not os.path.isfile(ikaFile):
 		open(ikaFile, 'w')
 		os.chmod(ikaFile, 0o600)
