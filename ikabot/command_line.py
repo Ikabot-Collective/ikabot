@@ -75,8 +75,8 @@ def menu(s):
 					update,
 					cargarTelegram
 					]
-	if not isWindows:
-		print(_('(0)  Send all current processes to background and exit'))
+
+	print(_('(0)  Send all current processes to background and exit'))
 	print(_('(1)  Lista de construcción'))
 	print(_('(2)  Enviar recursos'))
 	print(_('(3)  Distribuir recursos'))
@@ -114,8 +114,13 @@ def menu(s):
 			pass
 		menu(s)
 	else:
+		if isWindows:
+			# in unix, you can exit ikabot and close the terminal and the processes will continue to execute
+			# in windows, you can exit ikabot but if you close the terminal, the processes will die
+			print('Closing this console will kill the processes.')
+			enter()
 		clear()
-		os._exit(0) #kills the process which executes this statement, but it does not kill it's child processes (unix only)
+		os._exit(0) #kills the process which executes this statement, but it does not kill it's child processes
 
 def inicializar():
 	if isWindows:
