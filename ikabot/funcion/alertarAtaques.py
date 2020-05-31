@@ -11,7 +11,7 @@ import sys
 from ikabot.config import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.gui import enter
-from ikabot.helpers.process import forkear
+from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import daysHoursMinutes
 from ikabot.funcion.modoVacaciones import activarModoVacaciones
@@ -35,10 +35,7 @@ def alertarAtaques(s,e,fd):
 	print(_('Se buscarán ataques cada {} minutos.').format(minutos))
 	enter()
 
-	forkear(s)
-	if s.padre is True:
-		return
-
+	set_child_mode(s)
 	e.set()
 
 	info = _('\nEspero por ataques cada {} minutos\n').format(minutos)
@@ -64,19 +61,12 @@ def respondToAttack(s):
 				accion 	= int(rta.group(2))
 			else:
 				continue
-			s.padre = True
-			forkear(s) 
-			if s.padre is True:
-				s.padre = False
-				continue 
+
+			if accion == 1:
+				# mv
+				activarModoVacaciones(s)
 			else:
-				if accion == 1:
-					# mv
-					activarModoVacaciones(s) #this will be called as s.padre will be false after forkear()
-				else:
-					sendToBot(s, _('Comando inválido: {:d}').format(accion))
-				s.logout()
-				exit()
+				sendToBot(s, _('Comando inválido: {:d}').format(accion))
 
 def do_it(s, minutos):
 	conocidos = []

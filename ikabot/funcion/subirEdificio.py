@@ -15,10 +15,10 @@ from ikabot.helpers.varios import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.web.sesion import normal_get
-from ikabot.helpers.process import forkear
 from ikabot.helpers.planearViajes import *
 from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.signals import setInfoSignal
+from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.recursos import getRecursosDisponibles
 t = gettext.translation('subirEdificio', 
                         localedir, 
@@ -304,10 +304,7 @@ def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante, e1, fd):
 
 	enter()
 
-	forkear(s) #might cause trouble?
-	if s.padre is True:
-		return True #unreachable code
-	
+	set_child_mode(s) # TODO test this
 	e1.set()
 
 	planearAbastecimiento(s, idCiudad, origenes, faltante)
@@ -378,10 +375,8 @@ def subirEdificios(s,e,fd):
 		if rta.lower() == 'n':
 			e.set()
 			return
-	forkear(s)
-	if s.padre is True:
-		return
-	
+
+	set_child_mode(s)
 	e.set()
 
 	info = _('\nSubir edificio\n')

@@ -8,7 +8,7 @@ from ikabot.config import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.gui import *
-from ikabot.helpers.process import forkear
+from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.recursos import getRecursosDisponibles
@@ -41,10 +41,7 @@ def botDonador(s,e,fd):
 	print(_('Se donará todos los días.'))
 	enter()
 
-	forkear(s)
-	if s.padre is True:
-		return
-	
+	set_child_mode(s)
 	e.set()
 
 	info = _('\nDono todos los días\n')

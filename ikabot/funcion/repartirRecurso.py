@@ -11,7 +11,7 @@ from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.planearViajes import planearViajes
 from ikabot.helpers.recursos import *
 from ikabot.helpers.varios import addDot
-from ikabot.helpers.process import forkear
+from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.gui import banner
 
 t = gettext.translation('repartirRecurso',
@@ -103,9 +103,7 @@ def repartirRecurso(s,e,fd):
 		e.set()
 		return
 
-	forkear(s)
-	if s.padre is True:
-		return
+	set_child_mode(s)
 	e.set() #give main process control
 
 	rutas = []

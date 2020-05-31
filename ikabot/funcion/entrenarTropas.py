@@ -10,7 +10,7 @@ from ikabot.helpers.gui import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.varios import *
-from ikabot.helpers.process import forkear
+from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.varios import addDot
 from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.signals import setInfoSignal
@@ -264,10 +264,7 @@ def entrenarTropas(s,e,fd):
 	print(_('\nSe entrenarán las tropas seleccionadas.'))
 	enter()
 
-	forkear(s)
-	if s.padre is True:
-		return
-	
+	set_child_mode(s)
 	e.set()
 
 	info = _('\nEntreno tropas en {}\n').format(ciudad['cityName'])
