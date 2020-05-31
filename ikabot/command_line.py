@@ -38,10 +38,18 @@ t = gettext.translation('command_line',
                         fallback=True)
 _ = t.gettext
 processlist = []
+
 def menu(s):
 #	multiprocessing.Process(target=checkForUpdate).start() #checkForUpdate will check for updates on the PYPI page of ikabot and will print to stdout if there's an update available
 	banner()
-	
+
+	processlistActive = [ p for p in processlist if p.is_alive() ]
+	if len(processlistActive) > 0:
+		print('Running tasks are:')
+		for process in processlistActive:
+			print(str(process.pid) + '    ' + str(process.name))
+		print('')
+
 	processes = {} #creates dict of processes. It will look like this {entrynumber : relatedprocess, entrynumber : relatedprocess ...}
 	events = {} #creates dict of events. It will look like this {entrynumber : relatedevent, entrynumber : relatedevent ...}
 	menu_actions = [
@@ -89,11 +97,7 @@ def menu(s):
 	print(_('(19) Construir edificio'))
 	print(_('(20) Actualizar Ikabot'))
 	print(_('(21) Actualizar datos de Telegram'))
-	if len(processlist) > 0:
-		print('Running tasks are:')
-	for process in processlist:
-		print(str(process.pid) + '    ' + str(process.name))
-		
+
 	entradas = len(menu_actions)
 	eleccion = read(min=0, max=entradas)
 	
@@ -124,7 +128,7 @@ def inicializar():
 def start():
 	inicializar()
 	s = Sesion()
-	setSignalsHandlers(s)
+	#setSignalsHandlers(s)
 	try:
 		menu(s)
 	finally:
