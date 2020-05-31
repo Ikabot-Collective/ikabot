@@ -12,7 +12,7 @@ from ikabot.helpers.process import forkear
 from ikabot.helpers.varios import addDot
 from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.signals import setInfoSignal
-from ikabot.helpers.planearViajes import planearViajes
+from ikabot.helpers.planearViajes import executeRoutes
 
 t = gettext.translation('distributeResourcesEvenly',
                         localedir,
@@ -125,7 +125,7 @@ def distributeResourcesEvenly(s,e,fd):
 	setInfoSignal(s, info)
 
 	try:
-		planearViajes(s, routes) #plan trips for all the routes
+		executeRoutes(s, routes) #plan trips for all the routes
 	except:
 		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
 		sendToBot(s, msg) #sends message to telegram bot

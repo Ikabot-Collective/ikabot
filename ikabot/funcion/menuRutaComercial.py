@@ -7,7 +7,7 @@ from ikabot.config import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.pedirInfo import *
-from ikabot.helpers.planearViajes import planearViajes
+from ikabot.helpers.planearViajes import executeRoutes
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.process import forkear
@@ -135,7 +135,7 @@ def menuRutaComercial(s,e,fd):
 		msg += info
 		sendToBotDebug(s, msg, debugON_menuRutaComercial)
 
-		planearViajes(s, rutas)
+		executeRoutes(s, rutas)
 
 		msg  = _('Termino de enviar recursos:\n')
 		msg += info
