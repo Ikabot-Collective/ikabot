@@ -13,13 +13,16 @@ t = gettext.translation('gui',
 _ = t.gettext
 
 def enter():
-	if os.name == 'nt':
+	if isWindows:
 		input(_('\n[Enter]')) # TODO improve this
 	else:
 		getpass.getpass(_('\n[Enter]'))
 
 def clear():
-	os.system('clear')
+	if isWindows:
+		os.system('cls')
+	else:
+		os.system('clear')
 
 def banner():
 	clear()
