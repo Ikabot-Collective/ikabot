@@ -15,7 +15,7 @@ t = gettext.translation('config',
                         fallback=True)
 _ = t.gettext
 
-
+isWindows = os.name == 'nt'
 http_proxy  = "http://127.0.0.1:8080"
 https_proxy = "https://127.0.0.1:8080"
 proxyDict = {"http": http_proxy, "https": https_proxy}
