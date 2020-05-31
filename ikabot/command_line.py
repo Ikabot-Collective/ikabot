@@ -38,10 +38,18 @@ t = gettext.translation('command_line',
                         fallback=True)
 _ = t.gettext
 processlist = []
+
 def menu(s):
 #	multiprocessing.Process(target=checkForUpdate).start() #checkForUpdate will check for updates on the PYPI page of ikabot and will print to stdout if there's an update available
 	banner()
-	
+
+	processlistActive = [ p for p in processlist if p.is_alive() ]
+	if len(processlistActive) > 0:
+		print('Running tasks are:')
+		for process in processlistActive:
+			print(str(process.pid) + '    ' + str(process.name))
+		print('')
+
 	processes = {} #creates dict of processes. It will look like this {entrynumber : relatedprocess, entrynumber : relatedprocess ...}
 	events = {} #creates dict of events. It will look like this {entrynumber : relatedevent, entrynumber : relatedevent ...}
 	menu_actions = [
@@ -89,27 +97,20 @@ def menu(s):
 	print(_('(19) Construir edificio'))
 	print(_('(20) Actualizar Ikabot'))
 	print(_('(21) Actualizar datos de Telegram'))
-	print('Running tasks are:')
-	for process in processlist:
-		print(str(process.pid) + '    ' + str(process.name))
-		
+
 	entradas = len(menu_actions)
 	eleccion = read(min=0, max=entradas)
 	
 	if eleccion != 0:
-		if eleccion == 21: #this is needed for setting the bot data, bot data should not be set by a child process
-			menu_actions[20](s)
-		else:
-			try:
-				events.update({eleccion-1 : multiprocessing.Event()}) #inserts a new event into the dict
-				processes.update({eleccion-1 : multiprocessing.Process(target=menu_actions[eleccion-1], args=(s, events[eleccion-1], sys.stdin.fileno()), name=str(menu_actions[eleccion-1]))}) #inserts a new process into the dict. The process is passed s, the event that's made above and stdin so it can read from command line
-				processlist.append(processes[eleccion-1])
-				processes[eleccion-1].start() #starts the process at the selected function
-				events[eleccion-1].wait() #waits for the process to fire the event that's been given to it. When it does  this process gets back control of the command line and asks user for more input
-#				menu_actions[eleccion - 1](s)
-			except KeyboardInterrupt:
-				pass
-
+		try:
+			eleccion -= 1
+			events.update({eleccion : multiprocessing.Event()}) #inserts a new event into the dict
+			processes.update({eleccion : multiprocessing.Process(target=menu_actions[eleccion], args=(s, events[eleccion], sys.stdin.fileno()), name=str(menu_actions[eleccion]))}) #inserts a new process into the dict. The process is passed s, the event that's made above and stdin so it can read from command line
+			processlist.append(processes[eleccion])
+			processes[eleccion].start() #starts the process at the selected function
+			events[eleccion].wait() #waits for the process to fire the event that's been given to it. When it does  this process gets back control of the command line and asks user for more input
+		except KeyboardInterrupt:
+			pass
 		menu(s)
 	else:
 		clear()
@@ -127,7 +128,7 @@ def inicializar():
 def start():
 	inicializar()
 	s = Sesion()
-	setSignalsHandlers(s)
+	#setSignalsHandlers(s)
 	try:
 		menu(s)
 	finally:
