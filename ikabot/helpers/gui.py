@@ -13,13 +13,13 @@ t = gettext.translation('gui',
 _ = t.gettext
 
 def enter():
-	if isWindows:
+	if config.isWindows:
 		input(_('\n[Enter]')) # TODO improve this
 	else:
 		getpass.getpass(_('\n[Enter]'))
 
 def clear():
-	if isWindows:
+	if config.isWindows:
 		os.system('cls')
 	else:
 		os.system('clear')
