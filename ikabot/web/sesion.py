@@ -345,7 +345,7 @@ class Sesion:
 				time.sleep(ConnectionError_wait)
 
 	def login(self):
-		"""This function doesn't actually log into ikariam, it only increments a number in the .ikafile which represents the number currently running sessions
+		"""This function doesn't actually log into ikariam, it only increments a number in the .ikabot file which represents the number currently running sessions
 		Parameters
 		----------
 		self: Session
@@ -354,7 +354,7 @@ class Sesion:
 		self.__updateCookieFile(nuevo=True)
 
 	def logout(self):
-		"""This function decrements a number in the .ikafile representing the number of currently running sessions. If this number is 1, it will attempt to completely log out of ikariam
+		"""This function decrements a number in the .ikabot file representing the number of currently running sessions. If this number is 1, it will attempt to completely log out of ikariam
 		Parameters
 		----------
 		self: Session
