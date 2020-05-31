@@ -214,8 +214,11 @@ If there is an ikabot process that we identified with `ps aux | grep ikabot`, we
 #### Proxy
 
 To make Ikabot use a proxy simply open the config.py file which is located in the ikabot directory and change the following lines:
+
 `proxy = False` to `proxy = True`
+
 `https_proxy = "https://127.0.0.1:8080"` to `https_proxy = "https://{Your proxy server IP}:{Your proxy server port}"`
+
 Make sure that your proxy has HTTPS enabled.
 
 ### Windows
