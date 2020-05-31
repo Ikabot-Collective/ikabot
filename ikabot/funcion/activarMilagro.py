@@ -96,7 +96,7 @@ def activarMilagro(s,e,fd):
 	islas = obtenerMilagrosDisponibles(s)
 	if islas == []:
 		print(_('No existen milagros disponibles.'))
-		read()
+		enter()
 		e.set()
 		return
 
@@ -117,7 +117,7 @@ def activarMilagro(s,e,fd):
 
 		if rta[1][1][0] == 'error':
 			print(_('No se pudo activar el milagro {}.').format(isla['wonderName']))
-			read()
+			enter()
 			e.set()
 			return
 
@@ -130,7 +130,7 @@ def activarMilagro(s,e,fd):
 		wait_time = enddate - currentdate
 
 		print(_('Se activó el milagro {}.').format(isla['wonderName']))
-		read()
+		enter()
 		banner()
 
 		while True:
@@ -168,7 +168,7 @@ def activarMilagro(s,e,fd):
 		iterations = 1
 
 		print(_('\nSe activará el milagro.'))
-		read()
+		enter()
 		banner()
 
 		while True:

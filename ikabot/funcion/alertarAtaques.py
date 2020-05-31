@@ -33,7 +33,7 @@ def alertarAtaques(s,e,fd):
 	if minutos == '':
 		minutos = 20
 	print(_('Se buscarán ataques cada {} minutos.').format(minutos))
-	read()
+	enter()
 
 	forkear(s)
 	if s.padre is True:

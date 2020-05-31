@@ -58,12 +58,12 @@ def repartirRecurso(s,e,fd):
 
 	if recursoTotal == 0:
 		print(_('\nNo hay recursos para enviar.'))
-		read()
+		enter()
 		e.set()
 		return
 	if len(ciudadesDestino) == 0:
 		print(_('\nNo hay espacio disponible para enviar recursos.'))
-		read()
+		enter()
 		e.set()
 		return
 

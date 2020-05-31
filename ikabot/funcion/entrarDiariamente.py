@@ -20,7 +20,7 @@ _ = t.gettext
 def entrarDiariamente(s,e,fd):
 	sys.stdin = os.fdopen(fd)
 	print(_('Se entrará todos los días automaticamente.'))
-	read()
+	enter()
 
 	forkear(s)
 	if s.padre is True:

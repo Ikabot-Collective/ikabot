@@ -53,7 +53,7 @@ def venderAOfertas(s, ciudad, recurso, e):
 
 	if len(matches) == 0:
 		print(_('No hay ofertas disponibles.'))
-		read()
+		enter()
 		return
 
 	print(_('¿A cuáles ofertas le quiere vender?\n'))
@@ -160,7 +160,7 @@ def venderRecursos(s,e,fd):
 	ciudades_comerciales = getCiudadesComerciales(s)
 	if len(ciudades_comerciales) == 0:
 		print(_('No hay una Tienda contruida'))
-		read()
+		enter()
 		e.set()
 		return
 

@@ -103,7 +103,7 @@ def comprarRecursos(s,e,fd):
 	ciudades_comerciales = getCiudadesComerciales(s)
 	if len(ciudades_comerciales) == 0:
 		print(_('No hay una Tienda contruida'))
-		read()
+		enter()
 		e.set()
 		return
 
@@ -158,7 +158,7 @@ def comprarRecursos(s,e,fd):
 		return
 
 	print(_('Se comprará {}').format(addDot(cantidadAComprar)))
-	read()
+	enter()
 
 	forkear(s)
 	if s.padre is True:

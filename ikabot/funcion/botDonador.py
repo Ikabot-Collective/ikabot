@@ -39,7 +39,7 @@ def botDonador(s,e,fd):
 		ciudades_dict[idCiudad] = {'tipo': tipo}
 
 	print(_('Se donará todos los días.'))
-	read()
+	enter()
 
 	forkear(s)
 	if s.padre is True:

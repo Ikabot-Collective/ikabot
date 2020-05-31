@@ -82,6 +82,6 @@ def movimientosNavales(s,e,fd):
 				print(_('{} de {}').format(cantidad, tipo))
 			barcos = int(math.ceil((Decimal(cargaTotal) / Decimal(500))))
 			print(_('{:d} Barcos').format(barcos))
-	read()
+	enter()
 	e.set()
 	return
