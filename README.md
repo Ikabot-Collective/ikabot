@@ -211,6 +211,13 @@ When you want to use a functionality that requires Telegram, such as _Alert atta
 
 If there is an ikabot process that we identified with `ps aux | grep ikabot`, we can get a description of what it does with `kill -SIGUSR1 <pid>`. The description will arrive via Telegram.
 
+#### Proxy
+
+To make Ikabot use a proxy simply open the config.py file which is located in the ikabot directory and change the following lines:
+`proxy = False` to `proxy = True`
+`https_proxy = "https://127.0.0.1:8080"` to `https_proxy = "https://{Your proxy server IP}:{Your proxy server port}"`
+Make sure that your proxy has HTTPS enabled.
+
 ### Windows
 
 _Ikabot_ does not work in Windows, although in the future it might work in the Ubuntu bash of Windows 10.
