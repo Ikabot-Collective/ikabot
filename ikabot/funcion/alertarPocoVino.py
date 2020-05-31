@@ -10,7 +10,7 @@ from ikabot.config import *
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.process import forkear
 from ikabot.helpers.gui import *
-from ikabot.helpers.pedirInfo import getIdsDeCiudades
+from ikabot.helpers.pedirInfo import getIdsOfCities
 from ikabot.helpers.varios import diasHorasMinutos
 from ikabot.helpers.recursos import *
 from ikabot.helpers.botComm import *
@@ -51,9 +51,9 @@ def alertarPocoVino(s,e,fd):
 		s.logout()
 
 def do_it(s, horas):
-	ids, ciudades = getIdsDeCiudades(s)
+	ids, ciudades = getIdsOfCities(s)
 	while True:
-		ids, ciudades_new = getIdsDeCiudades(s)
+		ids, ciudades_new = getIdsOfCities(s)
 		if len(ciudades_new) != len(ciudades):
 			ciudades = ciudades_new
 

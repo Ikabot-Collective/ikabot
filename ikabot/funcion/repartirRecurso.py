@@ -38,7 +38,7 @@ def repartirRecurso(s,e,fd):
 
 	recursoTotal = 0
 	dict_idVino_diponible = {}
-	(idsCiudades, ciudades) = getIdsDeCiudades(s)
+	(idsCiudades, ciudades) = getIdsOfCities(s)
 	ciudadesOrigen = {}
 	ciudadesDestino = {}
 	for idCiudad in idsCiudades:

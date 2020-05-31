@@ -22,7 +22,7 @@ _ = t.gettext
 def botDonador(s,e,fd):
 	sys.stdin = os.fdopen(fd)
 	banner()
-	(idsCiudades, ciudades) = getIdsDeCiudades(s)
+	(idsCiudades, ciudades) = getIdsOfCities(s)
 	ciudades_dict = {}
 	bienes = {'1': _('(V)'), '2': '(M)', '3': '(C)', '4': _('(A)')}
 	for idCiudad in idsCiudades:

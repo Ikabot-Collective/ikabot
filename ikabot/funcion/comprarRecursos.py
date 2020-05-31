@@ -13,7 +13,7 @@ from ikabot.helpers.gui import enter, banner
 from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.planearViajes import esperarLlegada
-from ikabot.helpers.pedirInfo import getIdsDeCiudades, read
+from ikabot.helpers.pedirInfo import getIdsOfCities, read
 from ikabot.config import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.recursos import *

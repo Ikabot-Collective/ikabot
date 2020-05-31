@@ -20,7 +20,7 @@ t = gettext.translation('activarMilagro',
 _ = t.gettext
 
 def obtenerMilagrosDisponibles(s):
-	idsIslas = getIdsdeIslas(s)
+	idsIslas = getIdsOfIslands(s)
 	islas = []
 	for idIsla in idsIslas:
 		html = s.get(urlIsla + idIsla)
@@ -28,7 +28,7 @@ def obtenerMilagrosDisponibles(s):
 		isla['activable'] = False
 		islas.append(isla)
 
-	ids, citys = getIdsDeCiudades(s)
+	ids, citys = getIdsOfCities(s)
 	for ciudad in citys:
 		city = citys[ciudad]
 		wonder = [ isla['wonder'] for isla in islas if city['coords'] == '[{}:{}] '.format(isla['x'], isla['y']) ][0]

@@ -282,7 +282,7 @@ def menuEdificios(s, ids, cities, idCiudad, bienNombre, bienIndex, faltante):
 
 def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante, e1, fd):
 	sys.stdin = os.fdopen(fd)
-	idss, cities = getIdsDeCiudades(s)
+	idss, cities = getIdsOfCities(s)
 	origenes = {}
 	for i in range(5):
 		if faltante[i] <= 0:
@@ -323,9 +323,9 @@ def subirEdificios(s,e,fd):
 
 	banner()
 	esperarRecursos = False
-	ciudad = elegirCiudad(s)
+	ciudad = chooseCity(s)
 	idCiudad = ciudad['id']
-	edificios = getEdificios(s, idCiudad)
+	edificios = getBuildings(s, idCiudad)
 	if edificios == []:
 		e.set()
 		return
