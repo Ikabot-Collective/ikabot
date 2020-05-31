@@ -96,7 +96,7 @@ _Ikabot is a program written in python that grants iqual and even more functiona
 When you set an action in _ikabot_, you can enter and play ikariam without any problems. The only drawback that you may have is that the session expires, this is normal and if it happens just re-enter.
 
 ### Discord
-Join us in discord at:`https://discord.gg/ftT9wjN`
+Join us in discord at:`https://discord.gg/3hyxPRj`
 
 ### Install
 
