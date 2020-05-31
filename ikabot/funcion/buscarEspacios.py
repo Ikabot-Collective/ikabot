@@ -12,7 +12,7 @@ from ikabot.helpers.varios import wait
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.pedirInfo import getIdsOfIslands
 from ikabot.helpers.getJson import getIsla
-from ikabot.helpers.process import forkear
+from ikabot.helpers.process import set_child_mode
 
 t = gettext.translation('buscarEspacios', 
                         localedir, 
@@ -28,10 +28,7 @@ def buscarEspacios(s,e,fd):
 	print(_('Se buscarán espacios nuevos cada hora.'))
 	enter()
 
-	forkear(s)
-	if s.padre is True:
-		return
-
+	set_child_mode(s)
 	e.set()
 
 	info = _('\nBusco espacios nuevos en las islas cada 1 hora\n')

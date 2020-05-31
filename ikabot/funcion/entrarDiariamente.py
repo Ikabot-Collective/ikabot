@@ -8,7 +8,7 @@ import sys
 from ikabot.config import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.signals import setInfoSignal
-from ikabot.helpers.process import forkear
+from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.gui import enter
 
 t = gettext.translation('entrarDiariamente', 
@@ -22,10 +22,7 @@ def entrarDiariamente(s,e,fd):
 	print(_('Se entrará todos los días automaticamente.'))
 	enter()
 
-	forkear(s)
-	if s.padre is True:
-		return
-
+	set_child_mode(s)
 	e.set()
 
 	info = _('\nEntro diariamente\n')

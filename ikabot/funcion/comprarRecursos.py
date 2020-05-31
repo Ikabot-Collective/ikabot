@@ -7,7 +7,7 @@ import json
 import gettext
 import traceback
 from decimal import *
-from ikabot.helpers.process import forkear
+from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.varios import addDot
 from ikabot.helpers.gui import enter, banner
 from ikabot.helpers.getJson import getCiudad
@@ -160,10 +160,7 @@ def comprarRecursos(s,e,fd):
 	print(_('Se comprará {}').format(addDot(cantidadAComprar)))
 	enter()
 
-	forkear(s)
-	if s.padre is True:
-		return
-
+	set_child_mode(s)
 	e.set()
 
 	info = _('\nCompro {} de {} para {}\n').format(addDot(cantidadAComprar), tipoDeBien[numRecurso - 1], ciudad['cityName'])

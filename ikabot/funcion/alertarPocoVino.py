@@ -8,7 +8,7 @@ import gettext
 from decimal import *
 from ikabot.config import *
 from ikabot.helpers.signals import setInfoSignal
-from ikabot.helpers.process import forkear
+from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import getIdsOfCities
 from ikabot.helpers.varios import daysHoursMinutes
@@ -34,10 +34,7 @@ def alertarPocoVino(s,e,fd):
 	print(_('Se avisará cuando el vino se acabe en {:d} horas en alguna ciudad.').format(horas))
 	enter()
 
-	forkear(s)
-	if s.padre is True:
-		return
-
+	set_child_mode(s)
 	e.set()
 
 	info = _('\nAviso si el vino se acaba en {:d} horas\n').format(horas)
