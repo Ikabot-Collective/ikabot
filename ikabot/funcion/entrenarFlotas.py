@@ -262,7 +262,7 @@ def entrenarFlotas(s,e,fd):
 			return
 
 	print(_('\nSe entrenarán las tropas seleccionadas.'))
-	read()
+	enter()
 
 	forkear(s)
 	if s.padre is True:

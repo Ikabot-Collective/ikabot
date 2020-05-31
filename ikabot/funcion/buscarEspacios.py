@@ -26,7 +26,7 @@ def buscarEspacios(s,e,fd):
 		e.set()
 		return
 	print(_('Se buscarán espacios nuevos cada hora.'))
-	read()
+	enter()
 
 	forkear(s)
 	if s.padre is True:
