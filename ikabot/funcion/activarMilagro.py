@@ -81,7 +81,7 @@ def elegir_isla(islas):
 		if isla['available']:
 			print('({:d}) {}'.format(i, isla['wonderName']))
 		else:
-			print(_('({:d}) {} (disponible en: {})').format(i, isla['wonderName'], diasHorasMinutos(isla['available_in'])))
+			print(_('({:d}) {} (disponible en: {})').format(i, isla['wonderName'], daysHoursMinutes(isla['available_in'])))
 
 	index = read(min=0, max=i)
 	if index == 0:
@@ -149,7 +149,7 @@ def activarMilagro(s,e,fd):
 
 			duration = wait_time * iterations
 
-			print(_('Terminará en:{}').format(diasHorasMinutos(duration)))
+			print(_('Terminará en:{}').format(daysHoursMinutes(duration)))
 
 			print(_('¿Proceder? [Y/n]'))
 			r = read(values=['y', 'Y', 'n', 'N', ''])
@@ -158,7 +158,7 @@ def activarMilagro(s,e,fd):
 				continue
 			break
 	else:
-		print(_('\nSe activará el milagro {} en {}').format(isla['wonderName'], diasHorasMinutos(isla['available_in'])))
+		print(_('\nSe activará el milagro {} en {}').format(isla['wonderName'], daysHoursMinutes(isla['available_in'])))
 		print(_('¿Proceder? [Y/n]'))
 		rta = read(values=['y', 'Y', 'n', 'N', ''])
 		if rta.lower() == 'n':
@@ -189,7 +189,7 @@ def activarMilagro(s,e,fd):
 
 				iterations += 1
 				duration = wait_time * iterations
-				print(_('No se puede calcular el momento de finalización. (por lo menos: {}').format(diasHorasMinutos(duration)))
+				print(_('No se puede calcular el momento de finalización. (por lo menos: {}').format(daysHoursMinutes(duration)))
 				print(_('¿Proceder? [Y/n]'))
 
 				try:
@@ -242,7 +242,7 @@ def wait_for_miracle(s, isla):
 
 		msg = _('Espero {:d} segundos para activar el milagro {}').format(wait_time, isla['wonderName'])
 		sendToBotDebug(s, msg, debugON_activarMilagro)
-		esperar(wait_time + 5)
+		wait(wait_time + 5)
 
 def do_it(s, isla, iterations):
 

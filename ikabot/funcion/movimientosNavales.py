@@ -55,12 +55,12 @@ def movimientosNavales(s,e,fd):
 		destino = '{} ({})'.format(movement['target']['name'], movement['target']['avatarName'])
 		flecha = '<-' if movement['event']['isFleetReturning'] else '->'
 		tiempoFaltante = int(movement['eventTime']) - tiempoAhora
-		print('{}{} {} {}: {} ({}) {}'.format(color, origen, flecha, destino, movement['event']['missionText'], diasHorasMinutos(tiempoFaltante), bcolors.ENDC))
+		print('{}{} {} {}: {} ({}) {}'.format(color, origen, flecha, destino, movement['event']['missionText'], daysHoursMinutes(tiempoFaltante), bcolors.ENDC))
 
 		if movement['isHostile']:
 			tropas = movement['army']['amount']
 			flotas = movement['fleet']['amount']
-			print(_('Tropas:{}\nFlotas:{}').format(addPuntos(tropas), addPuntos(flotas)))
+			print(_('Tropas:{}\nFlotas:{}').format(addDot(tropas), addDot(flotas)))
 		elif esHostil(movement):
 			tropas = movement['army']['amount']
 			barcos = 0
@@ -70,7 +70,7 @@ def movimientosNavales(s,e,fd):
 					barcos += int(mov['amount'])
 				else:
 					flotas += int(mov['amount'])
-			print(_('Tropas:{}\nFlotas:{}\nBarcos:{}').format(addPuntos(tropas), addPuntos(flotas), addPuntos(barcos)))
+			print(_('Tropas:{}\nFlotas:{}\nBarcos:{}').format(addDot(tropas), addDot(flotas), addDot(barcos)))
 		else:
 			bien = {'wood': _('madera'), 'wine': _('vino'), 'marble': _('marmol'), 'glass': _('cristal'), 'sulfur': _('azufre')}
 			cargaTotal = 0

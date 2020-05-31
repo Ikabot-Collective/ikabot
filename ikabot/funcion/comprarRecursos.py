@@ -8,7 +8,7 @@ import gettext
 import traceback
 from decimal import *
 from ikabot.helpers.process import forkear
-from ikabot.helpers.varios import addPuntos
+from ikabot.helpers.varios import addDot
 from ikabot.helpers.gui import enter, banner
 from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.signals import setInfoSignal
@@ -128,18 +128,18 @@ def comprarRecursos(s,e,fd):
 		cantidad = oferta['cantidadDisponible']
 		unidad   = oferta['precio']
 		costo    = cantidad * unidad
-		print(_('cantidad :{}').format(addPuntos(cantidad)))
+		print(_('cantidad :{}').format(addDot(cantidad)))
 		print(_('precio   :{:d}').format(unidad))
-		print(_('costo    :{}').format(addPuntos(costo)))
+		print(_('costo    :{}').format(addDot(costo)))
 		print('')
 		precio_total += costo
 		cantidad_total += cantidad
 
 	disponible = ciudad['libre'][numRecurso - 1]
 
-	print(_('Total disponible para comprar: {}, por {}').format(addPuntos(cantidad_total), addPuntos(precio_total)))
+	print(_('Total disponible para comprar: {}, por {}').format(addDot(cantidad_total), addDot(precio_total)))
 	if disponible < cantidad_total:
-		print(_('Solo se puede comprar {} por falta de almacenamiento.').format(addPuntos(disponible)))
+		print(_('Solo se puede comprar {} por falta de almacenamiento.').format(addDot(disponible)))
 		cantidad_total = disponible
 	print('')
 	cantidadAComprar = read(msg=_('¿Cuánta cantidad comprar? '), min=0, max=cantidad_total)
@@ -150,14 +150,14 @@ def comprarRecursos(s,e,fd):
 	oro = getOro(s, ciudad)
 	costoTotal = calcularCosto(ofertas, cantidadAComprar)
 
-	print(_('\nOro actual : {}.\nCosto total: {}.\nOro final  : {}.'). format(addPuntos(oro), addPuntos(costoTotal), addPuntos(oro - costoTotal)))
+	print(_('\nOro actual : {}.\nCosto total: {}.\nOro final  : {}.'). format(addDot(oro), addDot(costoTotal), addDot(oro - costoTotal)))
 	print(_('¿Proceder? [Y/n]'))
 	rta = read(values=['y', 'Y', 'n', 'N', ''])
 	if rta.lower() == 'n':
 		e.set()
 		return
 
-	print(_('Se comprará {}').format(addPuntos(cantidadAComprar)))
+	print(_('Se comprará {}').format(addDot(cantidadAComprar)))
 	read()
 
 	forkear(s)
@@ -166,7 +166,7 @@ def comprarRecursos(s,e,fd):
 
 	e.set()
 
-	info = _('\nCompro {} de {} para {}\n').format(addPuntos(cantidadAComprar), tipoDeBien[numRecurso - 1], ciudad['cityName'])
+	info = _('\nCompro {} de {} para {}\n').format(addDot(cantidadAComprar), tipoDeBien[numRecurso - 1], ciudad['cityName'])
 	setInfoSignal(s, info)
 	try:
 		do_it(s, ciudad, ofertas, cantidadAComprar)
@@ -219,7 +219,7 @@ def buy(s, ciudad, oferta, cantidad):
 	else:
 		data_dict['cargo_tradegood{}'.format(resource)] = cantidad
 	s.post(payloadPost=data_dict)
-	msg = _('Compro {} a {} de {}').format(addPuntos(cantidad), oferta['ciudadDestino'], oferta['jugadorAComprar'])
+	msg = _('Compro {} a {} de {}').format(addDot(cantidad), oferta['ciudadDestino'], oferta['jugadorAComprar'])
 	sendToBotDebug(s, msg, debugON_comprarRecursos)
 
 def do_it(s, ciudad, ofertas, cantidadAComprar):

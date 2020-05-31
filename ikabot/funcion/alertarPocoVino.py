@@ -11,7 +11,7 @@ from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.process import forkear
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import getIdsOfCities
-from ikabot.helpers.varios import diasHorasMinutos
+from ikabot.helpers.varios import daysHoursMinutes
 from ikabot.helpers.recursos import *
 from ikabot.helpers.botComm import *
 
@@ -80,7 +80,7 @@ def do_it(s, horas):
 
 			if segsRestantes < horas*60*60:
 				if ciudades[city]['avisado'] is False:
-					tiempoRestante = diasHorasMinutos(segsRestantes)
+					tiempoRestante = daysHoursMinutes(segsRestantes)
 					msg = _('En {} se acabará el vino en {}').format(tiempoRestante, ciudades[city]['name'])
 					sendToBot(s, msg)
 					ciudades[city]['avisado'] = True

@@ -6,7 +6,7 @@ import time
 import math
 import json
 from decimal import *
-from ikabot.helpers.varios import esperar
+from ikabot.helpers.varios import wait
 from ikabot.helpers.naval import *
 
 def enviarBienes(s, idCiudadOrigen, idCiudadDestino, idIsla, md, vn, mr, cr, az, barcos):
@@ -59,6 +59,6 @@ def esperarLlegada(s):
 	barcos = getBarcosDisponibles(s)
 	while barcos == 0:
 		minTiempoDeEspera = obtenerMinimoTiempoDeEspera(s)
-		esperar( minTiempoDeEspera )
+		wait( minTiempoDeEspera )
 		barcos = getBarcosDisponibles(s)
 	return barcos

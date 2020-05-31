@@ -8,7 +8,7 @@ import sys
 from ikabot.config import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.gui import enter
-from ikabot.helpers.varios import esperar
+from ikabot.helpers.varios import wait
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.pedirInfo import getIdsOfIslands
 from ikabot.helpers.getJson import getIsla
@@ -75,4 +75,4 @@ def do_it(s):
 						sendToBot(s, msg)
 
 			isla_ciudades[idIsla] = ciudades.copy() #copies non empty cities into current islands cities (isla_ciudades)
-		esperar(1*60*60) #wait
+		wait(1*60*60) #wait
