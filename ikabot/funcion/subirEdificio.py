@@ -54,7 +54,7 @@ def esperarConstruccion(s, idCiudad, posicion):
 	while slp > 0:
 		html = s.get(urlCiudad + idCiudad)
 		slp = getTiempoDeConstruccion(s, html, posicion)
-		esperar(slp + 5)
+		wait(slp + 5)
 	html = s.get(urlCiudad + idCiudad)
 	ciudad = getCiudad(html)
 	edificio = ciudad['position'][posicion]
@@ -77,7 +77,7 @@ def subirEdificio(s, idCiudad, posicion, nivelesASubir, esperarRecursos):
 				edificio = ciudad['position'][posicion]
 				if segundos == 0:
 					break
-				esperar(segundos)
+				wait(segundos)
 
 		if edificio['canUpgrade'] is False:
 			msg  = _('Ciudad:{}\n').format(ciudad['cityName'])
@@ -256,7 +256,7 @@ def menuEdificios(s, ids, cities, idCiudad, bienNombre, bienIndex, faltante):
 		disponible = ciudad['recursos'][bienIndex]
 		if disponible == 0:
 			continue
-		opcion = '{}{} ({}): {} [Y/n]:'.format(' ' * (maxName - len(cities[id]['name'])), cities[id]['name'], trade, addPuntos(disponible))
+		opcion = '{}{} ({}): {} [Y/n]:'.format(' ' * (maxName - len(cities[id]['name'])), cities[id]['name'], trade, addDot(disponible))
 		eleccion = read(msg=opcion, values=['Y', 'y', 'N', 'n', ''])
 		if eleccion.lower() == 'n':
 			continue
@@ -347,15 +347,15 @@ def subirEdificios(s,e,fd):
 	if maderaDisp < madera or vinoDisp < vino or marmolDisp < marmol or cristalDisp < cristal or azufreDisp < azufre:
 		print(_('\nFalta:'))
 		if maderaDisp < madera:
-			print('{} de madera'.format(addPuntos(madera - maderaDisp)))
+			print('{} de madera'.format(addDot(madera - maderaDisp)))
 		if vinoDisp < vino:
-			print('{} de vino'.format(addPuntos(vino - vinoDisp)))
+			print('{} de vino'.format(addDot(vino - vinoDisp)))
 		if marmolDisp < marmol:
-			print('{} de marmol'.format(addPuntos(marmol - marmolDisp)))
+			print('{} de marmol'.format(addDot(marmol - marmolDisp)))
 		if cristalDisp < cristal:
-			print('{} de cristal'.format(addPuntos(cristal - cristalDisp)))
+			print('{} de cristal'.format(addDot(cristal - cristalDisp)))
 		if azufreDisp < azufre:
-			print('{} de azufre'.format(addPuntos(azufre - azufreDisp)))
+			print('{} de azufre'.format(addDot(azufre - azufreDisp)))
 
 		print(_('¿Transportar los recursos automáticamente? [Y/n]'))
 		rta = read(values=['y', 'Y', 'n', 'N', ''])

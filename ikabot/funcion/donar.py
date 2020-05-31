@@ -8,7 +8,7 @@ from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.getJson import *
 from ikabot.helpers.recursos import *
 from ikabot.helpers.gui import *
-from ikabot.helpers.varios import addPuntos
+from ikabot.helpers.varios import addDot
 
 t = gettext.translation('donar', 
                         localedir, 
@@ -41,7 +41,7 @@ def donar(s,e,fd):
 	bienOk = printEstadoMina(s, urlBien, bien)
 
 	tipo = ['resource', 'tradegood']
-	print(_('Madera disopnible:{} / {}\n').format(addPuntos(madera), addPuntos(almacenamiento)))
+	print(_('Madera disopnible:{} / {}\n').format(addDot(madera), addDot(almacenamiento)))
 
 	if aserraderoOk is True and bienOk is True:
 		msg = _('Aserradero(1) o {}(2)?:').format(bien)
@@ -76,7 +76,7 @@ def printEstadoMina(s, url, bien):
 		donado = int(donado.replace(',', ''))
 		porDonar = int(porDonar.replace(',', ''))
 		print('{} lv:{}'.format(bien, lv))
-		print('{} / {} {}%'.format(addPuntos(donado), addPuntos(porDonar), addPuntos(int((100 * donado) / porDonar))))
+		print('{} / {} {}%'.format(addDot(donado), addDot(porDonar), addDot(int((100 * donado) / porDonar))))
 	else:
 		print(_('{}: Está ampliando al nivel {:d}\n').format(bien, int(lv) + 1))
 	return infoMina is not None

@@ -11,7 +11,7 @@ from ikabot.helpers.planearViajes import planearViajes
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.process import forkear
-from ikabot.helpers.varios import addPuntos
+from ikabot.helpers.varios import addDot
 from ikabot.helpers.recursos import *
 
 
@@ -69,19 +69,19 @@ def menuRutaComercial(s,e,fd):
 		if ciudadD['propia']:
 			msg = ''
 			if resto[0] > mad:
-				msg += _('{} más de madera\n').format(addPuntos(mad if mad > 0 else 0))
+				msg += _('{} más de madera\n').format(addDot(mad if mad > 0 else 0))
 			if resto[1] > vin:
-				msg += _('{} más de vino\n').format(addPuntos(vin if vin > 0 else 0))
+				msg += _('{} más de vino\n').format(addDot(vin if vin > 0 else 0))
 			if resto[2] > mar:
-				msg += _('{} más de marmol\n').format(addPuntos(mar if mar > 0 else 0))
+				msg += _('{} más de marmol\n').format(addDot(mar if mar > 0 else 0))
 			if resto[3] > cri:
-				msg += _('{} más de cristal\n').format(addPuntos(cri if cri > 0 else 0))
+				msg += _('{} más de cristal\n').format(addDot(cri if cri > 0 else 0))
 			if resto[4] > azu:
-				msg += _('{} más de azufre\n').format(addPuntos(azu if azu > 0 else 0))
+				msg += _('{} más de azufre\n').format(addDot(azu if azu > 0 else 0))
 			if msg:
 				print(_('Solo puede almacenar:\n{}').format(msg))
 		print(_('Disponible:'))
-		print(_('Madera {} Vino {} Marmol {} Cristal {} Azufre {}').format(addPuntos(resto[0]), addPuntos(resto[1]), addPuntos(resto[2]), addPuntos(resto[3]), addPuntos(resto[4])))
+		print(_('Madera {} Vino {} Marmol {} Cristal {} Azufre {}').format(addDot(resto[0]), addDot(resto[1]), addDot(resto[2]), addDot(resto[3]), addDot(resto[4])))
 		print(_('Enviar:'))
 		try:
 			md = askForValue(_(' Madera:'), resto[0])
@@ -98,15 +98,15 @@ def menuRutaComercial(s,e,fd):
 		print(_('Por enviar de {} a {}').format(ciudadO['cityName'], ciudadD['cityName']))
 		enviado = ''
 		if md:
-			enviado += _('Madera:{} ').format(addPuntos(md))
+			enviado += _('Madera:{} ').format(addDot(md))
 		if vn:
-			enviado += _('Vino:{} ').format(addPuntos(vn))
+			enviado += _('Vino:{} ').format(addDot(vn))
 		if mr:
-			enviado += _('Marmol:{} ').format(addPuntos(mr))
+			enviado += _('Marmol:{} ').format(addDot(mr))
 		if cr:
-			enviado += _('Cristal:{} ').format(addPuntos(cr))
+			enviado += _('Cristal:{} ').format(addDot(cr))
 		if az:
-			enviado += _('Azufre:{}').format(addPuntos(az))
+			enviado += _('Azufre:{}').format(addDot(az))
 		print(enviado)
 		print(_('¿Proceder? [Y/n]'))
 		rta = read(values=['y', 'Y', 'n', 'N', ''])
@@ -127,7 +127,7 @@ def menuRutaComercial(s,e,fd):
 	info = _('\nRuta comercial\n')
 	for ruta in rutas:
 		(ciudadO, ciudadD, idIsla, md, vn, mr, cr, az) = ruta
-		info = info + _('{} -> {}\nMadera: {} Vino: {} Marmol: {} Cristal: {} Azufre: {}\n').format(ciudadO['cityName'], ciudadD['cityName'], addPuntos(md), addPuntos(vn), addPuntos(mr), addPuntos(cr), addPuntos(az))
+		info = info + _('{} -> {}\nMadera: {} Vino: {} Marmol: {} Cristal: {} Azufre: {}\n').format(ciudadO['cityName'], ciudadD['cityName'], addDot(md), addDot(vn), addDot(mr), addDot(cr), addDot(az))
 
 	setInfoSignal(s, info)
 	try:

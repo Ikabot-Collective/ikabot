@@ -10,7 +10,7 @@ from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.planearViajes import planearViajes
 from ikabot.helpers.recursos import *
-from ikabot.helpers.varios import addPuntos
+from ikabot.helpers.varios import addDot
 from ikabot.helpers.process import forkear
 from ikabot.helpers.gui import banner
 
@@ -95,7 +95,7 @@ def repartirRecurso(s,e,fd):
 	banner()
 	print(_('\nSe enviará {} a:').format(tipoDeBien[recurso].lower()))
 	for city in toSend:
-		print('  {}: {}'.format(ciudadesDestino[city]['name'], addPuntos(toSend[city])))
+		print('  {}: {}'.format(ciudadesDestino[city]['name'], addDot(toSend[city])))
 
 	print(_('\n¿Proceder? [Y/n]'))
 	rta = read(values=['y', 'Y', 'n', 'N', ''])
@@ -145,7 +145,7 @@ def repartirRecurso(s,e,fd):
 	for ruta in rutas:
 		(ciudadO, ciudadD, idIsla, md, vn, mr, cr, az) = ruta
 		rec = ruta[recurso + 3]
-		info = info + '{} -> {}\n{}: {}\n'.format(ciudadO['cityName'], ciudadD['cityName'], tipoDeBien[recurso], addPuntos(rec))
+		info = info + '{} -> {}\n{}: {}\n'.format(ciudadO['cityName'], ciudadD['cityName'], tipoDeBien[recurso], addDot(rec))
 	setInfoSignal(s, info)
 	try:
 		planearViajes(s, rutas)

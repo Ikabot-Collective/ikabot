@@ -9,7 +9,7 @@ from ikabot.helpers.gui import banner
 from ikabot.helpers.recursos import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.process import forkear
-from ikabot.helpers.varios import addPuntos
+from ikabot.helpers.varios import addDot
 from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.planearViajes import planearViajes
@@ -108,7 +108,7 @@ def distributeResourcesEvenly(s,e,fd):
 	for route in routes:
 		print('{} -> {} : {} {}'.format(route[0]['name'], route[1]['name'], route[resource+3], tipoDeBien[resource])) #displays all routes to be executed in console
 
-	print(_('\nTodas las ciuaddes tendrán al rededor de {} de {}').format(addPuntos(resourceAverage), tipoDeBien[resource]))
+	print(_('\nTodas las ciuaddes tendrán al rededor de {} de {}').format(addDot(resourceAverage), tipoDeBien[resource]))
 
 	print(_('\n¿Proceder? [Y/n]'))
 	rta = read(values=['y', 'Y', 'n', 'N', ''])

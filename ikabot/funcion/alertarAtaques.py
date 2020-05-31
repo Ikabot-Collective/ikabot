@@ -13,7 +13,7 @@ from ikabot.helpers.botComm import *
 from ikabot.helpers.gui import enter
 from ikabot.helpers.process import forkear
 from ikabot.helpers.signals import setInfoSignal
-from ikabot.helpers.varios import diasHorasMinutos
+from ikabot.helpers.varios import daysHoursMinutes
 from ikabot.funcion.modoVacaciones import activarModoVacaciones
 
 t = gettext.translation('alertarAtaques',
@@ -108,7 +108,7 @@ def do_it(s, minutos):
 				msg += _('a {}\n').format(target['name'])
 				msg += _('{} unidades\n').format(cantidadTropas)
 				msg += _('{} flotas\n').format(cantidadFlotas)
-				msg += _('llegada en: {}\n').format(diasHorasMinutos(tiempoFaltante))
+				msg += _('llegada en: {}\n').format(daysHoursMinutes(tiempoFaltante))
 				msg += _('Si quiere poner la cuenta en modo vacaciones envíe:\n')
 				msg += _('{:d}:1').format(os.getpid())
 				sendToBot(s, msg)
