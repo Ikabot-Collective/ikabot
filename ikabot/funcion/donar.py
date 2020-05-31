@@ -21,7 +21,7 @@ def donar(s,e,fd):
 	bienes = {'1': _('Viñedo'), '2': _('Cantera'), '3': _('Mina de cristal'), '4': _('Mina de azufre')}
 	banner()
 
-	ciudad = elegirCiudad(s)
+	ciudad = chooseCity(s)
 	banner()
 
 	madera = ciudad['recursos'][0]

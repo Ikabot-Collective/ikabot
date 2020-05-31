@@ -10,7 +10,7 @@ from ikabot.helpers.botComm import *
 from ikabot.helpers.gui import enter
 from ikabot.helpers.varios import esperar
 from ikabot.helpers.signals import setInfoSignal
-from ikabot.helpers.pedirInfo import getIdsdeIslas
+from ikabot.helpers.pedirInfo import getIdsOfIslands
 from ikabot.helpers.getJson import getIsla
 from ikabot.helpers.process import forkear
 
@@ -47,7 +47,7 @@ def buscarEspacios(s,e,fd):
 def do_it(s):
 	isla_ciudades = {}
 	while True:
-		idIslas = getIdsdeIslas(s) #gets the ids of the islands
+		idIslas = getIdsOfIslands(s) #gets the ids of the islands
 		for idIsla in idIslas: #for each island id
 			html = s.get(urlIsla + idIsla) #get html
 			isla = getIsla(html) #parse html into island object

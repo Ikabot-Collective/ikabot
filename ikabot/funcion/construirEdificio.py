@@ -19,7 +19,7 @@ def construirEdificio(s,e,fd):
 	banner()
 
 	print(_('Ciudad donde construir:'))
-	ciudad = elegirCiudad(s)
+	ciudad = chooseCity(s)
 	banner()
 
 	espacios = [ edificio for edificio in ciudad['position'] if edificio['building'] == 'empty' ]

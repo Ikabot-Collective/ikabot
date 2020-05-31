@@ -28,7 +28,7 @@ def menuRutaComercial(s,e,fd):
 		banner()
 		print(_('Ciudad de origen:'))
 		try:
-			ciudadO = elegirCiudad(s)
+			ciudadO = chooseCity(s)
 		except KeyboardInterrupt:
 			if rutas:
 				print(_('¿Enviar viajes? [Y/n]'))
@@ -40,7 +40,7 @@ def menuRutaComercial(s,e,fd):
 
 		banner()
 		print(_('Ciudad de destino'))
-		ciudadD = elegirCiudad(s, ajenas=True)
+		ciudadD = chooseCity(s, foreign=True)
 		idIsla = ciudadD['islandId']
 
 		if ciudadO['id'] == ciudadD['id']:
@@ -84,11 +84,11 @@ def menuRutaComercial(s,e,fd):
 		print(_('Madera {} Vino {} Marmol {} Cristal {} Azufre {}').format(addPuntos(resto[0]), addPuntos(resto[1]), addPuntos(resto[2]), addPuntos(resto[3]), addPuntos(resto[4])))
 		print(_('Enviar:'))
 		try:
-			md = pedirValor(_(' Madera:'), resto[0])
-			vn = pedirValor(_('   Vino:'), resto[1])
-			mr = pedirValor(_(' Marmol:'), resto[2])
-			cr = pedirValor(_('Cristal:'), resto[3])
-			az = pedirValor(_(' Azufre:'), resto[4])
+			md = askForValue(_(' Madera:'), resto[0])
+			vn = askForValue(_('   Vino:'), resto[1])
+			mr = askForValue(_(' Marmol:'), resto[2])
+			cr = askForValue(_('Cristal:'), resto[3])
+			az = askForValue(_(' Azufre:'), resto[4])
 		except KeyboardInterrupt:
 			continue
 		if md + vn + mr + cr + az == 0:

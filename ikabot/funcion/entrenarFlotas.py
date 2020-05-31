@@ -131,7 +131,7 @@ def entrenarFlotas(s,e,fd):
 	sys.stdin = os.fdopen(fd)
 	banner()
 	print(_('¿En qué ciudad quiere entrenar las flotas?'))
-	ciudad = elegirCiudad(s)
+	ciudad = chooseCity(s)
 	banner()
 
 	for i in range(len(ciudad['position'])):

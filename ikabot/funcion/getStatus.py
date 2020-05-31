@@ -28,7 +28,7 @@ def getStatus(s,e,fd):
 	print(_('Barcos {:d}/{:d}').format(getBarcosDisponibles(s), getBarcosTotales(s)))
 
 	print(_('\n¿De qué ciudad quiere ver el estado?'))
-	ciudad = elegirCiudad(s)
+	ciudad = chooseCity(s)
 	banner()
 
 	(wood, good, typeGood) = getProduccion(s, ciudad['id'])

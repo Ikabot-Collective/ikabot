@@ -5,10 +5,10 @@ import re
 import json
 from ikabot.config import *
 from ikabot.helpers.getJson import getCiudad
-from ikabot.helpers.pedirInfo import getIdsDeCiudades
+from ikabot.helpers.pedirInfo import getIdsOfCities
 
 def getCiudadesComerciales(s):
-	ids = getIdsDeCiudades(s)[0]
+	ids = getIdsOfCities(s)[0]
 	ciudades_comerciales = []
 	for idCiudad in ids:
 		html = s.get(urlCiudad + idCiudad)
