@@ -1,4 +1,5 @@
-## ikabot ~ Ikariam Bot
+## ikabot ~ Ikariam Bot  
+[![Downloads](https://pepy.tech/badge/ikabot)](https://pepy.tech/project/ikabot)
 
 _Ikabot is a program written in python that grants iqual and even more functionality than a premium account in ikariam, without spending ambrosia!_
 
