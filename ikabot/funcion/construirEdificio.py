@@ -41,7 +41,7 @@ def construirEdificio(s,e,fd):
 
 	if len(edificios) == 0:
 		print(_('No se puede construir ningún edificio'))
-		read()
+		enter()
 		e.set()
 		return
 
@@ -70,5 +70,5 @@ def construirEdificio(s,e,fd):
 	resp = s.post(params=params, noIndex=True)
 	msg = json.loads(resp, strict=False)[3][1][0]['text']
 	print(msg)
-	read()
+	enter()
 	e.set()

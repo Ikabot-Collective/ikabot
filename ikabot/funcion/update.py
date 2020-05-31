@@ -18,5 +18,5 @@ def update(s,e,fd):
 	sys.stdin = os.fdopen(fd)
 	print(_('Para actualizar ikabot correr:'))
 	print('python3 -m pip install --user --upgrade ikabot')
-	read()
+	enter()
 	e.set()
