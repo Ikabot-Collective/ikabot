@@ -13,7 +13,10 @@ t = gettext.translation('gui',
 _ = t.gettext
 
 def enter():
-	getpass.getpass(_('\n[Enter]'))
+	if os.name == 'nt':
+		input(_('\n[Enter]')) # TODO improve this
+	else:
+		getpass.getpass(_('\n[Enter]'))
 
 def clear():
 	os.system('clear')
