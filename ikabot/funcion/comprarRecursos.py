@@ -12,7 +12,7 @@ from ikabot.helpers.varios import addDot
 from ikabot.helpers.gui import enter, banner
 from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.signals import setInfoSignal
-from ikabot.helpers.planearViajes import esperarLlegada
+from ikabot.helpers.planearViajes import waitForArrival
 from ikabot.helpers.pedirInfo import getIdsOfCities, read
 from ikabot.config import *
 from ikabot.helpers.botComm import *
@@ -229,7 +229,7 @@ def do_it(s, ciudad, ofertas, cantidadAComprar):
 				return
 			if oferta['cantidadDisponible'] == 0:
 				continue
-			barcosDisp = esperarLlegada(s)
+			barcosDisp = waitForArrival(s)
 			capacidad  = barcosDisp * 500
 			comprable_max = capacidad if capacidad < cantidadAComprar else cantidadAComprar
 			compra = comprable_max if oferta['cantidadDisponible'] > comprable_max else oferta['cantidadDisponible']

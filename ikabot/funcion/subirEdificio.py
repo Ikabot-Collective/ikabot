@@ -71,7 +71,7 @@ def subirEdificio(s, idCiudad, posicion, nivelesASubir, esperarRecursos):
 		if edificio['canUpgrade'] is False and esperarRecursos is True:
 			while edificio['canUpgrade'] is False:
 				time.sleep(60) # tiempo para que se envien los recursos
-				segundos = obtenerMinimoTiempoDeEspera(s)
+				segundos = getMinimumWaitingTime(s)
 				html = s.get(urlCiudad + idCiudad)
 				ciudad = getCiudad(html)
 				edificio = ciudad['position'][posicion]
@@ -237,7 +237,7 @@ def planearAbastecimiento(s, destino, origenes, faltantes):
 			else:
 				ruta = (ciudadO, ciudadD, ciudadD['islandId'], 0, 0, 0, 0, mandar)
 			rutas.append(ruta)
-	planearViajes(s, rutas)
+	executeRoutes(s, rutas)
 
 def menuEdificios(s, ids, cities, idCiudad, bienNombre, bienIndex, faltante):
 	banner()
