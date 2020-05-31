@@ -126,7 +126,7 @@ def chooseCity(s, foreign=False):
 		return getCiudad(html)
 
 def chooseForeignCity(s):
-	"""Prompts the user to select an island, and a city on that island
+	"""Prompts the user to select an island, and a city on that island (is only used in chooseCity)
 	Parameters
 	----------
 	s : Session
@@ -180,19 +180,20 @@ def chooseForeignCity(s):
 	ciudad['propia'] = False
 	return ciudad
 
-def getBuildings(s, idCiudad):
+def getBuildings(s, cityId):
 	"""
 	Parameters
 	----------
 	s : Session
 		Session object
-	
+	cityID : str
+		Represents the ID of the target city
 	Returns
 	-------
-
-
+	selection : list
+		a list of integers representing THE SAME POSITION, x number of times, where x is the number of upgrades necessary to reach the user's desired level for the position
 	"""
-	html = s.get(urlCiudad + idCiudad)
+	html = s.get(urlCiudad + cityId)
 	ciudad = getCiudad(html)
 	i = 0
 	pos = -1
