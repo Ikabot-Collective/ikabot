@@ -291,7 +291,7 @@ def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante, e1, fd):
 		ids = menuEdificios(s, idss, cities, idCiudad, bien, i, faltante[i])
 		if enviarRecursos is False and ampliar:
 			print(_('\nSe intentará ampliar el edificio.'))
-			read()
+			enter()
 			return
 		elif enviarRecursos is False:
 			return
@@ -302,7 +302,7 @@ def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante, e1, fd):
 	else:
 		print(_('\nSe enviarán los recursos.'))
 
-	read()
+	enter()
 
 	forkear(s) #might cause trouble?
 	if s.padre is True:

@@ -33,7 +33,7 @@ def modoVacaciones(s,e,fd):
 	activarModoVacaciones(s)
 
 	print(_('Se activo el modo vacaciones.'))
-	read()
+	enter()
 	e.set()
 	clear()
 	exit()

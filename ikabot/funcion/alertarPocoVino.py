@@ -32,7 +32,7 @@ def alertarPocoVino(s,e,fd):
 	banner()
 	horas = read(msg=_('¿Cuántas horas deben quedar hasta que se acabe el vino en una ciudad para que es dé aviso?: '),min=1)
 	print(_('Se avisará cuando el vino se acabe en {:d} horas en alguna ciudad.').format(horas))
-	read()
+	enter()
 
 	forkear(s)
 	if s.padre is True:
