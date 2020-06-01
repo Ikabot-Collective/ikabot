@@ -1,6 +1,8 @@
 import os
+import random
 import locale
 import gettext
+from fake_useragent import UserAgent
 
 local = locale.setlocale(locale.LC_ALL, '')
 if 'es_' in local:
@@ -15,6 +17,13 @@ t = gettext.translation('config',
                         fallback=True)
 _ = t.gettext
 
+user_agent = UserAgent()
+# only use common browsers
+if random.randint(0, 1) == 0:
+	user_agent = user_agent.chrome
+else:
+	user_agent = user_agent.firefox
+update_msg = ''
 isWindows = os.name == 'nt'
 proxy = False
 proxyDict = {}
