@@ -246,7 +246,7 @@ class City:
     ciudadanosDisp: int
     consumo: int
     enventa: List[int]
-    libre: List[int]
+    freeSpaceForResources: List[int]
 
     def __getitem__(self,key):
         return getattr(self,key)
@@ -288,8 +288,8 @@ class City:
         ciudadanosDisp = from_int(obj.get("ciudadanosDisp"))
         consumo = from_int(obj.get("consumo"))
         enventa = from_list(from_int, obj.get("enventa"))
-        libre = from_list(from_int, obj.get("libre"))
-        return City(name, id, phase, isCapital, islandId, islandName, buildingSpeedupActive, showPirateFortressBackground, showPirateFortressShip, underConstruction, endUpgradeTime, startUpgradeTime, position, spiesInside, cityLeftMenu, walkers, displayStaticPlague, dailyTasks, cityCinema, flyingTrader, Id, Name, x, y, cityName, propia, recursos, capacidad, ciudadanosDisp, consumo, enventa, libre)
+        freeSpaceForResources = from_list(from_int, obj.get("freeSpaceForResources"))
+        return City(name, id, phase, isCapital, islandId, islandName, buildingSpeedupActive, showPirateFortressBackground, showPirateFortressShip, underConstruction, endUpgradeTime, startUpgradeTime, position, spiesInside, cityLeftMenu, walkers, displayStaticPlague, dailyTasks, cityCinema, flyingTrader, Id, Name, x, y, cityName, propia, recursos, capacidad, ciudadanosDisp, consumo, enventa, freeSpaceForResources)
 
     def to_dict(self) -> dict:
         result: dict = {}
@@ -324,7 +324,7 @@ class City:
         result["ciudadanosDisp"] = from_int(self.ciudadanosDisp)
         result["consumo"] = from_int(self.consumo)
         result["enventa"] = from_list(from_int, self.enventa)
-        result["libre"] = from_list(from_int, self.libre)
+        result["freeSpaceForResources"] = from_list(from_int, self.freeSpaceForResources)
         return result
 
 

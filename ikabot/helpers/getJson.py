@@ -97,9 +97,9 @@ def getCiudad(html):
 	ciudad['ciudadanosDisp'] = getCiudadanosDisponibles(html)
 	ciudad['consumo'] = getConsumoDeVino(html)
 	ciudad['enventa'] = enVenta(html)
-	ciudad['libre'] = []
+	ciudad['freeSpaceForResources'] = []
 	for i in range(5):
-		ciudad['libre'].append( ciudad['capacidad'] - ciudad['recursos'][i] - ciudad['enventa'][i] )
+		ciudad['freeSpaceForResources'].append( ciudad['capacidad'] - ciudad['recursos'][i] - ciudad['enventa'][i] )
 	city = {}
 #	a = json.dumps(ciudad) debugging line
 	try:
