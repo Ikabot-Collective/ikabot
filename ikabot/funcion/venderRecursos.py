@@ -115,7 +115,7 @@ def crearOferta(s, ciudad, recurso, e):
 	banner()
 
 	html = getStoreInfo(s, ciudad)
-	cap_venta = getCapacidadDeVenta(html)
+	cap_venta = getstorageCapacityDeVenta(html)
 	recurso_disp = ciudad['recursos'][recurso]
 	print(_('¿Cuánto quiere vender? [max = {}]').format(addDot(recurso_disp)))
 	vender = read(min=0, max=recurso_disp)
@@ -214,7 +214,7 @@ def do_it2(s, porVender, precio, recurso, cap_venta, ciudad):
 	while True:
 		html = getStoreInfo(s, ciudad)
 		enVenta = vendiendo(html)[recurso]
-		if enVenta < getCapacidadDeVenta(html):
+		if enVenta < getstorageCapacityDeVenta(html):
 			espacio = cap_venta - enVenta
 			ofertar = porVender if espacio > porVender else espacio
 			porVender -= ofertar

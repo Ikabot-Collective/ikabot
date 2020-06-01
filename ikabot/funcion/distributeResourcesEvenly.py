@@ -50,7 +50,7 @@ def distributeResourcesEvenly(s,e,fd):
 	resourceAverage = resourceTotal // len(allCities) #calculate the resource average
 	resourceTotal = 0
 	for cityID in cityIDs: #iterate through all the cities and exclude the ones with less capacity than the resource average from calculations
-		if allCities[cityID]['capacidad'] < resourceAverage:
+		if allCities[cityID]['storageCapacity'] < resourceAverage:
 			allCities.pop(cityID)
 		else:
 			resourceTotal += allCities[cityID]['recursos'][resource] #else add it to the total for recalculation

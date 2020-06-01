@@ -25,7 +25,7 @@ def donar(s,e,fd):
 	banner()
 
 	madera = ciudad['recursos'][0]
-	almacenamiento = ciudad['capacidad']
+	almacenamiento = ciudad['storageCapacity']
 
 	idIsla = ciudad['islandId']
 	html = s.get(urlIsla + idIsla)
