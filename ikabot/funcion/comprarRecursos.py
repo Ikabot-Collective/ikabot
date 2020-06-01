@@ -227,8 +227,8 @@ def do_it(s, ciudad, ofertas, cantidadAComprar):
 			if oferta['cantidadDisponible'] == 0:
 				continue
 			barcosDisp = waitForArrival(s)
-			capacidad  = barcosDisp * 500
-			comprable_max = capacidad if capacidad < cantidadAComprar else cantidadAComprar
+			storageCapacity  = barcosDisp * 500
+			comprable_max = storageCapacity if storageCapacity < cantidadAComprar else cantidadAComprar
 			compra = comprable_max if oferta['cantidadDisponible'] > comprable_max else oferta['cantidadDisponible']
 			cantidadAComprar -= compra
 			oferta['cantidadDisponible'] -= compra

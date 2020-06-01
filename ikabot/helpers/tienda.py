@@ -29,7 +29,7 @@ def getStoreHtml(s, ciudad):
 	json_data = json.loads(data, strict=False)
 	return json_data[1][1][1]
 
-def getCapacidadDeVenta(html):
+def getstorageCapacityDeVenta(html):
 	match = re.search(r'var\s*storageCapacity\s*=\s*(\d+);', html)
 	if match:
 		return int(match.group(1))

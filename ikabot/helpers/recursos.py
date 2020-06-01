@@ -10,7 +10,7 @@ def getRecursosDisponibles(html, num=False):
 	else:
 		return [recursos.group(1), recursos.group(3), recursos.group(2), recursos.group(5), recursos.group(4)]
 
-def getCapacidadDeAlmacenamiento(html):
+def getstorageCapacityDeAlmacenamiento(html):
 	almacenamiento = re.search(r'maxResources:\s*JSON\.parse\(\'{\\"resource\\":(\d+),', html).group(1)
 	return int(almacenamiento)
 

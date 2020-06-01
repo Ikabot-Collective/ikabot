@@ -242,7 +242,7 @@ class City:
     cityName: str
     propia: bool
     recursos: List[int]
-    capacidad: int
+    storageCapacity: int
     ciudadanosDisp: int
     consumo: int
     enventa: List[int]
@@ -284,12 +284,12 @@ class City:
         cityName = from_str(obj.get("cityName"))
         propia = from_bool(obj.get("propia"))
         recursos = from_list(from_int, obj.get("recursos"))
-        capacidad = from_int(obj.get("capacidad"))
+        storageCapacity = from_int(obj.get("storageCapacity"))
         ciudadanosDisp = from_int(obj.get("ciudadanosDisp"))
         consumo = from_int(obj.get("consumo"))
         enventa = from_list(from_int, obj.get("enventa"))
         freeSpaceForResources = from_list(from_int, obj.get("freeSpaceForResources"))
-        return City(name, id, phase, isCapital, islandId, islandName, buildingSpeedupActive, showPirateFortressBackground, showPirateFortressShip, underConstruction, endUpgradeTime, startUpgradeTime, position, spiesInside, cityLeftMenu, walkers, displayStaticPlague, dailyTasks, cityCinema, flyingTrader, Id, Name, x, y, cityName, propia, recursos, capacidad, ciudadanosDisp, consumo, enventa, freeSpaceForResources)
+        return City(name, id, phase, isCapital, islandId, islandName, buildingSpeedupActive, showPirateFortressBackground, showPirateFortressShip, underConstruction, endUpgradeTime, startUpgradeTime, position, spiesInside, cityLeftMenu, walkers, displayStaticPlague, dailyTasks, cityCinema, flyingTrader, Id, Name, x, y, cityName, propia, recursos, storageCapacity, ciudadanosDisp, consumo, enventa, freeSpaceForResources)
 
     def to_dict(self) -> dict:
         result: dict = {}
@@ -320,7 +320,7 @@ class City:
         result["cityName"] = from_str(self.cityName)
         result["propia"] = from_bool(self.propia)
         result["recursos"] = from_list(from_int, self.recursos)
-        result["capacidad"] = from_int(self.capacidad)
+        result["storageCapacity"] = from_int(self.storageCapacity)
         result["ciudadanosDisp"] = from_int(self.ciudadanosDisp)
         result["consumo"] = from_int(self.consumo)
         result["enventa"] = from_list(from_int, self.enventa)

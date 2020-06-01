@@ -93,18 +93,18 @@ def getCiudad(html):
 	ciudad['id'] = str(ciudad['id'])
 	ciudad['propia'] = True
 	ciudad['recursos'] = getRecursosDisponibles(html, num=True)
-	ciudad['capacidad'] = getCapacidadDeAlmacenamiento(html)
+	ciudad['storageCapacity'] = getstorageCapacityDeAlmacenamiento(html)
 	ciudad['ciudadanosDisp'] = getCiudadanosDisponibles(html)
 	ciudad['consumo'] = getConsumoDeVino(html)
 	ciudad['enventa'] = enVenta(html)
 	ciudad['freeSpaceForResources'] = []
 	for i in range(5):
-		ciudad['freeSpaceForResources'].append( ciudad['capacidad'] - ciudad['recursos'][i] - ciudad['enventa'][i] )
+		ciudad['freeSpaceForResources'].append( ciudad['storageCapacity'] - ciudad['recursos'][i] - ciudad['enventa'][i] )
 	city = {}
 #	a = json.dumps(ciudad) debugging line
-	try:
-		city = Cityfromdict(ciudad)
-		return city
-	except Exception:
-		print("Error: Not using City type")
-		return ciudad
+#	try:
+#		city = Cityfromdict(ciudad)
+#		return city
+#	except Exception:
+#		print("Error: Not using City type")
+	return ciudad

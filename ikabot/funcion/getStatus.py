@@ -34,15 +34,15 @@ def getStatus(s,e,fd):
 	(wood, good, typeGood) = getProduccion(s, ciudad['id'])
 	print('\033[1m' + tipoCiudad[int(typeGood)] + ciudad['cityName'] + tipoCiudad[0])
 	max = ciudad['recursos']
-	capacidadDeAlmacenamiento = ciudad['capacidad']
+	storageCapacityDeAlmacenamiento = ciudad['storageCapacity']
 	crecursos = []
 	for i in range(0,5):
-		if max[i] == capacidadDeAlmacenamiento:
+		if max[i] == storageCapacityDeAlmacenamiento:
 			crecursos.append(bcolors.RED)
 		else:
 			crecursos.append(bcolors.ENDC)
 	print(_('Almacenamiento:'))
-	print(addDot(capacidadDeAlmacenamiento))
+	print(addDot(storageCapacityDeAlmacenamiento))
 	print(_('Recursos:'))
 	print(_('Madera {1}{2}{0} Vino {3}{4}{0} Marmol {5}{6}{0} Cristal {7}{8}{0} Azufre {9}{10}{0}').format(bcolors.ENDC, crecursos[0], addDot(max[0]), crecursos[1], addDot(max[1]), crecursos[2], addDot(max[2]), crecursos[3], addDot(max[3]), crecursos[4], addDot(max[4])))
 	consumoXhr = ciudad['consumo']
