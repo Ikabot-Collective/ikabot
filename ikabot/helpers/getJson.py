@@ -102,9 +102,9 @@ def getCiudad(html):
 		ciudad['freeSpaceForResources'].append( ciudad['storageCapacity'] - ciudad['recursos'][i] - ciudad['enventa'][i] )
 	city = {}
 #	a = json.dumps(ciudad) debugging line
-#	try:
-#		city = Cityfromdict(ciudad)
-#		return city
-#	except Exception:
-#		print("Error: Not using City type")
-	return ciudad
+	try:
+		city = Cityfromdict(ciudad)
+		return city
+	except Exception:
+		print("Error: Not using City type")
+		return ciudad
