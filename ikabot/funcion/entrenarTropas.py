@@ -139,11 +139,11 @@ def entrenarTropas(s,e,fd):
 			ciudad['pos'] = str(i)
 			break
 
-	if ciudad['pos'] not in range(len(ciudad['position'])):
+	try:
+		data = getCuartelInfo(s, ciudad)
+	except Exception:
 		e.set()
 		return
-
-	data = getCuartelInfo(s, ciudad)
 	unidades_info = data[2][1]
 	unidades = generateTroops(unidades_info)
 
