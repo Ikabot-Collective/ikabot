@@ -139,6 +139,10 @@ def entrenarFlotas(s,e,fd):
 			ciudad['pos'] = str(i)
 			break
 
+	if ciudad['pos'] not in range(len(ciudad['position'])):
+		e.set()
+		return
+
 	data = getAstilleroInfo(s, ciudad)
 	unidades_info = data[2][1]
 	unidades = generateFleet(unidades_info)
