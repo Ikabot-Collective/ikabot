@@ -4,6 +4,7 @@
 import re
 import json
 from ikabot.helpers.recursos import *
+from ikabot.helpers.City import *
 
 def borrar(texto, ocurrencias):
 	for ocurrencia in ocurrencias:
@@ -99,5 +100,11 @@ def getCiudad(html):
 	ciudad['libre'] = []
 	for i in range(5):
 		ciudad['libre'].append( ciudad['capacidad'] - ciudad['recursos'][i] - ciudad['enventa'][i] )
-
-	return ciudad
+	city = {}
+#	a = json.dumps(ciudad) debugging line
+	try:
+		city = Cityfromdict(ciudad)
+		return city
+	except Exception:
+		print("Error: Not using City type")
+		return ciudad
