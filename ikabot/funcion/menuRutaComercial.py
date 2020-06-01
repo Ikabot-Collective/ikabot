@@ -47,11 +47,11 @@ def menuRutaComercial(s,e,fd):
 			continue
 
 		if ciudadD['propia']:
-			mad = ciudadD['libre'][0]
-			vin = ciudadD['libre'][1]
-			mar = ciudadD['libre'][2]
-			cri = ciudadD['libre'][3]
-			azu = ciudadD['libre'][4]
+			mad = ciudadD['freeSpaceForResources'][0]
+			vin = ciudadD['freeSpaceForResources'][1]
+			mar = ciudadD['freeSpaceForResources'][2]
+			cri = ciudadD['freeSpaceForResources'][3]
+			azu = ciudadD['freeSpaceForResources'][4]
 
 		resto = ciudadO['recursos']
 		for ruta in rutas:
