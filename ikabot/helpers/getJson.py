@@ -4,7 +4,7 @@
 import re
 import json
 from ikabot.helpers.recursos import *
-from ikabot.helpers.City import *
+from ikabot.helpers.City import Cityfromdict
 
 def borrar(texto, ocurrencias):
 	for ocurrencia in ocurrencias:
@@ -66,7 +66,7 @@ def getIsla(html):
 	isla['tipo'] = tipo
 	return isla
 
-def getCiudad(html):
+def getCiudad(html, s = {}):
 
 	ciudad = re.search(r'"updateBackgroundData",\s?([\s\S]*?)\],\["updateTemplateData"', html).group(1)
 	ciudad = json.loads(ciudad, strict=False)
@@ -103,7 +103,7 @@ def getCiudad(html):
 	city = {}
 #	a = json.dumps(ciudad) debugging line
 	try:
-		city = Cityfromdict(ciudad)
+		city = Cityfromdict(ciudad, s)
 		return city
 	except Exception:
 		print("Error: Not using City type")

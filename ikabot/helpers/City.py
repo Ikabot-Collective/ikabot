@@ -7,6 +7,8 @@
 #     result = Cityfromdict(json.loads(json_string))
 
 from dataclasses import dataclass
+from ikabot.config import *
+import ikabot
 from typing import Any, Optional, List, TypeVar, Type, cast, Callable
 
 
@@ -47,9 +49,14 @@ def from_union(fs, x):
     assert False
 
 
-def from_list(f: Callable[[Any], T], x: Any) -> List[T]:
+def from_list(f: Callable[[Any], T], x: Any, z: Any = {}, s : Any = {}) -> List[T]:
     assert isinstance(x, list)
+    if f.__name__ == 'from_dict':
+        return [f(y,z,s) for y in x]
     return [f(y) for y in x]
+        
+    
+    
 
 
 @dataclass
@@ -176,6 +183,8 @@ class Position:
     isBusy: bool
     building: str
     position: int
+    _city : Any
+    _s : Any
     isMaxLevel: Optional[bool] = None
     canUpgrade: Optional[bool] = None
     level: Optional[str] = None
@@ -187,18 +196,51 @@ class Position:
     def __setitem__(self,key,newvalue):
         setattr(self,key,newvalue)
 
+    def Upgrade(self) -> bool:
+        """Sends web request to upgrade the position, increasing it's level by 1
+        """
+        url = 'action=CityScreen&function=upgradeBuilding&actionRequest={}&cityId={}&position={:d}&level={}&activeTab=tabSendTransporter&backgroundView=city&currentCityId={}&templateView={}&ajax=1'.format(self._s.token(), self._city['id'], self.position, self.level, self._city['id'], self.building)
+        self._s.post(url)
+        html = self._s.get(urlCiudad + self._city['id'])
+        ciudad = ikabot.helpers.getJson.getCiudad(html)
+        edificio = ciudad['position'][self.position]
+        if edificio['isBusy']:
+            return True
+        return False
+
+    def Demolish(self) -> bool:
+        """Sends web request to demolish the position, lowering it's level by 1
+        """
+        url = 'action=CityScreen&function=demolishBuilding&level={}&cityId={}&position={:d}&backgroundView=city&currentCityId={}&templateView={}&actionRequest={}&ajax=1'.format(self.level, self._city['id'], self.position, self._city['id'], self.building, self._s.token())
+        self._s.post(url)
+        html = self._s.get(urlCiudad + self._city['id'])
+        ciudad = ikabot.helpers.getJson.getCiudad(html)
+        edificio = ciudad['position'][self.position]
+        try:
+            if int(edificio['level']) < int(self.level):
+                return True
+        except Exception:
+            return True
+        return False
+    
+
     @staticmethod
-    def from_dict(obj: Any) -> 'Position':
+    def from_dict(obj: Any, city : Any, s : Any) -> 'Position':
         assert isinstance(obj, dict)
         name = from_str(obj.get("name"))
         isBusy = from_bool(obj.get("isBusy"))
         building = from_str(obj.get("building"))
         position = from_int(obj.get("position"))
+        _city = city
+        _s = s
         level = from_union([from_str, from_none], obj.get("level"))
         canUpgrade = from_union([from_bool, from_none], obj.get("canUpgrade"))
         isMaxLevel = from_union([from_bool, from_none], obj.get("isMaxLevel"))
-        type = from_union([from_str, from_none], obj.get("type"))
-        return Position(name, isBusy, building, position, isMaxLevel, canUpgrade, level, type)
+        try:
+            type = from_union([from_str, from_none], obj.get("type"))
+        except AssertionError:
+            type = obj.get("type")
+        return Position(name, isBusy, building, position, _city, s, isMaxLevel, canUpgrade, level, type)
 
     def to_dict(self) -> dict:
         result: dict = {}
@@ -215,6 +257,7 @@ class Position:
 
 @dataclass
 class City:
+    _s : Any
     name: str
     id: str
     phase: int
@@ -253,10 +296,13 @@ class City:
     
     def __setitem__(self,key,newvalue):
         setattr(self,key,newvalue)
+    
+    
 
     @staticmethod
-    def from_dict(obj: Any) -> 'City':
+    def from_dict(obj: Any, s : Any = {} ) -> 'City':
         assert isinstance(obj, dict)
+        _s = s
         name = from_str(obj.get("name"))
         id = from_str(obj.get("id"))
         phase = from_int(obj.get("phase"))
@@ -269,7 +315,7 @@ class City:
         underConstruction = from_int(obj.get("underConstruction"))
         endUpgradeTime = from_int(obj.get("endUpgradeTime"))
         startUpgradeTime = from_int(obj.get("startUpgradeTime"))
-        position = from_list(Position.from_dict, obj.get("position"))
+        position = from_list(Position.from_dict, obj.get("position"), obj, s)
         spiesInside = from_none(obj.get("spiesInside"))
         cityLeftMenu = CityLeftMenu.from_dict(obj.get("cityLeftMenu"))
         walkers = from_list(lambda x: x, obj.get("walkers"))
@@ -283,13 +329,13 @@ class City:
         y = from_str(obj.get("y"))
         cityName = from_str(obj.get("cityName"))
         propia = from_bool(obj.get("propia"))
-        recursos = from_list(from_int, obj.get("recursos"))
+        recursos = from_list(from_int, obj.get("recursos"), obj, s)
         storageCapacity = from_int(obj.get("storageCapacity"))
         ciudadanosDisp = from_int(obj.get("ciudadanosDisp"))
         consumo = from_int(obj.get("consumo"))
         enventa = from_list(from_int, obj.get("enventa"))
         freeSpaceForResources = from_list(from_int, obj.get("freeSpaceForResources"))
-        return City(name, id, phase, isCapital, islandId, islandName, buildingSpeedupActive, showPirateFortressBackground, showPirateFortressShip, underConstruction, endUpgradeTime, startUpgradeTime, position, spiesInside, cityLeftMenu, walkers, displayStaticPlague, dailyTasks, cityCinema, flyingTrader, Id, Name, x, y, cityName, propia, recursos, storageCapacity, ciudadanosDisp, consumo, enventa, freeSpaceForResources)
+        return City(s, name, id, phase, isCapital, islandId, islandName, buildingSpeedupActive, showPirateFortressBackground, showPirateFortressShip, underConstruction, endUpgradeTime, startUpgradeTime, position, spiesInside, cityLeftMenu, walkers, displayStaticPlague, dailyTasks, cityCinema, flyingTrader, Id, Name, x, y, cityName, propia, recursos, storageCapacity, ciudadanosDisp, consumo, enventa, freeSpaceForResources)
 
     def to_dict(self) -> dict:
         result: dict = {}
@@ -328,8 +374,8 @@ class City:
         return result
 
 
-def Cityfromdict(s: Any) -> City:
-    return City.from_dict(s)
+def Cityfromdict(dictionary : Any, s : Any = {} ) -> City:
+    return City.from_dict(dictionary, s)
 
 
 def Citytodict(x: City) -> Any:
