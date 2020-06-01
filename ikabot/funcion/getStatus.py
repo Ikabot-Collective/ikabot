@@ -25,7 +25,7 @@ def getStatus(s,e,fd):
 	banner()
 	tipoCiudad = [bcolors.ENDC, bcolors.HEADER, bcolors.STONE, bcolors.BLUE, bcolors.WARNING]
 
-	print(_('Barcos {:d}/{:d}').format(getBarcosDisponibles(s), getBarcosTotales(s)))
+	print(_('Barcos {:d}/{:d}').format(getAvailableShips(s), getTotalShips(s)))
 
 	print(_('\n¿De qué ciudad quiere ver el estado?'))
 	ciudad = chooseCity(s)
