@@ -7,7 +7,6 @@ import multiprocessing
 from ikabot.config import *
 from ikabot.web.sesion import *
 from ikabot.helpers.gui import *
-from ikabot.helpers.process import run
 from ikabot.funcion.donar import donar
 from ikabot.funcion.update import update
 from ikabot.helpers.pedirInfo import read
@@ -23,6 +22,7 @@ from ikabot.funcion.activarMilagro import activarMilagro
 from ikabot.funcion.entrenarTropas import entrenarTropas
 from ikabot.funcion.entrenarFlotas import entrenarFlotas
 from ikabot.funcion.venderRecursos import venderRecursos
+from ikabot.funcion.checkForUpdate import checkForUpdate
 from ikabot.funcion.repartirRecurso import repartirRecurso
 from ikabot.funcion.alertarPocoVino import alertarPocoVino
 from ikabot.funcion.comprarRecursos import comprarRecursos
@@ -40,7 +40,7 @@ _ = t.gettext
 processlist = []
 
 def menu(s):
-#	multiprocessing.Process(target=checkForUpdate).start() #checkForUpdate will check for updates on the PYPI page of ikabot and will print to stdout if there's an update available
+	checkForUpdate()
 	banner()
 
 	processlistActive = [ p for p in processlist if p.is_alive() ]

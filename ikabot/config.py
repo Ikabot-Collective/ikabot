@@ -23,6 +23,7 @@ if random.randint(0, 1) == 0:
 	user_agent = user_agent.chrome
 else:
 	user_agent = user_agent.firefox
+update_msg = ''
 isWindows = os.name == 'nt'
 proxy = False
 proxyDict = {}
