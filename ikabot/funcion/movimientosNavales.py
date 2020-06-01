@@ -31,7 +31,7 @@ def movimientosNavales(s,e,fd):
 	sys.stdin = os.fdopen(fd)
 	banner()
 
-	print(_('Barcos {:d}/{:d}\n').format(getBarcosDisponibles(s), getBarcosTotales(s)))
+	print(_('Barcos {:d}/{:d}\n').format(getAvailableShips(s), getTotalShips(s)))
 
 	html = s.get()
 	idCiudad = re.search(r'currentCityId:\s(\d+),', html).group(1)

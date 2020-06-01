@@ -15,7 +15,7 @@ from ikabot.helpers.varios import addDot
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.process import set_child_mode
-from ikabot.helpers.planearViajes import esperarLlegada
+from ikabot.helpers.planearViajes import waitForArrival
 
 t = gettext.translation('venderRecursos', 
                         localedir, 
@@ -183,7 +183,7 @@ def do_it1(s, porVender, ofertas, recurso, ciudad):
 		quiereComprar = cant.replace(',', '').replace('.', '')
 		quiereComprar = int(quiereComprar)
 		while True:
-			barcos_disponibles = esperarLlegada(s)
+			barcos_disponibles = waitForArrival(s)
 			cant_venta = quiereComprar if quiereComprar < porVender else porVender
 			barcos_necesarios = int(math.ceil((Decimal(cant_venta) / Decimal(500))))
 			barcos_usados = barcos_disponibles if barcos_disponibles < barcos_necesarios else barcos_necesarios

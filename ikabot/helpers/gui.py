@@ -13,18 +13,24 @@ t = gettext.translation('gui',
 _ = t.gettext
 
 def enter():
+	"""Wait for the user to press Enter
+	"""
 	if config.isWindows:
 		input(_('\n[Enter]')) # TODO improve this
 	else:
 		getpass.getpass(_('\n[Enter]'))
 
 def clear():
+	"""Clears all text on the console
+	"""
 	if config.isWindows:
 		os.system('cls')
 	else:
 		os.system('clear')
 
 def banner():
+	"""Clears all text on the console and displays the Ikabot ASCII art banner
+	"""
 	clear()
 	bner = """
 	`7MMF'  `7MM                       `7MM\"""Yp,                 mm    

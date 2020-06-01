@@ -8,7 +8,7 @@ from ikabot.helpers.botComm import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.getJson import getCiudad
-from ikabot.helpers.planearViajes import planearViajes
+from ikabot.helpers.planearViajes import executeRoutes
 from ikabot.helpers.recursos import *
 from ikabot.helpers.varios import addDot
 from ikabot.helpers.process import set_child_mode
@@ -146,7 +146,7 @@ def repartirRecurso(s,e,fd):
 		info = info + '{} -> {}\n{}: {}\n'.format(ciudadO['cityName'], ciudadD['cityName'], tipoDeBien[recurso], addDot(rec))
 	setInfoSignal(s, info)
 	try:
-		planearViajes(s, rutas)
+		executeRoutes(s, rutas)
 	except:
 		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
 		sendToBot(s, msg)
