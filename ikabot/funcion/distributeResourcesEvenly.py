@@ -27,7 +27,7 @@ def distributeResourcesEvenly(s,e,fd):
 
 	print(_('¿Qué recurso quiere distribuir?'))
 	print(_('(0) Salir'))
-	for i in range(4):
+	for i in range(len(tipoDeBien)):
 		print('({:d}) {}'.format(i+1, tipoDeBien[i]))
 	resource = read(min=0, max=5)
 	if resource == 0:
