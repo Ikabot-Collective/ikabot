@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
 	name="ikabot",
-	version="5.8.6",
+	version="5.8.7",
 	author="physics-sp",
 	description="A bot for ikariam",
 	url="https://github.com/physics-sp/ikabot",
