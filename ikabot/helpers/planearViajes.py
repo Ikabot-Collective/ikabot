@@ -6,7 +6,9 @@ import time
 import math
 import json
 from decimal import *
+from ikabot.config import *
 from ikabot.helpers.varios import wait
+from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.naval import *
 
 def sendGoods(s, originCityId, destinationCityId, islandId, wood, wine, marble, crystal, sulfur, ships):
@@ -49,25 +51,42 @@ def executeRoutes(s, routes):
 	"""
 	for ruta in routes:
 		(ciudadOrigen, ciudadDestino, idIsla, md, vn, mr, cr, az) = ruta
+		destId = ciudadDestino.id
 		while (md + vn + mr + cr + az) > 0:
 			barcosDisp = waitForArrival(s)
-			storageCapacity = barcosDisp * 500
-			mdEnv = md if storageCapacity > md else storageCapacity
-			storageCapacity -= mdEnv
+			storageCapacityInShips = barcosDisp * 500
+
+			html = s.get(urlCiudad + destId)
+			ciudadDestino = getCiudad(html)
+			storageCapacityInCity = ciudadDestino.freeSpaceForResources
+
+			mdEnv = min(md, storageCapacityInShips, storageCapacityInCity[0])
+			storageCapacityInShips -= mdEnv
 			md -= mdEnv
-			vnEnv = vn if storageCapacity > vn else storageCapacity
-			storageCapacity -= vnEnv
+
+			vnEnv = min(vn, storageCapacityInShips, storageCapacityInCity[1])
+			storageCapacityInShips -= vnEnv
 			vn -= vnEnv
-			mrEnv = mr if storageCapacity > mr else storageCapacity
-			storageCapacity -= mrEnv
+
+			mrEnv = min(mr, storageCapacityInShips, storageCapacityInCity[2])
+			storageCapacityInShips -= mrEnv
 			mr -= mrEnv
-			crEnv = cr if storageCapacity > cr else storageCapacity
-			storageCapacity -= crEnv
+
+			crEnv = min(cr, storageCapacityInShips, storageCapacityInCity[3])
+			storageCapacityInShips -= crEnv
 			cr -= crEnv
-			azEnv = az if storageCapacity > az else storageCapacity
-			storageCapacity -= azEnv
+
+			azEnv = min(az, storageCapacityInShips, storageCapacityInCity[4])
+			storageCapacityInShips -= azEnv
 			az -= azEnv
+
 			cantEnviada = mdEnv + vnEnv + mrEnv + crEnv + azEnv
+			if cantEnviada == 0:
+				# no space available
+				# wait an hour and try again
+				wait(60 * 60)
+				continue
+
 			barcos = int(math.ceil((Decimal(cantEnviada) / Decimal(500))))
 			sendGoods(s, ciudadOrigen['id'], ciudadDestino['id'], idIsla, mdEnv, vnEnv, mrEnv, crEnv, azEnv, barcos)
 
