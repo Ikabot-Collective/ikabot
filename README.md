@@ -1,13 +1,14 @@
+
 ## ikabot ~ Ikariam Bot  
 [![Downloads](https://pepy.tech/badge/ikabot)](https://pepy.tech/project/ikabot)
 
-_Ikabot is a program written in python that grants iqual and even more functionality than a premium account in ikariam, without spending ambrosia!_
+_Ikabot is a cross-platform program written in python that grants equal or even more functionality than a premium account in ikariam, without spending ambrosia!_
 
 ### Features
 
 0. Exit
 
-	Closes the main menu, returning to the normal console. You can also use `ctrl-c`. When closing _ikabot_, all the actions that you configured will continue running in the background. You can list them with `ps aux | grep ikabot`.
+	Closes the main menu, returning to the normal console. You can also use `ctrl-c`. When closing _ikabot_, all the actions that you configured will continue running in the background. If you want to see which actions are running, simply run _ikabot_ and log into the account from which you initiated those actions. You will be able to see their PIDs and will be able to kill them using `kill -9 [pid]` on Unix or using Task Manager on Windows
 
 1. Construction list
 
@@ -47,7 +48,7 @@ _Ikabot is a program written in python that grants iqual and even more functiona
 
 10. Donate automatically
 
-	_Ikabot_ enters once a day and donates all the available wood from all cities to the luxury good or the forest.
+	_Ikabot_ enters once a day and donates ***ALL*** the available wood from ***ALL*** selected cities to the luxury good or the forest.
 
 11. Alert wine running out
 
@@ -102,28 +103,34 @@ Join us in discord at:`https://discord.gg/3hyxPRj`
 
 ```
 python3 -m pip install --user ikabot
+
 ```
-with the `ikabot` command you access the main menu.
+with the `python3 -m ikabot` command you access the main menu.
 
 ### Build from sources
 ```
 git clone https://github.com/physics-sp/ikabot
 cd ikabot
-python3 setup.py sdist bdist_wheel
-python3 -m pip install dist/*.whl
-rm -rf build dist ikabot.egg-info
+python3 -m pip install --user -e .
+
 ```
+Any change you make to that directory now will be reflected once you run _ikabot_ using the command `python3 -m ikabot`
 
 ### Uninstall
 
 ```
 python3 -m pip uninstall ikabot
+
 ```
 ### Requirements
 
-In order to install and use _ikabot_, python3 and pip must be installed. It must be run on **Linux**, it does not work on **Windows**.
+In order to install and use _ikabot_, python3 and pip must be installed.
 
-#### - Python 3
+#### - Python 3 on Windows
+
+You can install Python 3 on Windows OS by searching for it in the Windows App Store.
+
+#### - Python 3 on Unix
 It is probably installed by default in your system.
 
 To check if it is installed by default, just run `python3 --version`.
@@ -170,10 +177,13 @@ When you want to use a functionality that requires Telegram, such as _Alert atta
 
 **If you are concerned about privacy, set up your own bot, so that nobody has the bot's token**
 
-### Advanced
+#### Proxy
 
-If there is an ikabot process that we identified with `ps aux | grep ikabot`, we can get a description of what it does with `kill -SIGUSR1 <pid>`. The description will arrive via Telegram.
+To make Ikabot use a proxy simply open the config.py file which is located in the ikabot directory and change the following lines:
 
-### Windows
+`proxy = False` to `proxy = True`
 
-_Ikabot_ does not work in Windows, although in the future it might work in the Ubuntu bash of Windows 10.
+`https_proxy = "https://127.0.0.1:8080"` to `https_proxy = "https://{Your proxy server IP}:{Your proxy server port}"`
+
+Make sure that your proxy has HTTPS enabled.
+

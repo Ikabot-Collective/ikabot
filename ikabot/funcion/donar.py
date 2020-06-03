@@ -8,7 +8,7 @@ from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.getJson import *
 from ikabot.helpers.recursos import *
 from ikabot.helpers.gui import *
-from ikabot.helpers.varios import addPuntos
+from ikabot.helpers.varios import addDot
 
 t = gettext.translation('donar', 
                         localedir, 
@@ -16,15 +16,16 @@ t = gettext.translation('donar',
                         fallback=True)
 _ = t.gettext
 
-def donar(s):
+def donar(s,e,fd):
+	sys.stdin = os.fdopen(fd)
 	bienes = {'1': _('Viñedo'), '2': _('Cantera'), '3': _('Mina de cristal'), '4': _('Mina de azufre')}
 	banner()
 
-	ciudad = elegirCiudad(s)
+	ciudad = chooseCity(s)
 	banner()
 
 	madera = ciudad['recursos'][0]
-	almacenamiento = ciudad['capacidad']
+	almacenamiento = ciudad['storageCapacity']
 
 	idIsla = ciudad['islandId']
 	html = s.get(urlIsla + idIsla)
@@ -40,7 +41,7 @@ def donar(s):
 	bienOk = printEstadoMina(s, urlBien, bien)
 
 	tipo = ['resource', 'tradegood']
-	print(_('Madera disopnible:{} / {}\n').format(addPuntos(madera), addPuntos(almacenamiento)))
+	print(_('Madera disopnible:{} / {}\n').format(addDot(madera), addDot(almacenamiento)))
 
 	if aserraderoOk is True and bienOk is True:
 		msg = _('Aserradero(1) o {}(2)?:').format(bien)
@@ -59,6 +60,7 @@ def donar(s):
 
 	cantidad = read(min=0, max=madera, msg=_('Cantidad:'))
 	s.post(payloadPost={'islandId': idIsla, 'type': tipo, 'action': 'IslandScreen', 'function': 'donate', 'donation': cantidad, 'backgroundView': 'island', 'templateView': 'resource', 'actionRequest': s.token(), 'ajax': '1'})
+	e.set()
 
 def printEstadoMina(s, url, bien):
 	html = s.post(url)
@@ -74,7 +76,7 @@ def printEstadoMina(s, url, bien):
 		donado = int(donado.replace(',', ''))
 		porDonar = int(porDonar.replace(',', ''))
 		print('{} lv:{}'.format(bien, lv))
-		print('{} / {} {}%'.format(addPuntos(donado), addPuntos(porDonar), addPuntos(int((100 * donado) / porDonar))))
+		print('{} / {} {}%'.format(addDot(donado), addDot(porDonar), addDot(int((100 * donado) / porDonar))))
 	else:
 		print(_('{}: Está ampliando al nivel {:d}\n').format(bien, int(lv) + 1))
 	return infoMina is not None

@@ -40,7 +40,7 @@ class AESCipher:
 
 	def getFileData(self, s, all=False):
 		entry_key = self.getEntryKey(s)
-		with open(ikaFile, 'r', os.O_NONBLOCK) as filehandler:
+		with open(ikaFile, 'r') as filehandler:
 			ciphertexts = filehandler.read()
 
 		for ciphertext in ciphertexts.split('\n'):
@@ -79,7 +79,7 @@ class AESCipher:
 		plaintext  = json.dumps(session_data)
 		ciphertext = self.encrypt(plaintext)
 
-		with open(ikaFile, 'r', os.O_NONBLOCK) as filehandler:
+		with open(ikaFile, 'r') as filehandler:
 			data = filehandler.read()
 
 		entry_key  = self.getEntryKey(s)
@@ -90,6 +90,6 @@ class AESCipher:
 				newFile += line + '\n'
 		newFile += newline + '\n'
 
-		with open(ikaFile, 'w', os.O_NONBLOCK) as filehandler:
+		with open(ikaFile, 'w') as filehandler:
 			filehandler.write(newFile.strip())
 			filehandler.flush()

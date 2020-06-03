@@ -40,7 +40,7 @@ class Sesion:
 		return self.__genRand() + self.__genRand() + '-' + self.__genRand() + '-' + self.__genRand() + '-' + self.__genRand() + '-' + self.__genRand() + self.__genRand() + self.__genRand()
 
 	def __getGameforgeCookie(self):
-		headers = {'Host': 'pixelzirkus.gameforge.com', 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:66.0) Gecko/20100101 Firefox/66.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Encoding': 'gzip, deflate', 'Content-Type': 'application/x-www-form-urlencoded', 'DNT': '1', 'Connection': 'close', 'Upgrade-Insecure-Requests': '1'}
+		headers = {'Host': 'pixelzirkus.gameforge.com', 'User-Agent': user_agent, 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Encoding': 'gzip, deflate', 'Content-Type': 'application/x-www-form-urlencoded', 'DNT': '1', 'Connection': 'close', 'Upgrade-Insecure-Requests': '1'}
 		cookies = {'__asc': self.alexaCook, '__auc': self.alexaCook}
 		fp_eval_id = __fp_eval_id()
 		page = self.urlBase.replace(self.mundo + '-', '').replace('index.php?', '')
@@ -69,7 +69,7 @@ class Sesion:
 			msg += _('Nuevo')
 		else:
 			msg += _('Salida')
-		sendToBotDebug(self, msg, debugON_session)
+#		sendToBotDebug(self, msg, debugON_session)
 
 		fileData = self.getFileData()
 
@@ -314,10 +314,40 @@ class Sesion:
 				self.__expiroLaSesion()
 
 	def token(self):
+		"""Generates a valid actionRequest token from the session
+		Parameters
+		----------
+		self : Session
+			Session object
+
+		Returns
+		-------
+		token : str
+			a string representing a valid actionRequest token
+		"""
 		html = self.get()
 		return re.search(r'actionRequest"?:\s*"(.*?)"', html).group(1)
 
 	def get(self, url='', params={}, ignoreExpire=False, noIndex=False):
+		"""Sends get request to ikariam
+		Parameters
+		----------
+		self : Sesion
+			Session object
+		url : str
+			this string will be appended to the end of the urlBase of the Session object. urlBase will look like: 'https://s(number)-(country).ikariam.gameforge.com/index.php?'
+		params : dict
+			dictionary containing key-value pairs which represent the parameteres of the get request
+		ignoreExpire: bool
+			if set to True it will ignore if the current session is expired and will simply return whatever response it gets. If it's set to False, it will make sure that the current session is not expired before sending the get request, if it's expired it will login again
+		noIndex : bool
+			if set to True it will remove 'index.php' from the end of urlBase before appending url params and sending the get request
+		
+		Returns
+		-------
+		html : str
+			response from the server
+		"""
 		self.__checkCookie()
 		if noIndex:
 			url = self.urlBase.replace('index.php', '') + url
@@ -325,7 +355,7 @@ class Sesion:
 			url = self.urlBase + url
 		while True:
 			try:
-				html = self.s.get(url, params=params).text
+				html = self.s.get(url, params=params).text #this isn't recursion, this get is different from the one it's in
 				if ignoreExpire is False:
 					assert self.__isExpired(html) is False
 				return html
@@ -335,6 +365,27 @@ class Sesion:
 				time.sleep(ConnectionError_wait)
 
 	def post(self, url='', payloadPost={}, params={}, ignoreExpire=False, noIndex=False):
+		"""Sends post request to ikariam
+		Parameters
+		----------
+		self : Sesion
+			Session object
+		url : str
+			this string will be appended to the end of the urlBase of the Session object. urlBase will look like: 'https://s(number)-(country).ikariam.gameforge.com/index.php?'
+		payloadPost : dict
+			dictionary containing key-value pairs which represent the payload of the post request
+		params : dict
+			dictionary containing key-value pairs which represent the parameteres of the post request
+		ignoreExpire: bool
+			if set to True it will ignore if the current session is expired and will simply return whatever response it gets. If it's set to False, it will make sure that the current session is not expired before sending the post request, if it's expired it will login again
+		noIndex : bool
+			if set to True it will remove 'index.php' from the end of urlBase before appending url and params and sending the post request
+		
+		Returns
+		-------
+		html : str
+			response from the server
+		"""
 		self.__checkCookie()
 		if noIndex:
 			url = self.urlBase.replace('index.php', '') + url
@@ -352,20 +403,57 @@ class Sesion:
 				time.sleep(ConnectionError_wait)
 
 	def login(self):
+		"""This function doesn't actually log into ikariam, it only increments a number in the .ikabot file which represents the number currently running sessions
+		Parameters
+		----------
+		self: Session
+			Session object
+		"""
 		self.__updateCookieFile(nuevo=True)
 
 	def logout(self):
+		"""This function decrements a number in the .ikabot file representing the number of currently running sessions. If this number is 1, it will attempt to completely log out of ikariam
+		Parameters
+		----------
+		self: Session
+			Session object
+		"""
 		self.__updateCookieFile(salida=True)
 		if self.padre is False:
 			os._exit(0)
 
 	def setFileData(self, fileData):
+		"""Encrypts relevant session data and writes it to the .ikabot file
+		Parameters
+		----------
+		self : Session
+			Session object
+		fileData : dict
+			dictionary containing relevant session data, data is written to file using AESCipher.setFileData
+		"""
 		self.cipher.setFileData(self, fileData)
 
 	def getFileData(self):
+		"""Gets relevant session data from the .ikabot file
+		self : Session
+			Session object
+		"""
 		return self.cipher.getFileData(self)
 
 def normal_get(url, params={}):
+	"""Sends a get request to provided url
+	Parameters
+	----------
+	url : str
+		a string representing the url to which to send the get request
+	params : dict
+		a dictionary containing key-value pairs which represent the parameters of the get request
+	
+	Returns
+	-------
+	response : requests.Response
+		a requests.Response object which represents the webservers response. For more information on requests.Response refer to https://requests.readthedocs.io/en/master/api/#requests.Response
+	"""
 	try:
 		return requests.get(url, params=params)
 	except requests.exceptions.ConnectionError:

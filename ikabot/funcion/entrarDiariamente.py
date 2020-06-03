@@ -4,11 +4,14 @@
 import time
 import gettext
 import traceback
+import sys
 from ikabot.config import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.signals import setInfoSignal
-from ikabot.helpers.process import forkear
+from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.gui import enter
+from ikabot.helpers.pedirInfo import getIdsOfCities
+from ikabot.helpers.varios import wait
 
 t = gettext.translation('entrarDiariamente', 
                         localedir, 
@@ -16,13 +19,13 @@ t = gettext.translation('entrarDiariamente',
                         fallback=True)
 _ = t.gettext
 
-def entrarDiariamente(s):
+def entrarDiariamente(s,e,fd):
+	sys.stdin = os.fdopen(fd)
 	print(_('Se entrará todos los días automaticamente.'))
 	enter()
 
-	forkear(s)
-	if s.padre is True:
-		return
+	set_child_mode(s)
+	e.set()
 
 	info = _('\nEntro diariamente\n')
 	setInfoSignal(s, info)
@@ -36,5 +39,6 @@ def entrarDiariamente(s):
 
 def do_it(s):
 	while True:
-		s.get()
-		time.sleep(24*60*60)
+		(ids, cities) = getIdsOfCities(s)
+		s.get('action=AvatarAction&function=giveDailyActivityBonus&dailyActivityBonusCitySelect={}&startPageShown=1&detectedDevice=1&autoLogin=on&cityId={}&activeTab=multiTab2&backgroundView=city&currentCityId={}&actionRequest={}&ajax=1'.format(str(ids[0]), str(ids[0]), str(ids[0]), s.token()))
+		wait(24*60*60,1*60*60)

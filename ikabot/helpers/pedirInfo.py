@@ -19,6 +19,27 @@ _ = t.gettext
 getcontext().prec = 30
 
 def read(min=None, max=None, digit=False, msg=prompt, values=None, empty=False): # lee input del usuario
+	"""Reads input from user
+	Parameters
+	----------
+	min : int
+		smallest number acceptable as input
+	max : int
+		greatest number acceptable as input
+	digit : bool
+		boolean indicating whether or not the input MUST be an int
+	msg : str
+		string printed before the user is asked for input
+	values : list
+		list of strings which are acceptable as input
+	empty : bool
+		a boolean indicating whether or not an empty string is acceptable as input
+
+	Returns
+	-------
+	result : str
+		string representing the user's input
+	"""
 	def _invalido():
 		print('\033[1A\033[K', end="") # Borro linea
 		return read(min, max, digit, msg, values)
@@ -47,9 +68,22 @@ def read(min=None, max=None, digit=False, msg=prompt, values=None, empty=False):
 		return _invalido()
 	return leido
 
-def elegirCiudad(s, ajenas=False):
+def chooseCity(s, foreign=False):
+	"""Prompts the user to chose a city
+	Parameters
+	----------
+	s : Session
+		Session object
+	foreign : bool
+		lets the user choose a foreign city
+	
+	Returns
+	-------
+	city : City 
+		a city object representing the chosen city
+	"""
 	global menuCiudades
-	(ids, ciudades) = getIdsDeCiudades(s)
+	(ids, ciudades) = getIdsOfCities(s)
 	if menuCiudades == '':
 		maxNombre = 0
 		for unId in ids:
@@ -60,7 +94,7 @@ def elegirCiudad(s, ajenas=False):
 		bienes = {'1': '(V)', '2': '(M)', '3': '(C)', '4': '(A)'}
 		prints = []
 		i = 0
-		if ajenas:
+		if foreign:
 			print(_(' 0: ciudad ajena'))
 		else:
 			print('')
@@ -77,21 +111,32 @@ def elegirCiudad(s, ajenas=False):
 			num = ' ' + str(i) if i < 10 else str(i)
 			menuCiudades += '{}: {}{}{}\n'.format(num, nombre, pad(nombre), bien)
 		menuCiudades = menuCiudades[:-1]
-	if ajenas:
+	if foreign:
 		print(_(' 0: ciudad ajena'))
 	print(menuCiudades)
 
-	if ajenas:
+	if foreign:
 		eleccion = read(min=0, max=len(ids))
 	else:
 		eleccion = read(min=1, max=len(ids))
 	if eleccion == 0:
-		return elegirCiudadAjena(s)
+		return chooseForeignCity(s)
 	else:
 		html = s.get(urlCiudad + ids[eleccion -1])
-		return getCiudad(html)
+		return getCiudad(html,s)
 
-def elegirCiudadAjena(s):
+def chooseForeignCity(s):
+	"""Prompts the user to select an island, and a city on that island (is only used in chooseCity)
+	Parameters
+	----------
+	s : Session
+		Session object
+
+	Returns
+	-------
+	 city : City
+		a city object representing the city the user chose
+	"""
 	banner()
 	x = read(msg='coordenada x:', digit=True)
 	y = read(msg='coordenada y:', digit=True)
@@ -106,7 +151,7 @@ def elegirCiudadAjena(s):
 		print(_('Coordenadas incorrectas'))
 		enter()
 		banner()
-		return elegirCiudad(s, ajenas=True)
+		return chooseCity(s, foreign=True)
 	html = s.get(urlIsla + idIsla)
 	isla = getIsla(html)
 	maxNombre = 0
@@ -127,7 +172,7 @@ def elegirCiudadAjena(s):
 	if i == 0:
 		print(_('No hay ciudades donde enviar recursos en esta isla'))
 		enter()
-		return elegirCiudad(s, ajenas=True)
+		return chooseCity(s, foreign=True)
 	eleccion = read(min=1, max=i)
 	ciudad = opciones[eleccion - 1]
 	ciudad['islandId'] = isla['id']
@@ -135,8 +180,20 @@ def elegirCiudadAjena(s):
 	ciudad['propia'] = False
 	return ciudad
 
-def getEdificios(s, idCiudad):
-	html = s.get(urlCiudad + idCiudad)
+def getBuildings(s, cityId):
+	"""
+	Parameters
+	----------
+	s : Session
+		Session object
+	cityID : str
+		Represents the ID of the target city
+	Returns
+	-------
+	selection : list
+		a list of integers representing THE SAME POSITION, x number of times, where x is the number of upgrades necessary to reach the user's desired level for the position
+	"""
+	html = s.get(urlCiudad + cityId)
 	ciudad = getCiudad(html)
 	i = 0
 	pos = -1
@@ -155,10 +212,25 @@ def getEdificios(s, idCiudad):
 				level = level + '+'
 			prints.append(_('({:d})\tlv:{}\t{}').format(i, level, posicion['name']))
 			posiciones.append(pos)
-	eleccion = menuEdificios(prints, ciudad, posiciones)
+	eleccion = getPositionAndTargetLevel(prints, ciudad, posiciones) #prints - what to print , cuidad - city, posiciones - non-empty positions
 	return eleccion
 
-def menuEdificios(prints, ciudad, posiciones):
+def getPositionAndTargetLevel(prints, city, positions):
+	"""Lets the user select a position, and a desired level for the position (Don't use this function. It is only used in getBuildings)
+	Parameters
+	----------
+	prints : list
+		a list of strings to print on the screen
+	city : City
+		a city object from which the user will be selecting positions
+	positions : list
+		a list of integers representing non-empty, non-currently-upgrading positions from which the user will be able to chose
+
+	Returns
+	-------
+	rta : list
+		a list of integers representing THE SAME POSITION, x number of times, where x is the number of upgrades necessary to reach the user's desired level for the position
+	"""
 	banner()
 	for textoEdificio in prints:
 		print(textoEdificio)
@@ -167,13 +239,13 @@ def menuEdificios(prints, ciudad, posiciones):
 
 	if eleccion == 0:
 		return []
-	posicion = posiciones[eleccion]
-	nivelActual = int(ciudad['position'][posicion]['level'])
-	if ciudad['position'][posicion]['isBusy']:
+	posicion = positions[eleccion]
+	nivelActual = int(city['position'][posicion]['level']) 
+	if city['position'][posicion]['isBusy']: #sets the acutal level od the building 1 up, because it's being built right now
 		nivelActual += 1
 
 	banner()
-	print(_('edificio:{}').format(ciudad['position'][posicion]['name']))
+	print(_('edificio:{}').format(city['position'][posicion]['name']))
 	print(_('nivel actual:{}').format(nivelActual))
 
 	nivelFinal = read(min=nivelActual, msg=_('subir al nivel:'))
@@ -184,13 +256,41 @@ def menuEdificios(prints, ciudad, posiciones):
 		rta.append(posicion)
 	return rta
 
-def pedirValor(text, max):
+def askForValue(text, max):
+	"""Displays text and asks the user to enter a value between 0 and max
+
+	Parameters
+	----------
+	text : str
+		text to be displayed when asking the user for input
+	max : int
+		integer representing the number of input options
+	
+	Returns
+	-------
+	var : int
+		integer representing the user's input
+		if the user has inputed nothing, 0 will be returned instead
+	"""
 	var = read(msg=text, min=0, max=max, empty=True)
 	if var == '':
 		var = 0
 	return var
 
-def getIdsDeCiudades(s, all=False):
+def getIdsOfCities(s, all=False):
+	"""Gets the user's cities
+	Parameters
+	----------
+	s : Session
+		Session object
+	all : bool
+		boolean indicating whether all cities should be returned, or only those that belong to the current user
+
+	Returns
+	-------
+	(ids, cities) : tuple
+		a tuple containing the a list of city IDs and a list of city objects
+	"""
 	global ciudades
 	global ids
 	if ids is None or ciudades is None or s.padre is False:
@@ -214,8 +314,19 @@ def getIdsDeCiudades(s, all=False):
 	else:
 		return (ids, ciudades)
 
-def getIdsdeIslas(s):
-	(idsCiudades, ciudades) = getIdsDeCiudades(s)
+def getIdsOfIslands(s):
+	"""Gets the IDs of islands the user has cities on
+	Parameters
+	----------
+	s : Session
+		Session object
+	
+	Returns
+	-------
+	idsIslas : list
+		a list containing the IDs of the users islands
+	"""
+	(idsCiudades, ciudades) = getIdsOfCities(s)
 	idsIslas = set()
 	for idCiudad in idsCiudades:
 		html = s.get(urlCiudad + idCiudad)

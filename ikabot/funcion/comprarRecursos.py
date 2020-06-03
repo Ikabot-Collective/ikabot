@@ -7,13 +7,13 @@ import json
 import gettext
 import traceback
 from decimal import *
-from ikabot.helpers.process import forkear
-from ikabot.helpers.varios import addPuntos
+from ikabot.helpers.process import set_child_mode
+from ikabot.helpers.varios import addDot
 from ikabot.helpers.gui import enter, banner
 from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.signals import setInfoSignal
-from ikabot.helpers.planearViajes import esperarLlegada
-from ikabot.helpers.pedirInfo import getIdsDeCiudades, read
+from ikabot.helpers.planearViajes import waitForArrival
+from ikabot.helpers.pedirInfo import getIdsOfCities, read
 from ikabot.config import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.recursos import *
@@ -96,13 +96,15 @@ def elegirCiudadComercial(ciudades_comerciales):
 	ind = read(min=1, max=len(ciudades_comerciales))
 	return ciudades_comerciales[ind - 1]
 
-def comprarRecursos(s):
+def comprarRecursos(s,e,fd):
+	sys.stdin = os.fdopen(fd)
 	banner()
 
 	ciudades_comerciales = getCiudadesComerciales(s)
 	if len(ciudades_comerciales) == 0:
 		print(_('No hay una Tienda contruida'))
 		enter()
+		e.set()
 		return
 
 	if len(ciudades_comerciales) == 1:
@@ -117,6 +119,7 @@ def comprarRecursos(s):
 	ofertas = obtenerOfertas(s, ciudad)
 	if len(ofertas) == 0:
 		print(_('No se encontraron ofertas.'))
+		e.set()
 		return
 
 	precio_total   = 0
@@ -125,41 +128,42 @@ def comprarRecursos(s):
 		cantidad = oferta['cantidadDisponible']
 		unidad   = oferta['precio']
 		costo    = cantidad * unidad
-		print(_('cantidad :{}').format(addPuntos(cantidad)))
+		print(_('cantidad :{}').format(addDot(cantidad)))
 		print(_('precio   :{:d}').format(unidad))
-		print(_('costo    :{}').format(addPuntos(costo)))
+		print(_('costo    :{}').format(addDot(costo)))
 		print('')
 		precio_total += costo
 		cantidad_total += cantidad
 
-	disponible = ciudad['libre'][numRecurso - 1]
+	disponible = ciudad['freeSpaceForResources'][numRecurso - 1]
 
-	print(_('Total disponible para comprar: {}, por {}').format(addPuntos(cantidad_total), addPuntos(precio_total)))
+	print(_('Total disponible para comprar: {}, por {}').format(addDot(cantidad_total), addDot(precio_total)))
 	if disponible < cantidad_total:
-		print(_('Solo se puede comprar {} por falta de almacenamiento.').format(addPuntos(disponible)))
+		print(_('Solo se puede comprar {} por falta de almacenamiento.').format(addDot(disponible)))
 		cantidad_total = disponible
 	print('')
 	cantidadAComprar = read(msg=_('¿Cuánta cantidad comprar? '), min=0, max=cantidad_total)
 	if cantidadAComprar == 0:
+		e.set()
 		return
 
 	oro = getOro(s, ciudad)
 	costoTotal = calcularCosto(ofertas, cantidadAComprar)
 
-	print(_('\nOro actual : {}.\nCosto total: {}.\nOro final  : {}.'). format(addPuntos(oro), addPuntos(costoTotal), addPuntos(oro - costoTotal)))
+	print(_('\nOro actual : {}.\nCosto total: {}.\nOro final  : {}.'). format(addDot(oro), addDot(costoTotal), addDot(oro - costoTotal)))
 	print(_('¿Proceder? [Y/n]'))
 	rta = read(values=['y', 'Y', 'n', 'N', ''])
 	if rta.lower() == 'n':
+		e.set()
 		return
 
-	print(_('Se comprará {}').format(addPuntos(cantidadAComprar)))
+	print(_('Se comprará {}').format(addDot(cantidadAComprar)))
 	enter()
 
-	forkear(s)
-	if s.padre is True:
-		return
+	set_child_mode(s)
+	e.set()
 
-	info = _('\nCompro {} de {} para {}\n').format(addPuntos(cantidadAComprar), tipoDeBien[numRecurso - 1], ciudad['cityName'])
+	info = _('\nCompro {} de {} para {}\n').format(addDot(cantidadAComprar), tipoDeBien[numRecurso - 1], ciudad['cityName'])
 	setInfoSignal(s, info)
 	try:
 		do_it(s, ciudad, ofertas, cantidadAComprar)
@@ -212,7 +216,7 @@ def buy(s, ciudad, oferta, cantidad):
 	else:
 		data_dict['cargo_tradegood{}'.format(resource)] = cantidad
 	s.post(payloadPost=data_dict)
-	msg = _('Compro {} a {} de {}').format(addPuntos(cantidad), oferta['ciudadDestino'], oferta['jugadorAComprar'])
+	msg = _('Compro {} a {} de {}').format(addDot(cantidad), oferta['ciudadDestino'], oferta['jugadorAComprar'])
 	sendToBotDebug(s, msg, debugON_comprarRecursos)
 
 def do_it(s, ciudad, ofertas, cantidadAComprar):
@@ -222,9 +226,9 @@ def do_it(s, ciudad, ofertas, cantidadAComprar):
 				return
 			if oferta['cantidadDisponible'] == 0:
 				continue
-			barcosDisp = esperarLlegada(s)
-			capacidad  = barcosDisp * 500
-			comprable_max = capacidad if capacidad < cantidadAComprar else cantidadAComprar
+			barcosDisp = waitForArrival(s)
+			storageCapacity  = barcosDisp * 500
+			comprable_max = storageCapacity if storageCapacity < cantidadAComprar else cantidadAComprar
 			compra = comprable_max if oferta['cantidadDisponible'] > comprable_max else oferta['cantidadDisponible']
 			cantidadAComprar -= compra
 			oferta['cantidadDisponible'] -= compra
