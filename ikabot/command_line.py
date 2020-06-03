@@ -41,9 +41,9 @@ t = gettext.translation('command_line',
 _ = t.gettext
 
 def menu(s):
-	processlist = []
 	checkForUpdate()
 	banner()
+
 	processlist = updateProcessList(s)
 	if len(processlist) > 0:
 		print('Running tasks:')
@@ -55,6 +55,7 @@ def menu(s):
 
 			print('- pid: {} task: {} {}'.format(process['pid'], process['action'], proxy))
 		print('')
+
 	menu_actions = [
 					subirEdificios,
 					menuRutaComercial,
