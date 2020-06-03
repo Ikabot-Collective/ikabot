@@ -7,6 +7,7 @@ import json
 import math
 import gettext
 import traceback
+import multiprocessing
 from decimal import *
 from ikabot.config import *
 from ikabot.helpers.gui import *
@@ -14,10 +15,10 @@ from ikabot.helpers.varios import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.web.sesion import normal_get
-from ikabot.helpers.process import forkear
 from ikabot.helpers.planearViajes import *
 from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.signals import setInfoSignal
+from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.recursos import getRecursosDisponibles
 t = gettext.translation('subirEdificio', 
                         localedir, 
@@ -53,7 +54,7 @@ def esperarConstruccion(s, idCiudad, posicion):
 	while slp > 0:
 		html = s.get(urlCiudad + idCiudad)
 		slp = getTiempoDeConstruccion(s, html, posicion)
-		esperar(slp + 5)
+		wait(slp + 5)
 	html = s.get(urlCiudad + idCiudad)
 	ciudad = getCiudad(html)
 	edificio = ciudad['position'][posicion]
@@ -70,13 +71,13 @@ def subirEdificio(s, idCiudad, posicion, nivelesASubir, esperarRecursos):
 		if edificio['canUpgrade'] is False and esperarRecursos is True:
 			while edificio['canUpgrade'] is False:
 				time.sleep(60) # tiempo para que se envien los recursos
-				segundos = obtenerMinimoTiempoDeEspera(s)
+				segundos = getMinimumWaitingTime(s)
 				html = s.get(urlCiudad + idCiudad)
 				ciudad = getCiudad(html)
 				edificio = ciudad['position'][posicion]
 				if segundos == 0:
 					break
-				esperar(segundos)
+				wait(segundos)
 
 		if edificio['canUpgrade'] is False:
 			msg  = _('Ciudad:{}\n').format(ciudad['cityName'])
@@ -236,7 +237,7 @@ def planearAbastecimiento(s, destino, origenes, faltantes):
 			else:
 				ruta = (ciudadO, ciudadD, ciudadD['islandId'], 0, 0, 0, 0, mandar)
 			rutas.append(ruta)
-	planearViajes(s, rutas)
+	executeRoutes(s, rutas)
 
 def menuEdificios(s, ids, cities, idCiudad, bienNombre, bienIndex, faltante):
 	banner()
@@ -255,7 +256,7 @@ def menuEdificios(s, ids, cities, idCiudad, bienNombre, bienIndex, faltante):
 		disponible = ciudad['recursos'][bienIndex]
 		if disponible == 0:
 			continue
-		opcion = '{}{} ({}): {} [Y/n]:'.format(' ' * (maxName - len(cities[id]['name'])), cities[id]['name'], trade, addPuntos(disponible))
+		opcion = '{}{} ({}): {} [Y/n]:'.format(' ' * (maxName - len(cities[id]['name'])), cities[id]['name'], trade, addDot(disponible))
 		eleccion = read(msg=opcion, values=['Y', 'y', 'N', 'n', ''])
 		if eleccion.lower() == 'n':
 			continue
@@ -279,8 +280,9 @@ def menuEdificios(s, ids, cities, idCiudad, bienNombre, bienIndex, faltante):
 				ampliar = False
 	return rta
 
-def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante):
-	idss, cities = getIdsDeCiudades(s)
+def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante, e1, fd):
+	sys.stdin = os.fdopen(fd)
+	idss, cities = getIdsOfCities(s)
 	origenes = {}
 	for i in range(5):
 		if faltante[i] <= 0:
@@ -302,15 +304,15 @@ def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante):
 
 	enter()
 
-	forkear(s)
-	if s.padre is True:
-		return True
-	else:
-		planearAbastecimiento(s, idCiudad, origenes, faltante)
-		s.logout()
-		exit()
+	set_child_mode(s) # TODO test this
+	e1.set()
 
-def subirEdificios(s):
+	planearAbastecimiento(s, idCiudad, origenes, faltante)
+	s.logout()
+	exit()
+
+def subirEdificios(s,e,fd):
+	sys.stdin = os.fdopen(fd)
 	global ampliar
 	global enviarRecursos
 	ampliar = True
@@ -318,10 +320,11 @@ def subirEdificios(s):
 
 	banner()
 	esperarRecursos = False
-	ciudad = elegirCiudad(s)
+	ciudad = chooseCity(s)
 	idCiudad = ciudad['id']
-	edificios = getEdificios(s, idCiudad)
+	edificios = getBuildings(s, idCiudad)
 	if edificios == []:
+		e.set()
 		return
 	posEdificio = edificios[0]
 	niveles = len(edificios)
@@ -334,21 +337,22 @@ def subirEdificios(s):
 	hasta = desde + niveles
 	(madera, vino, marmol, cristal, azufre) = recursosNecesarios(s, ciudad, edificio, desde, hasta)
 	if madera == -1:
+		e.set()
 		return
 	html = s.get(urlCiudad + idCiudad)
 	(maderaDisp, vinoDisp, marmolDisp, cristalDisp, azufreDisp) = getRecursosDisponibles(html, num=True)
 	if maderaDisp < madera or vinoDisp < vino or marmolDisp < marmol or cristalDisp < cristal or azufreDisp < azufre:
 		print(_('\nFalta:'))
 		if maderaDisp < madera:
-			print('{} de madera'.format(addPuntos(madera - maderaDisp)))
+			print('{} de madera'.format(addDot(madera - maderaDisp)))
 		if vinoDisp < vino:
-			print('{} de vino'.format(addPuntos(vino - vinoDisp)))
+			print('{} de vino'.format(addDot(vino - vinoDisp)))
 		if marmolDisp < marmol:
-			print('{} de marmol'.format(addPuntos(marmol - marmolDisp)))
+			print('{} de marmol'.format(addDot(marmol - marmolDisp)))
 		if cristalDisp < cristal:
-			print('{} de cristal'.format(addPuntos(cristal - cristalDisp)))
+			print('{} de cristal'.format(addDot(cristal - cristalDisp)))
 		if azufreDisp < azufre:
-			print('{} de azufre'.format(addPuntos(azufre - azufreDisp)))
+			print('{} de azufre'.format(addDot(azufre - azufreDisp)))
 
 		print(_('¿Transportar los recursos automáticamente? [Y/n]'))
 		rta = read(values=['y', 'Y', 'n', 'N', ''])
@@ -356,20 +360,25 @@ def subirEdificios(s):
 			print(_('¿Proceder de todos modos? [Y/n]'))
 			rta = read(values=['y', 'Y', 'n', 'N', ''])
 			if rta.lower() == 'n':
+				e.set()
 				return
 		else:
 			esperarRecursos = True
 			faltante = [madera - maderaDisp, vino - vinoDisp, marmol - marmolDisp, cristal - cristalDisp, azufre - azufreDisp]
-			obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante)
+			e1 = multiprocessing.Event()
+			multiprocessing.Process(target=obtenerLosRecursos, args=(s, idCiudad, posEdificio, niveles, faltante, e1, fd)).start()
+			e1.wait()
 	else:
 		print(_('\nTiene materiales suficientes'))
 		print(_('¿Proceder? [Y/n]'))
 		rta = read(values=['y', 'Y', 'n', 'N', ''])
 		if rta.lower() == 'n':
+			e.set()
 			return
-	forkear(s)
-	if s.padre is True:
-		return
+
+	set_child_mode(s)
+	e.set()
+
 	info = _('\nSubir edificio\n')
 	info = info + 'Ciudad: {}\nEdificio: {}.Desde {:d}, hasta {:d}'.format(ciudad['cityName'], edificio['name'], desde, hasta)
 
