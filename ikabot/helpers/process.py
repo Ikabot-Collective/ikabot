@@ -25,13 +25,13 @@ def updateProcessList(s, programprocesslist = []):
 
 	# check it's still running
 	runningIkabotProcessList = []
+	ika_process = 'python.exe' if isWindows else 'ikabot'
 	for process in fileList:
 		try:
 			processName = psutil.Process(pid = process['pid']).name()
 		except:
 			continue
 
-		ika_process = 'python.exe' if isWindows else 'ikabot'
 		if processName == ika_process:
 			runningIkabotProcessList.append(process)
 
