@@ -1,5 +1,6 @@
 
-## ikabot ~ Ikariam Bot
+## ikabot ~ Ikariam Bot  
+[![Downloads](https://pepy.tech/badge/ikabot)](https://pepy.tech/project/ikabot)
 
 _Ikabot is a cross-platform program written in python that grants equal or even more functionality than a premium account in ikariam, without spending ambrosia!_
 
@@ -94,6 +95,9 @@ _Ikabot is a cross-platform program written in python that grants equal or even 
 	It allows you to set or update your Telegram contact information.
 
 When you set an action in _ikabot_, you can enter and play ikariam without any problems. The only drawback that you may have is that the session expires, this is normal and if it happens just re-enter.
+
+### Discord
+Join us in discord at:`https://discord.gg/3hyxPRj`
 
 ### Install
 
