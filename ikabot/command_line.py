@@ -39,16 +39,22 @@ t = gettext.translation('command_line',
                         languages=idiomas,
                         fallback=True)
 _ = t.gettext
-processlist = []
+
 def menu(s):
-	global processlist
+	processlist = []
 	checkForUpdate()
 	banner()
 	processlist = updateProcessList(s)
-	print('Running tasks:')
-	for process in processlist:
-		print(str(process['pid']) + '    ' + process['username'] + '    ' + str(process['proxies']) + '    ' + process['action'])
-	print('')
+	if len(processlist) > 0:
+		print('Running tasks:')
+		for process in processlist:
+			if len(process['proxies']) == 0:
+				proxy = ''
+			else:
+				proxy = 'proxy: ' + str(process['proxies'])
+
+			print('- pid: {} task: {} {}'.format(process['pid'], process['action'], proxy))
+		print('')
 	menu_actions = [
 					subirEdificios,
 					menuRutaComercial,
@@ -104,7 +110,7 @@ def menu(s):
 			event = multiprocessing.Event() #creates a new event
 			process = multiprocessing.Process(target=menu_actions[eleccion], args=(s, event, sys.stdin.fileno()), name=menu_actions[eleccion].__name__ + s.username)
 			process.start()
-			processlist.append({'pid': process.pid, 'username': s.username , 'proxies': s.s.proxies, 'action': menu_actions[eleccion].__name__ })
+			processlist.append({'pid': process.pid, 'proxies': s.s.proxies, 'action': menu_actions[eleccion].__name__ })
 			updateProcessList(s, programprocesslist = processlist)
 			event.wait() #waits for the process to fire the event that's been given to it. When it does  this process gets back control of the command line and asks user for more input
 		except KeyboardInterrupt:
