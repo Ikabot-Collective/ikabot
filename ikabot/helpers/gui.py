@@ -13,12 +13,24 @@ t = gettext.translation('gui',
 _ = t.gettext
 
 def enter():
-	getpass.getpass(_('\n[Enter]'))
+	"""Wait for the user to press Enter
+	"""
+	if config.isWindows:
+		input(_('\n[Enter]')) # TODO improve this
+	else:
+		getpass.getpass(_('\n[Enter]'))
 
 def clear():
-	os.system('clear')
+	"""Clears all text on the console
+	"""
+	if config.isWindows:
+		os.system('cls')
+	else:
+		os.system('clear')
 
 def banner():
+	"""Clears all text on the console and displays the Ikabot ASCII art banner
+	"""
 	clear()
 	bner = """
 	`7MMF'  `7MM                       `7MM\"""Yp,                 mm    
@@ -29,7 +41,7 @@ def banner():
 	  MM      MM `Mb.   8M   MM          MM    ,9   YA.   ,A9     MM    
 	.JMML.  .JMML. YA.  `Moo9^Yo.      .JMMmmmd9     `Ybmd9'      `Mbmo
 	"""
-	print('\n{}\n\n{}\n'.format(bner, config.infoUser))
+	print('\n{}\n\n{}\n{}'.format(bner, config.infoUser, config.update_msg))
 
 class bcolors:
 	HEADER = '\033[95m'

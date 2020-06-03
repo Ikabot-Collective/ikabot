@@ -8,10 +8,10 @@ from ikabot.helpers.botComm import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.getJson import getCiudad
-from ikabot.helpers.planearViajes import planearViajes
+from ikabot.helpers.planearViajes import executeRoutes
 from ikabot.helpers.recursos import *
-from ikabot.helpers.varios import addPuntos
-from ikabot.helpers.process import forkear
+from ikabot.helpers.varios import addDot
+from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.gui import banner
 
 t = gettext.translation('repartirRecurso',
@@ -20,7 +20,8 @@ t = gettext.translation('repartirRecurso',
                         fallback=True)
 _ = t.gettext
 
-def repartirRecurso(s):
+def repartirRecurso(s,e,fd):
+	sys.stdin = os.fdopen(fd)
 
 	banner()
 
@@ -32,11 +33,12 @@ def repartirRecurso(s):
 	print(_('(4) Azufre'))
 	recurso = read(min=0, max=4)
 	if recurso == 0:
+		e.set() #give back control to main process
 		return
 
 	recursoTotal = 0
 	dict_idVino_diponible = {}
-	(idsCiudades, ciudades) = getIdsDeCiudades(s)
+	(idsCiudades, ciudades) = getIdsOfCities(s)
 	ciudadesOrigen = {}
 	ciudadesDestino = {}
 	for idCiudad in idsCiudades:
@@ -50,17 +52,19 @@ def repartirRecurso(s):
 		else:
 			html = s.get(urlCiudad + idCiudad)
 			ciudad = getCiudad(html)
-			ciudad['disponible'] = ciudad['libre'][recurso]
+			ciudad['disponible'] = ciudad['freeSpaceForResources'][recurso]
 			if ciudad['disponible'] > 0:
 				ciudadesDestino[idCiudad] = ciudad
 
 	if recursoTotal == 0:
 		print(_('\nNo hay recursos para enviar.'))
 		enter()
+		e.set()
 		return
 	if len(ciudadesDestino) == 0:
 		print(_('\nNo hay espacio disponible para enviar recursos.'))
 		enter()
+		e.set()
 		return
 
 	recursoXciudad = recursoTotal // len(ciudadesDestino)
@@ -91,16 +95,16 @@ def repartirRecurso(s):
 	banner()
 	print(_('\nSe enviará {} a:').format(tipoDeBien[recurso].lower()))
 	for city in toSend:
-		print('  {}: {}'.format(ciudadesDestino[city]['name'], addPuntos(toSend[city])))
+		print('  {}: {}'.format(ciudadesDestino[city]['name'], addDot(toSend[city])))
 
 	print(_('\n¿Proceder? [Y/n]'))
 	rta = read(values=['y', 'Y', 'n', 'N', ''])
 	if rta.lower() == 'n':
+		e.set()
 		return
 
-	forkear(s)
-	if s.padre is True:
-		return
+	set_child_mode(s)
+	e.set() #give main process control
 
 	rutas = []
 	for idCiudad in ciudadesDestino:
@@ -139,10 +143,10 @@ def repartirRecurso(s):
 	for ruta in rutas:
 		(ciudadO, ciudadD, idIsla, md, vn, mr, cr, az) = ruta
 		rec = ruta[recurso + 3]
-		info = info + '{} -> {}\n{}: {}\n'.format(ciudadO['cityName'], ciudadD['cityName'], tipoDeBien[recurso], addPuntos(rec))
+		info = info + '{} -> {}\n{}: {}\n'.format(ciudadO['cityName'], ciudadD['cityName'], tipoDeBien[recurso], addDot(rec))
 	setInfoSignal(s, info)
 	try:
-		planearViajes(s, rutas)
+		executeRoutes(s, rutas)
 	except:
 		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
 		sendToBot(s, msg)

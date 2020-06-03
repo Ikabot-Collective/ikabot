@@ -4,6 +4,7 @@
 import re
 import json
 from ikabot.helpers.recursos import *
+from ikabot.helpers.City import Cityfromdict
 
 def borrar(texto, ocurrencias):
 	for ocurrencia in ocurrencias:
@@ -39,13 +40,13 @@ def getIsla(html):
 	sub = re.search(r',"type":\d', isla).group()
 	remove.append(sub)
 
-	quitar = re.search(r'(,"barbarians[\s\S]*?),"scores"', isla).group(1)
+	quitar = re.search(r'(,"barbarians[\s\S]*?),"scores"', isla).group(1) #to remove
 
-	remove.append(quitar)
+	remove.append(quitar) #to remove
 	remove.append(',"goodTarget":"tradegood"')
 	remove.append(',"name":"Building ground"')
 	remove.append(',"name":"Terreno"')
-	remove.append(',"actions":[]')
+	remove.append(',"actions":[]') #to remove
 	remove.append('"id":-1,')
 	remove.append(',"level":0,"viewAble":1')
 	remove.append(',"empty_type":"normal"')
@@ -65,7 +66,7 @@ def getIsla(html):
 	isla['tipo'] = tipo
 	return isla
 
-def getCiudad(html):
+def getCiudad(html, s = {}):
 
 	ciudad = re.search(r'"updateBackgroundData",\s?([\s\S]*?)\],\["updateTemplateData"', html).group(1)
 	ciudad = json.loads(ciudad, strict=False)
@@ -92,12 +93,18 @@ def getCiudad(html):
 	ciudad['id'] = str(ciudad['id'])
 	ciudad['propia'] = True
 	ciudad['recursos'] = getRecursosDisponibles(html, num=True)
-	ciudad['capacidad'] = getCapacidadDeAlmacenamiento(html)
+	ciudad['storageCapacity'] = getstorageCapacityDeAlmacenamiento(html)
 	ciudad['ciudadanosDisp'] = getCiudadanosDisponibles(html)
 	ciudad['consumo'] = getConsumoDeVino(html)
 	ciudad['enventa'] = enVenta(html)
-	ciudad['libre'] = []
+	ciudad['freeSpaceForResources'] = []
 	for i in range(5):
-		ciudad['libre'].append( ciudad['capacidad'] - ciudad['recursos'][i] - ciudad['enventa'][i] )
-
-	return ciudad
+		ciudad['freeSpaceForResources'].append( ciudad['storageCapacity'] - ciudad['recursos'][i] - ciudad['enventa'][i] )
+	city = {}
+#	a = json.dumps(ciudad) debugging line
+	try:
+		city = Cityfromdict(ciudad, s)
+		return city
+	except Exception:
+		print("Error: Not using City type")
+		return ciudad

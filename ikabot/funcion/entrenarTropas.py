@@ -10,8 +10,8 @@ from ikabot.helpers.gui import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.varios import *
-from ikabot.helpers.process import forkear
-from ikabot.helpers.varios import addPuntos
+from ikabot.helpers.process import set_child_mode
+from ikabot.helpers.varios import addDot
 from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.recursos import getRecursosDisponibles
@@ -40,7 +40,7 @@ def esperarEntrenamiento(s, ciudad):
 	if segundos:
 		segundos = segundos.group(1)
 		segundos = int(segundos) - data[0][1]['time']
-		esperar(segundos + 5)
+		wait(segundos + 5)
 
 def planearEntrenamientos(s, ciudad, entrenamientos):
 	while True:
@@ -127,10 +127,11 @@ def generateTroops(unidades_info):
 		i += 1
 	return unidades
 
-def entrenarTropas(s):
+def entrenarTropas(s,e,fd):
+	sys.stdin = os.fdopen(fd)
 	banner()
 	print(_('¿En qué ciudad quiere entrenar las flotas?'))
-	ciudad = elegirCiudad(s)
+	ciudad = chooseCity(s)
 	banner()
 
 	for i in range(len(ciudad['position'])):
@@ -138,7 +139,11 @@ def entrenarTropas(s):
 			ciudad['pos'] = str(i)
 			break
 
-	data = getCuartelInfo(s, ciudad)
+	try:
+		data = getCuartelInfo(s, ciudad)
+	except Exception:
+		e.set()
+		return
 	unidades_info = data[2][1]
 	unidades = generateTroops(unidades_info)
 
@@ -179,25 +184,26 @@ def entrenarTropas(s):
 				costo['tiempo'] += unidad['costs']['completiontime'] * unidad['cantidad']
 
 		if costo['madera']:
-			print(_('     Madera: {}').format(addPuntos(costo['madera'])))
+			print(_('     Madera: {}').format(addDot(costo['madera'])))
 		if costo['vino']:
-			print(_('       Vino: {}').format(addPuntos(costo['vino'])))
+			print(_('       Vino: {}').format(addDot(costo['vino'])))
 		if costo['marmol']:
-			print(_('     Marmol: {}').format(addPuntos(costo['marmol'])))
+			print(_('     Marmol: {}').format(addDot(costo['marmol'])))
 		if costo['cristal']:
-			print(_('    Cristal: {}').format(addPuntos(costo['cristal'])))
+			print(_('    Cristal: {}').format(addDot(costo['cristal'])))
 		if costo['azufre']:
-			print(_('     Azufre: {}').format(addPuntos(costo['azufre'])))
+			print(_('     Azufre: {}').format(addDot(costo['azufre'])))
 		if costo['ciudadanos']:
-			print(_(' Ciudadanos: {}').format(addPuntos(costo['ciudadanos'])))
+			print(_(' Ciudadanos: {}').format(addDot(costo['ciudadanos'])))
 		if costo['manuntencion']:
-			print(_('Manutención: {}').format(addPuntos(costo['manuntencion'])))
+			print(_('Manutención: {}').format(addDot(costo['manuntencion'])))
 		if costo['tiempo']:
-			print(_('   Duración: {}').format(diasHorasMinutos(int(costo['tiempo']))))
+			print(_('   Duración: {}').format(daysHoursMinutes(int(costo['tiempo']))))
 
 		print(_('\nProceder? [Y/n]'))
 		rta = read(values=['y', 'Y', 'n', 'N', ''])
 		if rta.lower() == 'n':
+			e.set()
 			return
 
 		entrenamientos.append(unidades)
@@ -241,29 +247,29 @@ def entrenarTropas(s):
 	if falta:
 		print(_('\nNo hay suficientes recursos:'))
 		if sobrante['madera'] < 0:
-			print(_('    Madera:{}').format(addPuntos(sobrante['madera']*-1)))
+			print(_('    Madera:{}').format(addDot(sobrante['madera']*-1)))
 		if sobrante['vino'] < 0:
-			print(_('      Vino:{}').format(addPuntos(sobrante['vino']*-1)))
+			print(_('      Vino:{}').format(addDot(sobrante['vino']*-1)))
 		if sobrante['marmol'] < 0:
-			print(_('    Marmol:{}').format(addPuntos(sobrante['marmol']*-1)))
+			print(_('    Marmol:{}').format(addDot(sobrante['marmol']*-1)))
 		if sobrante['cristal'] < 0:
-			print(_('   Cristal:{}').format(addPuntos(sobrante['cristal']*-1)))
+			print(_('   Cristal:{}').format(addDot(sobrante['cristal']*-1)))
 		if sobrante['azufre'] < 0:
-			print(_('    Azufre:{}').format(addPuntos(sobrante['azufre']*-1)))
+			print(_('    Azufre:{}').format(addDot(sobrante['azufre']*-1)))
 		if sobrante['ciudadanos'] < 0:
-			print(_('Ciudadanos:{}').format(addPuntos(sobrante['ciudadanos']*-1)))
+			print(_('Ciudadanos:{}').format(addDot(sobrante['ciudadanos']*-1)))
 
 		print(_('\n¿Proceder de todos modos? [Y/n]'))
 		rta = read(values=['y', 'Y', 'n', 'N', ''])
 		if rta.lower() == 'n':
+			e.set()
 			return
 
 	print(_('\nSe entrenarán las tropas seleccionadas.'))
 	enter()
 
-	forkear(s)
-	if s.padre is True:
-		return
+	set_child_mode(s)
+	e.set()
 
 	info = _('\nEntreno tropas en {}\n').format(ciudad['cityName'])
 	setInfoSignal(s, info)
