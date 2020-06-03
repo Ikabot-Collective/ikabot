@@ -211,6 +211,7 @@ def recursosNecesarios(s, ciudad, edificio, desde, hasta):
 	return costos
 
 def planearAbastecimiento(s, destino, origenes, faltantes):
+	set_child_mode(s)
 	rutas = []
 	html = s.get(urlCiudad + destino)
 	ciudadD = getCiudad(html)
@@ -280,8 +281,7 @@ def menuEdificios(s, ids, cities, idCiudad, bienNombre, bienIndex, faltante):
 				ampliar = False
 	return rta
 
-def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante, e1, fd):
-	sys.stdin = os.fdopen(fd)
+def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante):
 	idss, cities = getIdsOfCities(s)
 	origenes = {}
 	for i in range(5):
@@ -304,12 +304,7 @@ def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante, e1, fd):
 
 	enter()
 
-	set_child_mode(s) # TODO test this
-	e1.set()
-
-	planearAbastecimiento(s, idCiudad, origenes, faltante)
-	s.logout()
-	exit()
+	multiprocessing.Process(target=planearAbastecimiento, args=(s, idCiudad, origenes, faltante)).start()
 
 def subirEdificios(s,e,fd):
 	sys.stdin = os.fdopen(fd)
@@ -365,9 +360,7 @@ def subirEdificios(s,e,fd):
 		else:
 			esperarRecursos = True
 			faltante = [madera - maderaDisp, vino - vinoDisp, marmol - marmolDisp, cristal - cristalDisp, azufre - azufreDisp]
-			e1 = multiprocessing.Event()
-			multiprocessing.Process(target=obtenerLosRecursos, args=(s, idCiudad, posEdificio, niveles, faltante, e1, fd)).start()
-			e1.wait()
+			obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante)
 	else:
 		print(_('\nTiene materiales suficientes'))
 		print(_('¿Proceder? [Y/n]'))

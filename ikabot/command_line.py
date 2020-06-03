@@ -4,7 +4,6 @@
 import os
 import gettext
 import multiprocessing
-import psutil
 from ikabot.config import *
 from ikabot.web.sesion import *
 from ikabot.helpers.gui import *
