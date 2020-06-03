@@ -23,15 +23,20 @@ if random.randint(0, 1) == 0:
 	user_agent = user_agent.chrome
 else:
 	user_agent = user_agent.firefox
+user_agent = 'Mozilla/5.0 (X11; Linux x86_64; rv:77.0) Gecko/20100101 Firefox/77.0'
+
 update_msg = ''
+
 isWindows = os.name == 'nt'
+
 proxy = False
-proxyDict = {}
 if proxy:
     http_proxy  = "http://127.0.0.1:8080"
     https_proxy = "https://127.0.0.1:8080"
     proxyDict = {"http": http_proxy, "https": https_proxy}
-secure_traffic = True
+else:
+    proxyDict = {}
+
 ids = None
 ciudades = None
 menuCiudades = ''
@@ -42,6 +47,7 @@ urlIsla = 'view=island&islandId='
 prompt = ' >>  '
 tipoDeBien = [_('Madera'), _('Vino'), _('Marmol'), _('Cristal'), _('Azufre')]
 ConnectionError_wait = 5 * 60
+
 debugON_alertarAtaques    = False
 debugON_alertarPocoVino   = False
 debugON_botDonador        = False
@@ -53,4 +59,3 @@ debugON_subirEdificio     = False
 debugON_session           = False
 debugON_comprarRecursos   = False
 debugON_activarMilagro    = False
-

@@ -126,7 +126,7 @@ class Sesion:
 		self.s.proxies = proxyDict
 
 		# get gameEnvironmentId and platformGameId
-		self.headers = {'Host': 'lobby.ikariam.gameforge.com', 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:77.0) Gecko/20100101 Firefox/77.0', 'Accept': '*/*', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/'}
+		self.headers = {'Host': 'lobby.ikariam.gameforge.com', 'User-Agent': user_agent, 'Accept': '*/*', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/'}
 		self.s.headers.clear()
 		self.s.headers.update(self.headers)
 		r = self.s.get('https://lobby.ikariam.gameforge.com/config/configuration.js')
@@ -142,13 +142,13 @@ class Sesion:
 		platformGameId = platformGameId.group(1)
 
 		# get __cfduid cookie
-		self.headers = {'Host': 'gameforge.com', 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:77.0) Gecko/20100101 Firefox/77.0', 'Accept': '*/*', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/'}
+		self.headers = {'Host': 'gameforge.com', 'User-Agent': user_agent, 'Accept': '*/*', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/'}
 		self.s.headers.clear()
 		self.s.headers.update(self.headers)
 		r = self.s.get('https://gameforge.com/js/connect.js')
 
 		# update __cfduid cookie
-		self.headers = {'Host': 'gameforge.com', 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:77.0) Gecko/20100101 Firefox/77.0', 'Accept': '*/*', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'Referer': 'https://lobby.ikariam.gameforge.com/', 'Origin': 'https://lobby.ikariam.gameforge.com', 'DNT': '1', 'Connection': 'close'}
+		self.headers = {'Host': 'gameforge.com', 'User-Agent': user_agent, 'Accept': '*/*', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'Referer': 'https://lobby.ikariam.gameforge.com/', 'Origin': 'https://lobby.ikariam.gameforge.com', 'DNT': '1', 'Connection': 'close'}
 		self.s.headers.clear()
 		self.s.headers.update(self.headers)
 		r = self.s.get('https://gameforge.com/config')
@@ -157,52 +157,55 @@ class Sesion:
 		__fp_eval_id_2 = self.__fp_eval_id()
 
 		# get pc_idt cookie
-		self.headers = {'Host': 'pixelzirkus.gameforge.com', 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:77.0) Gecko/20100101 Firefox/77.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'Content-Type': 'application/x-www-form-urlencoded', 'Origin': 'https://lobby.ikariam.gameforge.com', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/', 'Upgrade-Insecure-Requests': '1'}
+		self.headers = {'Host': 'pixelzirkus.gameforge.com', 'User-Agent': user_agent, 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'Content-Type': 'application/x-www-form-urlencoded', 'Origin': 'https://lobby.ikariam.gameforge.com', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/', 'Upgrade-Insecure-Requests': '1'}
 		self.s.headers.clear()
 		self.s.headers.update(self.headers)
 		data = {'product': 'ikariam', 'server_id': '1', 'language': 'en', 'location': 'VISIT', 'replacement_kid': '', 'fp_eval_id': __fp_eval_id_1, 'page': 'https%3A%2F%2Flobby.ikariam.gameforge.com%2F', 'referrer': '', 'fingerprint': '2175408712', 'fp_exec_time': '1.00'}
 		r = self.s.post('https://pixelzirkus.gameforge.com/do/simple', data=data)
 
 		# update pc_idt cookie
-		self.headers = {'Host': 'pixelzirkus.gameforge.com', 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:77.0) Gecko/20100101 Firefox/77.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'Content-Type': 'application/x-www-form-urlencoded', 'Origin': 'https://lobby.ikariam.gameforge.com', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/', 'Upgrade-Insecure-Requests': '1'}
+		self.headers = {'Host': 'pixelzirkus.gameforge.com', 'User-Agent': user_agent, 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'Content-Type': 'application/x-www-form-urlencoded', 'Origin': 'https://lobby.ikariam.gameforge.com', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/', 'Upgrade-Insecure-Requests': '1'}
 		self.s.headers.clear()
 		self.s.headers.update(self.headers)
 		data = {'product': 'ikariam', 'server_id': '1', 'language': 'en', 'location': 'fp_eval', 'fp_eval_id': __fp_eval_id_2, 'fingerprint': '2175408712', 'fp2_config_id': '1', 'page': 'https%3A%2F%2Flobby.ikariam.gameforge.com%2F', 'referrer': '', 'fp2_value': '921af958be7cf2f76db1e448c8a5d89d', 'fp2_exec_time': '96.00'}
 		r = self.s.post('https://pixelzirkus.gameforge.com/do/simple', data=data)
 
 		# options req (not really needed)
-		self.headers = {'Host': 'gameforge.com','User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:77.0) Gecko/20100101 Firefox/77.0','Accept': '*/*','Accept-Language': 'en-US,en;q=0.5','Accept-Encoding': 'gzip, deflate','Access-Control-Request-Method': 'POST','Access-Control-Request-Headers': 'content-type,tnt-installation-id','Referer': 'https://lobby.ikariam.gameforge.com/es_AR/','Origin': 'https://lobby.ikariam.gameforge.com','DNT': '1','Connection': 'close'}
+		self.headers = {'Host': 'gameforge.com','User-Agent': user_agent,'Accept': '*/*','Accept-Language': 'en-US,en;q=0.5','Accept-Encoding': 'gzip, deflate','Access-Control-Request-Method': 'POST','Access-Control-Request-Headers': 'content-type,tnt-installation-id','Referer': 'https://lobby.ikariam.gameforge.com/es_AR/','Origin': 'https://lobby.ikariam.gameforge.com','DNT': '1','Connection': 'close'}
 		self.s.headers.clear()
 		self.s.headers.update(self.headers)
 		r = self.s.options('https://gameforge.com/api/v1/auth/thin/sessions')
 
 		# send creds
-		self.headers = {'Host': 'gameforge.com','User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:77.0) Gecko/20100101 Firefox/77.0','Accept': '*/*','Accept-Language': 'en-US,en;q=0.5','Accept-Encoding': 'gzip, deflate, br','Referer': 'https://lobby.ikariam.gameforge.com/es_AR/','TNT-Installation-Id': '','Content-Type': 'application/json','Origin': 'https://lobby.ikariam.gameforge.com','DNT': '1','Connection': 'keep-alive','Pragma': 'no-cache','Cache-Control': 'no-cache','TE': 'Trailers'}
+		self.headers = {'Host': 'gameforge.com','User-Agent': user_agent,'Accept': '*/*','Accept-Language': 'en-US,en;q=0.5','Accept-Encoding': 'gzip, deflate, br','Referer': 'https://lobby.ikariam.gameforge.com/es_AR/','TNT-Installation-Id': '','Content-Type': 'application/json','Origin': 'https://lobby.ikariam.gameforge.com','DNT': '1','Connection': 'keep-alive','Pragma': 'no-cache','Cache-Control': 'no-cache','TE': 'Trailers'}
 		self.s.headers.clear()
 		self.s.headers.update(self.headers)
 		data = {"identity": self.mail, "password": self.password, "locale":"es_AR", "gfLang":"ar", "platformGameId": platformGameId, "gameEnvironmentId": gameEnvironmentId, "autoGameAccountCreation": "false"}
 		r = self.s.post('https://gameforge.com/api/v1/auth/thin/sessions', json=data)
-
 		if r.status_code == 403:
 			exit(_('Mail o contraseña incorrecta\n'))
+
+		# get the authentication token and set the cookie
 		ses_json = json.loads(r.text, strict=False)
 		auth_token = ses_json['token']
+		cookie_obj = requests.cookies.create_cookie(domain='.gameforge.com', name='gf-token-production', value=auth_token)
+		self.s.cookies.set_cookie(cookie_obj)
+
+		# get accounts
+		self.headers = {'Host': 'lobby.ikariam.gameforge.com', 'User-Agent': user_agent, 'Accept': 'application/json', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'Referer': 'https://lobby.ikariam.gameforge.com/es_AR/hub', 'Authorization': 'Bearer {}'.format(auth_token), 'DNT': '1', 'Connection': 'close'}
+		self.s.headers.clear()
+		self.s.headers.update(self.headers)
+		r = self.s.get('https://lobby.ikariam.gameforge.com/api/users/me/accounts')
+		accounts = json.loads(r.text, strict=False)
+
+		# get servers
+		self.headers = {'Host': 'lobby.ikariam.gameforge.com', 'User-Agent': user_agent, 'Accept': 'application/json', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'Referer': 'https://lobby.ikariam.gameforge.com/es_AR/hub', 'Authorization': 'Bearer {}'.format(auth_token), 'DNT': '1', 'Connection': 'close'}
+		self.s.headers.clear()
+		self.s.headers.update(self.headers)
+		r = self.s.get('https://lobby.ikariam.gameforge.com/api/servers')
+		servers = json.loads(r.text, strict=False)
 
 		if not self.logged:
-
-			# get accounts
-			self.headers = {'Host': 'lobby.ikariam.gameforge.com', 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:77.0) Gecko/20100101 Firefox/77.0', 'Accept': 'application/json', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'Referer': 'https://lobby.ikariam.gameforge.com/es_AR/hub', 'Authorization': 'Bearer {}'.format(auth_token), 'DNT': '1', 'Connection': 'close'}
-			self.s.headers.clear()
-			self.s.headers.update(self.headers)
-			r = self.s.get('https://lobby.ikariam.gameforge.com/api/users/me/accounts')
-			accounts = json.loads(r.text, strict=False)
-
-			# get servers
-			self.headers = {'Host': 'lobby.ikariam.gameforge.com', 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:77.0) Gecko/20100101 Firefox/77.0', 'Accept': 'application/json', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'Referer': 'https://lobby.ikariam.gameforge.com/es_AR/hub', 'Authorization': 'Bearer {}'.format(auth_token), 'DNT': '1', 'Connection': 'close'}
-			self.s.headers.clear()
-			self.s.headers.update(self.headers)
-			r = self.s.get('https://lobby.ikariam.gameforge.com/api/servers')
-			servers = json.loads(r.text, strict=False)
 
 			if len([ account for account in accounts if account['blocked'] is False ]) == 1:
 				self.account  = [ account for account in accounts if account['blocked'] is False ][0]
@@ -250,7 +253,7 @@ class Sesion:
 
 		self.urlBase = match.group(0)
 		self.host = self.urlBase.split('//')[1].split('/index')[0]
-		self.headers = {'Host': self.host, 'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Encoding': 'gzip, deflate', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/es_ES/accounts', 'DNT': '1', 'Connection': 'close', 'Upgrade-Insecure-Requests': '1'}
+		self.headers = {'Host': self.host, 'User-Agent': user_agent, 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/es_AR/accounts', 'Upgrade-Insecure-Requests': '1'}
 		self.s.headers.clear()
 		self.s.headers.update(self.headers)
 		html = self.s.get(url).text
