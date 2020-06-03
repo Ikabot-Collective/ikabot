@@ -40,13 +40,13 @@ def getIsla(html):
 	sub = re.search(r',"type":\d', isla).group()
 	remove.append(sub)
 
-	quitar = re.search(r'(,"barbarians[\s\S]*?),"scores"', isla).group(1)
+	quitar = re.search(r'(,"barbarians[\s\S]*?),"scores"', isla).group(1) #to remove
 
-	remove.append(quitar)
+	remove.append(quitar) #to remove
 	remove.append(',"goodTarget":"tradegood"')
 	remove.append(',"name":"Building ground"')
 	remove.append(',"name":"Terreno"')
-	remove.append(',"actions":[]')
+	remove.append(',"actions":[]') #to remove
 	remove.append('"id":-1,')
 	remove.append(',"level":0,"viewAble":1')
 	remove.append(',"empty_type":"normal"')
