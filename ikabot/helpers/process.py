@@ -47,11 +47,10 @@ def updateProcessList(s, programprocesslist = []):
 
 
 	## add new to the list and write to file only if it's given
-	if programprocesslist != []:
-		for process in programprocesslist:
-			if process not in runningIkabotProcessList:
-				runningIkabotProcessList.append(process)
-	
+	for process in programprocesslist:
+		if process not in runningIkabotProcessList:
+			runningIkabotProcessList.append(process)
+
 	## write to file
 	fileData['processList'] = runningIkabotProcessList
 	s.setFileData(fileData)
