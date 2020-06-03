@@ -2,7 +2,6 @@ import os
 import random
 import locale
 import gettext
-from fake_useragent import UserAgent
 
 local = locale.setlocale(locale.LC_ALL, '')
 if 'es_' in local:
@@ -17,13 +16,11 @@ t = gettext.translation('config',
                         fallback=True)
 _ = t.gettext
 
-user_agent = UserAgent()
 # only use common browsers
 if random.randint(0, 1) == 0:
-	user_agent = user_agent.chrome
+    user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36'
 else:
-	user_agent = user_agent.firefox
-user_agent = 'Mozilla/5.0 (X11; Linux x86_64; rv:77.0) Gecko/20100101 Firefox/77.0'
+    user_agent = 'Mozilla/5.0 (X11; Linux x86_64; rv:77.0) Gecko/20100101 Firefox/77.0'
 
 update_msg = ''
 
