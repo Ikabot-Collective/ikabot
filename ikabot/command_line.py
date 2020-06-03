@@ -4,9 +4,11 @@
 import os
 import gettext
 import multiprocessing
+import psutil
 from ikabot.config import *
 from ikabot.web.sesion import *
 from ikabot.helpers.gui import *
+from ikabot.helpers.process import updateProcessList
 from ikabot.funcion.donar import donar
 from ikabot.funcion.update import update
 from ikabot.helpers.pedirInfo import read
@@ -38,20 +40,15 @@ t = gettext.translation('command_line',
                         fallback=True)
 _ = t.gettext
 processlist = []
-
 def menu(s):
+	global processlist
 	checkForUpdate()
 	banner()
-
-	processlistActive = [ p for p in processlist if p.is_alive() ]
-	if len(processlistActive) > 0:
-		print('Running tasks are:')
-		for process in processlistActive:
-			print(str(process.pid) + '    ' + str(process.name))
-		print('')
-
-	processes = {} #creates dict of processes. It will look like this {entrynumber : relatedprocess, entrynumber : relatedprocess ...}
-	events = {} #creates dict of events. It will look like this {entrynumber : relatedevent, entrynumber : relatedevent ...}
+	processlist = updateProcessList(s)
+	print('Running tasks:')
+	for process in processlist:
+		print(str(process['pid']) + '    ' + process['username'] + '    ' + str(process['proxies']) + '    ' + process['action'])
+	print('')
 	menu_actions = [
 					subirEdificios,
 					menuRutaComercial,
@@ -101,15 +98,15 @@ def menu(s):
 
 	entradas = len(menu_actions)
 	eleccion = read(min=0, max=entradas)
-	
 	if eleccion != 0:
 		try:
 			eleccion -= 1
-			events.update({eleccion : multiprocessing.Event()}) #inserts a new event into the dict
-			processes.update({eleccion : multiprocessing.Process(target=menu_actions[eleccion], args=(s, events[eleccion], sys.stdin.fileno()), name=str(menu_actions[eleccion]))}) #inserts a new process into the dict. The process is passed s, the event that's made above and stdin so it can read from command line
-			processlist.append(processes[eleccion])
-			processes[eleccion].start() #starts the process at the selected function
-			events[eleccion].wait() #waits for the process to fire the event that's been given to it. When it does  this process gets back control of the command line and asks user for more input
+			event = multiprocessing.Event() #creates a new event
+			process = multiprocessing.Process(target=menu_actions[eleccion], args=(s, event, sys.stdin.fileno()), name=menu_actions[eleccion].__name__ + s.username)
+			process.start()
+			processlist.append({'pid': process.pid, 'username': s.username , 'proxies': s.s.proxies, 'action': menu_actions[eleccion].__name__ })
+			updateProcessList(s, programprocesslist = processlist)
+			event.wait() #waits for the process to fire the event that's been given to it. When it does  this process gets back control of the command line and asks user for more input
 		except KeyboardInterrupt:
 			pass
 		menu(s)
