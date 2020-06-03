@@ -11,11 +11,11 @@ from ikabot.config import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.tienda import *
 from ikabot.helpers.botComm import *
+from ikabot.helpers.varios import addDot
 from ikabot.helpers.pedirInfo import read
-from ikabot.helpers.process import forkear
-from ikabot.helpers.varios import addPuntos
 from ikabot.helpers.signals import setInfoSignal
-from ikabot.helpers.planearViajes import esperarLlegada
+from ikabot.helpers.process import set_child_mode
+from ikabot.helpers.planearViajes import waitForArrival
 
 t = gettext.translation('venderRecursos', 
                         localedir, 
@@ -46,7 +46,7 @@ def getOfertas(s, ciudad, recurso):
 	html = json.loads(resp, strict=False)[1][1][1]
 	return re.findall(r'<td class=".*?">(.*?)<br/>\((.*?)\)\s*</td>\s*<td>(.*?)</td>\s*<td><img src=".*?"\s*alt=".*?"\s*title=".*?"/></td>\s*<td style="white-space:nowrap;">(\d+)\s*<img src=".*?"\s*class=".*?"/>.*?</td>\s*<td>(\d+)</td>\s*<td><a onclick="ajaxHandlerCall\(this\.href\);return false;"\s*href="\?view=takeOffer&destinationCityId=(\d+)&', html)
 
-def venderAOfertas(s, ciudad, recurso):
+def venderAOfertas(s, ciudad, recurso, e):
 	banner()
 
 	matches = getOfertas(s, ciudad, recurso)
@@ -66,7 +66,7 @@ def venderAOfertas(s, ciudad, recurso):
 		city = city.strip()
 		cantidad = cant.replace(',', '').replace('.', '')
 		cantidad = int(cantidad)
-		msg = _('{} ({}): {} a {} c/u ({} en total) [Y/n]').format(city, user, addPuntos(cantidad), precio, addPuntos(int(precio)*cantidad))
+		msg = _('{} ({}): {} a {} c/u ({} en total) [Y/n]').format(city, user, addDot(cantidad), precio, addDot(int(precio)*cantidad))
 		rta = read(msg=msg, values=['y', 'Y', 'n', 'N', ''])
 		if rta.lower() == 'n':
 			continue
@@ -80,7 +80,7 @@ def venderAOfertas(s, ciudad, recurso):
 	disp_venta = ciudad['recursos'][recurso]
 	vender = disp_venta if disp_venta < max_venta else max_venta
 
-	print(_('\n¿Cuánto quiere vender? [max = {}]').format(addPuntos(vender)))
+	print(_('\n¿Cuánto quiere vender? [max = {}]').format(addDot(vender)))
 	vender = read(min=0, max=vender)
 
 	faltaVender = vender
@@ -93,16 +93,15 @@ def venderAOfertas(s, ciudad, recurso):
 		compra = cantidad if cantidad < faltaVender else faltaVender
 		faltaVender -= compra
 		profit += compra * int(precio)
-	print(_('\n¿Vender {} de {} por un total de {}? [Y/n]').format(addPuntos(vender), tipoDeBien[recurso], addPuntos(profit)))
+	print(_('\n¿Vender {} de {} por un total de {}? [Y/n]').format(addDot(vender), tipoDeBien[recurso], addDot(profit)))
 	rta = read(values=['y', 'Y', 'n', 'N', ''])
 	if rta.lower() == 'n':
 		return
 
-	forkear(s)
-	if s.padre is True:
-		return
+	set_child_mode(s)
+	e.set()
 
-	info = _('\nVendo {} de {} en {}\n').format(addPuntos(vender), tipoDeBien[recurso], ciudad['name'])
+	info = _('\nVendo {} de {} en {}\n').format(addDot(vender), tipoDeBien[recurso], ciudad['name'])
 	setInfoSignal(s, info)
 	try:
 		do_it1(s, vender,  ofertas, recurso, ciudad)
@@ -112,13 +111,13 @@ def venderAOfertas(s, ciudad, recurso):
 	finally:
 		s.logout()
 
-def crearOferta(s, ciudad, recurso):
+def crearOferta(s, ciudad, recurso, e):
 	banner()
 
 	html = getStoreInfo(s, ciudad)
-	cap_venta = getCapacidadDeVenta(html)
+	cap_venta = getstorageCapacityDeVenta(html)
 	recurso_disp = ciudad['recursos'][recurso]
-	print(_('¿Cuánto quiere vender? [max = {}]').format(addPuntos(recurso_disp)))
+	print(_('¿Cuánto quiere vender? [max = {}]').format(addDot(recurso_disp)))
 	vender = read(min=0, max=recurso_disp)
 	if vender == 0:
 		return
@@ -129,17 +128,16 @@ def crearOferta(s, ciudad, recurso):
 	print(_('\n¿A qué precio? [min = {:d}, max = {:d}]').format(precio_min, precio_max))
 	precio = read(min=precio_min, max=precio_max)
 
-	print(_('\nSe venderá {} de {} a {}: {}').format(addPuntos(vender), tipoDeBien[recurso], addPuntos(precio), addPuntos(precio * vender)))
+	print(_('\nSe venderá {} de {} a {}: {}').format(addDot(vender), tipoDeBien[recurso], addDot(precio), addDot(precio * vender)))
 	print(_('\n¿Proceder? [Y/n]'))
 	rta = read(values=['y', 'Y', 'n', 'N', ''])
 	if rta.lower() == 'n':
 		return
 
-	forkear(s)
-	if s.padre is True:
-		return
+	set_child_mode(s)
+	e.set()
 
-	info = _('\nVendo {} de {} en {}\n').format(addPuntos(vender), tipoDeBien[recurso], ciudad['name'])
+	info = _('\nVendo {} de {} en {}\n').format(addDot(vender), tipoDeBien[recurso], ciudad['name'])
 	setInfoSignal(s, info)
 	try:
 		do_it2(s, vender, precio, recurso, cap_venta, ciudad)
@@ -149,13 +147,15 @@ def crearOferta(s, ciudad, recurso):
 	finally:
 		s.logout()
 
-def venderRecursos(s):
+def venderRecursos(s,e,fd):
+	sys.stdin = os.fdopen(fd)
 	banner()
 
 	ciudades_comerciales = getCiudadesComerciales(s)
 	if len(ciudades_comerciales) == 0:
 		print(_('No hay una Tienda contruida'))
 		enter()
+		e.set()
 		return
 
 	if len(ciudades_comerciales) == 1:
@@ -173,7 +173,8 @@ def venderRecursos(s):
 
 	print(_('¿Quiere vender a ofertas existenes (1) o quiere hacer su propia oferta (2)?'))
 	rta = read(min=1, max=2)
-	[venderAOfertas, crearOferta][rta - 1](s, ciudad, recurso)
+	[venderAOfertas, crearOferta][rta - 1](s, ciudad, recurso, e)
+	e.set()
 
 def do_it1(s, porVender, ofertas, recurso, ciudad):
 	for oferta in ofertas:
@@ -182,7 +183,7 @@ def do_it1(s, porVender, ofertas, recurso, ciudad):
 		quiereComprar = cant.replace(',', '').replace('.', '')
 		quiereComprar = int(quiereComprar)
 		while True:
-			barcos_disponibles = esperarLlegada(s)
+			barcos_disponibles = waitForArrival(s)
 			cant_venta = quiereComprar if quiereComprar < porVender else porVender
 			barcos_necesarios = int(math.ceil((Decimal(cant_venta) / Decimal(500))))
 			barcos_usados = barcos_disponibles if barcos_disponibles < barcos_necesarios else barcos_necesarios
@@ -213,7 +214,7 @@ def do_it2(s, porVender, precio, recurso, cap_venta, ciudad):
 	while True:
 		html = getStoreInfo(s, ciudad)
 		enVenta = vendiendo(html)[recurso]
-		if enVenta < getCapacidadDeVenta(html):
+		if enVenta < getstorageCapacityDeVenta(html):
 			espacio = cap_venta - enVenta
 			ofertar = porVender if espacio > porVender else espacio
 			porVender -= ofertar
@@ -236,7 +237,7 @@ def do_it2(s, porVender, precio, recurso, cap_venta, ciudad):
 		html = getStoreInfo(s, ciudad)
 		enVenta = vendiendo(html)[recurso]
 		if enVenta <= enVenta_inicial:
-			msg = _('Se vendieron {} de {} a {:d}').format(addPuntos(total), tipoDeBien[recurso], precio)
+			msg = _('Se vendieron {} de {} a {:d}').format(addDot(total), tipoDeBien[recurso], precio)
 			sendToBot(s, msg)
 			return
 		time.sleep(60 * 60 *  2)

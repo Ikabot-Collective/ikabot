@@ -6,6 +6,7 @@ import os
 import json
 import random
 import gettext
+import sys
 import ikabot.web.sesion
 from ikabot.config import *
 import ikabot.config as config
@@ -64,39 +65,45 @@ def botValido(s):
 		else:
 			return cargarTelegram(s)
 
-def cargarTelegram(s):
-			banner()
-			botToken = read(msg=_('Token del bot:'))
-			chat_id = read(msg=_('Chat_id:'))
+def cargarTelegram(s, e=None, fd=None):
+	if e is not None and fd is not None:
+		sys.stdin = os.fdopen(fd) # give process access to terminal
 
-			fileData = s.getFileData()
-			fileData['telegram'] = {}
-			fileData['telegram']['botToken'] = botToken.replace(' ', '').replace('.', '')
-			fileData['telegram']['chatId'] = chat_id
-			s.setFileData(fileData)
+	banner()
+	botToken = read(msg=_('Token del bot:'))
+	chat_id = read(msg=_('Chat_id:'))
 
-			rand = random.randint(1000, 9999)
-			msg = _('El token a ingresar es:{:d}').format(rand)
-			sendToBot(s, msg, Token=True)
+	fileData = s.getFileData()
+	fileData['telegram'] = {}
+	fileData['telegram']['botToken'] = botToken.replace(' ', '').replace('.', '')
+	fileData['telegram']['chatId'] = chat_id
+	s.setFileData(fileData)
 
-			rta = read(msg=_('Se envio un mensaje por telegram, ¿lo recibió? [Y/n]'), values=['y','Y','n', 'N', ''])
-			if rta.lower() == 'n':
-				valid = False
-			else:
-				recibido = read(msg=_('Ingrese el token recibido mediante telegram:'), digit=True)
-				if rand != recibido:
-					print(_('El token es incorrecto'))
-					valid = False
-				else:
-					print(_('El token es correcto.'))
-					valid = True
+	rand = random.randint(1000, 9999)
+	msg = _('El token a ingresar es:{:d}').format(rand)
+	sendToBot(s, msg, Token=True)
 
-			if valid is False:
-				fileData['telegram']['botToken'] = ''
-				fileData['telegram']['chatId'] = ''
-				s.setFileData(fileData)
-				print(_('Revíse las credenciales y vuelva a proveerlas.'))
-			else:
-				print(_('Los datos se guardaron.'))
-			enter()
-			return valid
+	rta = read(msg=_('Se envio un mensaje por telegram, ¿lo recibió? [Y/n]'), values=['y','Y','n', 'N', ''])
+	if rta.lower() == 'n':
+		valid = False
+	else:
+		recibido = read(msg=_('Ingrese el token recibido mediante telegram:'), digit=True)
+		if rand != recibido:
+			print(_('El token es incorrecto'))
+			valid = False
+		else:
+			print(_('El token es correcto.'))
+			valid = True
+
+	if valid is False:
+		fileData['telegram']['botToken'] = ''
+		fileData['telegram']['chatId'] = ''
+		s.setFileData(fileData)
+		print(_('Revíse las credenciales y vuelva a proveerlas.'))
+	else:
+		print(_('Los datos se guardaron.'))
+	enter()
+
+	if e is not None and fd is not None:
+		e.set() #give main process control before exiting
+	return valid

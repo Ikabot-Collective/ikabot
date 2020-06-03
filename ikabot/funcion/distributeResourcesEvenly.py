@@ -8,11 +8,11 @@ from ikabot.helpers.botComm import *
 from ikabot.helpers.gui import banner
 from ikabot.helpers.recursos import *
 from ikabot.helpers.pedirInfo import *
-from ikabot.helpers.process import forkear
-from ikabot.helpers.varios import addPuntos
+from ikabot.helpers.process import set_child_mode
+from ikabot.helpers.varios import addDot
 from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.signals import setInfoSignal
-from ikabot.helpers.planearViajes import planearViajes
+from ikabot.helpers.planearViajes import executeRoutes
 
 t = gettext.translation('distributeResourcesEvenly',
                         localedir,
@@ -20,52 +20,53 @@ t = gettext.translation('distributeResourcesEvenly',
                         fallback=True)
 _ = t.gettext
 
-def distributeResourcesEvenly(s):
+def distributeResourcesEvenly(s,e,fd):
+	sys.stdin = os.fdopen(fd) # give process access to terminal
 
 	banner() #displays the ascii art banner
 
 	print(_('¿Qué recurso quiere distribuir?'))
 	print(_('(0) Salir'))
-	for i in range(4):
+	for i in range(len(tipoDeBien)):
 		print('({:d}) {}'.format(i+1, tipoDeBien[i]))
 	resource = read(min=0, max=5)
 	if resource == 0:
+		e.set() #give main process control before exiting
 		return
 	resource -= 1
 
 	resourceTotal = 0 #total number of selected resource
-	(cityIDs, cities) = getIdsDeCiudades(s) #gets city ids
+	(cityIDs, cities) = getIdsOfCities(s) #gets city ids
 	originCities = {} #dictionary for origin cities
 	destinationCities = {} #dictionary for destination cities
 	allCities = {} #dictionary for all cities
 	for cityID in cityIDs: #for each of the users cities
-		
-		
+
 		html = s.get(urlCiudad + cityID) #load html from the get request for that particular city
 		city = getCiudad(html) #convert the html to a city object
-		
+
 		resourceTotal += city['recursos'][resource] #the cities resources are added to the total
 		allCities[cityID] = city #adds the city to all cities
 	resourceAverage = resourceTotal // len(allCities) #calculate the resource average
 	resourceTotal = 0
 	for cityID in cityIDs: #iterate through all the cities and exclude the ones with less capacity than the resource average from calculations
-		if allCities[cityID]['capacidad'] < resourceAverage:
+		if allCities[cityID]['storageCapacity'] < resourceAverage:
 			allCities.pop(cityID)
-		else: 
+		else:
 			resourceTotal += allCities[cityID]['recursos'][resource] #else add it to the total for recalculation
 	resourceAverage = resourceTotal // len(allCities) #recalculate the resource average
-	
+
 	for cityID in allCities: #iterate through cities and classify them as origin or destination based on amount of resource above average
 		if allCities[cityID]['recursos'][resource] > resourceAverage:
 			originCities[cityID] = allCities[cityID]['recursos'][resource] - resourceAverage #sets the value to the amount of resource above average
-		else: 
+		else:
 			destinationCities[cityID] = resourceAverage - allCities[cityID]['recursos'][resource] #sets the value to the amount of resource below average
 
 	originCities = {k: v for k, v in sorted(originCities.items(), key=lambda item: item[1],reverse=True)} #sort origin cities in descending order
 	destinationCities = {k: v for k, v in sorted(destinationCities.items(), key=lambda item: item[1])}    #sort destination cities in ascending order
 
 	routes = []
-	
+
 	for originCityID in originCities: #iterate through all origin city ids
 		if originCities[originCityID] == 0:
 			continue
@@ -77,6 +78,9 @@ def distributeResourcesEvenly(s):
 				toSend = destinationCities[destinationCityID] #number of resources to send is the number of resources below average in destination city
 			else:
 				toSend = originCities[originCityID] #send the amount of resources above average of the current origin city
+
+			if toSend == 0:
+				continue
 
 			# ROUTE BLOCK
 			if resource == 0:
@@ -104,22 +108,22 @@ def distributeResourcesEvenly(s):
 	for route in routes:
 		print('{} -> {} : {} {}'.format(route[0]['name'], route[1]['name'], route[resource+3], tipoDeBien[resource])) #displays all routes to be executed in console
 
-	print(_('\nTodas las ciuaddes tendrán al rededor de {} de {}').format(addPuntos(resourceAverage), tipoDeBien[resource]))
+	print(_('\nTodas las ciuaddes tendrán al rededor de {} de {}').format(addDot(resourceAverage), tipoDeBien[resource]))
 
 	print(_('\n¿Proceder? [Y/n]'))
 	rta = read(values=['y', 'Y', 'n', 'N', ''])
 	if rta.lower() == 'n':
+		e.set()
 		return
 
-	forkear(s) #forks the process.
-	if s.padre is True:
-		return
+	set_child_mode(s)
+	e.set() #this is where we give back control to main process
 
 	info = _('\nDistribuyo {} de forma uniforme entre todas las ciudades\n').format(tipoDeBien[resource])
 	setInfoSignal(s, info)
 
 	try:
-		planearViajes(s, routes) #plan trips for all the routes
+		executeRoutes(s, routes) #plan trips for all the routes
 	except:
 		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
 		sendToBot(s, msg) #sends message to telegram bot

@@ -5,10 +5,10 @@ import re
 import json
 from ikabot.config import *
 from ikabot.helpers.getJson import getCiudad
-from ikabot.helpers.pedirInfo import getIdsDeCiudades
+from ikabot.helpers.pedirInfo import getIdsOfCities
 
 def getCiudadesComerciales(s):
-	ids = getIdsDeCiudades(s)[0]
+	ids = getIdsOfCities(s)[0]
 	ciudades_comerciales = []
 	for idCiudad in ids:
 		html = s.get(urlCiudad + idCiudad)
@@ -29,7 +29,7 @@ def getStoreHtml(s, ciudad):
 	json_data = json.loads(data, strict=False)
 	return json_data[1][1][1]
 
-def getCapacidadDeVenta(html):
+def getstorageCapacityDeVenta(html):
 	match = re.search(r'var\s*storageCapacity\s*=\s*(\d+);', html)
 	if match:
 		return int(match.group(1))

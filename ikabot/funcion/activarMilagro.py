@@ -3,12 +3,13 @@
 
 import json
 import gettext
+import traceback
 from ikabot.config import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.varios import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.pedirInfo import *
-from ikabot.helpers.process import forkear
+from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.signals import setInfoSignal
 
@@ -19,7 +20,7 @@ t = gettext.translation('activarMilagro',
 _ = t.gettext
 
 def obtenerMilagrosDisponibles(s):
-	idsIslas = getIdsdeIslas(s)
+	idsIslas = getIdsOfIslands(s)
 	islas = []
 	for idIsla in idsIslas:
 		html = s.get(urlIsla + idIsla)
@@ -27,7 +28,7 @@ def obtenerMilagrosDisponibles(s):
 		isla['activable'] = False
 		islas.append(isla)
 
-	ids, citys = getIdsDeCiudades(s)
+	ids, citys = getIdsOfCities(s)
 	for ciudad in citys:
 		city = citys[ciudad]
 		wonder = [ isla['wonder'] for isla in islas if city['coords'] == '[{}:{}] '.format(isla['x'], isla['y']) ][0]
@@ -80,7 +81,7 @@ def elegir_isla(islas):
 		if isla['available']:
 			print('({:d}) {}'.format(i, isla['wonderName']))
 		else:
-			print(_('({:d}) {} (disponible en: {})').format(i, isla['wonderName'], diasHorasMinutos(isla['available_in'])))
+			print(_('({:d}) {} (disponible en: {})').format(i, isla['wonderName'], daysHoursMinutes(isla['available_in'])))
 
 	index = read(min=0, max=i)
 	if index == 0:
@@ -88,17 +89,20 @@ def elegir_isla(islas):
 	isla = islas[index - 1]
 	return isla
 
-def activarMilagro(s):
+def activarMilagro(s,e,fd):
+	sys.stdin = os.fdopen(fd)
 	banner()
 
 	islas = obtenerMilagrosDisponibles(s)
 	if islas == []:
 		print(_('No existen milagros disponibles.'))
 		enter()
+		e.set()
 		return
 
 	isla = elegir_isla(islas)
 	if isla is None:
+		e.set()
 		return
 
 	if isla['available']:
@@ -106,6 +110,7 @@ def activarMilagro(s):
 		print(_('¿Proceder? [Y/n]'))
 		r = read(values=['y', 'Y', 'n', 'N', ''])
 		if r.lower() == 'n':
+			e.set()
 			return
 
 		rta = activarMilagroImpl(s, isla)
@@ -113,6 +118,7 @@ def activarMilagro(s):
 		if rta[1][1][0] == 'error':
 			print(_('No se pudo activar el milagro {}.').format(isla['wonderName']))
 			enter()
+			e.set()
 			return
 
 		data = rta[2][1]
@@ -132,16 +138,18 @@ def activarMilagro(s):
 
 			r = read(values=['y', 'Y', 'n', 'N', ''])
 			if r.lower() != 'y':
+				e.set()
 				return
 
 			iterations = read(msg=_('¿Cuántas veces?: '), digit=True, min=0)
 
 			if iterations == 0:
+				e.set()
 				return
 
 			duration = wait_time * iterations
 
-			print(_('Terminará en:{}').format(diasHorasMinutos(duration)))
+			print(_('Terminará en:{}').format(daysHoursMinutes(duration)))
 
 			print(_('¿Proceder? [Y/n]'))
 			r = read(values=['y', 'Y', 'n', 'N', ''])
@@ -150,10 +158,11 @@ def activarMilagro(s):
 				continue
 			break
 	else:
-		print(_('\nSe activará el milagro {} en {}').format(isla['wonderName'], diasHorasMinutos(isla['available_in'])))
+		print(_('\nSe activará el milagro {} en {}').format(isla['wonderName'], daysHoursMinutes(isla['available_in'])))
 		print(_('¿Proceder? [Y/n]'))
 		rta = read(values=['y', 'Y', 'n', 'N', ''])
 		if rta.lower() == 'n':
+			e.set()
 			return
 		wait_time = isla['available_in']
 		iterations = 1
@@ -180,7 +189,7 @@ def activarMilagro(s):
 
 				iterations += 1
 				duration = wait_time * iterations
-				print(_('No se puede calcular el momento de finalización. (por lo menos: {}').format(diasHorasMinutos(duration)))
+				print(_('No se puede calcular el momento de finalización. (por lo menos: {}').format(daysHoursMinutes(duration)))
 				print(_('¿Proceder? [Y/n]'))
 
 				try:
@@ -195,9 +204,8 @@ def activarMilagro(s):
 					continue
 			break
 
-	forkear(s)
-	if s.padre is True:
-		return
+	set_child_mode(s)
+	e.set()
 
 	info = _('\nActivo el milagro {} {:d} veces\n').format(isla['wonderName'], iterations)
 	setInfoSignal(s, info)
@@ -231,7 +239,7 @@ def wait_for_miracle(s, isla):
 
 		msg = _('Espero {:d} segundos para activar el milagro {}').format(wait_time, isla['wonderName'])
 		sendToBotDebug(s, msg, debugON_activarMilagro)
-		esperar(wait_time + 5)
+		wait(wait_time + 5)
 
 def do_it(s, isla, iterations):
 

@@ -14,11 +14,12 @@ t = gettext.translation('construirEdificio',
                         fallback=True)
 _ = t.gettext
 
-def construirEdificio(s):
+def construirEdificio(s,e,fd):
+	sys.stdin = os.fdopen(fd)
 	banner()
 
 	print(_('Ciudad donde construir:'))
-	ciudad = elegirCiudad(s)
+	ciudad = chooseCity(s)
 	banner()
 
 	espacios = [ edificio for edificio in ciudad['position'] if edificio['building'] == 'empty' ]
@@ -41,6 +42,7 @@ def construirEdificio(s):
 	if len(edificios) == 0:
 		print(_('No se puede construir ningún edificio'))
 		enter()
+		e.set()
 		return
 
 	print(_('¿Qué edificio quiere construir?\n'))
@@ -69,3 +71,4 @@ def construirEdificio(s):
 	msg = json.loads(resp, strict=False)[3][1][0]['text']
 	print(msg)
 	enter()
+	e.set()

@@ -7,12 +7,13 @@ import time
 import json
 import traceback
 import threading
+import sys
 from ikabot.config import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.gui import enter
-from ikabot.helpers.process import forkear
+from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.signals import setInfoSignal
-from ikabot.helpers.varios import diasHorasMinutos
+from ikabot.helpers.varios import daysHoursMinutes
 from ikabot.funcion.modoVacaciones import activarModoVacaciones
 
 t = gettext.translation('alertarAtaques',
@@ -21,8 +22,10 @@ t = gettext.translation('alertarAtaques',
                         fallback=True)
 _ = t.gettext
 
-def alertarAtaques(s):
+def alertarAtaques(s,e,fd):
+	sys.stdin = os.fdopen(fd)
 	if botValido(s) is False:
+		e.set()
 		return
 
 	banner()
@@ -32,9 +35,8 @@ def alertarAtaques(s):
 	print(_('Se buscarán ataques cada {} minutos.').format(minutos))
 	enter()
 
-	forkear(s)
-	if s.padre is True:
-		return
+	set_child_mode(s)
+	e.set()
 
 	info = _('\nEspero por ataques cada {} minutos\n').format(minutos)
 	setInfoSignal(s, info)
@@ -59,19 +61,12 @@ def respondToAttack(s):
 				accion 	= int(rta.group(2))
 			else:
 				continue
-			s.padre = True
-			forkear(s)
-			if s.padre is True:
-				s.padre = False
-				continue
+
+			if accion == 1:
+				# mv
+				activarModoVacaciones(s)
 			else:
-				if accion == 1:
-					# mv
-					activarModoVacaciones(s)
-				else:
-					sendToBot(s, _('Comando inválido: {:d}').format(accion))
-				s.logout()
-				exit()
+				sendToBot(s, _('Comando inválido: {:d}').format(accion))
 
 def do_it(s, minutos):
 	conocidos = []
@@ -103,7 +98,7 @@ def do_it(s, minutos):
 				msg += _('a {}\n').format(target['name'])
 				msg += _('{} unidades\n').format(cantidadTropas)
 				msg += _('{} flotas\n').format(cantidadFlotas)
-				msg += _('llegada en: {}\n').format(diasHorasMinutos(tiempoFaltante))
+				msg += _('llegada en: {}\n').format(daysHoursMinutes(tiempoFaltante))
 				msg += _('Si quiere poner la cuenta en modo vacaciones envíe:\n')
 				msg += _('{:d}:1').format(os.getpid())
 				sendToBot(s, msg)

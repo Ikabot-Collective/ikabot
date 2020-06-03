@@ -40,7 +40,7 @@ class Sesion:
 		return self.__genRand() + self.__genRand() + '-' + self.__genRand() + '-' + self.__genRand() + '-' + self.__genRand() + '-' + self.__genRand() + self.__genRand() + self.__genRand()
 
 	def __getGameforgeCookie(self):
-		headers = {'Host': 'pixelzirkus.gameforge.com', 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:66.0) Gecko/20100101 Firefox/66.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Encoding': 'gzip, deflate', 'Content-Type': 'application/x-www-form-urlencoded', 'DNT': '1', 'Connection': 'close', 'Upgrade-Insecure-Requests': '1'}
+		headers = {'Host': 'pixelzirkus.gameforge.com', 'User-Agent': user_agent, 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Encoding': 'gzip, deflate', 'Content-Type': 'application/x-www-form-urlencoded', 'DNT': '1', 'Connection': 'close', 'Upgrade-Insecure-Requests': '1'}
 		cookies = {'__asc': self.alexaCook, '__auc': self.alexaCook}
 		fp_eval_id = __fp_eval_id()
 		page = self.urlBase.replace(self.mundo + '-', '').replace('index.php?', '')
@@ -69,7 +69,7 @@ class Sesion:
 			msg += _('Nuevo')
 		else:
 			msg += _('Salida')
-		sendToBotDebug(self, msg, debugON_session)
+#		sendToBotDebug(self, msg, debugON_session)
 
 		fileData = self.getFileData()
 
@@ -125,26 +125,84 @@ class Sesion:
 		self.s = requests.Session()
 		self.s.proxies = proxyDict
 
-		self.headers = {'Host': 'pixelzirkus.gameforge.com', 'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'Content-Type': 'application/x-www-form-urlencoded', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/es_ES/', 'Upgrade-Insecure-Requests': '1'}
+		# get gameEnvironmentId and platformGameId
+		self.headers = {'Host': 'lobby.ikariam.gameforge.com', 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:77.0) Gecko/20100101 Firefox/77.0', 'Accept': '*/*', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/'}
 		self.s.headers.clear()
 		self.s.headers.update(self.headers)
-		fp_eval_id = self.__fp_eval_id()
-		data = {'product': 'ikariam', 'server_id': '1', 'language': 'es', 'location': 'fp_eval', 'replacement_kid': '', 'fp_eval_id': self.__fp_eval_id(), 'fingerprint': '1666238048', 'fp2_config_id': '1', 'page': 'https%3A%2F%2Flobby.ikariam.gameforge.com%2Fes_ES', 'referrer': '', 'fp2_value': '6b28817d7585d24cdd53bda231eb310f', 'fp2_exec_time': '264.00'}
-		self.s.post('https://pixelzirkus.gameforge.com/do/simple', data=data)
+		r = self.s.get('https://lobby.ikariam.gameforge.com/config/configuration.js')
 
-		self.headers = {'Host': 'lobby.ikariam.gameforge.com', 'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0', 'Accept-Language': 'en-US,en;q=0.5','Accept':'application/json', 'Accept-Encoding':'gzip, deflate, br', 'Content-Type': 'application/json', 'Referer': 'https://lobby.ikariam.gameforge.com/es_ES', 'Origin': 'https://lobby.ikariam.gameforge.com', 'DNT': '1', 'Connection': 'close'}
+		js = r.text
+		gameEnvironmentId = re.search(r'"gameEnvironmentId":"(.*?)"', js)
+		if gameEnvironmentId is None:
+			exit('gameEnvironmentId not found')
+		gameEnvironmentId = gameEnvironmentId.group(1)
+		platformGameId = re.search(r'"platformGameId":"(.*?)"', js)
+		if platformGameId is None:
+			exit('platformGameId not found')
+		platformGameId = platformGameId.group(1)
+
+		# get __cfduid cookie
+		self.headers = {'Host': 'gameforge.com', 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:77.0) Gecko/20100101 Firefox/77.0', 'Accept': '*/*', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/'}
 		self.s.headers.clear()
 		self.s.headers.update(self.headers)
-		data = '{{"credentials":{{"email":"{}","password":"{}"}},"language":"es","kid":"","autoLogin":"false"}}'.format(self.mail, self.password)
-		r = self.s.post('https://lobby.ikariam.gameforge.com/api/users', data=data)
-		if r.status_code == 400:
+		r = self.s.get('https://gameforge.com/js/connect.js')
+
+		# update __cfduid cookie
+		self.headers = {'Host': 'gameforge.com', 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:77.0) Gecko/20100101 Firefox/77.0', 'Accept': '*/*', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'Referer': 'https://lobby.ikariam.gameforge.com/', 'Origin': 'https://lobby.ikariam.gameforge.com', 'DNT': '1', 'Connection': 'close'}
+		self.s.headers.clear()
+		self.s.headers.update(self.headers)
+		r = self.s.get('https://gameforge.com/config')
+
+		__fp_eval_id_1 = self.__fp_eval_id()
+		__fp_eval_id_2 = self.__fp_eval_id()
+
+		# get pc_idt cookie
+		self.headers = {'Host': 'pixelzirkus.gameforge.com', 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:77.0) Gecko/20100101 Firefox/77.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'Content-Type': 'application/x-www-form-urlencoded', 'Origin': 'https://lobby.ikariam.gameforge.com', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/', 'Upgrade-Insecure-Requests': '1'}
+		self.s.headers.clear()
+		self.s.headers.update(self.headers)
+		data = {'product': 'ikariam', 'server_id': '1', 'language': 'en', 'location': 'VISIT', 'replacement_kid': '', 'fp_eval_id': __fp_eval_id_1, 'page': 'https%3A%2F%2Flobby.ikariam.gameforge.com%2F', 'referrer': '', 'fingerprint': '2175408712', 'fp_exec_time': '1.00'}
+		r = self.s.post('https://pixelzirkus.gameforge.com/do/simple', data=data)
+
+		# update pc_idt cookie
+		self.headers = {'Host': 'pixelzirkus.gameforge.com', 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:77.0) Gecko/20100101 Firefox/77.0', 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'Content-Type': 'application/x-www-form-urlencoded', 'Origin': 'https://lobby.ikariam.gameforge.com', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/', 'Upgrade-Insecure-Requests': '1'}
+		self.s.headers.clear()
+		self.s.headers.update(self.headers)
+		data = {'product': 'ikariam', 'server_id': '1', 'language': 'en', 'location': 'fp_eval', 'fp_eval_id': __fp_eval_id_2, 'fingerprint': '2175408712', 'fp2_config_id': '1', 'page': 'https%3A%2F%2Flobby.ikariam.gameforge.com%2F', 'referrer': '', 'fp2_value': '921af958be7cf2f76db1e448c8a5d89d', 'fp2_exec_time': '96.00'}
+		r = self.s.post('https://pixelzirkus.gameforge.com/do/simple', data=data)
+
+		# options req (not really needed)
+		self.headers = {'Host': 'gameforge.com','User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:77.0) Gecko/20100101 Firefox/77.0','Accept': '*/*','Accept-Language': 'en-US,en;q=0.5','Accept-Encoding': 'gzip, deflate','Access-Control-Request-Method': 'POST','Access-Control-Request-Headers': 'content-type,tnt-installation-id','Referer': 'https://lobby.ikariam.gameforge.com/es_AR/','Origin': 'https://lobby.ikariam.gameforge.com','DNT': '1','Connection': 'close'}
+		self.s.headers.clear()
+		self.s.headers.update(self.headers)
+		r = self.s.options('https://gameforge.com/api/v1/auth/thin/sessions')
+
+		# send creds
+		self.headers = {'Host': 'gameforge.com','User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:77.0) Gecko/20100101 Firefox/77.0','Accept': '*/*','Accept-Language': 'en-US,en;q=0.5','Accept-Encoding': 'gzip, deflate, br','Referer': 'https://lobby.ikariam.gameforge.com/es_AR/','TNT-Installation-Id': '','Content-Type': 'application/json','Origin': 'https://lobby.ikariam.gameforge.com','DNT': '1','Connection': 'keep-alive','Pragma': 'no-cache','Cache-Control': 'no-cache','TE': 'Trailers'}
+		self.s.headers.clear()
+		self.s.headers.update(self.headers)
+		data = {"identity": self.mail, "password": self.password, "locale":"es_AR", "gfLang":"ar", "platformGameId": platformGameId, "gameEnvironmentId": gameEnvironmentId, "autoGameAccountCreation": "false"}
+		r = self.s.post('https://gameforge.com/api/v1/auth/thin/sessions', json=data)
+
+		if r.status_code == 403:
 			exit(_('Mail o contraseña incorrecta\n'))
+		ses_json = json.loads(r.text, strict=False)
+		auth_token = ses_json['token']
 
 		if not self.logged:
-			accounts = self.s.get('https://lobby.ikariam.gameforge.com/api/users/me/accounts').text
-			accounts = json.loads(accounts, strict=False)
-			servers = self.s.get('https://lobby.ikariam.gameforge.com/api/servers').text
-			servers = json.loads(servers, strict=False)
+
+			# get accounts
+			self.headers = {'Host': 'lobby.ikariam.gameforge.com', 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:77.0) Gecko/20100101 Firefox/77.0', 'Accept': 'application/json', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'Referer': 'https://lobby.ikariam.gameforge.com/es_AR/hub', 'Authorization': 'Bearer {}'.format(auth_token), 'DNT': '1', 'Connection': 'close'}
+			self.s.headers.clear()
+			self.s.headers.update(self.headers)
+			r = self.s.get('https://lobby.ikariam.gameforge.com/api/users/me/accounts')
+			accounts = json.loads(r.text, strict=False)
+
+			# get servers
+			self.headers = {'Host': 'lobby.ikariam.gameforge.com', 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:77.0) Gecko/20100101 Firefox/77.0', 'Accept': 'application/json', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'Referer': 'https://lobby.ikariam.gameforge.com/es_AR/hub', 'Authorization': 'Bearer {}'.format(auth_token), 'DNT': '1', 'Connection': 'close'}
+			self.s.headers.clear()
+			self.s.headers.update(self.headers)
+			r = self.s.get('https://lobby.ikariam.gameforge.com/api/servers')
+			servers = json.loads(r.text, strict=False)
 
 			if len([ account for account in accounts if account['blocked'] is False ]) == 1:
 				self.account  = [ account for account in accounts if account['blocked'] is False ][0]
@@ -256,10 +314,40 @@ class Sesion:
 				self.__expiroLaSesion()
 
 	def token(self):
+		"""Generates a valid actionRequest token from the session
+		Parameters
+		----------
+		self : Session
+			Session object
+
+		Returns
+		-------
+		token : str
+			a string representing a valid actionRequest token
+		"""
 		html = self.get()
 		return re.search(r'actionRequest"?:\s*"(.*?)"', html).group(1)
 
 	def get(self, url='', params={}, ignoreExpire=False, noIndex=False):
+		"""Sends get request to ikariam
+		Parameters
+		----------
+		self : Sesion
+			Session object
+		url : str
+			this string will be appended to the end of the urlBase of the Session object. urlBase will look like: 'https://s(number)-(country).ikariam.gameforge.com/index.php?'
+		params : dict
+			dictionary containing key-value pairs which represent the parameteres of the get request
+		ignoreExpire: bool
+			if set to True it will ignore if the current session is expired and will simply return whatever response it gets. If it's set to False, it will make sure that the current session is not expired before sending the get request, if it's expired it will login again
+		noIndex : bool
+			if set to True it will remove 'index.php' from the end of urlBase before appending url params and sending the get request
+		
+		Returns
+		-------
+		html : str
+			response from the server
+		"""
 		self.__checkCookie()
 		if noIndex:
 			url = self.urlBase.replace('index.php', '') + url
@@ -267,7 +355,7 @@ class Sesion:
 			url = self.urlBase + url
 		while True:
 			try:
-				html = self.s.get(url, params=params).text
+				html = self.s.get(url, params=params).text #this isn't recursion, this get is different from the one it's in
 				if ignoreExpire is False:
 					assert self.__isExpired(html) is False
 				return html
@@ -277,6 +365,27 @@ class Sesion:
 				time.sleep(ConnectionError_wait)
 
 	def post(self, url='', payloadPost={}, params={}, ignoreExpire=False, noIndex=False):
+		"""Sends post request to ikariam
+		Parameters
+		----------
+		self : Sesion
+			Session object
+		url : str
+			this string will be appended to the end of the urlBase of the Session object. urlBase will look like: 'https://s(number)-(country).ikariam.gameforge.com/index.php?'
+		payloadPost : dict
+			dictionary containing key-value pairs which represent the payload of the post request
+		params : dict
+			dictionary containing key-value pairs which represent the parameteres of the post request
+		ignoreExpire: bool
+			if set to True it will ignore if the current session is expired and will simply return whatever response it gets. If it's set to False, it will make sure that the current session is not expired before sending the post request, if it's expired it will login again
+		noIndex : bool
+			if set to True it will remove 'index.php' from the end of urlBase before appending url and params and sending the post request
+		
+		Returns
+		-------
+		html : str
+			response from the server
+		"""
 		self.__checkCookie()
 		if noIndex:
 			url = self.urlBase.replace('index.php', '') + url
@@ -294,20 +403,57 @@ class Sesion:
 				time.sleep(ConnectionError_wait)
 
 	def login(self):
+		"""This function doesn't actually log into ikariam, it only increments a number in the .ikabot file which represents the number currently running sessions
+		Parameters
+		----------
+		self: Session
+			Session object
+		"""
 		self.__updateCookieFile(nuevo=True)
 
 	def logout(self):
+		"""This function decrements a number in the .ikabot file representing the number of currently running sessions. If this number is 1, it will attempt to completely log out of ikariam
+		Parameters
+		----------
+		self: Session
+			Session object
+		"""
 		self.__updateCookieFile(salida=True)
 		if self.padre is False:
 			os._exit(0)
 
 	def setFileData(self, fileData):
+		"""Encrypts relevant session data and writes it to the .ikabot file
+		Parameters
+		----------
+		self : Session
+			Session object
+		fileData : dict
+			dictionary containing relevant session data, data is written to file using AESCipher.setFileData
+		"""
 		self.cipher.setFileData(self, fileData)
 
 	def getFileData(self):
+		"""Gets relevant session data from the .ikabot file
+		self : Session
+			Session object
+		"""
 		return self.cipher.getFileData(self)
 
 def normal_get(url, params={}):
+	"""Sends a get request to provided url
+	Parameters
+	----------
+	url : str
+		a string representing the url to which to send the get request
+	params : dict
+		a dictionary containing key-value pairs which represent the parameters of the get request
+	
+	Returns
+	-------
+	response : requests.Response
+		a requests.Response object which represents the webservers response. For more information on requests.Response refer to https://requests.readthedocs.io/en/master/api/#requests.Response
+	"""
 	try:
 		return requests.get(url, params=params)
 	except requests.exceptions.ConnectionError:

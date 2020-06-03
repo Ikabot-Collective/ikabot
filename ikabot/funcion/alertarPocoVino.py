@@ -8,10 +8,10 @@ import gettext
 from decimal import *
 from ikabot.config import *
 from ikabot.helpers.signals import setInfoSignal
-from ikabot.helpers.process import forkear
+from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.gui import *
-from ikabot.helpers.pedirInfo import getIdsDeCiudades
-from ikabot.helpers.varios import diasHorasMinutos
+from ikabot.helpers.pedirInfo import getIdsOfCities
+from ikabot.helpers.varios import daysHoursMinutes
 from ikabot.helpers.recursos import *
 from ikabot.helpers.botComm import *
 
@@ -24,17 +24,18 @@ _ = t.gettext
 
 getcontext().prec = 30
 
-def alertarPocoVino(s):
+def alertarPocoVino(s,e,fd):
+	sys.stdin = os.fdopen(fd)
 	if botValido(s) is False:
+		e.set()
 		return
 	banner()
 	horas = read(msg=_('¿Cuántas horas deben quedar hasta que se acabe el vino en una ciudad para que es dé aviso?: '),min=1)
 	print(_('Se avisará cuando el vino se acabe en {:d} horas en alguna ciudad.').format(horas))
 	enter()
 
-	forkear(s)
-	if s.padre is True:
-		return
+	set_child_mode(s)
+	e.set()
 
 	info = _('\nAviso si el vino se acaba en {:d} horas\n').format(horas)
 	setInfoSignal(s, info)
@@ -47,9 +48,9 @@ def alertarPocoVino(s):
 		s.logout()
 
 def do_it(s, horas):
-	ids, ciudades = getIdsDeCiudades(s)
+	ids, ciudades = getIdsOfCities(s)
 	while True:
-		ids, ciudades_new = getIdsDeCiudades(s)
+		ids, ciudades_new = getIdsOfCities(s)
 		if len(ciudades_new) != len(ciudades):
 			ciudades = ciudades_new
 
@@ -76,7 +77,7 @@ def do_it(s, horas):
 
 			if segsRestantes < horas*60*60:
 				if ciudades[city]['avisado'] is False:
-					tiempoRestante = diasHorasMinutos(segsRestantes)
+					tiempoRestante = daysHoursMinutes(segsRestantes)
 					msg = _('En {} se acabará el vino en {}').format(tiempoRestante, ciudades[city]['name'])
 					sendToBot(s, msg)
 					ciudades[city]['avisado'] = True
