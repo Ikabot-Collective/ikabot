@@ -11,7 +11,8 @@ setuptools.setup(
 	install_requires=[
 		  'requests',
 		  'cryptography',
-		  'fake_useragent'
+		  'fake_useragent',
+		  'psutil'
 	],
 	entry_points = {
 		'console_scripts': ['ikabot=ikabot.command_line:main'],
