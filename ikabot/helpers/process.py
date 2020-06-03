@@ -16,46 +16,32 @@ def run(command):
 	return subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.read()
 
 def updateProcessList(s, programprocesslist = []):
-	## read from file
+	# read from file
 	fileData = s.getFileData()
 	try:
 		fileList = fileData['processList']
-	except Exception:
+	except KeyError:
 		fileList = []
 
-
-	##check it's good
+	# check it's still running
 	runningIkabotProcessList = []
 	for process in fileList:
-		if isWindows:
-			try:
-				if psutil.Process(pid = process['pid']).name() == 'python.exe':
-					runningIkabotProcessList.append(process)
-				else:
-					continue
-			except Exception:
-				continue
-		else:
-			try:
-				if psutil.Process(pid = process['pid']).name() == 'ikabot':
-					runningIkabotProcessList.append(process)
-				else:
-					continue
-			except Exception:
-				continue
+		try:
+			processName = psutil.Process(pid = process['pid']).name()
+		except:
+			continue
 
+		ika_process = 'python.exe' if isWindows else 'ikabot'
+		if processName == ika_process:
+			runningIkabotProcessList.append(process)
 
-
-	## add new to the list and write to file only if it's given
+	# add new to the list and write to file only if it's given
 	for process in programprocesslist:
 		if process not in runningIkabotProcessList:
 			runningIkabotProcessList.append(process)
 
-	## write to file
+	# write to file
 	fileData['processList'] = runningIkabotProcessList
 	s.setFileData(fileData)
 	
 	return runningIkabotProcessList
-
-
-
