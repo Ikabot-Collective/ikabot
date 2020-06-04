@@ -42,6 +42,8 @@ def menu(s, checkUpdate=True):
 	if checkUpdate:
 		checkForUpdate()
 
+	banner()
+
 	processlist = updateProcessList(s)
 	if len(processlist) > 0:
 		print('Running tasks:')
@@ -53,8 +55,6 @@ def menu(s, checkUpdate=True):
 
 			print('- pid: {} task: {} {}'.format(process['pid'], process['action'], proxy))
 		print('')
-
-	banner()
 
 	menu_actions = [
 					subirEdificios,
