@@ -7,14 +7,13 @@ import multiprocessing
 from ikabot.config import *
 from ikabot.web.sesion import *
 from ikabot.helpers.gui import *
-from ikabot.helpers.process import updateProcessList
 from ikabot.funcion.donar import donar
 from ikabot.funcion.update import update
 from ikabot.helpers.pedirInfo import read
 from ikabot.funcion.getStatus import getStatus
 from ikabot.funcion.botDonador import botDonador
 from ikabot.helpers.botComm import cargarTelegram
-from ikabot.helpers.signals import setSignalsHandlers
+from ikabot.helpers.process import updateProcessList
 from ikabot.funcion.subirEdificio import subirEdificios
 from ikabot.funcion.buscarEspacios import buscarEspacios
 from ikabot.funcion.alertarAtaques import alertarAtaques
@@ -39,9 +38,9 @@ t = gettext.translation('command_line',
                         fallback=True)
 _ = t.gettext
 
-def menu(s):
-	checkForUpdate()
-	banner()
+def menu(s, checkUpdate=True):
+	if checkUpdate:
+		checkForUpdate()
 
 	processlist = updateProcessList(s)
 	if len(processlist) > 0:
@@ -54,6 +53,8 @@ def menu(s):
 
 			print('- pid: {} task: {} {}'.format(process['pid'], process['action'], proxy))
 		print('')
+
+	banner()
 
 	menu_actions = [
 					subirEdificios,
@@ -115,7 +116,7 @@ def menu(s):
 			event.wait() #waits for the process to fire the event that's been given to it. When it does  this process gets back control of the command line and asks user for more input
 		except KeyboardInterrupt:
 			pass
-		menu(s)
+		menu(s, checkUpdate=False)
 	else:
 		if isWindows:
 			# in unix, you can exit ikabot and close the terminal and the processes will continue to execute
@@ -126,10 +127,8 @@ def menu(s):
 		os._exit(0) #kills the process which executes this statement, but it does not kill it's child processes
 
 def inicializar():
-	if isWindows:
-		os.chdir(os.getenv("HOMEPATH"))
-	else:
-		os.chdir(os.getenv("HOME"))
+	home = 'HOMEPATH' if isWindows else 'HOME'
+	os.chdir(os.getenv(home))
 	if not os.path.isfile(ikaFile):
 		open(ikaFile, 'w')
 		os.chmod(ikaFile, 0o600)
@@ -137,10 +136,10 @@ def inicializar():
 def start():
 	inicializar()
 	s = Sesion()
-	#setSignalsHandlers(s)
 	try:
 		menu(s)
 	finally:
+		clear()
 		s.logout()
 
 def main():
