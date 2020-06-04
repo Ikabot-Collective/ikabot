@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
 	name="ikabot",
-	version="6.0.1",
+	version="6.0.2",
 	author="physics-sp",
 	description="A bot for ikariam",
 	url="https://github.com/physics-sp/ikabot",
@@ -11,7 +11,8 @@ setuptools.setup(
 	install_requires=[
 		  'requests',
 		  'cryptography',
-		  'psutil'
+		  'psutil',
+		  'requests[socks]'
 	],
 	entry_points = {
 		'console_scripts': ['ikabot=ikabot.command_line:main'],
