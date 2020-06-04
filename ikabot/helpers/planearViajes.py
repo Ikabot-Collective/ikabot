@@ -11,7 +11,7 @@ from ikabot.helpers.varios import wait
 from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.naval import *
 
-def sendGoods(s, originCityId, destinationCityId, islandId, ships, *send):
+def sendGoods(s, originCityId, destinationCityId, islandId, ships, send):
 	"""This function will execute one route
 	Parameters
 	----------
@@ -23,18 +23,10 @@ def sendGoods(s, originCityId, destinationCityId, islandId, ships, *send):
 		integer representing the ID of the destination city
 	islandId : int
 		integer representing the ID of the destination city's island
-	wood : int
-		integer representing the amount of wood to send
-	wine : int
-		integer representing the amount of wine to send
-	marble : int
-		integer representing the amount of marble to send
-	crystal : int
-		integer representing the amount of crystal to send
-	sulfur : int
-		integer representing the amount of sulfur to send
 	ships : int
 		integer representing the amount of ships needed to execute the route
+	send : array
+		array of resources to send
 	"""
 
 	html = s.get()
@@ -88,7 +80,7 @@ def executeRoutes(s, routes):
 				continue
 
 			barcos = int(math.ceil((Decimal(cantEnviada) / Decimal(500))))
-			sendGoods(s, ciudadOrigen['id'], ciudadDestino['id'], idIsla, barcos, *send)
+			sendGoods(s, ciudadOrigen['id'], ciudadDestino['id'], idIsla, barcos, send)
 
 def getMinimumWaitingTime(s):
 	"""This function returns the time needed to wait for the closest fleet to arrive. If all ships are unavailable, this represents the minimum time needed to wait for any ships to become available
