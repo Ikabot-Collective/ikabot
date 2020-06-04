@@ -3,6 +3,7 @@
 
 import json
 import base64
+import binascii
 import hashlib
 from ikabot.config import *
 from ikabot.helpers.botComm import *
@@ -38,6 +39,20 @@ class AESCipher:
 	def getEntryKey(self, s):
 		return hashlib.sha256( 'ikabot'.encode('utf-8') + s.mail.encode('utf-8') ).hexdigest()
 
+	def deleteFileData(self, s):
+		entry_key = self.getEntryKey(s)
+		with open(ikaFile, 'r') as filehandler:
+			data = filehandler.read()
+
+		newFile = ''
+		for line in data.split('\n'):
+			if entry_key != line[:64]:
+				newFile += line + '\n'
+
+		with open(ikaFile, 'w') as filehandler:
+			filehandler.write(newFile.strip())
+			filehandler.flush()
+
 	def getFileData(self, s, all=False):
 		entry_key = self.getEntryKey(s)
 		with open(ikaFile, 'r') as filehandler:
@@ -48,11 +63,13 @@ class AESCipher:
 				ciphertext = ciphertext[64:]
 				try:
 					plaintext = self.decrypt(ciphertext)
-				except ValueError:
+				except binascii.Error as e:
+					msg = e.message if hasattr(e, 'message') else e
 					if s.padre:
-						print(_('Mail o contrasenia incorrecta'))
+						print(msg)
 					else:
-						sendToBot(s, _('MAC check ERROR, ciphertext corrompido.'))
+						sendToBot(s, msg)
+					self.deleteFileData(s)
 					os._exit(0)
 				data_dict = json.loads(plaintext, strict=False)
 				if all:
