@@ -51,7 +51,7 @@ def executeRoutes(s, routes):
 	"""
 	for ruta in routes:
 		(ciudadOrigen, ciudadDestino, idIsla, md, vn, mr, cr, az) = ruta
-		destId = ciudadDestino.id
+		destId = ciudadDestino['id']
 		while (md + vn + mr + cr + az) > 0:
 			barcosDisp = waitForArrival(s)
 			storageCapacityInShips = barcosDisp * 500
