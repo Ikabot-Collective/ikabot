@@ -28,11 +28,14 @@ def updateProcessList(s, programprocesslist = []):
 	ika_process = 'python.exe' if isWindows else 'ikabot'
 	for process in fileList:
 		try:
-			processName = psutil.Process(pid = process['pid']).name()
-		except:
+			proc = psutil.Process(pid = process['pid'])
+		except psutil.NoSuchProcess:
 			continue
 
-		if processName == ika_process:
+		# windows doesn't support the status method
+		isAlive = True if isWindows else proc.status() != 'zombie'
+
+		if proc.name() == ika_process and isAlive:
 			runningIkabotProcessList.append(process)
 
 	# add new to the list and write to file only if it's given
