@@ -82,17 +82,9 @@ def distributeResourcesEvenly(s,e,fd):
 				if toSend == 0:
 					continue
 
-				# ROUTE BLOCK
-				if resource == 0:
-					route = (allCities[originCityID],allCities[destinationCityID],allCities[destinationCityID]['islandId'],toSend,0,0,0,0)
-				elif resource == 1:
-					route = (allCities[originCityID],allCities[destinationCityID],allCities[destinationCityID]['islandId'],0,toSend,0,0,0)
-				elif resource == 2:
-					route = (allCities[originCityID],allCities[destinationCityID],allCities[destinationCityID]['islandId'],0,0,toSend,0,0)
-				elif resource == 3:
-					route = (allCities[originCityID],allCities[destinationCityID],allCities[destinationCityID]['islandId'],0,0,0,toSend,0)
-				elif resource == 4:
-					route = (allCities[originCityID],allCities[destinationCityID],allCities[destinationCityID]['islandId'],0,0,0,0,toSend)
+				toSendArr = [0] * len(tipoDeBien)
+				toSendArr[resource] = toSend
+				route = (allCities[originCityID], allCities[destinationCityID], allCities[destinationCityID]['islandId'], *toSendArr)
 				routes.append(route)
 
 				# ROUTE BLOCK
