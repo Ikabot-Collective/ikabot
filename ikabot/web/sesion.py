@@ -146,6 +146,10 @@ class Sesion:
 		self.s.headers.clear()
 		self.s.headers.update(self.headers)
 		r = self.s.get('https://gameforge.com/js/connect.js')
+		html = r.text
+		captcha = re.search(r'Attention Required', html)
+		if captcha is not None:
+			exit('Captcha error!')
 
 		# update __cfduid cookie
 		self.headers = {'Host': 'gameforge.com', 'User-Agent': user_agent, 'Accept': '*/*', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'Referer': 'https://lobby.ikariam.gameforge.com/', 'Origin': 'https://lobby.ikariam.gameforge.com', 'DNT': '1', 'Connection': 'close'}
