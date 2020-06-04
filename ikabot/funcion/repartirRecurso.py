@@ -132,14 +132,10 @@ def repartirRecurso(s,e,fd):
 			else:
 				faltante -= enviar
 
-			if recurso == 1:
-				ruta = (ciudadO, ciudadD, idIsla, 0, enviar, 0, 0, 0)
-			elif recurso == 2:
-				ruta = (ciudadO, ciudadD, idIsla, 0, 0, enviar, 0, 0)
-			elif recurso == 3:
-				ruta = (ciudadO, ciudadD, idIsla, 0, 0, 0, enviar, 0)
-			else:
-				ruta = (ciudadO, ciudadD, idIsla, 0, 0, 0, 0, enviar)
+			toSend = [0] * len(tipoDeBien)
+			toSend[recurso] = enviar
+			ruta = (ciudadO, ciudadD, idIsla, *toSend)
+
 			rutas.append(ruta)
 
 	info = _('\nRepartir recurso\n')
