@@ -11,7 +11,7 @@ from ikabot.helpers.varios import wait
 from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.naval import *
 
-def sendGoods(s, originCityId, destinationCityId, islandId, wood, wine, marble, crystal, sulfur, ships):
+def sendGoods(s, originCityId, destinationCityId, islandId, ships, *send):
 	"""This function will execute one route
 	Parameters
 	----------
@@ -42,7 +42,14 @@ def sendGoods(s, originCityId, destinationCityId, islandId, wood, wine, marble, 
 	currId = city['id']
 	data = {'action': 'header', 'function': 'changeCurrentCity', 'actionRequest': s.token(), 'oldView': 'city', 'cityId': originCityId, 'backgroundView': 'city', 'currentCityId': currId, 'ajax': '1'}
 	s.post(payloadPost=data)
-	data = {'action': 'transportOperations', 'function': 'loadTransportersWithFreight', 'destinationCityId': destinationCityId, 'islandId': islandId, 'oldView': '', 'position': '', 'avatar2Name': '', 'city2Name': '', 'type': '', 'activeTab': '', 'transportDisplayPrice': '0', 'premiumTransporter': '0', 'minusPlusValue': '500', 'cargo_resource': wood, 'cargo_tradegood1': wine, 'cargo_tradegood2': marble, 'cargo_tradegood3': crystal, 'cargo_tradegood4': '0', 'capacity': '5', 'max_capacity': '5', 'jetPropulsion': '0', 'transporters': ships, 'backgroundView': 'city', 'currentCityId': originCityId, 'templateView': 'transport', 'currentTab': 'tabSendTransporter', 'actionRequest': s.token(), 'ajax': '1'}
+
+	data = {'action': 'transportOperations', 'function': 'loadTransportersWithFreight', 'destinationCityId': destinationCityId, 'islandId': islandId, 'oldView': '', 'position': '', 'avatar2Name': '', 'city2Name': '', 'type': '', 'activeTab': '', 'transportDisplayPrice': '0', 'premiumTransporter': '0', 'minusPlusValue': '500', 'capacity': '5', 'max_capacity': '5', 'jetPropulsion': '0', 'transporters': ships, 'backgroundView': 'city', 'currentCityId': originCityId, 'templateView': 'transport', 'currentTab': 'tabSendTransporter', 'actionRequest': s.token(), 'ajax': '1'}
+
+	# add amounts of resources to send
+	for i in range(len(send)):
+		key = 'cargo_resource' if i == 0 else 'cargo_tradegood{:d}'.format(i)
+		data[key] = send[i]
+
 	s.post(payloadPost=data)
 
 def executeRoutes(s, routes):
@@ -55,9 +62,10 @@ def executeRoutes(s, routes):
 		a list of tuples, each of which represent a route. A route is defined like so : (originCity,destinationCity,islandId,wood,wine,marble,crystal,sulfur). originCity and destintionCity should be passed as City objects 
 	"""
 	for ruta in routes:
-		(ciudadOrigen, ciudadDestino, idIsla, md, vn, mr, cr, az) = ruta
+		(ciudadOrigen, ciudadDestino, idIsla, *toSend) = ruta
 		destId = ciudadDestino['id']
-		while (md + vn + mr + cr + az) > 0:
+
+		while sum(toSend) > 0:
 			barcosDisp = waitForArrival(s)
 			storageCapacityInShips = barcosDisp * 500
 
@@ -65,27 +73,14 @@ def executeRoutes(s, routes):
 			ciudadDestino = getCiudad(html)
 			storageCapacityInCity = ciudadDestino['freeSpaceForResources']
 
-			mdEnv = min(md, storageCapacityInShips, storageCapacityInCity[0])
-			storageCapacityInShips -= mdEnv
-			md -= mdEnv
+			send = []
+			for i in range(len(toSend)):
+				min_val = min(toSend[i], storageCapacityInShips, storageCapacityInCity[i])
+				send.append(min_val)
+				storageCapacityInShips -= send[i]
+				toSend[i] -= send[i]
 
-			vnEnv = min(vn, storageCapacityInShips, storageCapacityInCity[1])
-			storageCapacityInShips -= vnEnv
-			vn -= vnEnv
-
-			mrEnv = min(mr, storageCapacityInShips, storageCapacityInCity[2])
-			storageCapacityInShips -= mrEnv
-			mr -= mrEnv
-
-			crEnv = min(cr, storageCapacityInShips, storageCapacityInCity[3])
-			storageCapacityInShips -= crEnv
-			cr -= crEnv
-
-			azEnv = min(az, storageCapacityInShips, storageCapacityInCity[4])
-			storageCapacityInShips -= azEnv
-			az -= azEnv
-
-			cantEnviada = mdEnv + vnEnv + mrEnv + crEnv + azEnv
+			cantEnviada = sum(send)
 			if cantEnviada == 0:
 				# no space available
 				# wait an hour and try again
@@ -93,7 +88,7 @@ def executeRoutes(s, routes):
 				continue
 
 			barcos = int(math.ceil((Decimal(cantEnviada) / Decimal(500))))
-			sendGoods(s, ciudadOrigen['id'], ciudadDestino['id'], idIsla, mdEnv, vnEnv, mrEnv, crEnv, azEnv, barcos)
+			sendGoods(s, ciudadOrigen['id'], ciudadDestino['id'], idIsla, barcos, *send)
 
 def getMinimumWaitingTime(s):
 	"""This function returns the time needed to wait for the closest fleet to arrive. If all ships are unavailable, this represents the minimum time needed to wait for any ships to become available
