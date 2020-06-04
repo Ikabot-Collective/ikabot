@@ -58,7 +58,7 @@ def executeRoutes(s, routes):
 
 			html = s.get(urlCiudad + destId)
 			ciudadDestino = getCiudad(html)
-			storageCapacityInCity = ciudadDestino.freeSpaceForResources
+			storageCapacityInCity = ciudadDestino['freeSpaceForResources']
 
 			mdEnv = min(md, storageCapacityInShips, storageCapacityInCity[0])
 			storageCapacityInShips -= mdEnv
