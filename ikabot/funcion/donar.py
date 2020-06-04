@@ -18,49 +18,53 @@ _ = t.gettext
 
 def donar(s,e,fd):
 	sys.stdin = os.fdopen(fd)
-	bienes = {'1': _('Viñedo'), '2': _('Cantera'), '3': _('Mina de cristal'), '4': _('Mina de azufre')}
-	banner()
+	try:
+		bienes = {'1': _('Viñedo'), '2': _('Cantera'), '3': _('Mina de cristal'), '4': _('Mina de azufre')}
+		banner()
 
-	ciudad = chooseCity(s)
-	banner()
+		ciudad = chooseCity(s)
+		banner()
 
-	madera = ciudad['recursos'][0]
-	almacenamiento = ciudad['storageCapacity']
+		madera = ciudad['recursos'][0]
+		almacenamiento = ciudad['storageCapacity']
 
-	idIsla = ciudad['islandId']
-	html = s.get(urlIsla + idIsla)
-	isla = getIsla(html)
+		idIsla = ciudad['islandId']
+		html = s.get(urlIsla + idIsla)
+		isla = getIsla(html)
 
-	tipo = isla['tipo']
-	bien = bienes[tipo]
+		tipo = isla['tipo']
+		bien = bienes[tipo]
 
-	urlAserradero = 'view=resource&type=resource&islandId={0}&backgroundView=island&currentIslandId={0}&actionRequest={1}&ajax=1'.format(idIsla, s.token())
-	aserraderoOk = printEstadoMina(s, urlAserradero, 'Aserradero')
+		urlAserradero = 'view=resource&type=resource&islandId={0}&backgroundView=island&currentIslandId={0}&actionRequest={1}&ajax=1'.format(idIsla, s.token())
+		aserraderoOk = printEstadoMina(s, urlAserradero, 'Aserradero')
 
-	urlBien = 'view=tradegood&type={0}&islandId={1}&backgroundView=island&currentIslandId={1}&actionRequest={2}&ajax=1'.format(tipo, idIsla, s.token())
-	bienOk = printEstadoMina(s, urlBien, bien)
+		urlBien = 'view=tradegood&type={0}&islandId={1}&backgroundView=island&currentIslandId={1}&actionRequest={2}&ajax=1'.format(tipo, idIsla, s.token())
+		bienOk = printEstadoMina(s, urlBien, bien)
 
-	tipo = ['resource', 'tradegood']
-	print(_('Madera disopnible:{} / {}\n').format(addDot(madera), addDot(almacenamiento)))
+		tipo = ['resource', 'tradegood']
+		print(_('Madera disopnible:{} / {}\n').format(addDot(madera), addDot(almacenamiento)))
 
-	if aserraderoOk is True and bienOk is True:
-		msg = _('Aserradero(1) o {}(2)?:').format(bien)
-		tipoDonacion = read(msg=msg, min=1, max=2)
-	elif aserraderoOk is True and bienOk is False:
-		tipoDonacion = 1
-		print(_('Aserradero:\n'))
-	elif aserraderoOk is False and bienOk is True:
-		tipoDonacion = 2
-		print('{}:\n'.format(bien))
-	else:
-		print(_('No se puede donar\n'))
+		if aserraderoOk is True and bienOk is True:
+			msg = _('Aserradero(1) o {}(2)?:').format(bien)
+			tipoDonacion = read(msg=msg, min=1, max=2)
+		elif aserraderoOk is True and bienOk is False:
+			tipoDonacion = 1
+			print(_('Aserradero:\n'))
+		elif aserraderoOk is False and bienOk is True:
+			tipoDonacion = 2
+			print('{}:\n'.format(bien))
+		else:
+			print(_('No se puede donar\n'))
+			return
+
+		tipo = tipo[tipoDonacion - 1]
+
+		cantidad = read(min=0, max=madera, msg=_('Cantidad:'))
+		s.post(payloadPost={'islandId': idIsla, 'type': tipo, 'action': 'IslandScreen', 'function': 'donate', 'donation': cantidad, 'backgroundView': 'island', 'templateView': 'resource', 'actionRequest': s.token(), 'ajax': '1'})
+		e.set()
+	except KeyboardInterrupt:
+		e.set()
 		return
-
-	tipo = tipo[tipoDonacion - 1]
-
-	cantidad = read(min=0, max=madera, msg=_('Cantidad:'))
-	s.post(payloadPost={'islandId': idIsla, 'type': tipo, 'action': 'IslandScreen', 'function': 'donate', 'donation': cantidad, 'backgroundView': 'island', 'templateView': 'resource', 'actionRequest': s.token(), 'ajax': '1'})
-	e.set()
 
 def printEstadoMina(s, url, bien):
 	html = s.post(url)

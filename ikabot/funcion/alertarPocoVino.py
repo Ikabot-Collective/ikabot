@@ -26,13 +26,17 @@ getcontext().prec = 30
 
 def alertarPocoVino(s,e,fd):
 	sys.stdin = os.fdopen(fd)
-	if botValido(s) is False:
+	try:
+		if botValido(s) is False:
+			e.set()
+			return
+		banner()
+		horas = read(msg=_('¿Cuántas horas deben quedar hasta que se acabe el vino en una ciudad para que es dé aviso?: '),min=1)
+		print(_('Se avisará cuando el vino se acabe en {:d} horas en alguna ciudad.').format(horas))
+		enter()
+	except KeyboardInterrupt:
 		e.set()
 		return
-	banner()
-	horas = read(msg=_('¿Cuántas horas deben quedar hasta que se acabe el vino en una ciudad para que es dé aviso?: '),min=1)
-	print(_('Se avisará cuando el vino se acabe en {:d} horas en alguna ciudad.').format(horas))
-	enter()
 
 	set_child_mode(s)
 	e.set()

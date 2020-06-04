@@ -149,32 +149,36 @@ def crearOferta(s, ciudad, recurso, e):
 
 def venderRecursos(s,e,fd):
 	sys.stdin = os.fdopen(fd)
-	banner()
-
-	ciudades_comerciales = getCiudadesComerciales(s)
-	if len(ciudades_comerciales) == 0:
-		print(_('No hay una Tienda contruida'))
-		enter()
-		e.set()
-		return
-
-	if len(ciudades_comerciales) == 1:
-		ciudad = ciudades_comerciales[0]
-	else:
-		ciudad = elegirCiudadComercial(ciudades_comerciales)
+	try:
 		banner()
 
-	print(_('¿Qué recurso quiere vender?'))
-	for indice, bien in enumerate(tipoDeBien):
-		print('({:d}) {}'.format(indice+1, bien))
-	eleccion = read(min=1, max=len(tipoDeBien))
-	recurso = eleccion - 1
-	banner()
+		ciudades_comerciales = getCiudadesComerciales(s)
+		if len(ciudades_comerciales) == 0:
+			print(_('No hay una Tienda contruida'))
+			enter()
+			e.set()
+			return
 
-	print(_('¿Quiere vender a ofertas existenes (1) o quiere hacer su propia oferta (2)?'))
-	rta = read(min=1, max=2)
-	[venderAOfertas, crearOferta][rta - 1](s, ciudad, recurso, e)
-	e.set()
+		if len(ciudades_comerciales) == 1:
+			ciudad = ciudades_comerciales[0]
+		else:
+			ciudad = elegirCiudadComercial(ciudades_comerciales)
+			banner()
+
+		print(_('¿Qué recurso quiere vender?'))
+		for indice, bien in enumerate(tipoDeBien):
+			print('({:d}) {}'.format(indice+1, bien))
+		eleccion = read(min=1, max=len(tipoDeBien))
+		recurso = eleccion - 1
+		banner()
+
+		print(_('¿Quiere vender a ofertas existenes (1) o quiere hacer su propia oferta (2)?'))
+		rta = read(min=1, max=2)
+		[venderAOfertas, crearOferta][rta - 1](s, ciudad, recurso, e)
+		e.set()
+	except KeyboardInterrupt:
+		e.set()
+		return
 
 def do_it1(s, porVender, ofertas, recurso, ciudad):
 	for oferta in ofertas:

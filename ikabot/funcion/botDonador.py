@@ -21,25 +21,29 @@ _ = t.gettext
 
 def botDonador(s,e,fd):
 	sys.stdin = os.fdopen(fd)
-	banner()
-	(idsCiudades, ciudades) = getIdsOfCities(s)
-	ciudades_dict = {}
-	bienes = {'1': _('(V)'), '2': '(M)', '3': '(C)', '4': _('(A)')}
-	for idCiudad in idsCiudades:
-		tradegood = ciudades[idCiudad]['tradegood']
-		bien = bienes[tradegood]
-		print(_('En la ciudad {} {}, ¿Desea donar al aserradero, al bien de cambio o a ninguno? [a/b/n]').format(ciudades[idCiudad]['name'], bien))
-		rta = read(values=[_('a'), _('A'), _('b'), _('B'), 'n', 'N'])
-		if rta.lower() == _('a'):
-			tipo = 'resource'
-		elif rta.lower() == _('b'):
-			tipo = 'tradegood'
-		else:
-			tipo = None
-		ciudades_dict[idCiudad] = {'tipo': tipo}
+	try:
+		banner()
+		(idsCiudades, ciudades) = getIdsOfCities(s)
+		ciudades_dict = {}
+		bienes = {'1': _('(V)'), '2': '(M)', '3': '(C)', '4': _('(A)')}
+		for idCiudad in idsCiudades:
+			tradegood = ciudades[idCiudad]['tradegood']
+			bien = bienes[tradegood]
+			print(_('En la ciudad {} {}, ¿Desea donar al aserradero, al bien de cambio o a ninguno? [a/b/n]').format(ciudades[idCiudad]['name'], bien))
+			rta = read(values=[_('a'), _('A'), _('b'), _('B'), 'n', 'N'])
+			if rta.lower() == _('a'):
+				tipo = 'resource'
+			elif rta.lower() == _('b'):
+				tipo = 'tradegood'
+			else:
+				tipo = None
+			ciudades_dict[idCiudad] = {'tipo': tipo}
 
-	print(_('Se donará todos los días.'))
-	enter()
+		print(_('Se donará todos los días.'))
+		enter()
+	except KeyboardInterrupt:
+		e.set()
+		return
 
 	set_child_mode(s)
 	e.set()

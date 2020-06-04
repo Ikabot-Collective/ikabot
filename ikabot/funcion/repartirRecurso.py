@@ -22,84 +22,87 @@ _ = t.gettext
 
 def repartirRecurso(s,e,fd):
 	sys.stdin = os.fdopen(fd)
+	try:
+		banner()
 
-	banner()
+		print(_('¿Qué recurso quiere repartir?'))
+		print(_('(0) Salir'))
+		print(_('(1) Vino'))
+		print(_('(2) Marmol'))
+		print(_('(3) Cristal'))
+		print(_('(4) Azufre'))
+		recurso = read(min=0, max=4)
+		if recurso == 0:
+			e.set() #give back control to main process
+			return
 
-	print(_('¿Qué recurso quiere repartir?'))
-	print(_('(0) Salir'))
-	print(_('(1) Vino'))
-	print(_('(2) Marmol'))
-	print(_('(3) Cristal'))
-	print(_('(4) Azufre'))
-	recurso = read(min=0, max=4)
-	if recurso == 0:
-		e.set() #give back control to main process
-		return
+		recursoTotal = 0
+		dict_idVino_diponible = {}
+		(idsCiudades, ciudades) = getIdsOfCities(s)
+		ciudadesOrigen = {}
+		ciudadesDestino = {}
+		for idCiudad in idsCiudades:
+			esTarget =  ciudades[idCiudad]['tradegood'] == str(recurso)
+			if esTarget:
+				html = s.get(urlCiudad + idCiudad)
+				ciudad = getCiudad(html)
+				ciudad['disponible'] = ciudad['recursos'][recurso]
+				recursoTotal += ciudad['disponible']
+				ciudadesOrigen[idCiudad] = ciudad
+			else:
+				html = s.get(urlCiudad + idCiudad)
+				ciudad = getCiudad(html)
+				ciudad['disponible'] = ciudad['freeSpaceForResources'][recurso]
+				if ciudad['disponible'] > 0:
+					ciudadesDestino[idCiudad] = ciudad
 
-	recursoTotal = 0
-	dict_idVino_diponible = {}
-	(idsCiudades, ciudades) = getIdsOfCities(s)
-	ciudadesOrigen = {}
-	ciudadesDestino = {}
-	for idCiudad in idsCiudades:
-		esTarget =  ciudades[idCiudad]['tradegood'] == str(recurso)
-		if esTarget:
-			html = s.get(urlCiudad + idCiudad)
-			ciudad = getCiudad(html)
-			ciudad['disponible'] = ciudad['recursos'][recurso]
-			recursoTotal += ciudad['disponible']
-			ciudadesOrigen[idCiudad] = ciudad
-		else:
-			html = s.get(urlCiudad + idCiudad)
-			ciudad = getCiudad(html)
-			ciudad['disponible'] = ciudad['freeSpaceForResources'][recurso]
-			if ciudad['disponible'] > 0:
-				ciudadesDestino[idCiudad] = ciudad
+		if recursoTotal == 0:
+			print(_('\nNo hay recursos para enviar.'))
+			enter()
+			e.set()
+			return
+		if len(ciudadesDestino) == 0:
+			print(_('\nNo hay espacio disponible para enviar recursos.'))
+			enter()
+			e.set()
+			return
 
-	if recursoTotal == 0:
-		print(_('\nNo hay recursos para enviar.'))
-		enter()
-		e.set()
-		return
-	if len(ciudadesDestino) == 0:
-		print(_('\nNo hay espacio disponible para enviar recursos.'))
-		enter()
-		e.set()
-		return
-
-	recursoXciudad = recursoTotal // len(ciudadesDestino)
-	espacios_disponibles = [ ciudadesDestino[city]['disponible'] for city in ciudadesDestino ]
-	totalEspacioDisponible = sum( espacios_disponibles )
-	restanteAEnviar = min(recursoTotal, totalEspacioDisponible)
-	toSend = {}
-
-	while restanteAEnviar > 0:
-		len_prev = len(toSend)
-		for city in ciudadesDestino:
-			ciudad = ciudadesDestino[city]
-			if city not in toSend and ciudad['disponible'] < recursoXciudad:
-				toSend[city] = ciudad['disponible']
-				restanteAEnviar -= ciudad['disponible']
-
-		if len(toSend) == len_prev:
-			for city in ciudadesDestino:
-				if city not in toSend:
-					toSend[city] = recursoXciudad
-			break
-
-		espacios_disponibles = [ ciudadesDestino[city]['disponible'] for city in ciudadesDestino if city not in toSend ]
+		recursoXciudad = recursoTotal // len(ciudadesDestino)
+		espacios_disponibles = [ ciudadesDestino[city]['disponible'] for city in ciudadesDestino ]
 		totalEspacioDisponible = sum( espacios_disponibles )
-		restanteAEnviar = min(restanteAEnviar, totalEspacioDisponible)
-		recursoXciudad = restanteAEnviar // len(espacios_disponibles)
+		restanteAEnviar = min(recursoTotal, totalEspacioDisponible)
+		toSend = {}
 
-	banner()
-	print(_('\nSe enviará {} a:').format(tipoDeBien[recurso].lower()))
-	for city in toSend:
-		print('  {}: {}'.format(ciudadesDestino[city]['name'], addDot(toSend[city])))
+		while restanteAEnviar > 0:
+			len_prev = len(toSend)
+			for city in ciudadesDestino:
+				ciudad = ciudadesDestino[city]
+				if city not in toSend and ciudad['disponible'] < recursoXciudad:
+					toSend[city] = ciudad['disponible']
+					restanteAEnviar -= ciudad['disponible']
 
-	print(_('\n¿Proceder? [Y/n]'))
-	rta = read(values=['y', 'Y', 'n', 'N', ''])
-	if rta.lower() == 'n':
+			if len(toSend) == len_prev:
+				for city in ciudadesDestino:
+					if city not in toSend:
+						toSend[city] = recursoXciudad
+				break
+
+			espacios_disponibles = [ ciudadesDestino[city]['disponible'] for city in ciudadesDestino if city not in toSend ]
+			totalEspacioDisponible = sum( espacios_disponibles )
+			restanteAEnviar = min(restanteAEnviar, totalEspacioDisponible)
+			recursoXciudad = restanteAEnviar // len(espacios_disponibles)
+
+		banner()
+		print(_('\nSe enviará {} a:').format(tipoDeBien[recurso].lower()))
+		for city in toSend:
+			print('  {}: {}'.format(ciudadesDestino[city]['name'], addDot(toSend[city])))
+
+		print(_('\n¿Proceder? [Y/n]'))
+		rta = read(values=['y', 'Y', 'n', 'N', ''])
+		if rta.lower() == 'n':
+			e.set()
+			return
+	except KeyboardInterrupt:
 		e.set()
 		return
 

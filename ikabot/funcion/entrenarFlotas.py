@@ -129,145 +129,148 @@ def generateFleet(unidades_info):
 
 def entrenarFlotas(s,e,fd):
 	sys.stdin = os.fdopen(fd)
-	banner()
-	print(_('¿En qué ciudad quiere entrenar las flotas?'))
-	ciudad = chooseCity(s)
-	banner()
-
-	for i in range(len(ciudad['position'])):
-		if ciudad['position'][i]['building'] == 'shipyard':
-			ciudad['pos'] = str(i)
-			break
-
 	try:
-		data = getAstilleroInfo(s, ciudad)
-	except Exception:
+		banner()
+		print(_('¿En qué ciudad quiere entrenar las flotas?'))
+		ciudad = chooseCity(s)
+		banner()
+
+		for i in range(len(ciudad['position'])):
+			if ciudad['position'][i]['building'] == 'shipyard':
+				ciudad['pos'] = str(i)
+				break
+		try:
+			data = getAstilleroInfo(s, ciudad)
+		except Exception:
+			e.set()
+			return
+			
+		unidades_info = data[2][1]
+		unidades = generateFleet(unidades_info)
+
+		maxSize = 0
+		for unidad in unidades:
+			if maxSize < len(unidad['local_name']):
+				maxSize = len(unidad['local_name'])
+
+		entrenamientos = []
+		while True:
+			unidades = generateFleet(unidades_info)
+			print(_('Entrenar:'))
+			for unidad in unidades:
+				cantidad = read(msg='{}{}:'.format(' '*(maxSize-len(unidad['local_name'])), unidad['local_name']), min=0, empty=True)
+				if cantidad == '':
+					cantidad = 0
+				unidad['cantidad'] = cantidad
+
+			print(_('\nCosto total:'))
+			costo = {'madera': 0, 'vino': 0, 'marmol': 0, 'cristal': 0, 'azufre': 0, 'ciudadanos': 0, 'manuntencion': 0, 'tiempo': 0}
+			for unidad in unidades:
+
+				if 'wood' in unidad['costs']:
+					costo['madera'] += unidad['costs']['wood'] * unidad['cantidad']
+				if 'wine' in unidad['costs']:
+					costo['vino'] += unidad['costs']['wine'] * unidad['cantidad']
+				if 'marble' in unidad['costs']:
+					costo['marmol'] += unidad['costs']['marble'] * unidad['cantidad']
+				if 'cristal' in unidad['costs']:
+					costo['cristal'] += unidad['costs']['cristal'] * unidad['cantidad']
+				if 'sulfur' in unidad['costs']:
+					costo['azufre'] += unidad['costs']['sulfur'] * unidad['cantidad']
+				if 'citizens' in unidad['costs']:
+					costo['ciudadanos'] += unidad['costs']['citizens'] * unidad['cantidad']
+				if 'upkeep' in unidad['costs']:
+					costo['manuntencion'] += unidad['costs']['upkeep'] * unidad['cantidad']
+				if 'completiontime' in unidad['costs']:
+					costo['tiempo'] += unidad['costs']['completiontime'] * unidad['cantidad']
+
+			if costo['madera']:
+				print(_('     Madera: {}').format(addDot(costo['madera'])))
+			if costo['vino']:
+				print(_('       Vino: {}').format(addDot(costo['vino'])))
+			if costo['marmol']:
+				print(_('     Marmol: {}').format(addDot(costo['marmol'])))
+			if costo['cristal']:
+				print(_('    Cristal: {}').format(addDot(costo['cristal'])))
+			if costo['azufre']:
+				print(_('     Azufre: {}').format(addDot(costo['azufre'])))
+			if costo['ciudadanos']:
+				print(_(' Ciudadanos: {}').format(addDot(costo['ciudadanos'])))
+			if costo['manuntencion']:
+				print(_('Manutención: {}').format(addDot(costo['manuntencion'])))
+			if costo['tiempo']:
+				print(_('   Duración: {}').format(daysHoursMinutes(int(costo['tiempo']))))
+
+			print(_('\nProceder? [Y/n]'))
+			rta = read(values=['y', 'Y', 'n', 'N', ''])
+			if rta.lower() == 'n':
+				e.set()
+				return
+
+			entrenamientos.append(unidades)
+
+			print(_('\n¿Quiere entrenar más tropas al terminar? [y/N]'))
+			rta = read(values=['y', 'Y', 'n', 'N', ''])
+			if rta.lower() == 'y':
+				banner()
+				continue
+			else:
+				break
+
+		recursos   = ciudad['recursos']
+		ciudadanos = ciudad['ciudadanosDisp']
+		sobrante               = {}
+		sobrante['madera']     = recursos[0]
+		sobrante['vino']       = recursos[1]
+		sobrante['marmol']     = recursos[2]
+		sobrante['cristal']    = recursos[3]
+		sobrante['azufre']     = recursos[4]
+		sobrante['ciudadanos'] = ciudadanos
+
+		for entrenamiento in entrenamientos:
+			for unidad in entrenamiento:
+
+				if 'wood' in unidad['costs']:
+					sobrante['madera'] -= unidad['costs']['wood'] * unidad['cantidad']
+				if 'wine' in unidad['costs']:
+					sobrante['vino'] -= unidad['costs']['wine'] * unidad['cantidad']
+				if 'marble' in unidad['costs']:
+					sobrante['marmol'] -= unidad['costs']['marble'] * unidad['cantidad']
+				if 'cristal' in unidad['costs']:
+					sobrante['cristal'] -= unidad['costs']['cristal'] * unidad['cantidad']
+				if 'sulfur' in unidad['costs']:
+					sobrante['azufre'] -= unidad['costs']['sulfur'] * unidad['cantidad']
+				if 'citizens' in unidad['costs']:
+					sobrante['ciudadanos'] -= unidad['costs']['citizens'] * unidad['cantidad']
+
+		falta = [ elem for elem in sobrante if sobrante[elem] < 0 ] != []
+
+		if falta:
+			print(_('\nNo hay suficientes recursos:'))
+			if sobrante['madera'] < 0:
+				print(_('    Madera:{}').format(addDot(sobrante['madera']*-1)))
+			if sobrante['vino'] < 0:
+				print(_('      Vino:{}').format(addDot(sobrante['vino']*-1)))
+			if sobrante['marmol'] < 0:
+				print(_('    Marmol:{}').format(addDot(sobrante['marmol']*-1)))
+			if sobrante['cristal'] < 0:
+				print(_('   Cristal:{}').format(addDot(sobrante['cristal']*-1)))
+			if sobrante['azufre'] < 0:
+				print(_('    Azufre:{}').format(addDot(sobrante['azufre']*-1)))
+			if sobrante['ciudadanos'] < 0:
+				print(_('Ciudadanos:{}').format(addDot(sobrante['ciudadanos']*-1)))
+
+			print(_('\n¿Proceder de todos modos? [Y/n]'))
+			rta = read(values=['y', 'Y', 'n', 'N', ''])
+			if rta.lower() == 'n':
+				e.set()
+				return
+
+		print(_('\nSe entrenarán las tropas seleccionadas.'))
+		enter()
+	except KeyboardInterrupt:
 		e.set()
 		return
-		
-	unidades_info = data[2][1]
-	unidades = generateFleet(unidades_info)
-
-	maxSize = 0
-	for unidad in unidades:
-		if maxSize < len(unidad['local_name']):
-			maxSize = len(unidad['local_name'])
-
-	entrenamientos = []
-	while True:
-		unidades = generateFleet(unidades_info)
-		print(_('Entrenar:'))
-		for unidad in unidades:
-			cantidad = read(msg='{}{}:'.format(' '*(maxSize-len(unidad['local_name'])), unidad['local_name']), min=0, empty=True)
-			if cantidad == '':
-				cantidad = 0
-			unidad['cantidad'] = cantidad
-
-		print(_('\nCosto total:'))
-		costo = {'madera': 0, 'vino': 0, 'marmol': 0, 'cristal': 0, 'azufre': 0, 'ciudadanos': 0, 'manuntencion': 0, 'tiempo': 0}
-		for unidad in unidades:
-
-			if 'wood' in unidad['costs']:
-				costo['madera'] += unidad['costs']['wood'] * unidad['cantidad']
-			if 'wine' in unidad['costs']:
-				costo['vino'] += unidad['costs']['wine'] * unidad['cantidad']
-			if 'marble' in unidad['costs']:
-				costo['marmol'] += unidad['costs']['marble'] * unidad['cantidad']
-			if 'cristal' in unidad['costs']:
-				costo['cristal'] += unidad['costs']['cristal'] * unidad['cantidad']
-			if 'sulfur' in unidad['costs']:
-				costo['azufre'] += unidad['costs']['sulfur'] * unidad['cantidad']
-			if 'citizens' in unidad['costs']:
-				costo['ciudadanos'] += unidad['costs']['citizens'] * unidad['cantidad']
-			if 'upkeep' in unidad['costs']:
-				costo['manuntencion'] += unidad['costs']['upkeep'] * unidad['cantidad']
-			if 'completiontime' in unidad['costs']:
-				costo['tiempo'] += unidad['costs']['completiontime'] * unidad['cantidad']
-
-		if costo['madera']:
-			print(_('     Madera: {}').format(addDot(costo['madera'])))
-		if costo['vino']:
-			print(_('       Vino: {}').format(addDot(costo['vino'])))
-		if costo['marmol']:
-			print(_('     Marmol: {}').format(addDot(costo['marmol'])))
-		if costo['cristal']:
-			print(_('    Cristal: {}').format(addDot(costo['cristal'])))
-		if costo['azufre']:
-			print(_('     Azufre: {}').format(addDot(costo['azufre'])))
-		if costo['ciudadanos']:
-			print(_(' Ciudadanos: {}').format(addDot(costo['ciudadanos'])))
-		if costo['manuntencion']:
-			print(_('Manutención: {}').format(addDot(costo['manuntencion'])))
-		if costo['tiempo']:
-			print(_('   Duración: {}').format(daysHoursMinutes(int(costo['tiempo']))))
-
-		print(_('\nProceder? [Y/n]'))
-		rta = read(values=['y', 'Y', 'n', 'N', ''])
-		if rta.lower() == 'n':
-			e.set()
-			return
-
-		entrenamientos.append(unidades)
-
-		print(_('\n¿Quiere entrenar más tropas al terminar? [y/N]'))
-		rta = read(values=['y', 'Y', 'n', 'N', ''])
-		if rta.lower() == 'y':
-			banner()
-			continue
-		else:
-			break
-
-	recursos   = ciudad['recursos']
-	ciudadanos = ciudad['ciudadanosDisp']
-	sobrante               = {}
-	sobrante['madera']     = recursos[0]
-	sobrante['vino']       = recursos[1]
-	sobrante['marmol']     = recursos[2]
-	sobrante['cristal']    = recursos[3]
-	sobrante['azufre']     = recursos[4]
-	sobrante['ciudadanos'] = ciudadanos
-
-	for entrenamiento in entrenamientos:
-		for unidad in entrenamiento:
-
-			if 'wood' in unidad['costs']:
-				sobrante['madera'] -= unidad['costs']['wood'] * unidad['cantidad']
-			if 'wine' in unidad['costs']:
-				sobrante['vino'] -= unidad['costs']['wine'] * unidad['cantidad']
-			if 'marble' in unidad['costs']:
-				sobrante['marmol'] -= unidad['costs']['marble'] * unidad['cantidad']
-			if 'cristal' in unidad['costs']:
-				sobrante['cristal'] -= unidad['costs']['cristal'] * unidad['cantidad']
-			if 'sulfur' in unidad['costs']:
-				sobrante['azufre'] -= unidad['costs']['sulfur'] * unidad['cantidad']
-			if 'citizens' in unidad['costs']:
-				sobrante['ciudadanos'] -= unidad['costs']['citizens'] * unidad['cantidad']
-
-	falta = [ elem for elem in sobrante if sobrante[elem] < 0 ] != []
-
-	if falta:
-		print(_('\nNo hay suficientes recursos:'))
-		if sobrante['madera'] < 0:
-			print(_('    Madera:{}').format(addDot(sobrante['madera']*-1)))
-		if sobrante['vino'] < 0:
-			print(_('      Vino:{}').format(addDot(sobrante['vino']*-1)))
-		if sobrante['marmol'] < 0:
-			print(_('    Marmol:{}').format(addDot(sobrante['marmol']*-1)))
-		if sobrante['cristal'] < 0:
-			print(_('   Cristal:{}').format(addDot(sobrante['cristal']*-1)))
-		if sobrante['azufre'] < 0:
-			print(_('    Azufre:{}').format(addDot(sobrante['azufre']*-1)))
-		if sobrante['ciudadanos'] < 0:
-			print(_('Ciudadanos:{}').format(addDot(sobrante['ciudadanos']*-1)))
-
-		print(_('\n¿Proceder de todos modos? [Y/n]'))
-		rta = read(values=['y', 'Y', 'n', 'N', ''])
-		if rta.lower() == 'n':
-			e.set()
-			return
-
-	print(_('\nSe entrenarán las tropas seleccionadas.'))
-	enter()
 
 	set_child_mode(s)
 	e.set()

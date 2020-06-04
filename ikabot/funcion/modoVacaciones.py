@@ -23,17 +23,21 @@ def activarModoVacaciones(s):
 
 def modoVacaciones(s,e,fd):
 	sys.stdin = os.fdopen(fd)
-	banner()
-	print(_('¿Activar modo vacaciones? [Y/n]'))
-	rta = read(values=['y', 'Y', 'n', 'N', ''])
-	if rta.lower() == 'n':
+	try:
+		banner()
+		print(_('¿Activar modo vacaciones? [Y/n]'))
+		rta = read(values=['y', 'Y', 'n', 'N', ''])
+		if rta.lower() == 'n':
+			e.set()
+			return
+
+		activarModoVacaciones(s)
+
+		print(_('Se activo el modo vacaciones.'))
+		enter()
+		e.set()
+		clear()
+		exit()
+	except KeyboardInterrupt:
 		e.set()
 		return
-
-	activarModoVacaciones(s)
-
-	print(_('Se activo el modo vacaciones.'))
-	enter()
-	e.set()
-	clear()
-	exit()
