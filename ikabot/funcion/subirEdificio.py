@@ -308,66 +308,70 @@ def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante):
 
 def subirEdificios(s,e,fd):
 	sys.stdin = os.fdopen(fd)
-	global ampliar
-	global enviarRecursos
-	ampliar = True
-	enviarRecursos = True
+	try:
+		global ampliar
+		global enviarRecursos
+		ampliar = True
+		enviarRecursos = True
 
-	banner()
-	esperarRecursos = False
-	ciudad = chooseCity(s)
-	idCiudad = ciudad['id']
-	edificios = getBuildings(s, idCiudad)
-	if edificios == []:
-		e.set()
-		return
-	posEdificio = edificios[0]
-	niveles = len(edificios)
-	html = s.get(urlCiudad + idCiudad)
-	ciudad = getCiudad(html)
-	edificio = ciudad['position'][posEdificio]
-	desde = int(edificio['level'])
-	if edificio['isBusy']:
-		desde += 1
-	hasta = desde + niveles
-	(madera, vino, marmol, cristal, azufre) = recursosNecesarios(s, ciudad, edificio, desde, hasta)
-	if madera == -1:
-		e.set()
-		return
-	html = s.get(urlCiudad + idCiudad)
-	(maderaDisp, vinoDisp, marmolDisp, cristalDisp, azufreDisp) = getRecursosDisponibles(html, num=True)
-	if maderaDisp < madera or vinoDisp < vino or marmolDisp < marmol or cristalDisp < cristal or azufreDisp < azufre:
-		print(_('\nFalta:'))
-		if maderaDisp < madera:
-			print('{} de madera'.format(addDot(madera - maderaDisp)))
-		if vinoDisp < vino:
-			print('{} de vino'.format(addDot(vino - vinoDisp)))
-		if marmolDisp < marmol:
-			print('{} de marmol'.format(addDot(marmol - marmolDisp)))
-		if cristalDisp < cristal:
-			print('{} de cristal'.format(addDot(cristal - cristalDisp)))
-		if azufreDisp < azufre:
-			print('{} de azufre'.format(addDot(azufre - azufreDisp)))
+		banner()
+		esperarRecursos = False
+		ciudad = chooseCity(s)
+		idCiudad = ciudad['id']
+		edificios = getBuildings(s, idCiudad)
+		if edificios == []:
+			e.set()
+			return
+		posEdificio = edificios[0]
+		niveles = len(edificios)
+		html = s.get(urlCiudad + idCiudad)
+		ciudad = getCiudad(html)
+		edificio = ciudad['position'][posEdificio]
+		desde = int(edificio['level'])
+		if edificio['isBusy']:
+			desde += 1
+		hasta = desde + niveles
+		(madera, vino, marmol, cristal, azufre) = recursosNecesarios(s, ciudad, edificio, desde, hasta)
+		if madera == -1:
+			e.set()
+			return
+		html = s.get(urlCiudad + idCiudad)
+		(maderaDisp, vinoDisp, marmolDisp, cristalDisp, azufreDisp) = getRecursosDisponibles(html, num=True)
+		if maderaDisp < madera or vinoDisp < vino or marmolDisp < marmol or cristalDisp < cristal or azufreDisp < azufre:
+			print(_('\nFalta:'))
+			if maderaDisp < madera:
+				print('{} de madera'.format(addDot(madera - maderaDisp)))
+			if vinoDisp < vino:
+				print('{} de vino'.format(addDot(vino - vinoDisp)))
+			if marmolDisp < marmol:
+				print('{} de marmol'.format(addDot(marmol - marmolDisp)))
+			if cristalDisp < cristal:
+				print('{} de cristal'.format(addDot(cristal - cristalDisp)))
+			if azufreDisp < azufre:
+				print('{} de azufre'.format(addDot(azufre - azufreDisp)))
 
-		print(_('¿Transportar los recursos automáticamente? [Y/n]'))
-		rta = read(values=['y', 'Y', 'n', 'N', ''])
-		if rta.lower() == 'n':
-			print(_('¿Proceder de todos modos? [Y/n]'))
+			print(_('¿Transportar los recursos automáticamente? [Y/n]'))
+			rta = read(values=['y', 'Y', 'n', 'N', ''])
+			if rta.lower() == 'n':
+				print(_('¿Proceder de todos modos? [Y/n]'))
+				rta = read(values=['y', 'Y', 'n', 'N', ''])
+				if rta.lower() == 'n':
+					e.set()
+					return
+			else:
+				esperarRecursos = True
+				faltante = [madera - maderaDisp, vino - vinoDisp, marmol - marmolDisp, cristal - cristalDisp, azufre - azufreDisp]
+				obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante)
+		else:
+			print(_('\nTiene materiales suficientes'))
+			print(_('¿Proceder? [Y/n]'))
 			rta = read(values=['y', 'Y', 'n', 'N', ''])
 			if rta.lower() == 'n':
 				e.set()
 				return
-		else:
-			esperarRecursos = True
-			faltante = [madera - maderaDisp, vino - vinoDisp, marmol - marmolDisp, cristal - cristalDisp, azufre - azufreDisp]
-			obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante)
-	else:
-		print(_('\nTiene materiales suficientes'))
-		print(_('¿Proceder? [Y/n]'))
-		rta = read(values=['y', 'Y', 'n', 'N', ''])
-		if rta.lower() == 'n':
-			e.set()
-			return
+	except KeyboardInterrupt:
+		e.set()
+		return
 
 	set_child_mode(s)
 	e.set()

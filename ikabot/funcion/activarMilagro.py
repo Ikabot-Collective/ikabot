@@ -91,118 +91,122 @@ def elegir_isla(islas):
 
 def activarMilagro(s,e,fd):
 	sys.stdin = os.fdopen(fd)
-	banner()
+	try:
+		banner()
 
-	islas = obtenerMilagrosDisponibles(s)
-	if islas == []:
-		print(_('No existen milagros disponibles.'))
-		enter()
-		e.set()
-		return
-
-	isla = elegir_isla(islas)
-	if isla is None:
-		e.set()
-		return
-
-	if isla['available']:
-		print(_('\nSe activará el milagro {}').format(isla['wonderName']))
-		print(_('¿Proceder? [Y/n]'))
-		r = read(values=['y', 'Y', 'n', 'N', ''])
-		if r.lower() == 'n':
-			e.set()
-			return
-
-		rta = activarMilagroImpl(s, isla)
-
-		if rta[1][1][0] == 'error':
-			print(_('No se pudo activar el milagro {}.').format(isla['wonderName']))
+		islas = obtenerMilagrosDisponibles(s)
+		if islas == []:
+			print(_('No existen milagros disponibles.'))
 			enter()
 			e.set()
 			return
 
-		data = rta[2][1]
-		for elem in data:
-			if 'countdown' in data[elem]:
-				enddate     = data[elem]['countdown']['enddate']
-				currentdate = data[elem]['countdown']['currentdate']
-				break
-		wait_time = enddate - currentdate
+		isla = elegir_isla(islas)
+		if isla is None:
+			e.set()
+			return
 
-		print(_('Se activó el milagro {}.').format(isla['wonderName']))
-		enter()
-		banner()
-
-		while True:
-			print(_('¿Desea activarlo nuevamente al terminar? [y/N]'))
-
-			r = read(values=['y', 'Y', 'n', 'N', ''])
-			if r.lower() != 'y':
-				e.set()
-				return
-
-			iterations = read(msg=_('¿Cuántas veces?: '), digit=True, min=0)
-
-			if iterations == 0:
-				e.set()
-				return
-
-			duration = wait_time * iterations
-
-			print(_('Terminará en:{}').format(daysHoursMinutes(duration)))
-
+		if isla['available']:
+			print(_('\nSe activará el milagro {}').format(isla['wonderName']))
 			print(_('¿Proceder? [Y/n]'))
 			r = read(values=['y', 'Y', 'n', 'N', ''])
 			if r.lower() == 'n':
-				banner()
-				continue
-			break
-	else:
-		print(_('\nSe activará el milagro {} en {}').format(isla['wonderName'], daysHoursMinutes(isla['available_in'])))
-		print(_('¿Proceder? [Y/n]'))
-		rta = read(values=['y', 'Y', 'n', 'N', ''])
-		if rta.lower() == 'n':
-			e.set()
-			return
-		wait_time = isla['available_in']
-		iterations = 1
+				e.set()
+				return
 
-		print(_('\nSe activará el milagro.'))
-		enter()
-		banner()
+			rta = activarMilagroImpl(s, isla)
 
-		while True:
-			print(_('¿Desea activarlo nuevamente al terminar? [y/N]'))
+			if rta[1][1][0] == 'error':
+				print(_('No se pudo activar el milagro {}.').format(isla['wonderName']))
+				enter()
+				e.set()
+				return
 
-			r = read(values=['y', 'Y', 'n', 'N', ''])
-			again = r.lower() == 'y'
-			if again is True:
-				try:
-					iterations = read(msg=_('¿Cuántas veces?: '), digit=True, min=0)
-				except KeyboardInterrupt:
-					iterations = 1
+			data = rta[2][1]
+			for elem in data:
+				if 'countdown' in data[elem]:
+					enddate     = data[elem]['countdown']['enddate']
+					currentdate = data[elem]['countdown']['currentdate']
 					break
+			wait_time = enddate - currentdate
+
+			print(_('Se activó el milagro {}.').format(isla['wonderName']))
+			enter()
+			banner()
+
+			while True:
+				print(_('¿Desea activarlo nuevamente al terminar? [y/N]'))
+
+				r = read(values=['y', 'Y', 'n', 'N', ''])
+				if r.lower() != 'y':
+					e.set()
+					return
+
+				iterations = read(msg=_('¿Cuántas veces?: '), digit=True, min=0)
 
 				if iterations == 0:
-					iterations = 1
-					break
+					e.set()
+					return
 
-				iterations += 1
 				duration = wait_time * iterations
-				print(_('No se puede calcular el momento de finalización. (por lo menos: {}').format(daysHoursMinutes(duration)))
+
+				print(_('Terminará en:{}').format(daysHoursMinutes(duration)))
+
 				print(_('¿Proceder? [Y/n]'))
-
-				try:
-					r = read(values=['y', 'Y', 'n', 'N', ''])
-				except KeyboardInterrupt:
-					iterations = 1
-					break
-
+				r = read(values=['y', 'Y', 'n', 'N', ''])
 				if r.lower() == 'n':
-					iterations = 1
 					banner()
 					continue
-			break
+				break
+		else:
+			print(_('\nSe activará el milagro {} en {}').format(isla['wonderName'], daysHoursMinutes(isla['available_in'])))
+			print(_('¿Proceder? [Y/n]'))
+			rta = read(values=['y', 'Y', 'n', 'N', ''])
+			if rta.lower() == 'n':
+				e.set()
+				return
+			wait_time = isla['available_in']
+			iterations = 1
+
+			print(_('\nSe activará el milagro.'))
+			enter()
+			banner()
+
+			while True:
+				print(_('¿Desea activarlo nuevamente al terminar? [y/N]'))
+
+				r = read(values=['y', 'Y', 'n', 'N', ''])
+				again = r.lower() == 'y'
+				if again is True:
+					try:
+						iterations = read(msg=_('¿Cuántas veces?: '), digit=True, min=0)
+					except KeyboardInterrupt:
+						iterations = 1
+						break
+
+					if iterations == 0:
+						iterations = 1
+						break
+
+					iterations += 1
+					duration = wait_time * iterations
+					print(_('No se puede calcular el momento de finalización. (por lo menos: {}').format(daysHoursMinutes(duration)))
+					print(_('¿Proceder? [Y/n]'))
+
+					try:
+						r = read(values=['y', 'Y', 'n', 'N', ''])
+					except KeyboardInterrupt:
+						iterations = 1
+						break
+
+					if r.lower() == 'n':
+						iterations = 1
+						banner()
+						continue
+				break
+	except KeyboardInterrupt:
+		e.set()
+		return
 
 	set_child_mode(s)
 	e.set()

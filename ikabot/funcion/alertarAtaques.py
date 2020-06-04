@@ -24,16 +24,20 @@ _ = t.gettext
 
 def alertarAtaques(s,e,fd):
 	sys.stdin = os.fdopen(fd)
-	if botValido(s) is False:
+	try:
+		if botValido(s) is False:
+			e.set()
+			return
+
+		banner()
+		minutos = read(msg=_('¿Cada cuántos minutos buscar ataques?(min:3, default: 20): '), min=3, empty=True)
+		if minutos == '':
+			minutos = 20
+		print(_('Se buscarán ataques cada {} minutos.').format(minutos))
+		enter()
+	except KeyboardInterrupt:
 		e.set()
 		return
-
-	banner()
-	minutos = read(msg=_('¿Cada cuántos minutos buscar ataques?(min:3, default: 20): '), min=3, empty=True)
-	if minutos == '':
-		minutos = 20
-	print(_('Se buscarán ataques cada {} minutos.').format(minutos))
-	enter()
 
 	set_child_mode(s)
 	e.set()

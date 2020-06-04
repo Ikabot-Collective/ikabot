@@ -98,67 +98,71 @@ def elegirCiudadComercial(ciudades_comerciales):
 
 def comprarRecursos(s,e,fd):
 	sys.stdin = os.fdopen(fd)
-	banner()
-
-	ciudades_comerciales = getCiudadesComerciales(s)
-	if len(ciudades_comerciales) == 0:
-		print(_('No hay una Tienda contruida'))
-		enter()
-		e.set()
-		return
-
-	if len(ciudades_comerciales) == 1:
-		ciudad = ciudades_comerciales[0]
-	else:
-		ciudad = elegirCiudadComercial(ciudades_comerciales)
+	try:
 		banner()
 
-	numRecurso, recurso = asignarRecursoBuscado(s, ciudad)
-	banner()
+		ciudades_comerciales = getCiudadesComerciales(s)
+		if len(ciudades_comerciales) == 0:
+			print(_('No hay una Tienda contruida'))
+			enter()
+			e.set()
+			return
 
-	ofertas = obtenerOfertas(s, ciudad)
-	if len(ofertas) == 0:
-		print(_('No se encontraron ofertas.'))
-		e.set()
-		return
+		if len(ciudades_comerciales) == 1:
+			ciudad = ciudades_comerciales[0]
+		else:
+			ciudad = elegirCiudadComercial(ciudades_comerciales)
+			banner()
 
-	precio_total   = 0
-	cantidad_total = 0
-	for oferta in ofertas:
-		cantidad = oferta['cantidadDisponible']
-		unidad   = oferta['precio']
-		costo    = cantidad * unidad
-		print(_('cantidad :{}').format(addDot(cantidad)))
-		print(_('precio   :{:d}').format(unidad))
-		print(_('costo    :{}').format(addDot(costo)))
+		numRecurso, recurso = asignarRecursoBuscado(s, ciudad)
+		banner()
+
+		ofertas = obtenerOfertas(s, ciudad)
+		if len(ofertas) == 0:
+			print(_('No se encontraron ofertas.'))
+			e.set()
+			return
+
+		precio_total   = 0
+		cantidad_total = 0
+		for oferta in ofertas:
+			cantidad = oferta['cantidadDisponible']
+			unidad   = oferta['precio']
+			costo    = cantidad * unidad
+			print(_('cantidad :{}').format(addDot(cantidad)))
+			print(_('precio   :{:d}').format(unidad))
+			print(_('costo    :{}').format(addDot(costo)))
+			print('')
+			precio_total += costo
+			cantidad_total += cantidad
+
+		disponible = ciudad['freeSpaceForResources'][numRecurso - 1]
+
+		print(_('Total disponible para comprar: {}, por {}').format(addDot(cantidad_total), addDot(precio_total)))
+		if disponible < cantidad_total:
+			print(_('Solo se puede comprar {} por falta de almacenamiento.').format(addDot(disponible)))
+			cantidad_total = disponible
 		print('')
-		precio_total += costo
-		cantidad_total += cantidad
+		cantidadAComprar = read(msg=_('¿Cuánta cantidad comprar? '), min=0, max=cantidad_total)
+		if cantidadAComprar == 0:
+			e.set()
+			return
 
-	disponible = ciudad['freeSpaceForResources'][numRecurso - 1]
+		oro = getOro(s, ciudad)
+		costoTotal = calcularCosto(ofertas, cantidadAComprar)
 
-	print(_('Total disponible para comprar: {}, por {}').format(addDot(cantidad_total), addDot(precio_total)))
-	if disponible < cantidad_total:
-		print(_('Solo se puede comprar {} por falta de almacenamiento.').format(addDot(disponible)))
-		cantidad_total = disponible
-	print('')
-	cantidadAComprar = read(msg=_('¿Cuánta cantidad comprar? '), min=0, max=cantidad_total)
-	if cantidadAComprar == 0:
+		print(_('\nOro actual : {}.\nCosto total: {}.\nOro final  : {}.'). format(addDot(oro), addDot(costoTotal), addDot(oro - costoTotal)))
+		print(_('¿Proceder? [Y/n]'))
+		rta = read(values=['y', 'Y', 'n', 'N', ''])
+		if rta.lower() == 'n':
+			e.set()
+			return
+
+		print(_('Se comprará {}').format(addDot(cantidadAComprar)))
+		enter()
+	except KeyboardInterrupt:
 		e.set()
 		return
-
-	oro = getOro(s, ciudad)
-	costoTotal = calcularCosto(ofertas, cantidadAComprar)
-
-	print(_('\nOro actual : {}.\nCosto total: {}.\nOro final  : {}.'). format(addDot(oro), addDot(costoTotal), addDot(oro - costoTotal)))
-	print(_('¿Proceder? [Y/n]'))
-	rta = read(values=['y', 'Y', 'n', 'N', ''])
-	if rta.lower() == 'n':
-		e.set()
-		return
-
-	print(_('Se comprará {}').format(addDot(cantidadAComprar)))
-	enter()
 
 	set_child_mode(s)
 	e.set()

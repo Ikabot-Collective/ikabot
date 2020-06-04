@@ -22,11 +22,15 @@ _ = t.gettext
 
 def buscarEspacios(s,e,fd):
 	sys.stdin = os.fdopen(fd)
-	if botValido(s) is False:
+	try:
+		if botValido(s) is False:
+			e.set()
+			return
+		print(_('Se buscarán espacios nuevos cada hora.'))
+		enter()
+	except KeyboardInterrupt:
 		e.set()
 		return
-	print(_('Se buscarán espacios nuevos cada hora.'))
-	enter()
 
 	set_child_mode(s)
 	e.set()

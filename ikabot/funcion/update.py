@@ -16,7 +16,11 @@ _ = t.gettext
 
 def update(s,e,fd):
 	sys.stdin = os.fdopen(fd)
-	print(_('Para actualizar ikabot correr:'))
-	print('python3 -m pip install --user --upgrade ikabot')
-	enter()
-	e.set()
+	try:
+		print(_('Para actualizar ikabot correr:'))
+		print('python3 -m pip install --user --upgrade ikabot')
+		enter()
+		e.set()
+	except KeyboardInterrupt:
+		e.set()
+		return

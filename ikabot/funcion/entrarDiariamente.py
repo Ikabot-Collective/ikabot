@@ -21,8 +21,12 @@ _ = t.gettext
 
 def entrarDiariamente(s,e,fd):
 	sys.stdin = os.fdopen(fd)
-	print(_('Se entrará todos los días automaticamente.'))
-	enter()
+	try:
+		print(_('Se entrará todos los días automaticamente.'))
+		enter()
+	except KeyboardInterrupt:
+		e.set()
+		return
 
 	set_child_mode(s)
 	e.set()
