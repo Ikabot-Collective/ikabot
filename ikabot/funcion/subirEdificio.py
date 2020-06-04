@@ -212,33 +212,43 @@ def recursosNecesarios(s, ciudad, edificio, desde, hasta):
 
 def planearAbastecimiento(s, destino, origenes, faltantes):
 	set_child_mode(s)
-	rutas = []
-	html = s.get(urlCiudad + destino)
-	ciudadD = getCiudad(html)
-	for i in range(5):
-		faltante = faltantes[i]
-		if faltante <= 0:
-			continue
-		for origen in origenes[i]:
-			if faltante == 0:
-				break
-			html = s.get(urlCiudad + origen)
-			ciudadO = getCiudad(html)
-			disp = ciudadO['recursos'][i]
-			mandar = disp if disp < faltante else faltante
-			faltante -= mandar
-			if i == 0:
-				ruta = (ciudadO, ciudadD, ciudadD['islandId'], mandar, 0, 0, 0, 0)
-			elif i == 1:
-				ruta = (ciudadO, ciudadD, ciudadD['islandId'], 0, mandar, 0, 0, 0)
-			elif i == 2:
-				ruta = (ciudadO, ciudadD, ciudadD['islandId'], 0, 0, mandar, 0, 0)
-			elif i == 3:
-				ruta = (ciudadO, ciudadD, ciudadD['islandId'], 0, 0, 0, mandar, 0)
-			else:
-				ruta = (ciudadO, ciudadD, ciudadD['islandId'], 0, 0, 0, 0, mandar)
-			rutas.append(ruta)
-	executeRoutes(s, rutas)
+
+	info = _('\nTransport resources to upload building\n')
+	setInfoSignal(s, info)
+
+	try:
+		rutas = []
+		html = s.get(urlCiudad + destino)
+		ciudadD = getCiudad(html)
+		for i in range(5):
+			faltante = faltantes[i]
+			if faltante <= 0:
+				continue
+			for origen in origenes[i]:
+				if faltante == 0:
+					break
+				html = s.get(urlCiudad + origen)
+				ciudadO = getCiudad(html)
+				disp = ciudadO['recursos'][i]
+				mandar = disp if disp < faltante else faltante
+				faltante -= mandar
+				if i == 0:
+					ruta = (ciudadO, ciudadD, ciudadD['islandId'], mandar, 0, 0, 0, 0)
+				elif i == 1:
+					ruta = (ciudadO, ciudadD, ciudadD['islandId'], 0, mandar, 0, 0, 0)
+				elif i == 2:
+					ruta = (ciudadO, ciudadD, ciudadD['islandId'], 0, 0, mandar, 0, 0)
+				elif i == 3:
+					ruta = (ciudadO, ciudadD, ciudadD['islandId'], 0, 0, 0, mandar, 0)
+				else:
+					ruta = (ciudadO, ciudadD, ciudadD['islandId'], 0, 0, 0, 0, mandar)
+				rutas.append(ruta)
+		executeRoutes(s, rutas)
+	except:
+		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
+		sendToBot(s, msg)
+	finally:
+		s.logout()
 
 def menuEdificios(s, ids, cities, idCiudad, bienNombre, bienIndex, faltante):
 	banner()
@@ -377,7 +387,7 @@ def subirEdificios(s,e,fd):
 	e.set()
 
 	info = _('\nSubir edificio\n')
-	info = info + 'Ciudad: {}\nEdificio: {}.Desde {:d}, hasta {:d}'.format(ciudad['cityName'], edificio['name'], desde, hasta)
+	info = info + _('Ciudad: {}\nEdificio: {}.Desde {:d}, hasta {:d}').format(ciudad['cityName'], edificio['name'], desde, hasta)
 
 	setInfoSignal(s, info)
 	try:
