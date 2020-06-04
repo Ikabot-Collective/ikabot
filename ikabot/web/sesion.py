@@ -271,7 +271,7 @@ class Sesion:
 			os._exit(0)
 		if self.__isExpired(html):
 			if self.padre:
-				msg = _('Mail o contraseña incorrecta')
+				msg = _('Login error.')
 				print(msg)
 				os._exit(0)
 			raise Exception('No se pudo iniciar sesión')

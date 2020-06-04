@@ -37,8 +37,13 @@ def sendGoods(s, originCityId, destinationCityId, islandId, wood, wine, marble, 
 		integer representing the amount of ships needed to execute the route
 	"""
 
-	s.post(payloadPost={'action': 'header', 'function': 'changeCurrentCity', 'actionRequest': s.token(), 'cityId': originCityId, 'ajax': '1'}) 
-	s.post(payloadPost={'action': 'transportOperations', 'function': 'loadTransportersWithFreight', 'destinationCityId': destinationCityId, 'islandId': islandId, 'oldView': '', 'position': '', 'avatar2Name': '', 'city2Name': '', 'type': '', 'activeTab': '', 'premiumTransporter': '0', 'minusPlusValue': '500', 'cargo_resource': wood, 'cargo_tradegood1': wine, 'cargo_tradegood2': marble, 'cargo_tradegood3': crystal, 'cargo_tradegood4': sulfur, 'capacity': '5', 'max_capacity': '5', 'jetPropulsion': '0', 'transporters': ships, 'backgroundView': 'city', 'currentCityId': originCityId, 'templateView': 'transport', 'currentTab': 'tabSendTransporter', 'actionRequest': s.token(), 'ajax': '1'})
+	html = s.get()
+	city = getCiudad(html)
+	currId = city['id']
+	data = {'action': 'header', 'function': 'changeCurrentCity', 'actionRequest': s.token(), 'oldView': 'city', 'cityId': originCityId, 'backgroundView': 'city', 'currentCityId': currId, 'ajax': '1'}
+	s.post(payloadPost=data)
+	data = {'action': 'transportOperations', 'function': 'loadTransportersWithFreight', 'destinationCityId': destinationCityId, 'islandId': islandId, 'oldView': '', 'position': '', 'avatar2Name': '', 'city2Name': '', 'type': '', 'activeTab': '', 'transportDisplayPrice': '0', 'premiumTransporter': '0', 'minusPlusValue': '500', 'cargo_resource': wood, 'cargo_tradegood1': wine, 'cargo_tradegood2': marble, 'cargo_tradegood3': crystal, 'cargo_tradegood4': '0', 'capacity': '5', 'max_capacity': '5', 'jetPropulsion': '0', 'transporters': ships, 'backgroundView': 'city', 'currentCityId': originCityId, 'templateView': 'transport', 'currentTab': 'tabSendTransporter', 'actionRequest': s.token(), 'ajax': '1'}
+	s.post(payloadPost=data)
 
 def executeRoutes(s, routes):
 	"""This function will execute all the routes passed to it, regardless if there are enough ships available to do so
@@ -51,14 +56,14 @@ def executeRoutes(s, routes):
 	"""
 	for ruta in routes:
 		(ciudadOrigen, ciudadDestino, idIsla, md, vn, mr, cr, az) = ruta
-		destId = ciudadDestino.id
+		destId = ciudadDestino['id']
 		while (md + vn + mr + cr + az) > 0:
 			barcosDisp = waitForArrival(s)
 			storageCapacityInShips = barcosDisp * 500
 
 			html = s.get(urlCiudad + destId)
 			ciudadDestino = getCiudad(html)
-			storageCapacityInCity = ciudadDestino.freeSpaceForResources
+			storageCapacityInCity = ciudadDestino['freeSpaceForResources']
 
 			mdEnv = min(md, storageCapacityInShips, storageCapacityInCity[0])
 			storageCapacityInShips -= mdEnv
