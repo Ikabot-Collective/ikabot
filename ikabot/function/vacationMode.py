@@ -25,7 +25,7 @@ def vacationMode(s,e,fd):
 	sys.stdin = os.fdopen(fd)
 	try:
 		banner()
-		print(_('¿Activar modo vacaciones? [Y/n]'))
+		print(_('Activate vacation mode? [Y/n]'))
 		rta = read(values=['y', 'Y', 'n', 'N', ''])
 		if rta.lower() == 'n':
 			e.set()
@@ -33,7 +33,7 @@ def vacationMode(s,e,fd):
 
 		activarvacationMode(s)
 
-		print(_('Se activo el modo vacaciones.'))
+		print(_('Vacation mode has been activated.'))
 		enter()
 		e.set()
 		clear()

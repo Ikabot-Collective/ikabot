@@ -34,7 +34,7 @@ def getTiempoDeConstruccion(s, html, posicion):
 	edificio = ciudad['position'][posicion]
 	hora_fin = re.search(r'"endUpgradeTime":(\d{10})', html)
 	if hora_fin is None:
-		msg = _('{}: No espero nada para que {} suba al nivel {:d}').format(ciudad['cityName'], edificio['name'], int(edificio['level']))
+		msg = _('{}: I don\'t wait anything so that {} gets to the level {:d}').format(ciudad['cityName'], edificio['name'], int(edificio['level']))
 		sendToBotDebug(s, msg, debugON_constructionList)
 		return 0
 
@@ -44,7 +44,7 @@ def getTiempoDeConstruccion(s, html, posicion):
 	if espera <= 0:
 		espera = 0
 
-	msg = _('{}: Espero {:d} segundos para que {} suba al nivel {:d}').format(ciudad['cityName'], espera, edificio['name'], int(edificio['level']) + 1)
+	msg = _('{}: I wait {:d} seconds so that {} gets to the level {:d}').format(ciudad['cityName'], espera, edificio['name'], int(edificio['level']) + 1)
 	sendToBotDebug(s, msg, debugON_constructionList)
 
 	return espera
@@ -58,7 +58,7 @@ def esperarConstruccion(s, idCiudad, posicion):
 	html = s.get(urlCiudad + idCiudad)
 	ciudad = getCiudad(html)
 	edificio = ciudad['position'][posicion]
-	msg = _('{}: El edificio {} alcanzó el nivel {:d}.').format(ciudad['cityName'], edificio['name'], int(edificio['level']))
+	msg = _('{}: The building {} reached the level {:d}.').format(ciudad['cityName'], edificio['name'], int(edificio['level']))
 	sendToBotDebug(s, msg, debugON_constructionList)
 	return ciudad
 
@@ -80,10 +80,10 @@ def constructionList1(s, idCiudad, posicion, nivelesASubir, esperarRecursos):
 				wait(segundos)
 
 		if edificio['canUpgrade'] is False:
-			msg  = _('Ciudad:{}\n').format(ciudad['cityName'])
-			msg += _('Edificio:{}\n').format(edificio['name'])
-			msg += _('No se pudo terminar de subir el edificio por falta de recursos.\n')
-			msg += _('Faltaron subir {:d} niveles').format(nivelesASubir - lv)
+			msg  = _('City:{}\n').format(ciudad['cityName'])
+			msg += _('Building:{}\n').format(edificio['name'])
+			msg += _('The building could not be completed due to lack of resources.\n')
+			msg += _('Missed {:d} levels').format(nivelesASubir - lv)
 			sendToBot(s, msg)
 			return
 
@@ -96,14 +96,14 @@ def constructionList1(s, idCiudad, posicion, nivelesASubir, esperarRecursos):
 			if edificio['isBusy']:
 				break
 		else:
-			msg  = _('{}: El edificio {} no se amplió después de tres intentos\n').format(ciudad['cityName'], edificio['name'])
+			msg  = _('{}: The building {} was not extended after three tries\n').format(ciudad['cityName'], edificio['name'])
 			sendToBot(s, msg)
 			return
 
-		msg = _('{}: El edificio {} se esta ampliando al nivel {:d}.').format(ciudad['cityName'], edificio['name'], int(edificio['level'])+1)
+		msg = _('{}: The building {} is being extended to level {:d}.').format(ciudad['cityName'], edificio['name'], int(edificio['level'])+1)
 		sendToBotDebug(s, msg, debugON_constructionList)
 
-	msg = _('{}: El edificio {} terminó de ampliarse al nivel: {:d}.').format(ciudad['cityName'], edificio['name'], int(edificio['level'])+1)
+	msg = _('{}: The building {} finished extending to level: {:d}.').format(ciudad['cityName'], edificio['name'], int(edificio['level'])+1)
 	sendToBotDebug(s, msg, debugON_constructionList)
 
 def getReductores(ciudad):
@@ -202,8 +202,8 @@ def recursosNecesarios(s, ciudad, edificio, desde, hasta):
 			costos[index] += math.ceil(costo_real)
 
 	if niveles_a_subir < hasta - desde:
-		print(_('Este edificio solo permite subir {:d} niveles más').format(niveles_a_subir))
-		msg = _('Subir {:d} niveles? [Y/n]:').format(niveles_a_subir)
+		print(_('This building only allows you to expand {:d} more levels').format(niveles_a_subir))
+		msg = _('Expand {:d} levels? [Y/n]:').format(niveles_a_subir)
 		eleccion = read(msg=msg, values=['Y', 'y', 'N', 'n', ''])
 		if eleccion.lower() == 'n':
 			return [-1,-1,-1,-1,-1]
@@ -245,16 +245,16 @@ def planearAbastecimiento(s, destino, origenes, faltantes):
 				rutas.append(ruta)
 		executeRoutes(s, rutas)
 	except:
-		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
+		msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
 		sendToBot(s, msg)
 	finally:
 		s.logout()
 
 def menuEdificios(s, ids, cities, idCiudad, bienNombre, bienIndex, faltante):
 	banner()
-	print(_('¿De qué ciudades obtener {}?').format(bienNombre))
+	print(_('From what cities obtain {}?').format(bienNombre))
 	rta = []
-	tradegood = [_('V'), 'M', 'C', _('A')]
+	tradegood = [_('W'), _('M'), _('C'), _('S')]
 	maxName = 0
 	for name in [ cities[city]['name'] for city in cities if cities[city]['id'] != idCiudad ]:
 		if len(name) > maxName:
@@ -278,14 +278,14 @@ def menuEdificios(s, ids, cities, idCiudad, bienNombre, bienIndex, faltante):
 	if total < faltante:
 		global enviarRecursos
 		global ampliar
-		print(_('\nNo hay recursos suficientes.'))
+		print(_('\nThere are not enough resources.'))
 		if enviarRecursos:
-			print(_('\n¿Enviar los recursos de todos modos? [Y/n]'))
+			print(_('\nSend the resources anyway? [Y/n]'))
 			choise = read(values=['y', 'Y', 'n', 'N', ''])
 			if choise.lower() == 'n':
 				enviarRecursos = False
 		if ampliar:
-			print(_('\n¿Intentar aumentar el edificio de todos modos? [y/N]'))
+			print(_('\nTry to expand the building anyway? [y/N]'))
 			choise = read(values=['y', 'Y', 'n', 'N', ''])
 			if choise.lower() == 'n' or choise == '':
 				ampliar = False
@@ -300,7 +300,7 @@ def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante):
 		bien = tipoDeBien[i]
 		ids = menuEdificios(s, idss, cities, idCiudad, bien, i, faltante[i])
 		if enviarRecursos is False and ampliar:
-			print(_('\nSe intentará ampliar el edificio.'))
+			print(_('\nThe building will be expanded if possible.'))
 			enter()
 			return
 		elif enviarRecursos is False:
@@ -308,9 +308,9 @@ def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante):
 		origenes[i] = ids
 
 	if ampliar:
-		print(_('\nSe enviarán los recursos y se intentará ampliar el edificio.'))
+		print(_('\nThe resources will be sent and the building will be expanded if possible.'))
 	else:
-		print(_('\nSe enviarán los recursos.'))
+		print(_('\nThe resources will be sent.'))
 
 	enter()
 
@@ -348,22 +348,22 @@ def constructionList(s,e,fd):
 		html = s.get(urlCiudad + idCiudad)
 		(maderaDisp, vinoDisp, marmolDisp, cristalDisp, azufreDisp) = getRecursosDisponibles(html, num=True)
 		if maderaDisp < madera or vinoDisp < vino or marmolDisp < marmol or cristalDisp < cristal or azufreDisp < azufre:
-			print(_('\nFalta:'))
+			print(_('\nMissing:'))
 			if maderaDisp < madera:
-				print('{} de madera'.format(addDot(madera - maderaDisp)))
+				print(_('{} of wood').format(addDot(madera - maderaDisp)))
 			if vinoDisp < vino:
-				print('{} de vino'.format(addDot(vino - vinoDisp)))
+				print(_('{} of wine').format(addDot(vino - vinoDisp)))
 			if marmolDisp < marmol:
-				print('{} de marmol'.format(addDot(marmol - marmolDisp)))
+				print(_('{} of marble').format(addDot(marmol - marmolDisp)))
 			if cristalDisp < cristal:
-				print('{} de cristal'.format(addDot(cristal - cristalDisp)))
+				print(_('{} of cristal').format(addDot(cristal - cristalDisp)))
 			if azufreDisp < azufre:
-				print('{} de azufre'.format(addDot(azufre - azufreDisp)))
+				print(_('{} of sulfur').format(addDot(azufre - azufreDisp)))
 
-			print(_('¿Transportar los recursos automáticamente? [Y/n]'))
+			print(_('Automatically transport resources? [Y/n]'))
 			rta = read(values=['y', 'Y', 'n', 'N', ''])
 			if rta.lower() == 'n':
-				print(_('¿Proceder de todos modos? [Y/n]'))
+				print(_('Proceed anyway? [Y/n]'))
 				rta = read(values=['y', 'Y', 'n', 'N', ''])
 				if rta.lower() == 'n':
 					e.set()
@@ -373,8 +373,8 @@ def constructionList(s,e,fd):
 				faltante = [madera - maderaDisp, vino - vinoDisp, marmol - marmolDisp, cristal - cristalDisp, azufre - azufreDisp]
 				obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante)
 		else:
-			print(_('\nTiene materiales suficientes'))
-			print(_('¿Proceder? [Y/n]'))
+			print(_('\nYou have enough materials'))
+			print(_('Proceed? [Y/n]'))
 			rta = read(values=['y', 'Y', 'n', 'N', ''])
 			if rta.lower() == 'n':
 				e.set()
@@ -386,15 +386,15 @@ def constructionList(s,e,fd):
 	set_child_mode(s)
 	e.set()
 
-	info = _('\nSubir edificio\n')
-	info = info + _('Ciudad: {}\nEdificio: {}.Desde {:d}, hasta {:d}').format(ciudad['cityName'], edificio['name'], desde, hasta)
+	info = _('\nUpgrade building\n')
+	info = info + _('City: {}\nBuilding: {}. From {:d}, to {:d}').format(ciudad['cityName'], edificio['name'], desde, hasta)
 
 	setInfoSignal(s, info)
 	try:
 		if ampliar:
 			constructionList1(s, idCiudad, posEdificio, niveles, esperarRecursos)
 	except:
-		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
+		msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
 		sendToBot(s, msg)
 	finally:
 		s.logout()

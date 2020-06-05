@@ -25,8 +25,8 @@ def distributeResources(s,e,fd):
 	try:
 		banner()
 
-		print(_('¿Qué recurso quiere distribuir?'))
-		print(_('(0) Salir'))
+		print(_('What resource do you want to distribute?'))
+		print(_('(0) Exit'))
 		for i in range(len(tipoDeBien)):
 			print('({:d}) {}'.format(i+1, tipoDeBien[i]))
 		resource = read(min=0, max=5)
@@ -52,11 +52,11 @@ def distributeResources(s,e,fd):
 			return
 
 		banner()
-		print(_('\nSe realizarán los siguientes envios:\n'))
+		print(_('\nThe following shipments will be made:\n'))
 		for route in routes:
 			print('{} -> {} : {} {}'.format(route[0]['name'], route[1]['name'], route[resource+3], tipoDeBien[resource])) #displays all routes to be executed in console
 
-		print(_('\n¿Proceder? [Y/n]'))
+		print(_('\nProceed? [Y/n]'))
 		rta = read(values=['y', 'Y', 'n', 'N', ''])
 		if rta.lower() == 'n':
 			e.set()
@@ -69,13 +69,13 @@ def distributeResources(s,e,fd):
 	set_child_mode(s)
 	e.set() #this is where we give back control to main process
 
-	info = _('\nDistribuyo {}\n').format(tipoDeBien[resource])
+	info = _('\nDistribute {}\n').format(tipoDeBien[resource])
 	setInfoSignal(s, info)
 
 	try:
 		executeRoutes(s, routes) #plan trips for all the routes
 	except:
-		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
+		msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
 		sendToBot(s, msg) #sends message to telegram bot
 	finally:
 		s.logout()
@@ -186,11 +186,11 @@ def distribute_unevenly(s, recurso):
 				ciudadesDestino[idCiudad] = ciudad
 
 	if recursoTotal <= 0:
-		print(_('\nNo hay recursos para enviar.'))
+		print(_('\nThere are no resources to send.'))
 		enter()
 		return None
 	if len(ciudadesDestino) == 0:
-		print(_('\nNo hay espacio disponible para enviar recursos.'))
+		print(_('\nThere is no space available to send resources.'))
 		enter()
 		return None
 

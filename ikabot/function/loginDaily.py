@@ -22,7 +22,7 @@ _ = t.gettext
 def loginDaily(s,e,fd):
 	sys.stdin = os.fdopen(fd)
 	try:
-		print(_('Se entrará todos los días automaticamente.'))
+		print(_('I will enter every day.'))
 		enter()
 	except KeyboardInterrupt:
 		e.set()
@@ -31,12 +31,12 @@ def loginDaily(s,e,fd):
 	set_child_mode(s)
 	e.set()
 
-	info = _('\nEntro diariamente\n')
+	info = _('\nI enter every day\n')
 	setInfoSignal(s, info)
 	try:
 		do_it(s)
 	except:
-		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
+		msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
 		sendToBot(s, msg)
 	finally:
 		s.logout()
@@ -45,4 +45,4 @@ def do_it(s):
 	while True:
 		(ids, cities) = getIdsOfCities(s)
 		s.get('action=AvatarAction&function=giveDailyActivityBonus&dailyActivityBonusCitySelect={}&startPageShown=1&detectedDevice=1&autoLogin=on&cityId={}&activeTab=multiTab2&backgroundView=city&currentCityId={}&actionRequest={}&ajax=1'.format(str(ids[0]), str(ids[0]), str(ids[0]), s.token()))
-		wait(24*60*60,1*60*60)
+		wait(24*60*60, 1*60*60)

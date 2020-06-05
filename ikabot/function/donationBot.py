@@ -25,12 +25,12 @@ def donationBot(s,e,fd):
 		banner()
 		(idsCiudades, ciudades) = getIdsOfCities(s)
 		ciudades_dict = {}
-		bienes = {'1': _('(V)'), '2': '(M)', '3': '(C)', '4': _('(A)')}
+		bienes = {'1': _('(W)'), '2': _('(M)'), '3': _('(C)'), '4': _('(S)')}
 		for idCiudad in idsCiudades:
 			tradegood = ciudades[idCiudad]['tradegood']
 			bien = bienes[tradegood]
-			print(_('En la ciudad {} {}, ¿Desea donate al aserradero, al bien de cambio o a ninguno? [a/b/n]').format(ciudades[idCiudad]['name'], bien))
-			rta = read(values=[_('a'), _('A'), _('b'), _('B'), 'n', 'N'])
+			print(_('In the city {} {}, Do you wish to donate to the forest, to the trading good or neither? [f/t/n]').format(ciudades[idCiudad]['name'], bien))
+			rta = read(values=[_('f'), _('F'), _('t'), _('T'), _('n'), _('N')])
 			if rta.lower() == _('a'):
 				tipo = 'resource'
 			elif rta.lower() == _('b'):
@@ -39,7 +39,7 @@ def donationBot(s,e,fd):
 				tipo = None
 			ciudades_dict[idCiudad] = {'tipo': tipo}
 
-		print(_('Se donateá todos los días.'))
+		print(_('I will donate every day.'))
 		enter()
 	except KeyboardInterrupt:
 		e.set()
@@ -48,12 +48,12 @@ def donationBot(s,e,fd):
 	set_child_mode(s)
 	e.set()
 
-	info = _('\nDono todos los días\n')
+	info = _('\nI donate every day\n')
 	setInfoSignal(s, info)
 	try:
 		do_it(s, idsCiudades, ciudades_dict)
 	except:
-		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
+		msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
 		sendToBot(s, msg)
 	finally:
 		s.logout()
@@ -71,6 +71,6 @@ def do_it(s, idsCiudades, ciudades_dict):
 			tipo = ciudades_dict[idCiudad]['tipo']
 			if tipo:
 				s.post(payloadPost={'islandId': idIsla, 'type': tipo, 'action': 'IslandScreen', 'function': 'donate', 'donation': madera, 'backgroundView': 'island', 'templateView': tipo, 'actionRequest': s.token(), 'ajax': '1'})
-		msg = _('Doné automaticamente.')
+		msg = _('I donated automatically.')
 		sendToBotDebug(s, msg, debugON_donationBot)
 		time.sleep(24*60*60)

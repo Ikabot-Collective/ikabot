@@ -26,7 +26,7 @@ def searchForIslandSpaces(s,e,fd):
 		if botValido(s) is False:
 			e.set()
 			return
-		print(_('Se buscarán espacios nuevos cada hora.'))
+		print(_('I will search for new spaces each hour.'))
 		enter()
 	except KeyboardInterrupt:
 		e.set()
@@ -35,12 +35,12 @@ def searchForIslandSpaces(s,e,fd):
 	set_child_mode(s)
 	e.set()
 
-	info = _('\nBusco espacios nuevos en las islas cada 1 hora\n')
+	info = _('\nI search for new spaces each hour\n')
 	setInfoSignal(s, info)
 	try:
 		do_it(s)
 	except:
-		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
+		msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
 		sendToBot(s, msg)
 	finally:
 		s.logout()
@@ -63,7 +63,7 @@ def do_it(s):
 						if ciudad['id'] == cityAntes['id']: #compare current city's id with beforecity's id
 							break
 					else:
-						msg = _('la ciudad {} del jugador {} desapareció en {} {}:{} {}').format(cityAntes['name'], cityAntes['Name'], tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
+						msg = _('the city {} of the player {} disappeared in {} {}:{} {}').format(cityAntes['name'], cityAntes['Name'], tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
 						sendToBot(s, msg)
 
 				# alguien fundo - someone colonised
@@ -72,8 +72,8 @@ def do_it(s):
 						if ciudad['id'] == cityAntes['id']: #compare current city's id with beforecity's id
 							break
 					else:
-						msg = _('{} fundó {} en {} {}:{} {}').format(ciudad['Name'], ciudad['name'], tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
+						msg = _('{} founded {} in {} {}:{} {}').format(ciudad['Name'], ciudad['name'], tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
 						sendToBot(s, msg)
 
 			isla_ciudades[idIsla] = ciudades.copy() #copies non empty cities into current islands cities (isla_ciudades)
-		wait(1*60*60) #wait
+		wait(1*60*60)

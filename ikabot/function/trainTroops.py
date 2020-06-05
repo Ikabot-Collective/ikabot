@@ -111,7 +111,7 @@ def planearEntrenamientos(s, ciudad, entrenamientos):
 			for tropa in entrenamiento:
 				total += tropa['entrenar']
 			if total == 0:
-				msg = _('No se pudo terminar de entrenar tropas por falta de recursos.')
+				msg = _('It was not possible to finish training troops due to lack of resources.')
 				sendToBot(s, msg)
 				return
 			entrenar(s, ciudad, entrenamiento)
@@ -131,7 +131,7 @@ def trainTroops(s,e,fd):
 	sys.stdin = os.fdopen(fd)
 	try:
 		banner()
-		print(_('¿En qué ciudad quiere entrenar las flotas?'))
+		print(_('In what city do you want to train the troops?'))
 		ciudad = chooseCity(s)
 		banner()
 
@@ -155,14 +155,14 @@ def trainTroops(s,e,fd):
 		entrenamientos = []
 		while True:
 			unidades = generateTroops(unidades_info)
-			print(_('Entrenar:'))
+			print(_('Train:'))
 			for unidad in unidades:
 				cantidad = read(msg='{}{}:'.format(' '*(maxSize-len(unidad['local_name'])), unidad['local_name']), min=0, empty=True)
 				if cantidad == '':
 					cantidad = 0
 				unidad['cantidad'] = cantidad
 
-			print(_('\nCosto total:'))
+			print(_('\nTotal cost:'))
 			costo = {'madera': 0, 'vino': 0, 'marmol': 0, 'cristal': 0, 'azufre': 0, 'ciudadanos': 0, 'manuntencion': 0, 'tiempo': 0}
 			for unidad in unidades:
 
@@ -184,23 +184,23 @@ def trainTroops(s,e,fd):
 					costo['tiempo'] += unidad['costs']['completiontime'] * unidad['cantidad']
 
 			if costo['madera']:
-				print(_('     Madera: {}').format(addDot(costo['madera'])))
+				print(_('       Wood: {}').format(addDot(costo['madera'])))
 			if costo['vino']:
-				print(_('       Vino: {}').format(addDot(costo['vino'])))
+				print(_('       Wine: {}').format(addDot(costo['vino'])))
 			if costo['marmol']:
-				print(_('     Marmol: {}').format(addDot(costo['marmol'])))
+				print(_('     Marble: {}').format(addDot(costo['marmol'])))
 			if costo['cristal']:
 				print(_('    Cristal: {}').format(addDot(costo['cristal'])))
 			if costo['azufre']:
-				print(_('     Azufre: {}').format(addDot(costo['azufre'])))
+				print(_('     Sulfur: {}').format(addDot(costo['azufre'])))
 			if costo['ciudadanos']:
-				print(_(' Ciudadanos: {}').format(addDot(costo['ciudadanos'])))
+				print(_('   Citizens: {}').format(addDot(costo['ciudadanos'])))
 			if costo['manuntencion']:
-				print(_('Manutención: {}').format(addDot(costo['manuntencion'])))
+				print(_('Maintenance: {}').format(addDot(costo['manuntencion'])))
 			if costo['tiempo']:
-				print(_('   Duración: {}').format(daysHoursMinutes(int(costo['tiempo']))))
+				print(_('   Duration: {}').format(daysHoursMinutes(int(costo['tiempo']))))
 
-			print(_('\nProceder? [Y/n]'))
+			print(_('\nProceed? [Y/n]'))
 			rta = read(values=['y', 'Y', 'n', 'N', ''])
 			if rta.lower() == 'n':
 				e.set()
@@ -208,7 +208,7 @@ def trainTroops(s,e,fd):
 
 			entrenamientos.append(unidades)
 
-			print(_('\n¿Quiere entrenar más tropas al terminar? [y/N]'))
+			print(_('\nDo you want to train more troops when you finish? [y/N]'))
 			rta = read(values=['y', 'Y', 'n', 'N', ''])
 			if rta.lower() == 'y':
 				banner()
@@ -245,27 +245,27 @@ def trainTroops(s,e,fd):
 		falta = [ elem for elem in sobrante if sobrante[elem] < 0 ] != []
 
 		if falta:
-			print(_('\nNo hay suficientes recursos:'))
+			print(_('\nThere are not enough resources:'))
 			if sobrante['madera'] < 0:
-				print(_('    Madera:{}').format(addDot(sobrante['madera']*-1)))
+				print(_('    Wood:{}').format(addDot(sobrante['madera']*-1)))
 			if sobrante['vino'] < 0:
-				print(_('      Vino:{}').format(addDot(sobrante['vino']*-1)))
+				print(_('    Wine:{}').format(addDot(sobrante['vino']*-1)))
 			if sobrante['marmol'] < 0:
-				print(_('    Marmol:{}').format(addDot(sobrante['marmol']*-1)))
+				print(_('  Marble:{}').format(addDot(sobrante['marmol']*-1)))
 			if sobrante['cristal'] < 0:
-				print(_('   Cristal:{}').format(addDot(sobrante['cristal']*-1)))
+				print(_(' Cristal:{}').format(addDot(sobrante['cristal']*-1)))
 			if sobrante['azufre'] < 0:
-				print(_('    Azufre:{}').format(addDot(sobrante['azufre']*-1)))
+				print(_('  Sulfur:{}').format(addDot(sobrante['azufre']*-1)))
 			if sobrante['ciudadanos'] < 0:
-				print(_('Ciudadanos:{}').format(addDot(sobrante['ciudadanos']*-1)))
+				print(_('Citizens:{}').format(addDot(sobrante['ciudadanos']*-1)))
 
-			print(_('\n¿Proceder de todos modos? [Y/n]'))
+			print(_('\nProceed anyway? [Y/n]'))
 			rta = read(values=['y', 'Y', 'n', 'N', ''])
 			if rta.lower() == 'n':
 				e.set()
 				return
 
-		print(_('\nSe entrenarán las tropas seleccionadas.'))
+		print(_('\nThe selected troops will be trained.'))
 		enter()
 	except KeyboardInterrupt:
 		e.set()
@@ -274,12 +274,12 @@ def trainTroops(s,e,fd):
 	set_child_mode(s)
 	e.set()
 
-	info = _('\nEntreno tropas en {}\n').format(ciudad['cityName'])
+	info = _('\nI train troops in {}\n').format(ciudad['cityName'])
 	setInfoSignal(s, info)
 	try:
 		planearEntrenamientos(s, ciudad, entrenamientos)
 	except:
-		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
+		msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
 		sendToBot(s, msg)
 	finally:
 		s.logout()

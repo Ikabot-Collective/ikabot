@@ -19,7 +19,7 @@ def constructBuilding(s,e,fd):
 	try:
 		banner()
 
-		print(_('Ciudad donde construir:'))
+		print(_('City where to build:'))
 		ciudad = chooseCity(s)
 		banner()
 
@@ -41,12 +41,12 @@ def constructBuilding(s,e,fd):
 					edificios.append({'building': match[0], 'name': match[1], 'buildingId': match[2], 'type': tipo})
 
 		if len(edificios) == 0:
-			print(_('No se puede construir ningún edificio'))
+			print(_('No building can be built.'))
 			enter()
 			e.set()
 			return
 
-		print(_('¿Qué edificio quiere construir?\n'))
+		print(_('What building do you want to build?\n'))
 		i = 0
 		for edificio in edificios:
 			i += 1
@@ -59,7 +59,7 @@ def constructBuilding(s,e,fd):
 		if len(opciones) == 1:
 			opcion = opciones[0]
 		else:
-			print(_('¿En qué posición quiere contruir?\n'))
+			print(_('In which position do you want to build?\n'))
 			i = 0
 			for opcion in opciones:
 				i += 1

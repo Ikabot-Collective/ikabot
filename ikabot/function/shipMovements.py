@@ -32,7 +32,7 @@ def shipMovements(s,e,fd):
 	try:
 		banner()
 
-		print(_('Barcos {:d}/{:d}\n').format(getAvailableShips(s), getTotalShips(s)))
+		print(_('Ships {:d}/{:d}\n').format(getAvailableShips(s), getTotalShips(s)))
 
 		html = s.get()
 		idCiudad = re.search(r'currentCityId:\s(\d+),', html).group(1)
@@ -61,7 +61,7 @@ def shipMovements(s,e,fd):
 			if movement['isHostile']:
 				tropas = movement['army']['amount']
 				flotas = movement['fleet']['amount']
-				print(_('Tropas:{}\nFlotas:{}').format(addDot(tropas), addDot(flotas)))
+				print(_('Troops:{}\nFleets:{}').format(addDot(tropas), addDot(flotas)))
 			elif esHostil(movement):
 				tropas = movement['army']['amount']
 				barcos = 0
@@ -71,18 +71,18 @@ def shipMovements(s,e,fd):
 						barcos += int(mov['amount'])
 					else:
 						flotas += int(mov['amount'])
-				print(_('Tropas:{}\nFlotas:{}\nBarcos:{}').format(addDot(tropas), addDot(flotas), addDot(barcos)))
+				print(_('Troops:{}\nFleets:{}\n Ships:{}').format(addDot(tropas), addDot(flotas), addDot(barcos)))
 			else:
-				bien = {'wood': _('madera'), 'wine': _('vino'), 'marble': _('marmol'), 'glass': _('cristal'), 'sulfur': _('azufre')}
+				bien = {'wood': _('wood'), 'wine': _('wine'), 'marble': _('marble'), 'glass': _('cristal'), 'sulfur': _('sulfur')}
 				cargaTotal = 0
 				for resource in movement['resources']:
 					cantidad = resource['amount']
 					tipo = resource['cssClass'].split()[1]
 					tipo = bien[tipo]
 					cargaTotal += int( cantidad.replace(',', '') )
-					print(_('{} de {}').format(cantidad, tipo))
+					print(_('{} of {}').format(cantidad, tipo))
 				barcos = int(math.ceil((Decimal(cargaTotal) / Decimal(500))))
-				print(_('{:d} Barcos').format(barcos))
+				print(_('{:d} Ships').format(barcos))
 		enter()
 		e.set()
 	except KeyboardInterrupt:

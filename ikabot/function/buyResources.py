@@ -26,7 +26,7 @@ t = gettext.translation('buyResources',
 _ = t.gettext
 
 def asignarRecursoBuscado(s, ciudad):
-	print(_('¿Qué recurso quiere comprar?'))
+	print(_('Which resource do you want to buy?'))
 	for indice, bien in enumerate(tipoDeBien):
 		print('({:d}) {}'.format(indice+1, bien))
 	eleccion = read(min=1, max=5)
@@ -90,7 +90,7 @@ def getOro(s, ciudad):
 	return int(oro.split('.')[0])
 
 def elegirCiudadComercial(ciudades_comerciales):
-	print(_('¿Desde cuál ciudad quiere comprar recursos?\n'))
+	print(_('From which city do you want to buy resources?\n'))
 	for i, ciudad in enumerate(ciudades_comerciales):
 		print('({:d}) {}'.format(i + 1, ciudad['name']))
 	ind = read(min=1, max=len(ciudades_comerciales))
@@ -103,7 +103,7 @@ def buyResources(s,e,fd):
 
 		ciudades_comerciales = getCiudadesComerciales(s)
 		if len(ciudades_comerciales) == 0:
-			print(_('No hay una Tienda contruida'))
+			print(_('There is no store build'))
 			enter()
 			e.set()
 			return
@@ -119,7 +119,7 @@ def buyResources(s,e,fd):
 
 		ofertas = obtenerOfertas(s, ciudad)
 		if len(ofertas) == 0:
-			print(_('No se encontraron ofertas.'))
+			print(_('There were no offers found.'))
 			e.set()
 			return
 
@@ -129,21 +129,21 @@ def buyResources(s,e,fd):
 			cantidad = oferta['cantidadDisponible']
 			unidad   = oferta['precio']
 			costo    = cantidad * unidad
-			print(_('cantidad :{}').format(addDot(cantidad)))
-			print(_('precio   :{:d}').format(unidad))
-			print(_('costo    :{}').format(addDot(costo)))
+			print(_('amount:{}').format(addDot(cantidad)))
+			print(_('price :{:d}').format(unidad))
+			print(_('cost  :{}').format(addDot(costo)))
 			print('')
 			precio_total += costo
 			cantidad_total += cantidad
 
 		disponible = ciudad['freeSpaceForResources'][numRecurso - 1]
 
-		print(_('Total disponible para comprar: {}, por {}').format(addDot(cantidad_total), addDot(precio_total)))
+		print(_('Total amount available to purchase: {}, for {}').format(addDot(cantidad_total), addDot(precio_total)))
 		if disponible < cantidad_total:
-			print(_('Solo se puede comprar {} por falta de almacenamiento.').format(addDot(disponible)))
+			print(_('You just can buy {} due to storing capacity').format(addDot(disponible)))
 			cantidad_total = disponible
 		print('')
-		cantidadAComprar = read(msg=_('¿Cuánta cantidad comprar? '), min=0, max=cantidad_total)
+		cantidadAComprar = read(msg=_('How much do you want to buy?: '), min=0, max=cantidad_total)
 		if cantidadAComprar == 0:
 			e.set()
 			return
@@ -151,14 +151,14 @@ def buyResources(s,e,fd):
 		oro = getOro(s, ciudad)
 		costoTotal = calcularCosto(ofertas, cantidadAComprar)
 
-		print(_('\nOro actual : {}.\nCosto total: {}.\nOro final  : {}.'). format(addDot(oro), addDot(costoTotal), addDot(oro - costoTotal)))
-		print(_('¿Proceder? [Y/n]'))
+		print(_('\nCurrent gold: {}.\nTotal cost  : {}.\nFinal gold  : {}.'). format(addDot(oro), addDot(costoTotal), addDot(oro - costoTotal)))
+		print(_('Proceed? [Y/n]'))
 		rta = read(values=['y', 'Y', 'n', 'N', ''])
 		if rta.lower() == 'n':
 			e.set()
 			return
 
-		print(_('Se comprará {}').format(addDot(cantidadAComprar)))
+		print(_('It will be purchased {}').format(addDot(cantidadAComprar)))
 		enter()
 	except KeyboardInterrupt:
 		e.set()
@@ -167,12 +167,12 @@ def buyResources(s,e,fd):
 	set_child_mode(s)
 	e.set()
 
-	info = _('\nCompro {} de {} para {}\n').format(addDot(cantidadAComprar), tipoDeBien[numRecurso - 1], ciudad['cityName'])
+	info = _('\nI will buy {} from {} to {}\n').format(addDot(cantidadAComprar), tipoDeBien[numRecurso - 1], ciudad['cityName'])
 	setInfoSignal(s, info)
 	try:
 		do_it(s, ciudad, ofertas, cantidadAComprar)
 	except:
-		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
+		msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
 		sendToBot(s, msg)
 	finally:
 		s.logout()
@@ -220,7 +220,7 @@ def buy(s, ciudad, oferta, cantidad):
 	else:
 		data_dict['cargo_tradegood{}'.format(resource)] = cantidad
 	s.post(payloadPost=data_dict)
-	msg = _('Compro {} a {} de {}').format(addDot(cantidad), oferta['ciudadDestino'], oferta['jugadorAComprar'])
+	msg = _('I buy {} to {} from {}').format(addDot(cantidad), oferta['ciudadDestino'], oferta['jugadorAComprar'])
 	sendToBotDebug(s, msg, debugON_buyResources)
 
 def do_it(s, ciudad, ofertas, cantidadAComprar):

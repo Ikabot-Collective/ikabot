@@ -31,8 +31,8 @@ def alertLowWine(s,e,fd):
 			e.set()
 			return
 		banner()
-		horas = read(msg=_('¿Cuántas horas deben quedar hasta que se acabe el vino en una ciudad para que es dé aviso?: '),min=1)
-		print(_('Se avisará cuando el vino se acabe en {:d} horas en alguna ciudad.').format(horas))
+		horas = read(msg=_('How many hours should be left until the wine runs out in a city so that it\'s alerted?'), min=1)
+		print(_('It will be alerted when the wine runs out in less than {:d} hours in any city').format(horas))
 		enter()
 	except KeyboardInterrupt:
 		e.set()
@@ -41,12 +41,12 @@ def alertLowWine(s,e,fd):
 	set_child_mode(s)
 	e.set()
 
-	info = _('\nAviso si el vino se acaba en {:d} horas\n').format(horas)
+	info = _('\nI alert if the wine runs out in less than {:d} hours\n').format(horas)
 	setInfoSignal(s, info)
 	try:
 		do_it(s, horas)
 	except:
-		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
+		msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
 		sendToBot(s, msg)
 	finally:
 		s.logout()
@@ -73,7 +73,7 @@ def do_it(s, horas):
 			vinoDisp = getRecursosDisponibles(html, num=True)[1]
 			if consumoXseg == 0:
 				if ciudades[city]['avisado'] is False:
-					msg = _('La ciudad {} no esta consumiendo vino!').format(ciudades[city]['name'])
+					msg = _('The city {} is not consuming wine!').format(ciudades[city]['name'])
 					sendToBot(s, msg)
 					ciudades[city]['avisado'] = True
 				continue
@@ -82,7 +82,7 @@ def do_it(s, horas):
 			if segsRestantes < horas*60*60:
 				if ciudades[city]['avisado'] is False:
 					tiempoRestante = daysHoursMinutes(segsRestantes)
-					msg = _('En {} se acabará el vino en {}').format(tiempoRestante, ciudades[city]['name'])
+					msg = _('In {}, the wine will run out in {}').format(tiempoRestante, ciudades[city]['name'])
 					sendToBot(s, msg)
 					ciudades[city]['avisado'] = True
 			else:

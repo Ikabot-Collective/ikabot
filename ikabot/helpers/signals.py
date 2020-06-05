@@ -22,7 +22,7 @@ def deactivate_sigint():
 
 def create_handler(s):
 	def _handler(signum, frame):
-		raise Exception(_('Señal recibida número {:d}').format(signum))
+		raise Exception(_('Signal number {:d} received').format(signum))
 	return _handler
 
 def setSignalsHandlers(s):
@@ -31,7 +31,7 @@ def setSignalsHandlers(s):
 		signal.signal(sgn, create_handler(s))
 
 def setInfoSignal(s, info): # el proceso explica su function por stdout
-	info = _('información del proceso {}:\n{}').format(os.getpid(), info)
+	info = _('information of the process {}:\n{}').format(os.getpid(), info)
 	def _sendInfo(signum, frame):
 		sendToBot(s, info)
 	signal.signal(signal.SIGTERM, _sendInfo) # kill -SIGUSR1 pid, SIGUSR1 replaced with SIGTERM

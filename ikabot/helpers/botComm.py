@@ -56,10 +56,10 @@ def botValido(s):
 		return True
 	else:
 		banner()
-		print(_('Debe proporcionar las credenciales válidas para comunicarse por telegram.'))
-		print(_('Se requiere del token del bot a utilizar y de su chat_id'))
-		print(_('Para más informacion sobre como obtenerlos vea al readme de https://github.com/physics-sp/ikabot'))
-		rta = read(msg=_('¿Porporcionará las credenciales ahora? [y/N]'), values=['y','Y','n', 'N', ''])
+		print(_('You must provide valid credentials to communicate by telegram.'))
+		print(_('You require the token of the bot you are going to use and your chat_id'))
+		print(_('For more information about how to obtain them read the readme at https://github.com/physics-sp/ikabot'))
+		rta = read(msg=_('Will you provide the credentials now? [y/N]'), values=['y','Y','n', 'N', ''])
 		if rta.lower() != 'y':
 			return False
 		else:
@@ -70,7 +70,7 @@ def updateTelegramData(s, e=None, fd=None):
 		sys.stdin = os.fdopen(fd) # give process access to terminal
 
 	banner()
-	botToken = read(msg=_('Token del bot:'))
+	botToken = read(msg=_('Bot\'s token:'))
 	chat_id = read(msg=_('Chat_id:'))
 
 	fileData = s.getFileData()
@@ -83,25 +83,25 @@ def updateTelegramData(s, e=None, fd=None):
 	msg = _('El token a ingresar es:{:d}').format(rand)
 	sendToBot(s, msg, Token=True)
 
-	rta = read(msg=_('Se envio un mensaje por telegram, ¿lo recibió? [Y/n]'), values=['y','Y','n', 'N', ''])
+	rta = read(msg=_('A message was sent by telegram, did you receive it? [Y/n]'), values=['y','Y','n', 'N', ''])
 	if rta.lower() == 'n':
 		valid = False
 	else:
-		recibido = read(msg=_('Ingrese el token recibido mediante telegram:'), digit=True)
+		recibido = read(msg=_('Enter the received token in telegram:'), digit=True)
 		if rand != recibido:
-			print(_('El token es incorrecto'))
+			print(_('The token is incorrect'))
 			valid = False
 		else:
-			print(_('El token es correcto.'))
+			print(_('The token is correct'))
 			valid = True
 
 	if valid is False:
 		fileData['telegram']['botToken'] = ''
 		fileData['telegram']['chatId'] = ''
 		s.setFileData(fileData)
-		print(_('Revíse las credenciales y vuelva a proveerlas.'))
+		print(_('Check the credentials and re-supply them.'))
 	else:
-		print(_('Los datos se guardaron.'))
+		print(_('The data was saved.'))
 	enter()
 
 	if e is not None and fd is not None:
