@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2020-05-27 22:20-0300\n"
+"POT-Creation-Date: 2020-06-05 13:51-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,55 +15,23 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: ../../../funcion/repartirRecurso.py:27
-msgid "¿Qué recurso quiere repartir?"
+#: ../../../funcion/repartirRecurso.py:28
+msgid "¿Qué recurso quiere distribuir?"
 msgstr "What resource do you want to distribute?"
 
-#: ../../../funcion/repartirRecurso.py:28
+#: ../../../funcion/repartirRecurso.py:29
 msgid "(0) Salir"
 msgstr "(0) Exit"
 
-#: ../../../funcion/repartirRecurso.py:29
-msgid "(1) Vino"
-msgstr "(1) Wine"
-
-#: ../../../funcion/repartirRecurso.py:30
-msgid "(2) Marmol"
-msgstr "(2) Marble"
-
-#: ../../../funcion/repartirRecurso.py:31
-msgid "(3) Cristal"
-msgstr "(3) Cristal"
-
-#: ../../../funcion/repartirRecurso.py:32
-msgid "(4) Azufre"
-msgstr "(4) Sulfur"
-
-#: ../../../funcion/repartirRecurso.py:58
+#: ../../../funcion/repartirRecurso.py:55
 msgid ""
 "\n"
-"No hay recursos para enviar."
+"Se realizarán los siguientes envios:\n"
 msgstr ""
 "\n"
-"There are no resources to send."
+"The following shipments will be made:\n"
 
-#: ../../../funcion/repartirRecurso.py:62
-msgid ""
-"\n"
-"No hay espacio disponible para enviar recursos."
-msgstr ""
-"\n"
-"There is no space available to send resources."
-
-#: ../../../funcion/repartirRecurso.py:92
-msgid ""
-"\n"
-"Se enviará {} a:"
-msgstr ""
-"\n"
-"{} will be sent to:"
-
-#: ../../../funcion/repartirRecurso.py:96
+#: ../../../funcion/repartirRecurso.py:59
 msgid ""
 "\n"
 "¿Proceder? [Y/n]"
@@ -71,15 +39,15 @@ msgstr ""
 "\n"
 "Proceed? [Y/n]"
 
-#: ../../../funcion/repartirRecurso.py:138
+#: ../../../funcion/repartirRecurso.py:72
 msgid ""
 "\n"
-"Repartir recurso\n"
+"Distribuyo {}\n"
 msgstr ""
 "\n"
-"Distribute resource\n"
+"Distribute {}\n"
 
-#: ../../../funcion/repartirRecurso.py:147
+#: ../../../funcion/repartirRecurso.py:78
 msgid ""
 "Error en:\n"
 "{}\n"
@@ -90,4 +58,20 @@ msgstr ""
 "{}\n"
 "Cause:\n"
 "{}"
+
+#: ../../../funcion/repartirRecurso.py:184
+msgid ""
+"\n"
+"No hay recursos para enviar."
+msgstr ""
+"\n"
+"There are no resources to send."
+
+#: ../../../funcion/repartirRecurso.py:188
+msgid ""
+"\n"
+"No hay espacio disponible para enviar recursos."
+msgstr ""
+"\n"
+"There is no space available to send resources."
 
