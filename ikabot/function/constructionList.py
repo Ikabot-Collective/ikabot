@@ -20,7 +20,7 @@ from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.recursos import getRecursosDisponibles
-t = gettext.translation('subirEdificio', 
+t = gettext.translation('constructionList', 
                         localedir, 
                         languages=idiomas,
                         fallback=True)
@@ -35,7 +35,7 @@ def getTiempoDeConstruccion(s, html, posicion):
 	hora_fin = re.search(r'"endUpgradeTime":(\d{10})', html)
 	if hora_fin is None:
 		msg = _('{}: No espero nada para que {} suba al nivel {:d}').format(ciudad['cityName'], edificio['name'], int(edificio['level']))
-		sendToBotDebug(s, msg, debugON_subirEdificio)
+		sendToBotDebug(s, msg, debugON_constructionList)
 		return 0
 
 	hora_actual = int( time.time() )
@@ -45,7 +45,7 @@ def getTiempoDeConstruccion(s, html, posicion):
 		espera = 0
 
 	msg = _('{}: Espero {:d} segundos para que {} suba al nivel {:d}').format(ciudad['cityName'], espera, edificio['name'], int(edificio['level']) + 1)
-	sendToBotDebug(s, msg, debugON_subirEdificio)
+	sendToBotDebug(s, msg, debugON_constructionList)
 
 	return espera
 
@@ -59,10 +59,10 @@ def esperarConstruccion(s, idCiudad, posicion):
 	ciudad = getCiudad(html)
 	edificio = ciudad['position'][posicion]
 	msg = _('{}: El edificio {} alcanzó el nivel {:d}.').format(ciudad['cityName'], edificio['name'], int(edificio['level']))
-	sendToBotDebug(s, msg, debugON_subirEdificio)
+	sendToBotDebug(s, msg, debugON_constructionList)
 	return ciudad
 
-def subirEdificio(s, idCiudad, posicion, nivelesASubir, esperarRecursos):
+def constructionList(s, idCiudad, posicion, nivelesASubir, esperarRecursos):
 
 	for lv in range(nivelesASubir):
 		ciudad = esperarConstruccion(s, idCiudad, posicion)
@@ -101,10 +101,10 @@ def subirEdificio(s, idCiudad, posicion, nivelesASubir, esperarRecursos):
 			return
 
 		msg = _('{}: El edificio {} se esta ampliando al nivel {:d}.').format(ciudad['cityName'], edificio['name'], int(edificio['level'])+1)
-		sendToBotDebug(s, msg, debugON_subirEdificio)
+		sendToBotDebug(s, msg, debugON_constructionList)
 
 	msg = _('{}: El edificio {} terminó de ampliarse al nivel: {:d}.').format(ciudad['cityName'], edificio['name'], int(edificio['level'])+1)
-	sendToBotDebug(s, msg, debugON_subirEdificio)
+	sendToBotDebug(s, msg, debugON_constructionList)
 
 def getReductores(ciudad):
 	(carpinteria, oficina, prensa, optico, area) = (0, 0, 0, 0, 0)
@@ -316,7 +316,7 @@ def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante):
 
 	multiprocessing.Process(target=planearAbastecimiento, args=(s, idCiudad, origenes, faltante)).start()
 
-def subirEdificios(s,e,fd):
+def constructionList(s,e,fd):
 	sys.stdin = os.fdopen(fd)
 	try:
 		global ampliar
@@ -392,7 +392,7 @@ def subirEdificios(s,e,fd):
 	setInfoSignal(s, info)
 	try:
 		if ampliar:
-			subirEdificio(s, idCiudad, posEdificio, niveles, esperarRecursos)
+			constructionList(s, idCiudad, posEdificio, niveles, esperarRecursos)
 	except:
 		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
 		sendToBot(s, msg)

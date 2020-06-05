@@ -10,13 +10,13 @@ from ikabot.helpers.recursos import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.varios import addDot
 
-t = gettext.translation('donar', 
+t = gettext.translation('donate', 
                         localedir, 
                         languages=idiomas,
                         fallback=True)
 _ = t.gettext
 
-def donar(s,e,fd):
+def donate(s,e,fd):
 	sys.stdin = os.fdopen(fd)
 	try:
 		bienes = {'1': _('Viñedo'), '2': _('Cantera'), '3': _('Mina de cristal'), '4': _('Mina de azufre')}
@@ -54,7 +54,7 @@ def donar(s,e,fd):
 			tipoDonacion = 2
 			print('{}:\n'.format(bien))
 		else:
-			print(_('No se puede donar\n'))
+			print(_('No se puede donate\n'))
 			return
 
 		tipo = tipo[tipoDonacion - 1]
@@ -76,11 +76,11 @@ def printEstadoMina(s, url, bien):
 	infoMina = re.search(r':<\\/h4>\\n\s*<ul\sclass=\\"resources\\">\\n\s*<li\sclass=\\"wood\\">([\d,]+)<[\s\S]*?:<\\/h4>\\n\s*<ul\sclass=\\"resources\\">\\n\s*<li\sclass=\\"wood\\">([\d,]+)<', html)
 	if infoMina is not None:
 		donado = infoMina.group(2)
-		porDonar = infoMina.group(1)
+		pordonate = infoMina.group(1)
 		donado = int(donado.replace(',', ''))
-		porDonar = int(porDonar.replace(',', ''))
+		pordonate = int(pordonate.replace(',', ''))
 		print('{} lv:{}'.format(bien, lv))
-		print('{} / {} {}%'.format(addDot(donado), addDot(porDonar), addDot(int((100 * donado) / porDonar))))
+		print('{} / {} {}%'.format(addDot(donado), addDot(pordonate), addDot(int((100 * donado) / pordonate))))
 	else:
 		print(_('{}: Está ampliando al nivel {:d}\n').format(bien, int(lv) + 1))
 	return infoMina is not None

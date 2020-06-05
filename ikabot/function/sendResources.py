@@ -15,9 +15,9 @@ from ikabot.helpers.varios import addDot
 from ikabot.helpers.recursos import *
 
 
-def menuRutaComercial(s,e,fd):
+def sendResources(s,e,fd):
 	sys.stdin = os.fdopen(fd)
-	t = gettext.translation('menuRutaComercial', 
+	t = gettext.translation('sendResources', 
 	                        localedir, 
 	                        languages=idiomas,
 	                        fallback=True)
@@ -134,13 +134,13 @@ def menuRutaComercial(s,e,fd):
 	try:
 		msg  = _('Comienzo a enviar recursos:\n')
 		msg += info
-		sendToBotDebug(s, msg, debugON_menuRutaComercial)
+		sendToBotDebug(s, msg, debugON_sendResources)
 
 		executeRoutes(s, rutas)
 
 		msg  = _('Termino de enviar recursos:\n')
 		msg += info
-		sendToBotDebug(s, msg, debugON_menuRutaComercial)
+		sendToBotDebug(s, msg, debugON_sendResources)
 	except:
 		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
 		sendToBot(s, msg)

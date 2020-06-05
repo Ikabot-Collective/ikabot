@@ -19,7 +19,7 @@ from ikabot.helpers.botComm import *
 from ikabot.helpers.recursos import *
 from ikabot.helpers.tienda import *
 
-t = gettext.translation('comprarRecursos', 
+t = gettext.translation('buyResources', 
                         localedir, 
                         languages=idiomas,
                         fallback=True)
@@ -96,7 +96,7 @@ def elegirCiudadComercial(ciudades_comerciales):
 	ind = read(min=1, max=len(ciudades_comerciales))
 	return ciudades_comerciales[ind - 1]
 
-def comprarRecursos(s,e,fd):
+def buyResources(s,e,fd):
 	sys.stdin = os.fdopen(fd)
 	try:
 		banner()
@@ -221,7 +221,7 @@ def buy(s, ciudad, oferta, cantidad):
 		data_dict['cargo_tradegood{}'.format(resource)] = cantidad
 	s.post(payloadPost=data_dict)
 	msg = _('Compro {} a {} de {}').format(addDot(cantidad), oferta['ciudadDestino'], oferta['jugadorAComprar'])
-	sendToBotDebug(s, msg, debugON_comprarRecursos)
+	sendToBotDebug(s, msg, debugON_buyResources)
 
 def do_it(s, ciudad, ofertas, cantidadAComprar):
 	while True:

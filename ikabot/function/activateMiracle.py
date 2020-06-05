@@ -13,7 +13,7 @@ from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.signals import setInfoSignal
 
-t = gettext.translation('activarMilagro',
+t = gettext.translation('activateMiracle',
                         localedir,
                         languages=idiomas,
                         fallback=True)
@@ -67,7 +67,7 @@ def obtenerMilagrosDisponibles(s):
 
 	return [ isla for isla in islas if isla['activable'] ]
 
-def activarMilagroImpl(s, isla):
+def activateMiracleImpl(s, isla):
 	params = {'action': 'CityScreen', 'cityId': isla['ciudad']['id'], 'function': 'activateWonder', 'position': isla['ciudad']['pos'], 'backgroundView': 'city', 'currentCityId': isla['ciudad']['id'], 'templateView': 'temple', 'actionRequest': s.token(), 'ajax': '1'}
 	rta = s.post(params=params)
 	return json.loads(rta, strict=False)
@@ -89,7 +89,7 @@ def elegir_isla(islas):
 	isla = islas[index - 1]
 	return isla
 
-def activarMilagro(s,e,fd):
+def activateMiracle(s,e,fd):
 	sys.stdin = os.fdopen(fd)
 	try:
 		banner()
@@ -114,7 +114,7 @@ def activarMilagro(s,e,fd):
 				e.set()
 				return
 
-			rta = activarMilagroImpl(s, isla)
+			rta = activateMiracleImpl(s, isla)
 
 			if rta[1][1][0] == 'error':
 				print(_('No se pudo activar el milagro {}.').format(isla['wonderName']))
@@ -242,7 +242,7 @@ def wait_for_miracle(s, isla):
 				wait_time = 60
 
 		msg = _('Espero {:d} segundos para activar el milagro {}').format(wait_time, isla['wonderName'])
-		sendToBotDebug(s, msg, debugON_activarMilagro)
+		sendToBotDebug(s, msg, debugON_activateMiracle)
 		wait(wait_time + 5)
 
 def do_it(s, isla, iterations):
@@ -251,7 +251,7 @@ def do_it(s, isla, iterations):
 
 		wait_for_miracle(s, isla)
 
-		rta = activarMilagroImpl(s, isla)
+		rta = activateMiracleImpl(s, isla)
 
 		if rta[1][1][0] == 'error':
 			msg = _('No se pudo activar el milagro {}.').format(isla['wonderName'])
@@ -259,4 +259,4 @@ def do_it(s, isla, iterations):
 			return
 
 		msg = _('Milagro {} activado con exito').format(isla['wonderName'])
-		sendToBotDebug(s, msg, debugON_activarMilagro)
+		sendToBotDebug(s, msg, debugON_activateMiracle)

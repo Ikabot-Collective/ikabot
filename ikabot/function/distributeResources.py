@@ -14,13 +14,13 @@ from ikabot.helpers.varios import addDot
 from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.gui import banner
 
-t = gettext.translation('repartirRecurso',
+t = gettext.translation('distributeResources',
                         localedir,
                         languages=idiomas,
                         fallback=True)
 _ = t.gettext
 
-def repartirRecurso(s,e,fd):
+def distributeResources(s,e,fd):
 	sys.stdin = os.fdopen(fd)
 	try:
 		banner()

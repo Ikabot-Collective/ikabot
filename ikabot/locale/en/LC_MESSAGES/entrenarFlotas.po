@@ -15,19 +15,19 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: ../../../funcion/entrenarFlotas.py:114
+#: ../../../function/trainFleets.py:114
 msgid "No se pudo terminar de entrenar tropas por falta de recursos."
 msgstr "It was not possible to finish the training of fleets due to lack of resources."
 
-#: ../../../funcion/entrenarFlotas.py:132
+#: ../../../function/trainFleets.py:132
 msgid "¿En qué ciudad quiere entrenar las flotas?"
 msgstr "In what city do you want to train the fleet?"
 
-#: ../../../funcion/entrenarFlotas.py:153
+#: ../../../function/trainFleets.py:153
 msgid "Entrenar:"
 msgstr "Train:"
 
-#: ../../../funcion/entrenarFlotas.py:160
+#: ../../../function/trainFleets.py:160
 msgid ""
 "\n"
 "Costo total:"
@@ -35,39 +35,39 @@ msgstr ""
 "\n"
 "Total cost:"
 
-#: ../../../funcion/entrenarFlotas.py:182
+#: ../../../function/trainFleets.py:182
 msgid "     Madera: {}"
 msgstr "       Wood: {}"
 
-#: ../../../funcion/entrenarFlotas.py:184
+#: ../../../function/trainFleets.py:184
 msgid "       Vino: {}"
 msgstr "       Wine: {}"
 
-#: ../../../funcion/entrenarFlotas.py:186
+#: ../../../function/trainFleets.py:186
 msgid "     Marmol: {}"
 msgstr "     Marble: {}"
 
-#: ../../../funcion/entrenarFlotas.py:188
+#: ../../../function/trainFleets.py:188
 msgid "    Cristal: {}"
 msgstr "    Cristal: {}"
 
-#: ../../../funcion/entrenarFlotas.py:190
+#: ../../../function/trainFleets.py:190
 msgid "     Azufre: {}"
 msgstr "     Sulfur: {}"
 
-#: ../../../funcion/entrenarFlotas.py:192
+#: ../../../function/trainFleets.py:192
 msgid " Ciudadanos: {}"
 msgstr "   Citizens: {}"
 
-#: ../../../funcion/entrenarFlotas.py:194
+#: ../../../function/trainFleets.py:194
 msgid "Manutención: {}"
 msgstr "Maintenance: {}"
 
-#: ../../../funcion/entrenarFlotas.py:196
+#: ../../../function/trainFleets.py:196
 msgid "   Duración: {}"
 msgstr "   Duration: {}"
 
-#: ../../../funcion/entrenarFlotas.py:198
+#: ../../../function/trainFleets.py:198
 msgid ""
 "\n"
 "Proceder? [Y/n]"
@@ -75,7 +75,7 @@ msgstr ""
 "\n"
 "Proceed? [Y/n]"
 
-#: ../../../funcion/entrenarFlotas.py:205
+#: ../../../function/trainFleets.py:205
 msgid ""
 "\n"
 "¿Quiere entrenar más tropas al terminar? [y/N]"
@@ -83,7 +83,7 @@ msgstr ""
 "\n"
 "Do you want to train more fleets when you finish? [y/N]"
 
-#: ../../../funcion/entrenarFlotas.py:242
+#: ../../../function/trainFleets.py:242
 msgid ""
 "\n"
 "No hay suficientes recursos:"
@@ -91,31 +91,31 @@ msgstr ""
 "\n"
 "There are not enough resources:"
 
-#: ../../../funcion/entrenarFlotas.py:244
+#: ../../../function/trainFleets.py:244
 msgid "    Madera:{}"
 msgstr "    Wood:{}"
 
-#: ../../../funcion/entrenarFlotas.py:246
+#: ../../../function/trainFleets.py:246
 msgid "      Vino:{}"
 msgstr "    Wine:{}"
 
-#: ../../../funcion/entrenarFlotas.py:248
+#: ../../../function/trainFleets.py:248
 msgid "    Marmol:{}"
 msgstr "  Marble:{}"
 
-#: ../../../funcion/entrenarFlotas.py:250
+#: ../../../function/trainFleets.py:250
 msgid "   Cristal:{}"
 msgstr " Cristal:{}"
 
-#: ../../../funcion/entrenarFlotas.py:252
+#: ../../../function/trainFleets.py:252
 msgid "    Azufre:{}"
 msgstr "  Sulfur:{}"
 
-#: ../../../funcion/entrenarFlotas.py:254
+#: ../../../function/trainFleets.py:254
 msgid "Ciudadanos:{}"
 msgstr "Citizens:{}"
 
-#: ../../../funcion/entrenarFlotas.py:256
+#: ../../../function/trainFleets.py:256
 msgid ""
 "\n"
 "¿Proceder de todos modos? [Y/n]"
@@ -123,7 +123,7 @@ msgstr ""
 "\n"
 "Proceed anyway? [Y/n]"
 
-#: ../../../funcion/entrenarFlotas.py:261
+#: ../../../function/trainFleets.py:261
 msgid ""
 "\n"
 "Se entrenarán las tropas seleccionadas."
@@ -131,7 +131,7 @@ msgstr ""
 "\n"
 "The selected fleet will be trained."
 
-#: ../../../funcion/entrenarFlotas.py:268
+#: ../../../function/trainFleets.py:268
 msgid ""
 "\n"
 "Entreno tropas en {}\n"
@@ -139,7 +139,7 @@ msgstr ""
 "\n"
 "I train a fleet in {}\n"
 
-#: ../../../funcion/entrenarFlotas.py:273
+#: ../../../function/trainFleets.py:273
 msgid ""
 "Error en:\n"
 "{}\n"

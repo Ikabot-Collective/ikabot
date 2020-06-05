@@ -15,49 +15,49 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: ../../../funcion/menuRutaComercial.py:28
+#: ../../../function/sendResources.py:28
 msgid "Ciudad de origen:"
 msgstr "Origin city:"
 
-#: ../../../funcion/menuRutaComercial.py:33
+#: ../../../function/sendResources.py:33
 msgid "¿Enviar viajes? [Y/n]"
 msgstr "Send shipment? [Y/n]"
 
-#: ../../../funcion/menuRutaComercial.py:43
+#: ../../../function/sendResources.py:43
 msgid "Ciudad de destino"
 msgstr "Destination city"
 
-#: ../../../funcion/menuRutaComercial.py:77
+#: ../../../function/sendResources.py:77
 msgid ""
 "{} más de madera\n"
 msgstr ""
 "{} more wood\n"
 
-#: ../../../funcion/menuRutaComercial.py:79
+#: ../../../function/sendResources.py:79
 msgid ""
 "{} más de vino\n"
 msgstr ""
 "{} more wine\n"
 
-#: ../../../funcion/menuRutaComercial.py:81
+#: ../../../function/sendResources.py:81
 msgid ""
 "{} más de marmol\n"
 msgstr ""
 "{} more marble\n"
 
-#: ../../../funcion/menuRutaComercial.py:83
+#: ../../../function/sendResources.py:83
 msgid ""
 "{} más de cristal\n"
 msgstr ""
 "{} more cristal\n"
 
-#: ../../../funcion/menuRutaComercial.py:85
+#: ../../../function/sendResources.py:85
 msgid ""
 "{} más de azufre\n"
 msgstr ""
 "{} more sulfur\n"
 
-#: ../../../funcion/menuRutaComercial.py:87
+#: ../../../function/sendResources.py:87
 msgid ""
 "Solo puede almacenar:\n"
 "{}"
@@ -65,71 +65,71 @@ msgstr ""
 "You can store just:\n"
 "{}"
 
-#: ../../../funcion/menuRutaComercial.py:88
+#: ../../../function/sendResources.py:88
 msgid "Disponible:"
 msgstr "Available:"
 
-#: ../../../funcion/menuRutaComercial.py:89
+#: ../../../function/sendResources.py:89
 msgid "Madera {} Vino {} Marmol {} Cristal {} Azufre {}"
 msgstr "Wood {} Wine {} Marbel {} Cristal {} Sulfur {}"
 
-#: ../../../funcion/menuRutaComercial.py:90
+#: ../../../function/sendResources.py:90
 msgid "Enviar:"
 msgstr "Send:"
 
-#: ../../../funcion/menuRutaComercial.py:92
+#: ../../../function/sendResources.py:92
 msgid " Madera:"
 msgstr "   Wood:"
 
-#: ../../../funcion/menuRutaComercial.py:93
+#: ../../../function/sendResources.py:93
 msgid "   Vino:"
 msgstr "   Wine:"
 
-#: ../../../funcion/menuRutaComercial.py:94
+#: ../../../function/sendResources.py:94
 msgid " Marmol:"
 msgstr " Marbel:"
 
-#: ../../../funcion/menuRutaComercial.py:95
+#: ../../../function/sendResources.py:95
 msgid "Cristal:"
 msgstr "Cristal:"
 
-#: ../../../funcion/menuRutaComercial.py:96
+#: ../../../function/sendResources.py:96
 msgid " Azufre:"
 msgstr " Sulfur:"
 
-#: ../../../funcion/menuRutaComercial.py:103
+#: ../../../function/sendResources.py:103
 msgid "Por enviar de {} a {}"
 msgstr "About to send from {} to {}"
 
-#: ../../../funcion/menuRutaComercial.py:106
+#: ../../../function/sendResources.py:106
 msgid "Madera:{} "
 msgstr "Wood:{} "
 
-#: ../../../funcion/menuRutaComercial.py:108
+#: ../../../function/sendResources.py:108
 msgid "Vino:{} "
 msgstr "Wine:{} "
 
-#: ../../../funcion/menuRutaComercial.py:110
+#: ../../../function/sendResources.py:110
 msgid "Marmol:{} "
 msgstr "Marble:{} "
 
-#: ../../../funcion/menuRutaComercial.py:112
+#: ../../../function/sendResources.py:112
 msgid "Cristal:{} "
 msgstr "Cristal:{} "
 
-#: ../../../funcion/menuRutaComercial.py:114
+#: ../../../function/sendResources.py:114
 msgid "Azufre:{}"
 msgstr "Sulfur:{}"
 
-#: ../../../funcion/menuRutaComercial.py:116
+#: ../../../function/sendResources.py:116
 msgid "¿Proceder? [Y/n]"
 msgstr "Proceed? [Y/n]"
 
-#: ../../../funcion/menuRutaComercial.py:121
+#: ../../../function/sendResources.py:121
 msgid "¿Realizar otro envio? [y/N]"
 msgstr "Create another shipment? [y/N]"
 
-#: ../../../funcion/menuRutaComercial.py:130
+#: ../../../function/sendResources.py:130
 msgid ""
 "\n"
 "Ruta comercial\n"
@@ -137,7 +137,7 @@ msgstr ""
 "\n"
 "Comercial rute\n"
 
-#: ../../../funcion/menuRutaComercial.py:133
+#: ../../../function/sendResources.py:133
 msgid ""
 "{} -> {}\n"
 "Madera: {} Vino: {} Marmol: {} Cristal: {} Azufre: {}\n"
@@ -145,19 +145,19 @@ msgstr ""
 "{} -> {}\n"
 "Wood: {} Wine: {} Marble: {} Cristal: {} Sulfur: {}\n"
 
-#: ../../../funcion/menuRutaComercial.py:137
+#: ../../../function/sendResources.py:137
 msgid ""
 "Comienzo a enviar recursos:\n"
 msgstr ""
 "Start to send the resources:\n"
 
-#: ../../../funcion/menuRutaComercial.py:143
+#: ../../../function/sendResources.py:143
 msgid ""
 "Termino de enviar recursos:\n"
 msgstr ""
 "End to send the resources:\n"
 
-#: ../../../funcion/menuRutaComercial.py:147
+#: ../../../function/sendResources.py:147
 msgid ""
 "Error en:\n"
 "{}\n"

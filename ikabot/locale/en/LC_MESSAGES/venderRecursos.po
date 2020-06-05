@@ -15,27 +15,27 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: ../../../funcion/venderRecursos.py:27
+#: ../../../function/sellResources.py:27
 msgid ""
 "¿En cuál ciudad quiere vender recursos?\n"
 msgstr ""
 "In which city do you want to sell resources?\n"
 
-#: ../../../funcion/venderRecursos.py:51
+#: ../../../function/sellResources.py:51
 msgid "No hay ofertas disponibles."
 msgstr "No offers available."
 
-#: ../../../funcion/venderRecursos.py:55
+#: ../../../function/sellResources.py:55
 msgid ""
 "¿A cuáles ofertas le quiere vender?\n"
 msgstr ""
 "Which offers do you want to sell to?\n"
 
-#: ../../../funcion/venderRecursos.py:64
+#: ../../../function/sellResources.py:64
 msgid "{} ({}): {} a {} c/u ({} en total) [Y/n]"
 msgstr "{} ({}): {} at {} each ({} in total) [Y/n]"
 
-#: ../../../funcion/venderRecursos.py:78
+#: ../../../function/sellResources.py:78
 msgid ""
 "\n"
 "¿Cuánto quiere vender? [max = {}]"
@@ -43,7 +43,7 @@ msgstr ""
 "\n"
 "How much do you want to sell? [max = {}]"
 
-#: ../../../funcion/venderRecursos.py:90
+#: ../../../function/sellResources.py:90
 msgid ""
 "\n"
 "¿Vender {} de {} por un total de {}? [Y/n]"
@@ -51,8 +51,8 @@ msgstr ""
 "\n"
 "Sell {} of {} for a total of {}? [Y/n]"
 
-#: ../../../funcion/venderRecursos.py:99
-#: ../../../funcion/venderRecursos.py:136
+#: ../../../function/sellResources.py:99
+#: ../../../function/sellResources.py:136
 msgid ""
 "\n"
 "Vendo {} de {} en {}\n"
@@ -60,8 +60,8 @@ msgstr ""
 "\n"
 "I sell {} of {} in {}\n"
 
-#: ../../../funcion/venderRecursos.py:104
-#: ../../../funcion/venderRecursos.py:141
+#: ../../../function/sellResources.py:104
+#: ../../../function/sellResources.py:141
 msgid ""
 "Error en:\n"
 "{}\n"
@@ -73,11 +73,11 @@ msgstr ""
 "Cause:\n"
 "{}"
 
-#: ../../../funcion/venderRecursos.py:115
+#: ../../../function/sellResources.py:115
 msgid "¿Cuánto quiere vender? [max = {}]"
 msgstr "How much do you want to sell? [max = {}]"
 
-#: ../../../funcion/venderRecursos.py:123
+#: ../../../function/sellResources.py:123
 msgid ""
 "\n"
 "¿A qué precio? [min = {:d}, max = {:d}]"
@@ -85,7 +85,7 @@ msgstr ""
 "\n"
 "At what price? [min = {:d}, max = {:d}]"
 
-#: ../../../funcion/venderRecursos.py:126
+#: ../../../function/sellResources.py:126
 msgid ""
 "\n"
 "Se venderá {} de {} a {}: {}"
@@ -93,7 +93,7 @@ msgstr ""
 "\n"
 "I will sell {} of {} at {}: {}"
 
-#: ../../../funcion/venderRecursos.py:127
+#: ../../../function/sellResources.py:127
 msgid ""
 "\n"
 "¿Proceder? [Y/n]"
@@ -101,19 +101,19 @@ msgstr ""
 "\n"
 "Proceed? [Y/n]"
 
-#: ../../../funcion/venderRecursos.py:151
+#: ../../../function/sellResources.py:151
 msgid "No hay una Tienda contruida"
 msgstr "There is no shop built"
 
-#: ../../../funcion/venderRecursos.py:161
+#: ../../../function/sellResources.py:161
 msgid "¿Qué recurso quiere vender?"
 msgstr "What resource do you want to sell?"
 
-#: ../../../funcion/venderRecursos.py:168
+#: ../../../function/sellResources.py:168
 msgid "¿Quiere vender a ofertas existenes (1) o quiere hacer su propia oferta (2)?"
 msgstr "Do you want to sell to existing offers (1) or do you want to make your own offer (2)?"
 
-#: ../../../funcion/venderRecursos.py:234
+#: ../../../function/sellResources.py:234
 msgid "Se vendieron {} de {} a {:d}"
 msgstr "{} of {} was sold at {:d}"
 

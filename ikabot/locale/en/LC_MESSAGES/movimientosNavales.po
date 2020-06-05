@@ -15,13 +15,13 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: ../../../funcion/movimientosNavales.py:31
+#: ../../../function/shipMovements.py:31
 msgid ""
 "Barcos {:d}/{:d}\n"
 msgstr ""
 "Ships {:d}/{:d}\n"
 
-#: ../../../funcion/movimientosNavales.py:60
+#: ../../../function/shipMovements.py:60
 msgid ""
 "Tropas:{}\n"
 "Flotas:{}"
@@ -29,7 +29,7 @@ msgstr ""
 "Troops:{}\n"
 "Fleets:{}"
 
-#: ../../../funcion/movimientosNavales.py:70
+#: ../../../function/shipMovements.py:70
 msgid ""
 "Tropas:{}\n"
 "Flotas:{}\n"
@@ -39,31 +39,31 @@ msgstr ""
 "Fleets:{}\n"
 " Ships:{}"
 
-#: ../../../funcion/movimientosNavales.py:72
+#: ../../../function/shipMovements.py:72
 msgid "azufre"
 msgstr "sulfur"
 
-#: ../../../funcion/movimientosNavales.py:72
+#: ../../../function/shipMovements.py:72
 msgid "cristal"
 msgstr "cristal"
 
-#: ../../../funcion/movimientosNavales.py:72
+#: ../../../function/shipMovements.py:72
 msgid "madera"
 msgstr "wood"
 
-#: ../../../funcion/movimientosNavales.py:72
+#: ../../../function/shipMovements.py:72
 msgid "marmol"
 msgstr "marble"
 
-#: ../../../funcion/movimientosNavales.py:72
+#: ../../../function/shipMovements.py:72
 msgid "vino"
 msgstr "wine"
 
-#: ../../../funcion/movimientosNavales.py:79
+#: ../../../function/shipMovements.py:79
 msgid "{} de {}"
 msgstr "{} of {}"
 
-#: ../../../funcion/movimientosNavales.py:81
+#: ../../../function/shipMovements.py:81
 msgid "{:d} Barcos"
 msgstr "{:d} Ships"
 

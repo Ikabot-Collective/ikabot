@@ -30,7 +30,7 @@ def setSignalsHandlers(s):
 	for sgn in signals:
 		signal.signal(sgn, create_handler(s))
 
-def setInfoSignal(s, info): # el proceso explica su funcion por stdout
+def setInfoSignal(s, info): # el proceso explica su function por stdout
 	info = _('información del proceso {}:\n{}').format(os.getpid(), info)
 	def _sendInfo(signum, frame):
 		sendToBot(s, info)

@@ -14,15 +14,15 @@ from ikabot.helpers.gui import enter
 from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import daysHoursMinutes
-from ikabot.funcion.modoVacaciones import activarModoVacaciones
+from ikabot.function.vacationMode import activarvacationMode
 
-t = gettext.translation('alertarAtaques',
+t = gettext.translation('alertAttacks',
                         localedir,
                         languages=idiomas,
                         fallback=True)
 _ = t.gettext
 
-def alertarAtaques(s,e,fd):
+def alertAttacks(s,e,fd):
 	sys.stdin = os.fdopen(fd)
 	try:
 		if botValido(s) is False:
@@ -68,7 +68,7 @@ def respondToAttack(s):
 
 			if accion == 1:
 				# mv
-				activarModoVacaciones(s)
+				activarvacationMode(s)
 			else:
 				sendToBot(s, _('Comando inválido: {:d}').format(accion))
 

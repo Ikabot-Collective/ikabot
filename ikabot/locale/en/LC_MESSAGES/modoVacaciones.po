@@ -15,11 +15,11 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: ../../../funcion/modoVacaciones.py:18
+#: ../../../function/vacationMode.py:18
 msgid "¿Activar modo vacaciones? [Y/n]"
 msgstr "Activate vacation mode? [Y/n]"
 
-#: ../../../funcion/modoVacaciones.py:27
+#: ../../../function/vacationMode.py:27
 msgid "Se activo el modo vacaciones."
 msgstr "Vacation mode has been activated."
 

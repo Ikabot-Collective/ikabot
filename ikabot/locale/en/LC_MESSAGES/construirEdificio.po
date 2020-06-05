@@ -15,21 +15,21 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: ../../../funcion/construirEdificio.py:19
+#: ../../../function/constructBuilding.py:19
 msgid "Ciudad donde construir:"
 msgstr "City where to build:"
 
-#: ../../../funcion/construirEdificio.py:43
+#: ../../../function/constructBuilding.py:43
 msgid "No se puede construir ningún edificio"
 msgstr "No building can be built"
 
-#: ../../../funcion/construirEdificio.py:47
+#: ../../../function/constructBuilding.py:47
 msgid ""
 "¿Qué edificio quiere construir?\n"
 msgstr ""
 "What building do you want to build?\n"
 
-#: ../../../funcion/construirEdificio.py:60
+#: ../../../function/constructBuilding.py:60
 msgid ""
 "¿En qué posición quiere contruir?\n"
 msgstr ""

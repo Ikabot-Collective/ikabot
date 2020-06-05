@@ -15,52 +15,52 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: ../../../funcion/donar.py:20
+#: ../../../function/donate.py:20
 msgid "Cantera"
 msgstr "Quarry"
 
-#: ../../../funcion/donar.py:20
+#: ../../../function/donate.py:20
 msgid "Mina de azufre"
 msgstr "Sulfur Pit"
 
-#: ../../../funcion/donar.py:20
+#: ../../../function/donate.py:20
 msgid "Mina de cristal"
 msgstr "Crystal Mine"
 
-#: ../../../funcion/donar.py:20
+#: ../../../function/donate.py:20
 msgid "Viñedo"
 msgstr "Vines"
 
-#: ../../../funcion/donar.py:44
+#: ../../../function/donate.py:44
 msgid ""
 "Madera disopnible:{} / {}\n"
 msgstr "Wood available:{} / {}\n"
 
-#: ../../../funcion/donar.py:47
+#: ../../../function/donate.py:47
 msgid "Aserradero(1) o {}(2)?:"
 msgstr "Forest(1) or {}(2)?:"
 
-#: ../../../funcion/donar.py:51
+#: ../../../function/donate.py:51
 msgid ""
 "Aserradero:\n"
 msgstr ""
 "Forest:\n"
 
-#: ../../../funcion/donar.py:56
+#: ../../../function/donate.py:56
 msgid ""
-"No se puede donar\n"
+"No se puede donate\n"
 msgstr ""
 "You cannot donate\n"
 
-#: ../../../funcion/donar.py:61
+#: ../../../function/donate.py:61
 msgid "Cantidad:"
 msgstr "Amount:"
 
-#: ../../../funcion/donar.py:67
+#: ../../../function/donate.py:67
 msgid "Aserradero"
 msgstr "Forest"
 
-#: ../../../funcion/donar.py:80
+#: ../../../function/donate.py:80
 msgid ""
 "{}: Está ampliando al nivel {:d}\n"
 msgstr "{}: Is expanding to level {:d}\n"

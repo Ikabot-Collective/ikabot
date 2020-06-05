@@ -36,7 +36,7 @@ msgid "(4)  Estado de la cuenta"
 msgstr "(4)  Account status"
 
 #: ../../../command_line.py:86
-msgid "(5)  Donar"
+msgid "(5)  donate"
 msgstr "(5)  Donate"
 
 #: ../../../command_line.py:87
@@ -52,7 +52,7 @@ msgid "(8)  Alertar ataques"
 msgstr "(8)  Alert attacks"
 
 #: ../../../command_line.py:90
-msgid "(9)  Donar automaticamente"
+msgid "(9)  donate automaticamente"
 msgstr "(9)  Donate automatically"
 
 #: ../../../command_line.py:91

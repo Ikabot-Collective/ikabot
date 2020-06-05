@@ -13,13 +13,13 @@ from ikabot.helpers.gui import enter
 from ikabot.helpers.pedirInfo import getIdsOfCities
 from ikabot.helpers.varios import wait
 
-t = gettext.translation('entrarDiariamente', 
+t = gettext.translation('loginDaily', 
                         localedir, 
                         languages=idiomas,
                         fallback=True)
 _ = t.gettext
 
-def entrarDiariamente(s,e,fd):
+def loginDaily(s,e,fd):
 	sys.stdin = os.fdopen(fd)
 	try:
 		print(_('Se entrará todos los días automaticamente.'))

@@ -13,13 +13,13 @@ from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.recursos import getRecursosDisponibles
 
-t = gettext.translation('botDonador', 
+t = gettext.translation('donationBot', 
                         localedir, 
                         languages=idiomas,
                         fallback=True)
 _ = t.gettext
 
-def botDonador(s,e,fd):
+def donationBot(s,e,fd):
 	sys.stdin = os.fdopen(fd)
 	try:
 		banner()
@@ -29,7 +29,7 @@ def botDonador(s,e,fd):
 		for idCiudad in idsCiudades:
 			tradegood = ciudades[idCiudad]['tradegood']
 			bien = bienes[tradegood]
-			print(_('En la ciudad {} {}, ¿Desea donar al aserradero, al bien de cambio o a ninguno? [a/b/n]').format(ciudades[idCiudad]['name'], bien))
+			print(_('En la ciudad {} {}, ¿Desea donate al aserradero, al bien de cambio o a ninguno? [a/b/n]').format(ciudades[idCiudad]['name'], bien))
 			rta = read(values=[_('a'), _('A'), _('b'), _('B'), 'n', 'N'])
 			if rta.lower() == _('a'):
 				tipo = 'resource'
@@ -39,7 +39,7 @@ def botDonador(s,e,fd):
 				tipo = None
 			ciudades_dict[idCiudad] = {'tipo': tipo}
 
-		print(_('Se donará todos los días.'))
+		print(_('Se donateá todos los días.'))
 		enter()
 	except KeyboardInterrupt:
 		e.set()
@@ -72,5 +72,5 @@ def do_it(s, idsCiudades, ciudades_dict):
 			if tipo:
 				s.post(payloadPost={'islandId': idIsla, 'type': tipo, 'action': 'IslandScreen', 'function': 'donate', 'donation': madera, 'backgroundView': 'island', 'templateView': tipo, 'actionRequest': s.token(), 'ajax': '1'})
 		msg = _('Doné automaticamente.')
-		sendToBotDebug(s, msg, debugON_botDonador)
+		sendToBotDebug(s, msg, debugON_donationBot)
 		time.sleep(24*60*60)

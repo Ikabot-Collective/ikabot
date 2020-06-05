@@ -63,9 +63,9 @@ def botValido(s):
 		if rta.lower() != 'y':
 			return False
 		else:
-			return cargarTelegram(s)
+			return updateTelegramData(s)
 
-def cargarTelegram(s, e=None, fd=None):
+def updateTelegramData(s, e=None, fd=None):
 	if e is not None and fd is not None:
 		sys.stdin = os.fdopen(fd) # give process access to terminal
 

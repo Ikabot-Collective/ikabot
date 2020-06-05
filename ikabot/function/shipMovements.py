@@ -13,7 +13,7 @@ from ikabot.helpers.gui import *
 from ikabot.helpers.naval import *
 from ikabot.helpers.varios import *
 
-t = gettext.translation('movimientosNavales',
+t = gettext.translation('shipMovements',
                         localedir,
                         languages=idiomas,
                         fallback=True)
@@ -27,7 +27,7 @@ def esHostil(movement):
 			return True
 	return False
 
-def movimientosNavales(s,e,fd):
+def shipMovements(s,e,fd):
 	sys.stdin = os.fdopen(fd)
 	try:
 		banner()
