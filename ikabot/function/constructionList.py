@@ -297,7 +297,7 @@ def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante):
 	for i in range(5):
 		if faltante[i] <= 0:
 			continue
-		bien = tipoDeBien[i]
+		bien = materials_names[i]
 		ids = menuEdificios(s, idss, cities, idCiudad, bien, i, faltante[i])
 		if enviarRecursos is False and ampliar:
 			print(_('\nThe building will be expanded if possible.'))

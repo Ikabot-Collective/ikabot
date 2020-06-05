@@ -93,7 +93,7 @@ def venderAOfertas(s, ciudad, recurso, e):
 		compra = cantidad if cantidad < faltaVender else faltaVender
 		faltaVender -= compra
 		profit += compra * int(precio)
-	print(_('\nSell {} of {} for a total of {}? [Y/n]').format(addDot(vender), tipoDeBien[recurso], addDot(profit)))
+	print(_('\nSell {} of {} for a total of {}? [Y/n]').format(addDot(vender), materials_names[recurso], addDot(profit)))
 	rta = read(values=['y', 'Y', 'n', 'N', ''])
 	if rta.lower() == 'n':
 		return
@@ -101,7 +101,7 @@ def venderAOfertas(s, ciudad, recurso, e):
 	set_child_mode(s)
 	e.set()
 
-	info = _('\nI sell {} of {} in {}\n').format(addDot(vender), tipoDeBien[recurso], ciudad['name'])
+	info = _('\nI sell {} of {} in {}\n').format(addDot(vender), materials_names[recurso], ciudad['name'])
 	setInfoSignal(s, info)
 	try:
 		do_it1(s, vender,  ofertas, recurso, ciudad)
@@ -128,7 +128,7 @@ def crearOferta(s, ciudad, recurso, e):
 	print(_('\nAt what price? [min = {:d}, max = {:d}]').format(precio_min, precio_max))
 	precio = read(min=precio_min, max=precio_max)
 
-	print(_('\nI will sell {} of {} at {}: {}').format(addDot(vender), tipoDeBien[recurso], addDot(precio), addDot(precio * vender)))
+	print(_('\nI will sell {} of {} at {}: {}').format(addDot(vender), materials_names[recurso], addDot(precio), addDot(precio * vender)))
 	print(_('\nProceed? [Y/n]'))
 	rta = read(values=['y', 'Y', 'n', 'N', ''])
 	if rta.lower() == 'n':
@@ -137,7 +137,7 @@ def crearOferta(s, ciudad, recurso, e):
 	set_child_mode(s)
 	e.set()
 
-	info = _('\nI sell {} of {} in {}\n').format(addDot(vender), tipoDeBien[recurso], ciudad['name'])
+	info = _('\nI sell {} of {} in {}\n').format(addDot(vender), materials_names[recurso], ciudad['name'])
 	setInfoSignal(s, info)
 	try:
 		do_it2(s, vender, precio, recurso, cap_venta, ciudad)
@@ -166,9 +166,9 @@ def sellResources(s,e,fd):
 			banner()
 
 		print(_('What resource do you want to sell?'))
-		for indice, bien in enumerate(tipoDeBien):
+		for indice, bien in enumerate(materials_names):
 			print('({:d}) {}'.format(indice+1, bien))
-		eleccion = read(min=1, max=len(tipoDeBien))
+		eleccion = read(min=1, max=len(materials_names))
 		recurso = eleccion - 1
 		banner()
 
@@ -241,7 +241,7 @@ def do_it2(s, porVender, precio, recurso, cap_venta, ciudad):
 		html = getStoreInfo(s, ciudad)
 		enVenta = vendiendo(html)[recurso]
 		if enVenta <= enVenta_inicial:
-			msg = _('{} of {} was sold at {:d}').format(addDot(total), tipoDeBien[recurso], precio)
+			msg = _('{} of {} was sold at {:d}').format(addDot(total), materials_names[recurso], precio)
 			sendToBot(s, msg)
 			return
 		time.sleep(60 * 60 *  2)

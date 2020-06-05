@@ -27,7 +27,7 @@ _ = t.gettext
 
 def asignarRecursoBuscado(s, ciudad):
 	print(_('Which resource do you want to buy?'))
-	for indice, bien in enumerate(tipoDeBien):
+	for indice, bien in enumerate(materials_names):
 		print('({:d}) {}'.format(indice+1, bien))
 	eleccion = read(min=1, max=5)
 	recurso = eleccion - 1
@@ -167,7 +167,7 @@ def buyResources(s,e,fd):
 	set_child_mode(s)
 	e.set()
 
-	info = _('\nI will buy {} from {} to {}\n').format(addDot(cantidadAComprar), tipoDeBien[numRecurso - 1], ciudad['cityName'])
+	info = _('\nI will buy {} from {} to {}\n').format(addDot(cantidadAComprar), materials_names[numRecurso - 1], ciudad['cityName'])
 	setInfoSignal(s, info)
 	try:
 		do_it(s, ciudad, ofertas, cantidadAComprar)

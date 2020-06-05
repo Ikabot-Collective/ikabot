@@ -25,54 +25,65 @@ def getStatus(s,e,fd):
 	sys.stdin = os.fdopen(fd)
 	try:
 		banner()
-		tipoCiudad = [bcolors.ENDC, bcolors.HEADER, bcolors.STONE, bcolors.BLUE, bcolors.WARNING]
+		color_arr = [bcolors.ENDC, bcolors.HEADER, bcolors.STONE, bcolors.BLUE, bcolors.WARNING]
 
 		print(_('Ships {:d}/{:d}').format(getAvailableShips(s), getTotalShips(s)))
 
 		print(_('\nOf which city do you want to see the state?'))
-		ciudad = chooseCity(s)
+		city = chooseCity(s)
 		banner()
 
-		(wood, good, typeGood) = getProduccion(s, ciudad['id'])
-		print('\033[1m' + tipoCiudad[int(typeGood)] + ciudad['cityName'] + tipoCiudad[0])
-		max = ciudad['recursos']
-		storageCapacityDeAlmacenamiento = ciudad['storageCapacity']
-		crecursos = []
-		for i in range(0,5):
-			if max[i] == storageCapacityDeAlmacenamiento:
-				crecursos.append(bcolors.RED)
+		(wood, good, typeGood) = getProduccion(s, city['id'])
+		print('\033[1m{}{}{}'.format(color_arr[int(typeGood)], city['cityName'], color_arr[0]))
+
+		resources = city['recursos']
+		storageCapacity = city['storageCapacity']
+		color_resources = []
+		for i in range(len(materials_names)):
+			if resources[i] == storageCapacity:
+				color_resources.append(bcolors.RED)
 			else:
-				crecursos.append(bcolors.ENDC)
+				color_resources.append(bcolors.ENDC)
 		print(_('Storage:'))
-		print(addDot(storageCapacityDeAlmacenamiento))
+		print(addDot(storageCapacity))
 		print(_('Resources:'))
-		print(_('Wood {1}{2}{0} Wine {3}{4}{0} Marble {5}{6}{0} Cristal {7}{8}{0} Sulfur {9}{10}{0}').format(bcolors.ENDC, crecursos[0], addDot(max[0]), crecursos[1], addDot(max[1]), crecursos[2], addDot(max[2]), crecursos[3], addDot(max[3]), crecursos[4], addDot(max[4])))
-		consumoXhr = ciudad['consumo']
-		tipo = tipoDeBien[typeGood]
+		for i in range(len(materials_names)):
+			print('{} {}{}{} '.format(materials_names[i], bcolors.ENDC, color_resources[i], addDot(resources[i])), end='')
+		print('')
+
 		print(_('Production:'))
-		print(_('Wood:{} {}:{}').format(addDot(wood*3600), tipo, addDot(good*3600)))
-		if consumoXhr == 0:
-			print(_('{}{}Does not consume wine!{}').format(bcolors.RED, bcolors.BOLD, bcolors.ENDC))
-		elif typeGood == 1 and (good*3600) > consumoXhr:
-			print(_('There is wine for:\n∞'))
-		else:
-			consumoXseg = Decimal(consumoXhr) / Decimal(3600)
-			segsRestantes = Decimal(max[1]) / Decimal(consumoXseg)
-			texto = daysHoursMinutes(segsRestantes)
-			print(_('There is wine for:\n{}').format(texto))
-		for edificio in [ edificio for edificio in ciudad['position'] if edificio['name'] != 'empty' ]:
+		print('{}:{} {}:{}'.format(materials_names[0], addDot(wood*3600), materials_names[typeGood], addDot(good*3600)))
+
+		hasTavern = 'tavern' in [ building['building'] for building in city['position'] ]
+		if hasTavern:
+			consume_per_hour = city['consumo']
+			if consume_per_hour == 0:
+				print(_('{}{}Does not consume wine!{}').format(bcolors.RED, bcolors.BOLD, bcolors.ENDC))
+			else:
+				if typeGood == 1 and (good*3600) > consume_per_hour:
+					time_lapse = '∞'
+				else:
+					consumoXseg = Decimal(consume_per_hour) / Decimal(3600)
+					segsRestantes = Decimal(resources[1]) / Decimal(consumoXseg)
+					time_lapse = daysHoursMinutes(segsRestantes)
+				print(_('There is wine for: {}').format(time_lapse))
+
+		for edificio in [ edificio for edificio in city['position'] if edificio['name'] != 'empty' ]:
 			if edificio['isMaxLevel'] is True:
 				color = bcolors.BLACK
 			elif edificio['canUpgrade'] is True:
 				color = bcolors.GREEN
 			else:
 				color = bcolors.RED
+
 			level = edificio['level']
 			if int(level) < 10:
 				level = ' ' + level
 			if edificio['isBusy'] is True:
 				level = level + '+'
+
 			print(_('lv:{}\t{}{}{}').format(level, color, edificio['name'], bcolors.ENDC))
+
 		enter()
 		print('')
 		e.set()

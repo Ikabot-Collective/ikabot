@@ -63,7 +63,7 @@ def do_it(s):
 						if ciudad['id'] == cityAntes['id']: #compare current city's id with beforecity's id
 							break
 					else:
-						msg = _('the city {} of the player {} disappeared in {} {}:{} {}').format(cityAntes['name'], cityAntes['Name'], tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
+						msg = _('the city {} of the player {} disappeared in {} {}:{} {}').format(cityAntes['name'], cityAntes['Name'], materials_names[int(isla['good'])], isla['x'], isla['y'], isla['name'])
 						sendToBot(s, msg)
 
 				# alguien fundo - someone colonised
@@ -72,7 +72,7 @@ def do_it(s):
 						if ciudad['id'] == cityAntes['id']: #compare current city's id with beforecity's id
 							break
 					else:
-						msg = _('{} founded {} in {} {}:{} {}').format(ciudad['Name'], ciudad['name'], tipoDeBien[int(isla['good'])], isla['x'], isla['y'], isla['name'])
+						msg = _('{} founded {} in {} {}:{} {}').format(ciudad['Name'], ciudad['name'], materials_names[int(isla['good'])], isla['x'], isla['y'], isla['name'])
 						sendToBot(s, msg)
 
 			isla_ciudades[idIsla] = ciudades.copy() #copies non empty cities into current islands cities (isla_ciudades)
