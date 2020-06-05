@@ -43,7 +43,7 @@ ikaFile = '.ikabot'
 urlCiudad = 'view=city&cityId='
 urlIsla = 'view=island&islandId='
 prompt = ' >>  '
-tipoDeBien = [_('Wood'), _('Wine'), _('Marble'), _('Cristal'), _('Sulfur')]
+materials_names = [_('Wood'), _('Wine'), _('Marble'), _('Cristal'), _('Sulfur')]
 ConnectionError_wait = 5 * 60
 
 debugON_alertAttacks    = False

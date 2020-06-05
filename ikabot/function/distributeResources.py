@@ -27,8 +27,8 @@ def distributeResources(s,e,fd):
 
 		print(_('What resource do you want to distribute?'))
 		print(_('(0) Exit'))
-		for i in range(len(tipoDeBien)):
-			print('({:d}) {}'.format(i+1, tipoDeBien[i]))
+		for i in range(len(materials_names)):
+			print('({:d}) {}'.format(i+1, materials_names[i]))
 		resource = read(min=0, max=5)
 		if resource == 0:
 			e.set() #give main process control before exiting
@@ -54,7 +54,7 @@ def distributeResources(s,e,fd):
 		banner()
 		print(_('\nThe following shipments will be made:\n'))
 		for route in routes:
-			print('{} -> {} : {} {}'.format(route[0]['name'], route[1]['name'], route[resource+3], tipoDeBien[resource])) #displays all routes to be executed in console
+			print('{} -> {} : {} {}'.format(route[0]['name'], route[1]['name'], route[resource+3], materials_names[resource])) #displays all routes to be executed in console
 
 		print(_('\nProceed? [Y/n]'))
 		rta = read(values=['y', 'Y', 'n', 'N', ''])
@@ -69,7 +69,7 @@ def distributeResources(s,e,fd):
 	set_child_mode(s)
 	e.set() #this is where we give back control to main process
 
-	info = _('\nDistribute {}\n').format(tipoDeBien[resource])
+	info = _('\nDistribute {}\n').format(materials_names[resource])
 	setInfoSignal(s, info)
 
 	try:
@@ -143,7 +143,7 @@ def distribute_evenly(s, resource):
 			if toSend == 0:
 				continue
 
-			toSendArr = [0] * len(tipoDeBien)
+			toSendArr = [0] * len(materials_names)
 			toSendArr[resource] = toSend
 			route = (allCities[originCityID], allCities[destinationCityID], allCities[destinationCityID]['islandId'], *toSendArr)
 			routes.append(route)
@@ -248,7 +248,7 @@ def distribute_unevenly(s, recurso):
 			else:
 				faltante -= enviar
 
-			toSendArr = [0] * len(tipoDeBien)
+			toSendArr = [0] * len(materials_names)
 			toSendArr[recurso] = enviar
 			ruta = (ciudadO, ciudadD, idIsla, *toSendArr)
 
