@@ -1,9 +1,9 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import os
 import json
 import base64
-import binascii
 import hashlib
 from ikabot.config import *
 from ikabot.helpers.botComm import *
@@ -63,8 +63,8 @@ class AESCipher:
 				ciphertext = ciphertext[64:]
 				try:
 					plaintext = self.decrypt(ciphertext)
-				except binascii.Error as e:
-					msg = e.message if hasattr(e, 'message') else e
+				except:
+					msg = 'Error while decrypting session data\nSaved data will be deleted.'
 					if s.padre:
 						print(msg)
 					else:
