@@ -170,7 +170,12 @@ def distribute_unevenly(s, recurso):
 		if esTarget:
 			html = s.get(urlCiudad + idCiudad)
 			ciudad = getCiudad(html)
-			ciudad['disponible'] = ciudad['recursos'][recurso]
+			if recurso == 1:
+				ciudad['disponible'] = ciudad['recursos'][recurso] - ciudad['consumo'] - 1
+			else:
+				ciudad['disponible'] = ciudad['recursos'][recurso]
+			if ciudad['disponible'] < 0:
+				ciudad['disponible'] = 0
 			recursoTotal += ciudad['disponible']
 			ciudadesOrigen[idCiudad] = ciudad
 		else:
@@ -180,7 +185,7 @@ def distribute_unevenly(s, recurso):
 			if ciudad['disponible'] > 0:
 				ciudadesDestino[idCiudad] = ciudad
 
-	if recursoTotal == 0:
+	if recursoTotal <= 0:
 		print(_('\nNo hay recursos para enviar.'))
 		enter()
 		return None
