@@ -16,25 +16,25 @@ from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.recursos import getRecursosDisponibles
 
-t = gettext.translation('entrenarFlotas',
+t = gettext.translation('trainTroops',
                         localedir,
                         languages=idiomas,
                         fallback=True)
 _ = t.gettext
 
-def getAstilleroInfo(s, ciudad):
-	params = {'view': 'shipyard', 'cityId': ciudad['id'], 'position': ciudad['pos'], 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'actionRequest': s.token(), 'ajax': '1'}
+def getCuartelInfo(s, ciudad):
+	params = {'view': 'barracks', 'cityId': ciudad['id'], 'position': ciudad['pos'], 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'actionRequest': s.token(), 'ajax': '1'}
 	data = s.post(params=params)
 	return json.loads(data, strict=False)
 
 def entrenar(s, ciudad, entrenamiento):
-	payload = {'action': 'CityScreen', 'function': 'buildShips', 'actionRequest': s.token(), 'cityId': ciudad['id'], 'position': ciudad['pos'], 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'shipyard', 'ajax': '1'}
+	payload = {'action': 'CityScreen', 'function': 'buildUnits', 'actionRequest': s.token(), 'cityId': ciudad['id'], 'position': ciudad['pos'], 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'barracks', 'ajax': '1'}
 	for tropa in entrenamiento:
 		payload[ tropa['unit_type_id'] ] = tropa['entrenar']
 	s.post(payloadPost=payload)
 
 def esperarEntrenamiento(s, ciudad):
-	data = getAstilleroInfo(s, ciudad)
+	data = getCuartelInfo(s, ciudad)
 	html = data[1][1][1]
 	segundos = re.search(r'\'buildProgress\', (\d+),', html)
 	if segundos:
@@ -116,7 +116,7 @@ def planearEntrenamientos(s, ciudad, entrenamientos):
 				return
 			entrenar(s, ciudad, entrenamiento)
 
-def generateFleet(unidades_info):
+def generateTroops(unidades_info):
 	i = 1
 	unidades = []
 	while 'js_barracksSlider{:d}'.format(i) in unidades_info:
@@ -127,7 +127,7 @@ def generateFleet(unidades_info):
 		i += 1
 	return unidades
 
-def entrenarFlotas(s,e,fd):
+def trainTroops(s,e,fd):
 	sys.stdin = os.fdopen(fd)
 	try:
 		banner()
@@ -136,17 +136,16 @@ def entrenarFlotas(s,e,fd):
 		banner()
 
 		for i in range(len(ciudad['position'])):
-			if ciudad['position'][i]['building'] == 'shipyard':
+			if ciudad['position'][i]['building'] == 'barracks':
 				ciudad['pos'] = str(i)
 				break
 		try:
-			data = getAstilleroInfo(s, ciudad)
+			data = getCuartelInfo(s, ciudad)
 		except Exception:
 			e.set()
 			return
-			
 		unidades_info = data[2][1]
-		unidades = generateFleet(unidades_info)
+		unidades = generateTroops(unidades_info)
 
 		maxSize = 0
 		for unidad in unidades:
@@ -155,7 +154,7 @@ def entrenarFlotas(s,e,fd):
 
 		entrenamientos = []
 		while True:
-			unidades = generateFleet(unidades_info)
+			unidades = generateTroops(unidades_info)
 			print(_('Entrenar:'))
 			for unidad in unidades:
 				cantidad = read(msg='{}{}:'.format(' '*(maxSize-len(unidad['local_name'])), unidad['local_name']), min=0, empty=True)

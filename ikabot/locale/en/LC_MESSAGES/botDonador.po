@@ -15,39 +15,39 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: ../../../funcion/botDonador.py:26
+#: ../../../function/donationBot.py:26
 msgid "(A)"
 msgstr "(S)"
 
-#: ../../../funcion/botDonador.py:26
+#: ../../../function/donationBot.py:26
 msgid "(V)"
 msgstr "(W)"
 
-#: ../../../funcion/botDonador.py:30
-msgid "En la ciudad {} {}, ¿Desea donar al aserradero, al bien de cambio o a ninguno? [a/b/n]"
+#: ../../../function/donationBot.py:30
+msgid "En la ciudad {} {}, ¿Desea donate al aserradero, al bien de cambio o a ninguno? [a/b/n]"
 msgstr "In the city {} {}, Do you wish to donate to the forest, to the trading good or neither? [f/t/n]"
 
-#: ../../../funcion/botDonador.py:31
+#: ../../../function/donationBot.py:31
 msgid "A"
 msgstr "F"
 
-#: ../../../funcion/botDonador.py:31
+#: ../../../function/donationBot.py:31
 msgid "B"
 msgstr "T"
 
-#: ../../../funcion/botDonador.py:31 ../../../funcion/botDonador.py:32
+#: ../../../function/donationBot.py:31 ../../../function/donationBot.py:32
 msgid "a"
 msgstr "f"
 
-#: ../../../funcion/botDonador.py:31 ../../../funcion/botDonador.py:34
+#: ../../../function/donationBot.py:31 ../../../function/donationBot.py:34
 msgid "b"
 msgstr "t"
 
-#: ../../../funcion/botDonador.py:40
-msgid "Se donará todos los días."
+#: ../../../function/donationBot.py:40
+msgid "Se donateá todos los días."
 msgstr "I will donate every day."
 
-#: ../../../funcion/botDonador.py:47
+#: ../../../function/donationBot.py:47
 msgid ""
 "\n"
 "Dono todos los días\n"
@@ -55,7 +55,7 @@ msgstr ""
 "\n"
 "I donate every day\n"
 
-#: ../../../funcion/botDonador.py:52
+#: ../../../function/donationBot.py:52
 msgid ""
 "Error en:\n"
 "{}\n"
@@ -67,7 +67,7 @@ msgstr ""
 "Cause:\n"
 "{}"
 
-#: ../../../funcion/botDonador.py:70
+#: ../../../function/donationBot.py:70
 msgid "Doné automaticamente."
 msgstr "I donated automatically."
 

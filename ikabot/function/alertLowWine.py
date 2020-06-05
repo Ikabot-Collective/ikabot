@@ -16,7 +16,7 @@ from ikabot.helpers.recursos import *
 from ikabot.helpers.botComm import *
 
 
-t = gettext.translation('alertarPocoVino',
+t = gettext.translation('alertLowWine',
                         localedir,
                         languages=idiomas,
                         fallback=True)
@@ -24,7 +24,7 @@ _ = t.gettext
 
 getcontext().prec = 30
 
-def alertarPocoVino(s,e,fd):
+def alertLowWine(s,e,fd):
 	sys.stdin = os.fdopen(fd)
 	try:
 		if botValido(s) is False:

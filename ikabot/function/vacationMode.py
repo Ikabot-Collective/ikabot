@@ -8,20 +8,20 @@ from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.getJson import getCiudad
 
-t = gettext.translation('modoVacaciones',
+t = gettext.translation('vacationMode',
                         localedir,
                         languages=idiomas,
                         fallback=True)
 _ = t.gettext
 
-def activarModoVacaciones(s):
+def activarvacationMode(s):
 	html = s.get()
 	ciudad = getCiudad(html)
 
 	data = {'action': 'Options', 'function': 'activateVacationMode', 'actionRequest': s.token(), 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'options_umod_confirm'}
 	s.post(params=data, ignoreExpire=True)
 
-def modoVacaciones(s,e,fd):
+def vacationMode(s,e,fd):
 	sys.stdin = os.fdopen(fd)
 	try:
 		banner()
@@ -31,7 +31,7 @@ def modoVacaciones(s,e,fd):
 			e.set()
 			return
 
-		activarModoVacaciones(s)
+		activarvacationMode(s)
 
 		print(_('Se activo el modo vacaciones.'))
 		enter()

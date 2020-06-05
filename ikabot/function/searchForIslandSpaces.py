@@ -14,13 +14,13 @@ from ikabot.helpers.pedirInfo import getIdsOfIslands
 from ikabot.helpers.getJson import getIsla
 from ikabot.helpers.process import set_child_mode
 
-t = gettext.translation('buscarEspacios', 
+t = gettext.translation('searchForIslandSpaces', 
                         localedir, 
                         languages=idiomas,
                         fallback=True)
 _ = t.gettext
 
-def buscarEspacios(s,e,fd):
+def searchForIslandSpaces(s,e,fd):
 	sys.stdin = os.fdopen(fd)
 	try:
 		if botValido(s) is False:

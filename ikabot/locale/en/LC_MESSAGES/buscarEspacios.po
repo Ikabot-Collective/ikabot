@@ -15,11 +15,11 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: ../../../funcion/buscarEspacios.py:24
+#: ../../../function/searchForIslandSpaces.py:24
 msgid "Se buscarán espacios nuevos cada hora."
 msgstr "I will search for new spaces each hour."
 
-#: ../../../funcion/buscarEspacios.py:31
+#: ../../../function/searchForIslandSpaces.py:31
 msgid ""
 "\n"
 "Busco espacios nuevos en las islas cada 1 hora\n"
@@ -27,7 +27,7 @@ msgstr ""
 "\n"
 "I search for new spaces each hour\n"
 
-#: ../../../funcion/buscarEspacios.py:37
+#: ../../../function/searchForIslandSpaces.py:37
 msgid ""
 "Error en:\n"
 "{}\n"
@@ -39,11 +39,11 @@ msgstr ""
 "Cause:\n"
 "{}"
 
-#: ../../../funcion/buscarEspacios.py:60
+#: ../../../function/searchForIslandSpaces.py:60
 msgid "la ciudad {} del jugador {} desapareció en {} {}:{} {}"
 msgstr "the city {} of the player {} disappeared in {} {}:{} {}"
 
-#: ../../../funcion/buscarEspacios.py:69
+#: ../../../function/searchForIslandSpaces.py:69
 msgid "{} fundó {} en {} {}:{} {}"
 msgstr "{} founded {} in {} {}:{} {}"
 

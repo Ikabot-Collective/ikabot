@@ -8,13 +8,13 @@ from ikabot.config import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import *
 
-t = gettext.translation('construirEdificio', 
+t = gettext.translation('constructBuilding', 
                         localedir, 
                         languages=idiomas,
                         fallback=True)
 _ = t.gettext
 
-def construirEdificio(s,e,fd):
+def constructBuilding(s,e,fd):
 	sys.stdin = os.fdopen(fd)
 	try:
 		banner()

@@ -7,29 +7,29 @@ import multiprocessing
 from ikabot.config import *
 from ikabot.web.sesion import *
 from ikabot.helpers.gui import *
-from ikabot.funcion.donar import donar
-from ikabot.funcion.update import update
+from ikabot.function.donate import donate
+from ikabot.function.update import update
 from ikabot.helpers.pedirInfo import read
-from ikabot.funcion.getStatus import getStatus
-from ikabot.funcion.botDonador import botDonador
-from ikabot.helpers.botComm import cargarTelegram
+from ikabot.function.getStatus import getStatus
+from ikabot.function.donationBot import donationBot
+from ikabot.helpers.botComm import updateTelegramData
 from ikabot.helpers.process import updateProcessList
-from ikabot.funcion.subirEdificio import subirEdificios
-from ikabot.funcion.buscarEspacios import buscarEspacios
-from ikabot.funcion.alertarAtaques import alertarAtaques
-from ikabot.funcion.modoVacaciones import modoVacaciones
-from ikabot.funcion.activarMilagro import activarMilagro
-from ikabot.funcion.entrenarTropas import entrenarTropas
-from ikabot.funcion.entrenarFlotas import entrenarFlotas
-from ikabot.funcion.venderRecursos import venderRecursos
-from ikabot.funcion.checkForUpdate import checkForUpdate
-from ikabot.funcion.repartirRecurso import repartirRecurso
-from ikabot.funcion.alertarPocoVino import alertarPocoVino
-from ikabot.funcion.comprarRecursos import comprarRecursos
-from ikabot.funcion.entrarDiariamente import entrarDiariamente
-from ikabot.funcion.menuRutaComercial import menuRutaComercial
-from ikabot.funcion.construirEdificio import construirEdificio
-from ikabot.funcion.movimientosNavales import movimientosNavales
+from ikabot.function.constructionList import constructionList
+from ikabot.function.searchForIslandSpaces import searchForIslandSpaces
+from ikabot.function.alertAttacks import alertAttacks
+from ikabot.function.vacationMode import vacationMode
+from ikabot.function.activateMiracle import activateMiracle
+from ikabot.function.trainTroops import trainTroops
+from ikabot.function.trainFleets import trainFleets
+from ikabot.function.sellResources import sellResources
+from ikabot.function.checkForUpdate import checkForUpdate
+from ikabot.function.distributeResources import distributeResources
+from ikabot.function.alertLowWine import alertLowWine
+from ikabot.function.buyResources import buyResources
+from ikabot.function.loginDaily import loginDaily
+from ikabot.function.sendResources import sendResources
+from ikabot.function.constructBuilding import constructBuilding
+from ikabot.function.shipMovements import shipMovements
 
 t = gettext.translation('command_line', 
                         localedir, 
@@ -56,26 +56,26 @@ def menu(s, checkUpdate=True):
 		print('')
 
 	menu_actions = [
-					subirEdificios,
-					menuRutaComercial,
-					repartirRecurso,
+					constructionList,
+					sendResources,
+					distributeResources,
 					getStatus,
-					donar,
-					buscarEspacios,
-					entrarDiariamente,
-					alertarAtaques,
-					botDonador,
-					alertarPocoVino,
-					comprarRecursos,
-					venderRecursos,
-					modoVacaciones,
-					activarMilagro,
-					entrenarTropas,
-					entrenarFlotas,
-					movimientosNavales,
-					construirEdificio,
+					donate,
+					searchForIslandSpaces,
+					loginDaily,
+					alertAttacks,
+					donationBot,
+					alertLowWine,
+					buyResources,
+					sellResources,
+					vacationMode,
+					activateMiracle,
+					trainTroops,
+					trainFleets,
+					shipMovements,
+					constructBuilding,
 					update,
-					cargarTelegram
+					updateTelegramData
 					]
 
 	print(_('(0)  Salir'))
@@ -83,11 +83,11 @@ def menu(s, checkUpdate=True):
 	print(_('(2)  Enviar recursos'))
 	print(_('(3)  Distribuir recursos'))
 	print(_('(4)  Estado de la cuenta'))
-	print(_('(5)  Donar'))
+	print(_('(5)  donate'))
 	print(_('(6)  Buscar espacios nuevos'))
 	print(_('(7)  Entrar diariamente'))
 	print(_('(8)  Alertar ataques'))
-	print(_('(9)  Donar automaticamente'))
+	print(_('(9)  donate automaticamente'))
 	print(_('(10) Alertar poco vino'))
 	print(_('(11) Comprar recursos'))
 	print(_('(12) Vender recursos'))

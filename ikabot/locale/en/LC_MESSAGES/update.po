@@ -15,7 +15,7 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: ../../../funcion/update.py:16
+#: ../../../function/update.py:16
 msgid "Para actualizar ikabot correr:"
 msgstr "To update ikabot run:"
 

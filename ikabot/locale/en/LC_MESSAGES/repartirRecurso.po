@@ -15,15 +15,15 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: ../../../funcion/repartirRecurso.py:28
+#: ../../../function/distributeResources.py:28
 msgid "¿Qué recurso quiere distribuir?"
 msgstr "What resource do you want to distribute?"
 
-#: ../../../funcion/repartirRecurso.py:29
+#: ../../../function/distributeResources.py:29
 msgid "(0) Salir"
 msgstr "(0) Exit"
 
-#: ../../../funcion/repartirRecurso.py:55
+#: ../../../function/distributeResources.py:55
 msgid ""
 "\n"
 "Se realizarán los siguientes envios:\n"
@@ -31,7 +31,7 @@ msgstr ""
 "\n"
 "The following shipments will be made:\n"
 
-#: ../../../funcion/repartirRecurso.py:59
+#: ../../../function/distributeResources.py:59
 msgid ""
 "\n"
 "¿Proceder? [Y/n]"
@@ -39,7 +39,7 @@ msgstr ""
 "\n"
 "Proceed? [Y/n]"
 
-#: ../../../funcion/repartirRecurso.py:72
+#: ../../../function/distributeResources.py:72
 msgid ""
 "\n"
 "Distribuyo {}\n"
@@ -47,7 +47,7 @@ msgstr ""
 "\n"
 "Distribute {}\n"
 
-#: ../../../funcion/repartirRecurso.py:78
+#: ../../../function/distributeResources.py:78
 msgid ""
 "Error en:\n"
 "{}\n"
@@ -59,7 +59,7 @@ msgstr ""
 "Cause:\n"
 "{}"
 
-#: ../../../funcion/repartirRecurso.py:184
+#: ../../../function/distributeResources.py:184
 msgid ""
 "\n"
 "No hay recursos para enviar."
@@ -67,7 +67,7 @@ msgstr ""
 "\n"
 "There are no resources to send."
 
-#: ../../../funcion/repartirRecurso.py:188
+#: ../../../function/distributeResources.py:188
 msgid ""
 "\n"
 "No hay espacio disponible para enviar recursos."

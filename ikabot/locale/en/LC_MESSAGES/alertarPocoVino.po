@@ -15,15 +15,15 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: ../../../funcion/alertarPocoVino.py:30
+#: ../../../function/alertLowWine.py:30
 msgid "¿Cuántas horas deben quedar hasta que se acabe el vino en una ciudad para que es dé aviso?: "
 msgstr "How many hours should be left until the wine runs out in a city so that it's alerted?"
 
-#: ../../../funcion/alertarPocoVino.py:31
+#: ../../../function/alertLowWine.py:31
 msgid "Se avisará cuando el vino se acabe en {:d} horas en alguna ciudad."
 msgstr "It will be alerted when the wine runs out in less than {:d} hours in any city"
 
-#: ../../../funcion/alertarPocoVino.py:38
+#: ../../../function/alertLowWine.py:38
 msgid ""
 "\n"
 "Aviso si el vino se acaba en {:d} horas\n"
@@ -31,7 +31,7 @@ msgstr ""
 "\n"
 "I alert if the wine runs out in less than {:d} hours\n"
 
-#: ../../../funcion/alertarPocoVino.py:43
+#: ../../../function/alertLowWine.py:43
 msgid ""
 "Error en:\n"
 "{}\n"
@@ -43,11 +43,11 @@ msgstr ""
 "Cause:\n"
 "{}"
 
-#: ../../../funcion/alertarPocoVino.py:65
+#: ../../../function/alertLowWine.py:65
 msgid "La ciudad {} no esta consumiendo vino!"
 msgstr "The city {} is not consuming wine!"
 
-#: ../../../funcion/alertarPocoVino.py:74
+#: ../../../function/alertLowWine.py:74
 msgid "En {} se acabará el vino en {}"
 msgstr "In {}, the wine will run out in {} "
 

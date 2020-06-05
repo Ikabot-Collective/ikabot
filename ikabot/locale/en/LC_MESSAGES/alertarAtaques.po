@@ -15,15 +15,15 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: ../../../funcion/alertarAtaques.py:29
+#: ../../../function/alertAttacks.py:29
 msgid "¿Cada cuántos minutos buscar ataques?(min:3, default: 20): "
 msgstr "How often should I search for attacks?(min:3, default: 20): "
 
-#: ../../../funcion/alertarAtaques.py:32
+#: ../../../function/alertAttacks.py:32
 msgid "Se buscarán ataques cada {} minutos."
 msgstr "I will check for attacks every {} minutes"
 
-#: ../../../funcion/alertarAtaques.py:39
+#: ../../../function/alertAttacks.py:39
 msgid ""
 "\n"
 "Espero por ataques cada {} minutos\n"
@@ -31,7 +31,7 @@ msgstr ""
 "\n"
 "I check for attacks every {} minutes\n"
 
-#: ../../../funcion/alertarAtaques.py:44
+#: ../../../function/alertAttacks.py:44
 msgid ""
 "Error en:\n"
 "{}\n"
@@ -43,53 +43,53 @@ msgstr ""
 "Cause:\n"
 "{}"
 
-#: ../../../funcion/alertarAtaques.py:72
+#: ../../../function/alertAttacks.py:72
 msgid "Comando inválido: {:d}"
 msgstr "Invalid command: {:d}"
 
-#: ../../../funcion/alertarAtaques.py:100
+#: ../../../function/alertAttacks.py:100
 msgid ""
 "-- ALERTA --\n"
 msgstr ""
 "-- ALERT --\n"
 
-#: ../../../funcion/alertarAtaques.py:102
+#: ../../../function/alertAttacks.py:102
 msgid ""
 "de la ciudad {} de {}\n"
 msgstr ""
 "from the city {} of {}\n"
 
-#: ../../../funcion/alertarAtaques.py:103
+#: ../../../function/alertAttacks.py:103
 msgid ""
 "a {}\n"
 msgstr ""
 "to {}\n"
 
-#: ../../../funcion/alertarAtaques.py:104
+#: ../../../function/alertAttacks.py:104
 msgid ""
 "{} unidades\n"
 msgstr ""
 "{} units\n"
 
-#: ../../../funcion/alertarAtaques.py:105
+#: ../../../function/alertAttacks.py:105
 msgid ""
 "{} flotas\n"
 msgstr ""
 "{} fleet\n"
 
-#: ../../../funcion/alertarAtaques.py:106
+#: ../../../function/alertAttacks.py:106
 msgid ""
 "llegada en: {}\n"
 msgstr ""
 "arrival in: {}\n"
 
-#: ../../../funcion/alertarAtaques.py:107
+#: ../../../function/alertAttacks.py:107
 msgid ""
 "Si quiere poner la cuenta en modo vacaciones envíe:\n"
 msgstr ""
 "If you want to put the account in vacation mode send:\n"
 
-#: ../../../funcion/alertarAtaques.py:108
+#: ../../../function/alertAttacks.py:108
 msgid "{:d}:1"
 msgstr "{:d}:1"
 

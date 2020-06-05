@@ -15,19 +15,19 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: ../../../funcion/entrenarTropas.py:121
+#: ../../../function/trainTroops.py:121
 msgid "No se pudo terminar de entrenar tropas por falta de recursos."
 msgstr "It was not possible to finish training troops due to lack of resources."
 
-#: ../../../funcion/entrenarTropas.py:139
+#: ../../../function/trainTroops.py:139
 msgid "¿En qué ciudad quiere entrenar las tropas?"
 msgstr "In what city do you want to train the troops?"
 
-#: ../../../funcion/entrenarTropas.py:160
+#: ../../../function/trainTroops.py:160
 msgid "Entrenar:"
 msgstr "Train:"
 
-#: ../../../funcion/entrenarTropas.py:168
+#: ../../../function/trainTroops.py:168
 msgid ""
 "\n"
 "Costo total:"
@@ -35,39 +35,39 @@ msgstr ""
 "\n"
 "Total cost:"
 
-#: ../../../funcion/entrenarTropas.py:197
+#: ../../../function/trainTroops.py:197
 msgid "     Madera: {}"
 msgstr "       Wood: {}"
 
-#: ../../../funcion/entrenarTropas.py:199
+#: ../../../function/trainTroops.py:199
 msgid "       Vino: {}"
 msgstr "       Wine: {}"
 
-#: ../../../funcion/entrenarTropas.py:201
+#: ../../../function/trainTroops.py:201
 msgid "     Marmol: {}"
 msgstr "     Marble: {}"
 
-#: ../../../funcion/entrenarTropas.py:203
+#: ../../../function/trainTroops.py:203
 msgid "    Cristal: {}"
 msgstr "    Cristal: {}"
 
-#: ../../../funcion/entrenarTropas.py:205
+#: ../../../function/trainTroops.py:205
 msgid "     Azufre: {}"
 msgstr "     Sulfur: {}"
 
-#: ../../../funcion/entrenarTropas.py:207
+#: ../../../function/trainTroops.py:207
 msgid " Ciudadanos: {}"
 msgstr "   Citizens: {}"
 
-#: ../../../funcion/entrenarTropas.py:209
+#: ../../../function/trainTroops.py:209
 msgid "Manutención: {}"
 msgstr "Maintenance: {}"
 
-#: ../../../funcion/entrenarTropas.py:211
+#: ../../../function/trainTroops.py:211
 msgid "   Duración: {}"
 msgstr "   Duration: {}"
 
-#: ../../../funcion/entrenarTropas.py:213
+#: ../../../function/trainTroops.py:213
 msgid ""
 "\n"
 "Proceder? [Y/n]"
@@ -75,7 +75,7 @@ msgstr ""
 "\n"
 "Proceed? [Y/n]"
 
-#: ../../../funcion/entrenarTropas.py:220
+#: ../../../function/trainTroops.py:220
 msgid ""
 "\n"
 "¿Quiere entrenar más tropas al terminar? [y/N]"
@@ -83,7 +83,7 @@ msgstr ""
 "\n"
 "Do you want to train more troops when you finish? [y/N]"
 
-#: ../../../funcion/entrenarTropas.py:257
+#: ../../../function/trainTroops.py:257
 msgid ""
 "\n"
 "No hay suficientes recursos:"
@@ -91,31 +91,31 @@ msgstr ""
 "\n"
 "There are not enough resources:"
 
-#: ../../../funcion/entrenarTropas.py:259
+#: ../../../function/trainTroops.py:259
 msgid "    Madera:{}"
 msgstr "    Wood:{}"
 
-#: ../../../funcion/entrenarTropas.py:261
+#: ../../../function/trainTroops.py:261
 msgid "      Vino:{}"
 msgstr "    Wine:{}"
 
-#: ../../../funcion/entrenarTropas.py:263
+#: ../../../function/trainTroops.py:263
 msgid "    Marmol:{}"
 msgstr "  Marble:{}"
 
-#: ../../../funcion/entrenarTropas.py:265
+#: ../../../function/trainTroops.py:265
 msgid "   Cristal:{}"
 msgstr " Cristal:{}"
 
-#: ../../../funcion/entrenarTropas.py:267
+#: ../../../function/trainTroops.py:267
 msgid "    Azufre:{}"
 msgstr "  Sulfur:{}"
 
-#: ../../../funcion/entrenarTropas.py:269
+#: ../../../function/trainTroops.py:269
 msgid "Ciudadanos:{}"
 msgstr "Citizens:{}"
 
-#: ../../../funcion/entrenarTropas.py:271
+#: ../../../function/trainTroops.py:271
 msgid ""
 "\n"
 "¿Proceder de todos modos? [Y/n]"
@@ -123,7 +123,7 @@ msgstr ""
 "\n"
 "Proceed anyway? [Y/n]"
 
-#: ../../../funcion/entrenarTropas.py:276
+#: ../../../function/trainTroops.py:276
 msgid ""
 "\n"
 "Se entrenarán las tropas seleccionadas."
@@ -131,7 +131,7 @@ msgstr ""
 "\n"
 "The selected troops will be trained."
 
-#: ../../../funcion/entrenarTropas.py:283
+#: ../../../function/trainTroops.py:283
 msgid ""
 "\n"
 "Entreno tropas en {}\n"
@@ -139,7 +139,7 @@ msgstr ""
 "\n"
 "I train troops in {}\n"
 
-#: ../../../funcion/entrenarTropas.py:288
+#: ../../../function/trainTroops.py:288
 msgid ""
 "Error en:\n"
 "{}\n"

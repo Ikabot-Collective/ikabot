@@ -15,11 +15,11 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: ../../../funcion/entrarDiariamente.py:22
+#: ../../../function/loginDaily.py:22
 msgid "Se entrará todos los días automaticamente."
 msgstr "I will enter every day"
 
-#: ../../../funcion/entrarDiariamente.py:29
+#: ../../../function/loginDaily.py:29
 msgid ""
 "\n"
 "Entro diariamente\n"
@@ -27,7 +27,7 @@ msgstr ""
 "\n"
 "I enter every day\n"
 
-#: ../../../funcion/entrarDiariamente.py:34
+#: ../../../function/loginDaily.py:34
 msgid ""
 "Error en:\n"
 "{}\n"

@@ -17,7 +17,7 @@ from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.planearViajes import waitForArrival
 
-t = gettext.translation('venderRecursos', 
+t = gettext.translation('sellResources', 
                         localedir, 
                         languages=idiomas,
                         fallback=True)
@@ -147,7 +147,7 @@ def crearOferta(s, ciudad, recurso, e):
 	finally:
 		s.logout()
 
-def venderRecursos(s,e,fd):
+def sellResources(s,e,fd):
 	sys.stdin = os.fdopen(fd)
 	try:
 		banner()
