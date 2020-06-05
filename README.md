@@ -99,13 +99,12 @@ Join us in discord at:`https://discord.gg/3hyxPRj`
 
 ```
 python3 -m pip install --user ikabot
-
 ```
 In Linux, you can access the main menu with `ikabot`, use `python3 -m ikabot` in windows.
 
 ### Requirements
 
-In order to install and use _ikabot_, python3 and pip must be installed.
+In order to install and use _ikabot_, **python3** and **pip** must be installed.  
 Also, in Linux you might have to install **gcc** and **python3-dev**.
 
 #### - Python3 on Windows
@@ -123,7 +122,7 @@ It is a tool to install python packages.
 To check if it is installed by default, just run `python3 -m pip -V`.  
 To install it, you must download the _get-pip.py_ file from [this page](https://pip.pypa.io/en/stable/installing/) and run `python3 get-pip.py`.  
 
-Or just excecute:
+Or, in Linux, you can just excecute:
 ```
 curl https://bootstrap.pypa.io/get-pip.py
 sudo python3 get-pip.py
