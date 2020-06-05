@@ -20,57 +20,53 @@ _Ikabot is a cross-platform program written in python that grants equal or even 
 
 3. Distribute resources
 
-	It sends whatever resource you choose from the cities that produce it to cities that do not. The same amount is sent to all cities, unless a city has little free storage space. (Very useful to send wine)
-
-4. Distribute resources evenly
-
-	This function attempts to distribute all of a given type of resource evenly among all cities, regardless of if they're production cities or non-production cities.
+	It lets you distribute the type of resource in two possible ways: from the cities that produce it to cities that do not (very useful to send wine) and to distribute it evenly among all cities.
 	
-5. Account status
+4. Account status
 
 	It shows information such as levels of the buildings, time until the wine runs out, resources among other things from all the cities.
 	
-6. Donate
+5. Donate
 
 	It allows you to donate (WOW!).
 	
-7. Search for new spaces
+6. Search for new spaces
 
 	This functionality alerts by telegram, if a city disappears or if someone founds in any of the islands where the user has at least one city.
 	
-8. Login daily
+7. Login daily
 
 	For those who do not want to spend a day without their account login.
 	
-9. Alert attacks
+8. Alert attacks
 
 	It alerts by telegram if you are going to be attacked. You can configure how often _ikabot_ checks for incoming attacks.
 
-10. Donate automatically
+9. Donate automatically
 
 	_Ikabot_ enters once a day and donates ***ALL*** the available wood from ***ALL*** selected cities to the luxury good or the forest.
 
-11. Alert wine running out
+10. Alert wine running out
 
 	It warns you by Telegram when less than N hours are needed for a city to run out of wine. The number of hours is specified by the user.
 
-12. Buy resources
+11. Buy resources
 
 	It allows you to choose what type of resource to buy and how much. It automatically purchases the different offers from the cheapest to the most expensive.
 	
-13. Sell resources
+12. Sell resources
 
 	It allows you to choose what type of resource to sell and how much. It does not matter how much storage you have, it automatically updates the offers as pĺayers buy from you. When it sells all the resources, it let's you know via Telegram.
 
-14. Activate Vacation Mode
+13. Activate Vacation Mode
 
 	Sets the account in vacation mode and closes _ikabot_.
 
-15. Activate miracle
+14. Activate miracle
 
 	It allows you to activate any miracle you have available N times in a row.
 
-16. Train troops
+15. Train troops
 
 	It allows you to easily create large amounts of troops in one city. If there are not enough resources to train all of them, it will train all the troops it can and when it finishes it will try to train the rest. It also allows you to build your army in multiple small steps so that you can use it as fast as possible.
 	
@@ -105,44 +101,27 @@ Join us in discord at:`https://discord.gg/3hyxPRj`
 python3 -m pip install --user ikabot
 
 ```
-with the `python3 -m ikabot` command you access the main menu.
+In Linux, you can access the main menu with `ikabot`, use `python3 -m ikabot` in windows.
 
-### Build from sources
-```
-git clone https://github.com/physics-sp/ikabot
-cd ikabot
-python3 -m pip install --user -e .
-
-```
-Any change you make to that directory now will be reflected once you run _ikabot_ using the command `python3 -m ikabot`
-
-### Uninstall
-
-```
-python3 -m pip uninstall ikabot
-
-```
 ### Requirements
 
 In order to install and use _ikabot_, python3 and pip must be installed.
+Also, in Linux you might have to install **gcc** and **python3-dev**.
 
-#### - Python 3 on Windows
+#### - Python3 on Windows
 
-You can install Python 3 on Windows OS by searching for it in the Windows App Store.
+To install Python3 on Windows, visit the [official website](https://www.python.org/downloads/windows/), or install it in the Windows App Store.
 
-#### - Python 3 on Unix
-It is probably installed by default in your system.
+#### - Python3 on Unix
 
-To check if it is installed by default, just run `python3 --version`.
-
+It is probably installed by default in your system.  
+To check if it is installed by default, just run `python3 --version`.  
 If it is not installed, visit the [official website](https://www.python.org/) 
 
 #### - Pip
-It is a tool to install python packages.
-
-To check if it is installed by default, just run `python3 -m pip -V`.
-
-To install it, you must download the _get-pip.py_ file from [this page](https://pip.pypa.io/en/stable/installing/) and run `python3 get-pip.py`.
+It is a tool to install python packages.  
+To check if it is installed by default, just run `python3 -m pip -V`.  
+To install it, you must download the _get-pip.py_ file from [this page](https://pip.pypa.io/en/stable/installing/) and run `python3 get-pip.py`.  
 
 Or just excecute:
 ```
@@ -151,15 +130,28 @@ sudo python3 get-pip.py
 rm get-pip.py
 ```
 
+### Build from sources
+
+If you want to have the lastest features, install from sources:
+```
+git clone https://github.com/physics-sp/ikabot
+cd ikabot
+python3 -m pip install --user -e .
+```
+Any change you make to that directory now will be reflected once you run _ikabot_ using the command `python3 -m ikabot`
+
+### Uninstall
+
+```
+python3 -m pip uninstall ikabot
+```
+
 ### Telegram
 
-Some features (such as alerting attacks) are communicated to you via Telegram messages.
-
-This messages are only visible for you.
-
-Setting this up is highly recommended, since it allows you to enjoy all the functionality of _ikabot_.
-
-To configure this, you just need to enter two pieces of information:
+Some features (such as alerting attacks) are communicated to you via Telegram messages.  
+This messages are only visible for you.  
+Setting this up is highly recommended, since it allows you to enjoy all the functionality of _ikabot_.  
+To configure this, you just need to enter two pieces of information:  
 
 1) The token of the bot you are going to use
 
@@ -175,15 +167,16 @@ To configure this, you just need to enter two pieces of information:
 
 When you want to use a functionality that requires Telegram, such as _Alert attacks_, _ikabot_ will ask you for the bot's token and your chat_id. Once entered, they will be saved in a file and will not be asked again.
 
-**If you are concerned about privacy, set up your own bot, so that nobody has the bot's token**
+**If you are concerned about privacy, set up your own bot, so that only you have the bot's token**
 
 #### Proxy
 
 To make Ikabot use a proxy simply open the config.py file which is located in the ikabot directory and change the following lines:
 
-`proxy = False` to `proxy = True`
+`proxy = False` to `proxy = True`  
+`https_proxy = "https://127.0.0.1:8080"` to `https_proxy = "https://{Your proxy server IP}:{Your proxy server port}"`  
 
-`https_proxy = "https://127.0.0.1:8080"` to `https_proxy = "https://{Your proxy server IP}:{Your proxy server port}"`
+Make sure that your proxy has HTTPS enabled.  
 
-Make sure that your proxy has HTTPS enabled.
+**Bare in mind that if another user is using the same proxy, you will have the same IP and you might get banned**
 
