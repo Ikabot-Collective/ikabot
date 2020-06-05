@@ -30,7 +30,6 @@ from ikabot.funcion.entrarDiariamente import entrarDiariamente
 from ikabot.funcion.menuRutaComercial import menuRutaComercial
 from ikabot.funcion.construirEdificio import construirEdificio
 from ikabot.funcion.movimientosNavales import movimientosNavales
-from ikabot.funcion.distributeResourcesEvenly import distributeResourcesEvenly
 
 t = gettext.translation('command_line', 
                         localedir, 
@@ -60,7 +59,6 @@ def menu(s, checkUpdate=True):
 					subirEdificios,
 					menuRutaComercial,
 					repartirRecurso,
-					distributeResourcesEvenly,
 					getStatus,
 					donar,
 					buscarEspacios,
@@ -80,28 +78,27 @@ def menu(s, checkUpdate=True):
 					cargarTelegram
 					]
 
-	print(_('(0)  Send all current processes to background and exit'))
+	print(_('(0)  Salir'))
 	print(_('(1)  Lista de construcción'))
 	print(_('(2)  Enviar recursos'))
 	print(_('(3)  Distribuir recursos'))
-	print(_('(4)  Distribuir recursos uniformemente'))
-	print(_('(5)  Estado de la cuenta'))
-	print(_('(6)  Donar'))
-	print(_('(7)  Buscar espacios nuevos'))
-	print(_('(8)  Entrar diariamente'))
-	print(_('(9)  Alertar ataques'))
-	print(_('(10) Donar automaticamente'))
-	print(_('(11) Alertar poco vino'))
-	print(_('(12) Comprar recursos'))
-	print(_('(13) Vender recursos'))
-	print(_('(14) Activar modo vacaciones'))
-	print(_('(15) Activar milagro'))
-	print(_('(16) Entrenar tropas'))
-	print(_('(17) Entrenar flotas'))
-	print(_('(18) Ver movimientos'))
-	print(_('(19) Construir edificio'))
-	print(_('(20) Actualizar Ikabot'))
-	print(_('(21) Actualizar datos de Telegram'))
+	print(_('(4)  Estado de la cuenta'))
+	print(_('(5)  Donar'))
+	print(_('(6)  Buscar espacios nuevos'))
+	print(_('(7)  Entrar diariamente'))
+	print(_('(8)  Alertar ataques'))
+	print(_('(9)  Donar automaticamente'))
+	print(_('(10) Alertar poco vino'))
+	print(_('(11) Comprar recursos'))
+	print(_('(12) Vender recursos'))
+	print(_('(13) Activar modo vacaciones'))
+	print(_('(14) Activar milagro'))
+	print(_('(15) Entrenar tropas'))
+	print(_('(16) Entrenar flotas'))
+	print(_('(17) Ver movimientos'))
+	print(_('(18) Construir edificio'))
+	print(_('(19) Actualizar Ikabot'))
+	print(_('(20) Actualizar datos de Telegram'))
 
 	entradas = len(menu_actions)
 	eleccion = read(min=0, max=entradas)
