@@ -82,13 +82,13 @@ def repartirRecurso(s,e,fd):
 		s.logout()
 
 def distribute_evenly(s, resource):
-	resourceTotal = 0 #total number of selected resource
-	(cityIDs, cities) = getIdsOfCities(s) #gets city ids
+	resourceTotal = 0
+	(cityIDs, cities) = getIdsOfCities(s)
 
-	originCities = {} #dictionary for origin cities
-	destinationCities = {} #dictionary for destination cities
-	allCities = {} #dictionary for all cities
-	for cityID in cityIDs: #for each of the users cities
+	originCities = {}
+	destinationCities = {}
+	allCities = {}
+	for cityID in cityIDs:
 
 		html = s.get(urlCiudad + cityID) #load html from the get request for that particular city
 		city = getCiudad(html) #convert the html to a city object
@@ -96,21 +96,34 @@ def distribute_evenly(s, resource):
 		resourceTotal += city['recursos'][resource] #the cities resources are added to the total
 		allCities[cityID] = city #adds the city to all cities
 
-	resourceAverage = resourceTotal // len(allCities) #calculate the resource average
-	resourceTotal = 0
-	for cityID in cityIDs: #iterate through all the cities and exclude the ones with less capacity than the resource average from calculations
-		if allCities[cityID]['storageCapacity'] < resourceAverage:
-			allCities.pop(cityID)
-		else:
-			resourceTotal += allCities[cityID]['recursos'][resource] #else add it to the total for recalculation
 
-	resourceAverage = resourceTotal // len(allCities) #recalculate the resource average
+	# if a city doesn't have enough storage to fit resourceAverage
+	# ikabot will send enough resources to fill the store to the max
+	# then, resourceAverage will be recalculated
+	resourceAverage = resourceTotal // len(allCities)
+	while True:
 
-	for cityID in allCities: #iterate through cities and classify them as origin or destination based on amount of resource above average
-		if allCities[cityID]['recursos'][resource] > resourceAverage:
-			originCities[cityID] = allCities[cityID]['recursos'][resource] - resourceAverage #sets the value to the amount of resource above average
-		else:
-			destinationCities[cityID] = resourceAverage - allCities[cityID]['recursos'][resource] #sets the value to the amount of resource below average
+		len_prev = len(destinationCities)
+		for cityID in allCities:
+			if cityID in destinationCities:
+				continue
+			freeStorage = allCities[cityID]['freeSpaceForResources'][resource]
+			storage = allCities[cityID]['storageCapacity']
+			if storage < resourceAverage:
+				destinationCities[cityID] = freeStorage
+				resourceTotal -= storage
+
+		resourceAverage = resourceTotal // ( len(allCities) - len(destinationCities) )
+
+		if len_prev == len(destinationCities):
+			for cityID in allCities:
+				if cityID in destinationCities:
+					continue
+				if allCities[cityID]['recursos'][resource] > resourceAverage:
+					originCities[cityID] = allCities[cityID]['recursos'][resource] - resourceAverage
+				else:
+					destinationCities[cityID] = resourceAverage - allCities[cityID]['recursos'][resource]
+			break
 
 	originCities = {k: v for k, v in sorted(originCities.items(), key=lambda item: item[1],reverse=True)} #sort origin cities in descending order
 	destinationCities = {k: v for k, v in sorted(destinationCities.items(), key=lambda item: item[1])}    #sort destination cities in ascending order
