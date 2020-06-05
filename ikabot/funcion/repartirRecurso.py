@@ -223,6 +223,7 @@ def distribute_unevenly(s, recurso):
 		for idCiudadOrigen in ciudadesOrigen:
 			if faltante == 0:
 				break
+
 			ciudadO = ciudadesOrigen[idCiudadOrigen]
 			recursoDisponible = ciudadO['disponible']
 			for ruta in rutas:
@@ -230,8 +231,12 @@ def distribute_unevenly(s, recurso):
 				rec = ruta[recurso + 3]
 				if origen['id'] == idCiudadOrigen:
 					recursoDisponible -= rec
-			enviar = faltante if recursoDisponible > faltante else recursoDisponible
+
+			enviar = min(faltante, recursoDisponible)
 			disponible = ciudadD['disponible']
+			if disponible == 0 or enviar == 0:
+				continue
+
 			if disponible < enviar:
 				faltante = 0
 				enviar = disponible
