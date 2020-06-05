@@ -73,8 +73,7 @@ def repartirRecurso(s,e,fd):
 	setInfoSignal(s, info)
 
 	try:
-		pass
-		#executeRoutes(s, routes) #plan trips for all the routes
+		executeRoutes(s, routes) #plan trips for all the routes
 	except:
 		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
 		sendToBot(s, msg) #sends message to telegram bot
