@@ -62,13 +62,13 @@ class Sesion:
 		return 'index.php?logout' in html
 
 	def __updateCookieFile(self, primero=False, nuevo=False, salida=False):
-		msg = _('Actualizo el archivo de cookies:\n')
+		msg = _('Updating the cookie file:\n')
 		if primero:
-			msg += _('Primero')
+			msg += _('First')
 		elif nuevo:
-			msg += _('Nuevo')
+			msg += _('New')
 		else:
-			msg += _('Salida')
+			msg += _('Out')
 #		sendToBotDebug(self, msg, debugON_session)
 
 		fileData = self.getFileData()
@@ -109,7 +109,7 @@ class Sesion:
 			requests.cookies.cookiejar_from_dict(cookie_dict, cookiejar=self.s.cookies, overwrite=True)
 			self.__updateCookieFile(nuevo=True)
 		except (KeyError, AssertionError):
-			msg = _('La sesión se venció, renovando sesión')
+			msg = _('Updating cookie using cookie file')
 			sendToBotDebug(self, msg, debugON_session)
 			self.__login(3)
 
@@ -118,7 +118,7 @@ class Sesion:
 			banner()
 
 			self.mail = read(msg=_('Mail:'))
-			self.password = getpass.getpass(_('Contraseña:'))
+			self.password = getpass.getpass(_('Password:'))
 
 			banner()
 
@@ -187,7 +187,7 @@ class Sesion:
 		data = {"identity": self.mail, "password": self.password, "locale":"es_AR", "gfLang":"ar", "platformGameId": platformGameId, "gameEnvironmentId": gameEnvironmentId, "autoGameAccountCreation": "false"}
 		r = self.s.post('https://gameforge.com/api/v1/auth/thin/sessions', json=data)
 		if r.status_code == 403:
-			exit(_('Mail o contraseña incorrecta\n'))
+			exit(_('Wrong email or password\n'))
 
 		# get the authentication token and set the cookie
 		ses_json = json.loads(r.text, strict=False)
@@ -214,7 +214,7 @@ class Sesion:
 			if len([ account for account in accounts if account['blocked'] is False ]) == 1:
 				self.account  = [ account for account in accounts if account['blocked'] is False ][0]
 			else:
-				print(_('¿Con qué cuenta quiere iniciar sesión?\n'))
+				print(_('With which account do you want to log in?\n'))
 
 				max_name = max( [ len(account['name']) for account in accounts if account['blocked'] is False ] )
 				i = 0
@@ -231,9 +231,9 @@ class Sesion:
 			self.servidor = self.account['server']['language']
 			self.mundo    = str(self.account['server']['number'])
 			self.word     = [ srv['name'] for srv in servers if srv['language'] == self.servidor and srv['number'] == int(self.mundo) ][0]
-			config.infoUser = _('Servidor:{}').format(self.servidor)
-			config.infoUser += _(', Mundo:{}').format(self.word)
-			config.infoUser += _(', Jugador:{}').format(self.username)
+			config.infoUser = _('Server:{}').format(self.servidor)
+			config.infoUser += _(', World:{}').format(self.word)
+			config.infoUser += _(', Player:{}').format(self.username)
 			banner()
 
 		resp = self.s.get('https://lobby.ikariam.gameforge.com/api/users/me/loginLink?id={}&server[language]={}&server[number]={}'.format(self.account['id'], self.servidor, self.mundo)).text
@@ -263,7 +263,7 @@ class Sesion:
 		html = self.s.get(url).text
 
 		if self.__isInVacation(html):
-			msg = _('La cuenta entró en modo vacaciones')
+			msg = _('The account went into vacation mode')
 			if self.padre:
 				print(msg)
 			else:
@@ -464,4 +464,4 @@ def normal_get(url, params={}):
 	try:
 		return requests.get(url, params=params)
 	except requests.exceptions.ConnectionError:
-		sys.exit(_('Fallo la conexion a internet'))
+		sys.exit(_('Internet connection failed'))

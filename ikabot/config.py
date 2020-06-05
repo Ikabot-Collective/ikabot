@@ -8,6 +8,7 @@ if 'es_' in local:
 	idiomas = ['es']
 else:
 	idiomas = ['en']
+idiomas = ['none']
 
 localedir = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'locale')
 t = gettext.translation('config', 
@@ -42,7 +43,7 @@ ikaFile = '.ikabot'
 urlCiudad = 'view=city&cityId='
 urlIsla = 'view=island&islandId='
 prompt = ' >>  '
-tipoDeBien = [_('Madera'), _('Vino'), _('Marmol'), _('Cristal'), _('Azufre')]
+tipoDeBien = [_('Wood'), _('Wine'), _('Marble'), _('Cristal'), _('Sulfur')]
 ConnectionError_wait = 5 * 60
 
 debugON_alertAttacks    = False

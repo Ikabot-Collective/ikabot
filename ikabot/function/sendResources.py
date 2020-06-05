@@ -27,12 +27,12 @@ def sendResources(s,e,fd):
 		while True:
 
 			banner()
-			print(_('Ciudad de origen:'))
+			print(_('Origin city:'))
 			try:
 				ciudadO = chooseCity(s)
 			except KeyboardInterrupt:
 				if rutas:
-					print(_('¿Enviar viajes? [Y/n]'))
+					print(_('Send shipment? [Y/n]'))
 					rta = read(values=['y', 'Y', 'n', 'N', ''])
 					if rta.lower() != 'n':
 						break
@@ -40,7 +40,7 @@ def sendResources(s,e,fd):
 				return
 
 			banner()
-			print(_('Ciudad de destino'))
+			print(_('Destination city'))
 			ciudadD = chooseCity(s, foreign=True)
 			idIsla = ciudadD['islandId']
 
@@ -70,51 +70,51 @@ def sendResources(s,e,fd):
 			if ciudadD['propia']:
 				msg = ''
 				if resto[0] > mad:
-					msg += _('{} más de madera\n').format(addDot(mad if mad > 0 else 0))
+					msg += _('{} more wood\n').format(addDot(mad if mad > 0 else 0))
 				if resto[1] > vin:
-					msg += _('{} más de vino\n').format(addDot(vin if vin > 0 else 0))
+					msg += _('{} more wine\n').format(addDot(vin if vin > 0 else 0))
 				if resto[2] > mar:
-					msg += _('{} más de marmol\n').format(addDot(mar if mar > 0 else 0))
+					msg += _('{} more marble\n').format(addDot(mar if mar > 0 else 0))
 				if resto[3] > cri:
-					msg += _('{} más de cristal\n').format(addDot(cri if cri > 0 else 0))
+					msg += _('{} more cristal\n').format(addDot(cri if cri > 0 else 0))
 				if resto[4] > azu:
-					msg += _('{} más de azufre\n').format(addDot(azu if azu > 0 else 0))
+					msg += _('{} more sulfur\n').format(addDot(azu if azu > 0 else 0))
 				if msg:
-					print(_('Solo puede almacenar:\n{}').format(msg))
-			print(_('Disponible:'))
-			print(_('Madera {} Vino {} Marmol {} Cristal {} Azufre {}').format(addDot(resto[0]), addDot(resto[1]), addDot(resto[2]), addDot(resto[3]), addDot(resto[4])))
-			print(_('Enviar:'))
+					print(_('You can store just:\n{}').format(msg))
+			print(_('Available:'))
+			print(_('Wood {} Wine {} Marbel {} Cristal {} Sulfur {}').format(addDot(resto[0]), addDot(resto[1]), addDot(resto[2]), addDot(resto[3]), addDot(resto[4])))
+			print(_('Send:'))
 			try:
-				md = askForValue(_(' Madera:'), resto[0])
-				vn = askForValue(_('   Vino:'), resto[1])
-				mr = askForValue(_(' Marmol:'), resto[2])
+				md = askForValue(_('   Wood:'), resto[0])
+				vn = askForValue(_('   Wine:'), resto[1])
+				mr = askForValue(_(' Marbel:'), resto[2])
 				cr = askForValue(_('Cristal:'), resto[3])
-				az = askForValue(_(' Azufre:'), resto[4])
+				az = askForValue(_(' Sulfur:'), resto[4])
 			except KeyboardInterrupt:
 				continue
 			if md + vn + mr + cr + az == 0:
 				continue
 
 			banner()
-			print(_('Por enviar de {} a {}').format(ciudadO['cityName'], ciudadD['cityName']))
+			print(_('About to send from {} to {}').format(ciudadO['cityName'], ciudadD['cityName']))
 			enviado = ''
 			if md:
-				enviado += _('Madera:{} ').format(addDot(md))
+				enviado += _('Wood:{} ').format(addDot(md))
 			if vn:
-				enviado += _('Vino:{} ').format(addDot(vn))
+				enviado += _('Wine:{} ').format(addDot(vn))
 			if mr:
-				enviado += _('Marmol:{} ').format(addDot(mr))
+				enviado += _('Marble:{} ').format(addDot(mr))
 			if cr:
 				enviado += _('Cristal:{} ').format(addDot(cr))
 			if az:
-				enviado += _('Azufre:{}').format(addDot(az))
+				enviado += _('Sulfur:{}').format(addDot(az))
 			print(enviado)
-			print(_('¿Proceder? [Y/n]'))
+			print(_('Proceed? [Y/n]'))
 			rta = read(values=['y', 'Y', 'n', 'N', ''])
 			if rta.lower() != 'n':
 				ruta = (ciudadO, ciudadD, idIsla, md, vn, mr, cr, az)
 				rutas.append(ruta)
-				print(_('¿Realizar otro envio? [y/N]'))
+				print(_('Create another shipment? [y/N]'))
 				rta = read(values=['y', 'Y', 'n', 'N', ''])
 				if rta.lower() != 'y':
 					break
@@ -125,24 +125,24 @@ def sendResources(s,e,fd):
 	set_child_mode(s)
 	e.set()
 
-	info = _('\nRuta comercial\n')
+	info = _('\nSend resources\n')
 	for ruta in rutas:
 		(ciudadO, ciudadD, idIsla, md, vn, mr, cr, az) = ruta
-		info = info + _('{} -> {}\nMadera: {} Vino: {} Marmol: {} Cristal: {} Azufre: {}\n').format(ciudadO['cityName'], ciudadD['cityName'], addDot(md), addDot(vn), addDot(mr), addDot(cr), addDot(az))
+		info = info + _('Wood: {} Wine: {} Marble: {} Cristal: {} Sulfur: {}\n').format(ciudadO['cityName'], ciudadD['cityName'], addDot(md), addDot(vn), addDot(mr), addDot(cr), addDot(az))
 
 	setInfoSignal(s, info)
 	try:
-		msg  = _('Comienzo a enviar recursos:\n')
+		msg  = _('I start to send the resources:\n')
 		msg += info
 		sendToBotDebug(s, msg, debugON_sendResources)
 
 		executeRoutes(s, rutas)
 
-		msg  = _('Termino de enviar recursos:\n')
+		msg  = _('I finish sendind the resources:\n')
 		msg += info
 		sendToBotDebug(s, msg, debugON_sendResources)
 	except:
-		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
+		msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
 		sendToBot(s, msg)
 	finally:
 		s.logout()

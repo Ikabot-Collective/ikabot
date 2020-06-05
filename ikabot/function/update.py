@@ -17,7 +17,7 @@ _ = t.gettext
 def update(s,e,fd):
 	sys.stdin = os.fdopen(fd)
 	try:
-		print(_('Para actualizar ikabot correr:'))
+		print(_('To update ikabot run:'))
 		print('python3 -m pip install --user --upgrade ikabot')
 		enter()
 		e.set()

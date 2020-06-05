@@ -24,7 +24,7 @@ t = gettext.translation('sellResources',
 _ = t.gettext
 
 def elegirCiudadComercial(ciudades_comerciales):
-	print(_('¿En cuál ciudad quiere vender recursos?\n'))
+	print(_('In which city do you want to sell resources?\n'))
 	for i, ciudad in enumerate(ciudades_comerciales):
 		print('({:d}) {}'.format(i + 1, ciudad['name']))
 	ind = read(min=1, max=len(ciudades_comerciales))
@@ -52,11 +52,11 @@ def venderAOfertas(s, ciudad, recurso, e):
 	matches = getOfertas(s, ciudad, recurso)
 
 	if len(matches) == 0:
-		print(_('No hay ofertas disponibles.'))
+		print(_('No offers available.'))
 		enter()
 		return
 
-	print(_('¿A cuáles ofertas le quiere vender?\n'))
+	print(_('Which offers do you want to sell to?\n'))
 
 	ofertas = []
 	max_venta = 0
@@ -66,7 +66,7 @@ def venderAOfertas(s, ciudad, recurso, e):
 		city = city.strip()
 		cantidad = cant.replace(',', '').replace('.', '')
 		cantidad = int(cantidad)
-		msg = _('{} ({}): {} a {} c/u ({} en total) [Y/n]').format(city, user, addDot(cantidad), precio, addDot(int(precio)*cantidad))
+		msg = _('{} ({}): {} at {} each ({} in total) [Y/n]').format(city, user, addDot(cantidad), precio, addDot(int(precio)*cantidad))
 		rta = read(msg=msg, values=['y', 'Y', 'n', 'N', ''])
 		if rta.lower() == 'n':
 			continue
@@ -80,7 +80,7 @@ def venderAOfertas(s, ciudad, recurso, e):
 	disp_venta = ciudad['recursos'][recurso]
 	vender = disp_venta if disp_venta < max_venta else max_venta
 
-	print(_('\n¿Cuánto quiere vender? [max = {}]').format(addDot(vender)))
+	print(_('\nHow much do you want to sell? [max = {}]').format(addDot(vender)))
 	vender = read(min=0, max=vender)
 
 	faltaVender = vender
@@ -93,7 +93,7 @@ def venderAOfertas(s, ciudad, recurso, e):
 		compra = cantidad if cantidad < faltaVender else faltaVender
 		faltaVender -= compra
 		profit += compra * int(precio)
-	print(_('\n¿Vender {} de {} por un total de {}? [Y/n]').format(addDot(vender), tipoDeBien[recurso], addDot(profit)))
+	print(_('\nSell {} of {} for a total of {}? [Y/n]').format(addDot(vender), tipoDeBien[recurso], addDot(profit)))
 	rta = read(values=['y', 'Y', 'n', 'N', ''])
 	if rta.lower() == 'n':
 		return
@@ -101,12 +101,12 @@ def venderAOfertas(s, ciudad, recurso, e):
 	set_child_mode(s)
 	e.set()
 
-	info = _('\nVendo {} de {} en {}\n').format(addDot(vender), tipoDeBien[recurso], ciudad['name'])
+	info = _('\nI sell {} of {} in {}\n').format(addDot(vender), tipoDeBien[recurso], ciudad['name'])
 	setInfoSignal(s, info)
 	try:
 		do_it1(s, vender,  ofertas, recurso, ciudad)
 	except:
-		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
+		msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
 		sendToBot(s, msg)
 	finally:
 		s.logout()
@@ -117,7 +117,7 @@ def crearOferta(s, ciudad, recurso, e):
 	html = getStoreInfo(s, ciudad)
 	cap_venta = getstorageCapacityDeVenta(html)
 	recurso_disp = ciudad['recursos'][recurso]
-	print(_('¿Cuánto quiere vender? [max = {}]').format(addDot(recurso_disp)))
+	print(_('How much do you want to sell? [max = {}]').format(addDot(recurso_disp)))
 	vender = read(min=0, max=recurso_disp)
 	if vender == 0:
 		return
@@ -125,11 +125,11 @@ def crearOferta(s, ciudad, recurso, e):
 	precio_max, precio_min = re.findall(r'\'upper\': (\d+),\s*\'lower\': (\d+)', html)[recurso]
 	precio_max = int(precio_max)
 	precio_min = int(precio_min)
-	print(_('\n¿A qué precio? [min = {:d}, max = {:d}]').format(precio_min, precio_max))
+	print(_('\nAt what price? [min = {:d}, max = {:d}]').format(precio_min, precio_max))
 	precio = read(min=precio_min, max=precio_max)
 
-	print(_('\nSe venderá {} de {} a {}: {}').format(addDot(vender), tipoDeBien[recurso], addDot(precio), addDot(precio * vender)))
-	print(_('\n¿Proceder? [Y/n]'))
+	print(_('\nI will sell {} of {} at {}: {}').format(addDot(vender), tipoDeBien[recurso], addDot(precio), addDot(precio * vender)))
+	print(_('\nProceed? [Y/n]'))
 	rta = read(values=['y', 'Y', 'n', 'N', ''])
 	if rta.lower() == 'n':
 		return
@@ -137,12 +137,12 @@ def crearOferta(s, ciudad, recurso, e):
 	set_child_mode(s)
 	e.set()
 
-	info = _('\nVendo {} de {} en {}\n').format(addDot(vender), tipoDeBien[recurso], ciudad['name'])
+	info = _('\nI sell {} of {} in {}\n').format(addDot(vender), tipoDeBien[recurso], ciudad['name'])
 	setInfoSignal(s, info)
 	try:
 		do_it2(s, vender, precio, recurso, cap_venta, ciudad)
 	except:
-		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
+		msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
 		sendToBot(s, msg)
 	finally:
 		s.logout()
@@ -154,7 +154,7 @@ def sellResources(s,e,fd):
 
 		ciudades_comerciales = getCiudadesComerciales(s)
 		if len(ciudades_comerciales) == 0:
-			print(_('No hay una Tienda contruida'))
+			print(_('There is no shop built'))
 			enter()
 			e.set()
 			return
@@ -165,14 +165,14 @@ def sellResources(s,e,fd):
 			ciudad = elegirCiudadComercial(ciudades_comerciales)
 			banner()
 
-		print(_('¿Qué recurso quiere vender?'))
+		print(_('What resource do you want to sell?'))
 		for indice, bien in enumerate(tipoDeBien):
 			print('({:d}) {}'.format(indice+1, bien))
 		eleccion = read(min=1, max=len(tipoDeBien))
 		recurso = eleccion - 1
 		banner()
 
-		print(_('¿Quiere vender a ofertas existenes (1) o quiere hacer su propia oferta (2)?'))
+		print(_('Do you want to sell to existing offers (1) or do you want to make your own offer (2)?'))
 		rta = read(min=1, max=2)
 		[venderAOfertas, crearOferta][rta - 1](s, ciudad, recurso, e)
 		e.set()
@@ -241,7 +241,7 @@ def do_it2(s, porVender, precio, recurso, cap_venta, ciudad):
 		html = getStoreInfo(s, ciudad)
 		enVenta = vendiendo(html)[recurso]
 		if enVenta <= enVenta_inicial:
-			msg = _('Se vendieron {} de {} a {:d}').format(addDot(total), tipoDeBien[recurso], precio)
+			msg = _('{} of {} was sold at {:d}').format(addDot(total), tipoDeBien[recurso], precio)
 			sendToBot(s, msg)
 			return
 		time.sleep(60 * 60 *  2)

@@ -45,14 +45,14 @@ def menu(s, checkUpdate=True):
 
 	processlist = updateProcessList(s)
 	if len(processlist) > 0:
-		print('Running tasks:')
+		print(_('Running tasks:'))
 		for process in processlist:
 			if len(process['proxies']) == 0:
 				proxy = ''
 			else:
-				proxy = 'proxy: ' + str(process['proxies'])
+				proxy = _('proxy: ') + str(process['proxies'])
 
-			print('- pid: {} task: {} {}'.format(process['pid'], process['action'], proxy))
+			print(_('- pid: {} task: {} {}').format(process['pid'], process['action'], proxy))
 		print('')
 
 	menu_actions = [
@@ -78,27 +78,27 @@ def menu(s, checkUpdate=True):
 					updateTelegramData
 					]
 
-	print(_('(0)  Salir'))
-	print(_('(1)  Lista de construcción'))
-	print(_('(2)  Enviar recursos'))
-	print(_('(3)  Distribuir recursos'))
-	print(_('(4)  Estado de la cuenta'))
-	print(_('(5)  donate'))
-	print(_('(6)  Buscar espacios nuevos'))
-	print(_('(7)  Entrar diariamente'))
-	print(_('(8)  Alertar ataques'))
-	print(_('(9)  donate automaticamente'))
-	print(_('(10) Alertar poco vino'))
-	print(_('(11) Comprar recursos'))
-	print(_('(12) Vender recursos'))
-	print(_('(13) Activar modo vacaciones'))
-	print(_('(14) Activar milagro'))
-	print(_('(15) Entrenar tropas'))
-	print(_('(16) Entrenar flotas'))
-	print(_('(17) Ver movimientos'))
-	print(_('(18) Construir edificio'))
-	print(_('(19) Actualizar Ikabot'))
-	print(_('(20) Actualizar datos de Telegram'))
+	print(_('(0)  Exit'))
+	print(_('(1)  Construction list'))
+	print(_('(2)  Send resources'))
+	print(_('(3)  Distribute resources'))
+	print(_('(4)  Account status'))
+	print(_('(5)  Donate'))
+	print(_('(6)  Search for new spaces'))
+	print(_('(7)  Login daily'))
+	print(_('(8)  Alert attacks'))
+	print(_('(9)  Donate automatically'))
+	print(_('(10) Alert wine running out'))
+	print(_('(11) Buy resources'))
+	print(_('(12) Sell resources'))
+	print(_('(13) Activate vacation mode'))
+	print(_('(14) Activate miracle'))
+	print(_('(15) Train troops'))
+	print(_('(16) Train fleet'))
+	print(_('(17) See movements'))
+	print(_('(18) Construct building'))
+	print(_('(19) Update Ikabot'))
+	print(_('(20) Update the Telegram data'))
 
 	entradas = len(menu_actions)
 	eleccion = read(min=0, max=entradas)
@@ -118,7 +118,7 @@ def menu(s, checkUpdate=True):
 		if isWindows:
 			# in unix, you can exit ikabot and close the terminal and the processes will continue to execute
 			# in windows, you can exit ikabot but if you close the terminal, the processes will die
-			print('Closing this console will kill the processes.')
+			print(_('Closing this console will kill the processes.'))
 			enter()
 		clear()
 		os._exit(0) #kills the process which executes this statement, but it does not kill it's child processes

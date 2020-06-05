@@ -64,7 +64,7 @@ class AESCipher:
 				try:
 					plaintext = self.decrypt(ciphertext)
 				except:
-					msg = 'Error while decrypting session data\nSaved data will be deleted.'
+					msg = _('Error while decrypting session data\nSaved data will be deleted.')
 					if s.padre:
 						print(msg)
 					else:

@@ -91,11 +91,11 @@ def chooseCity(s, foreign=False):
 			if largo > maxNombre:
 				maxNombre = largo
 		pad = lambda name: ' ' * (maxNombre - len(name) + 2)
-		bienes = {'1': '(V)', '2': '(M)', '3': '(C)', '4': '(A)'}
+		bienes = {'1': _('(W)'), '2': _('(M)'), '3': _('(C)'), '4': _('(S)')}
 		prints = []
 		i = 0
 		if foreign:
-			print(_(' 0: ciudad ajena'))
+			print(_(' 0: foreign city'))
 		else:
 			print('')
 		for unId in ids:
@@ -148,7 +148,7 @@ def chooseForeignCity(s):
 		jsonIslas = json.loads(jsonIslas, strict=False)
 		idIsla = jsonIslas['data'][str(x)][str(y)][0]
 	except:
-		print(_('Coordenadas incorrectas'))
+		print(_('Incorrect coordinates'))
 		enter()
 		banner()
 		return chooseCity(s, foreign=True)
@@ -170,7 +170,7 @@ def chooseForeignCity(s):
 			print('{}: {}{}({})'.format(num, ciudad['name'], pad(ciudad['name']), ciudad['Name']))
 			opciones.append(ciudad)
 	if i == 0:
-		print(_('No hay ciudades donde enviar recursos en esta isla'))
+		print(_('There are no cities where to send resources on this island'))
 		enter()
 		return chooseCity(s, foreign=True)
 	eleccion = read(min=1, max=i)
@@ -199,7 +199,7 @@ def getBuildings(s, cityId):
 	pos = -1
 	prints = []
 	posiciones = []
-	prints.append(_('(0)\t\tsalir'))
+	prints.append(_('(0)\t\texit'))
 	posiciones.append(None)
 	for posicion in ciudad['position']:
 		pos += 1
@@ -245,10 +245,10 @@ def getPositionAndTargetLevel(prints, city, positions):
 		nivelActual += 1
 
 	banner()
-	print(_('edificio:{}').format(city['position'][posicion]['name']))
-	print(_('nivel actual:{}').format(nivelActual))
+	print(_('building:{}').format(city['position'][posicion]['name']))
+	print(_('current level:{}').format(nivelActual))
 
-	nivelFinal = read(min=nivelActual, msg=_('subir al nivel:'))
+	nivelFinal = read(min=nivelActual, msg=_('increase to level:'))
 
 	niveles = nivelFinal - nivelActual
 	rta = []

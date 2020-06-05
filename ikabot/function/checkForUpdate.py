@@ -20,4 +20,4 @@ def checkForUpdate():
 		return
 
 	new = match.group(1)
-	config.update_msg = '[+] ikabot version {} is available\n'.format(new)
+	config.update_msg = _('[+] ikabot version {} is available\n').format(new)

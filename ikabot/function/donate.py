@@ -19,7 +19,7 @@ _ = t.gettext
 def donate(s,e,fd):
 	sys.stdin = os.fdopen(fd)
 	try:
-		bienes = {'1': _('Viñedo'), '2': _('Cantera'), '3': _('Mina de cristal'), '4': _('Mina de azufre')}
+		bienes = {'1': _('Vineyard'), '2': _('Quarry'), '3': _('Crystal Mine'), '4': _('Sulfur Pit')}
 		banner()
 
 		ciudad = chooseCity(s)
@@ -42,24 +42,24 @@ def donate(s,e,fd):
 		bienOk = printEstadoMina(s, urlBien, bien)
 
 		tipo = ['resource', 'tradegood']
-		print(_('Madera disopnible:{} / {}\n').format(addDot(madera), addDot(almacenamiento)))
+		print(_('Wood available:{} / {}\n').format(addDot(madera), addDot(almacenamiento)))
 
 		if aserraderoOk is True and bienOk is True:
-			msg = _('Aserradero(1) o {}(2)?:').format(bien)
+			msg = _('Forest(1) o {}(2)?:').format(bien)
 			tipoDonacion = read(msg=msg, min=1, max=2)
 		elif aserraderoOk is True and bienOk is False:
 			tipoDonacion = 1
-			print(_('Aserradero:\n'))
+			print(_('Forest:\n'))
 		elif aserraderoOk is False and bienOk is True:
 			tipoDonacion = 2
 			print('{}:\n'.format(bien))
 		else:
-			print(_('No se puede donate\n'))
+			print(_('You cannot donate\n'))
 			return
 
 		tipo = tipo[tipoDonacion - 1]
 
-		cantidad = read(min=0, max=madera, msg=_('Cantidad:'))
+		cantidad = read(min=0, max=madera, msg=_('Amount:'))
 		s.post(payloadPost={'islandId': idIsla, 'type': tipo, 'action': 'IslandScreen', 'function': 'donate', 'donation': cantidad, 'backgroundView': 'island', 'templateView': 'resource', 'actionRequest': s.token(), 'ajax': '1'})
 		e.set()
 	except KeyboardInterrupt:
@@ -69,7 +69,7 @@ def donate(s,e,fd):
 def printEstadoMina(s, url, bien):
 	html = s.post(url)
 	levels = re.search(r'"resourceLevel":"(\d+)","tradegoodLevel":"(\d+)"', html)
-	if bien == _('Aserradero'):
+	if bien == _('Forest'):
 		lv = levels.group(1)
 	else:
 		lv = levels.group(2)
@@ -82,5 +82,5 @@ def printEstadoMina(s, url, bien):
 		print('{} lv:{}'.format(bien, lv))
 		print('{} / {} {}%'.format(addDot(donado), addDot(pordonate), addDot(int((100 * donado) / pordonate))))
 	else:
-		print(_('{}: Está ampliando al nivel {:d}\n').format(bien, int(lv) + 1))
+		print(_('{}: Is expanding to level {:d}\n').format(bien, int(lv) + 1))
 	return infoMina is not None

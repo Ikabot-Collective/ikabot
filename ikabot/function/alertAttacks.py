@@ -30,10 +30,10 @@ def alertAttacks(s,e,fd):
 			return
 
 		banner()
-		minutos = read(msg=_('¿Cada cuántos minutos buscar ataques?(min:3, default: 20): '), min=3, empty=True)
+		minutos = read(msg=_('How often should I search for attacks?(min:3, default: 20): '), min=3, empty=True)
 		if minutos == '':
 			minutos = 20
-		print(_('Se buscarán ataques cada {} minutos.').format(minutos))
+		print(_('I will check for attacks every {} minutes').format(minutos))
 		enter()
 	except KeyboardInterrupt:
 		e.set()
@@ -42,12 +42,12 @@ def alertAttacks(s,e,fd):
 	set_child_mode(s)
 	e.set()
 
-	info = _('\nEspero por ataques cada {} minutos\n').format(minutos)
+	info = _('\nI check for attacks every {} minutes\n').format(minutos)
 	setInfoSignal(s, info)
 	try:
 		do_it(s, minutos)
 	except:
-		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
+		msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
 		sendToBot(s, msg)
 	finally:
 		s.logout()
@@ -70,7 +70,7 @@ def respondToAttack(s):
 				# mv
 				activarvacationMode(s)
 			else:
-				sendToBot(s, _('Comando inválido: {:d}').format(accion))
+				sendToBot(s, _('Invalid command: {:d}').format(accion))
 
 def do_it(s, minutos):
 	conocidos = []
@@ -96,14 +96,14 @@ def do_it(s, minutos):
 				cantidadTropas = militaryMovement['army']['amount']
 				cantidadFlotas = militaryMovement['fleet']['amount']
 				tiempoFaltante = int(militaryMovement['eventTime']) - tiempoAhora
-				msg  = _('-- ALERTA --\n')
+				msg  = _('-- ALERT --\n')
 				msg += missionText + '\n'
-				msg += _('de la ciudad {} de {}\n').format(origin['name'], origin['avatarName'])
+				msg += _('from the city {} of {}\n').format(origin['name'], origin['avatarName'])
 				msg += _('a {}\n').format(target['name'])
-				msg += _('{} unidades\n').format(cantidadTropas)
-				msg += _('{} flotas\n').format(cantidadFlotas)
-				msg += _('llegada en: {}\n').format(daysHoursMinutes(tiempoFaltante))
-				msg += _('Si quiere poner la cuenta en modo vacaciones envíe:\n')
+				msg += _('{} units\n').format(cantidadTropas)
+				msg += _('{} fleet\n').format(cantidadFlotas)
+				msg += _('arrival in: {}\n').format(daysHoursMinutes(tiempoFaltante))
+				msg += _('If you want to put the account in vacation mode send:\n')
 				msg += _('{:d}:1').format(os.getpid())
 				sendToBot(s, msg)
 
