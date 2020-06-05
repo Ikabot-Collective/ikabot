@@ -62,7 +62,7 @@ def esperarConstruccion(s, idCiudad, posicion):
 	sendToBotDebug(s, msg, debugON_constructionList)
 	return ciudad
 
-def constructionList(s, idCiudad, posicion, nivelesASubir, esperarRecursos):
+def constructionList1(s, idCiudad, posicion, nivelesASubir, esperarRecursos):
 
 	for lv in range(nivelesASubir):
 		ciudad = esperarConstruccion(s, idCiudad, posicion)
@@ -392,7 +392,7 @@ def constructionList(s,e,fd):
 	setInfoSignal(s, info)
 	try:
 		if ampliar:
-			constructionList(s, idCiudad, posEdificio, niveles, esperarRecursos)
+			constructionList1(s, idCiudad, posEdificio, niveles, esperarRecursos)
 	except:
 		msg = _('Error en:\n{}\nCausa:\n{}').format(info, traceback.format_exc())
 		sendToBot(s, msg)
