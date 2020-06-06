@@ -155,7 +155,8 @@ To configure this, you just need to enter two pieces of information:
 	
 	Then, when _ikabot_ asks you to enter the bot's token, use the following: `409993506: AAFwjxfazzx6ZqYusbmDJiARBTl_Zyb_Ue4`.
 	
-	If you want to use your own bot, you can create it with the following instructions: https://core.telegram.org/bots.
+	If you want to use your own bot, talk to @BotFather on Telegram and he will give you the token to a new bot once you give him the name of your new bot. Make sure to first talk to your new bot and type in /start before inserting it's token into _ikabot_.
+	You can find more information about the bot creation process here : https://core.telegram.org/bots
 
 2) Your chat_id
 
