@@ -65,7 +65,7 @@ def getIsla(html):
 	isla['tipo'] = tipo
 	return isla
 
-def getCiudad(html, s = {}):
+def getCiudad(html):
 
 	ciudad = re.search(r'"updateBackgroundData",\s?([\s\S]*?)\],\["updateTemplateData"', html).group(1)
 	ciudad = json.loads(ciudad, strict=False)

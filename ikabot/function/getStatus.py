@@ -33,7 +33,7 @@ def getStatus(s,e,fd):
 		city = chooseCity(s)
 		banner()
 
-		(wood, good, typeGood) = getProduccion(s, city['id'])
+		(wood, good, typeGood) = getProduccionPerSecond(s, city['id'])
 		print('\033[1m{}{}{}'.format(color_arr[int(typeGood)], city['cityName'], color_arr[0]))
 
 		resources = city['recursos']
@@ -90,10 +90,3 @@ def getStatus(s,e,fd):
 	except KeyboardInterrupt:
 		e.set()
 		return
-
-def getProduccion(s, idCiudad):
-	prod = s.post(payloadPost={'action': 'header', 'function': 'changeCurrentCity', 'actionRequest': s.token(), 'cityId': idCiudad, 'ajax': '1'}) 
-	wood = Decimal(re.search(r'"resourceProduction":([\d|\.]+),', prod).group(1))
-	good = Decimal(re.search(r'"tradegoodProduction":([\d|\.]+),', prod).group(1))
-	typeGood = int(re.search(r'"producedTradegood":"([\d|\.]+)"', prod).group(1))
-	return (wood, good, typeGood)

@@ -2,6 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import re
+import json
+from decimal import *
+
+getcontext().prec = 30
 
 def getRecursosDisponibles(html, num=False):
 	recursos = re.search(r'\\"resource\\":(\d+),\\"2\\":(\d+),\\"1\\":(\d+),\\"4\\":(\d+),\\"3\\":(\d+)}', html)
@@ -19,3 +23,12 @@ def getConsumoDeVino(html):
 	if rta:
 		return int(rta.group(1))
 	return 0
+
+def getProduccionPerSecond(s, idCiudad):
+	prod = s.post(payloadPost={'action': 'header', 'function': 'changeCurrentCity', 'actionRequest': s.token(), 'cityId': idCiudad, 'ajax': '1'})
+	prod = json.loads(prod, strict=False)
+	prod = prod[0][1]['headerData']
+	wood = Decimal( prod['resourceProduction'] )
+	good = Decimal( prod['tradegoodProduction'] )
+	typeGood = int( prod['producedTradegood'] )
+	return (wood, good, typeGood)

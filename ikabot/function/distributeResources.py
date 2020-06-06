@@ -161,7 +161,6 @@ def distribute_evenly(s, resource):
 def distribute_unevenly(s, recurso):
 
 	recursoTotal = 0
-	dict_idVino_diponible = {}
 	(idsCiudades, ciudades) = getIdsOfCities(s)
 	ciudadesOrigen = {}
 	ciudadesDestino = {}

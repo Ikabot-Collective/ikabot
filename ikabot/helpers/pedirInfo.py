@@ -123,7 +123,7 @@ def chooseCity(s, foreign=False):
 		return chooseForeignCity(s)
 	else:
 		html = s.get(urlCiudad + ids[eleccion -1])
-		return getCiudad(html,s)
+		return getCiudad(html)
 
 def chooseForeignCity(s):
 	"""Prompts the user to select an island, and a city on that island (is only used in chooseCity)
