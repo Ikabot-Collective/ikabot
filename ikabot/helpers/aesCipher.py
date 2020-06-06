@@ -53,7 +53,7 @@ class AESCipher:
 			filehandler.write(newFile.strip())
 			filehandler.flush()
 
-	def getFileData(self, s, all=False):
+	def getSessionData(self, s, all=False):
 		entry_key = self.getEntryKey(s)
 		with open(ikaFile, 'r') as filehandler:
 			ciphertexts = filehandler.read()
@@ -81,8 +81,8 @@ class AESCipher:
 						return {}
 		return {}
 
-	def setFileData(self, s, data):
-		session_data = self.getFileData(s, True)
+	def setSessionData(self, s, data):
+		session_data = self.getSessionData(s, True)
 
 		if s.username not in session_data:
 			session_data[s.username] = {}

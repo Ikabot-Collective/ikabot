@@ -26,21 +26,21 @@ def sendToBotDebug(s ,msg, debugON):
 def sendToBot(s, msg, Token=False):
 	if Token is False:
 		msg = 'pid:{}\n{}\n{}'.format(os.getpid(), config.infoUser, msg)
-	fileData = s.getFileData()
+	fileData = s.getSessionData()
 	try:
 		ikabot.web.sesion.normal_get('https://api.telegram.org/bot{}/sendMessage'.format(fileData['telegram']['botToken']), params={'chat_id': fileData['telegram']['chatId'], 'text': msg})
 	except KeyError:
 		pass
 
 def telegramCredsValidas(s):
-	fileData = s.getFileData()
+	fileData = s.getSessionData()
 	try:
 		return len(fileData['telegram']['botToken']) > 0 and len(fileData['telegram']['chatId']) > 0
 	except KeyError:
 		return False
 
 def getUserResponse(s):
-	fileData = s.getFileData()
+	fileData = s.getSessionData()
 	try:
 		updates = ikabot.web.sesion.normal_get('https://api.telegram.org/bot{}/getUpdates'.format(fileData['telegram']['botToken'])).text
 		updates = json.loads(updates, strict=False)
@@ -73,11 +73,11 @@ def updateTelegramData(s, e=None, fd=None):
 	botToken = read(msg=_('Bot\'s token:'))
 	chat_id = read(msg=_('Chat_id:'))
 
-	fileData = s.getFileData()
+	fileData = s.getSessionData()
 	fileData['telegram'] = {}
 	fileData['telegram']['botToken'] = botToken.replace(' ', '').replace('.', '')
 	fileData['telegram']['chatId'] = chat_id
-	s.setFileData(fileData)
+	s.setSessionData(fileData)
 
 	rand = random.randint(1000, 9999)
 	msg = _('El token a ingresar es:{:d}').format(rand)
@@ -98,7 +98,7 @@ def updateTelegramData(s, e=None, fd=None):
 	if valid is False:
 		fileData['telegram']['botToken'] = ''
 		fileData['telegram']['chatId'] = ''
-		s.setFileData(fileData)
+		s.setSessionData(fileData)
 		print(_('Check the credentials and re-supply them.'))
 	else:
 		print(_('The data was saved.'))

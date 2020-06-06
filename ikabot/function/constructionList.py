@@ -136,7 +136,7 @@ def recursosNecesarios(s, ciudad, edificio, desde, hasta):
 	rta = json.loads(rta, strict=False)
 	html_costos = rta[1][1][1]
 
-	fileData = s.getFileData()
+	fileData = s.getSessionData()
 	if 'reduccion_inv_max' in fileData:
 		reduccion_inv = 14
 	else:
@@ -161,7 +161,7 @@ def recursosNecesarios(s, ciudad, edificio, desde, hasta):
 
 		if reduccion_inv == 14:
 			fileData['reduccion_inv_max'] = True
-			s.setFileData(fileData)
+			s.setSessionData(fileData)
 
 	reduccion_inv /= 100
 	reduccion_inv = 1 - reduccion_inv
