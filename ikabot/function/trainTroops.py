@@ -139,11 +139,14 @@ def trainTroops(s,e,fd):
 			if ciudad['position'][i]['building'] == 'barracks':
 				ciudad['pos'] = str(i)
 				break
-		try:
-			data = getCuartelInfo(s, ciudad)
-		except Exception:
+		else:
+			print(_('Barracks not built.'))
+			enter()
 			e.set()
 			return
+
+		data = getCuartelInfo(s, ciudad)
+
 		unidades_info = data[2][1]
 		unidades = generateTroops(unidades_info)
 

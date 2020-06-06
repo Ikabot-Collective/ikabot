@@ -39,15 +39,6 @@ class Sesion:
 	def __fp_eval_id(self):
 		return self.__genRand() + self.__genRand() + '-' + self.__genRand() + '-' + self.__genRand() + '-' + self.__genRand() + '-' + self.__genRand() + self.__genRand() + self.__genRand()
 
-	def __getGameforgeCookie(self):
-		headers = {'Host': 'pixelzirkus.gameforge.com', 'User-Agent': user_agent, 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Encoding': 'gzip, deflate', 'Content-Type': 'application/x-www-form-urlencoded', 'DNT': '1', 'Connection': 'close', 'Upgrade-Insecure-Requests': '1'}
-		cookies = {'__asc': self.alexaCook, '__auc': self.alexaCook}
-		fp_eval_id = __fp_eval_id()
-		page = self.urlBase.replace(self.mundo + '-', '').replace('index.php?', '')
-		data = {'location': 'VISIT', 'product': 'ikariam', 'language': self.servidor, 'server-id': '1', 'replacement_kid': '', 'fp_eval_id': fp_eval_id, 'page': page,'referrer': '', 'fingerprint': '1820081159', 'fp_exec_time': '3.00'}
-		r = requests.post('https://pixelzirkus.gameforge.com/do/simple', headers=headers, cookies=cookies, data=data)
-		return r.cookies['pc_idt']
-
 	def __logout(self, html):
 		if html is not None:
 			idCiudad = getCiudad(html)['id']
