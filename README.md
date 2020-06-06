@@ -177,3 +177,12 @@ Make sure that your proxy has HTTPS enabled.
 
 **Bare in mind that if another user is using the same proxy, you will have the same IP and you might get banned**
 
+#### Automatization with Expect
+
+You can use [Expect](https://en.wikipedia.org/wiki/Expect) to automate some actions on _ikabot_.  
+There is an example [here](https://github.com/physics-sp/ikabot/wiki/Using-Expect-example:-distribute_wine_evenly.exp).  
+In Linux, you can use cron to run it:
+```
+sudo echo "00 03 * * * sudo -u $USER bash -c '~/distribute_wine.exp my@email.com my_password' > ~/expectFile.exp 2>&1" >> /etc/crontab
+```
+**Take into account that writing your password in plaintext can be very dangerous**
