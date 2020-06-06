@@ -1,0 +1,129 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2020-06-06 00:43-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: ../../../function/trainArmy.py:98
+msgid "It was not possible to finish the training due to lack of resources."
+msgstr ""
+
+#: ../../../function/trainArmy.py:120
+msgid "Do you want to train troops (1) or ships (2)?"
+msgstr ""
+
+#: ../../../function/trainArmy.py:126
+msgid "In what city do you want to train the troops?"
+msgstr ""
+
+#: ../../../function/trainArmy.py:128
+msgid "In what city do you want to train the fleet?"
+msgstr ""
+
+#: ../../../function/trainArmy.py:139
+msgid "Barracks not built."
+msgstr ""
+
+#: ../../../function/trainArmy.py:141
+msgid "Shipyard not built."
+msgstr ""
+
+#: ../../../function/trainArmy.py:156
+msgid "Train:"
+msgstr ""
+
+#: ../../../function/trainArmy.py:180
+msgid ""
+"\n"
+"Total cost:"
+msgstr ""
+
+#: ../../../function/trainArmy.py:185
+msgid "Citizens: {}"
+msgstr ""
+
+#: ../../../function/trainArmy.py:187
+msgid "Maintenance: {}"
+msgstr ""
+
+#: ../../../function/trainArmy.py:189
+msgid "Duration: {}"
+msgstr ""
+
+#: ../../../function/trainArmy.py:191
+msgid ""
+"\n"
+"Proceed? [Y/n]"
+msgstr ""
+
+#: ../../../function/trainArmy.py:200
+msgid ""
+"\n"
+"Do you want to train more troops when you finish? [y/N]"
+msgstr ""
+
+#: ../../../function/trainArmy.py:202
+msgid ""
+"\n"
+"Do you want to train more fleets when you finish? [y/N]"
+msgstr ""
+
+#: ../../../function/trainArmy.py:228
+msgid ""
+"\n"
+"There are not enough resources:"
+msgstr ""
+
+#: ../../../function/trainArmy.py:234
+msgid "Citizens:{}"
+msgstr ""
+
+#: ../../../function/trainArmy.py:236
+msgid ""
+"\n"
+"Proceed anyway? [Y/n]"
+msgstr ""
+
+#: ../../../function/trainArmy.py:243
+msgid ""
+"\n"
+"The selected troops will be trained."
+msgstr ""
+
+#: ../../../function/trainArmy.py:245
+msgid ""
+"\n"
+"The selected fleet will be trained."
+msgstr ""
+
+#: ../../../function/trainArmy.py:255
+msgid ""
+"\n"
+"I train troops in {}\n"
+msgstr ""
+
+#: ../../../function/trainArmy.py:257
+msgid ""
+"\n"
+"I train fleets in {}\n"
+msgstr ""
+
+#: ../../../function/trainArmy.py:262
+msgid ""
+"Error in:\n"
+"{}\n"
+"Cause:\n"
+"{}"
+msgstr ""
+

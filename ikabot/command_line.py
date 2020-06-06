@@ -19,8 +19,7 @@ from ikabot.function.searchForIslandSpaces import searchForIslandSpaces
 from ikabot.function.alertAttacks import alertAttacks
 from ikabot.function.vacationMode import vacationMode
 from ikabot.function.activateMiracle import activateMiracle
-from ikabot.function.trainTroops import trainTroops
-from ikabot.function.trainFleets import trainFleets
+from ikabot.function.trainArmy import trainArmy
 from ikabot.function.sellResources import sellResources
 from ikabot.function.checkForUpdate import checkForUpdate
 from ikabot.function.distributeResources import distributeResources
@@ -70,8 +69,7 @@ def menu(s, checkUpdate=True):
 					sellResources,
 					vacationMode,
 					activateMiracle,
-					trainTroops,
-					trainFleets,
+					trainArmy,
 					shipMovements,
 					constructBuilding,
 					update,
@@ -93,12 +91,11 @@ def menu(s, checkUpdate=True):
 	print(_('(12) Sell resources'))
 	print(_('(13) Activate vacation mode'))
 	print(_('(14) Activate miracle'))
-	print(_('(15) Train troops'))
-	print(_('(16) Train fleet'))
-	print(_('(17) See movements'))
-	print(_('(18) Construct building'))
-	print(_('(19) Update Ikabot'))
-	print(_('(20) Update the Telegram data'))
+	print(_('(15) Train army'))
+	print(_('(16) See movements'))
+	print(_('(17) Construct building'))
+	print(_('(18) Update Ikabot'))
+	print(_('(19) Update the Telegram data'))
 
 	entradas = len(menu_actions)
 	eleccion = read(min=0, max=entradas)
