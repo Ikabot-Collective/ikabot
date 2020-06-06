@@ -177,3 +177,6 @@ Make sure that your proxy has HTTPS enabled.
 
 **Bare in mind that if another user is using the same proxy, you will have the same IP and you might get banned**
 
+### Automatization with Expect
+"Example Expect script to distribute (evenly) wine"(distribute_wine.exp)
+Add to crontab and run at 3AM eg. via `sudo echo "00 03 * * * sudo -u $USER bash -c '~/ikabot/distribute_wine.exp my@email.com my_password' > ~/ikabot/distribution_wine.log 2>&1" >> /etc/crontab`
