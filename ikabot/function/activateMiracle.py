@@ -19,105 +19,112 @@ t = gettext.translation('activateMiracle',
                         fallback=True)
 _ = t.gettext
 
-def obtenerMilagrosDisponibles(s):
-	idsIslas = getIdsOfIslands(s)
-	islas = []
-	for idIsla in idsIslas:
-		html = s.get(urlIsla + idIsla)
+def obtainMiraclesAvailable(s):
+	idsIslands = getIdsOfIslands(s)
+	islands = []
+	for idIsland in idsIslands:
+		html = s.get(urlIsla + idIsland)
 		isla = getIsla(html)
 		isla['activable'] = False
-		islas.append(isla)
+		islands.append(isla)
 
 	ids, citys = getIdsOfCities(s)
-	for ciudad in citys:
-		city = citys[ciudad]
-		wonder = [ isla['wonder'] for isla in islas if city['coords'] == '[{}:{}] '.format(isla['x'], isla['y']) ][0]
-		if wonder in [ isla['wonder'] for isla in islas if isla['activable'] ]:
+	for cityId in citys:
+		city = citys[cityId]
+		# get the wonder for this city
+		wonder = [ island['wonder'] for island in islands if city['coords'] == '[{}:{}] '.format(island['x'], island['y']) ][0]
+		# if the wonder is not new, continue
+		if wonder in [ island['wonder'] for island in islands if island['activable'] ]:
 			continue
 
 		html = s.get(urlCiudad + str(city['id']))
-		ciudad = getCiudad(html)
+		city = getCiudad(html)
 
-		if 'temple' in [ edificio['building'] for edificio in ciudad['position'] ]:
-			for i in range( len( ciudad['position'] ) ):
-				if ciudad['position'][i]['building'] == 'temple':
-					ciudad['pos'] = str(i)
+		# make sure that the city has a temple
+		for i in range( len( city['position'] ) ):
+			if city['position'][i]['building'] == 'temple':
+				city['pos'] = str(i)
+				break
+		else:
+			continue
+
+		# get wonder information
+		params = {"view": "temple", "cityId": city['id'], "position": city['pos'], "backgroundView": "city", "currentCityId": city['id'], "actionRequest": s.token(), "ajax": "1"}
+		data = s.post(params=params)
+		data = json.loads(data, strict=False)
+		data = data[2][1]
+		available =  data['js_WonderViewButton']['buttonState'] == 'enabled'
+		if available is False:
+			for elem in data:
+				if 'countdown' in data[elem]:
+					enddate     = data[elem]['countdown']['enddate']
+					currentdate = data[elem]['countdown']['currentdate']
 					break
 
-			params = {"view": "temple", "cityId": ciudad['id'], "position": ciudad['pos'], "backgroundView": "city", "currentCityId": ciudad['id'], "actionRequest": s.token(), "ajax": "1"}
-			data = s.post(params=params)
-			data = json.loads(data, strict=False)
-			available =  data[2][1]['js_WonderViewButton']['buttonState'] == 'enabled'
-			if available is False:
-				data = data[2][1]
-				for elem in data:
-					if 'countdown' in data[elem]:
-						enddate     = data[elem]['countdown']['enddate']
-						currentdate = data[elem]['countdown']['currentdate']
-						break
+		# set the information on the island which wonder we can activate
+		for isla in islands:
+			if isla['id'] == city['islandId']:
+				isla['activable'] = True
+				isla['ciudad'] = city
+				isla['available'] = available
+				if available is False:
+					isla['available_in'] = enddate - currentdate
+				break
 
-			for isla in islas:
-				if isla['id'] == ciudad['islandId']:
-					isla['activable'] = True
-					isla['ciudad'] = ciudad
-					isla['available'] = available
-					if available is False:
-						isla['available_in'] = enddate - currentdate
-					break
-
-	return [ isla for isla in islas if isla['activable'] ]
+	# only return island which wonder we can activate
+	return [ island for island in islands if island['activable'] ]
 
 def activateMiracleImpl(s, isla):
 	params = {'action': 'CityScreen', 'cityId': isla['ciudad']['id'], 'function': 'activateWonder', 'position': isla['ciudad']['pos'], 'backgroundView': 'city', 'currentCityId': isla['ciudad']['id'], 'templateView': 'temple', 'actionRequest': s.token(), 'ajax': '1'}
 	rta = s.post(params=params)
 	return json.loads(rta, strict=False)
 
-def elegir_isla(islas):
+def chooseIsland(islands):
 	print(_('Which miracle do you want to activate?'))
 	i = 0
 	print(_('(0) Exit'))
-	for isla in islas:
+	for island in islands:
 		i += 1
-		if isla['available']:
-			print('({:d}) {}'.format(i, isla['wonderName']))
+		if island['available']:
+			print('({:d}) {}'.format(i, island['wonderName']))
 		else:
-			print(_('({:d}) {} (available in: {})').format(i, isla['wonderName'], daysHoursMinutes(isla['available_in'])))
+			print(_('({:d}) {} (available in: {})').format(i, island['wonderName'], daysHoursMinutes(island['available_in'])))
 
 	index = read(min=0, max=i)
 	if index == 0:
 		return None
-	isla = islas[index - 1]
-	return isla
+	island = islands[index - 1]
+	return island
 
 def activateMiracle(s,e,fd):
 	sys.stdin = os.fdopen(fd)
 	try:
 		banner()
 
-		islas = obtenerMilagrosDisponibles(s)
-		if islas == []:
+		islands = obtainMiraclesAvailable(s)
+		if islands == []:
 			print(_('There are no miracles available.'))
 			enter()
 			e.set()
 			return
 
-		isla = elegir_isla(islas)
-		if isla is None:
+		island = chooseIsland(islands)
+		if island is None:
 			e.set()
 			return
 
-		if isla['available']:
-			print(_('\nThe miracle {} will be activated').format(isla['wonderName']))
+		if island['available']:
+			print(_('\nThe miracle {} will be activated').format(island['wonderName']))
 			print(_('Proceed? [Y/n]'))
 			r = read(values=['y', 'Y', 'n', 'N', ''])
 			if r.lower() == 'n':
 				e.set()
 				return
 
-			rta = activateMiracleImpl(s, isla)
+			rta = activateMiracleImpl(s, island)
 
 			if rta[1][1][0] == 'error':
-				print(_('The miracle {} could not be activated.').format(isla['wonderName']))
+				print(_('The miracle {} could not be activated.').format(island['wonderName']))
 				enter()
 				e.set()
 				return
@@ -130,7 +137,7 @@ def activateMiracle(s,e,fd):
 					break
 			wait_time = enddate - currentdate
 
-			print(_('The miracle {} was activated.').format(isla['wonderName']))
+			print(_('The miracle {} was activated.').format(island['wonderName']))
 			enter()
 			banner()
 
@@ -159,13 +166,13 @@ def activateMiracle(s,e,fd):
 					continue
 				break
 		else:
-			print(_('\nThe miracle {} will be activated in {}').format(isla['wonderName'], daysHoursMinutes(isla['available_in'])))
+			print(_('\nThe miracle {} will be activated in {}').format(island['wonderName'], daysHoursMinutes(island['available_in'])))
 			print(_('Proceed? [Y/n]'))
 			rta = read(values=['y', 'Y', 'n', 'N', ''])
 			if rta.lower() == 'n':
 				e.set()
 				return
-			wait_time = isla['available_in']
+			wait_time = island['available_in']
 			iterations = 1
 
 			print(_('\nThe mirable will be activated.'))
@@ -211,10 +218,10 @@ def activateMiracle(s,e,fd):
 	set_child_mode(s)
 	e.set()
 
-	info = _('\nI activate the miracle {} {:d} times\n').format(isla['wonderName'], iterations)
+	info = _('\nI activate the miracle {} {:d} times\n').format(island['wonderName'], iterations)
 	setInfoSignal(s, info)
 	try:
-		do_it(s, isla, iterations)
+		do_it(s, island, iterations)
 	except:
 		msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
 		sendToBot(s, msg)

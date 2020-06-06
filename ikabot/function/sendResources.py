@@ -23,7 +23,7 @@ _ = t.gettext
 def sendResources(s,e,fd):
 	sys.stdin = os.fdopen(fd)
 	try:
-		rutas = []
+		routes = []
 		while True:
 
 			banner()
@@ -31,7 +31,7 @@ def sendResources(s,e,fd):
 			try:
 				cityO = chooseCity(s)
 			except KeyboardInterrupt:
-				if rutas:
+				if routes:
 					print(_('Send shipment? [Y/n]'))
 					rta = read(values=['y', 'Y', 'n', 'N', ''])
 					if rta.lower() != 'n':
@@ -48,8 +48,8 @@ def sendResources(s,e,fd):
 				continue
 
 			resources_left = cityO['recursos']
-			for ruta in rutas:
-				(origin_city, destination_city, __, *toSend) = ruta
+			for route in routes:
+				(origin_city, destination_city, __, *toSend) = route
 				if origin_city['id'] == cityO['id']:
 					for i in range(len(materials_names)):
 						resources_left[i] -= toSend[i]
@@ -57,7 +57,7 @@ def sendResources(s,e,fd):
 				# the destination city might be from another player
 				if cityD['propia'] and destination_city['id'] == cityD['id']:
 					for i in range(len(materials_names)):
-						cityD['freeSpaceForResources'] -= toSend[i]
+						cityD['freeSpaceForResources'][i] -= toSend[i]
 
 			banner()
 			# the destination city might be from another player
@@ -99,8 +99,8 @@ def sendResources(s,e,fd):
 			print(_('Proceed? [Y/n]'))
 			rta = read(values=['y', 'Y', 'n', 'N', ''])
 			if rta.lower() != 'n':
-				ruta = (cityO, cityD, idIsland, *send)
-				rutas.append(ruta)
+				route = (cityO, cityD, idIsland, *send)
+				routes.append(route)
 				print(_('Create another shipment? [y/N]'))
 				rta = read(values=['y', 'Y', 'n', 'N', ''])
 				if rta.lower() != 'y':
@@ -116,7 +116,7 @@ def sendResources(s,e,fd):
 
 	setInfoSignal(s, info)
 	try:
-		executeRoutes(s, rutas)
+		executeRoutes(s, routes)
 	except:
 		msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
 		sendToBot(s, msg)
