@@ -66,27 +66,24 @@ _Ikabot is a cross-platform program written in python that grants equal or even 
 
 	It allows you to activate any miracle you have available N times in a row.
 
-15. Train troops
+15. Train army
 
-	It allows you to easily create large amounts of troops in one city. If there are not enough resources to train all of them, it will train all the troops it can and when it finishes it will try to train the rest. It also allows you to build your army in multiple small steps so that you can use it as fast as possible.
+	It allows you to easily create large amounts of troops or fleets in one city. If there are not enough resources to train all of them, it will train all the units it can and when it finishes it will try to train the rest. It also allows you to build your army in multiple small steps so that you can use it as fast as possible.
 	
-17. Train fleet
 
-	The same as before but with boats.
-
-18. See movements
+16. See movements
 
 	Let's you see movements coming to/from your cities. This includes attacks, transports, etc.
 
-19. Construct building
+17. Construct building
 
 	It allows you to contruct a building (WOW!, again).
 
-20. Update Ikabot
+18. Update Ikabot
 
 	It tells you how to update _ikabot_
 
-21. Update the Telegram data
+19. Update the Telegram data
 
 	It allows you to set or update your Telegram contact information.
 
