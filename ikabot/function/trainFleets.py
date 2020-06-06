@@ -22,99 +22,84 @@ t = gettext.translation('trainFleets',
                         fallback=True)
 _ = t.gettext
 
-def getAstilleroInfo(s, ciudad):
-	params = {'view': 'shipyard', 'cityId': ciudad['id'], 'position': ciudad['pos'], 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'actionRequest': s.token(), 'ajax': '1'}
+def getShipyardInfo(s, city):
+	params = {'view': 'shipyard', 'cityId': city['id'], 'position': city['pos'], 'backgroundView': 'city', 'currentCityId': city['id'], 'actionRequest': s.token(), 'ajax': '1'}
 	data = s.post(params=params)
 	return json.loads(data, strict=False)
 
-def entrenar(s, ciudad, entrenamiento):
-	payload = {'action': 'CityScreen', 'function': 'buildShips', 'actionRequest': s.token(), 'cityId': ciudad['id'], 'position': ciudad['pos'], 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'shipyard', 'ajax': '1'}
-	for tropa in entrenamiento:
-		payload[ tropa['unit_type_id'] ] = tropa['entrenar']
+def train(s, city, trainings):
+	payload = {'action': 'CityScreen', 'function': 'buildShips', 'actionRequest': s.token(), 'cityId': city['id'], 'position': city['pos'], 'backgroundView': 'city', 'currentCityId': city['id'], 'templateView': 'shipyard', 'ajax': '1'}
+	for training in trainings:
+		payload[ training['unit_type_id'] ] = training['train']
 	s.post(payloadPost=payload)
 
-def esperarEntrenamiento(s, ciudad):
-	data = getAstilleroInfo(s, ciudad)
+def waitForTraining(s, ciudad):
+	data = getShipyardInfo(s, ciudad)
 	html = data[1][1][1]
-	segundos = re.search(r'\'buildProgress\', (\d+),', html)
-	if segundos:
-		segundos = segundos.group(1)
-		segundos = int(segundos) - data[0][1]['time']
-		wait(segundos + 5)
+	seconds = re.search(r'\'buildProgress\', (\d+),', html)
+	if seconds:
+		seconds = seconds.group(1)
+		seconds = int(seconds) - data[0][1]['time']
+		wait(seconds + 5)
 
-def planearEntrenamientos(s, ciudad, entrenamientos):
+def planTrainings(s, city, trainings):
+	shipyardPos = city['pos']
+
+	# trainings might be divided in multriple rounds
 	while True:
-		total = 0
-		for entrenamiento in entrenamientos:
-			for tropa in entrenamiento:
-				total += tropa['cantidad']
+
+		# total number of units to create
+		total = sum( [ fleet['cantidad'] for training in trainings for fleet in training ] )
 		if total == 0:
 			return
 
-		for entrenamiento in entrenamientos:
-			esperarEntrenamiento(s, ciudad)
-			html = s.get(urlCiudad + ciudad['id'])
+		for training in trainings:
+			waitForTraining(s, city)
+			html = s.get(urlCiudad + city['id'])
 			city = getCiudad(html)
-			ciudadanosDisp = city['ciudadanosDisp']
-			recursos = city['recursos']
-			maderaDisp  = recursos[0]
-			vinoDisp    = recursos[1]
-			marmolDisp  = recursos[2]
-			cristalDisp = recursos[3]
-			azufreDisp  = recursos[4]
+			city['pos'] = shipyardPos
 
-			for tropa in entrenamiento:
+			resourcesAvailable = city['recursos'].copy()
+			resourcesAvailable.append( city['ciudadanosDisp'] )
 
-				tropa['entrenar'] = tropa['cantidad']
+			# for each fleet type in training
+			for fleet in training:
 
-				if 'wood' in tropa['costs']:
-					limitante = maderaDisp // tropa['costs']['wood']
-					if limitante < tropa['entrenar']:
-						tropa['entrenar'] = limitante
-				if 'wine' in tropa['costs']:
-					limitante = vinoDisp // tropa['costs']['wine']
-					if limitante < tropa['entrenar']:
-						tropa['entrenar'] = limitante
-				if 'marble' in ['costs']:
-					limitante = marmolDisp // tropa['costs']['marble']
-					if limitante < tropa['entrenar']:
-						tropa['entrenar'] = limitante
-				if 'cristal' in ['costs']:
-					limitante = cristalDisp // tropa['costs']['cristal']
-					if limitante < tropa['entrenar']:
-						tropa['entrenar'] = limitante
-				if 'sulfur' in tropa['costs']:
-					limitante = azufreDisp // tropa['costs']['sulfur']
-					if limitante < tropa['entrenar']:
-						tropa['entrenar'] = limitante
-				if 'citizens' in tropa['costs']:
-					limitante = ciudadanosDisp // tropa['costs']['citizens']
-					if limitante < tropa['entrenar']:
-						tropa['entrenar'] = limitante
+				# calculate how many units can actually be trained based on the resources available
+				fleet['train'] = fleet['cantidad']
 
-				if 'wood' in tropa['costs']:
-					maderaDisp -= tropa['costs']['wood'] * tropa['entrenar']
-				if 'wine' in tropa['costs']:
-					vinoDisp -= tropa['costs']['wine'] * tropa['entrenar']
-				if 'marble' in tropa['costs']:
-					marmolDisp -= tropa['costs']['marble'] * tropa['entrenar']
-				if 'cristal' in ['costs']:
-					cristalDisp -= tropa['costs']['cristal'] * tropa['entrenar']
-				if 'sulfur' in tropa['costs']:
-					azufreDisp -= tropa['costs']['sulfur'] * tropa['entrenar']
-				if 'citizens' in tropa['costs']:
-					ciudadanosDisp -= tropa['costs']['citizens'] * tropa['entrenar']
+				for i in range(len(materials_names_english)):
+					material_name = materials_names_english[i].lower()
+					if material_name in fleet['costs']:
+						limiting = resourcesAvailable[i] // fleet['costs'][material_name]
+						if limiting < fleet['train']:
+							fleet['train'] = limiting
 
-				tropa['cantidad'] -= tropa['entrenar']
+				if 'citizens' in fleet['costs']:
+					limiting = resourcesAvailable[len(materials_names_english)] // fleet['costs']['citizens']
+					if limiting < fleet['train']:
+						fleet['train'] = limiting
+
+				# calculate the resources that will be left
+				for i in range(len(materials_names_english)):
+					material_name = materials_names_english[i].lower()
+					if material_name in fleet['costs']:
+						resourcesAvailable[i] -= fleet['costs'][material_name] * fleet['train']
+
+				if 'citizens' in fleet['costs']:
+					resourcesAvailable[len(materials_names_english)] -= fleet['costs']['citizens'] * fleet['train']
+
+				fleet['cantidad'] -= fleet['train']
 
 			total = 0
-			for tropa in entrenamiento:
-				total += tropa['entrenar']
+			for fleet in training:
+				total += fleet['train']
 			if total == 0:
 				msg = _('It was not possible to finish the training of fleets due to lack of resources.')
 				sendToBot(s, msg)
 				return
-			entrenar(s, ciudad, entrenamiento)
+
+			train(s, city, training)
 
 def generateFleet(unidades_info):
 	i = 1
@@ -132,74 +117,63 @@ def trainFleets(s,e,fd):
 	try:
 		banner()
 		print(_('In what city do you want to train the fleet?'))
-		ciudad = chooseCity(s)
+		city = chooseCity(s)
 		banner()
 
-		for i in range(len(ciudad['position'])):
-			if ciudad['position'][i]['building'] == 'shipyard':
-				ciudad['pos'] = str(i)
+		for i in range(len(city['position'])):
+			if city['position'][i]['building'] == 'shipyard':
+				city['pos'] = str(i)
 				break
-		try:
-			data = getAstilleroInfo(s, ciudad)
-		except Exception:
+		else:
+			print(_('Shipyard not built.'))
+			enter()
 			e.set()
 			return
-			
-		unidades_info = data[2][1]
-		unidades = generateFleet(unidades_info)
 
-		maxSize = 0
-		for unidad in unidades:
-			if maxSize < len(unidad['local_name']):
-				maxSize = len(unidad['local_name'])
+		data = getShipyardInfo(s, city)
 
-		entrenamientos = []
+		units_info = data[2][1]
+		units = generateFleet(units_info)
+
+		maxSize = max( [ len(unit['local_name']) for unit in units ] )
+
+		tranings = []
 		while True:
-			unidades = generateFleet(unidades_info)
+			units = generateFleet(units_info)
 			print(_('Train:'))
-			for unidad in unidades:
-				cantidad = read(msg='{}{}:'.format(' '*(maxSize-len(unidad['local_name'])), unidad['local_name']), min=0, empty=True)
-				if cantidad == '':
-					cantidad = 0
-				unidad['cantidad'] = cantidad
+			for unit in units:
+				pad = ' ' * ( maxSize - len(unit['local_name']) )
+				amount = read(msg='{}{}:'.format(pad, unit['local_name']), min=0, empty=True)
+				if amount == '':
+					amount = 0
+				unit['cantidad'] = amount
+
+			# calculate costs
+			cost = [0] * ( len(materials_names_english) + 3 )
+			for unit in units:
+
+				for i in range(len(materials_names_english)):
+					material_name = materials_names_english[i].lower()
+					if material_name in unit['costs']:
+						cost[i] += unit['costs'][material_name] * unit['cantidad']
+
+				if 'citizens' in unit['costs']:
+					cost[len(materials_names_english)+0] += unit['costs']['citizens'] * unit['cantidad']
+				if 'upkeep' in unit['costs']:
+					cost[len(materials_names_english)+1] += unit['costs']['upkeep'] * unit['cantidad']
+				if 'completiontime' in unit['costs']:
+					cost[len(materials_names_english)+2] += unit['costs']['completiontime'] * unit['cantidad']
 
 			print(_('\nTotal cost:'))
-			costo = {'madera': 0, 'vino': 0, 'marmol': 0, 'cristal': 0, 'azufre': 0, 'ciudadanos': 0, 'manuntencion': 0, 'tiempo': 0}
-			for unidad in unidades:
-
-				if 'wood' in unidad['costs']:
-					costo['madera'] += unidad['costs']['wood'] * unidad['cantidad']
-				if 'wine' in unidad['costs']:
-					costo['vino'] += unidad['costs']['wine'] * unidad['cantidad']
-				if 'marble' in unidad['costs']:
-					costo['marmol'] += unidad['costs']['marble'] * unidad['cantidad']
-				if 'cristal' in unidad['costs']:
-					costo['cristal'] += unidad['costs']['cristal'] * unidad['cantidad']
-				if 'sulfur' in unidad['costs']:
-					costo['azufre'] += unidad['costs']['sulfur'] * unidad['cantidad']
-				if 'citizens' in unidad['costs']:
-					costo['ciudadanos'] += unidad['costs']['citizens'] * unidad['cantidad']
-				if 'upkeep' in unidad['costs']:
-					costo['manuntencion'] += unidad['costs']['upkeep'] * unidad['cantidad']
-				if 'completiontime' in unidad['costs']:
-					costo['tiempo'] += unidad['costs']['completiontime'] * unidad['cantidad']
-
-			if costo['madera']:
-				print(_('       Wood: {}').format(addDot(costo['madera'])))
-			if costo['vino']:
-				print(_('       Wine: {}').format(addDot(costo['vino'])))
-			if costo['marmol']:
-				print(_('     Marble: {}').format(addDot(costo['marmol'])))
-			if costo['cristal']:
-				print(_('    Cristal: {}').format(addDot(costo['cristal'])))
-			if costo['azufre']:
-				print(_('     Sulfur: {}').format(addDot(costo['azufre'])))
-			if costo['ciudadanos']:
-				print(_('   Citizens: {}').format(addDot(costo['ciudadanos'])))
-			if costo['manuntencion']:
-				print(_('Maintenance: {}').format(addDot(costo['manuntencion'])))
-			if costo['tiempo']:
-				print(_('   Duration: {}').format(daysHoursMinutes(int(costo['tiempo']))))
+			for i in range(len(materials_names_english)):
+				if cost[i] > 0:
+					print('{}: {}'.format(materials_names_english[i], addDot(cost[i])))
+			if cost[len(materials_names_english)+0] > 0:
+				print(_('Citizens: {}').format(addDot(cost[len(materials_names_english)+0])))
+			if cost[len(materials_names_english)+1] > 0:
+				print(_('Maintenance: {}').format(addDot(cost[len(materials_names_english)+1])))
+			if cost[len(materials_names_english)+2] > 0:
+				print(_('Duration: {}').format(daysHoursMinutes(int(cost[len(materials_names_english)+2]))))
 
 			print(_('\nProceed? [Y/n]'))
 			rta = read(values=['y', 'Y', 'n', 'N', ''])
@@ -207,7 +181,7 @@ def trainFleets(s,e,fd):
 				e.set()
 				return
 
-			entrenamientos.append(unidades)
+			tranings.append(units)
 
 			print(_('\nDo you want to train more fleets when you finish? [y/N]'))
 			rta = read(values=['y', 'Y', 'n', 'N', ''])
@@ -217,48 +191,31 @@ def trainFleets(s,e,fd):
 			else:
 				break
 
-		recursos   = ciudad['recursos']
-		ciudadanos = ciudad['ciudadanosDisp']
-		sobrante               = {}
-		sobrante['madera']     = recursos[0]
-		sobrante['vino']       = recursos[1]
-		sobrante['marmol']     = recursos[2]
-		sobrante['cristal']    = recursos[3]
-		sobrante['azufre']     = recursos[4]
-		sobrante['ciudadanos'] = ciudadanos
+		# calculate if the city has enough resources
+		resourcesAvailable = city['recursos'].copy()
+		resourcesAvailable.append( city['ciudadanosDisp'] )
 
-		for entrenamiento in entrenamientos:
-			for unidad in entrenamiento:
+		for entrenamiento in tranings:
+			for unit in entrenamiento:
 
-				if 'wood' in unidad['costs']:
-					sobrante['madera'] -= unidad['costs']['wood'] * unidad['cantidad']
-				if 'wine' in unidad['costs']:
-					sobrante['vino'] -= unidad['costs']['wine'] * unidad['cantidad']
-				if 'marble' in unidad['costs']:
-					sobrante['marmol'] -= unidad['costs']['marble'] * unidad['cantidad']
-				if 'cristal' in unidad['costs']:
-					sobrante['cristal'] -= unidad['costs']['cristal'] * unidad['cantidad']
-				if 'sulfur' in unidad['costs']:
-					sobrante['azufre'] -= unidad['costs']['sulfur'] * unidad['cantidad']
-				if 'citizens' in unidad['costs']:
-					sobrante['ciudadanos'] -= unidad['costs']['citizens'] * unidad['cantidad']
+				for i in range(len(materials_names_english)):
+					material_name = materials_names_english[i].lower()
+					if material_name in unit['costs']:
+						resourcesAvailable[i] -= unit['costs'][material_name] * unit['cantidad']
 
-		falta = [ elem for elem in sobrante if sobrante[elem] < 0 ] != []
+				if 'citizens' in unit['costs']:
+					resourcesAvailable[len(materials_names_english)] -= unit['costs']['citizens'] * unit['cantidad']
 
-		if falta:
+		not_enough = [ elem for elem in resourcesAvailable if elem < 0 ] != []
+
+		if not_enough:
 			print(_('\nThere are not enough resources:'))
-			if sobrante['madera'] < 0:
-				print(_('    Wood:{}').format(addDot(sobrante['madera']*-1)))
-			if sobrante['vino'] < 0:
-				print(_('    Wine:{}').format(addDot(sobrante['vino']*-1)))
-			if sobrante['marmol'] < 0:
-				print(_('  Marble:{}').format(addDot(sobrante['marmol']*-1)))
-			if sobrante['cristal'] < 0:
-				print(_(' Cristal:{}').format(addDot(sobrante['cristal']*-1)))
-			if sobrante['azufre'] < 0:
-				print(_('  Sulfur:{}').format(addDot(sobrante['azufre']*-1)))
-			if sobrante['ciudadanos'] < 0:
-				print(_('Citizens:{}').format(addDot(sobrante['ciudadanos']*-1)))
+			for i in range(len(materials_names_english)):
+				if resourcesAvailable[i] < 0:
+					print('{}:{}'.format(materials_names[i], addDot(resourcesAvailable[i]*-1)))
+
+			if resourcesAvailable[len(materials_names_english)] < 0:
+				print(_('Citizens:{}').format(addDot(resourcesAvailable[len(materials_names_english)]*-1)))
 
 			print(_('\nProceed anyway? [Y/n]'))
 			rta = read(values=['y', 'Y', 'n', 'N', ''])
@@ -275,10 +232,10 @@ def trainFleets(s,e,fd):
 	set_child_mode(s)
 	e.set()
 
-	info = _('\nI train a fleet in {}\n').format(ciudad['cityName'])
+	info = _('\nI train a fleet in {}\n').format(city['cityName'])
 	setInfoSignal(s, info)
 	try:
-		planearEntrenamientos(s, ciudad, entrenamientos)
+		planTrainings(s, city, tranings)
 	except:
 		msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
 		sendToBot(s, msg)

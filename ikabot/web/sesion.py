@@ -243,7 +243,7 @@ class Sesion:
 			if retries > 0:
 				return self.__login(retries-1)
 			else:
-				msg = 'Login Error'
+				msg = 'Login Error: ' + str(resp)
 				if self.padre:
 					print(msg)
 					exit()
