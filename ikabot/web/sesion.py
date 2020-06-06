@@ -62,7 +62,7 @@ class Sesion:
 			msg += _('Out')
 #		sendToBotDebug(self, msg, debugON_session)
 
-		fileData = self.getFileData()
+		fileData = self.getSessionData()
 
 		if primero is True:
 			cookie_dict = dict(self.s.cookies.items())
@@ -85,11 +85,11 @@ class Sesion:
 				return
 			fileData['num_sesiones'] -= 1
 
-		self.setFileData(fileData)
+		self.setSessionData(fileData)
 
 	def __getCookie(self, fileData=None):
 		if fileData is None:
-			fileData = self.getFileData()
+			fileData = self.getSessionData()
 		try:
 			assert fileData['num_sesiones'] > 0
 			cookie_dict = fileData['cookies']
@@ -274,10 +274,10 @@ class Sesion:
 		if self.padre is False:
 			time.sleep(5 * random.randint(0, 10))
 
-	def __expiroLaSesion(self):
+	def __sessionExpired(self):
 		self.__backoff()
 
-		fileData = self.getFileData()
+		fileData = self.getSessionData()
 
 		try:
 			if fileData['num_sesiones'] > 0 and self.s.cookies['PHPSESSID'] != fileData['cookies']['PHPSESSID']:
@@ -286,15 +286,15 @@ class Sesion:
 				try:
 					self.__login(3)
 				except Exception:
-					self.__expiroLaSesion()
+					self.__sessionExpired()
 		except KeyError:
 			try:
 				self.__login(3)
 			except Exception:
-				self.__expiroLaSesion()
+				self.__sessionExpired()
 
 	def __checkCookie(self):
-		fileData = self.getFileData()
+		fileData = self.getSessionData()
 
 		try:
 			if fileData['num_sesiones'] > 0:
@@ -304,12 +304,12 @@ class Sesion:
 				try:
 					self.__login(3)
 				except Exception:
-					self.__expiroLaSesion()
+					self.__sessionExpired()
 		except KeyError:
 			try:
 				self.__login(3)
 			except Exception:
-				self.__expiroLaSesion()
+				self.__sessionExpired()
 
 	def token(self):
 		"""Generates a valid actionRequest token from the session
@@ -358,7 +358,7 @@ class Sesion:
 					assert self.__isExpired(html) is False
 				return html
 			except AssertionError:
-				self.__expiroLaSesion()
+				self.__sessionExpired()
 			except requests.exceptions.ConnectionError:
 				time.sleep(ConnectionError_wait)
 
@@ -396,7 +396,7 @@ class Sesion:
 					assert self.__isExpired(html) is False
 				return html
 			except AssertionError:
-				self.__expiroLaSesion()
+				self.__sessionExpired()
 			except requests.exceptions.ConnectionError:
 				time.sleep(ConnectionError_wait)
 
@@ -420,7 +420,7 @@ class Sesion:
 		if self.padre is False:
 			os._exit(0)
 
-	def setFileData(self, fileData):
+	def setSessionData(self, fileData):
 		"""Encrypts relevant session data and writes it to the .ikabot file
 		Parameters
 		----------
@@ -429,14 +429,14 @@ class Sesion:
 		fileData : dict
 			dictionary containing relevant session data, data is written to file using AESCipher.setFileData
 		"""
-		self.cipher.setFileData(self, fileData)
+		self.cipher.setSessionData(self, fileData)
 
-	def getFileData(self):
+	def getSessionData(self):
 		"""Gets relevant session data from the .ikabot file
 		self : Session
 			Session object
 		"""
-		return self.cipher.getFileData(self)
+		return self.cipher.getSessionData(self)
 
 def normal_get(url, params={}):
 	"""Sends a get request to provided url
