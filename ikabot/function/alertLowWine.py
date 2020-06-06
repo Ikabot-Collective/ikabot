@@ -12,9 +12,9 @@ from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import getIdsOfCities
 from ikabot.helpers.varios import daysHoursMinutes
+from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.recursos import *
 from ikabot.helpers.botComm import *
-
 
 t = gettext.translation('alertLowWine',
                         localedir,
@@ -31,8 +31,8 @@ def alertLowWine(s,e,fd):
 			e.set()
 			return
 		banner()
-		horas = read(msg=_('How many hours should be left until the wine runs out in a city so that it\'s alerted?'), min=1)
-		print(_('It will be alerted when the wine runs out in less than {:d} hours in any city').format(horas))
+		hours = read(msg=_('How many hours should be left until the wine runs out in a city so that it\'s alerted?'), min=1)
+		print(_('It will be alerted when the wine runs out in less than {:d} hours in any city').format(hours))
 		enter()
 	except KeyboardInterrupt:
 		e.set()
@@ -41,50 +41,65 @@ def alertLowWine(s,e,fd):
 	set_child_mode(s)
 	e.set()
 
-	info = _('\nI alert if the wine runs out in less than {:d} hours\n').format(horas)
+	info = _('\nI alert if the wine runs out in less than {:d} hours\n').format(hours)
 	setInfoSignal(s, info)
 	try:
-		do_it(s, horas)
+		do_it(s, hours)
 	except:
 		msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
 		sendToBot(s, msg)
 	finally:
 		s.logout()
 
-def do_it(s, horas):
-	ids, ciudades = getIdsOfCities(s)
+def do_it(s, hours):
+	ids, cities = getIdsOfCities(s)
 	while True:
-		ids, ciudades_new = getIdsOfCities(s)
-		if len(ciudades_new) != len(ciudades):
-			ciudades = ciudades_new
+		# getIdsOfCities is called on a loop because the amount of cities may change
+		ids, cities_new = getIdsOfCities(s)
+		if len(cities_new) != len(cities):
+			cities = cities_new
 
-		for city in ciudades:
-			if 'avisado' not in ciudades[city]:
-				ciudades[city]['avisado'] = False
+		for cityId in cities:
+			if 'reported' not in cities[cityId]:
+				cities[cityId]['reported'] = False
 
-		for city in ciudades:
-			if ciudades[city]['tradegood'] == '1':
+		for cityId in cities:
+			html = s.get(urlCiudad + cityId)
+			city = getCiudad(html)
+
+			# if the city doesn't even have a tavern built, ignore it
+			if 'tavern' not in [ building['building'] for building in city['position'] ]:
 				continue
 
-			id = str(ciudades[city]['id'])
-			html = s.get(urlCiudad + id)
-			consumoXhr = getConsumoDeVino(html)
-			consumoXseg = Decimal(consumoXhr) / Decimal(3600)
-			vinoDisp = getRecursosDisponibles(html, num=True)[1]
-			if consumoXseg == 0:
-				if ciudades[city]['avisado'] is False:
-					msg = _('The city {} is not consuming wine!').format(ciudades[city]['name'])
-					sendToBot(s, msg)
-					ciudades[city]['avisado'] = True
-				continue
-			segsRestantes = Decimal(vinoDisp) / Decimal(consumoXseg)
+			consumption_per_hour = city['consumo']
 
-			if segsRestantes < horas*60*60:
-				if ciudades[city]['avisado'] is False:
-					tiempoRestante = daysHoursMinutes(segsRestantes)
-					msg = _('In {}, the wine will run out in {}').format(tiempoRestante, ciudades[city]['name'])
+			# is a wine city
+			if cities[cityId]['tradegood'] == '1':
+				wine_production = getProduccionPerSecond(s, cityId)[1]
+				wine_production = wine_production * 60 * 60
+				if consumption_per_hour > wine_production:
+					consumption_per_hour -= wine_production
+				else:
+					continue
+
+			consumption_per_seg = Decimal(consumption_per_hour) / Decimal(3600)
+			wine_available = city['recursos'][1]
+
+			if consumption_per_seg == 0:
+				if cities[cityId]['reported'] is False:
+					msg = _('The city {} is not consuming wine!').format(city['name'])
 					sendToBot(s, msg)
-					ciudades[city]['avisado'] = True
+					cities[cityId]['reported'] = True
+				continue
+
+			seconds_left = Decimal(wine_available) / Decimal(consumption_per_seg)
+			if seconds_left < hours*60*60:
+				if cities[cityId]['reported'] is False:
+					time_left = daysHoursMinutes(seconds_left)
+					msg = _('In {}, the wine will run out in {}').format(time_left, city['name'])
+					sendToBot(s, msg)
+					cities[cityId]['reported'] = True
 			else:
-				ciudades[city]['avisado'] = False
+				cities[cityId]['reported'] = False
+
 		time.sleep(20*60)
