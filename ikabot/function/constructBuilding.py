@@ -20,42 +20,51 @@ def constructBuilding(s,e,fd):
 		banner()
 
 		print(_('City where to build:'))
-		ciudad = chooseCity(s)
+		city = chooseCity(s)
 		banner()
 
-		espacios = [ edificio for edificio in ciudad['position'] if edificio['building'] == 'empty' ]
+		# list of free spaces in the selected city
+		free_spaces = [ buildings for buildings in city['position'] if buildings['building'] == 'empty' ]
 
-		edificios = []
-		tipos = ['sea', 'land', 'shore', 'wall']
-		for tipo in tipos:
-			espacios_tipo = [ espacio for espacio in espacios if espacio['type'] == tipo ]
-			if len(espacios_tipo) > 0:
-				params = {'view': 'buildingGround', 'cityId': ciudad['id'], 'position': espacios_tipo[0]['position'], 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'actionRequest': s.token(), 'ajax': '1'}
+		# get a list of all the posible buildings that can be built
+		buildings = []
+		# different buildings can be built in different areas
+		type_spaces = ['sea', 'land', 'shore', 'wall']
+		for type_space in type_spaces:
+			free_spaces_of_type = [ free_space for free_space in free_spaces if free_space['type'] == type_space ]
+			if len(free_spaces_of_type) > 0:
+				# we take any space in the desired area
+				free_space_of_type = free_spaces_of_type[0]
+				params = {'view': 'buildingGround', 'cityId': city['id'], 'position': free_space_of_type['position'], 'backgroundView': 'city', 'currentCityId': city['id'], 'actionRequest': s.token(), 'ajax': '1'}
 				resp = s.post(params=params, noIndex=True)
 				resp = json.loads(resp, strict=False)[1][1]
 				if resp == '':
 					continue
 				html = resp[1]
 				matches = re.findall(r'<li class="building (.+?)">\s*<div class="buildinginfo">\s*<div title="(.+?)"\s*class="buildingimg .+?"\s*onclick="ajaxHandlerCall\(\'.*?buildingId=(\d+)&', html)
+				# add the buildings that can be built in this area
 				for match in matches:
-					edificios.append({'building': match[0], 'name': match[1], 'buildingId': match[2], 'type': tipo})
+					buildings.append({'building': match[0], 'name': match[1], 'buildingId': match[2], 'type': type_space})
 
-		if len(edificios) == 0:
+		if len(buildings) == 0:
 			print(_('No building can be built.'))
 			enter()
 			e.set()
 			return
 
+		# show list of buildings to the user
 		print(_('What building do you want to build?\n'))
 		i = 0
-		for edificio in edificios:
+		for building in buildings:
 			i += 1
-			print('({:d}) {}'.format(i, edificio['name']))
+			print('({:d}) {}'.format(i, building['name']))
 		rta = read(min=1, max=i)
 		banner()
-		edificio = edificios[rta - 1]
-		print('{}\n'.format(edificio['name']))
-		opciones = [ espacio for espacio in ciudad['position'] if espacio['building'] == 'empty' and espacio['type'] == edificio['type'] ]
+
+		# show posible positions for the selected building
+		building = buildings[rta - 1]
+		print('{}\n'.format(building['name']))
+		opciones = [ espacio for espacio in city['position'] if espacio['building'] == 'empty' and espacio['type'] == building['type'] ]
 		if len(opciones) == 1:
 			opcion = opciones[0]
 		else:
@@ -67,7 +76,9 @@ def constructBuilding(s,e,fd):
 			rta = read(min=1, max=i)
 			opcion = opciones[rta - 1]
 			banner()
-		params = {'action': 'CityScreen', 'function': 'build', 'cityId': ciudad['id'], 'position': opcion['position'], 'building': edificio['buildingId'], 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'buildingGround', 'actionRequest': s.token(), 'ajax': '1'}
+
+		# build it
+		params = {'action': 'CityScreen', 'function': 'build', 'cityId': city['id'], 'position': opcion['position'], 'building': building['buildingId'], 'backgroundView': 'city', 'currentCityId': city['id'], 'templateView': 'buildingGround', 'actionRequest': s.token(), 'ajax': '1'}
 		resp = s.post(params=params, noIndex=True)
 		msg = json.loads(resp, strict=False)[3][1][0]['text']
 		print(msg)
