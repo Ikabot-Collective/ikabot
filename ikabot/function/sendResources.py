@@ -57,7 +57,7 @@ def sendResources(s,e,fd):
 				# the destination city might be from another player
 				if cityD['propia'] and destination_city['id'] == cityD['id']:
 					for i in range(len(materials_names)):
-						cityD['freeSpaceForResources'] -= toSend[i]
+						cityD['freeSpaceForResources'][i] -= toSend[i]
 
 			banner()
 			# the destination city might be from another player
