@@ -16,7 +16,7 @@ from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.recursos import getRecursosDisponibles
 
-t = gettext.translation('trainFleets',
+t = gettext.translation('trainArmy',
                         localedir,
                         languages=idiomas,
                         fallback=True)
