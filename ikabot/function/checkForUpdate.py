@@ -2,8 +2,15 @@
 # -*- coding: utf-8 -*-
 
 import re
+import gettext
 import ikabot.config as config
 from ikabot.helpers.process import run
+
+t = gettext.translation('checkForUpdate',
+                        config.localedir,
+                        languages=config.idiomas,
+                        fallback=True)
+_ = t.gettext
 
 def checkForUpdate():
 	upgrade = run('python3 -m pip search ikabot').decode('utf-8').strip()
