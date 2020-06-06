@@ -1,0 +1,36 @@
+#!/usr/bin/env expect
+
+spawn ikabot
+
+expect "Mail:"
+send "[lindex $argv 0]\r"
+
+expect "Password:"
+send "[lindex $argv 1]\r"
+
+# select distribution of resources
+expect "(3)  Distribute resources"
+expect ">>"
+send "3\r"
+
+# select wine(2)
+expect "(2) Wine"
+expect ">>"
+send "2\r"
+
+# select distribute evenly
+expect "distribute them evenly among all cities (2)"
+expect ">>"
+send "2\r"
+
+# confirm distribution
+expect "Proceed? \\\[Y/n\\\]"
+expect ">>"
+send "y\r"
+
+# exit app
+expect "(0)  Exit"
+expect ">>"
+send "0\r"
+
+close $spawn_id	
