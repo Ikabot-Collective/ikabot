@@ -40,6 +40,7 @@ def telegramCredsValidas(s):
 		return False
 
 def getUserResponse(s):
+	# returns messages that the user sends to the telegram bot
 	sessionData = s.getSessionData()
 	try:
 		updates = ikabot.web.sesion.normal_get('https://api.telegram.org/bot{}/getUpdates'.format(sessionData['telegram']['botToken'])).text
@@ -47,6 +48,7 @@ def getUserResponse(s):
 		if updates['ok'] is False:
 			return []
 		updates = updates['result']
+		# only return messages from the chatId of our user
 		return [update['message']['text'] for update in updates if update['message']['chat']['id'] == int(sessionData['telegram']['chatId'])]
 	except KeyError:
 		return []
