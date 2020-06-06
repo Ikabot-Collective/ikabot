@@ -136,8 +136,8 @@ def recursosNecesarios(s, ciudad, edificio, desde, hasta):
 	rta = json.loads(rta, strict=False)
 	html_costos = rta[1][1][1]
 
-	fileData = s.getFileData()
-	if 'reduccion_inv_max' in fileData:
+	sessionData = s.getSessionData()
+	if 'reduccion_inv_max' in sessionData:
 		reduccion_inv = 14
 	else:
 		url = 'view=noViewChange&researchType=economy&backgroundView=city&currentCityId={}&templateView=researchAdvisor&actionRequest={}&ajax=1'.format(ciudad['id'], s.token())
@@ -160,8 +160,8 @@ def recursosNecesarios(s, ciudad, edificio, desde, hasta):
 				reduccion_inv += 8
 
 		if reduccion_inv == 14:
-			fileData['reduccion_inv_max'] = True
-			s.setFileData(fileData)
+			sessionData['reduccion_inv_max'] = True
+			s.setSessionData(sessionData)
 
 	reduccion_inv /= 100
 	reduccion_inv = 1 - reduccion_inv

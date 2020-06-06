@@ -60,39 +60,39 @@ class Sesion:
 			msg += _('New')
 		else:
 			msg += _('Out')
-#		sendToBotDebug(self, msg, debugON_session)
+		#sendToBotDebug(self, msg, debugON_session)
 
-		fileData = self.getFileData()
+		sessionData = self.getSessionData()
 
 		if primero is True:
 			cookie_dict = dict(self.s.cookies.items())
-			fileData['cookies'] = cookie_dict
-			fileData['num_sesiones'] = 1
+			sessionData['cookies'] = cookie_dict
+			sessionData['num_sesiones'] = 1
 
 		elif nuevo is True:
 			try:
-				fileData['num_sesiones'] += 1
+				sessionData['num_sesiones'] += 1
 			except KeyError:
-				fileData['num_sesiones'] = 1
+				sessionData['num_sesiones'] = 1
 
 		elif salida is True:
 			try:
-				if fileData['num_sesiones'] == 1:
+				if sessionData['num_sesiones'] == 1:
 					html = self.s.get(self.urlBase).text
 					if self.__isExpired(html) is False:
 						self.__logout(html)
 			except KeyError:
 				return
-			fileData['num_sesiones'] -= 1
+			sessionData['num_sesiones'] -= 1
 
-		self.setFileData(fileData)
+		self.setSessionData(sessionData)
 
-	def __getCookie(self, fileData=None):
-		if fileData is None:
-			fileData = self.getFileData()
+	def __getCookie(self, sessionData=None):
+		if sessionData is None:
+			sessionData = self.getSessionData()
 		try:
-			assert fileData['num_sesiones'] > 0
-			cookie_dict = fileData['cookies']
+			assert sessionData['num_sesiones'] > 0
+			cookie_dict = sessionData['cookies']
 			self.s = requests.Session()
 			self.s.proxies = proxyDict
 			self.s.headers.clear()
@@ -274,42 +274,42 @@ class Sesion:
 		if self.padre is False:
 			time.sleep(5 * random.randint(0, 10))
 
-	def __expiroLaSesion(self):
+	def __sessionExpired(self):
 		self.__backoff()
 
-		fileData = self.getFileData()
+		sessionData = self.getSessionData()
 
 		try:
-			if fileData['num_sesiones'] > 0 and self.s.cookies['PHPSESSID'] != fileData['cookies']['PHPSESSID']:
-				self.__getCookie(fileData)
+			if sessionData['num_sesiones'] > 0 and self.s.cookies['PHPSESSID'] != sessionData['cookies']['PHPSESSID']:
+				self.__getCookie(sessionData)
 			else:
 				try:
 					self.__login(3)
 				except Exception:
-					self.__expiroLaSesion()
+					self.__sessionExpired()
 		except KeyError:
 			try:
 				self.__login(3)
 			except Exception:
-				self.__expiroLaSesion()
+				self.__sessionExpired()
 
 	def __checkCookie(self):
-		fileData = self.getFileData()
+		sessionData = self.getSessionData()
 
 		try:
-			if fileData['num_sesiones'] > 0:
-				if self.s.cookies['PHPSESSID'] != fileData['cookies']['PHPSESSID']:
-					self.__getCookie(fileData)
+			if sessionData['num_sesiones'] > 0:
+				if self.s.cookies['PHPSESSID'] != sessionData['cookies']['PHPSESSID']:
+					self.__getCookie(sessionData)
 			else:
 				try:
 					self.__login(3)
 				except Exception:
-					self.__expiroLaSesion()
+					self.__sessionExpired()
 		except KeyError:
 			try:
 				self.__login(3)
 			except Exception:
-				self.__expiroLaSesion()
+				self.__sessionExpired()
 
 	def token(self):
 		"""Generates a valid actionRequest token from the session
@@ -358,7 +358,7 @@ class Sesion:
 					assert self.__isExpired(html) is False
 				return html
 			except AssertionError:
-				self.__expiroLaSesion()
+				self.__sessionExpired()
 			except requests.exceptions.ConnectionError:
 				time.sleep(ConnectionError_wait)
 
@@ -396,7 +396,7 @@ class Sesion:
 					assert self.__isExpired(html) is False
 				return html
 			except AssertionError:
-				self.__expiroLaSesion()
+				self.__sessionExpired()
 			except requests.exceptions.ConnectionError:
 				time.sleep(ConnectionError_wait)
 
@@ -420,23 +420,23 @@ class Sesion:
 		if self.padre is False:
 			os._exit(0)
 
-	def setFileData(self, fileData):
+	def setSessionData(self, sessionData):
 		"""Encrypts relevant session data and writes it to the .ikabot file
 		Parameters
 		----------
 		self : Session
 			Session object
-		fileData : dict
-			dictionary containing relevant session data, data is written to file using AESCipher.setFileData
+		sessionData : dict
+			dictionary containing relevant session data, data is written to file using AESCipher.setSessionData
 		"""
-		self.cipher.setFileData(self, fileData)
+		self.cipher.setSessionData(self, sessionData)
 
-	def getFileData(self):
+	def getSessionData(self):
 		"""Gets relevant session data from the .ikabot file
 		self : Session
 			Session object
 		"""
-		return self.cipher.getFileData(self)
+		return self.cipher.getSessionData(self)
 
 def normal_get(url, params={}):
 	"""Sends a get request to provided url

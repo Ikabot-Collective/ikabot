@@ -39,7 +39,7 @@ class AESCipher:
 	def getEntryKey(self, s):
 		return hashlib.sha256( 'ikabot'.encode('utf-8') + s.mail.encode('utf-8') ).hexdigest()
 
-	def deleteFileData(self, s):
+	def deleteSessionData(self, s):
 		entry_key = self.getEntryKey(s)
 		with open(ikaFile, 'r') as filehandler:
 			data = filehandler.read()
@@ -53,7 +53,7 @@ class AESCipher:
 			filehandler.write(newFile.strip())
 			filehandler.flush()
 
-	def getFileData(self, s, all=False):
+	def getSessionData(self, s, all=False):
 		entry_key = self.getEntryKey(s)
 		with open(ikaFile, 'r') as filehandler:
 			ciphertexts = filehandler.read()
@@ -69,7 +69,7 @@ class AESCipher:
 						print(msg)
 					else:
 						sendToBot(s, msg)
-					self.deleteFileData(s)
+					self.deleteSessionData(s)
 					os._exit(0)
 				data_dict = json.loads(plaintext, strict=False)
 				if all:
@@ -81,8 +81,8 @@ class AESCipher:
 						return {}
 		return {}
 
-	def setFileData(self, s, data):
-		session_data = self.getFileData(s, True)
+	def setSessionData(self, s, data):
+		session_data = self.getSessionData(s, True)
 
 		if s.username not in session_data:
 			session_data[s.username] = {}

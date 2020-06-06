@@ -17,9 +17,9 @@ def run(command):
 
 def updateProcessList(s, programprocesslist = []):
 	# read from file
-	fileData = s.getFileData()
+	sessionData = s.getSessionData()
 	try:
-		fileList = fileData['processList']
+		fileList = sessionData['processList']
 	except KeyError:
 		fileList = []
 
@@ -44,7 +44,7 @@ def updateProcessList(s, programprocesslist = []):
 			runningIkabotProcessList.append(process)
 
 	# write to file
-	fileData['processList'] = runningIkabotProcessList
-	s.setFileData(fileData)
+	sessionData['processList'] = runningIkabotProcessList
+	s.setSessionData(sessionData)
 	
 	return runningIkabotProcessList
