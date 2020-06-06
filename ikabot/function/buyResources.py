@@ -25,42 +25,45 @@ t = gettext.translation('buyResources',
                         fallback=True)
 _ = t.gettext
 
-def asignarRecursoBuscado(s, ciudad):
+def chooseResource(s, city):
 	print(_('Which resource do you want to buy?'))
-	for indice, bien in enumerate(materials_names):
-		print('({:d}) {}'.format(indice+1, bien))
-	eleccion = read(min=1, max=5)
-	recurso = eleccion - 1
-	if recurso == 0:
-		recurso = 'resource'
+	for index, material_name in enumerate(materials_names):
+		print('({:d}) {}'.format(index+1, material_name))
+	choise = read(min=1, max=5)
+	resource = choise - 1
+	if resource == 0:
+		resource = 'resource'
 	data = {
-	'cityId': ciudad['id'],
-	'position': ciudad['pos'],
+	'cityId': city['id'],
+	'position': city['pos'],
 	'view': 'branchOffice',
 	'activeTab': 'bargain',
 	'type': 444,
-	'searchResource': recurso,
-	'range': ciudad['rango'],
+	'searchResource': resource,
+	'range': city['rango'],
 	'backgroundView' : 'city',
-	'currentCityId': ciudad['id'],
+	'currentCityId': city['id'],
 	'templateView': 'branchOffice',
 	'currentTab': 'bargain',
 	'actionRequest': s.token(),
 	'ajax': 1
 	}
-	rta = s.post(payloadPost=data)
-	return eleccion, recurso
+	# this will set the chosen resource in the store
+	s.post(payloadPost=data)
+	resource = choise - 1
+	# return the chosen resource
+	return resource
 
-def obtenerOfertas(s, ciudad):
-	html = getStoreHtml(s, ciudad)
+def getOffers(s, city):
+	html = getStoreHtml(s, city)
 	hits = re.findall(r'short_text80">(.*?) *<br/>\((.*?)\)\s *</td>\s *<td>(\d+)</td>\s *<td>(.*?)/td>\s *<td><img src="skin/resources/icon_(\w+)\.png[\s\S]*?white-space:nowrap;">(\d+)\s[\s\S]*?href="\?view=takeOffer&destinationCityId=(\d+)&oldView=branchOffice&activeTab=bargain&cityId=(\d+)&position=(\d+)&type=(\d+)&resource=(\w+)"', html)
-	ofertas = []
+	offers = []
 	for hit in hits:
-		oferta = {
+		offer = {
 		'ciudadDestino': hit[0],
 		'jugadorAComprar' : hit[1],
 		'bienesXminuto': int(hit[2]),
-		'cantidadDisponible': int(hit[3].replace(',', '').replace('.', '').replace('<', '')),
+		'amountAvailable': int(hit[3].replace(',', '').replace('.', '').replace('<', '')),
 		'tipo': hit[4],
 		'precio': int(hit[5]),
 		'destinationCityId': hit[6],
@@ -69,96 +72,104 @@ def obtenerOfertas(s, ciudad):
 		'type': hit[9],
 		'resource': hit[10]
 		}
-		ofertas.append(oferta)
-	return ofertas
+		offers.append(offer)
+	return offers
 
-def calcularCosto(ofertas, cantidadAComprar):
-	costoTotal = 0
-	for oferta in ofertas:
-		if cantidadAComprar == 0:
+def calculateCost(offers, amount_to_buy):
+	total_cost = 0
+	for offer in offers:
+		if amount_to_buy == 0:
 			break
-		comprar = oferta['cantidadDisponible'] if oferta['cantidadDisponible'] < cantidadAComprar else cantidadAComprar
-		cantidadAComprar -= comprar
-		costoTotal += comprar * oferta['precio']
-	return costoTotal
+		buy = min(offer['amountAvailable'], amount_to_buy)
+		amount_to_buy -= buy
+		total_cost += buy * offer['precio']
+	return total_cost
 
-def getOro(s, ciudad):
+def getGold(s, ciudad):
 	url = 'view=finances&backgroundView=city&currentCityId={}&templateView=finances&actionRequest={}&ajax=1'.format(ciudad['id'], s.token())
 	data = s.post(url)
 	json_data = json.loads(data, strict=False)
-	oro = json_data[0][1]['headerData']['gold']
-	return int(oro.split('.')[0])
+	gold = json_data[0][1]['headerData']['gold']
+	gold = gold.split('.')[0]
+	gold = int(gold)
+	return gold
 
-def elegirCiudadComercial(ciudades_comerciales):
+def chooseCommertialCity(commercial_cities):
 	print(_('From which city do you want to buy resources?\n'))
-	for i, ciudad in enumerate(ciudades_comerciales):
+	for i, ciudad in enumerate(commercial_cities):
 		print('({:d}) {}'.format(i + 1, ciudad['name']))
-	ind = read(min=1, max=len(ciudades_comerciales))
-	return ciudades_comerciales[ind - 1]
+	ind = read(min=1, max=len(commercial_cities))
+	return commercial_cities[ind - 1]
 
 def buyResources(s,e,fd):
 	sys.stdin = os.fdopen(fd)
 	try:
 		banner()
 
-		ciudades_comerciales = getCiudadesComerciales(s)
-		if len(ciudades_comerciales) == 0:
+		# get all the cities with a store
+		commercial_cities = getCommertialCities(s)
+		if len(commercial_cities) == 0:
 			print(_('There is no store build'))
 			enter()
 			e.set()
 			return
 
-		if len(ciudades_comerciales) == 1:
-			ciudad = ciudades_comerciales[0]
+		# choose which city to buy from
+		if len(commercial_cities) == 1:
+			city = commercial_cities[0]
 		else:
-			ciudad = elegirCiudadComercial(ciudades_comerciales)
+			city = chooseCommertialCity(commercial_cities)
 			banner()
 
-		numRecurso, recurso = asignarRecursoBuscado(s, ciudad)
+		# choose resource to buy
+		resource = chooseResource(s, city)
 		banner()
 
-		ofertas = obtenerOfertas(s, ciudad)
-		if len(ofertas) == 0:
-			print(_('There were no offers found.'))
+		# get all the offers of the chosen resource from the chosen city
+		offers = getOffers(s, city)
+		if len(offers) == 0:
+			print(_('There are no offers available.'))
 			e.set()
 			return
 
-		precio_total   = 0
-		cantidad_total = 0
-		for oferta in ofertas:
-			cantidad = oferta['cantidadDisponible']
-			unidad   = oferta['precio']
-			costo    = cantidad * unidad
-			print(_('amount:{}').format(addDot(cantidad)))
-			print(_('price :{:d}').format(unidad))
-			print(_('cost  :{}').format(addDot(costo)))
+		# display offers to the user
+		total_price   = 0
+		total_amount = 0
+		for offer in offers:
+			amount = offer['amountAvailable']
+			price  = offer['precio']
+			cost   = amount * price
+			print(_('amount:{}').format(addDot(amount)))
+			print(_('price :{:d}').format(price))
+			print(_('cost  :{}').format(addDot(cost)))
 			print('')
-			precio_total += costo
-			cantidad_total += cantidad
+			total_price += cost
+			total_amount += amount
 
-		disponible = ciudad['freeSpaceForResources'][numRecurso - 1]
-
-		print(_('Total amount available to purchase: {}, for {}').format(addDot(cantidad_total), addDot(precio_total)))
-		if disponible < cantidad_total:
-			print(_('You just can buy {} due to storing capacity').format(addDot(disponible)))
-			cantidad_total = disponible
+		# ask how much to buy
+		print(_('Total amount available to purchase: {}, for {}').format(addDot(total_amount), addDot(total_price)))
+		available = city['freeSpaceForResources'][resource]
+		if available < total_amount:
+			print(_('You just can buy {} due to storing capacity').format(addDot(available)))
+			total_amount = available
 		print('')
-		cantidadAComprar = read(msg=_('How much do you want to buy?: '), min=0, max=cantidad_total)
-		if cantidadAComprar == 0:
+		amount_to_buy = read(msg=_('How much do you want to buy?: '), min=0, max=total_amount)
+		if amount_to_buy == 0:
 			e.set()
 			return
 
-		oro = getOro(s, ciudad)
-		costoTotal = calcularCosto(ofertas, cantidadAComprar)
+		# calculate the total cost
+		gold = getGold(s, city)
+		total_cost = calculateCost(offers, amount_to_buy)
 
-		print(_('\nCurrent gold: {}.\nTotal cost  : {}.\nFinal gold  : {}.'). format(addDot(oro), addDot(costoTotal), addDot(oro - costoTotal)))
+		print(_('\nCurrent gold: {}.\nTotal cost  : {}.\nFinal gold  : {}.'). format(addDot(gold), addDot(total_cost), addDot(gold - total_cost)))
 		print(_('Proceed? [Y/n]'))
 		rta = read(values=['y', 'Y', 'n', 'N', ''])
 		if rta.lower() == 'n':
 			e.set()
 			return
 
-		print(_('It will be purchased {}').format(addDot(cantidadAComprar)))
+		print(_('It will be purchased {}').format(addDot(amount_to_buy)))
 		enter()
 	except KeyboardInterrupt:
 		e.set()
@@ -167,43 +178,43 @@ def buyResources(s,e,fd):
 	set_child_mode(s)
 	e.set()
 
-	info = _('\nI will buy {} from {} to {}\n').format(addDot(cantidadAComprar), materials_names[numRecurso - 1], ciudad['cityName'])
+	info = _('\nI will buy {} from {} to {}\n').format(addDot(amount_to_buy), materials_names[resource], city['cityName'])
 	setInfoSignal(s, info)
 	try:
-		do_it(s, ciudad, ofertas, cantidadAComprar)
+		do_it(s, city, offers, amount_to_buy)
 	except:
 		msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
 		sendToBot(s, msg)
 	finally:
 		s.logout()
 
-def buy(s, ciudad, oferta, cantidad):
-	barcos = int(math.ceil((Decimal(cantidad) / Decimal(500))))
+def buy(s, city, offer, amount_to_buy):
+	ships = int(math.ceil((Decimal(amount_to_buy) / Decimal(500))))
 	data_dict = {
 	'action': 'transportOperations',
 	'function': 'buyGoodsAtAnotherBranchOffice',
-	'cityId': oferta['cityId'],
-	'destinationCityId': oferta['destinationCityId'],
+	'cityId': offer['cityId'],
+	'destinationCityId': offer['destinationCityId'],
 	'oldView': 'branchOffice',
-	'position': ciudad['pos'],
-	'avatar2Name': oferta['jugadorAComprar'],
-	'city2Name': oferta['ciudadDestino'],
-	'type': int(oferta['type']),
+	'position': city['pos'],
+	'avatar2Name': offer['jugadorAComprar'],
+	'city2Name': offer['ciudadDestino'],
+	'type': int(offer['type']),
 	'activeTab': 'bargain',
 	'transportDisplayPrice': 0,
 	'premiumTransporter': 0,
 	'capacity': 5,
 	'max_capacity': 5,
 	'jetPropulsion': 0,
-	'transporters': barcos,
+	'transporters': ships,
 	'backgroundView': 'city',
-	'currentCityId': oferta['cityId'],
+	'currentCityId': offer['cityId'],
 	'templateView': 'takeOffer',
 	'currentTab': 'bargain',
 	'actionRequest': s.token(),
 	'ajax': 1
 	}
-	url = 'view=takeOffer&destinationCityId={}&oldView=branchOffice&activeTab=bargain&cityId={}&position={}&type={}&resource={}&backgroundView=city&currentCityId={}&templateView=branchOffice&actionRequest={}&ajax=1'.format(oferta['destinationCityId'], oferta['cityId'], oferta['position'], oferta['type'], oferta['resource'], oferta['cityId'], s.token())
+	url = 'view=takeOffer&destinationCityId={}&oldView=branchOffice&activeTab=bargain&cityId={}&position={}&type={}&resource={}&backgroundView=city&currentCityId={}&templateView=branchOffice&actionRequest={}&ajax=1'.format(offer['destinationCityId'], offer['cityId'], offer['position'], offer['type'], offer['resource'], offer['cityId'], s.token())
 	data = s.post(url)
 	html = json.loads(data, strict=False)[1][1][1]
 	hits = re.findall(r'"tradegood(\d)Price"\s*value="(\d+)', html)
@@ -214,27 +225,29 @@ def buy(s, ciudad, oferta, cantidad):
 	if hit:
 		data_dict['resourcePrice'] = int(hit.group(1))
 		data_dict['cargo_resource'] = 0
-	resource = oferta['resource']
+	resource = offer['resource']
 	if resource == 'resource':
-		data_dict['cargo_resource'] = cantidad
+		data_dict['cargo_resource'] = amount_to_buy
 	else:
-		data_dict['cargo_tradegood{}'.format(resource)] = cantidad
+		data_dict['cargo_tradegood{}'.format(resource)] = amount_to_buy
 	s.post(payloadPost=data_dict)
-	msg = _('I buy {} to {} from {}').format(addDot(cantidad), oferta['ciudadDestino'], oferta['jugadorAComprar'])
+	msg = _('I buy {} to {} from {}').format(addDot(amount_to_buy), offer['ciudadDestino'], offer['jugadorAComprar'])
 	sendToBotDebug(s, msg, debugON_buyResources)
 
-def do_it(s, ciudad, ofertas, cantidadAComprar):
+def do_it(s, city, offers, amount_to_buy):
 	while True:
-		for oferta in ofertas:
-			if cantidadAComprar == 0:
+		for offer in offers:
+			if amount_to_buy == 0:
 				return
-			if oferta['cantidadDisponible'] == 0:
+			if offer['amountAvailable'] == 0:
 				continue
-			barcosDisp = waitForArrival(s)
-			storageCapacity  = barcosDisp * 500
-			comprable_max = storageCapacity if storageCapacity < cantidadAComprar else cantidadAComprar
-			compra = comprable_max if oferta['cantidadDisponible'] > comprable_max else oferta['cantidadDisponible']
-			cantidadAComprar -= compra
-			oferta['cantidadDisponible'] -= compra
-			buy(s, ciudad, oferta, compra)
-			break # vuelvo a empezar desde el principio
+
+			ships_available = waitForArrival(s)
+			storageCapacity  = ships_available * 500
+			buy_amount = min(amount_to_buy, storageCapacity, offer['amountAvailable'])
+
+			amount_to_buy -= buy_amount
+			offer['amountAvailable'] -= buy_amount
+			buy(s, city, offer, buy_amount)
+			# start from the beginning again, so that we always buy from the cheapest offers fisrt
+			break

@@ -7,7 +7,7 @@ from ikabot.config import *
 from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.pedirInfo import getIdsOfCities
 
-def getCiudadesComerciales(s):
+def getCommertialCities(s):
 	ids = getIdsOfCities(s)[0]
 	ciudades_comerciales = []
 	for idCiudad in ids:

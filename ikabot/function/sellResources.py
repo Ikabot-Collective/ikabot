@@ -152,7 +152,7 @@ def sellResources(s,e,fd):
 	try:
 		banner()
 
-		ciudades_comerciales = getCiudadesComerciales(s)
+		ciudades_comerciales = getCommertialCities(s)
 		if len(ciudades_comerciales) == 0:
 			print(_('There is no shop built'))
 			enter()
