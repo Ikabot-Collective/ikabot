@@ -376,7 +376,7 @@ def getBuildingToExpand(s, cityId):
 		else:
 			level = str(level)
 		if building['isBusy']:
-			level + '+'
+			level = level + '+'
 		print(_('({:d})\tlv:{}\t{}').format(i+1, level, building['name']))
 
 	choise = read(min=0, max=len(buildings))
