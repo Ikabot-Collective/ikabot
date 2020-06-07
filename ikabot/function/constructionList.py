@@ -26,15 +26,15 @@ t = gettext.translation('constructionList',
                         fallback=True)
 _ = t.gettext
 
-enviarRecursos = True
-ampliar = True
+sendResources = True
+expand = True
 
 def getTiempoDeConstruccion(s, html, posicion):
 	ciudad = getCiudad(html)
 	edificio = ciudad['position'][posicion]
 	hora_fin = re.search(r'"endUpgradeTime":(\d{10})', html)
 	if hora_fin is None:
-		msg = _('{}: I don\'t wait anything so that {} gets to the level {:d}').format(ciudad['cityName'], edificio['name'], int(edificio['level']))
+		msg = _('{}: I don\'t wait anything so that {} gets to the level {:d}').format(ciudad['cityName'], edificio['name'], edificio['level'])
 		sendToBotDebug(s, msg, debugON_constructionList)
 		return 0
 
@@ -44,7 +44,7 @@ def getTiempoDeConstruccion(s, html, posicion):
 	if espera <= 0:
 		espera = 0
 
-	msg = _('{}: I wait {:d} seconds so that {} gets to the level {:d}').format(ciudad['cityName'], espera, edificio['name'], int(edificio['level']) + 1)
+	msg = _('{}: I wait {:d} seconds so that {} gets to the level {:d}').format(ciudad['cityName'], espera, edificio['name'], edificio['level'] + 1)
 	sendToBotDebug(s, msg, debugON_constructionList)
 
 	return espera
@@ -58,11 +58,16 @@ def esperarConstruccion(s, idCiudad, posicion):
 	html = s.get(urlCiudad + idCiudad)
 	ciudad = getCiudad(html)
 	edificio = ciudad['position'][posicion]
-	msg = _('{}: The building {} reached the level {:d}.').format(ciudad['cityName'], edificio['name'], int(edificio['level']))
+	msg = _('{}: The building {} reached the level {:d}.').format(ciudad['cityName'], edificio['name'], edificio['level'])
 	sendToBotDebug(s, msg, debugON_constructionList)
 	return ciudad
 
-def constructionList1(s, idCiudad, posicion, nivelesASubir, esperarRecursos):
+def constructionList1(s, idCiudad, building, esperarRecursos):
+	current_level = building['level']
+	if building['isBusy']:
+		current_level += 1
+	nivelesASubir = building['upgradeTo'] - current_level
+	posicion = building['position']
 
 	for lv in range(nivelesASubir):
 		ciudad = esperarConstruccion(s, idCiudad, posicion)
@@ -100,16 +105,16 @@ def constructionList1(s, idCiudad, posicion, nivelesASubir, esperarRecursos):
 			sendToBot(s, msg)
 			return
 
-		msg = _('{}: The building {} is being extended to level {:d}.').format(ciudad['cityName'], edificio['name'], int(edificio['level'])+1)
+		msg = _('{}: The building {} is being extended to level {:d}.').format(ciudad['cityName'], edificio['name'], edificio['level']+1)
 		sendToBotDebug(s, msg, debugON_constructionList)
 
-	msg = _('{}: The building {} finished extending to level: {:d}.').format(ciudad['cityName'], edificio['name'], int(edificio['level'])+1)
+	msg = _('{}: The building {} finished extending to level: {:d}.').format(ciudad['cityName'], edificio['name'], edificio['level']+1)
 	sendToBotDebug(s, msg, debugON_constructionList)
 
 def getReductores(ciudad):
 	(carpinteria, oficina, prensa, optico, area) = (0, 0, 0, 0, 0)
 	for edificio in [ edificio for edificio in ciudad['position'] if edificio['name'] != 'empty' ]:
-		lv = int(edificio['level'])
+		lv = edificio['level']
 		if edificio['building'] == 'carpentering':
 			carpinteria = lv
 		elif edificio['building'] == 'architect':
@@ -122,7 +127,7 @@ def getReductores(ciudad):
 			area = lv
 	return (carpinteria, oficina, prensa, optico, area)
 
-def recursosNecesarios(s, ciudad, edificio, desde, hasta):
+def getResourcesNeeded(s, ciudad, edificio, desde, hasta):
 	url = 'view=buildingDetail&buildingId=0&helpId=1&backgroundView=city&currentCityId={}&templateView=ikipedia&actionRequest={}&ajax=1'.format(ciudad['id'], s.token())
 	rta = s.post(url)
 	rta = json.loads(rta, strict=False)
@@ -276,19 +281,19 @@ def menuEdificios(s, ids, cities, idCiudad, bienNombre, bienIndex, faltante):
 		if total >= faltante:
 			return rta
 	if total < faltante:
-		global enviarRecursos
-		global ampliar
+		global sendResources
+		global expand
 		print(_('\nThere are not enough resources.'))
-		if enviarRecursos:
+		if sendResources:
 			print(_('\nSend the resources anyway? [Y/n]'))
 			choise = read(values=['y', 'Y', 'n', 'N', ''])
 			if choise.lower() == 'n':
-				enviarRecursos = False
-		if ampliar:
+				sendResources = False
+		if expand:
 			print(_('\nTry to expand the building anyway? [y/N]'))
 			choise = read(values=['y', 'Y', 'n', 'N', ''])
 			if choise.lower() == 'n' or choise == '':
-				ampliar = False
+				expand = False
 	return rta
 
 def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante):
@@ -299,15 +304,15 @@ def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante):
 			continue
 		bien = materials_names[i]
 		ids = menuEdificios(s, idss, cities, idCiudad, bien, i, faltante[i])
-		if enviarRecursos is False and ampliar:
+		if sendResources is False and expand:
 			print(_('\nThe building will be expanded if possible.'))
 			enter()
 			return
-		elif enviarRecursos is False:
+		elif sendResources is False:
 			return
 		origenes[i] = ids
 
-	if ampliar:
+	if expand:
 		print(_('\nThe resources will be sent and the building will be expanded if possible.'))
 	else:
 		print(_('\nThe resources will be sent.'))
@@ -316,49 +321,89 @@ def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante):
 
 	multiprocessing.Process(target=planearAbastecimiento, args=(s, idCiudad, origenes, faltante)).start()
 
+def getBuildingToExpand(s, cityId):
+	html = s.get(urlCiudad + cityId)
+	city = getCiudad(html)
+
+	banner()
+	print(_('(0)\t\texit'))
+	buildings = [ building for building in city['position'] if building['name'] != 'empty' ]
+	for i in range(len(buildings)):
+		building = buildings[i]
+
+		level = building['level']
+		if level < 10:
+			level = ' ' + str(level)
+		else:
+			level = str(level)
+		if building['isBusy']:
+			level + '+'
+		print(_('({:d})\tlv:{}\t{}').format(i+1, level, building['name']))
+
+	choise = read(min=0, max=len(buildings))
+	if choise == 0:
+		return None
+
+	building = buildings[choise - 1]
+
+	current_level = int(building['level'])
+	# if the building is being expanded, add 1 level
+	if building['isBusy']:
+		current_level += 1
+
+	banner()
+	print(_('building:{}').format(building['name']))
+	print(_('current level:{}').format(current_level))
+
+	final_level = read(min=current_level, msg=_('increase to level:'))
+	building['upgradeTo'] = final_level
+
+	return building
+
 def constructionList(s,e,fd):
 	sys.stdin = os.fdopen(fd)
 	try:
-		global ampliar
-		global enviarRecursos
-		ampliar = True
-		enviarRecursos = True
+		global expand
+		global sendResources
+		expand = True
+		sendResources = True
 
 		banner()
-		esperarRecursos = False
-		ciudad = chooseCity(s)
-		idCiudad = ciudad['id']
-		edificios = getBuildings(s, idCiudad)
-		if edificios == []:
+		wait_resources = False
+		city = chooseCity(s)
+		idCiudad = city['id']
+		building = getBuildingToExpand(s, idCiudad)
+		if building is None:
 			e.set()
 			return
-		posEdificio = edificios[0]
-		niveles = len(edificios)
+
+		building_pos = building['position']
+		current_level = building['level']
+		if building['isBusy']:
+			current_level += 1
+		final_level = building['upgradeTo']
+		niveles = final_level - current_level
+
 		html = s.get(urlCiudad + idCiudad)
-		ciudad = getCiudad(html)
-		edificio = ciudad['position'][posEdificio]
-		desde = int(edificio['level'])
-		if edificio['isBusy']:
-			desde += 1
-		hasta = desde + niveles
-		(madera, vino, marmol, cristal, azufre) = recursosNecesarios(s, ciudad, edificio, desde, hasta)
-		if madera == -1:
+		city = getCiudad(html)
+		edificio = city['position'][building_pos]
+
+		resourcesNeeded = getResourcesNeeded(s, city, edificio, current_level, final_level)
+		if resourcesNeeded[0] == -1:
 			e.set()
 			return
-		html = s.get(urlCiudad + idCiudad)
-		(maderaDisp, vinoDisp, marmolDisp, cristalDisp, azufreDisp) = getRecursosDisponibles(html, num=True)
-		if maderaDisp < madera or vinoDisp < vino or marmolDisp < marmol or cristalDisp < cristal or azufreDisp < azufre:
+
+		missing = [0] * len(materials_names)
+
+		for i in range(len(materials_names)):
+			if city['recursos'][i] < resourcesNeeded[i]:
+				missing[i] = resourcesNeeded[i] - city['recursos'][i]
+
+		if sum(missing) > 0:
 			print(_('\nMissing:'))
-			if maderaDisp < madera:
-				print(_('{} of wood').format(addDot(madera - maderaDisp)))
-			if vinoDisp < vino:
-				print(_('{} of wine').format(addDot(vino - vinoDisp)))
-			if marmolDisp < marmol:
-				print(_('{} of marble').format(addDot(marmol - marmolDisp)))
-			if cristalDisp < cristal:
-				print(_('{} of cristal').format(addDot(cristal - cristalDisp)))
-			if azufreDisp < azufre:
-				print(_('{} of sulfur').format(addDot(azufre - azufreDisp)))
+			for i in range(len(materials_names)):
+				name = materials_names[i].lower()
+				print(_('{} of {}').format(addDot(missing[i]), name))
 
 			print(_('Automatically transport resources? [Y/n]'))
 			rta = read(values=['y', 'Y', 'n', 'N', ''])
@@ -369,9 +414,8 @@ def constructionList(s,e,fd):
 					e.set()
 					return
 			else:
-				esperarRecursos = True
-				faltante = [madera - maderaDisp, vino - vinoDisp, marmol - marmolDisp, cristal - cristalDisp, azufre - azufreDisp]
-				obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante)
+				wait_resources = True
+				obtenerLosRecursos(s, idCiudad, building_pos, niveles, missing)
 		else:
 			print(_('\nYou have enough materials'))
 			print(_('Proceed? [Y/n]'))
@@ -387,12 +431,12 @@ def constructionList(s,e,fd):
 	e.set()
 
 	info = _('\nUpgrade building\n')
-	info = info + _('City: {}\nBuilding: {}. From {:d}, to {:d}').format(ciudad['cityName'], edificio['name'], desde, hasta)
+	info = info + _('City: {}\nBuilding: {}. From {:d}, to {:d}').format(city['cityName'], edificio['name'], current_level, final_level)
 
 	setInfoSignal(s, info)
 	try:
-		if ampliar:
-			constructionList1(s, idCiudad, posEdificio, niveles, esperarRecursos)
+		if expand:
+			constructionList1(s, idCiudad, building, wait_resources)
 	except:
 		msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
 		sendToBot(s, msg)

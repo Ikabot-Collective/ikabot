@@ -77,8 +77,10 @@ def getStatus(s,e,fd):
 				color = bcolors.RED
 
 			level = edificio['level']
-			if int(level) < 10:
-				level = ' ' + level
+			if level < 10:
+				level = ' ' + str(level)
+			else:
+				level = str(level)
 			if edificio['isBusy'] is True:
 				level = level + '+'
 
