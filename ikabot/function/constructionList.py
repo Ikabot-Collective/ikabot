@@ -265,7 +265,7 @@ def sendResourcesNeeded(s, idDestiny, origins, missingArr):
 				missing -= send
 				toSend = [0] * len(materials_names)
 				toSend[i] = send
-				route = (cityO, cityD, cityD['islandId'], toSend)
+				route = (cityO, cityD, cityD['islandId'], *toSend)
 				routes.append(route)
 
 		executeRoutes(s, routes)
