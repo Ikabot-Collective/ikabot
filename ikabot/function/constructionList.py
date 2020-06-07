@@ -62,7 +62,7 @@ def waitForConstruction(s, cityId, position):
 	sendToBotDebug(s, msg, debugON_constructionList)
 	return city
 
-def expandBuilding(s, idCiudad, building, waitForResources):
+def expandBuilding(s, cityId, building, waitForResources):
 	current_level = building['level']
 	if building['isBusy']:
 		current_level += 1
@@ -70,16 +70,17 @@ def expandBuilding(s, idCiudad, building, waitForResources):
 	position = building['position']
 
 	for lv in range(levels_to_upgrade):
-		city = waitForConstruction(s, idCiudad, position)
+		city = waitForConstruction(s, cityId, position)
 		building = city['position'][position]
 
 		if building['canUpgrade'] is False and waitForResources is True:
 			while building['canUpgrade'] is False:
-				time.sleep(60) # time so that the resources get send
+				time.sleep(60) # time so that the resources get sent
 				seconds = getMinimumWaitingTime(s)
-				html = s.get(urlCiudad + idCiudad)
+				html = s.get(urlCiudad + cityId)
 				city = getCiudad(html)
 				building = city['position'][position]
+				# if no ships are comming, exit no matter if the building can or can't upgrade
 				if seconds == 0:
 					break
 				wait(seconds + 5)
@@ -92,10 +93,11 @@ def expandBuilding(s, idCiudad, building, waitForResources):
 			sendToBot(s, msg)
 			return
 
+		# try to upgrade 3 times, just in case
 		for i in range(3):
-			url = 'action=CityScreen&function=upgradeBuilding&actionRequest={}&cityId={}&position={:d}&level={}&activeTab=tabSendTransporter&backgroundView=city&currentCityId={}&templateView={}&ajax=1'.format(s.token(), idCiudad, position, building['level'], idCiudad, building['building'])
+			url = 'action=CityScreen&function=upgradeBuilding&actionRequest={}&cityId={}&position={:d}&level={}&activeTab=tabSendTransporter&backgroundView=city&currentCityId={}&templateView={}&ajax=1'.format(s.token(), cityId, position, building['level'], cityId, building['building'])
 			s.post(url)
-			html = s.get(urlCiudad + idCiudad)
+			html = s.get(urlCiudad + cityId)
 			city = getCiudad(html)
 			building = city['position'][position]
 			if building['isBusy']:
@@ -132,18 +134,20 @@ def getReductores(city):
 	return reductores
 
 def getResourcesNeeded(s, city, building, current_level, final_level):
+	# get html with information about buildings
 	url = 'view=buildingDetail&buildingId=0&helpId=1&backgroundView=city&currentCityId={}&templateView=ikipedia&actionRequest={}&ajax=1'.format(city['id'], s.token())
 	rta = s.post(url)
 	rta = json.loads(rta, strict=False)
 	html = rta[1][1][1]
 
+	# get html with information about buildings costs
 	regex = r'<div class="(?:selected)? button_building '+ re.escape(building['building']) + r'"\s*onmouseover="\$\(this\)\.addClass\(\'hover\'\);" onmouseout="\$\(this\)\.removeClass\(\'hover\'\);"\s*onclick="ajaxHandlerCall\(\'\?(.*?)\'\);'
 	match = re.search(regex, html)
 	url = match.group(1)
 	url += 'backgroundView=city&currentCityId={}&templateView=buildingDetail&actionRequest={}&ajax=1'.format(city['id'], s.token())
 	rta = s.post(url)
 	rta = json.loads(rta, strict=False)
-	html_costos = rta[1][1][1]
+	html_costs = rta[1][1][1]
 
 	# if the user has all the resource saving studies, we save that in the session data (one less request)
 	sessionData = s.getSessionData()
@@ -171,20 +175,25 @@ def getResourcesNeeded(s, city, building, current_level, final_level):
 			elif '2100' in link:
 				reduccion_inv += 8
 
-		# the user has all the resource saving studies
+		# if the user has all the resource saving studies, save that in the session data
 		if reduccion_inv == 14:
 			sessionData['reduccion_inv_max'] = True
 			s.setSessionData(sessionData)
 
+	# calculate cost reductions
 	reduccion_inv /= 100
 	reduccion_inv = 1 - reduccion_inv
 
+	# get buildings that reduce the cost of upgrades
 	reductores = getReductores(city)
 
-	resources_types = re.findall(r'<th class="costs"><img src="skin/resources/icon_(.*?)\.png"/></th>', html_costos)[:-1]
+	# get the type of resources that this upgrade will cost (wood, marble, etc)
+	resources_types = re.findall(r'<th class="costs"><img src="skin/resources/icon_(.*?)\.png"/></th>', html_costs)[:-1]
 
-	matches = re.findall(r'<td class="level">\d+</td>(?:\s+<td class="costs">.*?</td>)+', html_costos)
+	# get the actual cost of each upgrade
+	matches = re.findall(r'<td class="level">\d+</td>(?:\s+<td class="costs">.*?</td>)+', html_costs)
 
+	# calculate the cost of the entire upgrade, taking into account all the possible reductions
 	final_costs = [0] * len(materials_names)
 	levels_to_upgrade = 0
 	for match in matches:
@@ -198,6 +207,7 @@ def getResourcesNeeded(s, city, building, current_level, final_level):
 
 		levels_to_upgrade += 1
 
+		# get the costs for the current level
 		costs = re.findall(r'<td class="costs">([\d,\.]*)</td>', match)
 		for i in range(len(costs)):
 			resource_type = resources_types[i]
@@ -207,12 +217,16 @@ def getResourcesNeeded(s, city, building, current_level, final_level):
 					index = j
 					break
 
+			# get the cost of the current resource type
 			cost = costs[i]
 			cost = cost.replace(',', '').replace('.', '')
 			cost = 0 if cost == '' else int(cost)
 
+			# calculate all the reductions
 			real_cost = Decimal(cost)
+			# investigation reduction
 			original_cost = Decimal(real_cost) / Decimal(reduccion_inv)
+			# special building reduction
 			real_cost -= Decimal(original_cost) * (Decimal(reductores[index]) / Decimal(100))
 
 			final_costs[index] += math.ceil(real_cost)
@@ -233,13 +247,15 @@ def sendResourcesNeeded(s, idDestiny, origins, missingArr):
 	setInfoSignal(s, info)
 
 	try:
-		rutas = []
+		routes = []
 		html = s.get(urlCiudad + idDestiny)
 		cityD = getCiudad(html)
 		for i in range(len(materials_names)):
 			missing = missingArr[i]
 			if missing <= 0:
 				continue
+
+			# send the resources from each origin city
 			for cityO in origins[i]:
 				if missing == 0:
 					break
@@ -249,10 +265,10 @@ def sendResourcesNeeded(s, idDestiny, origins, missingArr):
 				missing -= send
 				toSend = [0] * len(materials_names)
 				toSend[i] = send
-				ruta = (cityO, cityD, cityD['islandId'], toSend)
-				rutas.append(ruta)
-		pass
-		executeRoutes(s, rutas)
+				route = (cityO, cityD, cityD['islandId'], toSend)
+				routes.append(route)
+
+		executeRoutes(s, routes)
 	except:
 		msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
 		sendToBot(s, msg)
@@ -284,6 +300,7 @@ def chooseResourceProviders(s, ids, cities, idCiudad, resource, missing):
 		if available == 0:
 			continue
 
+		# ask the user it this city should provide resources
 		tradegood_initial = tradegood_initials[ int( cities[cityId]['tradegood'] ) ]		
 		pad = ' ' * (maxName - len(cities[cityId]['name']))
 		msg = '{}{} ({}): {} [Y/n]:'.format(pad, cities[cityId]['name'], tradegood_initial, addDot(available))
@@ -291,11 +308,14 @@ def chooseResourceProviders(s, ids, cities, idCiudad, resource, missing):
 		if eleccion.lower() == 'n':
 			continue
 
+		# if so, save the city and calculate the total amount resources to send
 		total_available += available
 		origin_cities.append(city)
+		# if we have enough resources, return
 		if total_available >= missing:
 			return origin_cities
 
+	# if we reach this part, there are not enough resources to expand the building
 	print(_('\nThere are not enough resources.'))
 
 	if len(origin_cities) > 0:
@@ -312,20 +332,21 @@ def chooseResourceProviders(s, ids, cities, idCiudad, resource, missing):
 	return origin_cities
 
 def sendResourcesMenu(s, idCiudad, missing):
-	idss, cities = getIdsOfCities(s)
+	cities_ids, cities = getIdsOfCities(s)
 	origins = {}
-	for i in range(len(missing)):
-		if missing[i] <= 0:
+	# for each missing resource, choose providers
+	for resource in range(len(missing)):
+		if missing[resource] <= 0:
 			continue
 
-		origin_cities = chooseResourceProviders(s, idss, cities, idCiudad, i, missing[i])
+		origin_cities = chooseResourceProviders(s, cities_ids, cities, idCiudad, resource, missing[resource])
 		if sendResources is False and expand:
 			print(_('\nThe building will be expanded if possible.'))
 			enter()
 			return
 		elif sendResources is False:
 			return
-		origins[i] = origin_cities
+		origins[resource] = origin_cities
 
 	if expand:
 		print(_('\nThe resources will be sent and the building will be expanded if possible.'))
@@ -334,6 +355,7 @@ def sendResourcesMenu(s, idCiudad, missing):
 
 	enter()
 
+	# create a new process to send the resources (this could be a thread)
 	multiprocessing.Process(target=sendResourcesNeeded, args=(s, idCiudad, origins, missing)).start()
 
 def getBuildingToExpand(s, cityId):
@@ -341,6 +363,7 @@ def getBuildingToExpand(s, cityId):
 	city = getCiudad(html)
 
 	banner()
+	# show the buildings available to expand (ignore empty spaces)
 	print(_('Which building do you want to expand?\n'))
 	print(_('(0)\t\texit'))
 	buildings = [ building for building in city['position'] if building['name'] != 'empty' ]
@@ -388,8 +411,8 @@ def constructionList(s,e,fd):
 		wait_resources = False
 		print(_('In which city do you want to expand a building?'))
 		city = chooseCity(s)
-		idCiudad = city['id']
-		building = getBuildingToExpand(s, idCiudad)
+		cityId = city['id']
+		building = getBuildingToExpand(s, cityId)
 		if building is None:
 			e.set()
 			return
@@ -399,17 +422,19 @@ def constructionList(s,e,fd):
 			current_level += 1
 		final_level = building['upgradeTo']
 
+		# calculate the resources that are needed
 		resourcesNeeded = getResourcesNeeded(s, city, building, current_level, final_level)
 		if -1 in resourcesNeeded:
 			e.set()
 			return
 
+		# calculate the resources that are missing
 		missing = [0] * len(materials_names)
-
 		for i in range(len(materials_names)):
 			if city['recursos'][i] < resourcesNeeded[i]:
 				missing[i] = resourcesNeeded[i] - city['recursos'][i]
 
+		# show missing resources to the user
 		if sum(missing) > 0:
 			print(_('\nMissing:'))
 			for i in range(len(materials_names)):
@@ -419,6 +444,7 @@ def constructionList(s,e,fd):
 				print(_('{} of {}').format(addDot(missing[i]), name))
 			print('')
 
+			# if the user wants, send the resources from the selected cities
 			print(_('Automatically transport resources? [Y/n]'))
 			rta = read(values=['y', 'Y', 'n', 'N', ''])
 			if rta.lower() == 'n':
@@ -429,7 +455,7 @@ def constructionList(s,e,fd):
 					return
 			else:
 				wait_resources = True
-				sendResourcesMenu(s, idCiudad, missing)
+				sendResourcesMenu(s, cityId, missing)
 		else:
 			print(_('\nYou have enough materials'))
 			print(_('Proceed? [Y/n]'))
@@ -450,7 +476,7 @@ def constructionList(s,e,fd):
 	setInfoSignal(s, info)
 	try:
 		if expand:
-			expandBuilding(s, idCiudad, building, wait_resources)
+			expandBuilding(s, cityId, building, wait_resources)
 	except:
 		msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
 		sendToBot(s, msg)
