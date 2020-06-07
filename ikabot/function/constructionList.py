@@ -20,8 +20,8 @@ from ikabot.helpers.getJson import getCiudad
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.recursos import getRecursosDisponibles
-t = gettext.translation('constructionList', 
-                        localedir, 
+t = gettext.translation('constructionList',
+                        localedir,
                         languages=idiomas,
                         fallback=True)
 _ = t.gettext
@@ -29,141 +29,149 @@ _ = t.gettext
 sendResources = True
 expand = True
 
-def getTiempoDeConstruccion(s, html, posicion):
-	ciudad = getCiudad(html)
-	edificio = ciudad['position'][posicion]
-	hora_fin = re.search(r'"endUpgradeTime":(\d{10})', html)
-	if hora_fin is None:
-		msg = _('{}: I don\'t wait anything so that {} gets to the level {:d}').format(ciudad['cityName'], edificio['name'], edificio['level'])
+def getConstructionTime(s, html, position):
+	city = getCiudad(html)
+	building = city['position'][position]
+	final_time = re.search(r'"endUpgradeTime":(\d{10})', html)
+	if final_time is None:
+		msg = _('{}: I don\'t wait anything so that {} gets to the level {:d}').format(city['cityName'], building['name'], building['level'])
 		sendToBotDebug(s, msg, debugON_constructionList)
 		return 0
 
-	hora_actual = int( time.time() )
-	hora_fin    = int( hora_fin.group(1) )
-	espera      = hora_fin - hora_actual
-	if espera <= 0:
-		espera = 0
+	current_time    = int( time.time() )
+	final_time      = int( final_time.group(1) )
+	seconds_to_wait = final_time - current_time
+	if seconds_to_wait <= 0:
+		seconds_to_wait = 0
 
-	msg = _('{}: I wait {:d} seconds so that {} gets to the level {:d}').format(ciudad['cityName'], espera, edificio['name'], edificio['level'] + 1)
+	msg = _('{}: I wait {:d} seconds so that {} gets to the level {:d}').format(city['cityName'], seconds_to_wait, building['name'], building['level'] + 1)
 	sendToBotDebug(s, msg, debugON_constructionList)
 
-	return espera
+	return seconds_to_wait
 
-def esperarConstruccion(s, idCiudad, posicion):
+def waitForConstruction(s, cityId, position):
 	slp = 1
 	while slp > 0:
-		html = s.get(urlCiudad + idCiudad)
-		slp = getTiempoDeConstruccion(s, html, posicion)
+		html = s.get(urlCiudad + cityId)
+		slp = getConstructionTime(s, html, position)
 		wait(slp + 5)
-	html = s.get(urlCiudad + idCiudad)
-	ciudad = getCiudad(html)
-	edificio = ciudad['position'][posicion]
-	msg = _('{}: The building {} reached the level {:d}.').format(ciudad['cityName'], edificio['name'], edificio['level'])
+	html = s.get(urlCiudad + cityId)
+	city = getCiudad(html)
+	building = city['position'][position]
+	msg = _('{}: The building {} reached the level {:d}.').format(city['cityName'], building['name'], building['level'])
 	sendToBotDebug(s, msg, debugON_constructionList)
-	return ciudad
+	return city
 
-def constructionList1(s, idCiudad, building, esperarRecursos):
+def expandBuilding(s, idCiudad, building, waitForResources):
 	current_level = building['level']
 	if building['isBusy']:
 		current_level += 1
-	nivelesASubir = building['upgradeTo'] - current_level
-	posicion = building['position']
+	levels_to_upgrade = building['upgradeTo'] - current_level
+	position = building['position']
 
-	for lv in range(nivelesASubir):
-		ciudad = esperarConstruccion(s, idCiudad, posicion)
-		edificio = ciudad['position'][posicion]
+	for lv in range(levels_to_upgrade):
+		city = waitForConstruction(s, idCiudad, position)
+		building = city['position'][position]
 
-		if edificio['canUpgrade'] is False and esperarRecursos is True:
-			while edificio['canUpgrade'] is False:
-				time.sleep(60) # tiempo para que se envien los recursos
-				segundos = getMinimumWaitingTime(s)
+		if building['canUpgrade'] is False and waitForResources is True:
+			while building['canUpgrade'] is False:
+				time.sleep(60) # time so that the resources get send
+				seconds = getMinimumWaitingTime(s)
 				html = s.get(urlCiudad + idCiudad)
-				ciudad = getCiudad(html)
-				edificio = ciudad['position'][posicion]
-				if segundos == 0:
+				city = getCiudad(html)
+				building = city['position'][position]
+				if seconds == 0:
 					break
-				wait(segundos)
+				wait(seconds + 5)
 
-		if edificio['canUpgrade'] is False:
-			msg  = _('City:{}\n').format(ciudad['cityName'])
-			msg += _('Building:{}\n').format(edificio['name'])
+		if building['canUpgrade'] is False:
+			msg  = _('City:{}\n').format(city['cityName'])
+			msg += _('Building:{}\n').format(building['name'])
 			msg += _('The building could not be completed due to lack of resources.\n')
-			msg += _('Missed {:d} levels').format(nivelesASubir - lv)
+			msg += _('Missed {:d} levels').format(levels_to_upgrade - lv)
 			sendToBot(s, msg)
 			return
 
 		for i in range(3):
-			url = 'action=CityScreen&function=upgradeBuilding&actionRequest={}&cityId={}&position={:d}&level={}&activeTab=tabSendTransporter&backgroundView=city&currentCityId={}&templateView={}&ajax=1'.format(s.token(), idCiudad, posicion, edificio['level'], idCiudad, edificio['building'])
+			url = 'action=CityScreen&function=upgradeBuilding&actionRequest={}&cityId={}&position={:d}&level={}&activeTab=tabSendTransporter&backgroundView=city&currentCityId={}&templateView={}&ajax=1'.format(s.token(), idCiudad, position, building['level'], idCiudad, building['building'])
 			s.post(url)
 			html = s.get(urlCiudad + idCiudad)
-			ciudad = getCiudad(html)
-			edificio = ciudad['position'][posicion]
-			if edificio['isBusy']:
+			city = getCiudad(html)
+			building = city['position'][position]
+			if building['isBusy']:
 				break
 		else:
-			msg  = _('{}: The building {} was not extended after three tries\n').format(ciudad['cityName'], edificio['name'])
+			msg  = _('{}: The building {} was not extended after three tries\n').format(city['cityName'], building['name'])
 			sendToBot(s, msg)
 			return
 
-		msg = _('{}: The building {} is being extended to level {:d}.').format(ciudad['cityName'], edificio['name'], edificio['level']+1)
+		msg = _('{}: The building {} is being extended to level {:d}.').format(city['cityName'], building['name'], building['level']+1)
 		sendToBotDebug(s, msg, debugON_constructionList)
 
-	msg = _('{}: The building {} finished extending to level: {:d}.').format(ciudad['cityName'], edificio['name'], edificio['level']+1)
+	msg = _('{}: The building {} finished extending to level: {:d}.').format(city['cityName'], building['name'], building['level']+1)
 	sendToBotDebug(s, msg, debugON_constructionList)
 
-def getReductores(ciudad):
-	(carpinteria, oficina, prensa, optico, area) = (0, 0, 0, 0, 0)
-	for edificio in [ edificio for edificio in ciudad['position'] if edificio['name'] != 'empty' ]:
-		lv = edificio['level']
-		if edificio['building'] == 'carpentering':
-			carpinteria = lv
-		elif edificio['building'] == 'architect':
-			oficina = lv
-		elif edificio['building'] == 'vineyard':
-			prensa = lv
-		elif edificio['building'] == 'optician':
-			optico = lv
-		elif edificio['building'] == 'fireworker':
-			area = lv
-	return (carpinteria, oficina, prensa, optico, area)
+def getReductores(city):
+	reductores = [0] * len(materials_names)
+	assert len(reductores) == 5
 
-def getResourcesNeeded(s, ciudad, edificio, desde, hasta):
-	url = 'view=buildingDetail&buildingId=0&helpId=1&backgroundView=city&currentCityId={}&templateView=ikipedia&actionRequest={}&ajax=1'.format(ciudad['id'], s.token())
+	for building in city['position']:
+		if building['name'] == 'empty':
+			continue
+		lv = building['level']
+		if building['building'] == 'carpentering':
+			reductores[0] = lv
+		elif building['building'] == 'architect':
+			reductores[1] = lv
+		elif building['building'] == 'vineyard':
+			reductores[2] = lv
+		elif building['building'] == 'optician':
+			reductores[3] = lv
+		elif building['building'] == 'fireworker':
+			reductores[4] = lv
+	return reductores
+
+def getResourcesNeeded(s, city, building, current_level, final_level):
+	url = 'view=buildingDetail&buildingId=0&helpId=1&backgroundView=city&currentCityId={}&templateView=ikipedia&actionRequest={}&ajax=1'.format(city['id'], s.token())
 	rta = s.post(url)
 	rta = json.loads(rta, strict=False)
 	html = rta[1][1][1]
 
-	regex = r'<div class="(?:selected)? button_building '+ re.escape(edificio['building']) + r'"\s*onmouseover="\$\(this\)\.addClass\(\'hover\'\);" onmouseout="\$\(this\)\.removeClass\(\'hover\'\);"\s*onclick="ajaxHandlerCall\(\'\?(.*?)\'\);'
+	regex = r'<div class="(?:selected)? button_building '+ re.escape(building['building']) + r'"\s*onmouseover="\$\(this\)\.addClass\(\'hover\'\);" onmouseout="\$\(this\)\.removeClass\(\'hover\'\);"\s*onclick="ajaxHandlerCall\(\'\?(.*?)\'\);'
 	match = re.search(regex, html)
 	url = match.group(1)
-	url += 'backgroundView=city&currentCityId={}&templateView=buildingDetail&actionRequest={}&ajax=1'.format(ciudad['id'], s.token())
+	url += 'backgroundView=city&currentCityId={}&templateView=buildingDetail&actionRequest={}&ajax=1'.format(city['id'], s.token())
 	rta = s.post(url)
 	rta = json.loads(rta, strict=False)
 	html_costos = rta[1][1][1]
 
+	# if the user has all the resource saving studies, we save that in the session data (one less request)
 	sessionData = s.getSessionData()
 	if 'reduccion_inv_max' in sessionData:
 		reduccion_inv = 14
 	else:
-		url = 'view=noViewChange&researchType=economy&backgroundView=city&currentCityId={}&templateView=researchAdvisor&actionRequest={}&ajax=1'.format(ciudad['id'], s.token())
+		# get the studies
+		url = 'view=noViewChange&researchType=economy&backgroundView=city&currentCityId={}&templateView=researchAdvisor&actionRequest={}&ajax=1'.format(city['id'], s.token())
 		rta = s.post(url)
 		rta = json.loads(rta, strict=False)
 		studies = rta[2][1]['new_js_params']
 		studies = json.loads(studies, strict=False)
 		studies = studies['currResearchType']
 
+		# look for resource saving studies
 		reduccion_inv = 0
 		for study in studies:
+			if studies[study]['liClass'] != 'explored':
+				continue
 			link = studies[study]['aHref']
-			isExplored = studies[study]['liClass'] == 'explored'
-
-			if '2020' in link and isExplored:
+			if '2020' in link:
 				reduccion_inv += 2
-			elif '2060' in link and isExplored:
+			elif '2060' in link:
 				reduccion_inv += 4
-			elif '2100' in link and isExplored:
+			elif '2100' in link:
 				reduccion_inv += 8
 
+		# the user has all the resource saving studies
 		if reduccion_inv == 14:
 			sessionData['reduccion_inv_max'] = True
 			s.setSessionData(sessionData)
@@ -171,51 +179,54 @@ def getResourcesNeeded(s, ciudad, edificio, desde, hasta):
 	reduccion_inv /= 100
 	reduccion_inv = 1 - reduccion_inv
 
-	reductores = getReductores(ciudad)
+	reductores = getReductores(city)
 
-	recursos_tipo = re.findall(r'<th class="costs"><img src="skin/resources/icon_(.*?)\.png"/></th>', html_costos)[:-1]
-	recurso_index = {'wood': 0, 'wine': 1, 'marble': 2, 'glass': 3, 'sulfur': 4}
+	resources_types = re.findall(r'<th class="costs"><img src="skin/resources/icon_(.*?)\.png"/></th>', html_costos)[:-1]
 
 	matches = re.findall(r'<td class="level">\d+</td>(?:\s+<td class="costs">.*?</td>)+', html_costos)
 
-	costos = [0,0,0,0,0]
-	niveles_a_subir = 0
+	final_costs = [0] * len(materials_names)
+	levels_to_upgrade = 0
 	for match in matches:
 		lv = re.search(r'"level">(\d+)</td>', match).group(1)
 		lv = int(lv)
 
-		if lv <= desde:
+		if lv <= current_level:
 			continue
-		if lv > hasta:
+		if lv > final_level:
 			break
 
-		niveles_a_subir += 1
+		levels_to_upgrade += 1
 
 		costs = re.findall(r'<td class="costs">([\d,\.]*)</td>', match)
 		for i in range(len(costs)):
-			recurso = recursos_tipo[i]
-			index = recurso_index[recurso]
+			resource_type = resources_types[i]
+			for j in range(len(materials_names_english)):
+				name = materials_names_english[j].lower()
+				if resource_type == name:
+					index = j
+					break
 
-			costo = costs[i]
-			costo = costo.replace(',', '').replace('.', '')
-			costo = 0 if costo == '' else int(costo)
+			cost = costs[i]
+			cost = cost.replace(',', '').replace('.', '')
+			cost = 0 if cost == '' else int(cost)
 
-			costo_real = Decimal(costo)
-			costo_original = Decimal(costo_real) / Decimal(reduccion_inv)
-			costo_real -= Decimal(costo_original) * (Decimal(reductores[index]) / Decimal(100))
+			real_cost = Decimal(cost)
+			original_cost = Decimal(real_cost) / Decimal(reduccion_inv)
+			real_cost -= Decimal(original_cost) * (Decimal(reductores[index]) / Decimal(100))
 
-			costos[index] += math.ceil(costo_real)
+			final_costs[index] += math.ceil(real_cost)
 
-	if niveles_a_subir < hasta - desde:
-		print(_('This building only allows you to expand {:d} more levels').format(niveles_a_subir))
-		msg = _('Expand {:d} levels? [Y/n]:').format(niveles_a_subir)
-		eleccion = read(msg=msg, values=['Y', 'y', 'N', 'n', ''])
-		if eleccion.lower() == 'n':
+	if levels_to_upgrade < final_level - current_level:
+		print(_('This building only allows you to expand {:d} more levels').format(levels_to_upgrade))
+		msg = _('Expand {:d} levels? [Y/n]:').format(levels_to_upgrade)
+		rta = read(msg=msg, values=['Y', 'y', 'N', 'n', ''])
+		if rta.lower() == 'n':
 			return [-1,-1,-1,-1,-1]
 
-	return costos
+	return final_costs
 
-def planearAbastecimiento(s, destino, origenes, faltantes):
+def sendResourcesNeeded(s, idDestiny, origins, missingArr):
 	set_child_mode(s)
 
 	info = _('\nTransport resources to upload building\n')
@@ -223,31 +234,24 @@ def planearAbastecimiento(s, destino, origenes, faltantes):
 
 	try:
 		rutas = []
-		html = s.get(urlCiudad + destino)
-		ciudadD = getCiudad(html)
-		for i in range(5):
-			faltante = faltantes[i]
-			if faltante <= 0:
+		html = s.get(urlCiudad + idDestiny)
+		cityD = getCiudad(html)
+		for i in range(len(materials_names)):
+			missing = missingArr[i]
+			if missing <= 0:
 				continue
-			for origen in origenes[i]:
-				if faltante == 0:
+			for cityO in origins[i]:
+				if missing == 0:
 					break
-				html = s.get(urlCiudad + origen)
-				ciudadO = getCiudad(html)
-				disp = ciudadO['recursos'][i]
-				mandar = disp if disp < faltante else faltante
-				faltante -= mandar
-				if i == 0:
-					ruta = (ciudadO, ciudadD, ciudadD['islandId'], mandar, 0, 0, 0, 0)
-				elif i == 1:
-					ruta = (ciudadO, ciudadD, ciudadD['islandId'], 0, mandar, 0, 0, 0)
-				elif i == 2:
-					ruta = (ciudadO, ciudadD, ciudadD['islandId'], 0, 0, mandar, 0, 0)
-				elif i == 3:
-					ruta = (ciudadO, ciudadD, ciudadD['islandId'], 0, 0, 0, mandar, 0)
-				else:
-					ruta = (ciudadO, ciudadD, ciudadD['islandId'], 0, 0, 0, 0, mandar)
+
+				available = cityO['recursos'][i]
+				send = min(available, missing)
+				missing -= send
+				toSend = [0] * len(materials_names)
+				toSend[i] = send
+				ruta = (cityO, cityD, cityD['islandId'], toSend)
 				rutas.append(ruta)
+		pass
 		executeRoutes(s, rutas)
 	except:
 		msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
@@ -255,62 +259,73 @@ def planearAbastecimiento(s, destino, origenes, faltantes):
 	finally:
 		s.logout()
 
-def menuEdificios(s, ids, cities, idCiudad, bienNombre, bienIndex, faltante):
+def chooseResourceProviders(s, ids, cities, idCiudad, resource, missing):
+	global sendResources
+	sendResources = True
+	global expand
+	expand = True
+
 	banner()
-	print(_('From what cities obtain {}?').format(bienNombre))
-	rta = []
-	tradegood = [_('W'), _('M'), _('C'), _('S')]
-	maxName = 0
-	for name in [ cities[city]['name'] for city in cities if cities[city]['id'] != idCiudad ]:
-		if len(name) > maxName:
-			maxName = len(name)
-	total = 0
-	for id in [ id for id in ids if id != idCiudad ]:
-		trade = tradegood[ int( cities[id]['tradegood'] ) - 1 ]
-		html = s.get(urlCiudad + id)
-		ciudad = getCiudad(html)
-		disponible = ciudad['recursos'][bienIndex]
-		if disponible == 0:
+	print(_('From what cities obtain {}?').format(materials_names[resource].lower()))
+
+	tradegood_initials = [ material_name[0] for material_name in materials_names ]
+	maxName = max ( [ len(cities[city]['name']) for city in cities if cities[city]['id'] != idCiudad ] )
+
+	origin_cities = []
+	total_available = 0
+	for cityId in ids:
+		if cityId == idCiudad:
 			continue
-		opcion = '{}{} ({}): {} [Y/n]:'.format(' ' * (maxName - len(cities[id]['name'])), cities[id]['name'], trade, addDot(disponible))
-		eleccion = read(msg=opcion, values=['Y', 'y', 'N', 'n', ''])
+
+		html = s.get(urlCiudad + cityId)
+		city = getCiudad(html)
+
+		available = city['recursos'][resource]
+		if available == 0:
+			continue
+
+		tradegood_initial = tradegood_initials[ int( cities[cityId]['tradegood'] ) ]		
+		pad = ' ' * (maxName - len(cities[cityId]['name']))
+		msg = '{}{} ({}): {} [Y/n]:'.format(pad, cities[cityId]['name'], tradegood_initial, addDot(available))
+		eleccion = read(msg=msg, values=['Y', 'y', 'N', 'n', ''])
 		if eleccion.lower() == 'n':
 			continue
-		total += disponible
-		rta.append(id)
-		if total >= faltante:
-			return rta
-	if total < faltante:
-		global sendResources
-		global expand
-		print(_('\nThere are not enough resources.'))
-		if sendResources:
-			print(_('\nSend the resources anyway? [Y/n]'))
-			choise = read(values=['y', 'Y', 'n', 'N', ''])
-			if choise.lower() == 'n':
-				sendResources = False
-		if expand:
-			print(_('\nTry to expand the building anyway? [y/N]'))
-			choise = read(values=['y', 'Y', 'n', 'N', ''])
-			if choise.lower() == 'n' or choise == '':
-				expand = False
-	return rta
 
-def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante):
+		total_available += available
+		origin_cities.append(city)
+		if total_available >= missing:
+			return origin_cities
+
+	print(_('\nThere are not enough resources.'))
+
+	if len(origin_cities) > 0:
+		print(_('\nSend the resources anyway? [Y/n]'))
+		choise = read(values=['y', 'Y', 'n', 'N', ''])
+		if choise.lower() == 'n':
+			sendResources = False
+
+	print(_('\nTry to expand the building anyway? [y/N]'))
+	choise = read(values=['y', 'Y', 'n', 'N', ''])
+	if choise.lower() == 'n' or choise == '':
+		expand = False
+
+	return origin_cities
+
+def sendResourcesMenu(s, idCiudad, missing):
 	idss, cities = getIdsOfCities(s)
-	origenes = {}
-	for i in range(5):
-		if faltante[i] <= 0:
+	origins = {}
+	for i in range(len(missing)):
+		if missing[i] <= 0:
 			continue
-		bien = materials_names[i]
-		ids = menuEdificios(s, idss, cities, idCiudad, bien, i, faltante[i])
+
+		origin_cities = chooseResourceProviders(s, idss, cities, idCiudad, i, missing[i])
 		if sendResources is False and expand:
 			print(_('\nThe building will be expanded if possible.'))
 			enter()
 			return
 		elif sendResources is False:
 			return
-		origenes[i] = ids
+		origins[i] = origin_cities
 
 	if expand:
 		print(_('\nThe resources will be sent and the building will be expanded if possible.'))
@@ -319,13 +334,14 @@ def obtenerLosRecursos(s, idCiudad, posEdificio, niveles, faltante):
 
 	enter()
 
-	multiprocessing.Process(target=planearAbastecimiento, args=(s, idCiudad, origenes, faltante)).start()
+	multiprocessing.Process(target=sendResourcesNeeded, args=(s, idCiudad, origins, missing)).start()
 
 def getBuildingToExpand(s, cityId):
 	html = s.get(urlCiudad + cityId)
 	city = getCiudad(html)
 
 	banner()
+	print(_('Which building do you want to expand?\n'))
 	print(_('(0)\t\texit'))
 	buildings = [ building for building in city['position'] if building['name'] != 'empty' ]
 	for i in range(len(buildings)):
@@ -370,6 +386,7 @@ def constructionList(s,e,fd):
 
 		banner()
 		wait_resources = False
+		print(_('In which city do you want to expand a building?'))
 		city = chooseCity(s)
 		idCiudad = city['id']
 		building = getBuildingToExpand(s, idCiudad)
@@ -377,19 +394,13 @@ def constructionList(s,e,fd):
 			e.set()
 			return
 
-		building_pos = building['position']
 		current_level = building['level']
 		if building['isBusy']:
 			current_level += 1
 		final_level = building['upgradeTo']
-		niveles = final_level - current_level
 
-		html = s.get(urlCiudad + idCiudad)
-		city = getCiudad(html)
-		edificio = city['position'][building_pos]
-
-		resourcesNeeded = getResourcesNeeded(s, city, edificio, current_level, final_level)
-		if resourcesNeeded[0] == -1:
+		resourcesNeeded = getResourcesNeeded(s, city, building, current_level, final_level)
+		if -1 in resourcesNeeded:
 			e.set()
 			return
 
@@ -402,8 +413,11 @@ def constructionList(s,e,fd):
 		if sum(missing) > 0:
 			print(_('\nMissing:'))
 			for i in range(len(materials_names)):
+				if missing[i] == 0:
+					continue
 				name = materials_names[i].lower()
 				print(_('{} of {}').format(addDot(missing[i]), name))
+			print('')
 
 			print(_('Automatically transport resources? [Y/n]'))
 			rta = read(values=['y', 'Y', 'n', 'N', ''])
@@ -415,7 +429,7 @@ def constructionList(s,e,fd):
 					return
 			else:
 				wait_resources = True
-				obtenerLosRecursos(s, idCiudad, building_pos, niveles, missing)
+				sendResourcesMenu(s, idCiudad, missing)
 		else:
 			print(_('\nYou have enough materials'))
 			print(_('Proceed? [Y/n]'))
@@ -431,12 +445,12 @@ def constructionList(s,e,fd):
 	e.set()
 
 	info = _('\nUpgrade building\n')
-	info = info + _('City: {}\nBuilding: {}. From {:d}, to {:d}').format(city['cityName'], edificio['name'], current_level, final_level)
+	info = info + _('City: {}\nBuilding: {}. From {:d}, to {:d}').format(city['cityName'], building['name'], current_level, final_level)
 
 	setInfoSignal(s, info)
 	try:
 		if expand:
-			constructionList1(s, idCiudad, building, wait_resources)
+			expandBuilding(s, idCiudad, building, wait_resources)
 	except:
 		msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
 		sendToBot(s, msg)
