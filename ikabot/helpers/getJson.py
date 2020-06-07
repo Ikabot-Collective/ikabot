@@ -80,6 +80,8 @@ def getCiudad(html):
 	for position in ciudad['position']:
 		position['position'] = i
 		i += 1
+		if 'level' in position:
+			position['level'] = int(position['level'])
 		position['isBusy'] = False
 		if 'constructionSite' in position['building']:
 			position['isBusy'] = True
