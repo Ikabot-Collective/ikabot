@@ -70,7 +70,7 @@ def do_it(s, idsCiudades, ciudades_dict):
 			idIsla = ciudades_dict[idCiudad]['isla']
 			tipo = ciudades_dict[idCiudad]['tipo']
 			if tipo:
-				s.post(payloadPost={'islandId': idIsla, 'type': tipo, 'action': 'IslandScreen', 'function': 'donate', 'donation': madera, 'backgroundView': 'island', 'templateView': tipo, 'actionRequest': s.token(), 'ajax': '1'})
+				s.post(payloadPost={'islandId': idIsla, 'type': tipo, 'action': 'IslandScreen', 'function': 'donate', 'donation': madera, 'backgroundView': 'island', 'templateView': tipo, 'actionRequest': 'REQUESTID', 'ajax': '1'})
 		msg = _('I donated automatically.')
 		sendToBotDebug(s, msg, debugON_donationBot)
 		time.sleep(24*60*60)

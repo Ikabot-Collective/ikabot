@@ -36,7 +36,7 @@ def donate(s,e,fd):
 		tradegood_name = tradegoods_names[int(island_type)]
 
 		# get resource information
-		url = 'view=resource&type=resource&islandId={0}&backgroundView=island&currentIslandId={0}&actionRequest={1}&ajax=1'.format(islandId, s.token())
+		url = 'view=resource&type=resource&islandId={0}&backgroundView=island&currentIslandId={0}&actionRequest=REQUESTID&ajax=1'.format(islandId)
 		resp = s.post(url)
 		resp = json.loads(resp, strict=False)
 
@@ -73,7 +73,7 @@ def donate(s,e,fd):
 		print('{} / {} ({}%)\n'.format(addDot(wood_donated), addDot(wood_total_needed), addDot(int((100 * wood_donated) / wood_total_needed))))
 
 		# get tradegood information
-		url = 'view=tradegood&type={0}&islandId={1}&backgroundView=island&currentIslandId={1}&actionRequest={2}&ajax=1'.format(island_type, islandId, s.token())
+		url = 'view=tradegood&type={0}&islandId={1}&backgroundView=island&currentIslandId={1}&actionRequest=REQUESTID&ajax=1'.format(island_type, islandId)
 		resp = s.post(url)
 
 		resp = json.loads(resp, strict=False)
@@ -116,7 +116,7 @@ def donate(s,e,fd):
 			return
 
 		# do the donation
-		s.post(payloadPost={'islandId': islandId, 'type': donation_type, 'action': 'IslandScreen', 'function': 'donate', 'donation': amount, 'backgroundView': 'island', 'templateView': 'resource', 'actionRequest': s.token(), 'ajax': '1'})
+		s.post(payloadPost={'islandId': islandId, 'type': donation_type, 'action': 'IslandScreen', 'function': 'donate', 'donation': amount, 'backgroundView': 'island', 'templateView': 'resource', 'actionRequest': 'REQUESTID', 'ajax': '1'})
 
 		print('\nDonation successful.')
 		enter()

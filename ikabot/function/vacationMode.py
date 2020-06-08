@@ -18,7 +18,7 @@ def activarvacationMode(s):
 	html = s.get()
 	ciudad = getCiudad(html)
 
-	data = {'action': 'Options', 'function': 'activateVacationMode', 'actionRequest': s.token(), 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'options_umod_confirm'}
+	data = {'action': 'Options', 'function': 'activateVacationMode', 'actionRequest': 'REQUESTID', 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'options_umod_confirm'}
 	s.post(params=data, ignoreExpire=True)
 
 def vacationMode(s,e,fd):

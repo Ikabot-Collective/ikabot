@@ -5,6 +5,7 @@ import re
 import time
 import json
 import math
+import random
 import gettext
 import traceback
 import threading
@@ -69,13 +70,14 @@ def expandBuilding(s, cityId, building, waitForResources):
 	levels_to_upgrade = building['upgradeTo'] - current_level
 	position = building['position']
 
+	time.sleep(random.randint(5,15)) # to avoid race conditions with sendResourcesNeeded
+
 	for lv in range(levels_to_upgrade):
 		city = waitForConstruction(s, cityId, position)
 		building = city['position'][position]
 
 		if building['canUpgrade'] is False and waitForResources is True:
 			while building['canUpgrade'] is False:
-				time.sleep(60) # time so that the resources get sent
 				seconds = getMinimumWaitingTime(s)
 				html = s.get(urlCiudad + cityId)
 				city = getCiudad(html)
@@ -94,7 +96,7 @@ def expandBuilding(s, cityId, building, waitForResources):
 			return
 
 		url = 'action=CityScreen&function=upgradeBuilding&actionRequest=REQUESTID&cityId={}&position={:d}&level={}&activeTab=tabSendTransporter&backgroundView=city&currentCityId={}&templateView={}&ajax=1'.format(cityId, position, building['level'], cityId, building['building'])
-		s.post(url, addRequestId=True)
+		s.post(url)
 		html = s.get(urlCiudad + cityId)
 		city = getCiudad(html)
 		building = city['position'][position]
@@ -131,7 +133,7 @@ def getReductores(city):
 
 def getResourcesNeeded(s, city, building, current_level, final_level):
 	# get html with information about buildings
-	url = 'view=buildingDetail&buildingId=0&helpId=1&backgroundView=city&currentCityId={}&templateView=ikipedia&actionRequest={}&ajax=1'.format(city['id'], s.token())
+	url = 'view=buildingDetail&buildingId=0&helpId=1&backgroundView=city&currentCityId={}&templateView=ikipedia&actionRequest=REQUESTID&ajax=1'.format(city['id'])
 	rta = s.post(url)
 	rta = json.loads(rta, strict=False)
 	html = rta[1][1][1]
@@ -140,7 +142,7 @@ def getResourcesNeeded(s, city, building, current_level, final_level):
 	regex = r'<div class="(?:selected)? button_building '+ re.escape(building['building']) + r'"\s*onmouseover="\$\(this\)\.addClass\(\'hover\'\);" onmouseout="\$\(this\)\.removeClass\(\'hover\'\);"\s*onclick="ajaxHandlerCall\(\'\?(.*?)\'\);'
 	match = re.search(regex, html)
 	url = match.group(1)
-	url += 'backgroundView=city&currentCityId={}&templateView=buildingDetail&actionRequest={}&ajax=1'.format(city['id'], s.token())
+	url += 'backgroundView=city&currentCityId={}&templateView=buildingDetail&actionRequest=REQUESTID&ajax=1'.format(city['id'])
 	rta = s.post(url)
 	rta = json.loads(rta, strict=False)
 	html_costs = rta[1][1][1]
@@ -151,7 +153,7 @@ def getResourcesNeeded(s, city, building, current_level, final_level):
 		reduccion_inv = 14
 	else:
 		# get the studies
-		url = 'view=noViewChange&researchType=economy&backgroundView=city&currentCityId={}&templateView=researchAdvisor&actionRequest={}&ajax=1'.format(city['id'], s.token())
+		url = 'view=noViewChange&researchType=economy&backgroundView=city&currentCityId={}&templateView=researchAdvisor&actionRequest=REQUESTID&ajax=1'.format(city['id'])
 		rta = s.post(url)
 		rta = json.loads(rta, strict=False)
 		studies = rta[2][1]['new_js_params']

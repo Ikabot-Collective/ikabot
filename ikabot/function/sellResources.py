@@ -31,7 +31,7 @@ def elegirCiudadComercial(ciudades_comerciales):
 	return ciudades_comerciales[ind - 1]
 
 def getStoreInfo(s, ciudad):
-	params = {'view': 'branchOfficeOwnOffers', 'activeTab': 'tab_branchOfficeOwnOffers', 'cityId': ciudad['id'], 'position': ciudad['pos'], 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'branchOfficeOwnOffers', 'currentTab': 'tab_branchOfficeOwnOffers', 'actionRequest': s.token(), 'ajax': '1'}
+	params = {'view': 'branchOfficeOwnOffers', 'activeTab': 'tab_branchOfficeOwnOffers', 'cityId': ciudad['id'], 'position': ciudad['pos'], 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'branchOfficeOwnOffers', 'currentTab': 'tab_branchOfficeOwnOffers', 'actionRequest': 'REQUESTID', 'ajax': '1'}
 	resp = s.post(params=params, noIndex=True)
 	return json.loads(resp, strict=False)[1][1][1]
 
@@ -41,7 +41,7 @@ def getOfertas(s, ciudad, recurso):
 		recurso = 'resource'
 	else:
 		recurso = str(recurso)
-	data = {'cityId': ciudad['id'], 'position': ciudad['pos'], 'view': 'branchOffice', 'activeTab': 'bargain', 'type': '333', 'searchResource': recurso, 'range': ciudad['rango'], 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'branchOffice', 'currentTab': 'bargain', 'actionRequest': s.token(), 'ajax': '1'}
+	data = {'cityId': ciudad['id'], 'position': ciudad['pos'], 'view': 'branchOffice', 'activeTab': 'bargain', 'type': '333', 'searchResource': recurso, 'range': ciudad['rango'], 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'branchOffice', 'currentTab': 'bargain', 'actionRequest': 'REQUESTID', 'ajax': '1'}
 	resp = s.post(payloadPost=data)
 	html = json.loads(resp, strict=False)[1][1][1]
 	return re.findall(r'<td class=".*?">(.*?)<br/>\((.*?)\)\s*</td>\s*<td>(.*?)</td>\s*<td><img src=".*?"\s*alt=".*?"\s*title=".*?"/></td>\s*<td style="white-space:nowrap;">(\d+)\s*<img src=".*?"\s*class=".*?"/>.*?</td>\s*<td>(\d+)</td>\s*<td><a onclick="ajaxHandlerCall\(this\.href\);return false;"\s*href="\?view=takeOffer&destinationCityId=(\d+)&', html)
@@ -196,7 +196,7 @@ def do_it1(s, porVender, ofertas, recurso, ciudad):
 			porVender -= cant_venta
 			quiereComprar -= cant_venta
 
-			data = {'action': 'transportOperations', 'function': 'sellGoodsAtAnotherBranchOffice', 'cityId': ciudad['id'], 'destinationCityId': idDestino, 'oldView': 'branchOffice', 'position': ciudad['pos'], 'avatar2Name': user, 'city2Name': city, 'type': '333', 'activeTab': 'bargain', 'transportDisplayPrice': '0', 'premiumTransporter': '0', 'capacity': '5', 'max_capacity': '5', 'jetPropulsion': '0', 'transporters': str(barcos_usados), 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'takeOffer', 'currentTab': 'bargain', 'actionRequest': s.token(), 'ajax': '1'}
+			data = {'action': 'transportOperations', 'function': 'sellGoodsAtAnotherBranchOffice', 'cityId': ciudad['id'], 'destinationCityId': idDestino, 'oldView': 'branchOffice', 'position': ciudad['pos'], 'avatar2Name': user, 'city2Name': city, 'type': '333', 'activeTab': 'bargain', 'transportDisplayPrice': '0', 'premiumTransporter': '0', 'capacity': '5', 'max_capacity': '5', 'jetPropulsion': '0', 'transporters': str(barcos_usados), 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'takeOffer', 'currentTab': 'bargain', 'actionRequest': 'REQUESTID', 'ajax': '1'}
 			if recurso == 0:
 				data['cargo_resource'] = str(cant_venta)
 				data['resourcePrice'] = str(precio)
@@ -224,7 +224,7 @@ def do_it2(s, porVender, precio, recurso, cap_venta, ciudad):
 			porVender -= ofertar
 			nuevaVenta = enVenta + ofertar
 
-			payloadPost = {'cityId': ciudad['id'], 'position': ciudad['pos'], 'action': 'CityScreen', 'function': 'updateOffers', 'resourceTradeType': '444', 'resource': '0', 'resourcePrice': '10', 'tradegood1TradeType': '444', 'tradegood1': '0', 'tradegood1Price': '11', 'tradegood2TradeType': '444', 'tradegood2': '0', 'tradegood2Price': '12', 'tradegood3TradeType': '444', 'tradegood3': '0', 'tradegood3Price': '17', 'tradegood4TradeType': '444', 'tradegood4': '0', 'tradegood4Price': '5', 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'branchOfficeOwnOffers', 'currentTab': 'tab_branchOfficeOwnOffers', 'actionRequest': s.token(), 'ajax': '1'}
+			payloadPost = {'cityId': ciudad['id'], 'position': ciudad['pos'], 'action': 'CityScreen', 'function': 'updateOffers', 'resourceTradeType': '444', 'resource': '0', 'resourcePrice': '10', 'tradegood1TradeType': '444', 'tradegood1': '0', 'tradegood1Price': '11', 'tradegood2TradeType': '444', 'tradegood2': '0', 'tradegood2Price': '12', 'tradegood3TradeType': '444', 'tradegood3': '0', 'tradegood3Price': '17', 'tradegood4TradeType': '444', 'tradegood4': '0', 'tradegood4Price': '5', 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'branchOfficeOwnOffers', 'currentTab': 'tab_branchOfficeOwnOffers', 'actionRequest': 'REQUESTID', 'ajax': '1'}
 			if recurso == 0:
 				payloadPost['resource'] = str(nuevaVenta)
 				payloadPost['resourcePrice'] = str(precio)

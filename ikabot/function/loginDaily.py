@@ -44,5 +44,5 @@ def loginDaily(s,e,fd):
 def do_it(s):
 	while True:
 		(ids, cities) = getIdsOfCities(s)
-		s.get('action=AvatarAction&function=giveDailyActivityBonus&dailyActivityBonusCitySelect={}&startPageShown=1&detectedDevice=1&autoLogin=on&cityId={}&activeTab=multiTab2&backgroundView=city&currentCityId={}&actionRequest={}&ajax=1'.format(str(ids[0]), str(ids[0]), str(ids[0]), s.token()))
+		s.get('action=AvatarAction&function=giveDailyActivityBonus&dailyActivityBonusCitySelect={}&startPageShown=1&detectedDevice=1&autoLogin=on&cityId={}&activeTab=multiTab2&backgroundView=city&currentCityId={}&actionRequest=REQUESTID&ajax=1'.format(str(ids[0]), str(ids[0]), str(ids[0])))
 		wait(24*60*60, 1*60*60)

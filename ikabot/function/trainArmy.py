@@ -24,14 +24,14 @@ _ = t.gettext
 
 def getBuildingInfo(s, city, trainTroops):
 	view = 'barracks' if trainTroops else 'shipyard'
-	params = {'view': view, 'cityId': city['id'], 'position': city['pos'], 'backgroundView': 'city', 'currentCityId': city['id'], 'actionRequest': s.token(), 'ajax': '1'}
+	params = {'view': view, 'cityId': city['id'], 'position': city['pos'], 'backgroundView': 'city', 'currentCityId': city['id'], 'actionRequest': 'REQUESTID', 'ajax': '1'}
 	data = s.post(params=params)
 	return json.loads(data, strict=False)
 
 def train(s, city, trainings, trainTroops):
 	templateView = 'barracks' if trainTroops else 'shipyard'
 	function = 'buildUnits' if trainTroops else 'buildShips'
-	payload = {'action': 'CityScreen', 'function': function, 'actionRequest': s.token(), 'cityId': city['id'], 'position': city['pos'], 'backgroundView': 'city', 'currentCityId': city['id'], 'templateView': templateView, 'ajax': '1'}
+	payload = {'action': 'CityScreen', 'function': function, 'actionRequest': 'REQUESTID', 'cityId': city['id'], 'position': city['pos'], 'backgroundView': 'city', 'currentCityId': city['id'], 'templateView': templateView, 'ajax': '1'}
 	for training in trainings:
 		payload[ training['unit_type_id'] ] = training['train']
 	s.post(payloadPost=payload)

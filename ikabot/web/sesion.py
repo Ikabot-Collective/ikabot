@@ -318,7 +318,7 @@ class Sesion:
 			except Exception:
 				self.__sessionExpired()
 
-	def token(self):
+	def __token(self):
 		"""Generates a valid actionRequest token from the session
 		Parameters
 		----------
@@ -370,7 +370,7 @@ class Sesion:
 			except requests.exceptions.ConnectionError:
 				time.sleep(ConnectionError_wait)
 
-	def post(self, url='', payloadPost={}, params={}, ignoreExpire=False, noIndex=False, addRequestId=False):
+	def post(self, url='', payloadPost={}, params={}, ignoreExpire=False, noIndex=False):
 		"""Sends post request to ikariam
 		Parameters
 		----------
@@ -394,12 +394,22 @@ class Sesion:
 		"""
 		url_original = url
 		payloadPost_original = payloadPost
+		params_original = params
 		self.__checkCookie()
-		if addRequestId:
-			token = self.token()
-			url = url.replace('REQUESTID', token)
-			if 'actionRequest' in payloadPost:
-				payloadPost['actionRequest'] = token
+
+		# add the request id
+		token = self.__token()
+		match = re.search(r'requestId=(.*?)&', url)
+		if match:
+			url = url.replace(match.group(1), token)
+		match = re.search(r'actionRequest=(.*?)&', url)
+		if match:
+			url = url.replace(match.group(1), token)
+		if 'actionRequest' in payloadPost:
+			payloadPost['actionRequest'] = token
+		if 'actionRequest' in params:
+			params['actionRequest'] = token
+
 		if noIndex:
 			url = self.urlBase.replace('index.php', '') + url
 		else:
@@ -407,13 +417,14 @@ class Sesion:
 		self.__log('post({}), data={}'.format(url, str(payloadPost)))
 		while True:
 			try:
-				html = self.s.post(url, data=payloadPost, params=params).text
+				resp = self.s.post(url, data=payloadPost, params=params).text
 				if ignoreExpire is False:
-					assert self.__isExpired(html) is False
-				if addRequestId and 'TXT_ERROR_WRONG_REQUEST_ID' in html:
+					assert self.__isExpired(resp) is False
+				if 'TXT_ERROR_WRONG_REQUEST_ID' in resp:
 					self.__log(_('got TXT_ERROR_WRONG_REQUEST_ID'))
-					return self.post(url=url_original, payloadPost=payloadPost_original, params=params, ignoreExpire=ignoreExpire, noIndex=noIndex, addRequestId=addRequestId)
-				return html
+					return self.post(url=url_original, payloadPost=payloadPost_original, params=params_original, ignoreExpire=ignoreExpire, noIndex=noIndex)
+				self.__log(resp)
+				return resp
 			except AssertionError:
 				self.__sessionExpired()
 			except requests.exceptions.ConnectionError:
