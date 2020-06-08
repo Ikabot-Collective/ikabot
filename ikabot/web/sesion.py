@@ -228,7 +228,6 @@ class Sesion:
 			banner()
 
 		resp = self.s.get('https://lobby.ikariam.gameforge.com/api/users/me/loginLink?id={}&server[language]={}&server[number]={}'.format(self.account['id'], self.servidor, self.mundo)).text
-		self.s.cookies.__delitem__('PHPSESSID')
 		resp = json.loads(resp, strict=False)
 		if 'url' not in resp:
 			if retries > 0:
@@ -261,6 +260,8 @@ class Sesion:
 				sendToBot(self, msg)
 			os._exit(0)
 		if self.__isExpired(html):
+			if retries > 0:
+				return self.__login(retries-1)
 			if self.padre:
 				msg = _('Login error.')
 				print(msg)
