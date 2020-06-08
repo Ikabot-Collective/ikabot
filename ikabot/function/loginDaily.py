@@ -22,6 +22,7 @@ _ = t.gettext
 def loginDaily(s,e,fd):
 	sys.stdin = os.fdopen(fd)
 	try:
+		banner()
 		print(_('I will enter every day.'))
 		enter()
 	except KeyboardInterrupt:
@@ -44,5 +45,7 @@ def loginDaily(s,e,fd):
 def do_it(s):
 	while True:
 		(ids, cities) = getIdsOfCities(s)
-		s.get('action=AvatarAction&function=giveDailyActivityBonus&dailyActivityBonusCitySelect={}&startPageShown=1&detectedDevice=1&autoLogin=on&cityId={}&activeTab=multiTab2&backgroundView=city&currentCityId={}&actionRequest=REQUESTID&ajax=1'.format(str(ids[0]), str(ids[0]), str(ids[0])))
+		cityId = ids[0]
+		url = 'action=AvatarAction&function=giveDailyActivityBonus&dailyActivityBonusCitySelect={0}&startPageShown=1&detectedDevice=1&autoLogin=on&cityId={0}&activeTab=multiTab2&backgroundView=city&currentCityId={0}&actionRequest=REQUESTID&ajax=1'.format(cityId)
+		s.get(url)
 		wait(24*60*60, 1*60*60)
