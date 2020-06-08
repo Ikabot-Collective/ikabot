@@ -8,6 +8,7 @@ import json
 import time
 import random
 import getpass
+import datetime
 import gettext
 import requests
 from ikabot.config import *
@@ -26,9 +27,20 @@ _ = t.gettext
 
 class Sesion:
 	def __init__(self):
+		self.logfile = '/tmp/debug.txt'
+		self.log = False
 		self.padre = True
 		self.logged = False
 		self.__login()
+
+	def __log(self, msg):
+		if self.log is False:
+			return
+		now = datetime.datetime.now()
+		entry = '{}:{}:{}\t{:d}: {}\n'.format(now.hour, now.minute, now.second, os.getpid(), msg)
+		fh = open(self.logfile, 'a')
+		fh.write(entry)
+		fh.close()
 
 	def __genRand(self):
 		return hex(random.randint(0, 65535))[2:]
@@ -53,15 +65,6 @@ class Sesion:
 		return 'index.php?logout' in html
 
 	def __updateCookieFile(self, primero=False, nuevo=False, salida=False):
-		msg = _('Updating the cookie file:\n')
-		if primero:
-			msg += _('First')
-		elif nuevo:
-			msg += _('New')
-		else:
-			msg += _('Out')
-		#sendToBotDebug(self, msg, debugON_session)
-
 		sessionData = self.getSessionData()
 
 		if primero is True:
@@ -100,11 +103,10 @@ class Sesion:
 			requests.cookies.cookiejar_from_dict(cookie_dict, cookiejar=self.s.cookies, overwrite=True)
 			self.__updateCookieFile(nuevo=True)
 		except (KeyError, AssertionError):
-			msg = _('Updating cookie using cookie file')
-			sendToBotDebug(self, msg, debugON_session)
 			self.__login(3)
 
 	def __login(self, retries=0):
+		self.__log('__login()')
 		if not self.logged:
 			banner()
 
@@ -247,7 +249,8 @@ class Sesion:
 
 		self.urlBase = match.group(0)
 		self.host = self.urlBase.split('//')[1].split('/index')[0]
-		self.headers = {'Host': self.host, 'User-Agent': user_agent, 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/es_AR/accounts', 'Upgrade-Insecure-Requests': '1'}
+
+		self.headers = {'Host': self.host, 'User-Agent': user_agent, 'Accept': '*/*', 'Accept-Language': 'en,de-DE;q=0.8,en-US;q=0.5,es;q=0.3', 'Accept-Encoding': 'gzip, deflate, br', 'Referer': 'https://{}'.format(self.host), 'X-Requested-With': 'XMLHttpRequest', 'Origin': 'https://{}'.format(self.host), 'DNT': '1', 'Connection': 'keep-alive', 'Pragma': 'no-cache', 'Cache-Control': 'no-cache'}
 		self.s.headers.clear()
 		self.s.headers.update(self.headers)
 		html = self.s.get(url).text
@@ -272,10 +275,12 @@ class Sesion:
 		self.logged = True
 
 	def __backoff(self):
+		self.__log('__backoff()')
 		if self.padre is False:
 			time.sleep(5 * random.randint(0, 10))
 
 	def __sessionExpired(self):
+		self.__log('__sessionExpired()')
 		self.__backoff()
 
 		sessionData = self.getSessionData()
@@ -295,6 +300,7 @@ class Sesion:
 				self.__sessionExpired()
 
 	def __checkCookie(self):
+		self.__log('__checkCookie()')
 		sessionData = self.getSessionData()
 
 		try:
@@ -352,6 +358,7 @@ class Sesion:
 			url = self.urlBase.replace('index.php', '') + url
 		else:
 			url = self.urlBase + url
+		self.__log('get({}), params:{}'.format(url, str(params)))
 		while True:
 			try:
 				html = self.s.get(url, params=params).text #this isn't recursion, this get is different from the one it's in
@@ -363,7 +370,7 @@ class Sesion:
 			except requests.exceptions.ConnectionError:
 				time.sleep(ConnectionError_wait)
 
-	def post(self, url='', payloadPost={}, params={}, ignoreExpire=False, noIndex=False):
+	def post(self, url='', payloadPost={}, params={}, ignoreExpire=False, noIndex=False, addRequestId=False):
 		"""Sends post request to ikariam
 		Parameters
 		----------
@@ -385,16 +392,27 @@ class Sesion:
 		html : str
 			response from the server
 		"""
+		url_original = url
+		payloadPost_original = payloadPost
 		self.__checkCookie()
+		if addRequestId:
+			token = self.token()
+			url = url.replace('REQUESTID', token)
+			if 'actionRequest' in payloadPost:
+				payloadPost['actionRequest'] = token
 		if noIndex:
 			url = self.urlBase.replace('index.php', '') + url
 		else:
 			url = self.urlBase + url
+		self.__log('post({}), data={}'.format(url, str(payloadPost)))
 		while True:
 			try:
 				html = self.s.post(url, data=payloadPost, params=params).text
 				if ignoreExpire is False:
 					assert self.__isExpired(html) is False
+				if addRequestId and 'TXT_ERROR_WRONG_REQUEST_ID' in html:
+					self.__log(_('got TXT_ERROR_WRONG_REQUEST_ID'))
+					return self.post(url=url_original, payloadPost=payloadPost_original, params=params, ignoreExpire=ignoreExpire, noIndex=noIndex, addRequestId=addRequestId)
 				return html
 			except AssertionError:
 				self.__sessionExpired()
@@ -408,6 +426,7 @@ class Sesion:
 		self: Session
 			Session object
 		"""
+		self.__log('login({})')
 		self.__updateCookieFile(nuevo=True)
 
 	def logout(self):
@@ -417,6 +436,7 @@ class Sesion:
 		self: Session
 			Session object
 		"""
+		self.__log('logout({})')
 		self.__updateCookieFile(salida=True)
 		if self.padre is False:
 			os._exit(0)

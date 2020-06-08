@@ -32,17 +32,17 @@ def sendGoods(s, originCityId, destinationCityId, islandId, ships, send):
 	html = s.get()
 	city = getCiudad(html)
 	currId = city['id']
-	data = {'action': 'header', 'function': 'changeCurrentCity', 'actionRequest': s.token(), 'oldView': 'city', 'cityId': originCityId, 'backgroundView': 'city', 'currentCityId': currId, 'ajax': '1'}
-	s.post(payloadPost=data)
+	data = {'action': 'header', 'function': 'changeCurrentCity', 'actionRequest': 'REQUESTID', 'oldView': 'city', 'cityId': originCityId, 'backgroundView': 'city', 'currentCityId': currId, 'ajax': '1'}
+	s.post(payloadPost=data, addRequestId=True)
 
-	data = {'action': 'transportOperations', 'function': 'loadTransportersWithFreight', 'destinationCityId': destinationCityId, 'islandId': islandId, 'oldView': '', 'position': '', 'avatar2Name': '', 'city2Name': '', 'type': '', 'activeTab': '', 'transportDisplayPrice': '0', 'premiumTransporter': '0', 'minusPlusValue': '500', 'capacity': '5', 'max_capacity': '5', 'jetPropulsion': '0', 'transporters': ships, 'backgroundView': 'city', 'currentCityId': originCityId, 'templateView': 'transport', 'currentTab': 'tabSendTransporter', 'actionRequest': s.token(), 'ajax': '1'}
+	data = {'action': 'transportOperations', 'function': 'loadTransportersWithFreight', 'destinationCityId': destinationCityId, 'islandId': islandId, 'oldView': '', 'position': '', 'avatar2Name': '', 'city2Name': '', 'type': '', 'activeTab': '', 'transportDisplayPrice': '0', 'premiumTransporter': '0', 'minusPlusValue': '500', 'capacity': '5', 'max_capacity': '5', 'jetPropulsion': '0', 'transporters': ships, 'backgroundView': 'city', 'currentCityId': originCityId, 'templateView': 'transport', 'currentTab': 'tabSendTransporter', 'actionRequest': 'REQUESTID', 'ajax': '1'}
 
 	# add amounts of resources to send
 	for i in range(len(send)):
 		key = 'cargo_resource' if i == 0 else 'cargo_tradegood{:d}'.format(i)
 		data[key] = send[i]
 
-	s.post(payloadPost=data)
+	s.post(payloadPost=data, addRequestId=True)
 
 def executeRoutes(s, routes):
 	"""This function will execute all the routes passed to it, regardless if there are enough ships available to do so
