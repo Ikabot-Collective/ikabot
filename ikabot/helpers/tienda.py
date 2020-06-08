@@ -24,7 +24,7 @@ def getCommertialCities(s):
 	return ciudades_comerciales
 
 def getStoreHtml(s, ciudad):
-	url = 'view=branchOffice&cityId={}&position={:d}&currentCityId={}&backgroundView=city&actionRequest={}&ajax=1'.format(ciudad['id'], ciudad['pos'], ciudad['id'], s.token())
+	url = 'view=branchOffice&cityId={}&position={:d}&currentCityId={}&backgroundView=city&actionRequest=REQUESTID&ajax=1'.format(ciudad['id'], ciudad['pos'], ciudad['id'])
 	data = s.post(url)
 	json_data = json.loads(data, strict=False)
 	return json_data[1][1][1]

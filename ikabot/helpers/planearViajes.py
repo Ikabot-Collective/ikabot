@@ -29,20 +29,25 @@ def sendGoods(s, originCityId, destinationCityId, islandId, ships, send):
 		array of resources to send
 	"""
 
-	html = s.get()
-	city = getCiudad(html)
-	currId = city['id']
-	data = {'action': 'header', 'function': 'changeCurrentCity', 'actionRequest': 'REQUESTID', 'oldView': 'city', 'cityId': originCityId, 'backgroundView': 'city', 'currentCityId': currId, 'ajax': '1'}
-	s.post(payloadPost=data, addRequestId=True)
+	# this can fail if a random request is made in between this two posts
+	while True:
+		html = s.get()
+		city = getCiudad(html)
+		currId = city['id']
+		data = {'action': 'header', 'function': 'changeCurrentCity', 'actionRequest': 'REQUESTID', 'oldView': 'city', 'cityId': originCityId, 'backgroundView': 'city', 'currentCityId': currId, 'ajax': '1'}
+		s.post(payloadPost=data)
 
-	data = {'action': 'transportOperations', 'function': 'loadTransportersWithFreight', 'destinationCityId': destinationCityId, 'islandId': islandId, 'oldView': '', 'position': '', 'avatar2Name': '', 'city2Name': '', 'type': '', 'activeTab': '', 'transportDisplayPrice': '0', 'premiumTransporter': '0', 'minusPlusValue': '500', 'capacity': '5', 'max_capacity': '5', 'jetPropulsion': '0', 'transporters': ships, 'backgroundView': 'city', 'currentCityId': originCityId, 'templateView': 'transport', 'currentTab': 'tabSendTransporter', 'actionRequest': 'REQUESTID', 'ajax': '1'}
+		data = {'action': 'transportOperations', 'function': 'loadTransportersWithFreight', 'destinationCityId': destinationCityId, 'islandId': islandId, 'oldView': '', 'position': '', 'avatar2Name': '', 'city2Name': '', 'type': '', 'activeTab': '', 'transportDisplayPrice': '0', 'premiumTransporter': '0', 'minusPlusValue': '500', 'capacity': '5', 'max_capacity': '5', 'jetPropulsion': '0', 'transporters': ships, 'backgroundView': 'city', 'currentCityId': originCityId, 'templateView': 'transport', 'currentTab': 'tabSendTransporter', 'actionRequest': 'REQUESTID', 'ajax': '1'}
 
-	# add amounts of resources to send
-	for i in range(len(send)):
-		key = 'cargo_resource' if i == 0 else 'cargo_tradegood{:d}'.format(i)
-		data[key] = send[i]
+		# add amounts of resources to send
+		for i in range(len(send)):
+			key = 'cargo_resource' if i == 0 else 'cargo_tradegood{:d}'.format(i)
+			data[key] = send[i]
 
-	s.post(payloadPost=data, addRequestId=True)
+		resp = s.post(payloadPost=data)
+		resp = json.loads(resp, strict=False)
+		if resp[3][1][0]['type'] == 10:
+			break
 
 def executeRoutes(s, routes):
 	"""This function will execute all the routes passed to it, regardless if there are enough ships available to do so
@@ -96,7 +101,7 @@ def getMinimumWaitingTime(s):
 	"""
 	html = s.get()
 	idCiudad = re.search(r'currentCityId:\s(\d+),', html).group(1)
-	url = 'view=militaryAdvisor&oldView=city&oldBackgroundView=city&backgroundView=city&currentCityId={}&actionRequest={}&ajax=1'.format(idCiudad, s.token())
+	url = 'view=militaryAdvisor&oldView=city&oldBackgroundView=city&backgroundView=city&currentCityId={}&actionRequest=REQUESTID&ajax=1'.format(idCiudad)
 	posted = s.post(url)
 	postdata = json.loads(posted, strict=False)
 	militaryMovements = postdata[1][1][2]['viewScriptParams']['militaryAndFleetMovements']

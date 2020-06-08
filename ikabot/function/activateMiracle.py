@@ -49,7 +49,7 @@ def obtainMiraclesAvailable(s):
 			continue
 
 		# get wonder information
-		params = {"view": "temple", "cityId": city['id'], "position": city['pos'], "backgroundView": "city", "currentCityId": city['id'], "actionRequest": s.token(), "ajax": "1"}
+		params = {"view": "temple", "cityId": city['id'], "position": city['pos'], "backgroundView": "city", "currentCityId": city['id'], "actionRequest": "REQUESTID", "ajax": "1"}
 		data = s.post(params=params)
 		data = json.loads(data, strict=False)
 		data = data[2][1]
@@ -75,7 +75,7 @@ def obtainMiraclesAvailable(s):
 	return [ island for island in islands if island['activable'] ]
 
 def activateMiracleImpl(s, isla):
-	params = {'action': 'CityScreen', 'cityId': isla['ciudad']['id'], 'function': 'activateWonder', 'position': isla['ciudad']['pos'], 'backgroundView': 'city', 'currentCityId': isla['ciudad']['id'], 'templateView': 'temple', 'actionRequest': s.token(), 'ajax': '1'}
+	params = {'action': 'CityScreen', 'cityId': isla['ciudad']['id'], 'function': 'activateWonder', 'position': isla['ciudad']['pos'], 'backgroundView': 'city', 'currentCityId': isla['ciudad']['id'], 'templateView': 'temple', 'actionRequest': 'REQUESTID', 'ajax': '1'}
 	rta = s.post(params=params)
 	return json.loads(rta, strict=False)
 
@@ -230,7 +230,7 @@ def activateMiracle(s,e,fd):
 
 def wait_for_miracle(s, isla):
 	while True:
-		params = {"view": "temple", "cityId": isla['ciudad']['id'], "position": isla['ciudad']['pos'], "backgroundView": "city", "currentCityId": isla['ciudad']['id'], "actionRequest": s.token(), "ajax": "1"}
+		params = {"view": "temple", "cityId": isla['ciudad']['id'], "position": isla['ciudad']['pos'], "backgroundView": "city", "currentCityId": isla['ciudad']['id'], "actionRequest": "REQUESTID", "ajax": "1"}
 		data = s.post(params=params)
 		data = json.loads(data, strict=False)
 		data = data[2][1]

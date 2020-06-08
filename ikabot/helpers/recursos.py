@@ -25,7 +25,7 @@ def getConsumoDeVino(html):
 	return 0
 
 def getProduccionPerSecond(s, idCiudad):
-	prod = s.post(payloadPost={'action': 'header', 'function': 'changeCurrentCity', 'actionRequest': s.token(), 'cityId': idCiudad, 'ajax': '1'})
+	prod = s.post(payloadPost={'action': 'header', 'function': 'changeCurrentCity', 'actionRequest': 'REQUESTID', 'cityId': idCiudad, 'ajax': '1'})
 	prod = json.loads(prod, strict=False)
 	prod = prod[0][1]['headerData']
 	wood = Decimal( prod['resourceProduction'] )

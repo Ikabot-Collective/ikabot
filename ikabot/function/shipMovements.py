@@ -36,7 +36,7 @@ def shipMovements(s,e,fd):
 
 		html = s.get()
 		idCiudad = re.search(r'currentCityId:\s(\d+),', html).group(1)
-		url = 'view=militaryAdvisor&oldView=city&oldBackgroundView=city&backgroundView=city&currentCityId={}&actionRequest={}&ajax=1'.format(idCiudad, s.token())
+		url = 'view=militaryAdvisor&oldView=city&oldBackgroundView=city&backgroundView=city&currentCityId={}&actionRequest=REQUESTID&ajax=1'.format(idCiudad)
 		posted = s.post(url)
 		postdata = json.loads(posted, strict=False)
 		movements = postdata[1][1][2]['viewScriptParams']['militaryAndFleetMovements']

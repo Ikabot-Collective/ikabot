@@ -45,7 +45,7 @@ def chooseResource(s, city):
 	'currentCityId': city['id'],
 	'templateView': 'branchOffice',
 	'currentTab': 'bargain',
-	'actionRequest': s.token(),
+	'actionRequest': 'REQUESTID',
 	'ajax': 1
 	}
 	# this will set the chosen resource in the store
@@ -86,7 +86,7 @@ def calculateCost(offers, amount_to_buy):
 	return total_cost
 
 def getGold(s, ciudad):
-	url = 'view=finances&backgroundView=city&currentCityId={}&templateView=finances&actionRequest={}&ajax=1'.format(ciudad['id'], s.token())
+	url = 'view=finances&backgroundView=city&currentCityId={}&templateView=finances&actionRequest=REQUESTID&ajax=1'.format(ciudad['id'])
 	data = s.post(url)
 	json_data = json.loads(data, strict=False)
 	gold = json_data[0][1]['headerData']['gold']
@@ -211,10 +211,10 @@ def buy(s, city, offer, amount_to_buy):
 	'currentCityId': offer['cityId'],
 	'templateView': 'takeOffer',
 	'currentTab': 'bargain',
-	'actionRequest': s.token(),
+	'actionRequest': 'REQUESTID',
 	'ajax': 1
 	}
-	url = 'view=takeOffer&destinationCityId={}&oldView=branchOffice&activeTab=bargain&cityId={}&position={}&type={}&resource={}&backgroundView=city&currentCityId={}&templateView=branchOffice&actionRequest={}&ajax=1'.format(offer['destinationCityId'], offer['cityId'], offer['position'], offer['type'], offer['resource'], offer['cityId'], s.token())
+	url = 'view=takeOffer&destinationCityId={}&oldView=branchOffice&activeTab=bargain&cityId={}&position={}&type={}&resource={}&backgroundView=city&currentCityId={}&templateView=branchOffice&actionRequest=REQUESTID&ajax=1'.format(offer['destinationCityId'], offer['cityId'], offer['position'], offer['type'], offer['resource'], offer['cityId'])
 	data = s.post(url)
 	html = json.loads(data, strict=False)[1][1][1]
 	hits = re.findall(r'"tradegood(\d)Price"\s*value="(\d+)', html)
