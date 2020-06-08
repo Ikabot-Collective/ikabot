@@ -266,7 +266,7 @@ class Sesion:
 				msg = _('Login error.')
 				print(msg)
 				os._exit(0)
-			raise Exception('No se pudo iniciar sesión')
+			raise Exception('Couldn\t log in')
 		self.cipher = AESCipher(self.mail, self.username, self.password)
 		self.__updateCookieFile(primero=True)
 		self.logged = True
