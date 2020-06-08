@@ -45,11 +45,11 @@ def donationBot(s,e,fd):
 				percentage = None
 
 			if donation_type is not None:
-				print(_('What percentage of the resources do you want to donate every day? (default: 100%)'))
+				print(_('What is the maximum percentage of your storage capacity that you whish to keep occupied? (the resources that exceed it, will be donated) (default: 80%)'))
 				percentage = read(min=0, max=100, empty=True)
 				if percentage == '':
-					percentage = 100
-				elif percentage == 0:
+					percentage = 80
+				elif percentage == 100: # if the user is ok with the storage beeing totally full, don't donate at all
 					donation_type = None
 
 			cities_dict[cityId] = {'donation_type': donation_type, 'percentage': percentage}
@@ -85,13 +85,28 @@ def do_it(s, cities_ids, cities_dict):
 			if donation_type is None:
 				continue
 
+			# get the storageCapacity and the wood this city has
 			html = s.get(urlCiudad + cityId)
-			wood  = getRecursosDisponibles(html, num=True)[0]
-			wood *= ( cities_dict[cityId]['percentage'] / 100 )
-			wood = int(wood)
+			city = getCiudad(html)
+			wood = city['recursos'][0]
+			storageCapacity = city['storageCapacity']
+
+			# get the percentage
+			percentage = cities_dict[cityId]['percentage']
+			percentage /= 100
+
+			# calculate what is the amount of wood that should be preserved
+			max_wood = storageCapacity * percentage
+
+			# calculate the wood that is exceeding the percentage
+			to_donate = wood - max_wood
+			if to_donate <= 0:
+				continue
+
 			islandId = cities_dict[cityId]['island']
 
-			s.post(payloadPost={'islandId': islandId, 'type': donation_type, 'action': 'IslandScreen', 'function': 'donate', 'donation': wood, 'backgroundView': 'island', 'templateView': donation_type, 'actionRequest': 'REQUESTID', 'ajax': '1'})
+			# donate
+			s.post(payloadPost={'islandId': islandId, 'type': donation_type, 'action': 'IslandScreen', 'function': 'donate', 'donation': to_donate, 'backgroundView': 'island', 'templateView': donation_type, 'actionRequest': 'REQUESTID', 'ajax': '1'})
 
 		msg = _('I donated automatically.')
 		sendToBotDebug(s, msg, debugON_donationBot)
