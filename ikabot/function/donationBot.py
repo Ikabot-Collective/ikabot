@@ -97,6 +97,7 @@ def do_it(s, cities_ids, cities_dict):
 
 			# calculate what is the amount of wood that should be preserved
 			max_wood = storageCapacity * percentage
+			max_wood = int(max_wood)
 
 			# calculate the wood that is exceeding the percentage
 			to_donate = wood - max_wood
