@@ -7,7 +7,7 @@ import json
 import math
 import gettext
 import traceback
-import multiprocessing
+import threading
 from decimal import *
 from ikabot.config import *
 from ikabot.helpers.gui import *
@@ -93,17 +93,13 @@ def expandBuilding(s, cityId, building, waitForResources):
 			sendToBot(s, msg)
 			return
 
-		# try to upgrade 3 times, just in case
-		for i in range(3):
-			url = 'action=CityScreen&function=upgradeBuilding&actionRequest={}&cityId={}&position={:d}&level={}&activeTab=tabSendTransporter&backgroundView=city&currentCityId={}&templateView={}&ajax=1'.format(s.token(), cityId, position, building['level'], cityId, building['building'])
-			s.post(url)
-			html = s.get(urlCiudad + cityId)
-			city = getCiudad(html)
-			building = city['position'][position]
-			if building['isBusy']:
-				break
-		else:
-			msg  = _('{}: The building {} was not extended after three tries\n').format(city['cityName'], building['name'])
+		url = 'action=CityScreen&function=upgradeBuilding&actionRequest=REQUESTID&cityId={}&position={:d}&level={}&activeTab=tabSendTransporter&backgroundView=city&currentCityId={}&templateView={}&ajax=1'.format(cityId, position, building['level'], cityId, building['building'])
+		s.post(url, addRequestId=True)
+		html = s.get(urlCiudad + cityId)
+		city = getCiudad(html)
+		building = city['position'][position]
+		if building['isBusy'] is False:
+			msg  = _('{}: The building {} was not extended').format(city['cityName'], building['name'])
 			sendToBot(s, msg)
 			return
 
@@ -241,10 +237,9 @@ def getResourcesNeeded(s, city, building, current_level, final_level):
 	return final_costs
 
 def sendResourcesNeeded(s, idDestiny, origins, missingArr):
-	set_child_mode(s)
+	#set_child_mode(s)
 
 	info = _('\nTransport resources to upload building\n')
-	setInfoSignal(s, info)
 
 	try:
 		routes = []
@@ -267,13 +262,11 @@ def sendResourcesNeeded(s, idDestiny, origins, missingArr):
 				toSend[i] = send
 				route = (cityO, cityD, cityD['islandId'], *toSend)
 				routes.append(route)
-
 		executeRoutes(s, routes)
 	except:
 		msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
 		sendToBot(s, msg)
-	finally:
-		s.logout()
+		# no s.logout() because this is a thread, not a process
 
 def chooseResourceProviders(s, ids, cities, idCiudad, resource, missing):
 	global sendResources
@@ -355,8 +348,9 @@ def sendResourcesMenu(s, idCiudad, missing):
 
 	enter()
 
-	# create a new process to send the resources (this could be a thread)
-	multiprocessing.Process(target=sendResourcesNeeded, args=(s, idCiudad, origins, missing)).start()
+	# create a new thread to send the resources
+	t = threading.Thread(target=sendResourcesNeeded, args=(s, idCiudad, origins, missing,))
+	t.start()
 
 def getBuildingToExpand(s, cityId):
 	html = s.get(urlCiudad + cityId)
