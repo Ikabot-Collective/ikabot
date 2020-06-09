@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import re
 import time
 import random
 from decimal import *
@@ -70,3 +71,7 @@ def wait(seconds, maxrandom = 0):
 		restantes = fin - time.time()
 	time.sleep(randomTime)
 	return
+
+def getCurrentCityId(s):
+		html = s.get()
+		return re.search(r'currentCityId:\s(\d+),', html).group(1)
