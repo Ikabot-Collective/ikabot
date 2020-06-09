@@ -29,13 +29,13 @@ def getStoreHtml(s, ciudad):
 	json_data = json.loads(data, strict=False)
 	return json_data[1][1][1]
 
-def getstorageCapacityDeVenta(html):
+def storageCapacityOfStore(html):
 	match = re.search(r'var\s*storageCapacity\s*=\s*(\d+);', html)
 	if match:
 		return int(match.group(1))
 	else:
 		return 0
 
-def vendiendo(html):
+def onSellInStore(html):
 	mad, vin, mar, cri, azu = re.findall(r'<input type="text" class="textfield"\s*size="\d+"\s*name=".*?"\s*id=".*?"\s*value="(\d+)"', html)
 	return [int(mad), int(vin), int(mar), int(cri), int(azu)]
