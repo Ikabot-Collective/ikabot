@@ -7,11 +7,11 @@ import traceback
 import sys
 from ikabot.config import *
 from ikabot.helpers.botComm import *
-from ikabot.helpers.gui import enter
+from ikabot.helpers.gui import enter, enter
 from ikabot.helpers.varios import wait
 from ikabot.helpers.signals import setInfoSignal
-from ikabot.helpers.pedirInfo import getIdsOfIslands
-from ikabot.helpers.getJson import getIsla
+from ikabot.helpers.pedirInfo import getIslandsIds
+from ikabot.helpers.getJson import getIsland
 from ikabot.helpers.process import set_child_mode
 
 t = gettext.translation('searchForIslandSpaces', 
@@ -23,9 +23,10 @@ _ = t.gettext
 def searchForIslandSpaces(s,e,fd):
 	sys.stdin = os.fdopen(fd)
 	try:
-		if botValido(s) is False:
+		if checkTelegramData(s) is False:
 			e.set()
 			return
+		banner()
 		print(_('I will search for new spaces each hour.'))
 		enter()
 	except KeyboardInterrupt:
@@ -46,34 +47,38 @@ def searchForIslandSpaces(s,e,fd):
 		s.logout()
 
 def do_it(s):
-	isla_ciudades = {}
+	# this dict will contain all the cities from each island
+	# as they where in last scan
+	cities_before_per_island = {}
+
 	while True:
-		idIslas = getIdsOfIslands(s) #gets the ids of the islands
-		for idIsla in idIslas: #for each island id
-			html = s.get(urlIsla + idIsla) #get html
-			isla = getIsla(html) #parse html into island object
-			ciudades = [ciudad for ciudad in isla['cities'] if ciudad['type'] != 'empty'] #loads the islands non empty cities into ciudades
+		# this is done inside the loop because the user may colonize in a new island
+		islandsIds = getIslandsIds(s)
+		for islandId in islandsIds:
+			html = s.get(urlIsla + islandId)
+			island = getIsland(html)
+			# cities in the current island
+			cities_now = [city_space for city_space in island['cities'] if city_space['type'] != 'empty'] #loads the islands non empty cities into ciudades
 
-			if idIsla in isla_ciudades: #for each island
-				ciudadesAntes = isla_ciudades[idIsla] #loads into ciudadesAntes the current islands cities
+			# if we haven't scaned this island before,
+			# save it and do nothing
+			if islandId not in cities_before_per_island:
+				cities_before_per_island[islandId] = cities_now.copy()
+			else:
+				cities_before = cities_before_per_island[islandId]
 
-				# alguien desaparecio - someone disappeared
-				for cityAntes in ciudadesAntes: #for each beforecity on the island
-					for ciudad in ciudades: #for each city
-						if ciudad['id'] == cityAntes['id']: #compare current city's id with beforecity's id
-							break
-					else:
-						msg = _('the city {} of the player {} disappeared in {} {}:{} {}').format(cityAntes['name'], cityAntes['Name'], materials_names[int(isla['good'])], isla['x'], isla['y'], isla['name'])
+				# someone disappeared
+				for city_before in cities_before:
+					if city_before['id'] not in [ city_now['id'] for city_now in cities_now ]:
+						# we didn't find the city_before in the cities_now
+						msg = _('the city {} of the player {} disappeared in {} {}:{} {}').format(city_before['name'], city_before['Name'], materials_names[int(island['good'])], island['x'], island['y'], island['name'])
 						sendToBot(s, msg)
 
-				# alguien fundo - someone colonised
-				for ciudad in ciudades: #for each city on the island
-					for cityAntes in ciudadesAntes: #for each beforecity
-						if ciudad['id'] == cityAntes['id']: #compare current city's id with beforecity's id
-							break
-					else:
-						msg = _('{} founded {} in {} {}:{} {}').format(ciudad['Name'], ciudad['name'], materials_names[int(isla['good'])], isla['x'], isla['y'], isla['name'])
+				# someone colonised
+				for city_now in cities_now:
+					if city_now['id'] not in [ city_before['id'] for city_before in cities_before ]:
+						# we didn't find the city_now in the cities_before
+						msg = _('{} founded {} in {} {}:{} {}').format(city_now['Name'], city_now['name'], materials_names[int(island['good'])], island['x'], island['y'], island['name'])
 						sendToBot(s, msg)
 
-			isla_ciudades[idIsla] = ciudades.copy() #copies non empty cities into current islands cities (isla_ciudades)
 		wait(1*60*60)

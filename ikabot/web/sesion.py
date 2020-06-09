@@ -16,7 +16,7 @@ from ikabot.helpers.botComm import *
 from ikabot.helpers.gui import banner
 from ikabot.helpers.aesCipher import *
 from ikabot.helpers.pedirInfo import read
-from ikabot.helpers.getJson import getCiudad
+from ikabot.helpers.getJson import getCity
 
 t = gettext.translation('sesion', 
                         localedir, 
@@ -53,7 +53,7 @@ class Sesion:
 
 	def __logout(self, html):
 		if html is not None:
-			idCiudad = getCiudad(html)['id']
+			idCiudad = getCity(html)['id']
 			token = re.search(r'actionRequest"?:\s*"(.*?)"', html).group(1)
 			urlLogout = 'action=logoutAvatar&function=logout&sideBarExt=undefined&startPageShown=1&detectedDevice=1&cityId={0}&backgroundView=city&currentCityId={0}&actionRequest={1}'.format(idCiudad, token)
 			self.s.get(self.urlBase + urlLogout)

@@ -4,7 +4,7 @@
 import re
 import json
 from ikabot.config import *
-from ikabot.helpers.getJson import getCiudad
+from ikabot.helpers.getJson import getCity
 from ikabot.helpers.pedirInfo import getIdsOfCities
 
 def getCommertialCities(s):
@@ -12,7 +12,7 @@ def getCommertialCities(s):
 	ciudades_comerciales = []
 	for idCiudad in ids:
 		html = s.get(urlCiudad + idCiudad)
-		ciudad = getCiudad(html)
+		ciudad = getCity(html)
 		for pos, edificio in enumerate(ciudad['position']):
 			if edificio['building'] == 'branchOffice':
 				ciudad['pos'] = pos

@@ -123,7 +123,7 @@ def chooseCity(s, foreign=False):
 		return chooseForeignCity(s)
 	else:
 		html = s.get(urlCiudad + ids[eleccion -1])
-		return getCiudad(html)
+		return getCity(html)
 
 def chooseForeignCity(s):
 	"""Prompts the user to select an island, and a city on that island (is only used in chooseCity)
@@ -153,7 +153,7 @@ def chooseForeignCity(s):
 		banner()
 		return chooseCity(s, foreign=True)
 	html = s.get(urlIsla + idIsla)
-	isla = getIsla(html)
+	isla = getIsland(html)
 	maxNombre = 0
 	for ciudad in isla['cities']:
 		if ciudad['type'] == 'city':
@@ -238,7 +238,7 @@ def getIdsOfCities(s, all=False):
 	else:
 		return (ids, ciudades)
 
-def getIdsOfIslands(s):
+def getIslandsIds(s):
 	"""Gets the IDs of islands the user has cities on
 	Parameters
 	----------
@@ -254,7 +254,7 @@ def getIdsOfIslands(s):
 	idsIslas = set()
 	for idCiudad in idsCiudades:
 		html = s.get(urlCiudad + idCiudad)
-		ciudad = getCiudad(html)
+		ciudad = getCity(html)
 		idIsla = ciudad['islandId']
 		idsIslas.add(idIsla)
 	return list(idsIslas)

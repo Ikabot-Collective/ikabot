@@ -11,7 +11,7 @@ from ikabot.helpers.naval import *
 from ikabot.helpers.varios import *
 from ikabot.helpers.recursos import *
 from ikabot.helpers.pedirInfo import *
-from ikabot.helpers.getJson import getCiudad
+from ikabot.helpers.getJson import getCity
 
 t = gettext.translation('getStatus', 
                         localedir, 

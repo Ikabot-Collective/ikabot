@@ -17,7 +17,7 @@ from ikabot.helpers.botComm import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.web.sesion import normal_get
 from ikabot.helpers.planearViajes import *
-from ikabot.helpers.getJson import getCiudad
+from ikabot.helpers.getJson import getCity
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.recursos import getRecursosDisponibles
@@ -31,7 +31,7 @@ sendResources = True
 expand = True
 
 def getConstructionTime(s, html, position):
-	city = getCiudad(html)
+	city = getCity(html)
 	building = city['position'][position]
 	final_time = re.search(r'"endUpgradeTime":(\d{10})', html)
 	if final_time is None:
@@ -57,7 +57,7 @@ def waitForConstruction(s, cityId, position):
 		slp = getConstructionTime(s, html, position)
 		wait(slp + 5)
 	html = s.get(urlCiudad + cityId)
-	city = getCiudad(html)
+	city = getCity(html)
 	building = city['position'][position]
 	msg = _('{}: The building {} reached the level {:d}.').format(city['cityName'], building['name'], building['level'])
 	sendToBotDebug(s, msg, debugON_constructionList)
@@ -80,7 +80,7 @@ def expandBuilding(s, cityId, building, waitForResources):
 			while building['canUpgrade'] is False:
 				seconds = getMinimumWaitingTime(s)
 				html = s.get(urlCiudad + cityId)
-				city = getCiudad(html)
+				city = getCity(html)
 				building = city['position'][position]
 				# if no ships are comming, exit no matter if the building can or can't upgrade
 				if seconds == 0:
@@ -98,7 +98,7 @@ def expandBuilding(s, cityId, building, waitForResources):
 		url = 'action=CityScreen&function=upgradeBuilding&actionRequest=REQUESTID&cityId={}&position={:d}&level={}&activeTab=tabSendTransporter&backgroundView=city&currentCityId={}&templateView={}&ajax=1'.format(cityId, position, building['level'], cityId, building['building'])
 		s.post(url)
 		html = s.get(urlCiudad + cityId)
-		city = getCiudad(html)
+		city = getCity(html)
 		building = city['position'][position]
 		if building['isBusy'] is False:
 			msg  = _('{}: The building {} was not extended').format(city['cityName'], building['name'])
@@ -246,7 +246,7 @@ def sendResourcesNeeded(s, idDestiny, origins, missingArr):
 	try:
 		routes = []
 		html = s.get(urlCiudad + idDestiny)
-		cityD = getCiudad(html)
+		cityD = getCity(html)
 		for i in range(len(materials_names)):
 			missing = missingArr[i]
 			if missing <= 0:
@@ -289,7 +289,7 @@ def chooseResourceProviders(s, ids, cities, idCiudad, resource, missing):
 			continue
 
 		html = s.get(urlCiudad + cityId)
-		city = getCiudad(html)
+		city = getCity(html)
 
 		available = city['recursos'][resource]
 		if available == 0:
@@ -356,7 +356,7 @@ def sendResourcesMenu(s, idCiudad, missing):
 
 def getBuildingToExpand(s, cityId):
 	html = s.get(urlCiudad + cityId)
-	city = getCiudad(html)
+	city = getCity(html)
 
 	banner()
 	# show the buildings available to expand (ignore empty spaces)

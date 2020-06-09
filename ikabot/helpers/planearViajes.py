@@ -8,7 +8,7 @@ import json
 from decimal import *
 from ikabot.config import *
 from ikabot.helpers.varios import wait
-from ikabot.helpers.getJson import getCiudad
+from ikabot.helpers.getJson import getCity
 from ikabot.helpers.naval import *
 
 def sendGoods(s, originCityId, destinationCityId, islandId, ships, send):
@@ -32,7 +32,7 @@ def sendGoods(s, originCityId, destinationCityId, islandId, ships, send):
 	# this can fail if a random request is made in between this two posts
 	while True:
 		html = s.get()
-		city = getCiudad(html)
+		city = getCity(html)
 		currId = city['id']
 		data = {'action': 'header', 'function': 'changeCurrentCity', 'actionRequest': 'REQUESTID', 'oldView': 'city', 'cityId': originCityId, 'backgroundView': 'city', 'currentCityId': currId, 'ajax': '1'}
 		s.post(payloadPost=data)
@@ -67,7 +67,7 @@ def executeRoutes(s, routes):
 			storageCapacityInShips = barcosDisp * 500
 
 			html = s.get(urlCiudad + destId)
-			ciudadDestino = getCiudad(html)
+			ciudadDestino = getCity(html)
 			storageCapacityInCity = ciudadDestino['freeSpaceForResources']
 
 			send = []

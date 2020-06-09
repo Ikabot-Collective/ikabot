@@ -7,7 +7,7 @@ from ikabot.config import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.signals import setInfoSignal
-from ikabot.helpers.getJson import getCiudad
+from ikabot.helpers.getJson import getCity
 from ikabot.helpers.planearViajes import executeRoutes
 from ikabot.helpers.recursos import *
 from ikabot.helpers.varios import addDot
@@ -90,7 +90,7 @@ def distribute_evenly(s, resource):
 	for cityID in cityIDs:
 
 		html = s.get(urlCiudad + cityID) #load html from the get request for that particular city
-		city = getCiudad(html) #convert the html to a city object
+		city = getCity(html) #convert the html to a city object
 
 		resourceTotal += city['recursos'][resource] #the cities resources are added to the total
 		allCities[cityID] = city #adds the city to all cities
@@ -168,7 +168,7 @@ def distribute_unevenly(s, recurso):
 		esTarget =  ciudades[idCiudad]['tradegood'] == str(recurso)
 		if esTarget:
 			html = s.get(urlCiudad + idCiudad)
-			ciudad = getCiudad(html)
+			ciudad = getCity(html)
 			if recurso == 1:
 				ciudad['disponible'] = ciudad['recursos'][recurso] - ciudad['consumo'] - 1
 			else:
@@ -179,7 +179,7 @@ def distribute_unevenly(s, recurso):
 			ciudadesOrigen[idCiudad] = ciudad
 		else:
 			html = s.get(urlCiudad + idCiudad)
-			ciudad = getCiudad(html)
+			ciudad = getCity(html)
 			ciudad['disponible'] = ciudad['freeSpaceForResources'][recurso]
 			if ciudad['disponible'] > 0:
 				ciudadesDestino[idCiudad] = ciudad

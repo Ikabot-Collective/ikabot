@@ -32,7 +32,7 @@ def sendToBot(s, msg, Token=False):
 	except KeyError:
 		pass
 
-def telegramCredsValidas(s):
+def telegramDataIsValid(s):
 	sessionData = s.getSessionData()
 	try:
 		return len(sessionData['telegram']['botToken']) > 0 and len(sessionData['telegram']['chatId']) > 0
@@ -53,8 +53,8 @@ def getUserResponse(s):
 	except KeyError:
 		return []
 
-def botValido(s):
-	if telegramCredsValidas(s):
+def checkTelegramData(s):
+	if telegramDataIsValid(s):
 		return True
 	else:
 		banner()
