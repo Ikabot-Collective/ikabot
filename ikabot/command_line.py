@@ -12,7 +12,7 @@ from ikabot.function.update import update
 from ikabot.helpers.pedirInfo import read
 from ikabot.function.getStatus import getStatus
 from ikabot.function.donationBot import donationBot
-from ikabot.helpers.botComm import updateTelegramData
+from ikabot.helpers.botComm import updateTelegramData, telegramDataIsValid
 from ikabot.helpers.process import updateProcessList
 from ikabot.function.constructionList import constructionList
 from ikabot.function.searchForIslandSpaces import searchForIslandSpaces
@@ -95,7 +95,10 @@ def menu(s, checkUpdate=True):
 	print(_('(16) See movements'))
 	print(_('(17) Construct building'))
 	print(_('(18) Update Ikabot'))
-	print(_('(19) Update the Telegram data'))
+	if telegramDataIsValid(s):
+		print(_('(19) Change the Telegram data'))
+	else:
+		print(_('(19) Enter the Telegram data'))
 
 	entradas = len(menu_actions)
 	eleccion = read(min=0, max=entradas)

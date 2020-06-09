@@ -14,11 +14,11 @@ t = gettext.translation('vacationMode',
                         fallback=True)
 _ = t.gettext
 
-def activarvacationMode(s):
+def activateVacationMode(s):
 	html = s.get()
-	ciudad = getCity(html)
+	city = getCity(html)
 
-	data = {'action': 'Options', 'function': 'activateVacationMode', 'actionRequest': 'REQUESTID', 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'options_umod_confirm'}
+	data = {'action': 'Options', 'function': 'activateVacationMode', 'actionRequest': 'REQUESTID', 'backgroundView': 'city', 'currentCityId': city['id'], 'templateView': 'options_umod_confirm'}
 	s.post(params=data, ignoreExpire=True)
 
 def vacationMode(s,e,fd):
@@ -31,7 +31,7 @@ def vacationMode(s,e,fd):
 			e.set()
 			return
 
-		activarvacationMode(s)
+		activateVacationMode(s)
 
 		print(_('Vacation mode has been activated.'))
 		enter()
