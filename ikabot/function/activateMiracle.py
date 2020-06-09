@@ -10,7 +10,7 @@ from ikabot.helpers.varios import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.process import set_child_mode
-from ikabot.helpers.getJson import getCiudad
+from ikabot.helpers.getJson import getCity
 from ikabot.helpers.signals import setInfoSignal
 
 t = gettext.translation('activateMiracle',
@@ -20,11 +20,11 @@ t = gettext.translation('activateMiracle',
 _ = t.gettext
 
 def obtainMiraclesAvailable(s):
-	idsIslands = getIdsOfIslands(s)
+	idsIslands = getIslandsIds(s)
 	islands = []
 	for idIsland in idsIslands:
 		html = s.get(urlIsla + idIsland)
-		isla = getIsla(html)
+		isla = getIsland(html)
 		isla['activable'] = False
 		islands.append(isla)
 
@@ -38,7 +38,7 @@ def obtainMiraclesAvailable(s):
 			continue
 
 		html = s.get(urlCiudad + str(city['id']))
-		city = getCiudad(html)
+		city = getCity(html)
 
 		# make sure that the city has a temple
 		for i in range( len( city['position'] ) ):

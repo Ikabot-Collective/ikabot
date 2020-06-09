@@ -25,7 +25,7 @@ _ = t.gettext
 def alertAttacks(s,e,fd):
 	sys.stdin = os.fdopen(fd)
 	try:
-		if botValido(s) is False:
+		if checkTelegramData(s) is False:
 			e.set()
 			return
 

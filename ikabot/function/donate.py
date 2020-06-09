@@ -29,7 +29,7 @@ def donate(s,e,fd):
 
 		islandId = city['islandId']
 		html = s.get(urlIsla + islandId)
-		island = getIsla(html)
+		island = getIsland(html)
 
 		island_type = island['tipo']
 		resource_name  = tradegoods_names[0]

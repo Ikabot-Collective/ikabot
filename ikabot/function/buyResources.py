@@ -10,7 +10,7 @@ from decimal import *
 from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.varios import addDot
 from ikabot.helpers.gui import enter, banner
-from ikabot.helpers.getJson import getCiudad
+from ikabot.helpers.getJson import getCity
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.planearViajes import waitForArrival
 from ikabot.helpers.pedirInfo import getIdsOfCities, read

@@ -12,7 +12,7 @@ from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.varios import *
 from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.varios import addDot
-from ikabot.helpers.getJson import getCiudad
+from ikabot.helpers.getJson import getCity
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.recursos import getRecursosDisponibles
 
@@ -59,7 +59,7 @@ def planTrainings(s, city, trainings, trainTroops):
 		for training in trainings:
 			waitForTraining(s, city, trainTroops)
 			html = s.get(urlCiudad + city['id'])
-			city = getCiudad(html)
+			city = getCity(html)
 			city['pos'] = buildingPos
 
 			resourcesAvailable = city['recursos'].copy()

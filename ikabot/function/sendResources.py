@@ -9,7 +9,7 @@ from ikabot.helpers.botComm import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.planearViajes import executeRoutes
 from ikabot.helpers.signals import setInfoSignal
-from ikabot.helpers.getJson import getCiudad
+from ikabot.helpers.getJson import getCity
 from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.varios import addDot
 from ikabot.helpers.recursos import *

@@ -6,7 +6,7 @@ import sys
 from ikabot.config import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import read
-from ikabot.helpers.getJson import getCiudad
+from ikabot.helpers.getJson import getCity
 
 t = gettext.translation('vacationMode',
                         localedir,
@@ -16,7 +16,7 @@ _ = t.gettext
 
 def activarvacationMode(s):
 	html = s.get()
-	ciudad = getCiudad(html)
+	ciudad = getCity(html)
 
 	data = {'action': 'Options', 'function': 'activateVacationMode', 'actionRequest': 'REQUESTID', 'backgroundView': 'city', 'currentCityId': ciudad['id'], 'templateView': 'options_umod_confirm'}
 	s.post(params=data, ignoreExpire=True)

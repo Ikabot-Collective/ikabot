@@ -11,7 +11,7 @@ from ikabot.helpers.gui import *
 from ikabot.helpers.varios import wait
 from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.signals import setInfoSignal
-from ikabot.helpers.getJson import getCiudad
+from ikabot.helpers.getJson import getCity
 from ikabot.helpers.recursos import getRecursosDisponibles
 
 t = gettext.translation('donationBot', 
@@ -76,7 +76,7 @@ def donationBot(s,e,fd):
 def do_it(s, cities_ids, cities_dict):
 	for cityId in cities_ids:
 		html = s.get(urlCiudad + cityId)
-		city = getCiudad(html)
+		city = getCity(html)
 		cities_dict[cityId]['island'] = city['islandId']
 
 	while True:
@@ -87,7 +87,7 @@ def do_it(s, cities_ids, cities_dict):
 
 			# get the storageCapacity and the wood this city has
 			html = s.get(urlCiudad + cityId)
-			city = getCiudad(html)
+			city = getCity(html)
 			wood = city['recursos'][0]
 			storageCapacity = city['storageCapacity']
 

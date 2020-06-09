@@ -21,7 +21,7 @@ def enVenta(html):
 	else:
 		return [0, 0, 0, 0, 0]
 
-def getIsla(html):
+def getIsland(html):
 	isla = re.search(r'\[\["updateBackgroundData",([\s\S]*?),"specialServerBadges', html).group(1) + '}'
 
 	isla = isla.replace('buildplace', 'empty')
@@ -65,7 +65,7 @@ def getIsla(html):
 	isla['tipo'] = tipo
 	return isla
 
-def getCiudad(html):
+def getCity(html):
 
 	ciudad = re.search(r'"updateBackgroundData",\s?([\s\S]*?)\],\["updateTemplateData"', html).group(1)
 	ciudad = json.loads(ciudad, strict=False)

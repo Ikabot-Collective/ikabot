@@ -12,7 +12,7 @@ from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import getIdsOfCities
 from ikabot.helpers.varios import daysHoursMinutes
-from ikabot.helpers.getJson import getCiudad
+from ikabot.helpers.getJson import getCity
 from ikabot.helpers.recursos import *
 from ikabot.helpers.botComm import *
 
@@ -27,7 +27,7 @@ getcontext().prec = 30
 def alertLowWine(s,e,fd):
 	sys.stdin = os.fdopen(fd)
 	try:
-		if botValido(s) is False:
+		if checkTelegramData(s) is False:
 			e.set()
 			return
 		banner()
@@ -65,7 +65,7 @@ def do_it(s, hours):
 
 		for cityId in cities:
 			html = s.get(urlCiudad + cityId)
-			city = getCiudad(html)
+			city = getCity(html)
 
 			# if the city doesn't even have a tavern built, ignore it
 			if 'tavern' not in [ building['building'] for building in city['position'] ]:
