@@ -19,7 +19,7 @@ t = gettext.translation('shipMovements',
                         fallback=True)
 _ = t.gettext
 
-def esHostil(movement):
+def isHostile(movement):
 	if movement['army']['amount']:
 		return True
 	for mov in movement['fleet']['ships']:
@@ -34,13 +34,18 @@ def shipMovements(s,e,fd):
 
 		print(_('Ships {:d}/{:d}\n').format(getAvailableShips(s), getTotalShips(s)))
 
-		html = s.get()
-		idCiudad = re.search(r'currentCityId:\s(\d+),', html).group(1)
-		url = 'view=militaryAdvisor&oldView=city&oldBackgroundView=city&backgroundView=city&currentCityId={}&actionRequest=REQUESTID&ajax=1'.format(idCiudad)
-		posted = s.post(url)
-		postdata = json.loads(posted, strict=False)
-		movements = postdata[1][1][2]['viewScriptParams']['militaryAndFleetMovements']
-		tiempoAhora = int(postdata[0][1]['time'])
+		cityId = getCurrentCityId(s)
+		url = 'view=militaryAdvisor&oldView=city&oldBackgroundView=city&backgroundView=city&currentCityId={}&actionRequest=REQUESTID&ajax=1'.format(cityId)
+		resp = s.post(url)
+		resp = json.loads(resp, strict=False)
+		movements = resp[1][1][2]['viewScriptParams']['militaryAndFleetMovements']
+		time_now = int(resp[0][1]['time'])
+
+		if len(movements) == 0:
+			print(_('There are no movements'))
+			enter()
+			e.set()
+			return
 
 		for movement in movements:
 
@@ -52,37 +57,39 @@ def shipMovements(s,e,fd):
 			elif movement['isSameAlliance']:
 				color = bcolors.GREEN + bcolors.BOLD
 
-			origen  = '{} ({})'.format(movement['origin']['name'], movement['origin']['avatarName'])
-			destino = '{} ({})'.format(movement['target']['name'], movement['target']['avatarName'])
-			flecha = '<-' if movement['event']['isFleetReturning'] else '->'
-			tiempoFaltante = int(movement['eventTime']) - tiempoAhora
-			print('{}{} {} {}: {} ({}) {}'.format(color, origen, flecha, destino, movement['event']['missionText'], daysHoursMinutes(tiempoFaltante), bcolors.ENDC))
+			origin      = '{} ({})'.format(movement['origin']['name'], movement['origin']['avatarName'])
+			destination = '{} ({})'.format(movement['target']['name'], movement['target']['avatarName'])
+			arrow       = '<-' if movement['event']['isFleetReturning'] else '->'
+			time_left = int(movement['eventTime']) - time_now
+			print('{}{} {} {}: {} ({}) {}'.format(color, origin, arrow, destination, movement['event']['missionText'], daysHoursMinutes(time_left), bcolors.ENDC))
 
 			if movement['isHostile']:
-				tropas = movement['army']['amount']
-				flotas = movement['fleet']['amount']
-				print(_('Troops:{}\nFleets:{}').format(addDot(tropas), addDot(flotas)))
-			elif esHostil(movement):
-				tropas = movement['army']['amount']
-				barcos = 0
-				flotas = 0
+				troops = movement['army']['amount']
+				fleets = movement['fleet']['amount']
+				print(_('Troops:{}\nFleets:{}').format(addDot(troops), addDot(fleets)))
+			elif isHostile(movement):
+				troops = movement['army']['amount']
+				ships = 0
+				fleets = 0
 				for mov in movement['fleet']['ships']:
 					if mov['cssClass'] == 'ship_transport':
-						barcos += int(mov['amount'])
+						ships += int(mov['amount'])
 					else:
-						flotas += int(mov['amount'])
-				print(_('Troops:{}\nFleets:{}\n Ships:{}').format(addDot(tropas), addDot(flotas), addDot(barcos)))
+						fleets += int(mov['amount'])
+				print(_('Troops:{}\nFleets:{}\n Ships:{}').format(addDot(troops), addDot(fleets), addDot(ships)))
 			else:
-				bien = {'wood': _('wood'), 'wine': _('wine'), 'marble': _('marble'), 'glass': _('cristal'), 'sulfur': _('sulfur')}
-				cargaTotal = 0
+				assert len(materials_names) == 5
+				names_index = {'wood': 1, 'wine': 2, 'marble': 3, 'glass': 4, 'sulfur': 5}
+				total_load = 0
 				for resource in movement['resources']:
-					cantidad = resource['amount']
-					tipo = resource['cssClass'].split()[1]
-					tipo = bien[tipo]
-					cargaTotal += int( cantidad.replace(',', '') )
-					print(_('{} of {}').format(cantidad, tipo))
-				barcos = int(math.ceil((Decimal(cargaTotal) / Decimal(500))))
-				print(_('{:d} Ships').format(barcos))
+					amount = resource['amount']
+					tradegood = resource['cssClass'].split()[1]
+					index = names_index[tradegood]
+					tradegood = materials_names[index]
+					total_load += int( amount.replace(',', '') )
+					print(_('{} of {}').format(amount, tradegood))
+				ships = int(math.ceil((Decimal(total_load) / Decimal(500))))
+				print(_('{:d} Ships').format(ships))
 		enter()
 		e.set()
 	except KeyboardInterrupt:
