@@ -78,6 +78,7 @@ def expandBuilding(s, cityId, building, waitForResources):
 
 		if building['canUpgrade'] is False and waitForResources is True:
 			while building['canUpgrade'] is False:
+				time.sleep(60)
 				seconds = getMinimumWaitingTime(s)
 				html = s.get(urlCiudad + cityId)
 				city = getCity(html)
