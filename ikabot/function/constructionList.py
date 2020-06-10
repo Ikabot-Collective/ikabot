@@ -123,9 +123,9 @@ def getReductores(city):
 		lv = building['level']
 		if building['building'] == 'carpentering':
 			reductores[0] = lv
-		elif building['building'] == 'architect':
-			reductores[1] = lv
 		elif building['building'] == 'vineyard':
+			reductores[1] = lv
+		elif building['building'] == 'architect':
 			reductores[2] = lv
 		elif building['building'] == 'optician':
 			reductores[3] = lv
