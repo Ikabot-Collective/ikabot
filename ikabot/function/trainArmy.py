@@ -164,7 +164,6 @@ def trainArmy(s,e,fd):
 			# calculate costs
 			cost = [0] * ( len(materials_names_english) + 3 )
 			for unit in units:
-
 				for i in range(len(materials_names_english)):
 					material_name = materials_names_english[i].lower()
 					if material_name in unit['costs']:

@@ -79,12 +79,11 @@ def shipMovements(s,e,fd):
 				print(_('Troops:{}\nFleets:{}\n Ships:{}').format(addDot(troops), addDot(fleets), addDot(ships)))
 			else:
 				assert len(materials_names) == 5
-				names_index = {'wood': 1, 'wine': 2, 'marble': 3, 'glass': 4, 'sulfur': 5}
 				total_load = 0
 				for resource in movement['resources']:
 					amount = resource['amount']
 					tradegood = resource['cssClass'].split()[1]
-					index = names_index[tradegood]
+					index = materials_names_tec.index(tradegood) + 1
 					tradegood = materials_names[index]
 					total_load += int( amount.replace(',', '') )
 					print(_('{} of {}').format(amount, tradegood))
