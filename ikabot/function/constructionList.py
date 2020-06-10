@@ -96,13 +96,14 @@ def expandBuilding(s, cityId, building, waitForResources):
 			return
 
 		url = 'action=CityScreen&function=upgradeBuilding&actionRequest=REQUESTID&cityId={}&position={:d}&level={}&activeTab=tabSendTransporter&backgroundView=city&currentCityId={}&templateView={}&ajax=1'.format(cityId, position, building['level'], cityId, building['building'])
-		s.post(url)
+		resp = s.post(url)
 		html = s.get(urlCiudad + cityId)
 		city = getCity(html)
 		building = city['position'][position]
 		if building['isBusy'] is False:
 			msg  = _('{}: The building {} was not extended').format(city['cityName'], building['name'])
 			sendToBot(s, msg)
+			sendToBot(s, resp)
 			return
 
 		msg = _('{}: The building {} is being extended to level {:d}.').format(city['cityName'], building['name'], building['level']+1)
@@ -209,8 +210,8 @@ def getResourcesNeeded(s, city, building, current_level, final_level):
 		costs = re.findall(r'<td class="costs">([\d,\.]*)</td>', match)
 		for i in range(len(costs)):
 			resource_type = resources_types[i]
-			for j in range(len(materials_names_english)):
-				name = materials_names_english[j].lower()
+			for j in range(len(materials_names_tec)):
+				name = materials_names_tec[j]
 				if resource_type == name:
 					index = j
 					break

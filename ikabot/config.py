@@ -45,6 +45,7 @@ urlIsla = 'view=island&islandId='
 prompt = ' >>  '
 materials_names = [_('Wood'), _('Wine'), _('Marble'), _('Cristal'), _('Sulfur')]
 materials_names_english = ['Wood', 'Wine', 'Marble', 'Cristal', 'Sulfur']
+materials_names_tec = ['wood', 'wine', 'marble', 'glass', 'sulfur']
 tradegoods_names = [_('Saw mill'), _('Vineyard'), _('Quarry'), _('Crystal Mine'), _('Sulfur Pit')]
 ConnectionError_wait = 5 * 60
 
