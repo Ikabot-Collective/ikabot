@@ -16,6 +16,19 @@ def run(command):
 	return subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.read()
 
 def updateProcessList(s, programprocesslist = []):
+	"""This function will return data about all the active ikabot processes. If it is passed the ``programprocesslist`` argument, it will write new processes from that list to the .ikabot file
+	Parameters
+	----------
+	s : Session
+		Session object
+	programprocesslist : list[dict]
+		a list of dictionaries containing relevant data about a running ikabot process ('pid', 'proxies' and 'action')
+	
+	Returns
+	-------
+	runningIkabotProcessList : list[dict]
+		a list of dictionaries containing relevant data about a running ikabot process ('pid', 'proxies' and 'action')
+	"""
 	# read from file
 	sessionData = s.getSessionData()
 	try:
