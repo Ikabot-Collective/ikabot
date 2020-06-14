@@ -20,10 +20,30 @@ t = gettext.translation('botComm',
 _ = t.gettext
 
 def sendToBotDebug(s ,msg, debugON):
+	"""This function will send the ``msg`` argument passed to it as a message to the user on Telegram, only if ``debugOn`` is ``True``
+	Parameters
+	----------
+	s : Session
+		Session object 
+	msg : str
+		a string representing the message to send to the user on Telegram
+	debugON : bool
+		a boolean indicating whether or not to send the message.
+	"""
 	if debugON:
 		sendToBot(s, msg)
 
 def sendToBot(s, msg, Token=False):
+	"""This function will send the ``msg`` argument passed to it as a message to the user on Telegram
+	Parameters
+	----------
+	s : Session
+		Session object
+	msg : str
+		a string representing the message to send to the user on Telegram
+	Token : bool
+		a boolean indicating whether or not to attach the process id, the users server, world and Ikariam username to the message
+	"""
 	if Token is False:
 		msg = 'pid:{}\n{}\n{}'.format(os.getpid(), config.infoUser, msg)
 	sessionData = s.getSessionData()
@@ -33,6 +53,18 @@ def sendToBot(s, msg, Token=False):
 		pass
 
 def telegramDataIsValid(s):
+	"""This function checks whether or not there is any Telegram data stored in the .ikabot file
+	Parameters
+	----------
+	s : Session
+		Session object
+	
+	Returns
+	-------
+	valid : bool
+		a boolean indicating whether or not there is any Telegram data stored in the .ikabot file
+
+	"""
 	sessionData = s.getSessionData()
 	try:
 		return len(sessionData['telegram']['botToken']) > 0 and len(sessionData['telegram']['chatId']) > 0
@@ -40,6 +72,17 @@ def telegramDataIsValid(s):
 		return False
 
 def getUserResponse(s):
+	"""This function will retrieve a list of messages the user sent to the bot on Telegram.
+	Parameters
+	----------
+	s : Session
+		Session object
+
+	Returns
+	-------
+	updates : list[str]
+		a list containing all the messages the user sent to the bot on Telegram
+	"""
 	# returns messages that the user sends to the telegram bot
 	sessionData = s.getSessionData()
 	try:
@@ -54,6 +97,17 @@ def getUserResponse(s):
 		return []
 
 def checkTelegramData(s):
+	"""This function doesn't actually check any data itself, that is done by the ``telegramDataIsValid`` function. This function returns ``True`` if there is any Telegram data in the .ikabot file, and if there is none, it will ask the user to input it.
+	Parameters
+	----------
+	s : Session
+		Session object
+
+	Returns
+	-------
+	valid : bool
+		a boolean indicating whether or not there is valid Telegram data in the .ikabot file.
+	"""
 	if telegramDataIsValid(s):
 		return True
 	else:
@@ -68,6 +122,21 @@ def checkTelegramData(s):
 			return updateTelegramData(s)
 
 def updateTelegramData(s, e=None, fd=None):
+	"""This function asks the user to input the Telegram bot's token and the user's own Telegram chat id. After the user has inputted the neccessary data, this function will generate a random 4 digit number, send it to the user as a Telegram message using the token the user provided. It will then ask the user to input that number as validation.
+	Parameters
+	----------
+	s : Session
+		Session object
+	e : multiprocessing.Event
+		an event which, when fired, give back control of the terminal to the main process
+	fd : int
+		the standard input file descriptor passed to the function as a means of gaining control of the terminal
+	
+	Returns
+	-------
+	valid : bool
+		a boolean indicating whether or not the Telegram data has been successfully updated
+	"""
 	if e is not None and fd is not None:
 		sys.stdin = os.fdopen(fd) # give process access to terminal
 
