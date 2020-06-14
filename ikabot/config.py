@@ -30,7 +30,7 @@ isWindows = os.name == 'nt'
 proxy = False
 if proxy:
     http_proxy  = "http://127.0.0.1:8080"
-    https_proxy = "socks5://127.0.0.1:1080"
+    https_proxy = "socks5://127.0.0.1:9050"
     proxyDict = {"http": http_proxy, "https": https_proxy}
 else:
     proxyDict = {}
