@@ -97,7 +97,7 @@ class Sesion:
 			assert sessionData['num_sesiones'] > 0
 			cookie_dict = sessionData['cookies']
 			self.s = requests.Session()
-			self.s.proxies = proxyDict
+			#self.s.proxies = proxyDict
 			self.s.headers.clear()
 			self.s.headers.update(self.headers)
 			requests.cookies.cookiejar_from_dict(cookie_dict, cookiejar=self.s.cookies, overwrite=True)
@@ -116,7 +116,7 @@ class Sesion:
 			banner()
 
 		self.s = requests.Session()
-		self.s.proxies = proxyDict
+		#self.s.proxies = proxyDict
 
 		# get gameEnvironmentId and platformGameId
 		self.headers = {'Host': 'lobby.ikariam.gameforge.com', 'User-Agent': user_agent, 'Accept': '*/*', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/'}
@@ -253,7 +253,9 @@ class Sesion:
 		self.headers = {'Host': self.host, 'User-Agent': user_agent, 'Accept': '*/*', 'Accept-Language': 'en,de-DE;q=0.8,en-US;q=0.5,es;q=0.3', 'Accept-Encoding': 'gzip, deflate, br', 'Referer': 'https://{}'.format(self.host), 'X-Requested-With': 'XMLHttpRequest', 'Origin': 'https://{}'.format(self.host), 'DNT': '1', 'Connection': 'keep-alive', 'Pragma': 'no-cache', 'Cache-Control': 'no-cache'}
 		self.s.headers.clear()
 		self.s.headers.update(self.headers)
+		self.s.proxies = proxyDict
 		html = self.s.get(url).text
+		self.s.proxies = {}
 
 		if self.__isInVacation(html):
 			msg = _('The account went into vacation mode')
@@ -361,7 +363,9 @@ class Sesion:
 		self.__log('get({}), params:{}'.format(url, str(params)))
 		while True:
 			try:
+				self.s.proxies = proxyDict
 				html = self.s.get(url, params=params).text #this isn't recursion, this get is different from the one it's in
+				self.s.proxies = {}
 				if ignoreExpire is False:
 					assert self.__isExpired(html) is False
 				return html
@@ -417,7 +421,9 @@ class Sesion:
 		self.__log('post({}), data={}'.format(url, str(payloadPost)))
 		while True:
 			try:
+				self.s.proxies = proxyDict
 				resp = self.s.post(url, data=payloadPost, params=params).text
+				self.s.proxies = {}
 				if ignoreExpire is False:
 					assert self.__isExpired(resp) is False
 				if 'TXT_ERROR_WRONG_REQUEST_ID' in resp:
@@ -485,6 +491,8 @@ def normal_get(url, params={}):
 		a requests.Response object which represents the webservers response. For more information on requests.Response refer to https://requests.readthedocs.io/en/master/api/#requests.Response
 	"""
 	try:
+		
 		return requests.get(url, params=params)
+		
 	except requests.exceptions.ConnectionError:
 		sys.exit(_('Internet connection failed'))
