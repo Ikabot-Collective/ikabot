@@ -66,7 +66,7 @@ def executeRoutes(s, routes):
 			barcosDisp = waitForArrival(s)
 			storageCapacityInShips = barcosDisp * 500
 
-			html = s.get(urlCiudad + destId)
+			html = s.get(urlCiudad + str(destId))
 			ciudadDestino = getCity(html)
 			storageCapacityInCity = ciudadDestino['freeSpaceForResources']
 
