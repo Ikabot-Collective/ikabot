@@ -83,7 +83,7 @@ def shipMovements(s,e,fd):
 				for resource in movement['resources']:
 					amount = resource['amount']
 					tradegood = resource['cssClass'].split()[1]
-					index = materials_names_tec.index(tradegood) + 1
+					index = materials_names_tec.index(tradegood)
 					tradegood = materials_names[index]
 					total_load += int( amount.replace(',', '') )
 					print(_('{} of {}').format(amount, tradegood))
