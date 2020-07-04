@@ -7,21 +7,28 @@ from ikabot.config import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.pedirInfo import *
-from ikabot.helpers.planearViajes import executeRoutes
+from ikabot.helpers.planRoutes import executeRoutes
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.getJson import getCity
 from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.varios import addDot
-from ikabot.helpers.recursos import *
+from ikabot.helpers.resources import *
 
 t = gettext.translation('sendResources',
-						localedir,
-						languages=idiomas,
-						fallback=True)
+                        localedir,
+                        languages=languages,
+                        fallback=True)
 _ = t.gettext
 
-def sendResources(s,e,fd):
-	sys.stdin = os.fdopen(fd)
+def sendResources(session, event, stdin_fd):
+	"""
+	Parameters
+	----------
+	session : ikabot.web.session.Session
+	event : multiprocessing.Event
+	stdin_fd: int
+	"""
+	sys.stdin = os.fdopen(stdin_fd)
 	try:
 		routes = []
 		while True:
@@ -29,19 +36,19 @@ def sendResources(s,e,fd):
 			banner()
 			print(_('Origin city:'))
 			try:
-				cityO = chooseCity(s)
+				cityO = chooseCity(session)
 			except KeyboardInterrupt:
 				if routes:
 					print(_('Send shipment? [Y/n]'))
 					rta = read(values=['y', 'Y', 'n', 'N', ''])
 					if rta.lower() != 'n':
 						break
-				e.set()
+				event.set()
 				return
 
 			banner()
 			print(_('Destination city'))
-			cityD = chooseCity(s, foreign=True)
+			cityD = chooseCity(session, foreign=True)
 			idIsland = cityD['islandId']
 
 			if cityO['id'] == cityD['id']:
@@ -106,19 +113,19 @@ def sendResources(s,e,fd):
 				if rta.lower() != 'y':
 					break
 	except KeyboardInterrupt:
-		e.set()
+		event.set()
 		return
 
-	set_child_mode(s)
-	e.set()
+	set_child_mode(session)
+	event.set()
 
 	info = _('\nSend resources\n')
 
-	setInfoSignal(s, info)
+	setInfoSignal(session, info)
 	try:
-		executeRoutes(s, routes)
+		executeRoutes(session, routes)
 	except:
 		msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
-		sendToBot(s, msg)
+		sendToBot(session, msg)
 	finally:
-		s.logout()
+		session.logout()

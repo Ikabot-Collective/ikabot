@@ -12,19 +12,26 @@ from ikabot.helpers.varios import wait
 from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.getJson import getCity
-from ikabot.helpers.recursos import getRecursosDisponibles
+from ikabot.helpers.resources import getAvailableResources
 
-t = gettext.translation('donationBot', 
-                        localedir, 
-                        languages=idiomas,
+t = gettext.translation('donationBot',
+                        localedir,
+                        languages=languages,
                         fallback=True)
 _ = t.gettext
 
-def donationBot(s,e,fd):
-	sys.stdin = os.fdopen(fd)
+def donationBot(session, event, stdin_fd):
+	"""
+	Parameters
+	----------
+	session : ikabot.web.session.Session
+	event : multiprocessing.Event
+	stdin_fd: int
+	"""
+	sys.stdin = os.fdopen(stdin_fd)
 	try:
 		banner()
-		(cities_ids, cities) = getIdsOfCities(s)
+		(cities_ids, cities) = getIdsOfCities(session)
 		cities_dict = {}
 		initials = [ material_name[0] for material_name in materials_names ]
 		for cityId in cities_ids:
@@ -57,25 +64,32 @@ def donationBot(s,e,fd):
 		print(_('I will donate every day.'))
 		enter()
 	except KeyboardInterrupt:
-		e.set()
+		event.set()
 		return
 
-	set_child_mode(s)
-	e.set()
+	set_child_mode(session)
+	event.set()
 
 	info = _('\nI donate every day\n')
-	setInfoSignal(s, info)
+	setInfoSignal(session, info)
 	try:
-		do_it(s, cities_ids, cities_dict)
+		do_it(session, cities_ids, cities_dict)
 	except:
 		msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
-		sendToBot(s, msg)
+		sendToBot(session, msg)
 	finally:
-		s.logout()
+		session.logout()
 
-def do_it(s, cities_ids, cities_dict):
+def do_it(session, cities_ids, cities_dict):
+	"""
+	Parameters
+	----------
+	session : ikabot.web.session.Session
+	cities_ids : list[int]
+	cities_dict : dict[int, dict]
+	"""
 	for cityId in cities_ids:
-		html = s.get(urlCiudad + cityId)
+		html = session.get(city_url + cityId)
 		city = getCity(html)
 		cities_dict[cityId]['island'] = city['islandId']
 
@@ -86,7 +100,7 @@ def do_it(s, cities_ids, cities_dict):
 				continue
 
 			# get the storageCapacity and the wood this city has
-			html = s.get(urlCiudad + cityId)
+			html = session.get(city_url + cityId)
 			city = getCity(html)
 			wood = city['recursos'][0]
 			storageCapacity = city['storageCapacity']
@@ -107,10 +121,10 @@ def do_it(s, cities_ids, cities_dict):
 			islandId = cities_dict[cityId]['island']
 
 			# donate
-			s.post(payloadPost={'islandId': islandId, 'type': donation_type, 'action': 'IslandScreen', 'function': 'donate', 'donation': to_donate, 'backgroundView': 'island', 'templateView': donation_type, 'actionRequest': 'REQUESTID', 'ajax': '1'})
+			session.post(payloadPost={'islandId': islandId, 'type': donation_type, 'action': 'IslandScreen', 'function': 'donate', 'donation': to_donate, 'backgroundView': 'island', 'templateView': donation_type, 'actionRequest': 'REQUESTID', 'ajax': '1'})
 
 		msg = _('I donated automatically.')
-		sendToBotDebug(s, msg, debugON_donationBot)
+		sendToBotDebug(session, msg, debugON_donationBot)
 
 		# sleep a day
 		wait(24*60*60, maxrandom=60*60)

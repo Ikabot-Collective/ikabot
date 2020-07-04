@@ -15,69 +15,69 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: ../../../web/sesion.py:67
+#: ../../../web/session.py:67
 msgid ""
 "Actualizo el archivo de cookies:\n"
 msgstr ""
 "Updating the cookie file:\n"
 
-#: ../../../web/sesion.py:69
+#: ../../../web/session.py:69
 msgid "Primero"
 msgstr "First"
 
-#: ../../../web/sesion.py:71
+#: ../../../web/session.py:71
 msgid "Nuevo"
 msgstr "New"
 
-#: ../../../web/sesion.py:73
+#: ../../../web/session.py:73
 msgid "Salida"
 msgstr "Out"
 
-#: ../../../web/sesion.py:112
+#: ../../../web/session.py:112
 msgid "La sesión se venció, renovando sesión"
 msgstr "Updating cookie using cookie file"
 
-#: ../../../web/sesion.py:120
+#: ../../../web/session.py:120
 msgid "Mail:"
 msgstr "Mail:"
 
-#: ../../../web/sesion.py:121
+#: ../../../web/session.py:121
 msgid "Contraseña:"
 msgstr "Password:"
 
-#: ../../../web/sesion.py:141
+#: ../../../web/session.py:141
 msgid ""
 "Mail o contraseña incorrecta\n"
 msgstr ""
 "Wrong email or password\n"
 
-#: ../../../web/sesion.py:152
+#: ../../../web/session.py:152
 msgid ""
 "¿Con qué cuenta quiere iniciar sesión?\n"
 msgstr ""
 "With which account do you want to log in?\n"
 
-#: ../../../web/sesion.py:169
+#: ../../../web/session.py:169
 msgid "Servidor:{}"
 msgstr "Server:{}"
 
-#: ../../../web/sesion.py:170
+#: ../../../web/session.py:170
 msgid ", Mundo:{}"
 msgstr ", World:{}"
 
-#: ../../../web/sesion.py:171
+#: ../../../web/session.py:171
 msgid ", Jugador:{}"
 msgstr ", Player:{}"
 
-#: ../../../web/sesion.py:201
+#: ../../../web/session.py:201
 msgid "La cuenta entró en modo vacaciones"
 msgstr "The account went into vacation mode"
 
-#: ../../../web/sesion.py:209
+#: ../../../web/session.py:209
 msgid "Mail o contraseña incorrecta"
 msgstr "Wrong email or password"
 
-#: ../../../web/sesion.py:298
+#: ../../../web/session.py:298
 msgid "Fallo la conexion a internet"
 msgstr "Internet connection failed"
 

@@ -7,28 +7,35 @@ import json
 from ikabot.config import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.getJson import *
-from ikabot.helpers.recursos import *
+from ikabot.helpers.resources import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.varios import *
 
-t = gettext.translation('donate', 
-                        localedir, 
-                        languages=idiomas,
+t = gettext.translation('donate',
+                        localedir,
+                        languages=languages,
                         fallback=True)
 _ = t.gettext
 
-def donate(s,e,fd):
-	sys.stdin = os.fdopen(fd)
+def donate(session, event, stdin_fd):
+	"""
+	Parameters
+	----------
+	session : ikabot.web.session.Session
+	event : multiprocessing.Event
+	stdin_fd: int
+	"""
+	sys.stdin = os.fdopen(stdin_fd)
 	try:
 		banner()
 
-		city = chooseCity(s)
+		city = chooseCity(session)
 		banner()
 
 		woodAvailable = city['recursos'][0]
 
 		islandId = city['islandId']
-		html = s.get(urlIsla + islandId)
+		html = session.get(island_url + islandId)
 		island = getIsland(html)
 
 		island_type = island['tipo']
@@ -37,7 +44,7 @@ def donate(s,e,fd):
 
 		# get resource information
 		url = 'view=resource&type=resource&islandId={0}&backgroundView=island&currentIslandId={0}&actionRequest=REQUESTID&ajax=1'.format(islandId)
-		resp = s.post(url)
+		resp = session.post(url)
 		resp = json.loads(resp, strict=False)
 
 		resourceLevel  = resp[0][1]['backgroundData']['resourceLevel']
@@ -66,7 +73,7 @@ def donate(s,e,fd):
 		if resourceUpgrading and tradegoodUpgrading:
 			print(_('Both the {} (ends in:{}) and the {} (ends in:{}) are being upgraded rigth now.\n'.format(resource_name, daysHoursMinutes(resourceEndUpgradeTime), tradegood_name, daysHoursMinutes(tradegoodEndUpgradeTime))))
 			enter()
-			e.set()
+			event.set()
 			return
 
 		print('{} lv:{} {}'.format(resource_name, resourceLevel, resourceUpgradeMsg))
@@ -74,7 +81,7 @@ def donate(s,e,fd):
 
 		# get tradegood information
 		url = 'view=tradegood&type={0}&islandId={1}&backgroundView=island&currentIslandId={1}&actionRequest=REQUESTID&ajax=1'.format(island_type, islandId)
-		resp = s.post(url)
+		resp = session.post(url)
 
 		resp = json.loads(resp, strict=False)
 		html = resp[1][1][1]
@@ -107,7 +114,7 @@ def donate(s,e,fd):
 
 		amount = read(min=0, max=woodAvailable, msg=_('Amount:'))
 		if amount == 0:
-			e.set()
+			event.set()
 			return
 		print(_('Will donate {} to the {}?').format(addDot(amount), name))
 		print(_('\nProceed? [Y/n]'))
@@ -116,12 +123,12 @@ def donate(s,e,fd):
 			return
 
 		# do the donation
-		s.post(payloadPost={'islandId': islandId, 'type': donation_type, 'action': 'IslandScreen', 'function': 'donate', 'donation': amount, 'backgroundView': 'island', 'templateView': 'resource', 'actionRequest': 'REQUESTID', 'ajax': '1'})
+		session.post(payloadPost={'islandId': islandId, 'type': donation_type, 'action': 'IslandScreen', 'function': 'donate', 'donation': amount, 'backgroundView': 'island', 'templateView': 'resource', 'actionRequest': 'REQUESTID', 'ajax': '1'})
 
 		print('\nDonation successful.')
 		enter()
-		e.set()
+		event.set()
 		return
 	except KeyboardInterrupt:
-		e.set()
+		event.set()
 		return

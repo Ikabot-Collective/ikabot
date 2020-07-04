@@ -8,19 +8,26 @@ from ikabot.config import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import *
 
-t = gettext.translation('constructBuilding', 
-                        localedir, 
-                        languages=idiomas,
+t = gettext.translation('constructBuilding',
+                        localedir,
+                        languages=languages,
                         fallback=True)
 _ = t.gettext
 
-def constructBuilding(s,e,fd):
-	sys.stdin = os.fdopen(fd)
+def constructBuilding(session, event, stdin_fd):
+	"""
+	Parameters
+	----------
+	session : ikabot.web.session.Session
+	event : multiprocessing.Event
+	stdin_fd: int
+	"""
+	sys.stdin = os.fdopen(stdin_fd)
 	try:
 		banner()
 
 		print(_('City where to build:'))
-		city = chooseCity(s)
+		city = chooseCity(session)
 		banner()
 
 		# list of free spaces in the selected city
@@ -36,11 +43,11 @@ def constructBuilding(s,e,fd):
 				# we take any space in the desired area
 				free_space_of_type = free_spaces_of_type[0]
 				params = {'view': 'buildingGround', 'cityId': city['id'], 'position': free_space_of_type['position'], 'backgroundView': 'city', 'currentCityId': city['id'], 'actionRequest': 'REQUESTID', 'ajax': '1'}
-				resp = s.post(params=params, noIndex=True)
-				resp = json.loads(resp, strict=False)[1][1]
-				if resp == '':
+				buildings_response = session.post(params=params, noIndex=True)
+				buildings_response = json.loads(buildings_response, strict=False)[1][1]
+				if buildings_response == '':
 					continue
-				html = resp[1]
+				html = buildings_response[1]
 				matches = re.findall(r'<li class="building (.+?)">\s*<div class="buildinginfo">\s*<div title="(.+?)"\s*class="buildingimg .+?"\s*onclick="ajaxHandlerCall\(\'.*?buildingId=(\d+)&', html)
 				# add the buildings that can be built in this area
 				for match in matches:
@@ -49,7 +56,7 @@ def constructBuilding(s,e,fd):
 		if len(buildings) == 0:
 			print(_('No building can be built.'))
 			enter()
-			e.set()
+			event.set()
 			return
 
 		# show list of buildings to the user
@@ -58,32 +65,32 @@ def constructBuilding(s,e,fd):
 		for building in buildings:
 			i += 1
 			print('({:d}) {}'.format(i, building['name']))
-		rta = read(min=1, max=i)
+		selected_building_index = read(min=1, max=i)
 		banner()
 
 		# show posible positions for the selected building
-		building = buildings[rta - 1]
+		building = buildings[selected_building_index - 1]
 		print('{}\n'.format(building['name']))
-		opciones = [ espacio for espacio in city['position'] if espacio['building'] == 'empty' and espacio['type'] == building['type'] ]
-		if len(opciones) == 1:
-			opcion = opciones[0]
+		options = [ position_id for position_id in city['position'] if position_id['building'] == 'empty' and position_id['type'] == building['type'] ]
+		if len(options) == 1:
+			option = options[0]
 		else:
 			print(_('In which position do you want to build?\n'))
 			i = 0
-			for opcion in opciones:
+			for option in options:
 				i += 1
-				print('({:d}) {}'.format(i, opcion['position']))
-			rta = read(min=1, max=i)
-			opcion = opciones[rta - 1]
+				print('({:d}) {}'.format(i, option['position']))
+			selected_building_index = read(min=1, max=i)
+			option = options[selected_building_index - 1]
 			banner()
 
 		# build it
-		params = {'action': 'CityScreen', 'function': 'build', 'cityId': city['id'], 'position': opcion['position'], 'building': building['buildingId'], 'backgroundView': 'city', 'currentCityId': city['id'], 'templateView': 'buildingGround', 'actionRequest': 'REQUESTID', 'ajax': '1'}
-		resp = s.post(params=params, noIndex=True)
-		msg = json.loads(resp, strict=False)[3][1][0]['text']
+		params = {'action': 'CityScreen', 'function': 'build', 'cityId': city['id'], 'position': option['position'], 'building': building['buildingId'], 'backgroundView': 'city', 'currentCityId': city['id'], 'templateView': 'buildingGround', 'actionRequest': 'REQUESTID', 'ajax': '1'}
+		buildings_response = session.post(params=params, noIndex=True)
+		msg = json.loads(buildings_response, strict=False)[3][1][0]['text']
 		print(msg)
 		enter()
-		e.set()
+		event.set()
 	except KeyboardInterrupt:
-		e.set()
+		event.set()
 		return

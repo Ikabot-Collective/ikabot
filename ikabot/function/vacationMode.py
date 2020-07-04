@@ -10,34 +10,46 @@ from ikabot.helpers.getJson import getCity
 
 t = gettext.translation('vacationMode',
                         localedir,
-                        languages=idiomas,
+                        languages=languages,
                         fallback=True)
 _ = t.gettext
 
-def activateVacationMode(s):
-	html = s.get()
+def activateVacationMode(session):
+	"""
+	Parameters
+	----------
+	session : ikabot.web.session.Session
+	"""
+	html = session.get()
 	city = getCity(html)
 
 	data = {'action': 'Options', 'function': 'activateVacationMode', 'actionRequest': 'REQUESTID', 'backgroundView': 'city', 'currentCityId': city['id'], 'templateView': 'options_umod_confirm'}
-	s.post(params=data, ignoreExpire=True)
+	session.post(params=data, ignoreExpire=True)
 
-def vacationMode(s,e,fd):
-	sys.stdin = os.fdopen(fd)
+def vacationMode(session, event, stdin_fd):
+	"""
+	Parameters
+	----------
+	session : ikabot.web.session.Session
+	event : multiprocessing.Event
+	stdin_fd: int
+	"""
+	sys.stdin = os.fdopen(stdin_fd)
 	try:
 		banner()
 		print(_('Activate vacation mode? [Y/n]'))
 		rta = read(values=['y', 'Y', 'n', 'N', ''])
 		if rta.lower() == 'n':
-			e.set()
+			event.set()
 			return
 
-		activateVacationMode(s)
+		activateVacationMode(session)
 
 		print(_('Vacation mode has been activated.'))
 		enter()
-		e.set()
+		event.set()
 		clear()
 		exit()
 	except KeyboardInterrupt:
-		e.set()
+		event.set()
 		return
