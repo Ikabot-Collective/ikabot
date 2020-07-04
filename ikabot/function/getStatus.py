@@ -9,31 +9,38 @@ from ikabot.config import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.naval import *
 from ikabot.helpers.varios import *
-from ikabot.helpers.recursos import *
+from ikabot.helpers.resources import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.getJson import getCity
 
-t = gettext.translation('getStatus', 
-                        localedir, 
-                        languages=idiomas,
+t = gettext.translation('getStatus',
+                        localedir,
+                        languages=languages,
                         fallback=True)
 _ = t.gettext
 
 getcontext().prec = 30
 
-def getStatus(s,e,fd):
-	sys.stdin = os.fdopen(fd)
+def getStatus(session, event, stdin_fd):
+	"""
+	Parameters
+	----------
+	session : ikabot.web.session.Session
+	event : multiprocessing.Event
+	stdin_fd: int
+	"""
+	sys.stdin = os.fdopen(stdin_fd)
 	try:
 		banner()
 		color_arr = [bcolors.ENDC, bcolors.HEADER, bcolors.STONE, bcolors.BLUE, bcolors.WARNING]
 
-		print(_('Ships {:d}/{:d}').format(getAvailableShips(s), getTotalShips(s)))
+		print(_('Ships {:d}/{:d}').format(getAvailableShips(session), getTotalShips(session)))
 
 		print(_('\nOf which city do you want to see the state?'))
-		city = chooseCity(s)
+		city = chooseCity(session)
 		banner()
 
-		(wood, good, typeGood) = getProduccionPerSecond(s, city['id'])
+		(wood, good, typeGood) = getProductionPerSecond(session, city['id'])
 		print('\033[1m{}{}{}'.format(color_arr[int(typeGood)], city['cityName'], color_arr[0]))
 
 		resources = city['recursos']
@@ -56,39 +63,39 @@ def getStatus(s,e,fd):
 
 		hasTavern = 'tavern' in [ building['building'] for building in city['position'] ]
 		if hasTavern:
-			consume_per_hour = city['consumo']
-			if consume_per_hour == 0:
+			consumption_per_hour = city['consumo']
+			if consumption_per_hour == 0:
 				print(_('{}{}Does not consume wine!{}').format(bcolors.RED, bcolors.BOLD, bcolors.ENDC))
 			else:
-				if typeGood == 1 and (good*3600) > consume_per_hour:
-					time_lapse = '∞'
+				if typeGood == 1 and (good*3600) > consumption_per_hour:
+					elapsed_time_run_out = '∞'
 				else:
-					consumoXseg = Decimal(consume_per_hour) / Decimal(3600)
-					segsRestantes = Decimal(resources[1]) / Decimal(consumoXseg)
-					time_lapse = daysHoursMinutes(segsRestantes)
-				print(_('There is wine for: {}').format(time_lapse))
+					consumption_per_second = Decimal(consumption_per_hour) / Decimal(3600)
+					remaining_resources_to_consume = Decimal(resources[1]) / Decimal(consumption_per_second)
+					elapsed_time_run_out = daysHoursMinutes(remaining_resources_to_consume)
+				print(_('There is wine for: {}').format(elapsed_time_run_out))
 
-		for edificio in [ edificio for edificio in city['position'] if edificio['name'] != 'empty' ]:
-			if edificio['isMaxLevel'] is True:
+		for building in [ building for building in city['position'] if building['name'] != 'empty' ]:
+			if building['isMaxLevel'] is True:
 				color = bcolors.BLACK
-			elif edificio['canUpgrade'] is True:
+			elif building['canUpgrade'] is True:
 				color = bcolors.GREEN
 			else:
 				color = bcolors.RED
 
-			level = edificio['level']
+			level = building['level']
 			if level < 10:
 				level = ' ' + str(level)
 			else:
 				level = str(level)
-			if edificio['isBusy'] is True:
+			if building['isBusy'] is True:
 				level = level + '+'
 
-			print(_('lv:{}\t{}{}{}').format(level, color, edificio['name'], bcolors.ENDC))
+			print(_('lv:{}\t{}{}{}').format(level, color, building['name'], bcolors.ENDC))
 
 		enter()
 		print('')
-		e.set()
+		event.set()
 	except KeyboardInterrupt:
-		e.set()
+		event.set()
 		return

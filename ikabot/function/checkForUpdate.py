@@ -8,7 +8,7 @@ from ikabot.helpers.process import run
 
 t = gettext.translation('checkForUpdate',
                         config.localedir,
-                        languages=config.idiomas,
+                        languages=config.languages,
                         fallback=True)
 _ = t.gettext
 

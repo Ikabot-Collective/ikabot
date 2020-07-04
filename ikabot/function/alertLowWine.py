@@ -13,49 +13,62 @@ from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import getIdsOfCities
 from ikabot.helpers.varios import daysHoursMinutes
 from ikabot.helpers.getJson import getCity
-from ikabot.helpers.recursos import *
+from ikabot.helpers.resources import *
 from ikabot.helpers.botComm import *
 
 t = gettext.translation('alertLowWine',
                         localedir,
-                        languages=idiomas,
+                        languages=languages,
                         fallback=True)
 _ = t.gettext
 
 getcontext().prec = 30
 
-def alertLowWine(s,e,fd):
-	sys.stdin = os.fdopen(fd)
+def alertLowWine(session, event, stdin_fd):
+	"""
+	Parameters
+	----------
+	session : ikabot.web.session.Session
+	event : multiprocessing.Event
+	stdin_fd: int
+	"""
+	sys.stdin = os.fdopen(stdin_fd)
 	try:
-		if checkTelegramData(s) is False:
-			e.set()
+		if checkTelegramData(session) is False:
+			event.set()
 			return
 		banner()
 		hours = read(msg=_('How many hours should be left until the wine runs out in a city so that it\'s alerted?'), min=1)
 		print(_('It will be alerted when the wine runs out in less than {:d} hours in any city').format(hours))
 		enter()
 	except KeyboardInterrupt:
-		e.set()
+		event.set()
 		return
 
-	set_child_mode(s)
-	e.set()
+	set_child_mode(session)
+	event.set()
 
 	info = _('\nI alert if the wine runs out in less than {:d} hours\n').format(hours)
-	setInfoSignal(s, info)
+	setInfoSignal(session, info)
 	try:
-		do_it(s, hours)
+		do_it(session, hours)
 	except:
 		msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
-		sendToBot(s, msg)
+		sendToBot(session, msg)
 	finally:
-		s.logout()
+		session.logout()
 
-def do_it(s, hours):
-	ids, cities = getIdsOfCities(s)
+def do_it(session, hours):
+	"""
+	Parameters
+	----------
+	session : ikabot.web.session.Session
+	hours : int
+	"""
+	ids, cities = getIdsOfCities(session)
 	while True:
 		# getIdsOfCities is called on a loop because the amount of cities may change
-		ids, cities_new = getIdsOfCities(s)
+		ids, cities_new = getIdsOfCities(session)
 		if len(cities_new) != len(cities):
 			cities = cities_new
 
@@ -64,7 +77,7 @@ def do_it(s, hours):
 				cities[cityId]['reported'] = False
 
 		for cityId in cities:
-			html = s.get(urlCiudad + cityId)
+			html = session.get(city_url + cityId)
 			city = getCity(html)
 
 			# if the city doesn't even have a tavern built, ignore it
@@ -75,7 +88,7 @@ def do_it(s, hours):
 
 			# is a wine city
 			if cities[cityId]['tradegood'] == '1':
-				wine_production = getProduccionPerSecond(s, cityId)[1]
+				wine_production = getProductionPerSecond(session, cityId)[1]
 				wine_production = wine_production * 60 * 60
 				if consumption_per_hour > wine_production:
 					consumption_per_hour -= wine_production
@@ -88,7 +101,7 @@ def do_it(s, hours):
 			if consumption_per_seg == 0:
 				if cities[cityId]['reported'] is False:
 					msg = _('The city {} is not consuming wine!').format(city['name'])
-					sendToBot(s, msg)
+					sendToBot(session, msg)
 					cities[cityId]['reported'] = True
 				continue
 
@@ -97,7 +110,7 @@ def do_it(s, hours):
 				if cities[cityId]['reported'] is False:
 					time_left = daysHoursMinutes(seconds_left)
 					msg = _('In {}, the wine will run out in {}').format(time_left, city['name'])
-					sendToBot(s, msg)
+					sendToBot(session, msg)
 					cities[cityId]['reported'] = True
 			else:
 				cities[cityId]['reported'] = False

@@ -7,30 +7,35 @@ import json
 from ikabot.config import *
 from ikabot.helpers.signals import deactivate_sigint
 
-def set_child_mode(s):
-	s.padre = False
+def set_child_mode(session):
+	"""
+	Parameters
+	----------
+	session : ikabot.web.session.Session
+	"""
+	session.padre = False
 	deactivate_sigint()
-	s.login()
+	session.login()
 
 def run(command):
 	return subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.read()
 
-def updateProcessList(s, programprocesslist = []):
+def updateProcessList(session, programprocesslist = []):
 	"""This function will return data about all the active ikabot processes. If it is passed the ``programprocesslist`` argument, it will write new processes from that list to the .ikabot file
 	Parameters
 	----------
-	s : Session
+	session : ikabot.web.session.Session
 		Session object
 	programprocesslist : list[dict]
 		a list of dictionaries containing relevant data about a running ikabot process ('pid', 'proxies' and 'action')
-	
+
 	Returns
 	-------
 	runningIkabotProcessList : list[dict]
 		a list of dictionaries containing relevant data about a running ikabot process ('pid', 'proxies' and 'action')
 	"""
 	# read from file
-	sessionData = s.getSessionData()
+	sessionData = session.getSessionData()
 	try:
 		fileList = sessionData['processList']
 	except KeyError:
@@ -58,6 +63,6 @@ def updateProcessList(s, programprocesslist = []):
 
 	# write to file
 	sessionData['processList'] = runningIkabotProcessList
-	s.setSessionData(sessionData)
-	
+	session.setSessionData(sessionData)
+
 	return runningIkabotProcessList

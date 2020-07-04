@@ -13,39 +13,51 @@ from ikabot.helpers.gui import enter
 from ikabot.helpers.pedirInfo import getIdsOfCities
 from ikabot.helpers.varios import wait
 
-t = gettext.translation('loginDaily', 
-                        localedir, 
-                        languages=idiomas,
+t = gettext.translation('loginDaily',
+                        localedir,
+                        languages=languages,
                         fallback=True)
 _ = t.gettext
 
-def loginDaily(s,e,fd):
-	sys.stdin = os.fdopen(fd)
+def loginDaily(session, event, stdin_fd):
+	"""
+	Parameters
+	----------
+	session : ikabot.web.session.Session
+	event : multiprocessing.Event
+	stdin_fd: int
+	"""
+	sys.stdin = os.fdopen(stdin_fd)
 	try:
 		banner()
 		print(_('I will enter every day.'))
 		enter()
 	except KeyboardInterrupt:
-		e.set()
+		event.set()
 		return
 
-	set_child_mode(s)
-	e.set()
+	set_child_mode(session)
+	event.set()
 
 	info = _('\nI enter every day\n')
-	setInfoSignal(s, info)
+	setInfoSignal(session, info)
 	try:
-		do_it(s)
+		do_it(session)
 	except:
 		msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
-		sendToBot(s, msg)
+		sendToBot(session, msg)
 	finally:
-		s.logout()
+		session.logout()
 
-def do_it(s):
+def do_it(session):
+	"""
+	Parameters
+	----------
+	session : ikabot.web.session.Session
+	"""
 	while True:
-		(ids, cities) = getIdsOfCities(s)
+		(ids, cities) = getIdsOfCities(session)
 		cityId = ids[0]
 		url = 'action=AvatarAction&function=giveDailyActivityBonus&dailyActivityBonusCitySelect={0}&startPageShown=1&detectedDevice=1&autoLogin=on&cityId={0}&activeTab=multiTab2&backgroundView=city&currentCityId={0}&actionRequest=REQUESTID&ajax=1'.format(cityId)
-		s.post(url)
+		session.post(url)
 		wait(24*60*60, 1*60*60)

@@ -19,14 +19,14 @@ from ikabot.helpers.aesCipher import *
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.getJson import getCity
 
-t = gettext.translation('sesion', 
-                        localedir, 
-                        languages=idiomas,
+t = gettext.translation('session',
+                        localedir,
+                        languages=languages,
                         fallback=True)
 _ = t.gettext
 
 
-class Sesion:
+class Session:
 	def __init__(self):
 		self.logfile = '/tmp/debug.txt'
 		self.log = False
@@ -71,23 +71,23 @@ class Sesion:
 		if primero is True:
 			cookie_dict = dict(self.s.cookies.items())
 			sessionData['cookies'] = cookie_dict
-			sessionData['num_sesiones'] = 1
+			sessionData['num_sessions'] = 1
 
 		elif nuevo is True:
 			try:
-				sessionData['num_sesiones'] += 1
+				sessionData['num_sessions'] += 1
 			except KeyError:
-				sessionData['num_sesiones'] = 1
+				sessionData['num_sessions'] = 1
 
 		elif salida is True:
 			try:
-				if sessionData['num_sesiones'] == 1:
+				if sessionData['num_sessions'] == 1:
 					html = self.s.get(self.urlBase).text
 					if self.__isExpired(html) is False:
 						self.__logout(html)
 			except KeyError:
 				return
-			sessionData['num_sesiones'] -= 1
+			sessionData['num_sessions'] -= 1
 
 		self.setSessionData(sessionData)
 
@@ -95,7 +95,7 @@ class Sesion:
 		if sessionData is None:
 			sessionData = self.getSessionData()
 		try:
-			assert sessionData['num_sesiones'] > 0
+			assert sessionData['num_sessions'] > 0
 			cookie_dict = sessionData['cookies']
 			self.s = requests.Session()
 			#self.s.proxies = proxyDict
@@ -327,7 +327,7 @@ class Sesion:
 		sessionData = self.getSessionData()
 
 		try:
-			if sessionData['num_sesiones'] > 0 and self.s.cookies['PHPSESSID'] != sessionData['cookies']['PHPSESSID']:
+			if sessionData['num_sessions'] > 0 and self.s.cookies['PHPSESSID'] != sessionData['cookies']['PHPSESSID']:
 				self.__getCookie(sessionData)
 			else:
 				try:
@@ -345,7 +345,7 @@ class Sesion:
 		sessionData = self.getSessionData()
 
 		try:
-			if sessionData['num_sesiones'] > 0:
+			if sessionData['num_sessions'] > 0:
 				if self.s.cookies['PHPSESSID'] != sessionData['cookies']['PHPSESSID']:
 					self.__getCookie(sessionData)
 			else:
@@ -361,11 +361,6 @@ class Sesion:
 
 	def __token(self):
 		"""Generates a valid actionRequest token from the session
-		Parameters
-		----------
-		self : Session
-			Session object
-
 		Returns
 		-------
 		token : str
@@ -378,8 +373,6 @@ class Sesion:
 		"""Sends get request to ikariam
 		Parameters
 		----------
-		self : Sesion
-			Session object
 		url : str
 			this string will be appended to the end of the urlBase of the Session object. urlBase will look like: 'https://s(number)-(country).ikariam.gameforge.com/index.php?'
 		params : dict
@@ -388,7 +381,7 @@ class Sesion:
 			if set to True it will ignore if the current session is expired and will simply return whatever response it gets. If it's set to False, it will make sure that the current session is not expired before sending the get request, if it's expired it will login again
 		noIndex : bool
 			if set to True it will remove 'index.php' from the end of urlBase before appending url params and sending the get request
-		
+
 		Returns
 		-------
 		html : str
@@ -418,8 +411,6 @@ class Sesion:
 		"""Sends post request to ikariam
 		Parameters
 		----------
-		self : Sesion
-			Session object
 		url : str
 			this string will be appended to the end of the urlBase of the Session object. urlBase will look like: 'https://s(number)-(country).ikariam.gameforge.com/index.php?'
 		payloadPost : dict
@@ -430,7 +421,7 @@ class Sesion:
 			if set to True it will ignore if the current session is expired and will simply return whatever response it gets. If it's set to False, it will make sure that the current session is not expired before sending the post request, if it's expired it will login again
 		noIndex : bool
 			if set to True it will remove 'index.php' from the end of urlBase before appending url and params and sending the post request
-		
+
 		Returns
 		-------
 		html : str
@@ -484,20 +475,12 @@ class Sesion:
 
 	def login(self):
 		"""This function doesn't actually log into ikariam, it only increments a number in the .ikabot file which represents the number currently running sessions
-		Parameters
-		----------
-		self: Session
-			Session object
 		"""
 		self.__log('login({})')
 		self.__updateCookieFile(nuevo=True)
 
 	def logout(self):
 		"""This function decrements a number in the .ikabot file representing the number of currently running sessions. If this number is 1, it will attempt to completely log out of ikariam
-		Parameters
-		----------
-		self: Session
-			Session object
 		"""
 		self.__log('logout({})')
 		self.__updateCookieFile(salida=True)
@@ -508,8 +491,6 @@ class Sesion:
 		"""Encrypts relevant session data and writes it to the .ikabot file
 		Parameters
 		----------
-		self : Session
-			Session object
 		sessionData : dict
 			dictionary containing relevant session data, data is written to file using AESCipher.setSessionData
 		"""
@@ -517,8 +498,6 @@ class Sesion:
 
 	def getSessionData(self):
 		"""Gets relevant session data from the .ikabot file
-		self : Session
-			Session object
 		"""
 		return self.cipher.getSessionData(self)
 
@@ -530,15 +509,15 @@ def normal_get(url, params={}):
 		a string representing the url to which to send the get request
 	params : dict
 		a dictionary containing key-value pairs which represent the parameters of the get request
-	
+
 	Returns
 	-------
 	response : requests.Response
 		a requests.Response object which represents the webservers response. For more information on requests.Response refer to https://requests.readthedocs.io/en/master/api/#requests.Response
 	"""
 	try:
-		
+
 		return requests.get(url, params=params)
-		
+
 	except requests.exceptions.ConnectionError:
 		sys.exit(_('Internet connection failed'))

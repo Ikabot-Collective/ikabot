@@ -18,15 +18,22 @@ from ikabot.function.vacationMode import activateVacationMode
 
 t = gettext.translation('alertAttacks',
                         localedir,
-                        languages=idiomas,
+                        languages=languages,
                         fallback=True)
 _ = t.gettext
 
-def alertAttacks(s,e,fd):
-	sys.stdin = os.fdopen(fd)
+def alertAttacks(session, event, stdin_fd):
+	"""
+	Parameters
+	----------
+	session : ikabot.web.session.Session
+	event : multiprocessing.Event
+	stdin_fd: int
+	"""
+	sys.stdin = os.fdopen(stdin_fd)
 	try:
-		if checkTelegramData(s) is False:
-			e.set()
+		if checkTelegramData(session) is False:
+			event.set()
 			return
 
 		banner()
@@ -37,27 +44,33 @@ def alertAttacks(s,e,fd):
 		print(_('I will check for attacks every {:d} minutes').format(minutes))
 		enter()
 	except KeyboardInterrupt:
-		e.set()
+		event.set()
 		return
 
-	set_child_mode(s)
-	e.set()
+	set_child_mode(session)
+	event.set()
 
 	info = _('\nI check for attacks every {:d} minutes\n').format(minutes)
-	setInfoSignal(s, info)
+	setInfoSignal(session, info)
 	try:
-		do_it(s, minutes)
+		do_it(session, minutes)
 	except:
 		msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
-		sendToBot(s, msg)
+		sendToBot(session, msg)
 	finally:
-		s.logout()
+		session.logout()
 
-def respondToAttack(s):
+def respondToAttack(session):
+	"""
+	Parameters
+	---------
+	session : ikabot.web.session.Session
+	"""
+
 	# this allows the user to respond to an attack via telegram
 	while True:
 		time.sleep(60 * 3)
-		responses = getUserResponse(s)
+		responses = getUserResponse(session)
 		for response in responses:
 			# the response should be in the form of:
 			# <pid>:<action number>
@@ -75,33 +88,40 @@ def respondToAttack(s):
 			# currently just one action is supported
 			if action == 1:
 				# mv
-				activateVacationMode(s)
+				activateVacationMode(session)
 			else:
-				sendToBot(s, _('Invalid command: {:d}').format(action))
+				sendToBot(session, _('Invalid command: {:d}').format(action))
 
-def do_it(s, minutes):
+def do_it(session, minutes):
+	"""
+	Parameters
+	----------
+	session : ikabot.web.session.Session
+	minutes : int
+	"""
+
 	# this thread lets the user react to an attack once the alert is sent
-	t = threading.Thread(target=respondToAttack, args=(s,))
-	t.start()
+	thread = threading.Thread(target=respondToAttack, args=(session,))
+	thread.start()
 
 	knownAttacks = []
 	while True:
 		# get the militaryMovements
-		html = s.get()
-		idCiudad = re.search(r'currentCityId:\s(\d+),', html).group(1)
-		url = 'view=militaryAdvisor&oldView=city&oldBackgroundView=city&backgroundView=city&currentCityId={}&actionRequest=REQUESTID&ajax=1'.format(idCiudad)
-		posted = s.post(url)
-		postdata = json.loads(posted, strict=False)
+		html = session.get()
+		city_id = re.search(r'currentCityId:\s(\d+),', html).group(1)
+		url = 'view=militaryAdvisor&oldView=city&oldBackgroundView=city&backgroundView=city&currentCityId={}&actionRequest=REQUESTID&ajax=1'.format(city_id)
+		movements_response = session.post(url)
+		postdata = json.loads(movements_response, strict=False)
 		militaryMovements = postdata[1][1][2]['viewScriptParams']['militaryAndFleetMovements']
 		timeNow = int(postdata[0][1]['time'])
 
 		currentAttacks = []
 		for militaryMovement in [ mov for mov in militaryMovements if mov['isHostile'] ]:
-			id = militaryMovement['event']['id']
-			currentAttacks.append(id)
+			event_id = militaryMovement['event']['id']
+			currentAttacks.append(event_id)
 			# if we already alerted this, do nothing
-			if id not in knownAttacks:
-				knownAttacks.append(id)
+			if event_id not in knownAttacks:
+				knownAttacks.append(event_id)
 
 				# get information about the attack
 				missionText = militaryMovement['event']['missionText']
@@ -121,11 +141,11 @@ def do_it(s, minutes):
 				msg += _('arrival in: {}\n').format(daysHoursMinutes(timeLeft))
 				msg += _('If you want to put the account in vacation mode send:\n')
 				msg += _('{:d}:1').format(os.getpid())
-				sendToBot(s, msg)
+				sendToBot(session, msg)
 
 		# remove old attacks from knownAttacks
-		for id in list(knownAttacks):
-			if id not in currentAttacks:
-				knownAttacks.remove(id)
+		for event_id in list(knownAttacks):
+			if event_id not in currentAttacks:
+				knownAttacks.remove(event_id)
 
 		time.sleep(minutes * 60)

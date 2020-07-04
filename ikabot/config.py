@@ -5,23 +5,23 @@ import gettext
 
 local = locale.setlocale(locale.LC_ALL, '')
 if 'es_' in local:
-	idiomas = ['es']
+	languages = ['es']
 else:
-	idiomas = ['en']
-idiomas = ['none']
+	languages = ['en']
+languages = ['none']
 
 localedir = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'locale')
-t = gettext.translation('config', 
-                        localedir, 
-                        languages=idiomas,
+t = gettext.translation('config',
+                        localedir,
+                        languages=languages,
                         fallback=True)
 _ = t.gettext
 
 # only use common browsers
 if random.randint(0, 1) == 0:
-    user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36'
+	user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36'
 else:
-    user_agent = 'Mozilla/5.0 (X11; Linux x86_64; rv:77.0) Gecko/20100101 Firefox/77.0'
+	user_agent = 'Mozilla/5.0 (X11; Linux x86_64; rv:77.0) Gecko/20100101 Firefox/77.0'
 
 update_msg = ''
 
@@ -29,19 +29,19 @@ isWindows = os.name == 'nt'
 
 proxy = False
 if proxy:
-    http_proxy  = "http://127.0.0.1:8080"
-    https_proxy = "socks5://127.0.0.1:9050"
-    proxyDict = {"http": http_proxy, "https": https_proxy}
+	http_proxy  = "http://127.0.0.1:8080"
+	https_proxy = "socks5://127.0.0.1:9050"
+	proxyDict = {"http": http_proxy, "https": https_proxy}
 else:
-    proxyDict = {}
+	proxyDict = {}
 
-ids = None
-ciudades = None
-menuCiudades = ''
+ids_cache = None
+cities_cache = None
+menu_cities = ''
 infoUser = ''
 ikaFile = '.ikabot'
-urlCiudad = 'view=city&cityId='
-urlIsla = 'view=island&islandId='
+city_url = 'view=city&cityId='
+island_url = 'view=island&islandId='
 prompt = ' >>  '
 materials_names = [_('Wood'), _('Wine'), _('Marble'), _('Cristal'), _('Sulfur')]
 materials_names_english = ['Wood', 'Wine', 'Marble', 'Cristal', 'Sulfur']

@@ -11,24 +11,24 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 t = gettext.translation('aesCipher',
                         localedir,
-                        languages=idiomas,
+                        languages=languages,
                         fallback=True)
 _ = t.gettext
 
 class AESCipher:
 
-	def __init__( self, mail, username, password ):
+	def __init__(self, mail, username, password):
 		self.key = hashlib.sha256( mail.encode('utf-8') + b'\x00' + password.encode('utf-8') ).digest()
 		for i in range(0xfff):
 			self.key = hashlib.sha256( self.key ).digest()
 
-	def encrypt( self, plaintext ):
+	def encrypt(self, plaintext):
 		aesgcm = AESGCM(self.key)
 		nonce = os.urandom(16)
 		ciphertext = aesgcm.encrypt(nonce, plaintext.encode('utf-8'), None)
 		return base64.b64encode( nonce + ciphertext ).decode('utf-8')
 
-	def decrypt( self, ciphertext ):
+	def decrypt(self, ciphertext):
 		ciphertext = base64.b64decode(ciphertext)
 		nonce      = ciphertext[:16]
 		ciphertext = ciphertext[16:]
@@ -36,11 +36,25 @@ class AESCipher:
 		plaintext  = aesgcm.decrypt(nonce, ciphertext, None)
 		return plaintext.decode('utf-8')
 
-	def getEntryKey(self, s):
-		return hashlib.sha256( 'ikabot'.encode('utf-8') + s.mail.encode('utf-8') ).hexdigest()
+	def getEntryKey(self, session):
+		"""
+		Parameters
+		----------
+		session : ikabot.web.session.Session
 
-	def deleteSessionData(self, s):
-		entry_key = self.getEntryKey(s)
+		Returns
+		-------
+		entry key : str
+		"""
+		return hashlib.sha256('ikabot'.encode('utf-8') + session.mail.encode('utf-8')).hexdigest()
+
+	def deleteSessionData(self, session):
+		"""
+		Parameters
+		----------
+		session : ikabot.web.session.Session
+		"""
+		entry_key = self.getEntryKey(session)
 		with open(ikaFile, 'r') as filehandler:
 			data = filehandler.read()
 
@@ -53,8 +67,14 @@ class AESCipher:
 			filehandler.write(newFile.strip())
 			filehandler.flush()
 
-	def getSessionData(self, s, all=False):
-		entry_key = self.getEntryKey(s)
+	def getSessionData(self, session, all=False):
+		"""
+		Parameters
+		----------
+		session : ikabot.web.session.Session
+		all : bool
+		"""
+		entry_key = self.getEntryKey(session)
 		with open(ikaFile, 'r') as filehandler:
 			ciphertexts = filehandler.read()
 
@@ -65,33 +85,39 @@ class AESCipher:
 					plaintext = self.decrypt(ciphertext)
 				except:
 					msg = _('Error while decrypting session data\nSaved data will be deleted.')
-					if s.padre:
+					if session.padre:
 						print(msg)
 					else:
-						sendToBot(s, msg)
-					self.deleteSessionData(s)
+						sendToBot(session, msg)
+					self.deleteSessionData(session)
 					os._exit(0)
 				data_dict = json.loads(plaintext, strict=False)
 				if all:
 					return data_dict
 				else:
 					try:
-						return data_dict[s.username][s.mundo][s.servidor]
+						return data_dict[session.username][session.mundo][session.servidor]
 					except KeyError:
 						return {}
 		return {}
 
-	def setSessionData(self, s, data):
-		session_data = self.getSessionData(s, True)
+	def setSessionData(self, session, data):
+		"""
+		Parameters
+		----------
+		session : ikabot.web.session.Session
+		data : dict
+		"""
+		session_data = self.getSessionData(session, True)
 
-		if s.username not in session_data:
-			session_data[s.username] = {}
-		if s.mundo not in session_data[s.username]:
-			session_data[s.username][s.mundo] = {}
-		if s.servidor not in session_data[s.username][s.mundo]:
-			session_data[s.username][s.mundo][s.servidor] = {}
+		if session.username not in session_data:
+			session_data[session.username] = {}
+		if session.mundo not in session_data[session.username]:
+			session_data[session.username][session.mundo] = {}
+		if session.servidor not in session_data[session.username][session.mundo]:
+			session_data[session.username][session.mundo][session.servidor] = {}
 
-		session_data[s.username][s.mundo][s.servidor] = data
+		session_data[session.username][session.mundo][session.servidor] = data
 
 		plaintext  = json.dumps(session_data)
 		ciphertext = self.encrypt(plaintext)
@@ -99,7 +125,7 @@ class AESCipher:
 		with open(ikaFile, 'r') as filehandler:
 			data = filehandler.read()
 
-		entry_key  = self.getEntryKey(s)
+		entry_key  = self.getEntryKey(session)
 		newFile = ''
 		newline = entry_key + ' ' + ciphertext
 		for line in data.split('\n'):
