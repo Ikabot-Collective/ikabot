@@ -362,7 +362,13 @@ class Sesion:
 		match = re.search(r'requestId=(.*?)&', url)
 		if match:
 			url = url.replace(match.group(1), token)
+		match = re.search(r'requestId=(.*?)$', url)
+		if match:
+			url = url.replace(match.group(1), token)
 		match = re.search(r'actionRequest=(.*?)&', url)
+		if match:
+			url = url.replace(match.group(1), token)
+		match = re.search(r'actionRequest=(.*?)$', url)
 		if match:
 			url = url.replace(match.group(1), token)
 
@@ -416,7 +422,13 @@ class Sesion:
 		match = re.search(r'requestId=(.*?)&', url)
 		if match:
 			url = url.replace(match.group(1), token)
+		match = re.search(r'requestId=(.*?)$', url)
+		if match:
+			url = url.replace(match.group(1), token)
 		match = re.search(r'actionRequest=(.*?)&', url)
+		if match:
+			url = url.replace(match.group(1), token)
+		match = re.search(r'actionRequest=(.*?)$', url)
 		if match:
 			url = url.replace(match.group(1), token)
 		if 'actionRequest' in payloadPost:
