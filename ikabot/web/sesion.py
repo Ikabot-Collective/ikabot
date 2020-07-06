@@ -8,7 +8,6 @@ import json
 import time
 import random
 import getpass
-import pickle
 import datetime
 import gettext
 import requests
@@ -72,7 +71,6 @@ class Sesion:
 		if primero is True:
 			cookie_dict = dict(self.s.cookies.items())
 			sessionData['cookies'] = cookie_dict
-			sessionData['pickledSession'] = base64.b64encode(pickle.dumps(self.s)).decode('ascii')
 			sessionData['num_sesiones'] = 1
 
 		elif nuevo is True:
@@ -231,56 +229,68 @@ class Sesion:
 			config.infoUser += _(', World:{}').format(self.word)
 			config.infoUser += _(', Player:{}').format(self.username)
 			banner()
-			
-				
 
+		self.host = f's{self.mundo}-{self.servidor}.ikariam.gameforge.com'
+		self.urlBase = f'https://{self.host}/index.php?'
 
-		resp = self.s.get('https://lobby.ikariam.gameforge.com/api/users/me/loginLink?id={}&server[language]={}&server[number]={}'.format(self.account['id'], self.servidor, self.mundo)).text
-		resp = json.loads(resp, strict=False)
-		if 'url' not in resp:
-			if retries > 0:
-				return self.__login(retries-1)
-			else:
-				msg = 'Login Error: ' + str(resp)
-				if self.padre:
-					print(msg)
-					exit()
+		self.headers = {'Host': self.host, 'User-Agent': user_agent, 'Accept': '*/*', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate, br', 'Referer': 'https://{}'.format(self.host), 'X-Requested-With': 'XMLHttpRequest', 'Origin': 'https://{}'.format(self.host), 'DNT': '1', 'Connection': 'keep-alive', 'Pragma': 'no-cache', 'Cache-Control': 'no-cache'}
+
+		self.cipher = AESCipher(self.mail, self.username, self.password)
+		sessionData = self.getSessionData()
+
+		used_old_cookies = False
+		# if there are cookies stored, try to use them
+		if 'num_sesiones' in sessionData and sessionData['num_sesiones'] > 0 and self.logged is False:
+			# create a new temporary session object
+			old_s = requests.Session()
+			# set the headers
+			old_s.headers.clear()
+			old_s.headers.update(self.headers)
+			# set the cookies to test
+			cookie_dict = sessionData['cookies']
+			requests.cookies.cookiejar_from_dict(cookie_dict, cookiejar=old_s.cookies, overwrite=True)
+			# make a request to check the connection
+			old_s.proxies = proxyDict
+			html = old_s.get(self.urlBase).text
+			old_s.proxies = {}
+
+			cookies_are_valid = self.__isExpired(html) is False
+			if cookies_are_valid:
+				used_old_cookies = True
+				# assign the old cookies to the session object
+				requests.cookies.cookiejar_from_dict(cookie_dict, cookiejar=self.s.cookies, overwrite=True)
+				# set the headers
+				self.s.headers.clear()
+				self.s.headers.update(self.headers)
+
+		# login as normal and get new cookies
+		if used_old_cookies is False:
+			resp = self.s.get('https://lobby.ikariam.gameforge.com/api/users/me/loginLink?id={}&server[language]={}&server[number]={}'.format(self.account['id'], self.servidor, self.mundo)).text
+			resp = json.loads(resp, strict=False)
+			if 'url' not in resp:
+				if retries > 0:
+					return self.__login(retries-1)
 				else:
-					exit(msg)
+					msg = 'Login Error: ' + str(resp)
+					if self.padre:
+						print(msg)
+						exit()
+					else:
+						exit(msg)
 
-		url = resp['url']
-		match = re.search(r'https://s\d+-\w{2}\.ikariam\.gameforge\.com/index\.php\?', url)
-		if match is None:
-			exit('Error')
+			url = resp['url']
+			match = re.search(r'https://s\d+-\w{2}\.ikariam\.gameforge\.com/index\.php\?', url)
+			if match is None:
+				exit('Error')
 
-		self.urlBase = match.group(0)
-		self.host = self.urlBase.split('//')[1].split('/index')[0]
+			# set the headers
+			self.s.headers.clear()
+			self.s.headers.update(self.headers)
 
-		self.cipher = AESCipher(self.mail, self.username, self.password)		
-
-		self.headers = {'Host': self.host, 'User-Agent': user_agent, 'Accept': '*/*', 'Accept-Language': 'en,de-DE;q=0.8,en-US;q=0.5,es;q=0.3', 'Accept-Encoding': 'gzip, deflate, br', 'Referer': 'https://{}'.format(self.host), 'X-Requested-With': 'XMLHttpRequest', 'Origin': 'https://{}'.format(self.host), 'DNT': '1', 'Connection': 'keep-alive', 'Pragma': 'no-cache', 'Cache-Control': 'no-cache'}
-		self.s.headers.clear()
-		self.s.headers.update(self.headers)
-		# save the session that the bot will use to log in
-		loginPickleSession = pickle.dumps(self.s)
-		try:
-			data = self.getSessionData()
-			# load the session saved to .ikabot file
-			self.s = pickle.loads(base64.b64decode(data['pickledSession'].encode('ascii')))
+			# use the new cookies instead, invalidate the old ones
 			self.s.proxies = proxyDict
-			html = self.s.get(self.urlBase).text
-			self.s.proxies = {}
-			# check if the loaded session is expired
-			if self.__isExpired(html):
-				raise Exception
-		except Exception:
-			# if the loaded session is expired, load the previously saved login session and log in
-			self.s = pickle.loads(loginPickleSession)
-			self.s.proxies = proxyDict
-			# executing this get request will invalidate all other ikariam sessions in the selected world
 			html = self.s.get(url).text
 			self.s.proxies = {}
-
 
 		if self.__isInVacation(html):
 			msg = _('The account went into vacation mode')
@@ -296,8 +306,13 @@ class Sesion:
 				msg = _('Login error.')
 				print(msg)
 				os._exit(0)
-			raise Exception('Couldn\t log in')
-		self.__updateCookieFile(primero=True)
+			raise Exception('Couldn\'t log in')
+
+		if used_old_cookies:
+			self.__updateCookieFile(nuevo=True)
+		else:
+			self.__updateCookieFile(primero=True)
+
 		self.logged = True
 
 	def __backoff(self):
@@ -380,21 +395,6 @@ class Sesion:
 			response from the server
 		"""
 		self.__checkCookie()
-
-		# add the request id
-		token = self.__token()
-		match = re.search(r'requestId=(.*?)&', url)
-		if match:
-			url = url.replace(match.group(1), token)
-		match = re.search(r'requestId=(.*?)$', url)
-		if match:
-			url = url.replace(match.group(1), token)
-		match = re.search(r'actionRequest=(.*?)&', url)
-		if match:
-			url = url.replace(match.group(1), token)
-		match = re.search(r'actionRequest=(.*?)$', url)
-		if match:
-			url = url.replace(match.group(1), token)
 
 		if noIndex:
 			url = self.urlBase.replace('index.php', '') + url
