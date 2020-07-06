@@ -8,9 +8,11 @@ import json
 import time
 import random
 import getpass
+import pickle
 import datetime
 import gettext
 import requests
+import base64
 from ikabot.config import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.gui import banner
@@ -70,6 +72,7 @@ class Sesion:
 		if primero is True:
 			cookie_dict = dict(self.s.cookies.items())
 			sessionData['cookies'] = cookie_dict
+			sessionData['pickledSession'] = base64.b64encode(pickle.dumps(self.s)).decode('ascii')
 			sessionData['num_sesiones'] = 1
 
 		elif nuevo is True:
@@ -228,6 +231,9 @@ class Sesion:
 			config.infoUser += _(', World:{}').format(self.word)
 			config.infoUser += _(', Player:{}').format(self.username)
 			banner()
+			
+				
+
 
 		resp = self.s.get('https://lobby.ikariam.gameforge.com/api/users/me/loginLink?id={}&server[language]={}&server[number]={}'.format(self.account['id'], self.servidor, self.mundo)).text
 		resp = json.loads(resp, strict=False)
@@ -250,12 +256,31 @@ class Sesion:
 		self.urlBase = match.group(0)
 		self.host = self.urlBase.split('//')[1].split('/index')[0]
 
+		self.cipher = AESCipher(self.mail, self.username, self.password)		
+
 		self.headers = {'Host': self.host, 'User-Agent': user_agent, 'Accept': '*/*', 'Accept-Language': 'en,de-DE;q=0.8,en-US;q=0.5,es;q=0.3', 'Accept-Encoding': 'gzip, deflate, br', 'Referer': 'https://{}'.format(self.host), 'X-Requested-With': 'XMLHttpRequest', 'Origin': 'https://{}'.format(self.host), 'DNT': '1', 'Connection': 'keep-alive', 'Pragma': 'no-cache', 'Cache-Control': 'no-cache'}
 		self.s.headers.clear()
 		self.s.headers.update(self.headers)
-		self.s.proxies = proxyDict
-		html = self.s.get(url).text
-		self.s.proxies = {}
+		# save the session that the bot will use to log in
+		loginPickleSession = pickle.dumps(self.s)
+		try:
+			data = self.getSessionData()
+			# load the session saved to .ikabot file
+			self.s = pickle.loads(base64.b64decode(data['pickledSession'].encode('ascii')))
+			self.s.proxies = proxyDict
+			html = self.s.get(self.urlBase).text
+			self.s.proxies = {}
+			# check if the loaded session is expired
+			if self.__isExpired(html):
+				raise Exception
+		except Exception:
+			# if the loaded session is expired, load the previously saved login session and log in
+			self.s = pickle.loads(loginPickleSession)
+			self.s.proxies = proxyDict
+			# executing this get request will invalidate all other ikariam sessions in the selected world
+			html = self.s.get(url).text
+			self.s.proxies = {}
+
 
 		if self.__isInVacation(html):
 			msg = _('The account went into vacation mode')
@@ -272,7 +297,6 @@ class Sesion:
 				print(msg)
 				os._exit(0)
 			raise Exception('Couldn\t log in')
-		self.cipher = AESCipher(self.mail, self.username, self.password)
 		self.__updateCookieFile(primero=True)
 		self.logged = True
 
@@ -356,15 +380,6 @@ class Sesion:
 			response from the server
 		"""
 		self.__checkCookie()
-
-		# add the request id
-		token = self.__token()
-		match = re.search(r'requestId=(.*?)&', url)
-		if match:
-			url = url.replace(match.group(1), token)
-		match = re.search(r'actionRequest=(.*?)&', url)
-		if match:
-			url = url.replace(match.group(1), token)
 
 		if noIndex:
 			url = self.urlBase.replace('index.php', '') + url
