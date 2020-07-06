@@ -356,6 +356,16 @@ class Sesion:
 			response from the server
 		"""
 		self.__checkCookie()
+
+		# add the request id
+		token = self.__token()
+		match = re.search(r'requestId=(.*?)&', url)
+		if match:
+			url = url.replace(match.group(1), token)
+		match = re.search(r'actionRequest=(.*?)&', url)
+		if match:
+			url = url.replace(match.group(1), token)
+
 		if noIndex:
 			url = self.urlBase.replace('index.php', '') + url
 		else:
