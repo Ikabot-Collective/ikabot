@@ -47,5 +47,5 @@ def do_it(s):
 		(ids, cities) = getIdsOfCities(s)
 		cityId = ids[0]
 		url = 'action=AvatarAction&function=giveDailyActivityBonus&dailyActivityBonusCitySelect={0}&startPageShown=1&detectedDevice=1&autoLogin=on&cityId={0}&activeTab=multiTab2&backgroundView=city&currentCityId={0}&actionRequest=REQUESTID&ajax=1'.format(cityId)
-		s.get(url)
+		s.post(url)
 		wait(24*60*60, 1*60*60)

@@ -29,6 +29,7 @@ from ikabot.function.loginDaily import loginDaily
 from ikabot.function.sendResources import sendResources
 from ikabot.function.constructBuilding import constructBuilding
 from ikabot.function.shipMovements import shipMovements
+from ikabot.function.insertCookies import insertCookies
 
 t = gettext.translation('command_line', 
                         localedir, 
@@ -73,6 +74,7 @@ def menu(s, checkUpdate=True):
 					shipMovements,
 					constructBuilding,
 					update,
+					insertCookies,
 					updateTelegramData
 					]
 
@@ -95,10 +97,11 @@ def menu(s, checkUpdate=True):
 	print(_('(16) See movements'))
 	print(_('(17) Construct building'))
 	print(_('(18) Update Ikabot'))
+	print(_('(19) Insert cookies into Chrome'))
 	if telegramDataIsValid(s):
-		print(_('(19) Change the Telegram data'))
+		print(_('(20) Change the Telegram data'))
 	else:
-		print(_('(19) Enter the Telegram data'))
+		print(_('(20) Enter the Telegram data'))
 
 	entradas = len(menu_actions)
 	eleccion = read(min=0, max=entradas)
