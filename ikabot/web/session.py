@@ -436,7 +436,7 @@ class Session:
 
 		# add the request id
 		token = self.__token()
-		url = url.replace('REQUESTID', token)
+		url = url.replace(actionRequest, token)
 		if 'actionRequest' in payloadPost:
 			payloadPost['actionRequest'] = token
 		if 'actionRequest' in params:

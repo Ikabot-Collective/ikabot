@@ -58,6 +58,6 @@ def do_it(session):
 	while True:
 		(ids, cities) = getIdsOfCities(session)
 		cityId = ids[0]
-		url = 'action=AvatarAction&function=giveDailyActivityBonus&dailyActivityBonusCitySelect={0}&startPageShown=1&detectedDevice=1&autoLogin=on&cityId={0}&activeTab=multiTab2&backgroundView=city&currentCityId={0}&actionRequest=REQUESTID&ajax=1'.format(cityId)
+		url = 'action=AvatarAction&function=giveDailyActivityBonus&dailyActivityBonusCitySelect={0}&startPageShown=1&detectedDevice=1&autoLogin=on&cityId={0}&activeTab=multiTab2&backgroundView=city&currentCityId={0}&actionRequest={1}&ajax=1'.format(cityId, actionRequest)
 		session.post(url)
 		wait(24*60*60, 1*60*60)

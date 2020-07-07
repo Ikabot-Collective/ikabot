@@ -109,7 +109,7 @@ def do_it(session, minutes):
 		# get the militaryMovements
 		html = session.get()
 		city_id = re.search(r'currentCityId:\s(\d+),', html).group(1)
-		url = 'view=militaryAdvisor&oldView=city&oldBackgroundView=city&backgroundView=city&currentCityId={}&actionRequest=REQUESTID&ajax=1'.format(city_id)
+		url = 'view=militaryAdvisor&oldView=city&oldBackgroundView=city&backgroundView=city&currentCityId={}&actionRequest={}&ajax=1'.format(city_id, actionRequest)
 		movements_response = session.post(url)
 		postdata = json.loads(movements_response, strict=False)
 		militaryMovements = postdata[1][1][2]['viewScriptParams']['militaryAndFleetMovements']

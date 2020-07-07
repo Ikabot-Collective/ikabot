@@ -58,7 +58,7 @@ def obtainMiraclesAvailable(session):
 			continue
 
 		# get wonder information
-		params = {"view": "temple", "cityId": city['id'], "position": city['pos'], "backgroundView": "city", "currentCityId": city['id'], "actionRequest": "REQUESTID", "ajax": "1"}
+		params = {"view": "temple", "cityId": city['id'], "position": city['pos'], "backgroundView": "city", "currentCityId": city['id'], "actionRequest": actionRequest, "ajax": "1"}
 		data = session.post(params=params)
 		data = json.loads(data, strict=False)
 		data = data[2][1]
@@ -94,7 +94,7 @@ def activateMiracleHttpCall(session, island):
 	-------
 	json : dict
 	"""
-	params = {'action': 'CityScreen', 'cityId': island['ciudad']['id'], 'function': 'activateWonder', 'position': island['ciudad']['pos'], 'backgroundView': 'city', 'currentCityId': island['ciudad']['id'], 'templateView': 'temple', 'actionRequest': 'REQUESTID', 'ajax': '1'}
+	params = {'action': 'CityScreen', 'cityId': island['ciudad']['id'], 'function': 'activateWonder', 'position': island['ciudad']['pos'], 'backgroundView': 'city', 'currentCityId': island['ciudad']['id'], 'templateView': 'temple', 'actionRequest': actionRequest, 'ajax': '1'}
 	response = session.post(params=params)
 	return json.loads(response, strict=False)
 
@@ -271,7 +271,7 @@ def wait_for_miracle(session, island):
 	island : dict
 	"""
 	while True:
-		params = {"view": "temple", "cityId": island['ciudad']['id'], "position": island['ciudad']['pos'], "backgroundView": "city", "currentCityId": island['ciudad']['id'], "actionRequest": "REQUESTID", "ajax": "1"}
+		params = {"view": "temple", "cityId": island['ciudad']['id'], "position": island['ciudad']['pos'], "backgroundView": "city", "currentCityId": island['ciudad']['id'], "actionRequest": actionRequest, "ajax": "1"}
 		temple_response = session.post(params=params)
 		temple_response = json.loads(temple_response, strict=False)
 		temple_response = temple_response[2][1]
