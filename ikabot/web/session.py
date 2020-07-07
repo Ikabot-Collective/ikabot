@@ -230,8 +230,8 @@ class Session:
 			config.infoUser += _(', Player:{}').format(self.username)
 			banner()
 
-		self.host = f's{self.mundo}-{self.servidor}.ikariam.gameforge.com'
-		self.urlBase = f'https://{self.host}/index.php?'
+		self.host = 's{}-{}.ikariam.gameforge.com'.format(self.mundo, self.servidor)
+		self.urlBase = 'https://{}/index.php?'.format(self.host)
 
 		self.headers = {'Host': self.host, 'User-Agent': user_agent, 'Accept': '*/*', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate, br', 'Referer': 'https://{}'.format(self.host), 'X-Requested-With': 'XMLHttpRequest', 'Origin': 'https://{}'.format(self.host), 'DNT': '1', 'Connection': 'keep-alive', 'Pragma': 'no-cache', 'Cache-Control': 'no-cache'}
 
