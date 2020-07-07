@@ -115,7 +115,7 @@ def menu(session, checkUpdate=True):
 		try:
 			selected -= 1
 			event = multiprocessing.Event() #creates a new event
-			process = multiprocessing.Process(target=menu_actions[selected], args=(s, event, sys.stdin.fileno()), name=menu_actions[selected].__name__)
+			process = multiprocessing.Process(target=menu_actions[selected], args=(session, event, sys.stdin.fileno()), name=menu_actions[selected].__name__)
 			process.start()
 			process_list.append({'pid': process.pid, 'proxies': session.s.proxies, 'action': menu_actions[selected].__name__ })
 			updateProcessList(session, programprocesslist=process_list)

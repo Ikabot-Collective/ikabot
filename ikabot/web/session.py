@@ -256,6 +256,7 @@ class Session:
 
 			cookies_are_valid = self.__isExpired(html) is False
 			if cookies_are_valid:
+				self.__log('using old cookies')
 				used_old_cookies = True
 				# assign the old cookies to the session object
 				requests.cookies.cookiejar_from_dict(cookie_dict, cookiejar=self.s.cookies, overwrite=True)
@@ -265,6 +266,7 @@ class Session:
 
 		# login as normal and get new cookies
 		if used_old_cookies is False:
+			self.__log('using new cookies')
 			resp = self.s.get('https://lobby.ikariam.gameforge.com/api/users/me/loginLink?id={}&server[language]={}&server[number]={}'.format(self.account['id'], self.servidor, self.mundo)).text
 			resp = json.loads(resp, strict=False)
 			if 'url' not in resp:

@@ -55,7 +55,7 @@ def getStatus(session, event, stdin_fd):
 		print(addDot(storageCapacity))
 		print(_('Resources:'))
 		for i in range(len(materials_names)):
-			print('{} {}{}{} '.format(materials_names[i], bcolors.ENDC, color_resources[i], addDot(resources[i])), end='')
+			print('{} {}{}{} '.format(materials_names[i], color_resources[i], addDot(resources[i]), bcolors.ENDC), end='')
 		print('')
 
 		print(_('Production:'))
