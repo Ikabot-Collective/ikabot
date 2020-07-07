@@ -8,20 +8,27 @@ from ikabot.helpers.botComm import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.getJson import getCity
-from ikabot.helpers.planearViajes import executeRoutes
-from ikabot.helpers.recursos import *
+from ikabot.helpers.planRoutes import executeRoutes
+from ikabot.helpers.resources import *
 from ikabot.helpers.varios import addDot
 from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.gui import banner
 
 t = gettext.translation('distributeResources',
                         localedir,
-                        languages=idiomas,
+                        languages=languages,
                         fallback=True)
 _ = t.gettext
 
-def distributeResources(s,e,fd):
-	sys.stdin = os.fdopen(fd)
+def distributeResources(session, event, stdin_fd):
+	"""
+	Parameters
+	----------
+	session : ikabot.web.session.Session
+	event : multiprocessing.Event
+	stdin_fd: int
+	"""
+	sys.stdin = os.fdopen(stdin_fd)
 	try:
 		banner()
 
@@ -31,7 +38,7 @@ def distributeResources(s,e,fd):
 			print('({:d}) {}'.format(i+1, materials_names[i]))
 		resource = read(min=0, max=5)
 		if resource == 0:
-			e.set() #give main process control before exiting
+			event.set() #give main process control before exiting
 			return
 		resource -= 1
 
@@ -43,12 +50,12 @@ def distributeResources(s,e,fd):
 			evenly = type_distribution == 2
 
 		if evenly:
-			routes = distribute_evenly(s, resource)
+			routes = distribute_evenly(session, resource)
 		else:
-			routes = distribute_unevenly(s, resource)
+			routes = distribute_unevenly(session, resource)
 
 		if routes is None:
-			e.set()
+			event.set()
 			return
 
 		banner()
@@ -59,40 +66,46 @@ def distributeResources(s,e,fd):
 		print(_('\nProceed? [Y/n]'))
 		rta = read(values=['y', 'Y', 'n', 'N', ''])
 		if rta.lower() == 'n':
-			e.set()
+			event.set()
 			return
 
 	except KeyboardInterrupt:
-		e.set()
+		event.set()
 		return
 
-	set_child_mode(s)
-	e.set() #this is where we give back control to main process
+	set_child_mode(session)
+	event.set() #this is where we give back control to main process
 
 	info = _('\nDistribute {}\n').format(materials_names[resource])
-	setInfoSignal(s, info)
+	setInfoSignal(session, info)
 
 	try:
-		executeRoutes(s, routes) #plan trips for all the routes
+		executeRoutes(session, routes) #plan trips for all the routes
 	except:
 		msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
-		sendToBot(s, msg) #sends message to telegram bot
+		sendToBot(session, msg) #sends message to telegram bot
 	finally:
-		s.logout()
+		session.logout()
 
-def distribute_evenly(s, resource):
+def distribute_evenly(session, resource_type):
+	"""
+	Parameters
+	----------
+	session : ikabot.web.session.Session
+	resource_type : int
+	"""
 	resourceTotal = 0
-	(cityIDs, cities) = getIdsOfCities(s)
+	(cityIDs, cities) = getIdsOfCities(session)
 
 	originCities = {}
 	destinationCities = {}
 	allCities = {}
 	for cityID in cityIDs:
 
-		html = s.get(urlCiudad + cityID) #load html from the get request for that particular city
+		html = session.get(city_url + cityID) #load html from the get request for that particular city
 		city = getCity(html) #convert the html to a city object
 
-		resourceTotal += city['recursos'][resource] #the cities resources are added to the total
+		resourceTotal += city['recursos'][resource_type] #the cities resources are added to the total
 		allCities[cityID] = city #adds the city to all cities
 
 
@@ -106,7 +119,7 @@ def distribute_evenly(s, resource):
 		for cityID in allCities:
 			if cityID in destinationCities:
 				continue
-			freeStorage = allCities[cityID]['freeSpaceForResources'][resource]
+			freeStorage = allCities[cityID]['freeSpaceForResources'][resource_type]
 			storage = allCities[cityID]['storageCapacity']
 			if storage < resourceAverage:
 				destinationCities[cityID] = freeStorage
@@ -118,10 +131,10 @@ def distribute_evenly(s, resource):
 			for cityID in allCities:
 				if cityID in destinationCities:
 					continue
-				if allCities[cityID]['recursos'][resource] > resourceAverage:
-					originCities[cityID] = allCities[cityID]['recursos'][resource] - resourceAverage
+				if allCities[cityID]['recursos'][resource_type] > resourceAverage:
+					originCities[cityID] = allCities[cityID]['recursos'][resource_type] - resourceAverage
 				else:
-					destinationCities[cityID] = resourceAverage - allCities[cityID]['recursos'][resource]
+					destinationCities[cityID] = resourceAverage - allCities[cityID]['recursos'][resource_type]
 			break
 
 	originCities = {k: v for k, v in sorted(originCities.items(), key=lambda item: item[1],reverse=True)} #sort origin cities in descending order
@@ -144,7 +157,7 @@ def distribute_evenly(s, resource):
 				continue
 
 			toSendArr = [0] * len(materials_names)
-			toSendArr[resource] = toSend
+			toSendArr[resource_type] = toSend
 			route = (allCities[originCityID], allCities[destinationCityID], allCities[destinationCityID]['islandId'], *toSendArr)
 			routes.append(route)
 
@@ -158,99 +171,104 @@ def distribute_evenly(s, resource):
 
 	return routes
 
-def distribute_unevenly(s, recurso):
-
-	recursoTotal = 0
-	(idsCiudades, ciudades) = getIdsOfCities(s)
-	ciudadesOrigen = {}
-	ciudadesDestino = {}
-	for idCiudad in idsCiudades:
-		esTarget =  ciudades[idCiudad]['tradegood'] == str(recurso)
-		if esTarget:
-			html = s.get(urlCiudad + idCiudad)
-			ciudad = getCity(html)
-			if recurso == 1:
-				ciudad['disponible'] = ciudad['recursos'][recurso] - ciudad['consumo'] - 1
+def distribute_unevenly(session, resource_type):
+	"""
+	Parameters
+	----------
+	session : ikabot.web.session.Session
+	resource_type : int
+	"""
+	total_available_resources_from_all_cities = 0
+	(cities_ids, cities) = getIdsOfCities(session)
+	origin_cities = {}
+	destination_cities = {}
+	for destination_city_id in cities_ids:
+		is_city_mining_this_resource = cities[destination_city_id]['tradegood'] == str(resource_type)
+		if is_city_mining_this_resource:
+			html = session.get(city_url + destination_city_id)
+			city = getCity(html)
+			if resource_type == 1: # wine
+				city['available_amount_of_resource'] = city['recursos'][resource_type] - city['consumo'] - 1
 			else:
-				ciudad['disponible'] = ciudad['recursos'][recurso]
-			if ciudad['disponible'] < 0:
-				ciudad['disponible'] = 0
-			recursoTotal += ciudad['disponible']
-			ciudadesOrigen[idCiudad] = ciudad
+				city['available_amount_of_resource'] = city['recursos'][resource_type]
+			if city['available_amount_of_resource'] < 0:
+				city['available_amount_of_resource'] = 0
+			total_available_resources_from_all_cities += city['available_amount_of_resource']
+			origin_cities[destination_city_id] = city
 		else:
-			html = s.get(urlCiudad + idCiudad)
-			ciudad = getCity(html)
-			ciudad['disponible'] = ciudad['freeSpaceForResources'][recurso]
-			if ciudad['disponible'] > 0:
-				ciudadesDestino[idCiudad] = ciudad
+			html = session.get(city_url + destination_city_id)
+			city = getCity(html)
+			city['free_storage_for_resource'] = city['freeSpaceForResources'][resource_type]
+			if city['free_storage_for_resource'] > 0:
+				destination_cities[destination_city_id] = city
 
-	if recursoTotal <= 0:
+	if total_available_resources_from_all_cities <= 0:
 		print(_('\nThere are no resources to send.'))
 		enter()
 		return None
-	if len(ciudadesDestino) == 0:
+	if len(destination_cities) == 0:
 		print(_('\nThere is no space available to send resources.'))
 		enter()
 		return None
 
-	recursoXciudad = recursoTotal // len(ciudadesDestino)
-	espacios_disponibles = [ ciudadesDestino[city]['disponible'] for city in ciudadesDestino ]
-	totalEspacioDisponible = sum( espacios_disponibles )
-	restanteAEnviar = min(recursoTotal, totalEspacioDisponible)
+	remaining_resources_to_be_sent_to_each_city = total_available_resources_from_all_cities // len(destination_cities)
+	free_storage_available_per_city = [destination_cities[city]['free_storage_for_resource'] for city in destination_cities]
+	total_free_storage_available_in_all_cities = sum(free_storage_available_per_city)
+	remaining_resources_to_send = min(total_available_resources_from_all_cities, total_free_storage_available_in_all_cities)
 	toSend = {}
 
-	while restanteAEnviar > 0:
+	while remaining_resources_to_send > 0:
 		len_prev = len(toSend)
-		for city in ciudadesDestino:
-			ciudad = ciudadesDestino[city]
-			if city not in toSend and ciudad['disponible'] < recursoXciudad:
-				toSend[city] = ciudad['disponible']
-				restanteAEnviar -= ciudad['disponible']
+		for city_id in destination_cities:
+			city = destination_cities[city_id]
+			if city_id not in toSend and city['available_amount_of_resource'] < remaining_resources_to_be_sent_to_each_city:
+				toSend[city_id] = city['available_amount_of_resource']
+				remaining_resources_to_send -= city['available_amount_of_resource']
 
 		if len(toSend) == len_prev:
-			for city in ciudadesDestino:
-				if city not in toSend:
-					toSend[city] = recursoXciudad
+			for city_id in destination_cities:
+				if city_id not in toSend:
+					toSend[city_id] = remaining_resources_to_be_sent_to_each_city
 			break
 
-		espacios_disponibles = [ ciudadesDestino[city]['disponible'] for city in ciudadesDestino if city not in toSend ]
-		totalEspacioDisponible = sum( espacios_disponibles )
-		restanteAEnviar = min(restanteAEnviar, totalEspacioDisponible)
-		recursoXciudad = restanteAEnviar // len(espacios_disponibles)
+		free_storage_available_per_city = [ destination_cities[city]['available_amount_of_resource'] for city in destination_cities if city not in toSend ]
+		total_free_storage_available_in_all_cities = sum( free_storage_available_per_city )
+		remaining_resources_to_send = min(remaining_resources_to_send, total_free_storage_available_in_all_cities)
+		remaining_resources_to_be_sent_to_each_city = remaining_resources_to_send // len(free_storage_available_per_city)
 
 
-	rutas = []
-	for idCiudad in ciudadesDestino:
-		ciudadD = ciudadesDestino[idCiudad]
-		idIsla = ciudadD['islandId']
-		faltante = toSend[idCiudad]
-		for idCiudadOrigen in ciudadesOrigen:
-			if faltante == 0:
+	routes = []
+	for destination_city_id in destination_cities:
+		destination_city = destination_cities[destination_city_id]
+		island_id = destination_city['islandId']
+		missing_resources = toSend[destination_city_id]
+		for origin_city_id in origin_cities:
+			if missing_resources == 0:
 				break
 
-			ciudadO = ciudadesOrigen[idCiudadOrigen]
-			recursoDisponible = ciudadO['disponible']
-			for ruta in rutas:
-				origen = ruta[0]
-				rec = ruta[recurso + 3]
-				if origen['id'] == idCiudadOrigen:
-					recursoDisponible -= rec
+			origin_city = origin_cities[origin_city_id]
+			resources_available_in_this_city = origin_city['available_amount_of_resource']
+			for route in routes:
+				origin = route[0]
+				resource = route[resource_type + 3]
+				if origin['id'] == origin_city_id:
+					resources_available_in_this_city -= resource
 
-			enviar = min(faltante, recursoDisponible)
-			disponible = ciudadD['disponible']
-			if disponible == 0 or enviar == 0:
+			send_this_round = min(missing_resources, resources_available_in_this_city)
+			available = destination_city['available_amount_of_resource']
+			if available == 0 or send_this_round == 0:
 				continue
 
-			if disponible < enviar:
-				faltante = 0
-				enviar = disponible
+			if available < send_this_round:
+				missing_resources = 0
+				send_this_round = available
 			else:
-				faltante -= enviar
+				missing_resources -= send_this_round
 
 			toSendArr = [0] * len(materials_names)
-			toSendArr[recurso] = enviar
-			ruta = (ciudadO, ciudadD, idIsla, *toSendArr)
+			toSendArr[resource_type] = send_this_round
+			route = (origin_city, destination_city, island_id, *toSendArr)
 
-			rutas.append(ruta)
+			routes.append(route)
 
-	return rutas
+	return routes

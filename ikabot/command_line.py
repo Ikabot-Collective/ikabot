@@ -5,7 +5,7 @@ import os
 import gettext
 import multiprocessing
 from ikabot.config import *
-from ikabot.web.sesion import *
+from ikabot.web.session import *
 from ikabot.helpers.gui import *
 from ikabot.function.donate import donate
 from ikabot.function.update import update
@@ -31,22 +31,28 @@ from ikabot.function.constructBuilding import constructBuilding
 from ikabot.function.shipMovements import shipMovements
 from ikabot.function.insertCookies import insertCookies
 
-t = gettext.translation('command_line', 
-                        localedir, 
-                        languages=idiomas,
+t = gettext.translation('command_line',
+                        localedir,
+                        languages=languages,
                         fallback=True)
 _ = t.gettext
 
-def menu(s, checkUpdate=True):
+def menu(session, checkUpdate=True):
+	"""
+	Parameters
+	----------
+	session : ikabot.web.session.Session
+	checkUpdate : bool
+	"""
 	if checkUpdate:
 		checkForUpdate()
 
 	banner()
 
-	processlist = updateProcessList(s)
-	if len(processlist) > 0:
+	process_list = updateProcessList(session)
+	if len(process_list) > 0:
 		print(_('Running tasks:'))
-		for process in processlist:
+		for process in process_list:
 			if len(process['proxies']) == 0:
 				proxy = ''
 			else:
@@ -98,25 +104,25 @@ def menu(s, checkUpdate=True):
 	print(_('(17) Construct building'))
 	print(_('(18) Update Ikabot'))
 	print(_('(19) Insert cookies into Chrome'))
-	if telegramDataIsValid(s):
+	if telegramDataIsValid(session):
 		print(_('(20) Change the Telegram data'))
 	else:
 		print(_('(20) Enter the Telegram data'))
 
-	entradas = len(menu_actions)
-	eleccion = read(min=0, max=entradas)
-	if eleccion != 0:
+	total_options = len(menu_actions)
+	selected = read(min=0, max=total_options)
+	if selected != 0:
 		try:
-			eleccion -= 1
+			selected -= 1
 			event = multiprocessing.Event() #creates a new event
-			process = multiprocessing.Process(target=menu_actions[eleccion], args=(s, event, sys.stdin.fileno()), name=menu_actions[eleccion].__name__)
+			process = multiprocessing.Process(target=menu_actions[selected], args=(s, event, sys.stdin.fileno()), name=menu_actions[selected].__name__)
 			process.start()
-			processlist.append({'pid': process.pid, 'proxies': s.s.proxies, 'action': menu_actions[eleccion].__name__ })
-			updateProcessList(s, programprocesslist = processlist)
+			process_list.append({'pid': process.pid, 'proxies': session.s.proxies, 'action': menu_actions[selected].__name__ })
+			updateProcessList(session, programprocesslist=process_list)
 			event.wait() #waits for the process to fire the event that's been given to it. When it does  this process gets back control of the command line and asks user for more input
 		except KeyboardInterrupt:
 			pass
-		menu(s, checkUpdate=False)
+		menu(session, checkUpdate=False)
 	else:
 		if isWindows:
 			# in unix, you can exit ikabot and close the terminal and the processes will continue to execute
@@ -126,7 +132,7 @@ def menu(s, checkUpdate=True):
 		clear()
 		os._exit(0) #kills the process which executes this statement, but it does not kill it's child processes
 
-def inicializar():
+def init():
 	home = 'HOMEPATH' if isWindows else 'HOME'
 	os.chdir(os.getenv(home))
 	if not os.path.isfile(ikaFile):
@@ -134,13 +140,13 @@ def inicializar():
 		os.chmod(ikaFile, 0o600)
 
 def start():
-	inicializar()
-	s = Sesion()
+	init()
+	session = Session()
 	try:
-		menu(s)
+		menu(session)
 	finally:
 		clear()
-		s.logout()
+		session.logout()
 
 def main():
 	try:

@@ -10,15 +10,15 @@ from ikabot.config import *
 from ikabot.helpers.getJson import *
 from ikabot.helpers.gui import *
 
-t = gettext.translation('pedirInfo', 
-                        localedir, 
-                        languages=idiomas,
+t = gettext.translation('pedirInfo',
+                        localedir,
+                        languages=languages,
                         fallback=True)
 _ = t.gettext
 
 getcontext().prec = 30
 
-def read(min=None, max=None, digit=False, msg=prompt, values=None, empty=False): # lee input del usuario
+def read(min=None, max=None, digit=False, msg=prompt, values=None, empty=False): # user input
 	"""Reads input from user
 	Parameters
 	----------
@@ -37,99 +37,99 @@ def read(min=None, max=None, digit=False, msg=prompt, values=None, empty=False):
 
 	Returns
 	-------
-	result : str
-		string representing the user's input
+	result : int
+		int representing the user's choice
 	"""
-	def _invalido():
-		print('\033[1A\033[K', end="") # Borro linea
+	def _invalid():
+		print('\033[1A\033[K', end="") # remove line
 		return read(min, max, digit, msg, values)
 
 	try:
-		leido = input(msg)
+		read_input = input(msg)
 	except EOFError:
-		return _invalido()
+		return _invalid()
 
-	if leido == '' and empty is True:
-		return leido
+	if read_input == '' and empty is True:
+		return read_input
 
 	if digit is True or min is not None or max is not None:
-		if leido.isdigit() is False:
-			return _invalido()
+		if read_input.isdigit() is False:
+			return _invalid()
 		else:
 			try:
-				leido = eval(leido)
+				read_input = eval(read_input)
 			except SyntaxError:
-				return _invalido()
-	if min is not None and leido < min:
-		return _invalido()
-	if max is not None and leido > max:
-		return _invalido()
-	if values is not None and leido not in values:
-		return _invalido()
-	return leido
+				return _invalid()
+	if min is not None and read_input < min:
+		return _invalid()
+	if max is not None and read_input > max:
+		return _invalid()
+	if values is not None and read_input not in values:
+		return _invalid()
+	return read_input
 
-def chooseCity(s, foreign=False):
+def chooseCity(session, foreign=False):
 	"""Prompts the user to chose a city
 	Parameters
 	----------
-	s : Session
+	session : ikabot.web.session.Session
 		Session object
 	foreign : bool
 		lets the user choose a foreign city
-	
+
 	Returns
 	-------
-	city : City 
+	city : City
 		a city object representing the chosen city
 	"""
-	global menuCiudades
-	(ids, ciudades) = getIdsOfCities(s)
-	if menuCiudades == '':
-		maxNombre = 0
-		for unId in ids:
-			largo = len(ciudades[unId]['name'])
-			if largo > maxNombre:
-				maxNombre = largo
-		pad = lambda name: ' ' * (maxNombre - len(name) + 2)
-		bienes = {'1': _('(W)'), '2': _('(M)'), '3': _('(C)'), '4': _('(S)')}
-		prints = []
+	global menu_cities
+	(ids, cities) = getIdsOfCities(session)
+	if menu_cities == '':
+		longest_city_name_length = 0
+		for city_id in ids:
+			length = len(cities[city_id]['name'])
+			if length > longest_city_name_length:
+				longest_city_name_length = length
+		pad = lambda city_name: ' ' * (longest_city_name_length - len(city_name) + 2)
+		resources_abbreviations = {'1': _('(W)'), '2': _('(M)'), '3': _('(C)'), '4': _('(S)')}
+
 		i = 0
 		if foreign:
 			print(_(' 0: foreign city'))
 		else:
 			print('')
-		for unId in ids:
+		for city_id in ids:
 			i += 1
-			tradegood = ciudades[unId]['tradegood']
-			bien = bienes[tradegood]
-			nombre = ciudades[unId]['name']
-			matches = re.findall(r'u[0-9a-f]{4}', nombre)
+			resource_index = cities[city_id]['tradegood']
+			resource_abb = resources_abbreviations[resource_index]
+			city_name = cities[city_id]['name']
+			matches = re.findall(r'u[0-9a-f]{4}', city_name)
 			for match in matches:
 				to_unicode = '\\' + match
 				to_unicode = to_unicode.encode().decode('unicode-escape')
-				nombre = nombre.replace(match, to_unicode)
+				city_name = city_name.replace(match, to_unicode)
 			num = ' ' + str(i) if i < 10 else str(i)
-			menuCiudades += '{}: {}{}{}\n'.format(num, nombre, pad(nombre), bien)
-		menuCiudades = menuCiudades[:-1]
+			menu_cities += '{}: {}{}{}\n'.format(num, city_name, pad(city_name), resource_abb)
+		menu_cities = menu_cities[:-1]
 	if foreign:
 		print(_(' 0: ciudad ajena'))
-	print(menuCiudades)
+	print(menu_cities)
 
 	if foreign:
-		eleccion = read(min=0, max=len(ids))
+		selected_city_index = read(min=0, max=len(ids))
 	else:
-		eleccion = read(min=1, max=len(ids))
-	if eleccion == 0:
-		return chooseForeignCity(s)
+		selected_city_index = read(min=1, max=len(ids))
+	if selected_city_index == 0:
+		return chooseForeignCity(session)
 	else:
-		html = s.get(urlCiudad + ids[eleccion -1])
+		html = session.get(city_url + ids[selected_city_index - 1])
 		return getCity(html)
 
-def chooseForeignCity(s):
+def chooseForeignCity(session):
 	"""Prompts the user to select an island, and a city on that island (is only used in chooseCity)
 	Parameters
 	----------
-	s : Session
+	session : ikabot.web.session.Session
 		Session object
 
 	Returns
@@ -142,43 +142,43 @@ def chooseForeignCity(s):
 	y = read(msg='coordenada y:', digit=True)
 	print('')
 	url = 'view=worldmap_iso&islandX={}&islandY={}&oldBackgroundView=island&islandWorldviewScale=1'.format(x, y)
-	html = s.get(url)
+	html = session.get(url)
 	try:
-		jsonIslas = re.search(r'jsonData = \'(.*?)\';', html).group(1)
-		jsonIslas = json.loads(jsonIslas, strict=False)
-		idIsla = jsonIslas['data'][str(x)][str(y)][0]
+		islands_json = re.search(r'jsonData = \'(.*?)\';', html).group(1)
+		islands_json = json.loads(islands_json, strict=False)
+		island_id = islands_json['data'][str(x)][str(y)][0]
 	except:
 		print(_('Incorrect coordinates'))
 		enter()
 		banner()
-		return chooseCity(s, foreign=True)
-	html = s.get(urlIsla + idIsla)
-	isla = getIsland(html)
-	maxNombre = 0
-	for ciudad in isla['cities']:
-		if ciudad['type'] == 'city':
-			largo = len(ciudad['name'])
-			if largo > maxNombre:
-				maxNombre = largo
-	pad = lambda name: ' ' * (maxNombre - len(name) + 2)
+		return chooseCity(session, foreign=True)
+	html = session.get(island_url + island_id)
+	island = getIsland(html)
+	longest_city_name_length = 0
+	for city in island['cities']:
+		if city['type'] == 'city':
+			city_name_length = len(city['name'])
+			if city_name_length > longest_city_name_length:
+				longest_city_name_length = city_name_length
+	pad = lambda name: ' ' * (longest_city_name_length - len(name) + 2)
 	i = 0
-	opciones = []
-	for ciudad in isla['cities']:
-		if ciudad['type'] == 'city' and ciudad['state'] == '' and ciudad['Name'] != s.username:
+	city_options = []
+	for city in island['cities']:
+		if city['type'] == 'city' and city['state'] == '' and city['Name'] != session.username:
 			i += 1
 			num = ' ' + str(i) if i < 10 else str(i)
-			print('{}: {}{}({})'.format(num, ciudad['name'], pad(ciudad['name']), ciudad['Name']))
-			opciones.append(ciudad)
+			print('{}: {}{}({})'.format(num, city['name'], pad(city['name']), city['Name']))
+			city_options.append(city)
 	if i == 0:
 		print(_('There are no cities where to send resources on this island'))
 		enter()
-		return chooseCity(s, foreign=True)
-	eleccion = read(min=1, max=i)
-	ciudad = opciones[eleccion - 1]
-	ciudad['islandId'] = isla['id']
-	ciudad['cityName'] = ciudad['name']
-	ciudad['propia'] = False
-	return ciudad
+		return chooseCity(session, foreign=True)
+	selected_city_index = read(min=1, max=i)
+	city = city_options[selected_city_index - 1]
+	city['islandId'] = island['id']
+	city['cityName'] = city['name']
+	city['propia'] = False
+	return city
 
 def askForValue(text, max):
 	"""Displays text and asks the user to enter a value between 0 and max
@@ -189,7 +189,7 @@ def askForValue(text, max):
 		text to be displayed when asking the user for input
 	max : int
 		integer representing the number of input options
-	
+
 	Returns
 	-------
 	var : int
@@ -201,11 +201,11 @@ def askForValue(text, max):
 		var = 0
 	return var
 
-def getIdsOfCities(s, all=False):
+def getIdsOfCities(session, all=False):
 	"""Gets the user's cities
 	Parameters
 	----------
-	s : Session
+	session : ikabot.web.session.Session
 		Session object
 	all : bool
 		boolean indicating whether all cities should be returned, or only those that belong to the current user
@@ -215,46 +215,46 @@ def getIdsOfCities(s, all=False):
 	(ids, cities) : tuple
 		a tuple containing the a list of city IDs and a list of city objects
 	"""
-	global ciudades
-	global ids
-	if ids is None or ciudades is None or s.padre is False:
-		html = s.get()
-		ciudades = re.search(r'relatedCityData:\sJSON\.parse\(\'(.+?),\\"additionalInfo', html).group(1) + '}'
-		ciudades = ciudades.replace('\\', '')
-		ciudades = ciudades.replace('city_', '')
-		ciudades = json.loads(ciudades, strict=False)
+	global cities_cache
+	global ids_cache
+	if ids_cache is None or cities_cache is None or session.padre is False:
+		html = session.get()
+		cities_cache = re.search(r'relatedCityData:\sJSON\.parse\(\'(.+?),\\"additionalInfo', html).group(1) + '}'
+		cities_cache = cities_cache.replace('\\', '')
+		cities_cache = cities_cache.replace('city_', '')
+		cities_cache = json.loads(cities_cache, strict=False)
 
-		ids = [ciudad for ciudad in ciudades]
-		ids = sorted(ids)
+		ids_cache = [city for city in cities_cache]
+		ids_cache = sorted(ids_cache)
 
 	# {'coords': '[x:y] ', 'id': idCiudad, 'tradegood': '..', 'name': 'nomberCiudad', 'relationship': 'ownCity'|'occupiedCities'|..}
 	if all is False:
-		ids_own   = [ciudad for ciudad in ciudades if ciudades[ciudad]['relationship'] == 'ownCity']
-		ids_other = [ciudad for ciudad in ciudades if ciudades[ciudad]['relationship'] != 'ownCity']
-		ciudades_own = ciudades.copy()
+		ids_own   = [city_id for city_id in cities_cache if cities_cache[city_id]['relationship'] == 'ownCity']
+		ids_other = [city_id for city_id in cities_cache if cities_cache[city_id]['relationship'] != 'ownCity']
+		own_cities = cities_cache.copy()
 		for id in ids_other:
-			del ciudades_own[id]
-		return (ids_own, ciudades_own)
+			del own_cities[id]
+		return ids_own, own_cities
 	else:
-		return (ids, ciudades)
+		return ids_cache, cities_cache
 
-def getIslandsIds(s):
+def getIslandsIds(session):
 	"""Gets the IDs of islands the user has cities on
 	Parameters
 	----------
-	s : Session
+	session : ikabot.web.session.Session
 		Session object
-	
+
 	Returns
 	-------
-	idsIslas : list
+	islands_ids : list
 		a list containing the IDs of the users islands
 	"""
-	(idsCiudades, ciudades) = getIdsOfCities(s)
-	idsIslas = set()
-	for idCiudad in idsCiudades:
-		html = s.get(urlCiudad + idCiudad)
-		ciudad = getCity(html)
-		idIsla = ciudad['islandId']
-		idsIslas.add(idIsla)
-	return list(idsIslas)
+	(cities_ids, cities) = getIdsOfCities(session)
+	islands_ids = set()
+	for city_id in cities_ids:
+		html = session.get(city_url + city_id)
+		city = getCity(html)
+		island_id = city['islandId']
+		islands_ids.add(island_id)
+	return list(islands_ids)

@@ -6,9 +6,9 @@ import os
 import gettext
 import ikabot.config as config
 
-t = gettext.translation('gui', 
-                        config.localedir, 
-                        languages=config.idiomas,
+t = gettext.translation('gui',
+                        config.localedir,
+                        languages=config.languages,
                         fallback=True)
 _ = t.gettext
 
