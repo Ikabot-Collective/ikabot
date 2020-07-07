@@ -10,7 +10,6 @@ import gettext
 import traceback
 import threading
 from decimal import *
-
 from ikabot.config import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.varios import *
