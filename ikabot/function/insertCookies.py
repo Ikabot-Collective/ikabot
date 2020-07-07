@@ -3,12 +3,12 @@
 import gettext
 import json
 import sys
-from ikabot.helpers.gui import enter
+from ikabot.helpers.gui import *
 from ikabot.config import *
 
 t = gettext.translation('insertCookies',
                         localedir,
-                        languages=idiomas,
+                        languages=languages,
                         fallback=True)
 _ = t.gettext
 
@@ -21,6 +21,7 @@ def insertCookies(session, event, stdin_fd):
 	stdin_fd: int
 	"""
 	sys.stdin = os.fdopen(stdin_fd)
+	banner()
 	try:
 		cookies = json.dumps(session.getSessionData()['cookies'])
 		cookies_js = 'cookies={};i=0;for(let cookie in cookies){{document.cookie=Object.keys(cookies)[i]+\"=\"+cookies[cookie];i++}}'.format(cookies)
