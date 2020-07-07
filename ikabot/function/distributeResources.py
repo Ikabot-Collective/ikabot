@@ -221,9 +221,9 @@ def distribute_unevenly(session, resource_type):
 		len_prev = len(toSend)
 		for city_id in destination_cities:
 			city = destination_cities[city_id]
-			if city_id not in toSend and city['available_amount_of_resource'] < remaining_resources_to_be_sent_to_each_city:
-				toSend[city_id] = city['available_amount_of_resource']
-				remaining_resources_to_send -= city['available_amount_of_resource']
+			if city_id not in toSend and city['free_storage_for_resource'] < remaining_resources_to_be_sent_to_each_city:
+				toSend[city_id] = city['free_storage_for_resource']
+				remaining_resources_to_send -= city['free_storage_for_resource']
 
 		if len(toSend) == len_prev:
 			for city_id in destination_cities:
@@ -255,7 +255,7 @@ def distribute_unevenly(session, resource_type):
 					resources_available_in_this_city -= resource
 
 			send_this_round = min(missing_resources, resources_available_in_this_city)
-			available = destination_city['available_amount_of_resource']
+			available = destination_city['free_storage_for_resource']
 			if available == 0 or send_this_round == 0:
 				continue
 
