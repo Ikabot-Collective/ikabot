@@ -436,18 +436,7 @@ class Session:
 
 		# add the request id
 		token = self.__token()
-		match = re.search(r'requestId=(.*?)&', url)
-		if match:
-			url = url.replace(match.group(1), token)
-		match = re.search(r'requestId=(.*?)$', url)
-		if match:
-			url = url.replace(match.group(1), token)
-		match = re.search(r'actionRequest=(.*?)&', url)
-		if match:
-			url = url.replace(match.group(1), token)
-		match = re.search(r'actionRequest=(.*?)$', url)
-		if match:
-			url = url.replace(match.group(1), token)
+		url = url.replace('REQUESTID', token)
 		if 'actionRequest' in payloadPost:
 			payloadPost['actionRequest'] = token
 		if 'actionRequest' in params:
