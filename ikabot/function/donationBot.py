@@ -121,7 +121,7 @@ def do_it(session, cities_ids, cities_dict):
 			islandId = cities_dict[cityId]['island']
 
 			# donate
-			session.post(payloadPost={'islandId': islandId, 'type': donation_type, 'action': 'IslandScreen', 'function': 'donate', 'donation': to_donate, 'backgroundView': 'island', 'templateView': donation_type, 'actionRequest': 'REQUESTID', 'ajax': '1'})
+			session.post(payloadPost={'islandId': islandId, 'type': donation_type, 'action': 'IslandScreen', 'function': 'donate', 'donation': to_donate, 'backgroundView': 'island', 'templateView': donation_type, 'actionRequest': actionRequest, 'ajax': '1'})
 
 		msg = _('I donated automatically.')
 		sendToBotDebug(session, msg, debugON_donationBot)

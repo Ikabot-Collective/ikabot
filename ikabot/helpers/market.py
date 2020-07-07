@@ -39,7 +39,7 @@ def getMarketHtml(session, city):
 	session : ikabot.web.session.Session
 	city : dict
 	"""
-	url = 'view=branchOffice&cityId={}&position={:d}&currentCityId={}&backgroundView=city&actionRequest=REQUESTID&ajax=1'.format(city['id'], city['pos'], city['id'])
+	url = 'view=branchOffice&cityId={}&position={:d}&currentCityId={}&backgroundView=city&actionRequest={}&ajax=1'.format(city['id'], city['pos'], city['id'], actionRequest)
 	data = session.post(url)
 	json_data = json.loads(data, strict=False)
 	return json_data[1][1][1]

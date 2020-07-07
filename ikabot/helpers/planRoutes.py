@@ -34,10 +34,10 @@ def sendGoods(session, originCityId, destinationCityId, islandId, ships, send):
 		html = session.get()
 		city = getCity(html)
 		currId = city['id']
-		data = {'action': 'header', 'function': 'changeCurrentCity', 'actionRequest': 'REQUESTID', 'oldView': 'city', 'cityId': originCityId, 'backgroundView': 'city', 'currentCityId': currId, 'ajax': '1'}
+		data = {'action': 'header', 'function': 'changeCurrentCity', 'actionRequest': actionRequest, 'oldView': 'city', 'cityId': originCityId, 'backgroundView': 'city', 'currentCityId': currId, 'ajax': '1'}
 		session.post(payloadPost=data)
 
-		data = {'action': 'transportOperations', 'function': 'loadTransportersWithFreight', 'destinationCityId': destinationCityId, 'islandId': islandId, 'oldView': '', 'position': '', 'avatar2Name': '', 'city2Name': '', 'type': '', 'activeTab': '', 'transportDisplayPrice': '0', 'premiumTransporter': '0', 'minusPlusValue': '500', 'capacity': '5', 'max_capacity': '5', 'jetPropulsion': '0', 'transporters': ships, 'backgroundView': 'city', 'currentCityId': originCityId, 'templateView': 'transport', 'currentTab': 'tabSendTransporter', 'actionRequest': 'REQUESTID', 'ajax': '1'}
+		data = {'action': 'transportOperations', 'function': 'loadTransportersWithFreight', 'destinationCityId': destinationCityId, 'islandId': islandId, 'oldView': '', 'position': '', 'avatar2Name': '', 'city2Name': '', 'type': '', 'activeTab': '', 'transportDisplayPrice': '0', 'premiumTransporter': '0', 'minusPlusValue': '500', 'capacity': '5', 'max_capacity': '5', 'jetPropulsion': '0', 'transporters': ships, 'backgroundView': 'city', 'currentCityId': originCityId, 'templateView': 'transport', 'currentTab': 'tabSendTransporter', 'actionRequest': actionRequest, 'ajax': '1'}
 
 		# add amounts of resources to send
 		for i in range(len(send)):
@@ -101,7 +101,7 @@ def getMinimumWaitingTime(session):
 	"""
 	html = session.get()
 	idCiudad = re.search(r'currentCityId:\s(\d+),', html).group(1)
-	url = 'view=militaryAdvisor&oldView=city&oldBackgroundView=city&backgroundView=city&currentCityId={}&actionRequest=REQUESTID&ajax=1'.format(idCiudad)
+	url = 'view=militaryAdvisor&oldView=city&oldBackgroundView=city&backgroundView=city&currentCityId={}&actionRequest={}&ajax=1'.format(idCiudad, actionRequest)
 	posted = session.post(url)
 	postdata = json.loads(posted, strict=False)
 	militaryMovements = postdata[1][1][2]['viewScriptParams']['militaryAndFleetMovements']

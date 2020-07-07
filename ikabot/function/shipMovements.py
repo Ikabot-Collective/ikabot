@@ -51,7 +51,7 @@ def shipMovements(session, event, stdin_fd):
 		print(_('Ships {:d}/{:d}\n').format(getAvailableShips(session), getTotalShips(session)))
 
 		cityId = getCurrentCityId(session)
-		url = 'view=militaryAdvisor&oldView=city&oldBackgroundView=city&backgroundView=city&currentCityId={}&actionRequest=REQUESTID&ajax=1'.format(cityId)
+		url = 'view=militaryAdvisor&oldView=city&oldBackgroundView=city&backgroundView=city&currentCityId={}&actionRequest={}&ajax=1'.format(cityId, actionRequest)
 		resp = session.post(url)
 		resp = json.loads(resp, strict=False)
 		movements = resp[1][1][2]['viewScriptParams']['militaryAndFleetMovements']

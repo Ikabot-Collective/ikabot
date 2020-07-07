@@ -23,7 +23,7 @@ def activateVacationMode(session):
 	html = session.get()
 	city = getCity(html)
 
-	data = {'action': 'Options', 'function': 'activateVacationMode', 'actionRequest': 'REQUESTID', 'backgroundView': 'city', 'currentCityId': city['id'], 'templateView': 'options_umod_confirm'}
+	data = {'action': 'Options', 'function': 'activateVacationMode', 'actionRequest': actionRequest, 'backgroundView': 'city', 'currentCityId': city['id'], 'templateView': 'options_umod_confirm'}
 	session.post(params=data, ignoreExpire=True)
 
 def vacationMode(session, event, stdin_fd):

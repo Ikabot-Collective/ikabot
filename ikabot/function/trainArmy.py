@@ -35,7 +35,7 @@ def getBuildingInfo(session, city, trainTroops):
 	response : dict
 	"""
 	view = 'barracks' if trainTroops else 'shipyard'
-	params = {'view': view, 'cityId': city['id'], 'position': city['pos'], 'backgroundView': 'city', 'currentCityId': city['id'], 'actionRequest': 'REQUESTID', 'ajax': '1'}
+	params = {'view': view, 'cityId': city['id'], 'position': city['pos'], 'backgroundView': 'city', 'currentCityId': city['id'], 'actionRequest': actionRequest, 'ajax': '1'}
 	data = session.post(params=params)
 	return json.loads(data, strict=False)
 

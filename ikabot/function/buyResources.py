@@ -51,7 +51,7 @@ def chooseResource(session, city):
 	'currentCityId': city['id'],
 	'templateView': 'branchOffice',
 	'currentTab': 'bargain',
-	'actionRequest': 'REQUESTID',
+	'actionRequest': actionRequest,
 	'ajax': 1
 	}
 	# this will set the chosen resource in the store
@@ -119,7 +119,7 @@ def getGold(session, city):
 	-------
 	gold : int
 	"""
-	url = 'view=finances&backgroundView=city&currentCityId={}&templateView=finances&actionRequest=REQUESTID&ajax=1'.format(city['id'])
+	url = 'view=finances&backgroundView=city&currentCityId={}&templateView=finances&actionRequest={}&ajax=1'.format(city['id'], actionRequest)
 	data = session.post(url)
 	json_data = json.loads(data, strict=False)
 	gold = json_data[0][1]['headerData']['gold']
@@ -268,10 +268,10 @@ def buy(session, city, offer, amount_to_buy):
 	'currentCityId': offer['cityId'],
 	'templateView': 'takeOffer',
 	'currentTab': 'bargain',
-	'actionRequest': 'REQUESTID',
+	'actionRequest': actionRequest,
 	'ajax': 1
 	}
-	url = 'view=takeOffer&destinationCityId={}&oldView=branchOffice&activeTab=bargain&cityId={}&position={}&type={}&resource={}&backgroundView=city&currentCityId={}&templateView=branchOffice&actionRequest=REQUESTID&ajax=1'.format(offer['destinationCityId'], offer['cityId'], offer['position'], offer['type'], offer['resource'], offer['cityId'])
+	url = 'view=takeOffer&destinationCityId={}&oldView=branchOffice&activeTab=bargain&cityId={}&position={}&type={}&resource={}&backgroundView=city&currentCityId={}&templateView=branchOffice&actionRequest={}&ajax=1'.format(offer['destinationCityId'], offer['cityId'], offer['position'], offer['type'], offer['resource'], offer['cityId'], actionRequest)
 	data = session.post(url)
 	html = json.loads(data, strict=False)[1][1][1]
 	hits = re.findall(r'"tradegood(\d)Price"\s*value="(\d+)', html)

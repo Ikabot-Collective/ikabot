@@ -4,6 +4,7 @@
 import re
 import json
 from decimal import *
+from ikabot.config import *
 
 getcontext().prec = 30
 
@@ -60,7 +61,7 @@ def getProductionPerSecond(session, city_id):
 	-------
 	production: tuple[Decimal, Decimal, int]
 	"""
-	prod = session.post(payloadPost={'action': 'header', 'function': 'changeCurrentCity', 'actionRequest': 'REQUESTID', 'cityId': city_id, 'ajax': '1'})
+	prod = session.post(payloadPost={'action': 'header', 'function': 'changeCurrentCity', 'actionRequest': actionRequest, 'cityId': city_id, 'ajax': '1'})
 	prod = json.loads(prod, strict=False)
 	prod = prod[0][1]['headerData']
 	wood_production = Decimal( prod['resourceProduction'] )

@@ -42,7 +42,7 @@ def constructBuilding(session, event, stdin_fd):
 			if len(free_spaces_of_type) > 0:
 				# we take any space in the desired area
 				free_space_of_type = free_spaces_of_type[0]
-				params = {'view': 'buildingGround', 'cityId': city['id'], 'position': free_space_of_type['position'], 'backgroundView': 'city', 'currentCityId': city['id'], 'actionRequest': 'REQUESTID', 'ajax': '1'}
+				params = {'view': 'buildingGround', 'cityId': city['id'], 'position': free_space_of_type['position'], 'backgroundView': 'city', 'currentCityId': city['id'], 'actionRequest': actionRequest, 'ajax': '1'}
 				buildings_response = session.post(params=params, noIndex=True)
 				buildings_response = json.loads(buildings_response, strict=False)[1][1]
 				if buildings_response == '':
@@ -85,7 +85,7 @@ def constructBuilding(session, event, stdin_fd):
 			banner()
 
 		# build it
-		params = {'action': 'CityScreen', 'function': 'build', 'cityId': city['id'], 'position': option['position'], 'building': building['buildingId'], 'backgroundView': 'city', 'currentCityId': city['id'], 'templateView': 'buildingGround', 'actionRequest': 'REQUESTID', 'ajax': '1'}
+		params = {'action': 'CityScreen', 'function': 'build', 'cityId': city['id'], 'position': option['position'], 'building': building['buildingId'], 'backgroundView': 'city', 'currentCityId': city['id'], 'templateView': 'buildingGround', 'actionRequest': actionRequest, 'ajax': '1'}
 		buildings_response = session.post(params=params, noIndex=True)
 		msg = json.loads(buildings_response, strict=False)[3][1][0]['text']
 		print(msg)

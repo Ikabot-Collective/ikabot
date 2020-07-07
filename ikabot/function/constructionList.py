@@ -126,7 +126,7 @@ def expandBuilding(session, cityId, building, waitForResources):
 			sendToBot(session, msg)
 			return
 
-		url = 'action=CityScreen&function=upgradeBuilding&actionRequest=REQUESTID&cityId={}&position={:d}&level={}&activeTab=tabSendTransporter&backgroundView=city&currentCityId={}&templateView={}&ajax=1'.format(cityId, position, building['level'], cityId, building['building'])
+		url = 'action=CityScreen&function=upgradeBuilding&actionRequest={}&cityId={}&position={:d}&level={}&activeTab=tabSendTransporter&backgroundView=city&currentCityId={}&templateView={}&ajax=1'.format(actionRequest, cityId, position, building['level'], cityId, building['building'])
 		resp = session.post(url)
 		html = session.get(city_url + cityId)
 		city = getCity(html)
@@ -187,7 +187,7 @@ def getResourcesNeeded(session, city, building, current_level, final_level):
 	costs_per_material : dict[int, int]
 	"""
 	# get html with information about buildings
-	building_detail_url = 'view=buildingDetail&buildingId=0&helpId=1&backgroundView=city&currentCityId={}&templateView=ikipedia&actionRequest=REQUESTID&ajax=1'.format(city['id'])
+	building_detail_url = 'view=buildingDetail&buildingId=0&helpId=1&backgroundView=city&currentCityId={}&templateView=ikipedia&actionRequest={}&ajax=1'.format(city['id'], actionRequest)
 	building_detail_response = session.post(building_detail_url)
 	building_detail = json.loads(building_detail_response, strict=False)
 	building_html = building_detail[1][1][1]
@@ -196,7 +196,7 @@ def getResourcesNeeded(session, city, building, current_level, final_level):
 	regex_building_detail = r'<div class="(?:selected)? button_building '+ re.escape(building['building']) + r'"\s*onmouseover="\$\(this\)\.addClass\(\'hover\'\);" onmouseout="\$\(this\)\.removeClass\(\'hover\'\);"\s*onclick="ajaxHandlerCall\(\'\?(.*?)\'\);'
 	match = re.search(regex_building_detail, building_html)
 	building_costs_url = match.group(1)
-	building_costs_url += 'backgroundView=city&currentCityId={}&templateView=buildingDetail&actionRequest=REQUESTID&ajax=1'.format(city['id'])
+	building_costs_url += 'backgroundView=city&currentCityId={}&templateView=buildingDetail&actionRequest={}&ajax=1'.format(city['id'], actionRequest)
 	building_costs_response = session.post(building_costs_url)
 	building_costs = json.loads(building_costs_response, strict=False)
 	html_costs = building_costs[1][1][1]
@@ -207,7 +207,7 @@ def getResourcesNeeded(session, city, building, current_level, final_level):
 		costs_reduction = 14
 	else:
 		# get the studies
-		url = 'view=noViewChange&researchType=economy&backgroundView=city&currentCityId={}&templateView=researchAdvisor&actionRequest=REQUESTID&ajax=1'.format(city['id'])
+		url = 'view=noViewChange&researchType=economy&backgroundView=city&currentCityId={}&templateView=researchAdvisor&actionRequest={}&ajax=1'.format(city['id'], actionRequest)
 		rta = session.post(url)
 		rta = json.loads(rta, strict=False)
 		studies = rta[2][1]['new_js_params']

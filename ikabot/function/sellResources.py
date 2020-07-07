@@ -50,7 +50,7 @@ def getMarketInfo(session, city):
 	-------
 	response : dict
 	"""
-	params = {'view': 'branchOfficeOwnOffers', 'activeTab': 'tab_branchOfficeOwnOffers', 'cityId': city['id'], 'position': city['pos'], 'backgroundView': 'city', 'currentCityId': city['id'], 'templateView': 'branchOfficeOwnOffers', 'currentTab': 'tab_branchOfficeOwnOffers', 'actionRequest': 'REQUESTID', 'ajax': '1'}
+	params = {'view': 'branchOfficeOwnOffers', 'activeTab': 'tab_branchOfficeOwnOffers', 'cityId': city['id'], 'position': city['pos'], 'backgroundView': 'city', 'currentCityId': city['id'], 'templateView': 'branchOfficeOwnOffers', 'currentTab': 'tab_branchOfficeOwnOffers', 'actionRequest': actionRequest, 'ajax': '1'}
 	resp = session.post(params=params, noIndex=True)
 	return json.loads(resp, strict=False)[1][1][1]
 
@@ -70,7 +70,7 @@ def getOffers(session, my_market_city, resource_type):
 		resource_type = 'resource'
 	else:
 		resource_type = str(resource_type)
-	data = {'cityId': my_market_city['id'], 'position': my_market_city['pos'], 'view': 'branchOffice', 'activeTab': 'bargain', 'type': '333', 'searchResource': resource_type, 'range': my_market_city['rango'], 'backgroundView': 'city', 'currentCityId': my_market_city['id'], 'templateView': 'branchOffice', 'currentTab': 'bargain', 'actionRequest': 'REQUESTID', 'ajax': '1'}
+	data = {'cityId': my_market_city['id'], 'position': my_market_city['pos'], 'view': 'branchOffice', 'activeTab': 'bargain', 'type': '333', 'searchResource': resource_type, 'range': my_market_city['rango'], 'backgroundView': 'city', 'currentCityId': my_market_city['id'], 'templateView': 'branchOffice', 'currentTab': 'bargain', 'actionRequest': actionRequest, 'ajax': '1'}
 	resp = session.post(payloadPost=data)
 	html = json.loads(resp, strict=False)[1][1][1]
 	return re.findall(r'<td class=".*?">(.*?)<br/>\((.*?)\)\s*</td>\s*<td>(.*?)</td>\s*<td><img src=".*?"\s*alt=".*?"\s*title=".*?"/></td>\s*<td style="white-space:nowrap;">(\d+)\s*<img src=".*?"\s*class=".*?"/>.*?</td>\s*<td>(\d+)</td>\s*<td><a onclick="ajaxHandlerCall\(this\.href\);return false;"\s*href="\?view=takeOffer&destinationCityId=(\d+)&', html)
@@ -268,7 +268,7 @@ def do_it1(session, left_to_sell, offers, resource_type, city_to_buy_from):
 			left_to_sell -= amount_to_sell
 			amount_to_buy -= amount_to_sell
 
-			data = {'action': 'transportOperations', 'function': 'sellGoodsAtAnotherBranchOffice', 'cityId': city_to_buy_from['id'], 'destinationCityId': destination_city_id, 'oldView': 'branchOffice', 'position': city_to_buy_from['pos'], 'avatar2Name': username, 'city2Name': cityname, 'type': '333', 'activeTab': 'bargain', 'transportDisplayPrice': '0', 'premiumTransporter': '0', 'capacity': '5', 'max_capacity': '5', 'jetPropulsion': '0', 'transporters': str(ships_used), 'backgroundView': 'city', 'currentCityId': city_to_buy_from['id'], 'templateView': 'takeOffer', 'currentTab': 'bargain', 'actionRequest': 'REQUESTID', 'ajax': '1'}
+			data = {'action': 'transportOperations', 'function': 'sellGoodsAtAnotherBranchOffice', 'cityId': city_to_buy_from['id'], 'destinationCityId': destination_city_id, 'oldView': 'branchOffice', 'position': city_to_buy_from['pos'], 'avatar2Name': username, 'city2Name': cityname, 'type': '333', 'activeTab': 'bargain', 'transportDisplayPrice': '0', 'premiumTransporter': '0', 'capacity': '5', 'max_capacity': '5', 'jetPropulsion': '0', 'transporters': str(ships_used), 'backgroundView': 'city', 'currentCityId': city_to_buy_from['id'], 'templateView': 'takeOffer', 'currentTab': 'bargain', 'actionRequest': actionRequest, 'ajax': '1'}
 			if resource_type == 0:
 				data['cargo_resource'] = amount_to_sell
 				data['resourcePrice'] = precio
@@ -309,7 +309,7 @@ def do_it2(session, amount_to_sell, price, resource_type, sell_market_capacity, 
 			amount_to_sell -= offer
 			new_offer = currently_on_sell + offer
 
-			payloadPost = {'cityId': city['id'], 'position': city['pos'], 'action': 'CityScreen', 'function': 'updateOffers', 'resourceTradeType': '444', 'resource': '0', 'resourcePrice': '10', 'tradegood1TradeType': '444', 'tradegood1': '0', 'tradegood1Price': '11', 'tradegood2TradeType': '444', 'tradegood2': '0', 'tradegood2Price': '12', 'tradegood3TradeType': '444', 'tradegood3': '0', 'tradegood3Price': '17', 'tradegood4TradeType': '444', 'tradegood4': '0', 'tradegood4Price': '5', 'backgroundView': 'city', 'currentCityId': city['id'], 'templateView': 'branchOfficeOwnOffers', 'currentTab': 'tab_branchOfficeOwnOffers', 'actionRequest': 'REQUESTID', 'ajax': '1'}
+			payloadPost = {'cityId': city['id'], 'position': city['pos'], 'action': 'CityScreen', 'function': 'updateOffers', 'resourceTradeType': '444', 'resource': '0', 'resourcePrice': '10', 'tradegood1TradeType': '444', 'tradegood1': '0', 'tradegood1Price': '11', 'tradegood2TradeType': '444', 'tradegood2': '0', 'tradegood2Price': '12', 'tradegood3TradeType': '444', 'tradegood3': '0', 'tradegood3Price': '17', 'tradegood4TradeType': '444', 'tradegood4': '0', 'tradegood4Price': '5', 'backgroundView': 'city', 'currentCityId': city['id'], 'templateView': 'branchOfficeOwnOffers', 'currentTab': 'tab_branchOfficeOwnOffers', 'actionRequest': actionRequest, 'ajax': '1'}
 			if resource_type == 0:
 				payloadPost['resource'] = new_offer
 				payloadPost['resourcePrice'] = price
