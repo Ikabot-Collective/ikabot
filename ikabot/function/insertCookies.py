@@ -12,10 +12,17 @@ t = gettext.translation('insertCookies',
                         fallback=True)
 _ = t.gettext
 
-def insertCookies(s,e,fd):
-	sys.stdin = os.fdopen(fd)
+def insertCookies(session, event, stdin_fd):
+	"""
+	Parameters
+	----------
+	session : ikabot.web.session.Session
+	event : multiprocessing.Event
+	stdin_fd: int
+	"""
+	sys.stdin = os.fdopen(stdin_fd)
 	try:
-		cookies = json.dumps(s.getSessionData()['cookies'])
+		cookies = json.dumps(session.getSessionData()['cookies'])
 		cookies_js = 'cookies={};i=0;for(let cookie in cookies){{document.cookie=Object.keys(cookies)[i]+\"=\"+cookies[cookie];i++}}'.format(cookies)
 		print("""To prevent ikabot from logging you out while playing Ikariam do the following:
 		1. While you're in Ikariam on the "Your session has expired screen" open chrome developer tools by pressing CTRL + SHIFT + I
@@ -29,7 +36,7 @@ def insertCookies(s,e,fd):
 		""")
 		print(cookies_js)
 		enter()
-		e.set()
+		event.set()
 	except KeyboardInterrupt:
-		e.set()
+		event.set()
 		return

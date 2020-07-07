@@ -3,7 +3,7 @@
 
 import re
 import json
-from ikabot.helpers.recursos import *
+from ikabot.helpers.resources import *
 
 def removeOccurrences(text, occurrences):
 	"""This function rids the string passed to it as ``text`` of every occurrence of every element from the list of characters or strings passed to it as ``occurrences``.
@@ -13,7 +13,7 @@ def removeOccurrences(text, occurrences):
 		a string representing text which will be modified so as to not include any occurrence of any element in the occurrences list
 	occurrences : list[str,char]
 		a list containing characters or strings whose occurrences will be removed from ``text``
-	
+
 	Returns
 	-------
 	text : str
@@ -29,7 +29,7 @@ def getFreeCitizens(html):
 	----------
 	html : str
 		a string representing html which is returned when sending a get request to view a city.
-	
+
 	Returns
 	-------
 	freeCitizens : int
@@ -62,7 +62,7 @@ def getIsland(html):
 	----------
 	html : str
 		the html returned when a get request to view the island is made. This request can be made with the following statement: ``s.get(urlIsla + islandId)``, where ``urlIsla`` is a string defined in ``config.py`` and ``islandId`` is the id of the island.
-	
+
 	Returns
 	-------
 	island : Island
@@ -117,24 +117,24 @@ def getCity(html):
 	----------
 	html : str
 		the html returned when a get request to view the city is made. This request can be made with the following statement: ``s.get(urlCiudad + id)``, where urlCiudad is a string defined in ``config.py`` and id is the id of the city.
-	
+
 	Returns
 	-------
-	city : City
+	city : dict
 		this function returns a json parsed City object. For more information about this object refer to the github wiki page of Ikabot.
 	"""
 
-	ciudad = re.search(r'"updateBackgroundData",\s?([\s\S]*?)\],\["updateTemplateData"', html).group(1)
-	ciudad = json.loads(ciudad, strict=False)
+	city = re.search(r'"updateBackgroundData",\s?([\s\S]*?)\],\["updateTemplateData"', html).group(1)
+	city = json.loads(city, strict=False)
 
-	ciudad['Id'] = ciudad.pop('ownerId')
-	ciudad['Name'] = ciudad.pop('ownerName')
-	ciudad['x'] = ciudad.pop('islandXCoord')
-	ciudad['y'] = ciudad.pop('islandYCoord')
-	ciudad['cityName'] = ciudad['name']
+	city['Id'] = city.pop('ownerId')
+	city['Name'] = city.pop('ownerName')
+	city['x'] = city.pop('islandXCoord')
+	city['y'] = city.pop('islandYCoord')
+	city['cityName'] = city['name']
 
 	i = 0
-	for position in ciudad['position']:
+	for position in city['position']:
 		position['position'] = i
 		i += 1
 		if 'level' in position:
@@ -148,15 +148,15 @@ def getCity(html):
 			position['type'] = position['building'].split(' ')[-1]
 			position['building'] = 'empty'
 
-	ciudad['id'] = str(ciudad['id'])
-	ciudad['propia'] = True
-	ciudad['recursos'] = getRecursosDisponibles(html, num=True)
-	ciudad['storageCapacity'] = getstorageCapacityDeAlmacenamiento(html)
-	ciudad['ciudadanosDisp'] = getFreeCitizens(html)
-	ciudad['consumo'] = getConsumoDeVino(html)
-	ciudad['enventa'] = onSale(html)
-	ciudad['freeSpaceForResources'] = []
+	city['id'] = str(city['id'])
+	city['propia'] = True
+	city['recursos'] = getAvailableResources(html, num=True)
+	city['storageCapacity'] = getWarehouseCapacity(html)
+	city['ciudadanosDisp'] = getFreeCitizens(html)
+	city['consumo'] = getWineConsumption(html)
+	city['enventa'] = onSale(html)
+	city['freeSpaceForResources'] = []
 	for i in range(5):
-		ciudad['freeSpaceForResources'].append( ciudad['storageCapacity'] - ciudad['recursos'][i] - ciudad['enventa'][i] )
+		city['freeSpaceForResources'].append( city['storageCapacity'] - city['recursos'][i] - city['enventa'][i] )
 
-	return ciudad
+	return city

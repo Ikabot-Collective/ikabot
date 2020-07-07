@@ -14,7 +14,7 @@ def addDot(num):
 	----------
 	num : int
 		integer number to format
-	
+
 	Returns
 	-------
 	number : str
@@ -23,12 +23,12 @@ def addDot(num):
 	return '{0:,}'.format(int(num)).replace(',','.')
 
 def daysHoursMinutes(totalSeconds):
-	"""Formats the total number of seconds into days hours minutes (eg. 321454 -> 3D 17H) 
+	"""Formats the total number of seconds into days hours minutes (eg. 321454 -> 3D 17H)
 	Parameters
 	----------
 	totalSeconds : int
 		total number of seconds
-	
+
 	Returns
 	-------
 	text : str
@@ -52,7 +52,7 @@ def daysHoursMinutes(totalSeconds):
 
 def wait(seconds, maxrandom = 0):
 	"""This function will wait the provided number of seconds plus a random number of seconds between 0 and maxrandom
-	Parameteres
+	Parameters
 	-----------
 	seconds : int
 		the number of seconds to wait for
@@ -70,8 +70,12 @@ def wait(seconds, maxrandom = 0):
 		time.sleep(restantes * ratio)
 		restantes = fin - time.time()
 	time.sleep(randomTime)
-	return
 
-def getCurrentCityId(s):
-		html = s.get()
-		return re.search(r'currentCityId:\s(\d+),', html).group(1)
+def getCurrentCityId(session):
+	"""
+	Parameters
+	----------
+	session : ikabot.web.session.Session
+	"""
+	html = session.get()
+	return re.search(r'currentCityId:\s(\d+),', html).group(1)

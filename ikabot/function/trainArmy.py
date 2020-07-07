@@ -14,30 +14,56 @@ from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.varios import addDot
 from ikabot.helpers.getJson import getCity
 from ikabot.helpers.signals import setInfoSignal
-from ikabot.helpers.recursos import getRecursosDisponibles
+from ikabot.helpers.resources import getAvailableResources
 
 t = gettext.translation('trainArmy',
                         localedir,
-                        languages=idiomas,
+                        languages=languages,
                         fallback=True)
 _ = t.gettext
 
-def getBuildingInfo(s, city, trainTroops):
+def getBuildingInfo(session, city, trainTroops):
+	"""
+	Parameters
+	----------
+	session : ikabot.web.session.Session
+	city : dict
+	trainTroops : bool
+
+	Returns
+	-------
+	response : dict
+	"""
 	view = 'barracks' if trainTroops else 'shipyard'
 	params = {'view': view, 'cityId': city['id'], 'position': city['pos'], 'backgroundView': 'city', 'currentCityId': city['id'], 'actionRequest': 'REQUESTID', 'ajax': '1'}
-	data = s.post(params=params)
+	data = session.post(params=params)
 	return json.loads(data, strict=False)
 
-def train(s, city, trainings, trainTroops):
+def train(session, city, trainings, trainTroops):
+	"""
+	Parameters
+	----------
+	session : ikabot.web.session.Session
+	city : dict
+	trainings : list[dict]
+	trainTroops : bool
+	"""
 	templateView = 'barracks' if trainTroops else 'shipyard'
 	function = 'buildUnits' if trainTroops else 'buildShips'
 	payload = {'action': 'CityScreen', 'function': function, 'actionRequest': 'REQUESTID', 'cityId': city['id'], 'position': city['pos'], 'backgroundView': 'city', 'currentCityId': city['id'], 'templateView': templateView, 'ajax': '1'}
 	for training in trainings:
 		payload[ training['unit_type_id'] ] = training['train']
-	s.post(payloadPost=payload)
+	session.post(payloadPost=payload)
 
-def waitForTraining(s, ciudad, trainTroops):
-	data = getBuildingInfo(s, ciudad, trainTroops)
+def waitForTraining(session, city, trainTroops):
+	"""
+	Parameters
+	----------
+	session : ikabot.web.session.Session
+	city : dict
+	trainTroops : bool
+	"""
+	data = getBuildingInfo(session, city, trainTroops)
 	html = data[1][1][1]
 	seconds = re.search(r'\'buildProgress\', (\d+),', html)
 	if seconds:
@@ -45,7 +71,15 @@ def waitForTraining(s, ciudad, trainTroops):
 		seconds = int(seconds) - data[0][1]['time']
 		wait(seconds + 5)
 
-def planTrainings(s, city, trainings, trainTroops):
+def planTrainings(session, city, trainings, trainTroops):
+	"""
+	Parameters
+	----------
+	session : ikabot.web.session.Session
+	city : dict
+	trainings : list[list[dict]]
+	trainTroops : bool
+	"""
 	buildingPos = city['pos']
 
 	# trainings might be divided in multriple rounds
@@ -57,8 +91,8 @@ def planTrainings(s, city, trainings, trainTroops):
 			return
 
 		for training in trainings:
-			waitForTraining(s, city, trainTroops)
-			html = s.get(urlCiudad + city['id'])
+			waitForTraining(session, city, trainTroops)
+			html = session.get(city_url + city['id'])
 			city = getCity(html)
 			city['pos'] = buildingPos
 
@@ -96,12 +130,21 @@ def planTrainings(s, city, trainings, trainTroops):
 			total = sum( [ unit['train'] for unit in training ] )
 			if total == 0:
 				msg = _('It was not possible to finish the training due to lack of resources.')
-				sendToBot(s, msg)
+				sendToBot(session, msg)
 				return
 
-			train(s, city, training, trainTroops)
+			train(session, city, training, trainTroops)
 
 def generateArmyData(units_info):
+	"""
+	Parameters
+	----------
+	units_info : dict
+
+	Returns
+	-------
+	units : list[dict]
+	"""
 	i = 1
 	units = []
 	while 'js_barracksSlider{:d}'.format(i) in units_info:
@@ -112,8 +155,15 @@ def generateArmyData(units_info):
 		i += 1
 	return units
 
-def trainArmy(s,e,fd):
-	sys.stdin = os.fdopen(fd)
+def trainArmy(session, event, stdin_fd):
+	"""
+	Parameters
+	----------
+	session : ikabot.web.session.Session
+	event : multiprocessing.Event
+	stdin_fd: int
+	"""
+	sys.stdin = os.fdopen(stdin_fd)
 	try:
 		banner()
 
@@ -126,7 +176,7 @@ def trainArmy(s,e,fd):
 			print(_('In what city do you want to train the troops?'))
 		else:
 			print(_('In what city do you want to train the fleet?'))
-		city = chooseCity(s)
+		city = chooseCity(session)
 		banner()
 
 		lookfor = 'barracks' if trainTroops else 'shipyard'
@@ -140,10 +190,10 @@ def trainArmy(s,e,fd):
 			else:
 				print(_('Shipyard not built.'))
 			enter()
-			e.set()
+			event.set()
 			return
 
-		data = getBuildingInfo(s, city, trainTroops)
+		data = getBuildingInfo(session, city, trainTroops)
 
 		units_info = data[2][1]
 		units = generateArmyData(units_info)
@@ -190,7 +240,7 @@ def trainArmy(s,e,fd):
 			print(_('\nProceed? [Y/n]'))
 			rta = read(values=['y', 'Y', 'n', 'N', ''])
 			if rta.lower() == 'n':
-				e.set()
+				event.set()
 				return
 
 			tranings.append(units)
@@ -235,7 +285,7 @@ def trainArmy(s,e,fd):
 			print(_('\nProceed anyway? [Y/n]'))
 			rta = read(values=['y', 'Y', 'n', 'N', ''])
 			if rta.lower() == 'n':
-				e.set()
+				event.set()
 				return
 
 		if trainTroops:
@@ -244,21 +294,21 @@ def trainArmy(s,e,fd):
 			print(_('\nThe selected fleet will be trained.'))
 		enter()
 	except KeyboardInterrupt:
-		e.set()
+		event.set()
 		return
 
-	set_child_mode(s)
-	e.set()
+	set_child_mode(session)
+	event.set()
 
 	if trainTroops:
 		info = _('\nI train troops in {}\n').format(city['cityName'])
 	else:
 		info = _('\nI train fleets in {}\n').format(city['cityName'])
-	setInfoSignal(s, info)
+	setInfoSignal(session, info)
 	try:
-		planTrainings(s, city, tranings, trainTroops)
+		planTrainings(session, city, tranings, trainTroops)
 	except:
 		msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
-		sendToBot(s, msg)
+		sendToBot(session, msg)
 	finally:
-		s.logout()
+		session.logout()

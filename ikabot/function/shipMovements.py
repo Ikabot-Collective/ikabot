@@ -15,11 +15,20 @@ from ikabot.helpers.varios import *
 
 t = gettext.translation('shipMovements',
                         localedir,
-                        languages=idiomas,
+                        languages=languages,
                         fallback=True)
 _ = t.gettext
 
 def isHostile(movement):
+	"""
+	Parameters
+	----------
+	movement : dict
+
+	Returns
+	-------
+	is hostile : bool
+	"""
 	if movement['army']['amount']:
 		return True
 	for mov in movement['fleet']['ships']:
@@ -27,16 +36,23 @@ def isHostile(movement):
 			return True
 	return False
 
-def shipMovements(s,e,fd):
-	sys.stdin = os.fdopen(fd)
+def shipMovements(session, event, stdin_fd):
+	"""
+	Parameters
+	----------
+	session : ikabot.web.session.Session
+	event : multiprocessing.Event
+	stdin_fd: int
+	"""
+	sys.stdin = os.fdopen(stdin_fd)
 	try:
 		banner()
 
-		print(_('Ships {:d}/{:d}\n').format(getAvailableShips(s), getTotalShips(s)))
+		print(_('Ships {:d}/{:d}\n').format(getAvailableShips(session), getTotalShips(session)))
 
-		cityId = getCurrentCityId(s)
+		cityId = getCurrentCityId(session)
 		url = 'view=militaryAdvisor&oldView=city&oldBackgroundView=city&backgroundView=city&currentCityId={}&actionRequest=REQUESTID&ajax=1'.format(cityId)
-		resp = s.post(url)
+		resp = session.post(url)
 		resp = json.loads(resp, strict=False)
 		movements = resp[1][1][2]['viewScriptParams']['militaryAndFleetMovements']
 		time_now = int(resp[0][1]['time'])
@@ -44,7 +60,7 @@ def shipMovements(s,e,fd):
 		if len(movements) == 0:
 			print(_('There are no movements'))
 			enter()
-			e.set()
+			event.set()
 			return
 
 		for movement in movements:
@@ -90,7 +106,7 @@ def shipMovements(s,e,fd):
 				ships = int(math.ceil((Decimal(total_load) / Decimal(500))))
 				print(_('{:d} Ships').format(ships))
 		enter()
-		e.set()
+		event.set()
 	except KeyboardInterrupt:
-		e.set()
+		event.set()
 		return
