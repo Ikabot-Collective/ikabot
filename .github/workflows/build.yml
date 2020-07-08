@@ -8,21 +8,30 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    continue-on-error: ${{ endsWith(matrix.python-version, '-dev') }}
     strategy:
       matrix:
-        python-version: [3.5, 3.6, 3.7, 3.8]
+        os: [ubuntu-latest, windows-latest]
+        python-version: [3.5, 3.6, 3.7, 3.8, 3.9-dev]
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
+      if: "!endsWith(matrix.python-version, '-dev')"
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: deadsnakes/action@v1.0.0
+      if: endsWith(matrix.python-version, '-dev')
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python3 -m pip install --user -e .
+        python -m pip install -e .
     - name: Just run ikabot
       run: |
-        printf "\n\n" | python -m ikabot &> log.log || exit 0
-        (grep "Wrong email or password" log.log && cat log.log && exit 0) || (cat log.log && exit 1)
+        printf "\n\n" | python -m ikabot &> log.log || cat log.log
+        grep "Wrong email or password" log.log && exit 0 || exit 1
