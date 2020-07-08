@@ -45,7 +45,9 @@ def distributeResources(session, event, stdin_fd):
 		if resource == 0:
 			evenly = True
 		else:
-			print('\nDistributes resources from cities that do produce them \nto cities that do not (1) or distribute them evenly among all cities (2)?')
+			print('\nHow do you want to distribute the resources?')
+			print('1) From cities that produce them to cities that do not')
+			print('2) Distribute them evenly among all cities')
 			type_distribution = read(min=1, max=2)
 			evenly = type_distribution == 2
 
@@ -231,7 +233,7 @@ def distribute_unevenly(session, resource_type):
 					toSend[city_id] = remaining_resources_to_be_sent_to_each_city
 			break
 
-		free_storage_available_per_city = [ destination_cities[city]['available_amount_of_resource'] for city in destination_cities if city not in toSend ]
+		free_storage_available_per_city = [ destination_cities[city]['free_storage_for_resource'] for city in destination_cities if city not in toSend ]
 		total_free_storage_available_in_all_cities = sum( free_storage_available_per_city )
 		remaining_resources_to_send = min(remaining_resources_to_send, total_free_storage_available_in_all_cities)
 		remaining_resources_to_be_sent_to_each_city = remaining_resources_to_send // len(free_storage_available_per_city)
