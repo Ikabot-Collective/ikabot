@@ -60,13 +60,13 @@ def executeRoutes(session, routes):
 	"""
 	for route in routes:
 		(origin_city, destination_city, island_id, *toSend) = route
-		destination_city_ud = destination_city['id']
+		destination_city_id = destination_city['id']
 
 		while sum(toSend) > 0:
 			ships_available = waitForArrival(session)
 			storageCapacityInShips = ships_available * 500
 
-			html = session.get(city_url + str(destination_city_ud))
+			html = session.get(city_url + str(destination_city_id))
 			destination_city = getCity(html)
 			storageCapacityInCity = destination_city['freeSpaceForResources']
 
