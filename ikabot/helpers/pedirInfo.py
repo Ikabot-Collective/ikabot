@@ -37,7 +37,7 @@ def read(min=None, max=None, digit=False, msg=prompt, values=None, empty=False):
 
 	Returns
 	-------
-	result : int
+	result : int | str
 		int representing the user's choice
 	"""
 	def _invalid():
@@ -224,7 +224,7 @@ def getIdsOfCities(session, all=False):
 		cities_cache = cities_cache.replace('city_', '')
 		cities_cache = json.loads(cities_cache, strict=False)
 
-		ids_cache = [city for city in cities_cache]
+		ids_cache = [city_id for city_id in cities_cache]
 		ids_cache = sorted(ids_cache)
 
 	# {'coords': '[x:y] ', 'id': idCiudad, 'tradegood': '..', 'name': 'nomberCiudad', 'relationship': 'ownCity'|'occupiedCities'|..}
