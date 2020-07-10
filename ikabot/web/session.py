@@ -64,6 +64,9 @@ class Session:
 
 	def __isExpired(self, html):
 		return 'index.php?logout' in html
+	
+	def isExpired(self,html):
+		return self.__isExpired(html)
 
 	def __updateCookieFile(self, primero=False, nuevo=False, salida=False):
 		sessionData = self.getSessionData()
@@ -240,7 +243,7 @@ class Session:
 
 		used_old_cookies = False
 		# if there are cookies stored, try to use them
-		if 'num_sesiones' in sessionData and sessionData['num_sesiones'] > 0 and self.logged is False:
+		if 'num_sessions' in sessionData and self.logged is False:
 			# create a new temporary session object
 			old_s = requests.Session()
 			# set the headers
