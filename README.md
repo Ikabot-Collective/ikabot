@@ -83,7 +83,13 @@ _Ikabot is a cross-platform program written in python that grants equal or even 
 
 	It tells you how to update _ikabot_
 
-19. Update the Telegram data
+19. Import / Export cookie
+
+	You can use this feature to insert your _ikabot_ cookie into your browser or other _ikabot_ instances running on a different machine.
+	This will result in _ikabot_ not logging your browser Ikariam session. Keep in mind that logging into Ikariam from another browser will
+	invalidate all prevous cookies, and you will need to do this again if that happens.
+
+20. Update the Telegram data
 
 	It allows you to set or update your Telegram contact information.
 
@@ -171,13 +177,13 @@ When you want to use a functionality that requires Telegram, such as _Alert atta
 To make Ikabot use a proxy simply open the config.py file which is located in the ikabot directory and change the following lines:
 
 `proxy = False` to `proxy = True`  
-`https_proxy = "https://127.0.0.1:8080"` to `https_proxy = "https://{Your proxy server IP}:{Your proxy server port}"`  
+`https_proxy = "socks5://127.0.0.1:9050"` to `https_proxy = "https://{Your proxy server IP}:{Your proxy server port}"`  
 
 Make sure that your proxy has HTTPS enabled.  
 
 **Bare in mind that if another user is using the same proxy, you will have the same IP and you might get banned**
 
-#### Automatization with Expect
+#### Automation with Expect
 
 You can use [Expect](https://en.wikipedia.org/wiki/Expect) to automate some actions on _ikabot_.  
 There is an example [here](https://github.com/physics-sp/ikabot/wiki/Using-Expect-example:-distribute_wine_evenly.exp).  
