@@ -50,7 +50,10 @@ def importCookie(session):
 	newcookie = newcookie.replace('ikariam=','')
 	cookies = session.getSessionData()['cookies']
 	cookies['ikariam'] = newcookie
-	session.s.cookies.set('ikariam', newcookie, domain = session.host, path = '/')
+	if session.host in session.s.cookies._cookies:
+		session.s.cookies.set('ikariam', newcookie, domain = session.host, path = '/')
+	else:
+		session.s.cookies.set('ikariam', newcookie, domain = '', path = '/')
 	session.s.proxies = proxyDict
 	html = session.s.get(session.urlBase).text
 	session.s.proxies = {}
