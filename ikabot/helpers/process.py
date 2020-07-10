@@ -15,7 +15,6 @@ def set_child_mode(session):
 	"""
 	session.padre = False
 	deactivate_sigint()
-	session.login()
 
 def run(command):
 	return subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.read()

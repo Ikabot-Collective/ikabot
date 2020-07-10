@@ -28,7 +28,7 @@ _ = t.gettext
 
 class Session:
 	def __init__(self):
-		self.logfile = '/tmp/debug.txt'
+		self.logfile = '/tmp/ikabot.log'
 		self.log = False
 		self.padre = True
 		self.logged = False
@@ -68,29 +68,11 @@ class Session:
 	def isExpired(self,html):
 		return self.__isExpired(html)
 
-	def __updateCookieFile(self, primero=False, nuevo=False, salida=False):
+	def __saveNewCookies(self):
 		sessionData = self.getSessionData()
 
-		if primero is True:
-			cookie_dict = dict(self.s.cookies.items())
-			sessionData['cookies'] = cookie_dict
-			sessionData['num_sessions'] = 1
-
-		elif nuevo is True:
-			try:
-				sessionData['num_sessions'] += 1
-			except KeyError:
-				sessionData['num_sessions'] = 1
-
-		elif salida is True:
-			try:
-				if sessionData['num_sessions'] == 1:
-					html = self.s.get(self.urlBase).text
-					if self.__isExpired(html) is False:
-						self.__logout(html)
-			except KeyError:
-				return
-			sessionData['num_sessions'] -= 1
+		cookie_dict = dict(self.s.cookies.items())
+		sessionData['cookies'] = cookie_dict
 
 		self.setSessionData(sessionData)
 
@@ -98,15 +80,13 @@ class Session:
 		if sessionData is None:
 			sessionData = self.getSessionData()
 		try:
-			assert sessionData['num_sessions'] > 0
 			cookie_dict = sessionData['cookies']
 			self.s = requests.Session()
 			#self.s.proxies = proxyDict
 			self.s.headers.clear()
 			self.s.headers.update(self.headers)
 			requests.cookies.cookiejar_from_dict(cookie_dict, cookiejar=self.s.cookies, overwrite=True)
-			self.__updateCookieFile(nuevo=True)
-		except (KeyError, AssertionError):
+		except KeyError:
 			self.__login(3)
 
 	def __login(self, retries=0):
@@ -243,7 +223,7 @@ class Session:
 
 		used_old_cookies = False
 		# if there are cookies stored, try to use them
-		if 'num_sessions' in sessionData and self.logged is False:
+		if 'cookies' in sessionData and self.logged is False:
 			# create a new temporary session object
 			old_s = requests.Session()
 			# set the headers
@@ -313,10 +293,8 @@ class Session:
 				os._exit(0)
 			raise Exception('Couldn\'t log in')
 
-		if used_old_cookies:
-			self.__updateCookieFile(nuevo=True)
-		else:
-			self.__updateCookieFile(primero=True)
+		if not used_old_cookies:
+			self.__saveNewCookies()
 
 		self.logged = True
 
@@ -332,7 +310,7 @@ class Session:
 		sessionData = self.getSessionData()
 
 		try:
-			if sessionData['num_sessions'] > 0 and self.s.cookies['PHPSESSID'] != sessionData['cookies']['PHPSESSID']:
+			if self.s.cookies['PHPSESSID'] != sessionData['cookies']['PHPSESSID']:
 				self.__getCookie(sessionData)
 			else:
 				try:
@@ -350,14 +328,8 @@ class Session:
 		sessionData = self.getSessionData()
 
 		try:
-			if sessionData['num_sessions'] > 0:
-				if self.s.cookies['PHPSESSID'] != sessionData['cookies']['PHPSESSID']:
-					self.__getCookie(sessionData)
-			else:
-				try:
-					self.__login(3)
-				except Exception:
-					self.__sessionExpired()
+			if self.s.cookies['PHPSESSID'] != sessionData['cookies']['PHPSESSID']:
+				self.__getCookie(sessionData)
 		except KeyError:
 			try:
 				self.__login(3)
@@ -467,17 +439,10 @@ class Session:
 			except requests.exceptions.ConnectionError:
 				time.sleep(ConnectionError_wait)
 
-	def login(self):
-		"""This function doesn't actually log into ikariam, it only increments a number in the .ikabot file which represents the number currently running sessions
-		"""
-		self.__log('login({})')
-		self.__updateCookieFile(nuevo=True)
-
 	def logout(self):
-		"""This function decrements a number in the .ikabot file representing the number of currently running sessions. If this number is 1, it will attempt to completely log out of ikariam
+		"""This function kills the current (chlid) process
 		"""
 		self.__log('logout({})')
-		self.__updateCookieFile(salida=True)
 		if self.padre is False:
 			os._exit(0)
 
