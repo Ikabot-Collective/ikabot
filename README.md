@@ -32,7 +32,8 @@ _Ikabot is a cross-platform program written in python that grants equal or even 
 	
 6. Search for new spaces
 
-	This functionality alerts by telegram, if a city disappears or if someone founds in any of the islands where the user has at least one city.
+	This functionality alerts by telegram, if a city disappears or if someone founds in any of the islands where the user has at least one city
+	or any user defined island or set of islands.
 	
 7. Login daily
 

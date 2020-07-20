@@ -34,7 +34,36 @@ def searchForIslandSpaces(session, event, stdin_fd):
 			event.set()
 			return
 		banner()
-		print(_('I will search for new spaces each hour.'))
+		print('Do you want to search for spaces on your islands or a specific set of islands?')
+		print('(0) Back')
+		print('(1) Search all islands I have colonised')
+		print('(2) Search a specific set of islands')
+		choice = read(min=0, max = 2)
+		islandList = []
+		if choice == 0:
+			event.set()
+			return
+		elif choice == 2:
+			banner()
+			print('Insert the coordinates of each island you want searched like so: X1:Y1, X2:Y2, X3:Y3...')
+			coords_string = read()
+			coords_string = coords_string.replace(' ', '')
+			coords = coords_string.split(',')
+			for coord in coords:
+				coord = '&xcoord=' + coord
+				coord = coord.replace(':', '&ycoord=')
+				html = session.get('view=island' + coord)
+				island = getIsland(html)
+				islandList.append(island['id'])
+		else:
+			pass
+		
+		banner()
+		print('How frequently should the islands be searched in minutes (minimum is 3)?')
+		time = read(min = 3, digit = True)
+
+		banner()
+		print(_('I will search for changes in the selected islands'))
 		enter()
 	except KeyboardInterrupt:
 		event.set()
@@ -46,14 +75,14 @@ def searchForIslandSpaces(session, event, stdin_fd):
 	info = _('\nI search for new spaces each hour\n')
 	setInfoSignal(session, info)
 	try:
-		do_it(session)
+		do_it(session, islandList, time)
 	except:
 		msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
 		sendToBot(session, msg)
 	finally:
 		session.logout()
 
-def do_it(session):
+def do_it(session, islandList, time):
 	"""
 	Parameters
 	----------
@@ -66,7 +95,10 @@ def do_it(session):
 
 	while True:
 		# this is done inside the loop because the user may colonize in a new island
-		islandsIds = getIslandsIds(session)
+		if islandList != []:
+			islandsIds = islandList
+		else:
+			islandsIds = getIslandsIds(session)
 		for islandId in islandsIds:
 			html = session.get(island_url + islandId)
 			island = getIsland(html)
@@ -94,4 +126,4 @@ def do_it(session):
 						msg = _('{} founded {} in {} {}:{} {}').format(city_now['Name'], city_now['name'], materials_names[int(island['good'])], island['x'], island['y'], island['name'])
 						sendToBot(session, msg)
 
-		wait(1*60*60)
+		wait(time * 60)
