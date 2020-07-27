@@ -90,7 +90,11 @@ _Ikabot is a cross-platform program written in python that grants equal or even 
 	This will result in _ikabot_ not logging your browser Ikariam session. Keep in mind that logging into Ikariam from another browser will
 	invalidate all prevous cookies, and you will need to do this again if that happens.
 
-20. Update the Telegram data
+20. Auto-Pirate
+
+	This feature will run the 'Smugglers' piracy mission as many times as you need it to. It will also attempt to automatically solve the captcha should it be presented with one.
+
+21. Update the Telegram data
 
 	It allows you to set or update your Telegram contact information.
 
@@ -100,6 +104,12 @@ When you set an action in _ikabot_, you can enter and play ikariam without any p
 Join us in discord at:`https://discord.gg/3hyxPRj`
 
 ### Install
+
+#### Pre-built Windows binary
+
+You can use the pre-built _ikabot_ binary for Windows in the ikabot.zip file for a certain version [here](https://github.com/physics-sp/ikabot/releases)!
+
+#### Using pip
 
 ```
 python3 -m pip install --user ikabot

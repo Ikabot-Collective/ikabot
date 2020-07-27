@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 import gettext
 import multiprocessing
 from ikabot.config import *
@@ -158,4 +159,7 @@ def main():
 		clear()
 
 if __name__ == '__main__':
+	if sys.platform.startswith('win'):
+	# On Windows calling this function is necessary.
+		multiprocessing.freeze_support()
 	main()
