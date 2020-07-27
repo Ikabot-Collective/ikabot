@@ -49,7 +49,8 @@ def autoPirate(session, event, stdin_fd):
                 wait(5)
                 pirateCount += 1 #don't count this as an iteration of the loop
                 continue
-            url = 'action=PiracyScreen&function=capture&buildingLevel={0}&view=pirateFortress&cityId={1}&position=17&activeTab=tabBootyQuest&backgroundView=city&currentCityId={1}&templateView=pirateFortress&actionRequest={2}&ajax=1'.format(piracyCities[0]['position'][17]['level'], piracyCities[0]['id'], actionRequest)
+                                                       #buildingLevel=[level of pirate fortress for certain mission], for example for mission 2 you'll put 3 here because that's the level of the piratefortress needed to run that mission, max level can be accessed with piracyCities[0]['position'][17]['level']
+            url = 'action=PiracyScreen&function=capture&buildingLevel={0}&view=pirateFortress&cityId={1}&position=17&activeTab=tabBootyQuest&backgroundView=city&currentCityId={1}&templateView=pirateFortress&actionRequest={2}&ajax=1'.format('1', piracyCities[0]['id'], actionRequest)
             html = session.post(url)
             
             if 'Security word:' in html:
@@ -62,7 +63,7 @@ def autoPirate(session, event, stdin_fd):
                         if captcha == 'Error':
                             continue
                         session.post(city_url + str(piracyCities[0]['id']))
-                        params = {'action': 'PiracyScreen', 'function': 'capture', 'cityId': piracyCities[0]['id'], 'position': '17', 'captchaNeeded': '1', 'buildingLevel': piracyCities[0]['position'][17]['level'], 'captcha': captcha, 'activeTab': 'tabBootyQuest', 'backgroundView': 'city', 'currentCityId': piracyCities[0]['id'], 'templateView': 'pirateFortress', 'actionRequest': actionRequest, 'ajax': '1'}
+                        params = {'action': 'PiracyScreen', 'function': 'capture', 'cityId': piracyCities[0]['id'], 'position': '17', 'captchaNeeded': '1', 'buildingLevel': '1', 'captcha': captcha, 'activeTab': 'tabBootyQuest', 'backgroundView': 'city', 'currentCityId': piracyCities[0]['id'], 'templateView': 'pirateFortress', 'actionRequest': actionRequest, 'ajax': '1'}
                         html = session.post(payloadPost = params, noIndex = True)
                         if '"showPirateFortressShip":1' in html: #if this is true, then the crew is still in the town, that means that the request didn't succeed
                             continue
