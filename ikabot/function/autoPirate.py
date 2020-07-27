@@ -43,7 +43,6 @@ def autoPirate(session, event, stdin_fd):
     try:
         while (pirateCount > 0):
             pirateCount -= 1
-            banner()
             piracyCities = getPiracyCities(session)
             html = session.post(city_url + str(piracyCities[0]['id'])) #this is needed because for some reason you need to look at the town where you are sending a request from in the line below, before you send that request
             if '"showPirateFortressShip":0' in html: # this is in case the user has manually run a capture run, in that case, there is no need to wait 150secs instead we can check every 5
