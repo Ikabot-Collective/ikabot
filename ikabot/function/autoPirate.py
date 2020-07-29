@@ -53,7 +53,7 @@ def autoPirate(session, event, stdin_fd):
             url = 'action=PiracyScreen&function=capture&buildingLevel={0}&view=pirateFortress&cityId={1}&position=17&activeTab=tabBootyQuest&backgroundView=city&currentCityId={1}&templateView=pirateFortress&actionRequest={2}&ajax=1'.format('1', piracyCities[0]['id'], actionRequest)
             html = session.post(url)
             
-            if 'Security word:' in html:
+            if 'function=createCaptcha' in html:
                 try:
                     for i in range(20):
                         if i == 19:
