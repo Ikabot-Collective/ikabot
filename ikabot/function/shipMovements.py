@@ -101,7 +101,7 @@ def shipMovements(session, event, stdin_fd):
 					tradegood = resource['cssClass'].split()[1]
 					index = materials_names_tec.index(tradegood)
 					tradegood = materials_names[index]
-					total_load += int( amount.replace(',', '') )
+					total_load += int( amount.replace(',', '').replace('.', '') )
 					print(_('{} of {}').format(amount, tradegood))
 				ships = int(math.ceil((Decimal(total_load) / Decimal(500))))
 				print(_('{:d} Ships').format(ships))
