@@ -99,8 +99,10 @@ def shipMovements(session, event, stdin_fd):
 				for resource in movement['resources']:
 					amount = resource['amount']
 					tradegood = resource['cssClass'].split()[1]
-					index = materials_names_tec.index(tradegood)
-					tradegood = materials_names[index]
+					# gold won't be translated
+					if tradegood != 'gold':
+						index = materials_names_tec.index(tradegood)
+						tradegood = materials_names[index]
 					total_load += int( amount.replace(',', '').replace('.', '') )
 					print(_('{} of {}').format(amount, tradegood))
 				ships = int(math.ceil((Decimal(total_load) / Decimal(500))))
