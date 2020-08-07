@@ -137,7 +137,7 @@ def menu(session, checkUpdate=True):
 		os._exit(0) #kills the process which executes this statement, but it does not kill it's child processes
 
 def init():
-	home = 'HOMEPATH' if isWindows else 'HOME'
+	home = 'USERPROFILE' if isWindows else 'HOME'
 	os.chdir(os.getenv(home))
 	if not os.path.isfile(ikaFile):
 		open(ikaFile, 'w')
