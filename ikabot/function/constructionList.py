@@ -44,14 +44,14 @@ def getConstructionTime(session, html, building_position_id):
 	"""
 	city = getCity(html)
 	building = city['position'][building_position_id]
-	final_time = re.search(r'"endUpgradeTime":(\d{10})', html)
-	if final_time is None:
+
+	if building['isBusy'] is False:
 		msg = _('{}: I don\'t wait anything so that {} gets to the level {:d}').format(city['cityName'], building['name'], building['level'])
 		sendToBotDebug(session, msg, debugON_constructionList)
 		return 0
 
 	current_time    = int( time.time() )
-	final_time      = int( final_time.group(1) )
+	final_time      = int( building['completed'] )
 	seconds_to_wait = final_time - current_time
 	if seconds_to_wait <= 0:
 		seconds_to_wait = 0
