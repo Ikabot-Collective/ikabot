@@ -30,33 +30,32 @@ _ = t.gettext
 sendResources = True
 expand = True
 
-def getConstructionTime(session, html, building_position_id):
+def getConstructionTime(session, city):
 	"""
 	Parameters
 	----------
 	session : ikabot.web.session.Session
-	html : string
-	building_position_id : int
+	city : dict
 
 	Returns
 	-------
 	seconds_to_wait : int
 	"""
-	city = getCity(html)
-	building = city['position'][building_position_id]
 
-	if building['isBusy'] is False:
-		msg = _('{}: I don\'t wait anything so that {} gets to the level {:d}').format(city['cityName'], building['name'], building['level'])
-		sendToBotDebug(session, msg, debugON_constructionList)
+	construction_buildings = [ building for building in city['position'] if 'completed' in building ]
+	if len(construction_buildings) == 0:
 		return 0
 
+	construction_building = construction_buildings[0]
+	construction_time = construction_building['completed']
+
 	current_time    = int( time.time() )
-	final_time      = int( building['completed'] )
+	final_time      = int( construction_time )
 	seconds_to_wait = final_time - current_time
 	if seconds_to_wait <= 0:
 		seconds_to_wait = 0
 
-	msg = _('{}: I wait {:d} seconds so that {} gets to the level {:d}').format(city['cityName'], seconds_to_wait, building['name'], building['level'] + 1)
+	msg = _('{}: I wait {:d} seconds so that {} gets to the level {:d}').format(city['cityName'], seconds_to_wait, construction_building['name'], construction_building['level'] + 1)
 	sendToBotDebug(session, msg, debugON_constructionList)
 
 	return seconds_to_wait
@@ -76,7 +75,8 @@ def waitForConstruction(session, city_id, building_position):
 	seconds_to_finish_building = 1
 	while seconds_to_finish_building > 0:
 		html = session.get(city_url + city_id)
-		seconds_to_finish_building = getConstructionTime(session, html, building_position)
+		city = getCity(html)
+		seconds_to_finish_building = getConstructionTime(session, city)
 		wait(seconds_to_finish_building + 5)
 	html = session.get(city_url + city_id)
 	city = getCity(html)
