@@ -87,6 +87,11 @@ def do_it(session, islandList, time):
 	Parameters
 	----------
 	session : ikabot.web.session.Session
+		Session object
+	islandList : list[dict]
+		A list containing island objects which should be searched, if an empty list is passed, all the user's colonised islands are searched
+	time : int
+		The time in minutes between two consecutive seraches
 	"""
 
 	# this dict will contain all the cities from each island
@@ -118,6 +123,7 @@ def do_it(session, islandList, time):
 						# we didn't find the city_before in the cities_now
 						msg = _('the city {} of the player {} disappeared in {} {}:{} {}').format(city_before['name'], city_before['Name'], materials_names[int(island['good'])], island['x'], island['y'], island['name'])
 						sendToBot(session, msg)
+						cities_before_per_island[islandId] = cities_now.copy() #update cities_before_per_island for the current island
 
 				# someone colonised
 				for city_now in cities_now:
@@ -125,5 +131,6 @@ def do_it(session, islandList, time):
 						# we didn't find the city_now in the cities_before
 						msg = _('{} founded {} in {} {}:{} {}').format(city_now['Name'], city_now['name'], materials_names[int(island['good'])], island['x'], island['y'], island['name'])
 						sendToBot(session, msg)
+						cities_before_per_island[islandId] = cities_now.copy() #update cities_before_per_island for the current island
 
 		wait(time * 60)
