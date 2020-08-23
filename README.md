@@ -93,8 +93,12 @@ _Ikabot is a cross-platform program written in python that grants equal or even 
 20. Auto-Pirate
 
 	This feature will run the 'Smugglers' piracy mission as many times as you need it to. It will also attempt to automatically solve the captcha should it be presented with one.
+	
+21. Investigate
 
-21. Update the Telegram data
+	It allows you to investigate an available research.
+
+22. Update the Telegram data
 
 	It allows you to set or update your Telegram contact information.
 
