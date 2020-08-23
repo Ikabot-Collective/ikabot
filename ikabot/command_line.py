@@ -32,6 +32,7 @@ from ikabot.function.constructBuilding import constructBuilding
 from ikabot.function.shipMovements import shipMovements
 from ikabot.function.importExportCookie import importExportCookie
 from ikabot.function.autoPirate import autoPirate
+from ikabot.function.investigate import investigate
 
 t = gettext.translation('command_line',
                         localedir,
@@ -84,6 +85,7 @@ def menu(session, checkUpdate=True):
 					update,
 					importExportCookie,
 					autoPirate,
+					investigate,
 					updateTelegramData
 					]
 
@@ -108,10 +110,11 @@ def menu(session, checkUpdate=True):
 	print(_('(18) Update Ikabot'))
 	print(_('(19) Import / Export cookie'))
 	print(_('(20) Auto-Pirate'))
+	print(_('(21) Investigate'))
 	if telegramDataIsValid(session):
-		print(_('(21) Change the Telegram data'))
+		print(_('(22) Change the Telegram data'))
 	else:
-		print(_('(21) Enter the Telegram data'))
+		print(_('(22) Enter the Telegram data'))
 
 	total_options = len(menu_actions)
 	selected = read(min=0, max=total_options)
