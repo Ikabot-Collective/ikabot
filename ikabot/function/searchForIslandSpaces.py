@@ -35,7 +35,7 @@ def searchForIslandSpaces(session, event, stdin_fd):
 			return
 		banner()
 		print('Do you want to search for spaces on your islands or a specific set of islands?')
-		print('(0) Back')
+		print('(0) Exit')
 		print('(1) Search all islands I have colonised')
 		print('(2) Search a specific set of islands')
 		choice = read(min=0, max = 2)
