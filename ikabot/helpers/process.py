@@ -1,9 +1,10 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import subprocess
-import psutil
+import os
 import json
+import psutil
+import subprocess
 from ikabot.config import *
 from ikabot.helpers.signals import deactivate_sigint
 
@@ -42,7 +43,7 @@ def updateProcessList(session, programprocesslist = []):
 
 	# check it's still running
 	runningIkabotProcessList = []
-	ika_process = ['python.exe','ikabot.exe', 'python3.8.exe', 'python3.7.exe', 'python3.6.exe'] if isWindows else ['ikabot']
+	ika_process = psutil.Process(pid = os.getpid()).name()
 	for process in fileList:
 		try:
 			proc = psutil.Process(pid = process['pid'])
@@ -52,7 +53,7 @@ def updateProcessList(session, programprocesslist = []):
 		# windows doesn't support the status method
 		isAlive = True if isWindows else proc.status() != 'zombie'
 
-		if proc.name() in ika_process and isAlive:
+		if proc.name() == ika_process and isAlive:
 			runningIkabotProcessList.append(process)
 
 	# add new to the list and write to file only if it's given
