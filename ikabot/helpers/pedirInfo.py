@@ -112,7 +112,7 @@ def chooseCity(session, foreign=False):
 			menu_cities += '{}: {}{}{}\n'.format(num, city_name, pad(city_name), resource_abb)
 		menu_cities = menu_cities[:-1]
 	if foreign:
-		print(_(' 0: ciudad ajena'))
+		print(_(' 0: foreign city'))
 	print(menu_cities)
 
 	if foreign:
