@@ -14,7 +14,7 @@ setuptools.setup(
 		  'requests',
 		  'requests[socks]',
 		  'cryptography',
-		  'psutil'
+		  'psutil',
 		  'python-bidi'
 	],
 	entry_points = {
