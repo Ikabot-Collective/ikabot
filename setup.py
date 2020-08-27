@@ -15,6 +15,7 @@ setuptools.setup(
 		  'requests[socks]',
 		  'cryptography',
 		  'psutil'
+		  'python-bidi'
 	],
 	entry_points = {
 		'console_scripts': ['ikabot=ikabot.command_line:main'],
