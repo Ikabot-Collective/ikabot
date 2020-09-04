@@ -57,12 +57,7 @@ def menu(session, checkUpdate=True):
 	if len(process_list) > 0:
 		print(_('Running tasks:'))
 		for process in process_list:
-			if len(process['proxies']) == 0:
-				proxy = ''
-			else:
-				proxy = _('proxy: ') + str(process['proxies'])
-
-			print(_('- pid: {} task: {} {}').format(process['pid'], process['action'], proxy))
+			print(_('- pid: {} task: {}').format(process['pid'], process['action']))
 		print('')
 
 	menu_actions = [
@@ -127,7 +122,7 @@ def menu(session, checkUpdate=True):
 			event = multiprocessing.Event() #creates a new event
 			process = multiprocessing.Process(target=menu_actions[selected], args=(session, event, sys.stdin.fileno()), name=menu_actions[selected].__name__)
 			process.start()
-			process_list.append({'pid': process.pid, 'proxies': session.s.proxies, 'action': menu_actions[selected].__name__ })
+			process_list.append({'pid': process.pid, 'action': menu_actions[selected].__name__ })
 			updateProcessList(session, programprocesslist=process_list)
 			event.wait() #waits for the process to fire the event that's been given to it. When it does  this process gets back control of the command line and asks user for more input
 		except KeyboardInterrupt:
