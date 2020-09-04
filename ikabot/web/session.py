@@ -213,6 +213,7 @@ class Session:
 			config.infoUser += _(', Player:{}').format(self.username)
 			banner()
 
+
 		self.host = 's{}-{}.ikariam.gameforge.com'.format(self.mundo, self.servidor)
 		self.urlBase = 'https://{}/index.php?'.format(self.host)
 
@@ -235,8 +236,10 @@ class Session:
 			# make a request to check the connection
 			if 'proxy' in sessionData:
 				old_s.proxies = sessionData['proxy']['conf']
-
-			html = old_s.get(self.urlBase).text
+			try:
+				html = old_s.get(self.urlBase).text
+			except:
+				self.__proxy_error()
 
 			cookies_are_valid = self.__isExpired(html) is False
 			if cookies_are_valid:
@@ -281,7 +284,10 @@ class Session:
 				self.s.proxies = sessionData['proxy']['conf']
 
 			# use the new cookies instead, invalidate the old ones
-			html = self.s.get(url).text
+			try:
+				html = self.s.get(url).text
+			except:
+				self.__proxy_error()
 
 		if self.__isInVacation(html):
 			msg = _('The account went into vacation mode')
@@ -328,6 +334,29 @@ class Session:
 				self.__login(3)
 			except Exception:
 				self.__sessionExpired()
+
+	def __proxy_error(self):
+		sessionData = self.getSessionData()
+		if 'proxy' not in sessionData or sessionData['proxy']['set'] is False:
+			exit('network error')
+		if self.padre is True:
+			print(_('There seems to be a problem connecting to ikariam.'))
+			print(_('Do you want to disable the proxy? [Y/n]'))
+			rta = read(values=['y', 'Y', 'n', 'N', ''])
+			if rta.lower() == 'n':
+				exit()
+			else:
+				sessionData['proxy'] = {}
+				sessionData['proxy']['conf'] = {}
+				sessionData['proxy']['set']  = False
+				self.setSessionData(sessionData)
+				print(_('Proxy disabled, try again.'))
+				enter()
+				exit()
+		else:
+			msg = _('Network error. Consider disabling the proxy.')
+			sendToBot(self, msg)
+			exit()
 
 	def __checkCookie(self):
 		self.__log('__checkCookie()')
