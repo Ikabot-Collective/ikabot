@@ -54,9 +54,8 @@ def importCookie(session):
 		session.s.cookies.set('ikariam', newcookie, domain = session.host, path = '/')
 	else:
 		session.s.cookies.set('ikariam', newcookie, domain = '', path = '/')
-	session.s.proxies = proxyDict
+
 	html = session.s.get(session.urlBase).text
-	session.s.proxies = {}
 
 	if session.isExpired(html):
 		print('{}Failure!{} All your other sessions have just been invalidated!'.format(bcolors.RED, bcolors.ENDC))

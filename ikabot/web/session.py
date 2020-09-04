@@ -82,7 +82,8 @@ class Session:
 		try:
 			cookie_dict = sessionData['cookies']
 			self.s = requests.Session()
-			#self.s.proxies = proxyDict
+			if 'proxy' in sessionData:
+				self.s.proxies = sessionData['proxy']['conf']
 			self.s.headers.clear()
 			self.s.headers.update(self.headers)
 			requests.cookies.cookiejar_from_dict(cookie_dict, cookiejar=self.s.cookies, overwrite=True)
@@ -100,7 +101,6 @@ class Session:
 			banner()
 
 		self.s = requests.Session()
-		#self.s.proxies = proxyDict
 
 		# get gameEnvironmentId and platformGameId
 		self.headers = {'Host': 'lobby.ikariam.gameforge.com', 'User-Agent': user_agent, 'Accept': '*/*', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/'}
@@ -233,9 +233,10 @@ class Session:
 			cookie_dict = sessionData['cookies']
 			requests.cookies.cookiejar_from_dict(cookie_dict, cookiejar=old_s.cookies, overwrite=True)
 			# make a request to check the connection
-			old_s.proxies = proxyDict
+			if 'proxy' in sessionData:
+				old_s.proxies = sessionData['proxy']['conf']
+
 			html = old_s.get(self.urlBase).text
-			old_s.proxies = {}
 
 			cookies_are_valid = self.__isExpired(html) is False
 			if cookies_are_valid:
@@ -243,6 +244,9 @@ class Session:
 				used_old_cookies = True
 				# assign the old cookies to the session object
 				requests.cookies.cookiejar_from_dict(cookie_dict, cookiejar=self.s.cookies, overwrite=True)
+				# set the proxy
+				if 'proxy' in sessionData:
+					self.s.proxies = sessionData['proxy']['conf']
 				# set the headers
 				self.s.headers.clear()
 				self.s.headers.update(self.headers)
@@ -272,10 +276,12 @@ class Session:
 			self.s.headers.clear()
 			self.s.headers.update(self.headers)
 
+			# set the proxy
+			if 'proxy' in sessionData:
+				self.s.proxies = sessionData['proxy']['conf']
+
 			# use the new cookies instead, invalidate the old ones
-			self.s.proxies = proxyDict
 			html = self.s.get(url).text
-			self.s.proxies = {}
 
 		if self.__isInVacation(html):
 			msg = _('The account went into vacation mode')
@@ -373,9 +379,7 @@ class Session:
 		self.__log('get({}), params:{}'.format(url, str(params)))
 		while True:
 			try:
-				self.s.proxies = proxyDict
 				html = self.s.get(url, params=params).text #this isn't recursion, this get is different from the one it's in
-				self.s.proxies = {}
 				if ignoreExpire is False:
 					assert self.__isExpired(html) is False
 				return html
@@ -424,9 +428,7 @@ class Session:
 		self.__log('post({}), data={}'.format(url, str(payloadPost)))
 		while True:
 			try:
-				self.s.proxies = proxyDict
 				resp = self.s.post(url, data=payloadPost, params=params).text
-				self.s.proxies = {}
 				if ignoreExpire is False:
 					assert self.__isExpired(resp) is False
 				if 'TXT_ERROR_WRONG_REQUEST_ID' in resp:
