@@ -6,13 +6,30 @@ import gettext
 import requests
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.gui import *
-from ikabot.config import *
+import ikabot.config as config
 
 t = gettext.translation('proxy',
-                        localedir,
-                        languages=languages,
+                        config.localedir,
+                        languages=config.languages,
                         fallback=True)
 _ = t.gettext
+
+def show_proxy(session):
+	session_data = session.getSessionData()
+	msg = _('using proxy:')
+	if 'proxy' in session_data and session_data['proxy']['set'] is True:
+		curr_proxy = session_data['proxy']['conf']['https']
+		if msg not in config.update_msg:
+			# add proxy message
+			config.update_msg += '{} {}\n'.format(msg, curr_proxy)
+		else:
+			# delete old proxy message
+			config.update_msg = config.update_msg.replace('\n'.join(config.update_msg.split('\n')[-2:]), '')
+			# add new proxy message
+			config.update_msg += '{} {}\n'.format(msg, curr_proxy)
+	elif msg in config.update_msg:
+		# delete old proxy message
+		config.update_msg = config.update_msg.replace('\n'.join(config.update_msg.split('\n')[-2:]), '')
 
 def test_proxy(proxy_dict):
 	try:

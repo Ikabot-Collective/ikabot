@@ -33,7 +33,7 @@ from ikabot.function.shipMovements import shipMovements
 from ikabot.function.importExportCookie import importExportCookie
 from ikabot.function.autoPirate import autoPirate
 from ikabot.function.investigate import investigate
-from ikabot.function.proxyConf import proxyConf
+from ikabot.function.proxyConf import proxyConf, show_proxy
 
 t = gettext.translation('command_line',
                         localedir,
@@ -50,6 +50,8 @@ def menu(session, checkUpdate=True):
 	"""
 	if checkUpdate:
 		checkForUpdate()
+
+	show_proxy(session)
 
 	banner()
 

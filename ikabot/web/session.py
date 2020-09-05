@@ -82,8 +82,7 @@ class Session:
 		try:
 			cookie_dict = sessionData['cookies']
 			self.s = requests.Session()
-			if 'proxy' in sessionData:
-				self.s.proxies = sessionData['proxy']['conf']
+			self.__update_proxy(sessionData=sessionData)
 			self.s.headers.clear()
 			self.s.headers.update(self.headers)
 			requests.cookies.cookiejar_from_dict(cookie_dict, cookiejar=self.s.cookies, overwrite=True)
@@ -233,10 +232,9 @@ class Session:
 			# set the cookies to test
 			cookie_dict = sessionData['cookies']
 			requests.cookies.cookiejar_from_dict(cookie_dict, cookiejar=old_s.cookies, overwrite=True)
-			# make a request to check the connection
-			if 'proxy' in sessionData:
-				old_s.proxies = sessionData['proxy']['conf']
+			self.__update_proxy(obj=old_s, sessionData=sessionData)
 			try:
+				# make a request to check the connection
 				html = old_s.get(self.urlBase).text
 			except:
 				self.__proxy_error()
@@ -248,8 +246,7 @@ class Session:
 				# assign the old cookies to the session object
 				requests.cookies.cookiejar_from_dict(cookie_dict, cookiejar=self.s.cookies, overwrite=True)
 				# set the proxy
-				if 'proxy' in sessionData:
-					self.s.proxies = sessionData['proxy']['conf']
+				self.__update_proxy(sessionData=sessionData)
 				# set the headers
 				self.s.headers.clear()
 				self.s.headers.update(self.headers)
@@ -280,8 +277,7 @@ class Session:
 			self.s.headers.update(self.headers)
 
 			# set the proxy
-			if 'proxy' in sessionData:
-				self.s.proxies = sessionData['proxy']['conf']
+			self.__update_proxy(sessionData=sessionData)
 
 			# use the new cookies instead, invalidate the old ones
 			try:
@@ -358,6 +354,15 @@ class Session:
 			sendToBot(self, msg)
 			exit()
 
+	def __update_proxy(self, *, obj=None, sessionData=None):
+		# set the proxy
+		if obj is None:
+			obj = self.s
+		if sessionData is None:
+			sessionData = self.getSessionData()
+		if 'proxy' in sessionData:
+			obj.proxies = sessionData['proxy']['conf']
+
 	def __checkCookie(self):
 		self.__log('__checkCookie()')
 		sessionData = self.getSessionData()
@@ -400,6 +405,7 @@ class Session:
 			response from the server
 		"""
 		self.__checkCookie()
+		self.__update_proxy()
 
 		if noIndex:
 			url = self.urlBase.replace('index.php', '') + url
@@ -441,6 +447,7 @@ class Session:
 		payloadPost_original = payloadPost
 		params_original = params
 		self.__checkCookie()
+		self.__update_proxy()
 
 		# add the request id
 		token = self.__token()
