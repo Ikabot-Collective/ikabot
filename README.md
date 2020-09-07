@@ -45,7 +45,7 @@ _Ikabot is a cross-platform program written in python that grants equal or even 
 
 9. Donate automatically
 
-	_Ikabot_ enters once a day and donates ***ALL*** the available wood from ***ALL*** selected cities to the luxury good or the forest.
+	_Ikabot_ enters once a day and donates a percentage of the available wood from the selected cities to the luxury good or the forest.
 
 10. Alert wine running out
 
@@ -65,7 +65,7 @@ _Ikabot is a cross-platform program written in python that grants equal or even 
 
 14. Activate miracle
 
-	It allows you to activate any miracle you have available N times in a row.
+	It allows you to activate any miracle you have available as many times in a row as you want.
 
 15. Train army
 
@@ -97,12 +97,16 @@ _Ikabot is a cross-platform program written in python that grants equal or even 
 21. Investigate
 
 	It allows you to investigate an available research.
+	
+22. Configure Proxy
 
-22. Update the Telegram data
+	It lets you configure a proxy that will be used to all request except those sent to the lobby (during login).
+	The proxy affects immediately all processes associated with the current ikariam username.
 
-	It allows you to set or update your Telegram contact information.
+23. Update the Telegram data
 
-When you set an action in _ikabot_, you can enter and play ikariam without any problems. The only drawback that you may have is that the session expires, this is normal and if it happens just re-enter.
+	It allows you to set or change the Telegram's bot.
+
 
 ### Discord
 Join us in discord at:`https://discord.gg/3hyxPRj`
@@ -118,7 +122,7 @@ You can use the pre-built _ikabot_ binary for Windows in the ikabot.zip file for
 ```
 python3 -m pip install --user ikabot
 ```
-In Linux, you can access the main menu with `ikabot`, use `python3 -m ikabot` in windows.
+In Linux, you can access the main menu with `ikabot`, use `python3 -m ikabot` in Windows.
 
 ### Requirements
 
@@ -187,16 +191,6 @@ When you want to use a functionality that requires Telegram, such as _Alert atta
 
 **If you are concerned about privacy, set up your own bot, so that only you have the bot's token**
 
-#### Proxy
-
-To make Ikabot use a proxy simply open the config.py file which is located in the ikabot directory and change the following lines:
-
-`proxy = False` to `proxy = True`  
-`https_proxy = "socks5://127.0.0.1:9050"` to `https_proxy = "https://{Your proxy server IP}:{Your proxy server port}"`  
-
-Make sure that your proxy has HTTPS enabled.  
-
-**Bare in mind that if another user is using the same proxy, you will have the same IP and you might get banned**
 
 #### Automation with Expect
 
