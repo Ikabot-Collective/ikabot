@@ -18,7 +18,7 @@ _ = t.gettext
 
 getcontext().prec = 30
 
-def read(min=None, max=None, digit=False, msg=prompt, values=None, empty=False): # user input
+def read(min=None, max=None, digit=False, msg=prompt, values=None, empty=False, additionalValues = None): # user input
 	"""Reads input from user
 	Parameters
 	----------
@@ -34,6 +34,8 @@ def read(min=None, max=None, digit=False, msg=prompt, values=None, empty=False):
 		list of strings which are acceptable as input
 	empty : bool
 		a boolean indicating whether or not an empty string is acceptable as input
+	additionalValues : list
+		list of strings which are additional valid inputs. Can be used with digit = True to validate a string as an input among all digits
 
 	Returns
 	-------
@@ -42,12 +44,15 @@ def read(min=None, max=None, digit=False, msg=prompt, values=None, empty=False):
 	"""
 	def _invalid():
 		print('\033[1A\033[K', end="") # remove line
-		return read(min, max, digit, msg, values)
+		return read(min, max, digit, msg, values, additionalValues = additionalValues)
 
 	try:
 		read_input = input(msg)
 	except EOFError:
 		return _invalid()
+
+	if additionalValues is not None and read_input in additionalValues:
+		return read_input
 
 	if read_input == '' and empty is True:
 		return read_input
