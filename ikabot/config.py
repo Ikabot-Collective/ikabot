@@ -41,6 +41,8 @@ materials_names_tec = ['wood', 'wine', 'marble', 'glass', 'sulfur']
 tradegoods_names = [_('Saw mill'), _('Vineyard'), _('Quarry'), _('Crystal Mine'), _('Sulfur Pit')]
 ConnectionError_wait = 5 * 60
 actionRequest = 'REQUESTID'
+piracyMissionToBuildingLevel = {1 : 1, 2 : 3, 3 : 5, 4 : 7, 5 : 9, 6 : 11, 7 : 13, 8 : 15, 9 : 17}
+piracyMissionWaitingTime = {1 : 150, 2 : 450, 3 : 900, 4 : 1800, 5 : 3600, 6 : 7200, 7 : 14400, 8 : 28800, 9 : 57600}
 
 debugON_alertAttacks          = False
 debugON_alertLowWine          = False
