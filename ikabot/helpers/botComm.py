@@ -150,7 +150,7 @@ def updateTelegramData(session, event=None, stdin_fd=None):
 	sessionData['telegram']['chatId'] = chat_id
 	session.setSessionData(sessionData)
 
-	rand = random.randint(1000, 9999)
+	rand = str(random.randint(0, 9999)).zfill(4)
 	msg = _('El token a ingresar es:{:d}').format(rand)
 	sendToBot(session, msg, Token=True)
 

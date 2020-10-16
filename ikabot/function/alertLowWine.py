@@ -65,16 +65,15 @@ def do_it(session, hours):
 	session : ikabot.web.session.Session
 	hours : int
 	"""
-	ids, cities = getIdsOfCities(session)
+
+	was_alerted = {}
 	while True:
 		# getIdsOfCities is called on a loop because the amount of cities may change
-		ids, cities_new = getIdsOfCities(session)
-		if len(cities_new) != len(cities):
-			cities = cities_new
+		ids, cities = getIdsOfCities(session)
 
 		for cityId in cities:
-			if 'reported' not in cities[cityId]:
-				cities[cityId]['reported'] = False
+			if cityId not in was_alerted:
+				was_alerted[cityId] = False
 
 		for cityId in cities:
 			html = session.get(city_url + cityId)
@@ -93,26 +92,27 @@ def do_it(session, hours):
 				if consumption_per_hour > wine_production:
 					consumption_per_hour -= wine_production
 				else:
+					was_alerted[cityId] = False
 					continue
 
 			consumption_per_seg = Decimal(consumption_per_hour) / Decimal(3600)
 			wine_available = city['recursos'][1]
 
 			if consumption_per_seg == 0:
-				if cities[cityId]['reported'] is False:
+				if was_alerted[cityId] is False:
 					msg = _('The city {} is not consuming wine!').format(city['name'])
 					sendToBot(session, msg)
-					cities[cityId]['reported'] = True
+					was_alerted[cityId] = True
 				continue
 
 			seconds_left = Decimal(wine_available) / Decimal(consumption_per_seg)
 			if seconds_left < hours*60*60:
-				if cities[cityId]['reported'] is False:
+				if was_alerted[cityId] is False:
 					time_left = daysHoursMinutes(seconds_left)
 					msg = _('In {}, the wine will run out in {}').format(time_left, city['name'])
 					sendToBot(session, msg)
-					cities[cityId]['reported'] = True
+					was_alerted[cityId] = True
 			else:
-				cities[cityId]['reported'] = False
+				was_alerted[cityId] = False
 
 		time.sleep(20*60)
