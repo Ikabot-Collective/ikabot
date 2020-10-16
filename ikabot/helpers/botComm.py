@@ -151,7 +151,7 @@ def updateTelegramData(session, event=None, stdin_fd=None):
 	session.setSessionData(sessionData)
 
 	rand = str(random.randint(0, 9999)).zfill(4)
-	msg = _('El token a ingresar es:{:d}').format(rand)
+	msg = _('The token is:{}').format(rand)
 	sendToBot(session, msg, Token=True)
 
 	rta = read(msg=_('A message was sent by telegram, did you receive it? [Y/n]'), values=['y','Y','n', 'N', ''])
