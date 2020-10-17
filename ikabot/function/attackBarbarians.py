@@ -115,19 +115,21 @@ def get_units(session, city):
 	unit_id_names   = re.findall(r'<div class="army (.*?)">\s*<div class="tooltip">(.*?)<\/div>', html)
 	unit_amounts = re.findall(r'<td>([\d,]+)\s*</td>', html)
 
-	units = []
-
+	units = {}
 	for i in range(len(unit_id_names)):
 		amount = int(unit_amounts[i].replace(',', ''))
-		if amount > 0:
-			units.append([unit_id_names[i][0][1:], unit_id_names[i][1], amount])
+		unit_id = unit_id_names[i][0][1:]
+		unit_name = unit_id_names[i][1]
+		units[unit_id] = {}
+		units[unit_id]['name'] = unit_name
+		units[unit_id]['amount'] = amount
 
 	return units
 
 def plan_attack(session, city, babarians_info):
-	units = get_units(session, city)
+	total_units = get_units(session, city)
 
-	if len(units) == 0:
+	if sum( [ total_units[unit_id]['amount'] for unit_id in total_units ] ) == 0:
 		print('You don\'t have any troops in this city!')
 		enter()
 		return None
@@ -137,20 +139,26 @@ def plan_attack(session, city, babarians_info):
 
 		banner()
 
-		units_available = []
-		for unit_id, unit_name, unit_amount in units:
+		units_available = {}
+		for unit_id in total_units:
+
 			already_sent = sum( [ p['units'][u] for p in plan for u in p['units'] if u == unit_id ] )
-			if already_sent < unit_amount:
-				units_available.append([unit_id, unit_name, unit_amount - already_sent])
+			if already_sent < total_units[unit_id]['amount']:
+				units_available[unit_id] = {}
+				units_available[unit_id]['amount'] = total_units[unit_id]['amount'] - already_sent
+				units_available[unit_id]['name']   = total_units[unit_id]['name']
 
 		if len(units_available) == 0:
+			print(_('No more troops available to send'))
+			enter()
 			break
 
 		attack_round = {}
 		attack_round['units'] = {}
 		print(_('Which troops do you want to send?').format(len(plan)+1))
-		for unit_id, unit_name, unit_amount in units_available:
-
+		for unit_id in units_available:
+			unit_amount = units_available[unit_id]['amount']
+			unit_name   = units_available[unit_id]['name']
 			amount_to_send = read(msg='{} (max: {}): '.format(unit_name, addDot(unit_amount)), max=unit_amount, default=0)
 			if amount_to_send > 0:
 				attack_round['units'][unit_id] = amount_to_send
@@ -306,9 +314,10 @@ def do_it(session, island, city, babarians_info, plan, iterations):
 			}
 
 			ships_needed = 0
+			current_units = get_units(session, city)
 			for unit_id in current_round_group['units']:
-				amount_to_send = current_round_group['units'][unit_id]
-				attack_data['cargo_army_{}'.format(unit_id)] += amount_to_send
+				amount_to_send = min(current_round_group['units'][unit_id], current_units[unit_id]['amount'])
+				attack_data['cargo_army_{}'.format(unit_id)] = amount_to_send
 
 				if city_is_in_island(city, island) is False:
 					weight = get_unit_weight(session, city['id'], unit_id)
