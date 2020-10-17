@@ -124,7 +124,7 @@ def get_units(session, city):
 
 	return units
 
-def plan_attack(session, city):
+def plan_attack(session, city, babarians_info):
 	units = get_units(session, city)
 
 	if len(units) == 0:
@@ -158,9 +158,13 @@ def plan_attack(session, city):
 
 		if len(plan) > 0:
 			round_def = len(plan) + 1
-			attack_round['round'] = read(msg=_('In which battle round do you want to send them? (default: {:d}): ').format(round_def), default=round_def)
+			attack_round['round'] = read(msg=_('In which battle round do you want to send them? (min: 2, default: {:d}): ').format(round_def), min=2, default=round_def)
 		else:
 			attack_round['round'] = 1
+		print('')
+
+		max_ships = babarians_info['ships']
+		attack_round['ships'] = read(msg=_('How many ships do you want to send in this round? (min: 0, max: {:d}): ').format(max_ships), min=0, max=max_ships)
 		print('')
 
 		plan.append(attack_round)
@@ -201,7 +205,7 @@ def attackBarbarians(session, event, stdin_fd):
 		print(_('From which city do you want to attack?'))
 		city = chooseCity(session)
 
-		plan = plan_attack(session, city)
+		plan = plan_attack(session, city, babarians_info)
 		if plan is None:
 			event.set()
 			return
@@ -234,90 +238,89 @@ def attackBarbarians(session, event, stdin_fd):
 	finally:
 		session.logout()
 
+def get_unit_weight(session, city_id, unit_id):
+	params_w = {
+		'view': 'unitdescription',
+		'unitId': unit_id,
+		'helpId': 9,
+		'subHelpId': 0,
+		'backgroundView': 'city',
+		'currentCityId': city_id,
+		'templateView': 'unitdescription',
+		'actionRequest': actionRequest,
+		'ajax': 1
+	}
+	resp = session.post(params=params_w)
+	resp = json.loads(resp, strict=False)
+	html = resp[1][1][1]
+
+	weight = re.search(r'<li class="weight fifthpos" title=".*?"><span\s*class="accesshint">\'.*?\': </span>(\d+)</li>', html).group(1)
+	weight = int(weight)
+
+	return weight
+
+def city_is_in_island(city, island):
+	return city['id'] in [ c['id'] for c in island['cities'] ]
+
 def do_it(session, island, city, babarians_info, plan, iterations):
 
 	for round_number in range(1, iterations + 1):
 
-		attack_data = {
-			'action': 'transportOperations',
-			'function': 'attackBarbarianVillage',
-			'actionRequest': actionRequest,
-			'islandId': island['id'],
-			'destinationCityId': 0,
-			'cargo_army_304_upkeep': 3,
-			'cargo_army_304': 0,
-			'cargo_army_315_upkeep': 1,
-			'cargo_army_315': 0,
-			'cargo_army_302_upkeep': 4,
-			'cargo_army_302': 0,
-			'cargo_army_303_upkeep': 3,
-			'cargo_army_303': 0,
-			'cargo_army_312_upkeep': 15,
-			'cargo_army_312': 0,
-			'cargo_army_309_upkeep': 45,
-			'cargo_army_309': 0,
-			'cargo_army_307_upkeep': 15,
-			'cargo_army_307': 0,
-			'cargo_army_306_upkeep': 25,
-			'cargo_army_306': 0,
-			'cargo_army_305_upkeep': 30,
-			'cargo_army_305': 0,
-			'cargo_army_311_upkeep': 20,
-			'cargo_army_311': 0,
-			'cargo_army_310_upkeep': 10,
-			'cargo_army_310': 0,
-			'transporter': 0,
-			'barbarianVillage': 1,
-			'backgroundView': 'island',
-			'currentIslandId': island['id'],
-			'templateView': 'plunder',
-			'ajax': 1
-		}
+		current_round_groups = [ r for r in plan if r['round'] == round_number ]
+		for current_round_group in current_round_groups:
 
-		troops_to_send = {}
-		rounds = [ r for r in plan if r['round'] == round_number ]
-		for attack_round in rounds:
-			for unit_id in attack_round['units']:
-				attack_data['cargo_army_{}'.format(unit_id)] += attack_round['units'][unit_id]
-				if unit_id not in troops_to_send:
-					troops_to_send[unit_id] = attack_round['units'][unit_id]
-				else:
-					troops_to_send[unit_id] += attack_round['units'][unit_id]
+			attack_data = {
+				'action': 'transportOperations',
+				'function': 'attackBarbarianVillage',
+				'actionRequest': actionRequest,
+				'islandId': island['id'],
+				'destinationCityId': 0,
+				'cargo_army_304_upkeep': 3,
+				'cargo_army_304': 0,
+				'cargo_army_315_upkeep': 1,
+				'cargo_army_315': 0,
+				'cargo_army_302_upkeep': 4,
+				'cargo_army_302': 0,
+				'cargo_army_303_upkeep': 3,
+				'cargo_army_303': 0,
+				'cargo_army_312_upkeep': 15,
+				'cargo_army_312': 0,
+				'cargo_army_309_upkeep': 45,
+				'cargo_army_309': 0,
+				'cargo_army_307_upkeep': 15,
+				'cargo_army_307': 0,
+				'cargo_army_306_upkeep': 25,
+				'cargo_army_306': 0,
+				'cargo_army_305_upkeep': 30,
+				'cargo_army_305': 0,
+				'cargo_army_311_upkeep': 20,
+				'cargo_army_311': 0,
+				'cargo_army_310_upkeep': 10,
+				'cargo_army_310': 0,
+				'transporter': 0,
+				'barbarianVillage': 1,
+				'backgroundView': 'island',
+				'currentIslandId': island['id'],
+				'templateView': 'plunder',
+				'ajax': 1
+			}
 
-		# only send ships on the last round
-		if round_number == iterations:
 			ships_needed = 0
-			ships_available = waitForArrival(session)
-			if city['id'] not in [ city['id'] for city in island['cities'] ]:
-				for unit_id in troops_to_send:
+			for unit_id in current_round_group['units']:
+				amount_to_send = current_round_group['units'][unit_id]
+				attack_data['cargo_army_{}'.format(unit_id)] += amount_to_send
 
-					params_w = {
-						'view': 'unitdescription',
-						'unitId': unit_id,
-						'helpId': 9,
-						'subHelpId': 0,
-						'backgroundView': 'city',
-						'currentCityId': city['id'],
-						'templateView': 'unitdescription',
-						'actionRequest': actionRequest,
-						'ajax': 1
-					}
-					resp = session.post(params=params_w)
-					resp = json.loads(resp, strict=False)
-					html = resp[1][1][1]
+				if city_is_in_island(city, island) is False:
+					weight = get_unit_weight(session, city['id'], unit_id)
+					ships_needed += Decimal(amount_to_send * weight) / Decimal(500)
 
-					weight = re.search(r'<li class="weight fifthpos" title=".*?"><span\s*class="accesshint">\'.*?\': </span>(\d+)</li>', html).group(1)
-					weight = int(weight)
-					ships_needed += Decimal(troops_to_send[unit_id] * weight) / Decimal(500)
+			ships_needed = math.ceil(ships_needed)
 
-				ships_needed = math.ceil(ships_needed)
-
-				ships_available = 0
-				while ships_available < ships_needed:
-					ships_available = waitForArrival(session)
-
+			ships_available = 0
+			while ships_available < ships_needed:
+				ships_available = waitForArrival(session)
 			ships_available -= ships_needed
-			transporter = min(babarians_info['ships'], ships_available)
-			attack_data['transporter'] = transporter
 
-		session.post(data=attack_data)
+			attack_data['transporter'] = min(current_round_group['ships'], ships_available)
+
+			session.post(payloadPost=attack_data)
