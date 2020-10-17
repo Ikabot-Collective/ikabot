@@ -113,7 +113,7 @@ def get_units(session, city):
 
 	return units
 
-def plan_attack(session, city, barbarians_info):
+def plan_attack(session, city):
 	units = get_units(session, city)
 
 	if len(units) == 0:
@@ -176,21 +176,31 @@ def attackBarbarians(session, event, stdin_fd):
 			event.set()
 			return
 
-		info = get_babarians_info(session, island)
+		babarians_info = get_babarians_info(session, island)
 
 		print(_('The barbarians have:'))
-		for name, amount in info['troops']:
+		for name, amount in babarians_info['troops']:
 			print(_('{} units of {}').format(amount, name))
 		print('')
 
-		print('From which city do you want to attack?')
+		print(_('From which city do you want to attack?'))
 		city = chooseCity(session)
 
-		plan = plan_attack(session, city, info)
+		plan = plan_attack(session, city)
 		if plan is None:
 			event.set()
 			return
 
+		banner()
+		print(_('How many times do you wan\'t to attack?'))
+		iterations = read(min=0)
+		if iterations == 0:
+			event.set()
+			return
+
+		banner()
+		print(_('The barbarians in [{}:{}] will be attacked {:d} times.').format(island['x'], island['y'], iterations))
+		enter()
 
 	except KeyboardInterrupt:
 		event.set()
@@ -202,12 +212,14 @@ def attackBarbarians(session, event, stdin_fd):
 	info = _('\nI attack the barbarians in [{}:{}] {:d} times\n').format(island['x'], island['y'], iterations)
 	setInfoSignal(session, info)
 	try:
-		do_it(session, island, iterations)
+		do_it(session, island, city, babarians_info, plan, iterations)
 	except:
 		msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
 		sendToBot(session, msg)
 	finally:
 		session.logout()
 
-def do_it(session, island, iterations):
-	pass
+def do_it(session, island, city, babarians_info, plan, iterations):
+	
+	for i in range(iterations):
+		pass
