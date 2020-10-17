@@ -84,31 +84,6 @@ def get_babarians_info(session, island):
 
 	return info
 
-def get_city_in_island(session, island):
-	banner()
-	cities = [ city for city in island['cities'] if city['type'] != 'empty' and city['Name'] == session.username ]
-	if len(cities) == 1:
-		return cities[0]
-
-	cities.sort(key=lambda city:city['id'])
-
-	longest_city_name_length = 0
-	for city in cities:
-		longest_city_name_length = max(len(city['name']), longest_city_name_length)
-
-	pad = lambda city_name: ' ' * (longest_city_name_length - len(city_name)) + city_name
-
-	print('With which city do you want to attack?')
-	print(' 0) {}'.format(pad('Exit')))
-	for i, city in enumerate(cities):
-		num = ' ' + str(i+1) if i < 10 else str(i+1)
-		print('{}) {}'.format(num, pad(city['name'])))
-	index = read(min=0, max=len(cities))
-	if index == 0:
-		return None
-	else:
-		return cities[index-1]
-
 def get_units(session, city):
 	params = {
 		'view': 'cityMilitary',
@@ -153,7 +128,7 @@ def plan_attack(session, city, barbarians_info):
 
 		units_available = []
 		for unit_id, unit_name, unit_amount in units:
-			already_sent = sum([ p[u] for p in plan for u in p if u == unit_id ] )
+			already_sent = sum( [ p[u] for p in plan for u in p if u == unit_id ] )
 			if already_sent < unit_amount:
 				units_available.append([unit_id, unit_name, unit_amount - already_sent])
 
@@ -208,10 +183,8 @@ def attackBarbarians(session, event, stdin_fd):
 			print(_('{} units of {}').format(amount, name))
 		print('')
 
-		city = get_city_in_island(session, island)
-		if city is None:
-			event.set()
-			return
+		print('From which city do you want to attack?')
+		city = chooseCity(session)
 
 		plan = plan_attack(session, city, info)
 		if plan is None:
