@@ -85,6 +85,7 @@ def get_babarians_info(session, island):
 	return info
 
 def get_city_in_island(session, island):
+	banner()
 	cities = [ city for city in island['cities'] if city['type'] != 'empty' and city['Name'] == session.username ]
 	if len(cities) == 1:
 		return cities[0]
@@ -107,6 +108,81 @@ def get_city_in_island(session, island):
 		return None
 	else:
 		return cities[index-1]
+
+def get_units(session, city):
+	params = {
+		'view': 'cityMilitary',
+		'activeTab': 'tabUnits',
+		'cityId': city['id'],
+		'backgroundView': 'city',
+		'currentCityId': city['id'],
+		'currentTab': 'multiTab1',
+		'actionRequest': actionRequest,
+		'ajax': '1'
+	}
+
+	resp = session.post(params=params)
+	resp = json.loads(resp, strict=False)
+	html = resp[1][1][1]
+	html = html.split('<div class="fleet')[0]
+
+	unit_id_names   = re.findall(r'<div class="army (.*?)">\s*<div class="tooltip">(.*?)<\/div>', html)
+	unit_amounts = re.findall(r'<td>([\d,]+)\s*</td>', html)
+
+	units = []
+
+	for i in range(len(unit_id_names)):
+		amount = int(unit_amounts[i].replace(',', ''))
+		if amount > 0:
+			units.append([unit_id_names[i][0], unit_id_names[i][1], amount])
+
+	return units
+
+def plan_attack(session, city, barbarians_info):
+	units = get_units(session, city)
+
+	if len(units) == 0:
+		print('You don\'t have any troops in this city!')
+		enter()
+		return None
+
+	plan = []
+	while True:
+
+		banner()
+
+		units_available = []
+		for unit_id, unit_name, unit_amount in units:
+			already_sent = sum([ p[u] for p in plan for u in p if u == unit_id ] )
+			if already_sent < unit_amount:
+				units_available.append([unit_id, unit_name, unit_amount - already_sent])
+
+		if len(units_available) == 0:
+			break
+
+		attack_round = {}
+		print(_('Which troops do you want to send?').format(len(plan)+1))
+		for unit_id, unit_name, unit_amount in units_available:
+
+			amount_to_send = read(msg='{} (max: {}): '.format(unit_name, addDot(unit_amount)), max=unit_amount, default=0)
+			if amount_to_send > 0:
+				attack_round[unit_id] = amount_to_send
+		print('')
+
+		if len(plan) > 0:
+			round_def = len(plan) + 1
+			attack_round['round'] = read(msg=_('In which battle round do you want to send them? (default: {:d}): ').format(round_def), default=round_def)
+		else:
+			attack_round['round'] = 1
+
+		plan.append(attack_round)
+
+		print(_('Do you want to send another round of troops? [y/N]'))
+		resp = read(values=['y', 'Y', 'n', 'N'], default='n')
+		if resp.lower() != 'y':
+			break
+
+	return plan
 
 def attackBarbarians(session, event, stdin_fd):
 	"""
@@ -136,6 +212,12 @@ def attackBarbarians(session, event, stdin_fd):
 		if city is None:
 			event.set()
 			return
+
+		plan = plan_attack(session, city, info)
+		if plan is None:
+			event.set()
+			return
+
 
 	except KeyboardInterrupt:
 		event.set()
