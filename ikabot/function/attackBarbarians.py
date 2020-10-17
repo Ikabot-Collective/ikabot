@@ -237,7 +237,7 @@ def attackBarbarians(session, event, stdin_fd):
 def do_it(session, island, city, babarians_info, plan, iterations):
 
 	for round_number in range(1, iterations + 1):
-		
+
 		attack_data = {
 			'action': 'transportOperations',
 			'function': 'attackBarbarianVillage',
@@ -274,10 +274,15 @@ def do_it(session, island, city, babarians_info, plan, iterations):
 			'ajax': 1
 		}
 
+		troops_to_send = {}
 		rounds = [ r for r in plan if r['round'] == round_number ]
 		for attack_round in rounds:
 			for unit_id in attack_round['units']:
 				attack_data['cargo_army_{}'.format(unit_id)] += attack_round['units'][unit_id]
+				if unit_id not in troops_to_send:
+					troops_to_send[unit_id] = attack_round['units'][unit_id]
+				else:
+					troops_to_send[unit_id] += attack_round['units'][unit_id]
 
 		# only send ships on the last round
 		if round_number == iterations:
