@@ -68,14 +68,16 @@ def get_babarians_info(session, island):
 	resp = json.loads(resp, strict=False)
 
 	level = resp[2][1]['js_islandBarbarianLevel']['text']
+	level = int(level)
 	gold  = resp[2][1]['js_islandBarbarianResourcegold']['text']
+	gold  = int(gold)
 
 	resources = [0] * len(materials_names)
 	for i in range(len(materials_names)):
 		if i == 0:
-			resources[i] = resp[2][1]['js_islandBarbarianResourceresource']['text']
+			resources[i] = int(resp[2][1]['js_islandBarbarianResourceresource']['text'])
 		else:
-			resources[i] = resp[2][1]['js_islandBarbarianResourcetradegood{:d}'.format(i)]['text']
+			resources[i] = int(resp[2][1]['js_islandBarbarianResourcetradegood{:d}'.format(i)]['text'])
 
 	html = resp[1][1][1]
 	troops = re.findall(r'<div class="army \w*?">\s*<div class=".*?">(.*?)</div>\s*</div>\s*</td>\s*</tr>\s*<tr>\s*<td class="center">\s*(\d+)', html)
@@ -232,23 +234,10 @@ def attackBarbarians(session, event, stdin_fd):
 	finally:
 		session.logout()
 
-def get_cargo_ships(babarians_info):
-
-
 def do_it(session, island, city, babarians_info, plan, iterations):
 
 	for round_number in range(1, iterations + 1):
 		
-		troops_to_send = {}
-
-		rounds = [ r for r in plan if r['round'] == round_number ]
-		for attack_round in rounds:
-			for unit_id in attack_round['units']:
-				if unit_id not in troops_to_send:
-					troops_to_send[unit_id] = attack_round['units'][unit_id]
-				else:
-					troops_to_send[unit_id] += attack_round['units'][unit_id]
-
 		attack_data = {
 			'action': 'transportOperations',
 			'function': 'attackBarbarianVillage',
@@ -285,8 +274,10 @@ def do_it(session, island, city, babarians_info, plan, iterations):
 			'ajax': 1
 		}
 
-		for unit_id in troops_to_send:
-			attack_data['cargo_army_{}'.format(unit_id)] = troops_to_send[unit_id]
+		rounds = [ r for r in plan if r['round'] == round_number ]
+		for attack_round in rounds:
+			for unit_id in attack_round['units']:
+				attack_data['cargo_army_{}'.format(unit_id)] += attack_round['units'][unit_id]
 
 		# only send ships on the last round
 		if round_number == iterations:
