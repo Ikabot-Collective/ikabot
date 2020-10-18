@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import re
+import time
 import json
 import math
 import gettext
@@ -67,10 +68,8 @@ def get_babarians_info(session, island):
 	resp = session.post(params=params)
 	resp = json.loads(resp, strict=False)
 
-	level = resp[2][1]['js_islandBarbarianLevel']['text']
-	level = int(level)
-	gold  = resp[2][1]['js_islandBarbarianResourcegold']['text']
-	gold  = int(gold)
+	level = int(resp[2][1]['js_islandBarbarianLevel']['text'])
+	gold  = int(resp[2][1]['js_islandBarbarianResourcegold']['text'].replace(',', ''))
 
 	resources = [0] * len(materials_names)
 	for i in range(len(materials_names)):
@@ -86,6 +85,7 @@ def get_babarians_info(session, island):
 	ships = math.ceil(Decimal(total_cargo) / Decimal(500))
 
 	info = {
+		'island_id': island['id'],
 		'level': level,
 		'gold': gold,
 		'resources': resources,
@@ -182,6 +182,7 @@ def plan_attack(session, city, babarians_info):
 		if resp.lower() != 'y':
 			break
 
+	plan.sort(key=lambda ar:ar['round'])
 	return plan
 
 def attackBarbarians(session, event, stdin_fd):
@@ -270,12 +271,104 @@ def get_unit_weight(session, city_id, unit_id):
 def city_is_in_island(city, island):
 	return city['id'] in [ c['id'] for c in island['cities'] ]
 
-def do_it(session, island, city, babarians_info, plan, iterations):
+def get_barbarian_info(session, babarians_info):
+	query = {
+		'view': 'barbarianVillage',
+		'destinationIslandId': babarians_info['island_id'],
+		'backgroundView': 'island',
+		'currentIslandId': babarians_info['island_id'],
+		'actionRequest': actionRequest,
+		'ajax': 1
+	}
+	resp = session.post(params=query)
+	resp = json.loads(resp, strict=False)
+	return resp
 
-	for round_number in range(1, iterations + 1):
+def under_attack(session, babarians_info):
+	html = session.get(island_url + babarians_info['island_id'])
+	island = getIsland(html)
+	return island['barbarians']['underAttack'] != 0
 
-		current_round_groups = [ r for r in plan if r['round'] == round_number ]
-		for current_round_group in current_round_groups:
+def wait_barbarians_ready(session, babarians_info):
+	resp = get_barbarian_info(session, babarians_info)
+	if 'barbarianCityCooldownTimer' in resp[2][1]:
+		CooldownTimer = resp[2][1]['barbarianCityCooldownTimer']['countdown']
+		wait_time = CooldownTimer['enddate'] - CooldownTimer['currentdate']
+		wait(wait_time + 5)
+
+def get_movements(session, city_id=None, event_id=None):
+	if city_id is None:
+		city_id = getCurrentCityId(session)
+	query = {
+		'view': 'militaryAdvisor',
+		'oldView': 'updateGlobalData',
+		'cityId': city_id,
+		'backgroundView': 'city',
+		'currentCityId': city_id,
+		'templateView': 'militaryAdvisor',
+		'actionRequest': actionRequest,
+		'ajax': 1
+	}
+
+	resp = session.post(params=query)
+	resp = json.loads(resp, strict=False)
+	movements = resp[1][1][2]['viewScriptParams']['militaryAndFleetMovements']
+
+	if event_id is not None:
+		movements = [ movement for movement in movements if movement['event']['id'] == event_id ]
+		assert len(movements) == 1, "movement not found!"
+		return movements[0]
+
+	return movements
+
+def get_attack_info(session, city, island, known_event_ids):
+
+	movements = get_movements(session, city['id'])
+
+	for movement in movements:
+		if movement['event']['mission'] != 13:
+			continue
+		if movement['origin']['cityId'] != city['id']:
+			continue
+		if movement['target']['islandId'] != island['id']:
+			continue
+		if movement['origin']['avatarId'] != movement['target']['avatarId']:
+			continue
+		if movement['event']['id'] in known_event_ids:
+			continue
+
+		known_event_ids.append(movement['event']['id'])
+		return movement
+
+	assert False, 'movement not found'
+
+def wait_for_new_round(previous_round_num, session, city, island, known_event_ids):
+	if previous_round_num == 1:
+		movement = get_attack_info(session, city, island, known_event_ids)
+		if movement['event']['missionState'] == 1:
+			wait_time = movement['eventTime'] - time.time()
+			wait(wait_time + 5)
+			movement = get_movements(session, city['id'], movement['event']['id'])
+			wait_time = movement['eventTime'] - time.time()
+		wait(wait_time + 5)
+	else:
+		pass
+
+def do_it(session, island, city, babarians_info, plan, repetitions):
+
+	weights = {}
+	known_event_ids = []
+
+	for repetition in range(1, repetitions + 1):
+
+		wait_barbarians_ready(session, babarians_info)
+
+		previous_round_num = 0
+
+		for attack_round in plan:
+
+			if previous_round_num < attack_round['round'] and previous_round_num > 0:
+				wait_for_new_round(previous_round_num, session, city, island, known_event_ids)
 
 			attack_data = {
 				'action': 'transportOperations',
@@ -315,12 +408,14 @@ def do_it(session, island, city, babarians_info, plan, iterations):
 
 			ships_needed = 0
 			current_units = get_units(session, city)
-			for unit_id in current_round_group['units']:
-				amount_to_send = min(current_round_group['units'][unit_id], current_units[unit_id]['amount'])
+			for unit_id in attack_round['units']:
+				amount_to_send = min(attack_round['units'][unit_id], current_units[unit_id]['amount'])
 				attack_data['cargo_army_{}'.format(unit_id)] = amount_to_send
 
 				if city_is_in_island(city, island) is False:
-					weight = get_unit_weight(session, city['id'], unit_id)
+					if unit_id not in weights:
+						weights[unit_id] = get_unit_weight(session, city['id'], unit_id)
+					weight = weights[unit_id]
 					ships_needed += Decimal(amount_to_send * weight) / Decimal(500)
 
 			ships_needed = math.ceil(ships_needed)
@@ -330,6 +425,14 @@ def do_it(session, island, city, babarians_info, plan, iterations):
 				ships_available = waitForArrival(session)
 			ships_available -= ships_needed
 
-			attack_data['transporter'] = min(current_round_group['ships'], ships_available)
+			attack_data['transporter'] = min(attack_round['ships'], ships_available)
 
+			# battle ended before the last round
+			if attack_round['round'] > 1 and under_attack(session, babarians_info) is False:
+				return
+
+			# send new round
 			session.post(payloadPost=attack_data)
+
+			previous_round_num = attack_round['round']
+
