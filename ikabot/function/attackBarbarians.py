@@ -250,7 +250,7 @@ def attackBarbarians(session, event, stdin_fd):
 	finally:
 		session.logout()
 
-def get_unit_weight(session, city_id, unit_id):
+def get_unit_data(session, city_id, unit_id):
 	params_w = {
 		'view': 'unitdescription',
 		'unitId': unit_id,
@@ -269,7 +269,10 @@ def get_unit_weight(session, city_id, unit_id):
 	weight = re.search(r'<li class="weight fifthpos" title=".*?"><span\s*class="accesshint">\'.*?\': </span>(\d+)</li>', html).group(1)
 	weight = int(weight)
 
-	return weight
+	speed = re.search(r'(\d+)\s*<br\/>\s*<span class="textLabel">.*?\s*:<\/span>\d+<br\/>\s*<\/div>\s*<div class="clearfloat"><\/div>\s*<div class="weapon">', html).group(1)
+	speed = int(speed)
+
+	return {'speed': speed, 'weight': weight}
 
 def city_is_in_island(city, island):
 	return city['id'] in [ c['id'] for c in island['cities'] ]
@@ -372,14 +375,23 @@ def wait_for_arrival(session, city, island):
 
 def wait_for_round(session, city, island, travel_time, current_round_num, next_round_num):
 	if next_round_num == 1:
-		return
+		wait_until_attack_is_over(session, city, island, travel_time)
 	elif next_round_num == 2:
 		# make sure that the first round has left the port
+		attacks = get_current_attacks(session, city['id'], island['id'])
 		eventTimes = [ attack['eventTime'] for attack in attacks if attack['event']['missionState'] == 1 ]
+		if len(eventTimes) > 0:
+			wait_time  = max( eventTimes )
+			wait_time -= time.time()
+			wait(wait_time + 5)
+			attacks = get_current_attacks(session, city['id'], island['id'])
+
+		eventTimes = [ attack['eventTime'] for attack in attacks if attack['event']['missionState'] == 2 ]
 		if len(eventTimes) == 0:
 			return
 		wait_time  = max( eventTimes )
 		wait_time -= time.time()
+		wait_time -= travel_time
 		wait(wait_time + 5)
 	elif current_round_num == next_round_num:
 		return
@@ -395,32 +407,23 @@ def wait_for_round(session, city, island, travel_time, current_round_num, next_r
 		wait_time -= time.time()
 		wait_time -= travel_time
 		wait(wait_time + 5)
-		wait_for_round(session, city, island, travel_time, current_round_num+1, next_round_num)
+		wait_for_round(session, city, island, units_data, units, current_round_num+1, next_round_num)
 
-def calc_travel_time(city, island):
+def calc_travel_time(city, island, speed=60):
 	if city['x'] == island['x'] and city['y'] == island['y']:
-		return 10*60
+		return math.ceil(36000/speed)
 	else:
-		return math.ceil(1200 * math.sqrt( ((city['x'] - island['x']) ** 2) + ((city['y'] - island['y']) ** 2) )) + 5
+		return math.ceil(1200 * math.sqrt( ((city['x'] - island['x']) ** 2) + ((city['y'] - island['y']) ** 2) ))
 
 def do_it(session, island, city, babarians_info, plan, num_attacks):
 
-	weights = {}
-	travel_time = calc_travel_time(city, island)
+	units_data = {}
 
 	for i in range(1, num_attacks + 1):
-
-		wait_until_attack_is_over(session, city, island, travel_time)
 
 		current_round_num = 0
 
 		for attack_round in plan:
-
-			try:
-				wait_for_round(session, city, island, travel_time, current_round_num, attack_round['round'])
-			except AssertionError:
-				# battle ended before expected
-				return
 
 			attack_data = {
 				'action': 'transportOperations',
@@ -459,23 +462,36 @@ def do_it(session, island, city, babarians_info, plan, num_attacks):
 			}
 
 			ships_needed = 0
+			speeds = []
 			current_units = get_units(session, city)
 			for unit_id in attack_round['units']:
 				amount_to_send = min(attack_round['units'][unit_id], current_units[unit_id]['amount'])
 				attack_data['cargo_army_{}'.format(unit_id)] = amount_to_send
 
+				if unit_id not in units_data:
+					units_data[unit_id] = get_unit_data(session, city['id'], unit_id)
+
+				speeds.append(units_data[unit_id]['speed'])
+
 				if city_is_in_island(city, island) is False:
-					if unit_id not in weights:
-						weights[unit_id] = get_unit_weight(session, city['id'], unit_id)
-					weight = weights[unit_id]
+					weight = units_data[unit_id]['weight']
 					ships_needed += Decimal(amount_to_send * weight) / Decimal(500)
 
 			ships_needed = math.ceil(ships_needed)
+			speed = min(speeds)
+			travel_time = calc_travel_time(city, island, speed)
+			try:
+				wait_for_round(session, city, island, travel_time, current_round_num, attack_round['round'])
+			except AssertionError:
+				# battle ended before expected
+				break
 
 			ships_available = 0
 			while ships_available < ships_needed:
 				ships_available = waitForArrival(session)
 			ships_available -= ships_needed
+
+			# if the number of available troops changed, the POST request will fail
 
 			attack_data['transporter'] = min(babarians_info['ships'], attack_round['ships'], ships_available)
 
