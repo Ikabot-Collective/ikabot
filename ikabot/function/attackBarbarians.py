@@ -224,13 +224,13 @@ def attackBarbarians(session, event, stdin_fd):
 			return
 
 		banner()
-		iterations = read(msg=_('How many times do you want to attack? (default: 1): '), min=0, default=1)
-		if iterations == 0:
+		num_attacks = read(msg=_('How many times do you want to attack? (default: 1): '), min=0, default=1)
+		if num_attacks == 0:
 			event.set()
 			return
 
 		banner()
-		print(_('The barbarians in [{}:{}] will be attacked {:d} times.').format(island['x'], island['y'], iterations))
+		print(_('The barbarians in [{}:{}] will be attacked {:d} times.').format(island['x'], island['y'], num_attacks))
 		enter()
 
 	except KeyboardInterrupt:
@@ -240,10 +240,10 @@ def attackBarbarians(session, event, stdin_fd):
 	set_child_mode(session)
 	event.set()
 
-	info = _('\nI attack the barbarians in [{}:{}] {:d} times\n').format(island['x'], island['y'], iterations)
+	info = _('\nI attack the barbarians in [{}:{}] {:d} times\n').format(island['x'], island['y'], num_attacks)
 	setInfoSignal(session, info)
 	try:
-		do_it(session, island, city, babarians_info, plan, iterations)
+		do_it(session, island, city, babarians_info, plan, num_attacks)
 	except:
 		msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
 		sendToBot(session, msg)
@@ -292,7 +292,7 @@ def under_attack(session, babarians_info):
 	island = getIsland(html)
 	return island['barbarians']['underAttack'] != 0
 
-def wait_until_attack_is_over(session, city, island):
+def wait_until_attack_is_over(session, city, island, travel_time):
 	html = session.get(island_url + island['id'])
 	island = getIsland(html)
 
@@ -309,7 +309,7 @@ def wait_until_attack_is_over(session, city, island):
 		if len(enddate) > 0:
 			wait_time  = max(enddate)
 			wait_time -= time.time()
-		wait_until_attack_is_over(session, city, island)
+		wait_until_attack_is_over(session, city, island, travel_time)
 
 	if island['barbarians']['destroyed'] == 1:
 		# the barbarians are destroyed and can't be attacked
@@ -317,8 +317,8 @@ def wait_until_attack_is_over(session, city, island):
 		if 'barbarianCityCooldownTimer' in resp[2][1]:
 			CooldownTimer = resp[2][1]['barbarianCityCooldownTimer']['countdown']
 			wait_time = CooldownTimer['enddate'] - CooldownTimer['currentdate']
+			wait_time -= travel_time
 			wait(wait_time + 5)
-		wait_until_attack_is_over(session, city, island)
 
 def get_movements(session, city_id=None):
 	if city_id is None:
@@ -370,27 +370,57 @@ def wait_for_arrival(session, city, island):
 
 	wait_for_arrival(session, city, island)
 
-def wait_for_new_round(previous_round_num, session, city, island):
-	if previous_round_num == 1:
-		#wait_for_arrival(session, city, island)
+def wait_for_round(session, city, island, travel_time, current_round_num, next_round_num):
+	if next_round_num == 1:
+		return
+	elif next_round_num == 2:
+		# make sure that the first round has left the port
+		eventTimes = [ attack['eventTime'] for attack in attacks if attack['event']['missionState'] == 1 ]
+		if len(eventTimes) == 0:
+			return
+		wait_time  = max( eventTimes )
+		wait_time -= time.time()
+		wait(wait_time + 5)
+	elif current_round_num == next_round_num:
 		return
 	else:
-		raise Exception('not implemented')
+		attacks = get_current_attacks(session, city['id'], island['id'])
+		if len(attacks) == 0:
+			return
 
-def do_it(session, island, city, babarians_info, plan, repetitions):
+		eventTimes = [ attack['eventTime'] for attack in attacks if attack['event']['missionState'] == 3 ]
+		assert len(eventTimes) > 0, "the attack ended before expected"
+
+		wait_time  = max( eventTimes )
+		wait_time -= time.time()
+		wait_time -= travel_time
+		wait(wait_time + 5)
+		wait_for_round(session, city, island, travel_time, current_round_num+1, next_round_num)
+
+def calc_travel_time(city, island):
+	if city['x'] == island['x'] and city['y'] == island['y']:
+		return 10*60
+	else:
+		return math.ceil(1200 * math.sqrt( ((city['x'] - island['x']) ** 2) + ((city['y'] - island['y']) ** 2) )) + 5
+
+def do_it(session, island, city, babarians_info, plan, num_attacks):
 
 	weights = {}
+	travel_time = calc_travel_time(city, island)
 
-	for repetition in range(1, repetitions + 1):
+	for i in range(1, num_attacks + 1):
 
-		wait_until_attack_is_over(session, city, island)
+		wait_until_attack_is_over(session, city, island, travel_time)
 
-		previous_round_num = 0
+		current_round_num = 0
 
 		for attack_round in plan:
 
-			if previous_round_num < attack_round['round'] and previous_round_num > 0:
-				wait_for_new_round(previous_round_num, session, city, island)
+			try:
+				wait_for_round(session, city, island, travel_time, current_round_num, attack_round['round'])
+			except AssertionError:
+				# battle ended before expected
+				return
 
 			attack_data = {
 				'action': 'transportOperations',
@@ -449,12 +479,7 @@ def do_it(session, island, city, babarians_info, plan, repetitions):
 
 			attack_data['transporter'] = min(babarians_info['ships'], attack_round['ships'], ships_available)
 
-			# battle ended before the last round
-			if attack_round['round'] > 1 and under_attack(session, babarians_info) is False:
-				return
-
 			# send new round
 			session.post(payloadPost=attack_data)
 
-			previous_round_num = attack_round['round']
-
+			current_round_num = attack_round['round']
