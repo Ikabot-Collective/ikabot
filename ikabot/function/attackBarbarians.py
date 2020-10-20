@@ -290,11 +290,6 @@ def get_barbarians_info(session, island_id):
 	resp = json.loads(resp, strict=False)
 	return resp
 
-def under_attack(session, babarians_info):
-	html = session.get(island_url + babarians_info['island_id'])
-	island = getIsland(html)
-	return island['barbarians']['underAttack'] != 0
-
 def wait_until_attack_is_over(session, city, island, travel_time):
 	html = session.get(island_url + island['id'])
 	island = getIsland(html)
@@ -349,11 +344,13 @@ def get_current_attacks(session, city_id, island_id):
 	curr_attacks = []
 
 	for movement in movements:
-		if movement['event']['isReturning'] != 0:
-			continue
 		if movement['event']['mission'] != 13:
 			continue
 		if movement['target']['islandId'] != int(island_id):
+			continue
+		if movement['event']['isReturning'] != 0:
+			continue
+		if movement['origin']['cityId'] == -1:
 			continue
 
 		curr_attacks.append(movement)
@@ -362,58 +359,71 @@ def get_current_attacks(session, city_id, island_id):
 
 def wait_for_arrival(session, city, island):
 	attacks = get_current_attacks(session, city['id'], island['id'])
-	eventTimes = [ attack['eventTime'] for attack in attacks if attack['event']['missionState'] in [1, 2] ]
+	attacks = filter_loading(attacks) + filter_traveling(attacks)
+	eventTimes = [ attack['eventTime'] for attack in attacks ]
 
 	if len(eventTimes) == 0:
 		return
 
-	wait_time  = max( eventTimes )
+	wait_time  = max(eventTimes)
 	wait_time -= time.time()
 	wait(wait_time + 5)
 
 	wait_for_arrival(session, city, island)
 
 def wait_for_round(session, city, island, travel_time, current_round_num, next_round_num):
-	if next_round_num == 1:
+	if current_round_num == next_round_num:
+		return
+	elif next_round_num == 1:
 		wait_until_attack_is_over(session, city, island, travel_time)
 	elif next_round_num == 2:
-		# make sure that the first round has left the port
+		# give time to the first round to reach its target
 		attacks = get_current_attacks(session, city['id'], island['id'])
-		eventTimes = [ attack['eventTime'] for attack in attacks if attack['event']['missionState'] == 1 ]
+		attacks_loading = filter_loading(attacks)
+		eventTimes = [ attack['eventTime'] for attack in attacks_loading ]
 		if len(eventTimes) > 0:
-			wait_time  = max( eventTimes )
+			wait_time  = max(eventTimes)
 			wait_time -= time.time()
 			wait(wait_time + 5)
 			attacks = get_current_attacks(session, city['id'], island['id'])
 
-		eventTimes = [ attack['eventTime'] for attack in attacks if attack['event']['missionState'] == 2 ]
+		attacks_traveling = filter_traveling(attacks)
+		eventTimes = [ attack['eventTime'] for attack in attacks_traveling ]
 		if len(eventTimes) == 0:
 			return
-		wait_time  = max( eventTimes )
+		wait_time  = max(eventTimes)
 		wait_time -= time.time()
 		wait_time -= travel_time
 		wait(wait_time + 5)
-	elif current_round_num == next_round_num:
-		return
 	else:
 		attacks = get_current_attacks(session, city['id'], island['id'])
-		if len(attacks) == 0:
+		attacks_fighting = filter_fighting(attacks)
+		if len(attacks_fighting) == 0:
 			return
 
-		eventTimes = [ attack['eventTime'] for attack in attacks if attack['event']['missionState'] == 3 ]
+		eventTimes = [ attack['eventTime'] for attack in attacks_fighting ]
 		assert len(eventTimes) > 0, "the attack ended before expected"
 
-		wait_time  = max( eventTimes )
+		wait_time  = max(eventTimes)
 		wait_time -= time.time()
 		wait_time -= travel_time
 		wait(wait_time + 5)
 		wait_for_round(session, city, island, units_data, units, current_round_num+1, next_round_num)
 
-def calc_travel_time(city, island, speed=60):
+def calc_travel_time(city, island, speed):
 	if city['x'] == island['x'] and city['y'] == island['y']:
 		return math.ceil(36000/speed)
 	else:
 		return math.ceil(1200 * math.sqrt( ((city['x'] - island['x']) ** 2) + ((city['y'] - island['y']) ** 2) ))
+
+def filter_loading(attacks):
+	return [ attack for attack in attacks if attack['event']['missionState'] == 1 ]
+
+def filter_traveling(attacks):
+	return [ attack for attack in attacks if attack['event']['missionState'] == 2 and attack['event']['canAbort'] ]
+
+def filter_fighting(attacks):
+	return [ attack for attack in attacks if attack['event']['missionState'] == 2 and attack['event']['canRetreat'] ]
 
 def do_it(session, island, city, babarians_info, plan, num_attacks):
 
