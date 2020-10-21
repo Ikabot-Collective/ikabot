@@ -277,7 +277,7 @@ def get_unit_data(session, city_id, unit_id):
 	return {'speed': speed, 'weight': weight}
 
 def city_is_in_island(city, island):
-	return city['id'] in [ c['id'] for c in island['cities'] ]
+	return city['x'] == island['x'] and city['y'] == island['y']
 
 def get_barbarians_info(session, island_id):
 	query = {
@@ -321,6 +321,7 @@ def wait_until_attack_is_over(session, city, island, travel_time):
 			wait_time = CooldownTimer['enddate'] - CooldownTimer['currentdate']
 			wait_time -= travel_time
 			wait(wait_time + 5)
+		wait_until_attack_is_over(session, city, island, travel_time)
 
 def get_movements(session, city_id=None):
 	if city_id is None:
@@ -387,7 +388,7 @@ def wait_for_round(session, city, island, travel_time, battle_start, round_numbe
 		if battle_start < time.time():
 			html = session.get(island_url + idIsland)
 			island = getIsland(html)
-			assert island['barbarians']['underAttack'] == 1, "battle ended before expected"
+			assert island['barbarians']['underAttack'] == 1, "the battle ended before expected"
 
 def calc_travel_time(city, island, speed):
 	if city['x'] == island['x'] and city['y'] == island['y']:
@@ -480,7 +481,7 @@ def do_it(session, island, city, babarians_info, plan, num_attacks):
 				ships_available = waitForArrival(session)
 			ships_available -= ships_needed
 
-			# if the number of available troops changed, the POST request will fail
+			# if the number of available troops changed, the POST request might not work as intended
 
 			attack_data['transporter'] = min(babarians_info['ships'], attack_round['ships'], ships_available)
 
