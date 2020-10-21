@@ -407,11 +407,10 @@ def filter_fighting(attacks):
 def do_it(session, island, city, babarians_info, plan, num_attacks):
 
 	units_data = {}
-	battle_start = None
 
 	for i in range(1, num_attacks + 1):
 
-		current_round_num = 0
+		battle_start = None
 
 		for attack_round in plan:
 
