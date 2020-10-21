@@ -383,6 +383,11 @@ def wait_for_round(session, city, island, travel_time, battle_start, round_numbe
 		wait_time -= travel_time
 		wait(wait_time + 5)
 
+		if battle_start < time.time():
+			html = session.get(island_url + idIsland)
+			island = getIsland(html)
+			assert island['barbarians']['underAttack'] == 1, "battle ended before expected"
+
 def calc_travel_time(city, island, speed):
 	if city['x'] == island['x'] and city['y'] == island['y']:
 		return math.ceil(36000/speed)
