@@ -134,6 +134,7 @@ def plan_attack(session, city, babarians_info):
 		return None
 
 	plan = []
+	total_ships = None
 	while True:
 
 		banner()
@@ -171,8 +172,9 @@ def plan_attack(session, city, babarians_info):
 		print('')
 
 		#max_ships = babarians_info['ships']
-		max_ships = getTotalShips(session)
-		max_ships = max_ships - sum( [ ar['ships'] for ar in plan ] )
+		if total_ships is None:
+			total_ships = getTotalShips(session)
+		max_ships = total_ships - sum( [ ar['ships'] for ar in plan ] )
 		if max_ships > 0:
 			attack_round['ships'] = read(msg=_('How many ships do you want to send in this round? (min: 0, max: {:d}): ').format(max_ships), min=0, max=max_ships)
 			print('')
@@ -303,7 +305,8 @@ def wait_until_attack_is_over(session, city, island, travel_time):
 	if island['barbarians']['underAttack'] == 1:
 		# a battle is taking place
 		attacks = get_current_attacks(session, city['id'], island['id'])
-		enddates = [ attack[2][1]['js_MilitaryMovementsCombat1Row0ArrivalTime']['countdown']['enddate'] for attack in attacks if 'js_MilitaryMovementsCombat1Row0ArrivalTime' in attack[2][1] ]
+		attacks_fighting = filter_fighting(attacks)
+		enddates = [ attack[2][1]['js_MilitaryMovementsCombat1Row0ArrivalTime']['countdown']['enddate'] for attack in attacks_fighting if 'js_MilitaryMovementsCombat1Row0ArrivalTime' in attack[2][1] ]
 		if len(enddate) > 0:
 			wait_time  = max(enddate)
 			wait_time -= time.time()
@@ -371,44 +374,14 @@ def wait_for_arrival(session, city, island):
 
 	wait_for_arrival(session, city, island)
 
-def wait_for_round(session, city, island, travel_time, current_round_num, next_round_num):
-	if current_round_num == next_round_num:
-		return
-	elif next_round_num == 1:
+def wait_for_round(session, city, island, travel_time, battle_start, round_number):
+	if round_number == 1:
 		wait_until_attack_is_over(session, city, island, travel_time)
-	elif next_round_num == 2:
-		# give time to the first round to reach its target
-		attacks = get_current_attacks(session, city['id'], island['id'])
-		attacks_loading = filter_loading(attacks)
-		eventTimes = [ attack['eventTime'] for attack in attacks_loading ]
-		if len(eventTimes) > 0:
-			wait_time  = max(eventTimes)
-			wait_time -= time.time()
-			wait(wait_time + 5)
-			attacks = get_current_attacks(session, city['id'], island['id'])
-
-		attacks_traveling = filter_traveling(attacks)
-		eventTimes = [ attack['eventTime'] for attack in attacks_traveling ]
-		if len(eventTimes) == 0:
-			return
-		wait_time  = max(eventTimes)
-		wait_time -= time.time()
-		wait_time -= travel_time
-		wait(wait_time + 5)
 	else:
-		attacks = get_current_attacks(session, city['id'], island['id'])
-		attacks_fighting = filter_fighting(attacks)
-		if len(attacks_fighting) == 0:
-			return
-
-		eventTimes = [ attack['eventTime'] for attack in attacks_fighting ]
-		assert len(eventTimes) > 0, "the attack ended before expected"
-
-		wait_time  = max(eventTimes)
+		wait_time  = battle_start + (round_number - 2) * 15 * 60
 		wait_time -= time.time()
 		wait_time -= travel_time
 		wait(wait_time + 5)
-		wait_for_round(session, city, island, units_data, units, current_round_num+1, next_round_num)
 
 def calc_travel_time(city, island, speed):
 	if city['x'] == island['x'] and city['y'] == island['y']:
@@ -428,6 +401,7 @@ def filter_fighting(attacks):
 def do_it(session, island, city, babarians_info, plan, num_attacks):
 
 	units_data = {}
+	battle_start = None
 
 	for i in range(1, num_attacks + 1):
 
@@ -491,7 +465,7 @@ def do_it(session, island, city, babarians_info, plan, num_attacks):
 			speed = min(speeds)
 			travel_time = calc_travel_time(city, island, speed)
 			try:
-				wait_for_round(session, city, island, travel_time, current_round_num, attack_round['round'])
+				wait_for_round(session, city, island, travel_time, battle_start, attack_round['round'])
 			except AssertionError:
 				# battle ended before expected
 				break
@@ -508,4 +482,5 @@ def do_it(session, island, city, babarians_info, plan, num_attacks):
 			# send new round
 			session.post(payloadPost=attack_data)
 
-			current_round_num = attack_round['round']
+			if attack_round['round'] == 1:
+				battle_start = time.time() + travel_time
