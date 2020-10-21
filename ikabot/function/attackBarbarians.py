@@ -80,7 +80,7 @@ def get_barbarians_lv(session, island):
 	html = resp[1][1][1]
 	troops = re.findall(r'<div class="army \w*?">\s*<div class=".*?">(.*?)</div>\s*</div>\s*</td>\s*</tr>\s*<tr>\s*<td class="center">\s*(\d+)', html)
 
-	total_cargo = gold + sum(resources)
+	total_cargo = sum(resources)
 	ships = math.ceil(Decimal(total_cargo) / Decimal(500))
 
 	info = {
