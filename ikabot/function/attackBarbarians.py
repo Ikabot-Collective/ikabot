@@ -306,10 +306,11 @@ def wait_until_attack_is_over(session, city, island, travel_time):
 		# a battle is taking place
 		attacks = get_current_attacks(session, city['id'], island['id'])
 		attacks_fighting = filter_fighting(attacks)
-		enddates = [ attack[2][1]['js_MilitaryMovementsCombat1Row0ArrivalTime']['countdown']['enddate'] for attack in attacks_fighting if 'js_MilitaryMovementsCombat1Row0ArrivalTime' in attack[2][1] ]
-		if len(enddate) > 0:
-			wait_time  = max(enddate)
+		eventTimes = [ attack['eventTime'] for attack in attacks_fighting ]
+		if len(eventTimes) > 0:
+			wait_time  = max(eventTimes)
 			wait_time -= time.time()
+			wait(wait_time + 5)
 		wait_until_attack_is_over(session, city, island, travel_time)
 
 	if island['barbarians']['destroyed'] == 1:
