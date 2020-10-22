@@ -98,12 +98,16 @@ _Ikabot is a cross-platform program written in python that grants equal or even 
 
 	It allows you to investigate an available research.
 	
-22. Configure Proxy
+22. Attack barbarians
+
+	Now you can attack the barbarians in an automated way. You can send your troops in many rounds and repeate the attack as many times as you want.
+
+23. Configure Proxy
 
 	It lets you configure a proxy that will be used to all request except those sent to the lobby (during login).
 	The proxy affects immediately all processes associated with the current ikariam username.
 
-23. Update the Telegram data
+24. Update the Telegram data
 
 	It allows you to set or change the Telegram's bot.
 
