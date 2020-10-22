@@ -18,7 +18,7 @@ _ = t.gettext
 
 getcontext().prec = 30
 
-def read(min=None, max=None, digit=False, msg=prompt, values=None, empty=False, additionalValues = None): # user input
+def read(min=None, max=None, digit=False, msg=prompt, values=None, empty=False, additionalValues=None, default=None): # user input
 	"""Reads input from user
 	Parameters
 	----------
@@ -53,6 +53,9 @@ def read(min=None, max=None, digit=False, msg=prompt, values=None, empty=False, 
 
 	if additionalValues is not None and read_input in additionalValues:
 		return read_input
+
+	if read_input == '' and default is not None:
+		return default
 
 	if read_input == '' and empty is True:
 		return read_input

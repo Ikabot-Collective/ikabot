@@ -59,9 +59,9 @@ def wait(seconds, maxrandom = 0):
 	maxrandom : int
 		the maximum number of additional seconds to wait for
 	"""
-	randomTime = random.randint(0, maxrandom)
 	if seconds <= 0:
 		return
+	randomTime = random.randint(0, maxrandom)
 	ratio = (1 + 5 ** 0.5) / 2 - 1 # 0.6180339887498949
 	comienzo = time.time()
 	fin = comienzo + seconds
