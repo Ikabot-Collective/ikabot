@@ -33,6 +33,7 @@ from ikabot.function.shipMovements import shipMovements
 from ikabot.function.importExportCookie import importExportCookie
 from ikabot.function.autoPirate import autoPirate
 from ikabot.function.investigate import investigate
+from ikabot.function.attackBarbarians import attackBarbarians
 from ikabot.function.proxyConf import proxyConf, show_proxy
 
 t = gettext.translation('command_line',
@@ -84,6 +85,7 @@ def menu(session, checkUpdate=True):
 					importExportCookie,
 					autoPirate,
 					investigate,
+					attackBarbarians,
 					proxyConf,
 					updateTelegramData
 					]
@@ -110,11 +112,12 @@ def menu(session, checkUpdate=True):
 	print(_('(19) Import / Export cookie'))
 	print(_('(20) Auto-Pirate'))
 	print(_('(21) Investigate'))
-	print(_('(22) Configure Proxy'))
+	print(_('(22) Attack barbarians'))
+	print(_('(23) Configure Proxy'))
 	if telegramDataIsValid(session):
-		print(_('(23) Change the Telegram data'))
+		print(_('(24) Change the Telegram data'))
 	else:
-		print(_('(23) Enter the Telegram data'))
+		print(_('(24) Enter the Telegram data'))
 
 	total_options = len(menu_actions)
 	selected = read(min=0, max=total_options)

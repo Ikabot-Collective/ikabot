@@ -158,7 +158,7 @@ def updateTelegramData(session, event=None, stdin_fd=None):
 	if rta.lower() == 'n':
 		valid = False
 	else:
-		recibido = read(msg=_('Enter the received token in telegram:'), digit=True)
+		recibido = read(msg=_('Enter the received token in telegram:'))
 		if rand != recibido:
 			print(_('The token is incorrect'))
 			valid = False
