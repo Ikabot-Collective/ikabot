@@ -317,8 +317,8 @@ def wait_until_attack_is_over(session, city, island, travel_time):
 		# the barbarians are destroyed and can't be attacked
 		resp = get_barbarians_info(session, island['id'])
 		if 'barbarianCityCooldownTimer' in resp[2][1]:
-			CooldownTimer = resp[2][1]['barbarianCityCooldownTimer']['countdown']
-			wait_time = CooldownTimer['enddate'] - CooldownTimer['currentdate']
+			wait_time  = resp[2][1]['barbarianCityCooldownTimer']['countdown']['enddate']
+			wait_time -= time.time()
 			wait_time -= travel_time
 			wait(wait_time + 5)
 		wait_until_attack_is_over(session, city, island, travel_time)
@@ -476,7 +476,7 @@ def do_it(session, island, city, babarians_info, plan, num_attacks):
 				# battle ended before expected
 				break
 
-			ships_available = 0
+			ships_available = waitForArrival(session)
 			while ships_available < ships_needed:
 				ships_available = waitForArrival(session)
 			ships_available -= ships_needed
