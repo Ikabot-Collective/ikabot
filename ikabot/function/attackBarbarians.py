@@ -116,8 +116,7 @@ def get_units(session, city):
 
 	units = {}
 	for i in range(len(unit_id_names)):
-		unit_amounts[i] = (unit_amounts[i].replace('-', '0'))
-		amount = int(unit_amounts[i].replace(',', ''))
+		amount = int(unit_amounts[i].replace(',', '').replace('-', '0'))
 		unit_id = unit_id_names[i][0][1:]
 		unit_name = unit_id_names[i][1]
 		units[unit_id] = {}
@@ -395,7 +394,7 @@ def calc_travel_time(city, island, speed):
 	if city['x'] == island['x'] and city['y'] == island['y']:
 		return math.ceil(36000/speed)
 	else:
-		return math.ceil(1200 * math.sqrt( ((int(city['x']) - int(island['x'])) ** 2) + ((int(city['y']) - int(island['y'])) ** 2) ))#lior fix
+		return math.ceil(1200 * math.sqrt( ((city['x'] - island['x']) ** 2) + ((city['y'] - island['y']) ** 2) )) # lior fix
 
 def filter_loading(attacks):
 	return [ attack for attack in attacks if attack['event']['missionState'] == 1 ]
