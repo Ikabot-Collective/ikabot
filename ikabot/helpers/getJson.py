@@ -57,10 +57,13 @@ def getIsland(html):
 	isla = isla.replace('yCoord', 'y')
 	isla = isla.replace(',"owner', ',"')
 
+
 	# {"id":idIsla,"name":nombreIsla,"x":,"y":,"good":numeroBien,"woodLv":,"goodLv":,"wonder":numeroWonder, "wonderName": "nombreDelMilagro","wonderLv":"5","cities":[{"type":"city","name":cityName,"id":cityId,"level":lvIntendencia,"Id":playerId,"Name":playerName,"AllyId":,"AllyTag":,"state":"vacation"},...}}
 	isla = json.loads(isla, strict=False)
-	tipo = re.search(r'"tradegood":"(\d)"', html).group(1)
-	isla['tipo'] = tipo
+	isla['tipo'] = re.search(r'"tradegood":"(\d)"', html).group(1)
+	isla['x'] = int(isla['x'])
+	isla['y'] = int(isla['y'])
+
 	return isla
 
 def getCity(html):
@@ -81,8 +84,8 @@ def getCity(html):
 
 	city['Id'] = city.pop('ownerId')
 	city['Name'] = city.pop('ownerName')
-	city['x'] = city.pop('islandXCoord')
-	city['y'] = city.pop('islandYCoord')
+	city['x'] = int(city.pop('islandXCoord'))
+	city['y'] = int(city.pop('islandYCoord'))
 	city['cityName'] = city['name']
 
 	i = 0
