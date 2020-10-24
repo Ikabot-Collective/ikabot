@@ -112,10 +112,11 @@ def get_units(session, city):
 	html = html.split('<div class="fleet')[0]
 
 	unit_id_names   = re.findall(r'<div class="army (.*?)">\s*<div class="tooltip">(.*?)<\/div>', html)
-	unit_amounts = re.findall(r'<td>([\d,]+)\s*</td>', html)
+	unit_amounts = re.findall(r'<td>(.*?)\s*</td>', html) # fixed lior 
 
 	units = {}
 	for i in range(len(unit_id_names)):
+		unit_amounts[i] = (unit_amounts[i].replace('-', '0'))
 		amount = int(unit_amounts[i].replace(',', ''))
 		unit_id = unit_id_names[i][0][1:]
 		unit_name = unit_id_names[i][1]
