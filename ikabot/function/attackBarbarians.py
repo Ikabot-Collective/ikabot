@@ -135,6 +135,7 @@ def plan_attack(session, city, babarians_info):
 
 	plan = []
 	total_ships = None
+	last = False
 	while True:
 
 		banner()
@@ -164,29 +165,44 @@ def plan_attack(session, city, babarians_info):
 				attack_round['units'][unit_id] = amount_to_send
 		print('')
 
-		if len(plan) > 0:
-			round_def = len(plan) + 1
-			attack_round['round'] = read(msg=_('In which battle round do you want to send them? (min: 2, default: {:d}): ').format(round_def), min=2, default=round_def)
+		attack_round['loot'] = last
+		if last:
+			attack_round['round'] = len(plan) + 1
 		else:
-			attack_round['round'] = 1
+			if len(plan) > 0:
+				round_def = len(plan) + 1
+				attack_round['round'] = read(msg=_('In which battle round do you want to send them? (min: 2, default: {:d}): ').format(round_def), min=2, default=round_def)
+			else:
+				attack_round['round'] = 1
 		print('')
 
 		#max_ships = babarians_info['ships']
-		if total_ships is None:
-			total_ships = getTotalShips(session)
-		max_ships = total_ships - sum( [ ar['ships'] for ar in plan ] )
-		if max_ships > 0:
-			attack_round['ships'] = read(msg=_('How many ships do you want to send in this round? (min: 0, max: {:d}): ').format(max_ships), min=0, max=max_ships)
-			print('')
-		else:
-			attack_round['ships'] = 0
+		if last is False:
+			if total_ships is None:
+				total_ships = getTotalShips(session)
+			max_ships = total_ships - sum( [ ar['ships'] for ar in plan ] )
+			if max_ships > 0:
+				attack_round['ships'] = read(msg=_('How many ships do you want to send in this round? (min: 0, max: {:d}): ').format(max_ships), min=0, max=max_ships)
+				print('')
+			else:
+				attack_round['ships'] = 0
 
 		plan.append(attack_round)
+
+		if last:
+			break
 
 		print(_('Do you want to send another round of troops? [y/N]'))
 		resp = read(values=['y', 'Y', 'n', 'N'], default='n')
 		if resp.lower() != 'y':
-			break
+			print('')
+			print(_('Do you want to select the troops that will be used to collect the remaining resources? (they need to destroy the wall) [y/N]'))
+			resp = read(values=['y', 'Y', 'n', 'N'], default='n')
+			if resp.lower() != 'y':
+				break
+			else:
+				last = True
+
 
 	plan.sort(key=lambda ar:ar['round'])
 	return plan
@@ -418,16 +434,41 @@ def wait_until_attack_is_over(session, city, island):
 		html = session.get(island_url + island['id'])
 		island = getIsland(html)
 
-def loot(session, island, city, units_data):
+def load_troops(session, city, island, attack_round, units_data, attack_data, extra_cargo=0):
+	ships_needed = Decimal(extra_cargo) / Decimal(500)
+	speeds = []
+	current_units = get_units(session, city)
+	for unit_id in attack_round['units']:
+		amount_to_send = min(attack_round['units'][unit_id], current_units[unit_id]['amount'])
+		attack_data['cargo_army_{}'.format(unit_id)] = amount_to_send
+
+		if unit_id not in units_data:
+			units_data[unit_id] = get_unit_data(session, city['id'], unit_id)
+
+		speeds.append(units_data[unit_id]['speed'])
+
+		if city_is_in_island(city, island) is False:
+			weight = units_data[unit_id]['weight']
+			ships_needed += Decimal(amount_to_send * weight) / Decimal(500)
+
+	ships_needed = math.ceil(ships_needed)
+	speed = min(speeds)
+	travel_time = calc_travel_time(city, island, speed)
+	return attack_data, ships_needed, travel_time
+
+def loot(session, island, city, units_data, loot_round):
 	while True:
+
+		attack_data = {'action': 'transportOperations', 'function': 'attackBarbarianVillage', 'actionRequest': actionRequest, 'islandId': island['id'], 'destinationCityId': 0, 'cargo_army_304_upkeep': 3, 'cargo_army_304': 0, 'cargo_army_315_upkeep': 1, 'cargo_army_315': 0, 'cargo_army_302_upkeep': 4, 'cargo_army_302': 0, 'cargo_army_303_upkeep': 3, 'cargo_army_303': 0, 'cargo_army_312_upkeep': 15, 'cargo_army_312': 0, 'cargo_army_309_upkeep': 45, 'cargo_army_309': 0, 'cargo_army_307_upkeep': 15, 'cargo_army_307': 0, 'cargo_army_306_upkeep': 25, 'cargo_army_306': 0, 'cargo_army_305_upkeep': 30, 'cargo_army_305': 0, 'cargo_army_311_upkeep': 20, 'cargo_army_311': 0, 'cargo_army_310_upkeep': 10, 'cargo_army_310': 0, 'transporter': 0, 'barbarianVillage': 1, 'backgroundView': 'island', 'currentIslandId': island['id'], 'templateView': 'plunder', 'ajax': 1}
+
 		# make sure we have ships on the port
 		ships_available = waitForArrival(session)
 
+		# if the barbarians are active again or all the resources were stolen, return
 		html = session.get(island_url + island['id'])
 		island = getIsland(html)
 		destroyed = island['barbarians']['destroyed'] == 1
 		resources = get_barbarians_lv(session, island)['resources']
-		# if the barbarians are active again or all the resources were stolen, return
 		if destroyed is False or sum(resources) == 0:
 			return
 
@@ -437,20 +478,7 @@ def loot(session, island, city, units_data):
 		if len(attacks) > 0:
 			return
 
-		# send just one unit, the one with less weight
-		current_units = get_units(session, city)
-		min_weight = min( [ units_data[unit_id]['weight'] for unit_id in units_data if unit_id in current_units ] )
-		unit_id = [ unit_id for unit_id in current_units if units_data[unit_id]['weight'] == min_weight ]
-		if len(unit_id) == 0:
-			return
-		unit_id = unit_id[0]
-		attack_data = {'action': 'transportOperations', 'function': 'attackBarbarianVillage', 'actionRequest': actionRequest, 'islandId': island['id'], 'destinationCityId': 0, 'cargo_army_304_upkeep': 3, 'cargo_army_304': 0, 'cargo_army_315_upkeep': 1, 'cargo_army_315': 0, 'cargo_army_302_upkeep': 4, 'cargo_army_302': 0, 'cargo_army_303_upkeep': 3, 'cargo_army_303': 0, 'cargo_army_312_upkeep': 15, 'cargo_army_312': 0, 'cargo_army_309_upkeep': 45, 'cargo_army_309': 0, 'cargo_army_307_upkeep': 15, 'cargo_army_307': 0, 'cargo_army_306_upkeep': 25, 'cargo_army_306': 0, 'cargo_army_305_upkeep': 30, 'cargo_army_305': 0, 'cargo_army_311_upkeep': 20, 'cargo_army_311': 0, 'cargo_army_310_upkeep': 10, 'cargo_army_310': 0, 'transporter': 0, 'barbarianVillage': 1, 'backgroundView': 'island', 'currentIslandId': island['id'], 'templateView': 'plunder', 'ajax': 1}
-		attack_data['cargo_army_{}'.format(unit_id)] = 1
-
-		ships_needed = Decimal(sum(resources)) / Decimal(500)
-		if city_is_in_island(city, island) is False:
-			ships_needed += Decimal(units_data[unit_id]['weight']) / Decimal(500)
-		ships_needed = math.ceil(ships_needed)
+		attack_data, ships_needed, travel_time = load_troops(session, city, island, attack_round, units_data, attack_data, sum(resources))
 		attack_data['transporter'] = min(ships_available, ships_needed)
 
 		# make sure we have time to send the attack
@@ -459,7 +487,6 @@ def loot(session, island, city, units_data):
 		if 'barbarianCityCooldownTimer' in resp[2][1]:
 			time_left  = resp[2][1]['barbarianCityCooldownTimer']['countdown']['enddate']
 			time_left -= time.time()
-		travel_time = calc_travel_time(city, island, units_data[unit_id]['speed'])
 		if time_left is not None and travel_time > time_left:
 			return
 
@@ -474,27 +501,14 @@ def do_it(session, island, city, babarians_info, plan):
 
 	for attack_round in plan:
 
+		# this round is supposed to get the resources
+		if attack_round['loot']:
+			break
+
 		attack_data = {'action': 'transportOperations', 'function': 'attackBarbarianVillage', 'actionRequest': actionRequest, 'islandId': island['id'], 'destinationCityId': 0, 'cargo_army_304_upkeep': 3, 'cargo_army_304': 0, 'cargo_army_315_upkeep': 1, 'cargo_army_315': 0, 'cargo_army_302_upkeep': 4, 'cargo_army_302': 0, 'cargo_army_303_upkeep': 3, 'cargo_army_303': 0, 'cargo_army_312_upkeep': 15, 'cargo_army_312': 0, 'cargo_army_309_upkeep': 45, 'cargo_army_309': 0, 'cargo_army_307_upkeep': 15, 'cargo_army_307': 0, 'cargo_army_306_upkeep': 25, 'cargo_army_306': 0, 'cargo_army_305_upkeep': 30, 'cargo_army_305': 0, 'cargo_army_311_upkeep': 20, 'cargo_army_311': 0, 'cargo_army_310_upkeep': 10, 'cargo_army_310': 0, 'transporter': 0, 'barbarianVillage': 1, 'backgroundView': 'island', 'currentIslandId': island['id'], 'templateView': 'plunder', 'ajax': 1}
 
-		ships_needed = 0
-		speeds = []
-		current_units = get_units(session, city)
-		for unit_id in attack_round['units']:
-			amount_to_send = min(attack_round['units'][unit_id], current_units[unit_id]['amount'])
-			attack_data['cargo_army_{}'.format(unit_id)] = amount_to_send
+		attack_data, ships_needed, travel_time = load_troops(session, city, island, attack_round, units_data, attack_data)
 
-			if unit_id not in units_data:
-				units_data[unit_id] = get_unit_data(session, city['id'], unit_id)
-
-			speeds.append(units_data[unit_id]['speed'])
-
-			if city_is_in_island(city, island) is False:
-				weight = units_data[unit_id]['weight']
-				ships_needed += Decimal(amount_to_send * weight) / Decimal(500)
-
-		ships_needed = math.ceil(ships_needed)
-		speed = min(speeds)
-		travel_time = calc_travel_time(city, island, speed)
 		try:
 			wait_for_round(session, city, island, travel_time, battle_start, attack_round['round'])
 		except AssertionError:
@@ -518,4 +532,6 @@ def do_it(session, island, city, babarians_info, plan):
 
 	wait_until_attack_is_over(session, city, island)
 
-	loot(session, city, island, units_data)
+	last_round = plan[-1]
+	if last_round['loot']:
+		loot(session, city, island, units_data, last_round)
