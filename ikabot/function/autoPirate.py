@@ -53,6 +53,8 @@ def autoPirate(session, event, stdin_fd):
     if autoConvert.lower() == 'y':
         print('How many points should I convert every time I do a mission? (Type "all" to convert all points at once)')
         convertPerMission = read(min = 0, additionalValues = ['all'], digit = True)
+    print('Enter a maximum additional random waiting time between missions in seconds. (min = 0)')
+    maxRandomWaitingTime = read(min = 0, digit = True)
     piracyCities = getPiracyCities(session, pirateMissionChoice)
     if piracyCities == []:
         print('You do not have any city with a pirate fortress capable of executing this mission!')
@@ -103,7 +105,7 @@ def autoPirate(session, event, stdin_fd):
                     break
             if autoConvert.lower() == 'y':
                 convertCapturePoints(session, piracyCities, convertPerMission)
-            wait(piracyMissionWaitingTime[pirateMissionChoice])
+            wait(piracyMissionWaitingTime[pirateMissionChoice], maxRandomWaitingTime)
 
     except Exception:
         event.set()
