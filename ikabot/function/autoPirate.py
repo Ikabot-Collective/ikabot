@@ -92,7 +92,7 @@ def autoPirate(session, event, stdin_fd):
                         if captcha == 'Error':
                             continue
                         session.post(city_url + str(piracyCities[0]['id']))
-                        params = {'action': 'PiracyScreen', 'function': 'capture', 'cityId': piracyCities[0]['id'], 'position': '17', 'captchaNeeded': '1', 'buildingLevel': '1', 'captcha': captcha, 'activeTab': 'tabBootyQuest', 'backgroundView': 'city', 'currentCityId': piracyCities[0]['id'], 'templateView': 'pirateFortress', 'actionRequest': actionRequest, 'ajax': '1'}
+                        params = {'action': 'PiracyScreen', 'function': 'capture', 'cityId': piracyCities[0]['id'], 'position': '17', 'captchaNeeded': '1', 'buildingLevel': str(piracyMissionToBuildingLevel[pirateMissionChoice]), 'captcha': captcha, 'activeTab': 'tabBootyQuest', 'backgroundView': 'city', 'currentCityId': piracyCities[0]['id'], 'templateView': 'pirateFortress', 'actionRequest': actionRequest, 'ajax': '1'}
                         html = session.post(payloadPost = params, noIndex = True)
                         if '"showPirateFortressShip":1' in html: #if this is true, then the crew is still in the town, that means that the request didn't succeed
                             continue
