@@ -11,7 +11,7 @@ from ikabot.helpers.planRoutes import executeRoutes
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.getJson import getCity
 from ikabot.helpers.process import set_child_mode
-from ikabot.helpers.varios import addDot
+from ikabot.helpers.varios import addThousandSeparator
 from ikabot.helpers.resources import *
 
 t = gettext.translation('sendResources',
@@ -72,14 +72,14 @@ def sendResources(session, event, stdin_fd):
 				msg = ''
 				for i in range(len(materials_names)):
 					if resources_left[i] > cityD['freeSpaceForResources'][i]:
-						msg += '{} more {}\n'.format(addDot(cityD['freeSpaceForResources'][i]), materials_names[i].lower())
+						msg += '{} more {}\n'.format(addThousandSeparator(cityD['freeSpaceForResources'][i]), materials_names[i].lower())
 
 				if len(msg) > 0:
 					print(_('You can store just:\n{}').format(msg))
 
 			print(_('Available:'))
 			for i in range(len(materials_names)):
-				print('{}:{} '.format(materials_names[i], addDot(resources_left[i])), end='')
+				print('{}:{} '.format(materials_names[i], addThousandSeparator(resources_left[i])), end='')
 			print('')
 
 			print(_('Send:'))
@@ -100,7 +100,7 @@ def sendResources(session, event, stdin_fd):
 			print(_('About to send from {} to {}').format(cityO['cityName'], cityD['cityName']))
 			for i in range(len(materials_names)):
 				if send[i] > 0:
-					print('{}:{} '.format(materials_names[i], addDot(send[i])), end='')
+					print('{}:{} '.format(materials_names[i], addThousandSeparator(send[i])), end='')
 			print('')
 
 			print(_('Proceed? [Y/n]'))

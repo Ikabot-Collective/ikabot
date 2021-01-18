@@ -77,7 +77,7 @@ def donate(session, event, stdin_fd):
 			return
 
 		print('{} lv:{} {}'.format(resource_name, resourceLevel, resourceUpgradeMsg))
-		print('{} / {} ({}%)\n'.format(addDot(wood_donated), addDot(wood_total_needed), addDot(int((100 * wood_donated) / wood_total_needed))))
+		print('{} / {} ({}%)\n'.format(addThousandSeparator(wood_donated), addThousandSeparator(wood_total_needed), addThousandSeparator(int((100 * wood_donated) / wood_total_needed))))
 
 		# get tradegood information
 		url = 'view=tradegood&type={0}&islandId={1}&backgroundView=island&currentIslandId={1}&actionRequest={2}&ajax=1'.format(island_type, islandId, actionRequest)
@@ -92,9 +92,9 @@ def donate(session, event, stdin_fd):
 		tradegood_donated = int(tradegood_donated)
 
 		print('{} lv:{} {}'.format(tradegood_name, tradegoodLevel, tradegoodUpgradeMsg))
-		print('{} / {} ({}%)\n'.format(addDot(tradegood_donated), addDot(tradegood_total_needed), addDot(int((100 * tradegood_donated) / tradegood_total_needed))))
+		print('{} / {} ({}%)\n'.format(addThousandSeparator(tradegood_donated), addThousandSeparator(tradegood_total_needed), addThousandSeparator(int((100 * tradegood_donated) / tradegood_total_needed))))
 
-		print(_('Wood available:{}\n').format(addDot(woodAvailable)))
+		print(_('Wood available:{}\n').format(addThousandSeparator(woodAvailable)))
 
 		if resourceUpgrading is False and tradegoodUpgrading is False:
 			msg = _('Donate to {} (1) or {} (2)?:').format(resource_name, tradegood_name)
@@ -116,7 +116,7 @@ def donate(session, event, stdin_fd):
 		if amount == 0:
 			event.set()
 			return
-		print(_('Will donate {} to the {}?').format(addDot(amount), name))
+		print(_('Will donate {} to the {}?').format(addThousandSeparator(amount), name))
 		print(_('\nProceed? [Y/n]'))
 		rta = read(values=['y', 'Y', 'n', 'N', ''])
 		if rta.lower() == 'n':

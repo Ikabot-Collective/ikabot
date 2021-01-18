@@ -11,7 +11,7 @@ from ikabot.helpers.botComm import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.varios import *
 from ikabot.helpers.process import set_child_mode
-from ikabot.helpers.varios import addDot
+from ikabot.helpers.varios import addThousandSeparator
 from ikabot.helpers.getJson import getCity
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.resources import getAvailableResources
@@ -229,11 +229,11 @@ def trainArmy(session, event, stdin_fd):
 			print(_('\nTotal cost:'))
 			for i in range(len(materials_names_english)):
 				if cost[i] > 0:
-					print('{}: {}'.format(materials_names_english[i], addDot(cost[i])))
+					print('{}: {}'.format(materials_names_english[i], addThousandSeparator(cost[i])))
 			if cost[len(materials_names_english)+0] > 0:
-				print(_('Citizens: {}').format(addDot(cost[len(materials_names_english)+0])))
+				print(_('Citizens: {}').format(addThousandSeparator(cost[len(materials_names_english)+0])))
 			if cost[len(materials_names_english)+1] > 0:
-				print(_('Maintenance: {}').format(addDot(cost[len(materials_names_english)+1])))
+				print(_('Maintenance: {}').format(addThousandSeparator(cost[len(materials_names_english)+1])))
 			if cost[len(materials_names_english)+2] > 0:
 				print(_('Duration: {}').format(daysHoursMinutes(int(cost[len(materials_names_english)+2]))))
 
@@ -277,10 +277,10 @@ def trainArmy(session, event, stdin_fd):
 			print(_('\nThere are not enough resources:'))
 			for i in range(len(materials_names_english)):
 				if resourcesAvailable[i] < 0:
-					print('{}:{}'.format(materials_names[i], addDot(resourcesAvailable[i]*-1)))
+					print('{}:{}'.format(materials_names[i], addThousandSeparator(resourcesAvailable[i]*-1)))
 
 			if resourcesAvailable[len(materials_names_english)] < 0:
-				print(_('Citizens:{}').format(addDot(resourcesAvailable[len(materials_names_english)]*-1)))
+				print(_('Citizens:{}').format(addThousandSeparator(resourcesAvailable[len(materials_names_english)]*-1)))
 
 			print(_('\nProceed anyway? [Y/n]'))
 			rta = read(values=['y', 'Y', 'n', 'N', ''])

@@ -8,7 +8,7 @@ import gettext
 import traceback
 from decimal import *
 from ikabot.helpers.process import set_child_mode
-from ikabot.helpers.varios import addDot
+from ikabot.helpers.varios import addThousandSeparator
 from ikabot.helpers.gui import enter, banner
 from ikabot.helpers.getJson import getCity
 from ikabot.helpers.signals import setInfoSignal
@@ -18,6 +18,7 @@ from ikabot.config import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.resources import *
 from ikabot.helpers.market import *
+
 
 t = gettext.translation('buyResources',
                         localedir,
@@ -109,23 +110,6 @@ def calculateCost(offers, total_amount_to_buy):
 		total_cost += buy_amount * offer['precio']
 	return total_cost
 
-def getGold(session, city):
-	"""
-	Parameters
-	----------
-	session : ikabot.web.session.Session
-	city : dict
-	Returns
-	-------
-	gold : int
-	"""
-	url = 'view=finances&backgroundView=city&currentCityId={}&templateView=finances&actionRequest={}&ajax=1'.format(city['id'], actionRequest)
-	data = session.post(url)
-	json_data = json.loads(data, strict=False)
-	gold = json_data[0][1]['headerData']['gold']
-	gold = gold.split('.')[0]
-	gold = int(gold)
-	return gold
 
 def chooseCommertialCity(commercial_cities):
 	"""
@@ -188,18 +172,18 @@ def buyResources(session, event, stdin_fd):
 			amount = offer['amountAvailable']
 			price  = offer['precio']
 			cost   = amount * price
-			print(_('amount:{}').format(addDot(amount)))
+			print(_('amount:{}').format(addThousandSeparator(amount)))
 			print(_('price :{:d}').format(price))
-			print(_('cost  :{}').format(addDot(cost)))
+			print(_('cost  :{}').format(addThousandSeparator(cost)))
 			print('')
 			total_price += cost
 			total_amount += amount
 
 		# ask how much to buy
-		print(_('Total amount available to purchase: {}, for {}').format(addDot(total_amount), addDot(total_price)))
+		print(_('Total amount available to purchase: {}, for {}').format(addThousandSeparator(total_amount), addThousandSeparator(total_price)))
 		available = city['freeSpaceForResources'][resource]
 		if available < total_amount:
-			print(_('You just can buy {} due to storing capacity').format(addDot(available)))
+			print(_('You just can buy {} due to storing capacity').format(addThousandSeparator(available)))
 			total_amount = available
 		print('')
 		amount_to_buy = read(msg=_('How much do you want to buy?: '), min=0, max=total_amount)
@@ -208,17 +192,17 @@ def buyResources(session, event, stdin_fd):
 			return
 
 		# calculate the total cost
-		gold = getGold(session, city)
+		(gold, __)  = getGold(session, city)
 		total_cost = calculateCost(offers, amount_to_buy)
 
-		print(_('\nCurrent gold: {}.\nTotal cost  : {}.\nFinal gold  : {}.'). format(addDot(gold), addDot(total_cost), addDot(gold - total_cost)))
+		print(_('\nCurrent gold: {}.\nTotal cost  : {}.\nFinal gold  : {}.'). format(addThousandSeparator(gold), addThousandSeparator(total_cost), addThousandSeparator(gold - total_cost)))
 		print(_('Proceed? [Y/n]'))
 		rta = read(values=['y', 'Y', 'n', 'N', ''])
 		if rta.lower() == 'n':
 			event.set()
 			return
 
-		print(_('It will be purchased {}').format(addDot(amount_to_buy)))
+		print(_('It will be purchased {}').format(addThousandSeparator(amount_to_buy)))
 		enter()
 	except KeyboardInterrupt:
 		event.set()
@@ -227,7 +211,7 @@ def buyResources(session, event, stdin_fd):
 	set_child_mode(session)
 	event.set()
 
-	info = _('\nI will buy {} from {} to {}\n').format(addDot(amount_to_buy), materials_names[resource], city['cityName'])
+	info = _('\nI will buy {} from {} to {}\n').format(addThousandSeparator(amount_to_buy), materials_names[resource], city['cityName'])
 	setInfoSignal(session, info)
 	try:
 		do_it(session, city, offers, amount_to_buy)
@@ -288,7 +272,7 @@ def buy(session, city, offer, amount_to_buy):
 	else:
 		data_dict['cargo_tradegood{}'.format(resource)] = amount_to_buy
 	session.post(payloadPost=data_dict)
-	msg = _('I buy {} to {} from {}').format(addDot(amount_to_buy), offer['ciudadDestino'], offer['jugadorAComprar'])
+	msg = _('I buy {} to {} from {}').format(addThousandSeparator(amount_to_buy), offer['ciudadDestino'], offer['jugadorAComprar'])
 	sendToBotDebug(session, msg, debugON_buyResources)
 
 def do_it(session, city, offers, amount_to_buy):

@@ -351,7 +351,7 @@ def chooseResourceProviders(session, cities_ids, cities, city_id, resource, miss
 		# ask the user it this city should provide resources
 		tradegood_initial = tradegood_initials[ int( cities[cityId]['tradegood'] ) ]
 		pad = ' ' * (maxName - len(cities[cityId]['name']))
-		msg = '{}{} ({}): {} [Y/n]:'.format(pad, cities[cityId]['name'], tradegood_initial, addDot(available))
+		msg = '{}{} ({}): {} [Y/n]:'.format(pad, cities[cityId]['name'], tradegood_initial, addThousandSeparator(available))
 		choice = read(msg=msg, values=['Y', 'y', 'N', 'n', ''])
 		if choice.lower() == 'n':
 			continue
@@ -514,7 +514,7 @@ def constructionList(session, event, stdin_fd):
 				if missing[i] == 0:
 					continue
 				name = materials_names[i].lower()
-				print(_('{} of {}').format(addDot(missing[i]), name))
+				print(_('{} of {}').format(addThousandSeparator(missing[i]), name))
 			print('')
 
 			# if the user wants, send the resources from the selected cities

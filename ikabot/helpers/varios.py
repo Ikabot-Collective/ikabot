@@ -8,19 +8,21 @@ from decimal import *
 
 getcontext().prec = 30
 
-def addDot(num):
-	"""Formats the number into a string and adds a '.' for every thousand (eg. 3000 -> 3.000)
+def addThousandSeparator(num, character = '.'):
+	"""Formats the number into a string and adds a `character` for every thousand (eg. 3000 -> 3.000)
 	Parameters
 	----------
 	num : int
 		integer number to format
+	character : str
+		character to act as the thousand separator
 
 	Returns
 	-------
 	number : str
-		a string representing that number with added dots for every thousand
+		a string representing that number with added `character` for every thousand
 	"""
-	return '{0:,}'.format(int(num)).replace(',','.')
+	return '{0:,}'.format(int(num)).replace(',', character)
 
 def daysHoursMinutes(totalSeconds):
 	"""Formats the total number of seconds into days hours minutes (eg. 321454 -> 3D 17H)

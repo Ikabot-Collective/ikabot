@@ -82,7 +82,7 @@ def shipMovements(session, event, stdin_fd):
 			if movement['isHostile']:
 				troops = movement['army']['amount']
 				fleets = movement['fleet']['amount']
-				print(_('Troops:{}\nFleets:{}').format(addDot(troops), addDot(fleets)))
+				print(_('Troops:{}\nFleets:{}').format(addThousandSeparator(troops), addThousandSeparator(fleets)))
 			elif isHostile(movement):
 				troops = movement['army']['amount']
 				ships = 0
@@ -92,7 +92,7 @@ def shipMovements(session, event, stdin_fd):
 						ships += int(mov['amount'])
 					else:
 						fleets += int(mov['amount'])
-				print(_('Troops:{}\nFleets:{}\n Ships:{}').format(addDot(troops), addDot(fleets), addDot(ships)))
+				print(_('Troops:{}\nFleets:{}\n Ships:{}').format(addThousandSeparator(troops), addThousandSeparator(fleets), addThousandSeparator(ships)))
 			else:
 				assert len(materials_names) == 5
 				total_load = 0

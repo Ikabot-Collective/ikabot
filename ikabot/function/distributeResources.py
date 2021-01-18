@@ -10,7 +10,7 @@ from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.getJson import getCity
 from ikabot.helpers.planRoutes import executeRoutes
 from ikabot.helpers.resources import *
-from ikabot.helpers.varios import addDot
+from ikabot.helpers.varios import addThousandSeparator
 from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.gui import banner
 

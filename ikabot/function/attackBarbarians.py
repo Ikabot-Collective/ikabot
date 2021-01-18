@@ -160,7 +160,7 @@ def plan_attack(session, city, babarians_info):
 		for unit_id in units_available:
 			unit_amount = units_available[unit_id]['amount']
 			unit_name   = units_available[unit_id]['name']
-			amount_to_send = read(msg='{} (max: {}): '.format(unit_name, addDot(unit_amount)), max=unit_amount, default=0)
+			amount_to_send = read(msg='{} (max: {}): '.format(unit_name, addThousandSeparator(unit_amount)), max=unit_amount, default=0)
 			if amount_to_send > 0:
 				attack_round['units'][unit_id] = amount_to_send
 		print('')
