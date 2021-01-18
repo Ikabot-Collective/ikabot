@@ -54,3 +54,22 @@ def storageCapacityOfMarket(html):
 def onSellInMarket(html):
 	mad, vin, mar, cri, azu = re.findall(r'<input type="text" class="textfield"\s*size="\d+"\s*name=".*?"\s*id=".*?"\s*value="(\d+)"', html)
 	return [int(mad), int(vin), int(mar), int(cri), int(azu)]
+
+def getGold(session, city):
+	"""
+	Parameters
+	----------
+	session : ikabot.web.session.Session
+	city : dict
+	Returns
+	-------
+	gold : int
+	"""
+	url = 'view=finances&backgroundView=city&currentCityId={}&templateView=finances&actionRequest={}&ajax=1'.format(city['id'], actionRequest)
+	data = session.post(url)
+	json_data = json.loads(data, strict=False)
+	gold = json_data[0][1]['headerData']['gold']
+	gold = gold.split('.')[0]
+	gold = int(gold)
+	gold_production = json_data[0][1]['headerData']['scientistsUpkeep'] + json_data[0][1]['headerData']['income'] +json_data[0][1]['headerData']['upkeep']
+	return gold, int(gold_production)
