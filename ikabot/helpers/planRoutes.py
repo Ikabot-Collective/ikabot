@@ -48,6 +48,7 @@ def sendGoods(session, originCityId, destinationCityId, islandId, ships, send):
 		resp = json.loads(resp, strict=False)
 		if resp[3][1][0]['type'] == 10:
 			break
+		time.sleep(5)
 
 def executeRoutes(session, routes):
 	"""This function will execute all the routes passed to it, regardless if there are enough ships available to do so
@@ -66,13 +67,20 @@ def executeRoutes(session, routes):
 			ships_available = waitForArrival(session)
 			storageCapacityInShips = ships_available * 500
 
+			html = session.get(city_url + str(origin_city['id']))
+			origin_city = getCity(html)
 			html = session.get(city_url + str(destination_city_id))
 			destination_city = getCity(html)
-			storageCapacityInCity = destination_city['freeSpaceForResources']
+			foreign = str(destination_city['id']) != str(destination_city_id)
+			if foreign is False:
+				storageCapacityInCity = destination_city['freeSpaceForResources']
 
 			send = []
 			for i in range(len(toSend)):
-				min_val = min(toSend[i], storageCapacityInShips, storageCapacityInCity[i])
+				if foreign is False:
+					min_val = min(origin_city['recursos'][i], toSend[i], storageCapacityInShips, storageCapacityInCity[i])
+				else:
+					min_val = min(origin_city['recursos'][i], toSend[i], storageCapacityInShips)
 				send.append(min_val)
 				storageCapacityInShips -= send[i]
 				toSend[i] -= send[i]
@@ -85,7 +93,7 @@ def executeRoutes(session, routes):
 				continue
 
 			available_ships = int(math.ceil((Decimal(resources_to_send) / Decimal(500))))
-			sendGoods(session, origin_city['id'], destination_city['id'], island_id, available_ships, send)
+			sendGoods(session, origin_city['id'], destination_city_id, island_id, available_ships, send)
 
 def getMinimumWaitingTime(session):
 	"""This function returns the time needed to wait for the closest fleet to arrive. If all ships are unavailable, this represents the minimum time needed to wait for any ships to become available
