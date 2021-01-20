@@ -146,8 +146,8 @@ def chooseForeignCity(session):
 		a city object representing the city the user chose
 	"""
 	banner()
-	x = read(msg='coordenada x:', digit=True)
-	y = read(msg='coordenada y:', digit=True)
+	x = read(msg='coordinate x:', digit=True)
+	y = read(msg='coordinate y:', digit=True)
 	print('')
 	url = 'view=worldmap_iso&islandX={}&islandY={}&oldBackgroundView=island&islandWorldviewScale=1'.format(x, y)
 	html = session.get(url)
