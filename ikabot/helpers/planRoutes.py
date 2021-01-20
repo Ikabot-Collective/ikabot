@@ -68,11 +68,16 @@ def executeRoutes(session, routes):
 
 			html = session.get(city_url + str(destination_city_id))
 			destination_city = getCity(html)
-			storageCapacityInCity = destination_city['freeSpaceForResources']
+			foreign = destination_city['id'] != destination_city_id
+			if foreign is False:
+				storageCapacityInCity = destination_city['freeSpaceForResources']
 
 			send = []
 			for i in range(len(toSend)):
-				min_val = min(toSend[i], storageCapacityInShips, storageCapacityInCity[i])
+				if foreign is False:
+					min_val = min(toSend[i], storageCapacityInShips, storageCapacityInCity[i])
+				else:
+					min_val = min(toSend[i], storageCapacityInShips)
 				send.append(min_val)
 				storageCapacityInShips -= send[i]
 				toSend[i] -= send[i]
@@ -85,7 +90,7 @@ def executeRoutes(session, routes):
 				continue
 
 			available_ships = int(math.ceil((Decimal(resources_to_send) / Decimal(500))))
-			sendGoods(session, origin_city['id'], destination_city['id'], island_id, available_ships, send)
+			sendGoods(session, origin_city['id'], destination_city_id, island_id, available_ships, send)
 
 def getMinimumWaitingTime(session):
 	"""This function returns the time needed to wait for the closest fleet to arrive. If all ships are unavailable, this represents the minimum time needed to wait for any ships to become available
