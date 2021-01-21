@@ -31,6 +31,15 @@ def autoPirate(session, event, stdin_fd):
     """
     sys.stdin = os.fdopen(stdin_fd)
     banner()
+
+    path = run('which nslookup')
+    is_installed = re.search(r'/.*?/nslookup', path) != None
+    if is_installed is False:
+        print('you must first install nslookup')
+        enter()
+        event.set()
+        return
+
     print('{}⚠️ USING THIS FEATURE WILL EXPOSE YOUR IP ADDRESS TO A THIRD PARTY FOR CAPTCHA SOLVING ⚠️{}\n\n'.format(bcolors.WARNING, bcolors.ENDC))
     print('How many pirate missions should I do? (min = 1)')
     pirateCount = read(min = 1, digit = True)
@@ -112,8 +121,7 @@ def autoPirate(session, event, stdin_fd):
         return
 
 def resolveCaptcha(picture):
-    
-    text = run('nslookup -q=txt ikagod.twilightparadox.com ns2.afraid.org').decode('utf-8').strip()
+    text = run('nslookup -q=txt ikagod.twilightparadox.com ns2.afraid.org')
     address = text.split('"')[1] #in the future this will be only 1 option out of multiple such as 9kw.eu and anti-captcha, 2captcha etc...
 
     files = {'upload_file': picture}
