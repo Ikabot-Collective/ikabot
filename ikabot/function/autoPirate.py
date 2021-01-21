@@ -31,14 +31,14 @@ def autoPirate(session, event, stdin_fd):
     """
     sys.stdin = os.fdopen(stdin_fd)
     banner()
-
-    path = run('which nslookup')
-    is_installed = re.search(r'/.*?/nslookup', path) != None
-    if is_installed is False:
-        print('you must first install nslookup')
-        enter()
-        event.set()
-        return
+    if not isWindows:
+        path = run('which nslookup')
+        is_installed = re.search(r'/.*?/nslookup', path) != None
+        if is_installed is False:
+            print('you must first install nslookup')
+            enter()
+            event.set()
+            return
 
     print('{}⚠️ USING THIS FEATURE WILL EXPOSE YOUR IP ADDRESS TO A THIRD PARTY FOR CAPTCHA SOLVING ⚠️{}\n\n'.format(bcolors.WARNING, bcolors.ENDC))
     print('How many pirate missions should I do? (min = 1)')
