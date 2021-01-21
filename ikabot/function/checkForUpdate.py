@@ -13,7 +13,7 @@ t = gettext.translation('checkForUpdate',
 _ = t.gettext
 
 def checkForUpdate():
-	upgrade = run('python3 -m pip search ikabot').decode('utf-8').strip()
+	upgrade = run('python3 -m pip search ikabot')
 	if 'ikabot' not in upgrade:
 		return
 

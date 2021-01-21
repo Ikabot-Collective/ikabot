@@ -18,7 +18,11 @@ def set_child_mode(session):
 	deactivate_sigint()
 
 def run(command):
-	return subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.read()
+	ret = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.read()
+	try:
+		return ret.decode('utf-8').strip()
+	except:
+		return ret
 
 def updateProcessList(session, programprocesslist = []):
 	"""This function will return data about all the active ikabot processes. If it is passed the ``programprocesslist`` argument, it will write new processes from that list to the .ikabot file
