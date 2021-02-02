@@ -32,7 +32,7 @@ class Session:
 			self.logfile = os.getenv('temp') + '/ikabot.log'
 		else:
 			self.logfile = '/tmp/ikabot.log'
-		self.log = False
+		self.log = True
 		self.padre = True
 		self.logged = False
 		self.__login()
@@ -369,7 +369,7 @@ class Session:
 		if sessionData is None:
 			sessionData = self.getSessionData()
 		if 'proxy' in sessionData:
-			obj.proxies = sessionData['proxy']['conf']
+			obj.proxies.update(sessionData['proxy']['conf'])
 
 	def __checkCookie(self):
 		self.__log('__checkCookie()')
@@ -394,7 +394,7 @@ class Session:
 		html = self.get()
 		return re.search(r'actionRequest"?:\s*"(.*?)"', html).group(1)
 
-	def get(self, url='', params={}, ignoreExpire=False, noIndex=False):
+	def get(self, url='', params={}, ignoreExpire=False, noIndex=False, fullResponse=False):
 		"""Sends get request to ikariam
 		Parameters
 		----------
@@ -422,7 +422,11 @@ class Session:
 		self.__log('get({}), params:{}'.format(url, str(params)))
 		while True:
 			try:
-				html = self.s.get(url, params=params).text #this isn't recursion, this get is different from the one it's in
+				if fullResponse:
+					response = self.s.get(url, params=params)
+				else:
+					response = self.s.get(url, params=params).text #this isn't recursion, this get is different from the one it's in
+				html = response
 				if ignoreExpire is False:
 					assert self.__isExpired(html) is False
 				return html

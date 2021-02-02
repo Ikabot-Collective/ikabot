@@ -31,50 +31,54 @@ def autoPirate(session, event, stdin_fd):
     """
     sys.stdin = os.fdopen(stdin_fd)
     banner()
-    if not isWindows:
-        path = run('which nslookup')
-        is_installed = re.search(r'/.*?/nslookup', path) != None
-        if is_installed is False:
-            print('you must first install nslookup')
+    try:
+        if not isWindows:
+            path = run('which nslookup')
+            is_installed = re.search(r'/.*?/nslookup', path) != None
+            if is_installed is False:
+                print('you must first install nslookup')
+                enter()
+                event.set()
+                return
+
+        print('{}⚠️ USING THIS FEATURE WILL EXPOSE YOUR IP ADDRESS TO A THIRD PARTY FOR CAPTCHA SOLVING ⚠️{}\n\n'.format(bcolors.WARNING, bcolors.ENDC))
+        print('How many pirate missions should I do? (min = 1)')
+        pirateCount = read(min = 1, digit = True)
+        print(
+    """Which pirate mission should I do?
+    (1) 2m 30s
+    (2) 7m 30s
+    (3) 15m
+    (4) 30m
+    (5) 1h
+    (6) 2h
+    (7) 4h
+    (8) 8h
+    (9) 16h
+    """
+    )
+        pirateMissionChoice = read(min = 1, max = 9, digit = True)
+        print('Do you want me to automatically convert capture points to crew strength? (Y|N)')
+        autoConvert = read(values = ['y','Y','n','N'])
+        if autoConvert.lower() == 'y':
+            print('How many points should I convert every time I do a mission? (Type "all" to convert all points at once)')
+            convertPerMission = read(min = 0, additionalValues = ['all'], digit = True)
+        print('Enter a maximum additional random waiting time between missions in seconds. (min = 0)')
+        maxRandomWaitingTime = read(min = 0, digit = True)
+        piracyCities = getPiracyCities(session, pirateMissionChoice)
+        if piracyCities == []:
+            print('You do not have any city with a pirate fortress capable of executing this mission!')
             enter()
             event.set()
             return
 
-    print('{}⚠️ USING THIS FEATURE WILL EXPOSE YOUR IP ADDRESS TO A THIRD PARTY FOR CAPTCHA SOLVING ⚠️{}\n\n'.format(bcolors.WARNING, bcolors.ENDC))
-    print('How many pirate missions should I do? (min = 1)')
-    pirateCount = read(min = 1, digit = True)
-    print(
-"""Which pirate mission should I do?
-(1) 2m 30s
-(2) 7m 30s
-(3) 15m
-(4) 30m
-(5) 1h
-(6) 2h
-(7) 4h
-(8) 8h
-(9) 16h
-"""
-)
-    pirateMissionChoice = read(min = 1, max = 9, digit = True)
-    print('Do you want me to automatically convert capture points to crew strength? (Y|N)')
-    autoConvert = read(values = ['y','Y','n','N'])
-    if autoConvert.lower() == 'y':
-        print('How many points should I convert every time I do a mission? (Type "all" to convert all points at once)')
-        convertPerMission = read(min = 0, additionalValues = ['all'], digit = True)
-    print('Enter a maximum additional random waiting time between missions in seconds. (min = 0)')
-    maxRandomWaitingTime = read(min = 0, digit = True)
-    piracyCities = getPiracyCities(session, pirateMissionChoice)
-    if piracyCities == []:
-        print('You do not have any city with a pirate fortress capable of executing this mission!')
+
+
+        print('YAAAAAR!') #get data for options such as auto-convert to crew strength, time intervals, number of piracy attempts... ^^
         enter()
+    except KeyboardInterrupt:
         event.set()
         return
-
-
-
-    print('YAAAAAR!') #get data for options such as auto-convert to crew strength, time intervals, number of piracy attempts... ^^
-    enter()
     event.set()
     try:
         while (pirateCount > 0):
@@ -84,7 +88,9 @@ def autoPirate(session, event, stdin_fd):
                 raise Exception('No city with pirate fortress capable of executing selected mission')
             html = session.post(city_url + str(piracyCities[0]['id'])) # this is needed because for some reason you need to look at the town where you are sending a request from in the line below, before you send that request
             if '"showPirateFortressShip":0' in html: # this is in case the user has manually run a capture run, in that case, there is no need to wait 150secs instead we can check every 5
-                wait(5)
+                url = 'view=pirateFortress&cityId={}&position=17&backgroundView=city&currentCityId={}&actionRequest={}&ajax=1'.format(piracyCities[0]['id'], piracyCities[0]['id'], actionRequest)
+                html = session.post(url)
+                wait(getCurrentMissionWaitingTime(html), maxRandomWaitingTime)
                 pirateCount += 1 # don't count this as an iteration of the loop
                 continue
                                                        #buildingLevel=[level of pirate fortress for certain mission], for example for mission 2 you'll put 3 here because that's the level of the piratefortress needed to run that mission, max level can be accessed with piracyCities[0]['position'][17]['level']
@@ -96,7 +102,7 @@ def autoPirate(session, event, stdin_fd):
                     for i in range(20):
                         if i == 19:
                             raise Exception("Failed to resolve captcha too many times")
-                        picture = session.s.get(session.urlBase + 'action=Options&function=createCaptcha').content
+                        picture = session.get('action=Options&function=createCaptcha',fullResponse=True).content
                         captcha = resolveCaptcha(picture)
                         if captcha == 'Error':
                             continue
@@ -166,3 +172,16 @@ def convertCapturePoints(session, piracyCities, convertPerMission):
         return
     data = {'action': 'PiracyScreen', 'function': 'convert', 'view': 'pirateFortress', 'cityId': piracyCities[0]['id'], 'islandId': piracyCities[0]['islandId'], 'activeTab': 'tabCrew', 'crewPoints': str(int(convertPerMission/10)), 'position': '17', 'backgroundView': 'city', 'currentCityId': piracyCities[0]['id'], 'templateView': 'pirateFortress', 'actionRequest': actionRequest, 'ajax': '1'}
     html = session.post(payloadPost = data, noIndex = True)
+
+def getCurrentMissionWaitingTime(html):
+    match = re.search("""missionProgressTime\\\\">(.*?)<\\\\\/div>""", html)
+    if match is None:
+        return 0
+    else:
+        time_string = match.group(1)
+        time_string = time_string.replace('h','*3600 +')
+        time_string = time_string.replace('m','*60 +')
+        time_string = time_string.replace('s','*1 +')
+        time_string = time_string + '0'
+        waiting_time = eval(time_string)
+        return int(waiting_time)
