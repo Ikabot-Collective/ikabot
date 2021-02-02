@@ -48,6 +48,8 @@ def sendGoods(session, originCityId, destinationCityId, islandId, ships, send):
 		resp = json.loads(resp, strict=False)
 		if resp[3][1][0]['type'] == 10:
 			break
+		elif resp[3][1][0]['type'] == 11:
+			waitForArrival(session)
 		time.sleep(5)
 
 def executeRoutes(session, routes):
@@ -96,7 +98,7 @@ def executeRoutes(session, routes):
 			sendGoods(session, origin_city['id'], destination_city_id, island_id, available_ships, send)
 
 def getMinimumWaitingTime(session):
-	"""This function returns the time needed to wait for the closest fleet to arrive. If all ships are unavailable, this represents the minimum time needed to wait for any ships to become available
+	"""This function returns the time needed to wait for the closest fleet to arrive. If all ships are unavailable, this represents the minimum time needed to wait for any ships to become available. A random waiting time between 0 and 10 seconds is added to the waiting time to avoid race conditions between multiple concurrently running processes.
 	Parameters
 	----------
 	session : ikabot.web.session.Session
@@ -119,7 +121,7 @@ def getMinimumWaitingTime(session):
 		remaining_time = int(militaryMovement['eventTime']) - current_time
 		delivered_times.append(remaining_time)
 	if delivered_times:
-		return min(delivered_times)
+		return min(delivered_times) + random.uniform(0,10)
 	else:
 		return 0
 
