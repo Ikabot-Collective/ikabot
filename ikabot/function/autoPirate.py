@@ -174,14 +174,24 @@ def convertCapturePoints(session, piracyCities, convertPerMission):
     html = session.post(payloadPost = data, noIndex = True)
 
 def getCurrentMissionWaitingTime(html):
-    match = re.search("""missionProgressTime\\\\">(.*?)<\\\\\/div>""", html)
+    match = re.search(r'missionProgressTime\\\\">(.*?)<\\\\\/div>', html)
     if match is None:
         return 0
     else:
         time_string = match.group(1)
-        time_string = time_string.replace('h','*3600 +')
-        time_string = time_string.replace('m','*60 +')
-        time_string = time_string.replace('s','*1 +')
-        time_string = time_string + '0'
-        waiting_time = eval(time_string)
-        return int(waiting_time)
+        hours = re.search(r'(\d+)h', time_string)
+        if hours is None:
+            hours = 0
+        else:
+            hours = int(hours.group(1)) * 3600
+        minutes = re.search(r'(\d+)m', time_string)
+        if minutes is None:
+            minutes = 0
+        else:
+            minutes = int(minutes.group(1)) * 60
+        seconds = re.search(r'(\d+)s', time_string)
+        if seconds is None:
+            seconds = 0
+        else:
+            seconds = int(seconds.group(1)) * 1
+        return hours + minutes + seconds
