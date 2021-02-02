@@ -32,7 +32,7 @@ class Session:
 			self.logfile = os.getenv('temp') + '/ikabot.log'
 		else:
 			self.logfile = '/tmp/ikabot.log'
-		self.log = True
+		self.log = False
 		self.padre = True
 		self.logged = False
 		self.__login()
