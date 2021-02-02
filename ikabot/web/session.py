@@ -28,17 +28,23 @@ _ = t.gettext
 
 class Session:
 	def __init__(self):
-		self.logfile = '/tmp/ikabot.log'
+		if isWindows:
+			self.logfile = os.getenv('temp') + '/ikabot.log'
+		else:
+			self.logfile = '/tmp/ikabot.log'
 		self.log = False
 		self.padre = True
 		self.logged = False
 		self.__login()
 
+	def writeLog(self, msg):
+		return self.__log(msg)
+
 	def __log(self, msg):
 		if self.log is False:
 			return
 		now = datetime.datetime.now()
-		entry = '{}:{}:{}\t{:d}: {}\n'.format(now.hour, now.minute, now.second, os.getpid(), msg)
+		entry = '{}.{:02}.{:02} {:02d}:{:02}:{:02}\t{:d}: {}\n'.format(now.year, now.month, now.day, now.hour, now.minute, now.second, os.getpid(), msg)
 		fh = open(self.logfile, 'a')
 		fh.write(entry)
 		fh.close()
@@ -450,7 +456,7 @@ class Session:
 		params_original = params
 		self.__checkCookie()
 		self.__update_proxy()
-
+		
 		# add the request id
 		token = self.__token()
 		url = url.replace(actionRequest, token)
