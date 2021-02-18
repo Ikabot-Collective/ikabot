@@ -46,8 +46,7 @@ t = gettext.translation('command_line',
                         fallback=True)
 _ = t.gettext
 
-manager = multiprocessing.Manager()
-predetermined_input = manager.list()
+
 
 def menu(session, checkUpdate=True):
 	"""
@@ -178,11 +177,10 @@ def start():
 	init()
 	for arg in sys.argv:
 		try:
-			predetermined_input.append(int(arg))
+			config.predetermined_input.append(int(arg))
 		except ValueError:
-			predetermined_input.append(arg)
-	predetermined_input.pop(0)
-	config.predetermined_input = predetermined_input
+			config.predetermined_input.append(arg)
+	config.predetermined_input.pop(0)
 
 	session = Session()
 	try:
@@ -202,4 +200,7 @@ if __name__ == '__main__':
 	if sys.platform.startswith('win'):
 	# On Windows calling this function is necessary.
 		multiprocessing.freeze_support()
+	manager = multiprocessing.Manager()
+	predetermined_input = manager.list()
+	config.predetermined_input = predetermined_input
 	main()
