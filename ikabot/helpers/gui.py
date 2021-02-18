@@ -4,18 +4,24 @@
 import getpass
 import os
 import gettext
-import ikabot.config as config
+from ikabot import config
+from ikabot.config import *
 
 t = gettext.translation('gui',
-                        config.localedir,
-                        languages=config.languages,
+                        localedir,
+                        languages=languages,
                         fallback=True)
 _ = t.gettext
 
 def enter():
 	"""Wait for the user to press Enter
 	"""
-	if config.isWindows:
+	try:
+		if len(config.predetermined_input) != 0:
+			return
+	except Exception:
+		pass
+	if isWindows:
 		input(_('\n[Enter]')) # TODO improve this
 	else:
 		getpass.getpass(_('\n[Enter]'))
@@ -23,7 +29,7 @@ def enter():
 def clear():
 	"""Clears all text on the console
 	"""
-	if config.isWindows:
+	if isWindows:
 		os.system('cls')
 	else:
 		os.system('clear')
@@ -41,7 +47,7 @@ def banner():
 	  MM      MM `Mb.   8M   MM          MM    ,9   YA.   ,A9     MM    
 	.JMML.  .JMML. YA.  `Moo9^Yo.      .JMMmmmd9     `Ybmd9'      `Mbmo
 	"""
-	print('\n{}\n\n{}\n{}'.format(bner, config.infoUser, config.update_msg))
+	print('\n{}\n\n{}\n{}'.format(bner, infoUser, update_msg))
 
 class bcolors:
 	HEADER = '\033[95m'

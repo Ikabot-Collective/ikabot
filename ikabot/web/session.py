@@ -12,6 +12,7 @@ import datetime
 import gettext
 import requests
 import base64
+from ikabot import config
 from ikabot.config import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.gui import banner
@@ -101,7 +102,11 @@ class Session:
 			banner()
 
 			self.mail = read(msg=_('Mail:'))
-			self.password = getpass.getpass(_('Password:'))
+
+			if len(config.predetermined_input) != 0:
+				self.password = config.predetermined_input.pop(0)
+			else:
+				self.password = getpass.getpass(_('Password:'))
 
 			banner()
 
@@ -170,6 +175,8 @@ class Session:
 		self.s.headers.update(self.headers)
 		data = {"identity": self.mail, "password": self.password, "locale":"es_AR", "gfLang":"ar", "platformGameId": platformGameId, "gameEnvironmentId": gameEnvironmentId, "autoGameAccountCreation": "false"}
 		r = self.s.post('https://gameforge.com/api/v1/auth/thin/sessions', json=data)
+		if 'gf-challenge-id' in r.headers:
+			exit(_('Captcha error! (Interactive)'))
 		if r.status_code == 403:
 			exit(_('Wrong email or password\n'))
 

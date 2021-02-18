@@ -5,6 +5,8 @@ import re
 import sys
 import json
 import gettext
+import os
+from ikabot import config
 from decimal import *
 from ikabot.config import *
 from ikabot.helpers.getJson import *
@@ -42,6 +44,12 @@ def read(min=None, max=None, digit=False, msg=prompt, values=None, empty=False, 
 	result : int | str
 		int representing the user's choice
 	"""
+	try:
+		if len(config.predetermined_input) !=0:
+			return config.predetermined_input.pop(0)
+	except Exception:
+		pass
+
 	def _invalid():
 		print('\033[1A\033[K', end="") # remove line
 		return read(min, max, digit, msg, values, additionalValues = additionalValues)
