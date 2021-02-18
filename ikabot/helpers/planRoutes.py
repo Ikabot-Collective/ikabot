@@ -49,7 +49,7 @@ def sendGoods(session, originCityId, destinationCityId, islandId, ships, send):
 		if resp[3][1][0]['type'] == 10:
 			break
 		elif resp[3][1][0]['type'] == 11:
-			waitForArrival(session)
+			wait(getMinimumWaitingTime(session))
 		time.sleep(5)
 
 def executeRoutes(session, routes):
