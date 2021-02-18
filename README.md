@@ -37,11 +37,11 @@ _Ikabot is a cross-platform program written in python that grants equal or even 
 	
 7. Login daily
 
-	For those who do not want to spend a day without their account login.
+	For those who do not want to spend a day without their account login. This feature also collects the ambrosia fountain if it is available.
 	
 8. Alert attacks
 
-	It alerts by telegram if you are going to be attacked. You can configure how often _ikabot_ checks for incoming attacks.
+	It alerts by Telegram if you are going to be attacked. You can configure how often _ikabot_ checks for incoming attacks.
 
 9. Donate automatically
 
@@ -57,7 +57,7 @@ _Ikabot is a cross-platform program written in python that grants equal or even 
 	
 12. Sell resources
 
-	It allows you to choose what type of resource to sell and how much. It does not matter how much storage you have, it automatically updates the offers as pĺayers buy from you. When it sells all the resources, it let's you know via Telegram.
+	It allows you to choose what type of resource to sell and how much. It does not matter how much storage you have, it automatically updates the offers as pĺayers buy from you. When it sells all the resources, it lets you know via Telegram.
 
 13. Activate Vacation Mode
 
@@ -71,7 +71,6 @@ _Ikabot is a cross-platform program written in python that grants equal or even 
 
 	It allows you to easily create large amounts of troops or fleets in one city. If there are not enough resources to train all of them, it will train all the units it can and when it finishes it will try to train the rest. It also allows you to build your army in multiple small steps so that you can use it as fast as possible.
 	
-
 16. See movements
 
 	Let's you see movements coming to/from your cities. This includes attacks, transports, etc.
@@ -87,8 +86,7 @@ _Ikabot is a cross-platform program written in python that grants equal or even 
 19. Import / Export cookie
 
 	You can use this feature to insert your _ikabot_ cookie into your browser or other _ikabot_ instances running on a different machine.
-	This will result in _ikabot_ not logging your browser Ikariam session. Keep in mind that logging into Ikariam from another browser will
-	invalidate all prevous cookies, and you will need to do this again if that happens.
+	This will result in _ikabot_ not logging you out of your browser Ikariam session. Keep in mind that logging into Ikariam from another browser will invalidate all prevous cookies, and you will need to do this again if that happens.
 
 20. Auto-Pirate
 
@@ -100,16 +98,29 @@ _Ikabot is a cross-platform program written in python that grants equal or even 
 	
 22. Attack barbarians
 
-	Now you can attack the barbarians in an automated way. You can send your troops in many rounds and repeate the attack as many times as you want.
+	Now you can attack the barbarians in an automated way. You can send your troops in many rounds and repeat the attack as many times as you want.
 
-23. Configure Proxy
+24. Configure Proxy
 
 	It lets you configure a proxy that will be used to all request except those sent to the lobby (during login).
 	The proxy affects immediately all processes associated with the current ikariam username.
 
-24. Update the Telegram data
+25. Update the Telegram data
 
-	It allows you to set or change the Telegram's bot.
+	It allows you to set or change the Telegram data.
+
+26. Kill tasks
+
+	It allows you to end a currently-running ikabot task
+
+27. Configure captcha resolver
+
+	It allows you to configure your desired captcha resolver for the Auto-pirate task. The options you have to choose from are:
+
+	1. Default 
+	2. Custom
+	3. 9kw.eu
+	4. Telegram
 
 
 ### Discord
@@ -142,6 +153,11 @@ To install Python3 on Windows, visit the [official website](https://www.python.o
 It is probably installed by default in your system.  
 To check if it is installed by default, just run `python3 --version`.  
 If it is not installed, visit the [official website](https://www.python.org/) 
+
+### - Notice
+
+Python version 3.9 has proven to be unstable using _ikabot_ so it is recommended you use Python 3.8 or Python 3.7. 
+This notice will be removed once it is confirmed that _ikabot_ works fine on Python 3.9
 
 #### - Pip
 It is a tool to install python packages.  
@@ -201,4 +217,11 @@ When you want to use a functionality that requires Telegram, such as _Alert atta
 You can use [Expect](https://en.wikipedia.org/wiki/Expect) to automate some actions on _ikabot_.  
 There is an example [here](https://github.com/physics-sp/ikabot/wiki/Using-Expect-example:-distribute_wine_evenly.exp).  
 In Linux, you can use cron to run it.  
+
+You can also run ikabot with command line arguments to make it automatically run a task with pre-determined input.
+An example of running the login daily function with predetermined input is:
+`python3 -m ikabot [email] [password] [account number] 7 0`
+Interactivity is returned to the user as soon as the list of pre-determined input arguments is exhausted, allowing _ikabot_ to be run like so:
+`python3 -m ikabot [email] [password]`
+**Take into account that running _ikabot_ with pre-determined input will leave your username and password in the command line history**
 **Take into account that writing your password in plaintext can be very dangerous**
