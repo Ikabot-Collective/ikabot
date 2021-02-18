@@ -33,7 +33,7 @@ def sendToBotDebug(session, msg, debugON):
 	if debugON:
 		sendToBot(session, msg)
 
-def sendToBot(session, msg, Token=False):
+def sendToBot(session, msg, Token = False, Photo = None):
 	"""This function will send the ``msg`` argument passed to it as a message to the user on Telegram
 	Parameters
 	----------
@@ -48,9 +48,15 @@ def sendToBot(session, msg, Token=False):
 		msg = 'pid:{}\n{}\n{}'.format(os.getpid(), config.infoUser, msg)
 	sessionData = session.getSessionData()
 	try:
-		ikabot.web.session.normal_get('https://api.telegram.org/bot{}/sendMessage'.format(sessionData['telegram']['botToken']), params={'chat_id': sessionData['telegram']['chatId'], 'text': msg})
+		if Photo is None:
+			ikabot.web.session.normal_get('https://api.telegram.org/bot{}/sendMessage'.format(sessionData['telegram']['botToken']), params={'chat_id': sessionData['telegram']['chatId'], 'text': msg})
+		else:
+			resp = session.s.post('https://api.telegram.org/bot{}/sendPhoto?chat_id={}&caption={}'.format(sessionData['telegram']['botToken'], sessionData['telegram']['chatId'], msg), files = {'photo' : Photo})
+			pass
+
 	except KeyError:
 		pass
+
 
 def telegramDataIsValid(session):
 	"""This function checks whether or not there is any Telegram data stored in the .ikabot file
@@ -71,7 +77,7 @@ def telegramDataIsValid(session):
 	except KeyError:
 		return False
 
-def getUserResponse(session):
+def getUserResponse(session, fullResponse = False):
 	"""This function will retrieve a list of messages the user sent to the bot on Telegram.
 	Parameters
 	----------
@@ -92,7 +98,10 @@ def getUserResponse(session):
 			return []
 		updates = updates['result']
 		# only return messages from the chatId of our user
-		return [update['message']['text'] for update in updates if update['message']['chat']['id'] == int(sessionData['telegram']['chatId'])]
+		if fullResponse:
+			return [update['message'] for update in updates if update['message']['chat']['id'] == int(sessionData['telegram']['chatId'])]
+		else:
+			return [update['message']['text'] for update in updates if update['message']['chat']['id'] == int(sessionData['telegram']['chatId'])]
 	except KeyError:
 		return []
 
@@ -121,16 +130,18 @@ def checkTelegramData(session):
 		else:
 			return updateTelegramData(session)
 
-def updateTelegramData(session, event=None, stdin_fd=None):
+def updateTelegramData(session, event=None, stdin_fd=None, predetermined_input = []):
 	"""This function asks the user to input the Telegram bot's token and the user's own Telegram chat id. After the user has inputted the neccessary data, this function will generate a random 4 digit number, send it to the user as a Telegram message using the token the user provided. It will then ask the user to input that number as validation.
 	Parameters
 	----------
 	session : ikabot.web.session.Session
 		Session object
 	event : multiprocessing.Event
-		an event which, when fired, give back control of the terminal to the main process
+		an event which, when fired, gives back control of the terminal to the main process
 	stdin_fd : int
 		the standard input file descriptor passed to the function as a means of gaining control of the terminal
+	predetermined_input : multiprocessing.managers.SyncManager.list
+		a process synced list of predetermined inputs
 
 	Returns
 	-------
@@ -139,7 +150,7 @@ def updateTelegramData(session, event=None, stdin_fd=None):
 	"""
 	if event is not None and stdin_fd is not None:
 		sys.stdin = os.fdopen(stdin_fd) # give process access to terminal
-
+	config.predetermined_input = predetermined_input
 	banner()
 	botToken = read(msg=_('Bot\'s token:'))
 	chat_id = read(msg=_('Chat_id:'))
