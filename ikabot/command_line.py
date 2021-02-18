@@ -5,6 +5,8 @@ import os
 import sys
 import gettext
 import multiprocessing
+import time
+import datetime
 from ikabot.config import *
 from ikabot.web.session import *
 from ikabot.helpers.gui import *
@@ -35,12 +37,17 @@ from ikabot.function.autoPirate import autoPirate
 from ikabot.function.investigate import investigate
 from ikabot.function.attackBarbarians import attackBarbarians
 from ikabot.function.proxyConf import proxyConf, show_proxy
+from ikabot.function.killTasks import killTasks 
+from ikabot.function.decaptchaConf import decaptchaConf
 
 t = gettext.translation('command_line',
                         localedir,
                         languages=languages,
                         fallback=True)
 _ = t.gettext
+
+manager = multiprocessing.Manager()
+predetermined_input = manager.list()
 
 def menu(session, checkUpdate=True):
 	"""
@@ -58,37 +65,44 @@ def menu(session, checkUpdate=True):
 
 	process_list = updateProcessList(session)
 	if len(process_list) > 0:
-		print(_('Running tasks:'))
+		print('|{:^5}|{:^35}|{:^15}|'.format('pid','task','date'))
+		print('_'*59)
 		for process in process_list:
-			print(_('- pid: {} task: {}').format(process['pid'], process['action']))
+			if 'date' in process:
+				print('|{:^5}|{:^35}|{:^15}|'.format(process['pid'],process['action'],datetime.datetime.fromtimestamp(process['date']).strftime('%b %d %H:%M:%S')))
+			else:
+				print('|{:^5}|{:^35}|'.format(process['pid'],process['action']))
+
 		print('')
 
-	menu_actions = [
-					constructionList,
-					sendResources,
-					distributeResources,
-					getStatus,
-					donate,
-					searchForIslandSpaces,
-					loginDaily,
-					alertAttacks,
-					donationBot,
-					alertLowWine,
-					buyResources,
-					sellResources,
-					vacationMode,
-					activateMiracle,
-					trainArmy,
-					shipMovements,
-					constructBuilding,
-					update,
-					importExportCookie,
-					autoPirate,
-					investigate,
-					attackBarbarians,
-					proxyConf,
-					updateTelegramData
-					]
+	menu_actions = {
+		1 :			constructionList,
+		2 :			sendResources,
+		3 :			distributeResources,
+		4 :			getStatus,
+		5 :			donate,
+		6 :			searchForIslandSpaces,
+		7 :			loginDaily,
+		8 :			alertAttacks,
+		9 :			donationBot,
+		10:			alertLowWine,
+		11:			buyResources,
+		12:			sellResources,
+		13:			vacationMode,
+		14:			activateMiracle,
+		15:			trainArmy,
+		16:			shipMovements,
+		17:			constructBuilding,
+		18:			update,
+		19:			importExportCookie,
+		20:			autoPirate,
+		21:			investigate,
+		22:			attackBarbarians,
+		24:			proxyConf,
+		25:			updateTelegramData,
+		26:			killTasks,
+		27:			decaptchaConf,
+					}
 
 	print(_('(0)  Exit'))
 	print(_('(1)  Construction list'))
@@ -113,21 +127,32 @@ def menu(session, checkUpdate=True):
 	print(_('(20) Auto-Pirate'))
 	print(_('(21) Investigate'))
 	print(_('(22) Attack barbarians'))
-	print(_('(23) Configure Proxy'))
-	if telegramDataIsValid(session):
-		print(_('(24) Change the Telegram data'))
-	else:
-		print(_('(24) Enter the Telegram data'))
+	print(_('(23) Options / Settings'))
+	total_options = len(menu_actions) + 1
+	selected = read(min=0, max=total_options, digit=True)
 
-	total_options = len(menu_actions)
-	selected = read(min=0, max=total_options)
+	if selected == 23:
+		banner()
+		print(_('(0) Back'))
+		print(_('(24) Configure Proxy'))
+		if telegramDataIsValid(session):
+			print(_('(25) Change the Telegram data'))
+		else:
+			print(_('(25) Enter the Telegram data'))
+		print(_('(26) Kill tasks'))
+		print(_('(27) Configure captcha resolver'))
+
+		selected = read(min=0, max=total_options, digit=True)
+		if selected in [0,23]:
+			menu(session, checkUpdate = False)
+		
+		
 	if selected != 0:
 		try:
-			selected -= 1
 			event = multiprocessing.Event() #creates a new event
-			process = multiprocessing.Process(target=menu_actions[selected], args=(session, event, sys.stdin.fileno()), name=menu_actions[selected].__name__)
+			process = multiprocessing.Process(target=menu_actions[selected], args=(session, event, sys.stdin.fileno(), config.predetermined_input), name=menu_actions[selected].__name__)
 			process.start()
-			process_list.append({'pid': process.pid, 'action': menu_actions[selected].__name__ })
+			process_list.append({'pid': process.pid, 'action': menu_actions[selected].__name__, 'date' : time.time() })
 			updateProcessList(session, programprocesslist=process_list)
 			event.wait() #waits for the process to fire the event that's been given to it. When it does  this process gets back control of the command line and asks user for more input
 		except KeyboardInterrupt:
@@ -151,6 +176,14 @@ def init():
 
 def start():
 	init()
+	for arg in sys.argv:
+		try:
+			predetermined_input.append(int(arg))
+		except ValueError:
+			predetermined_input.append(arg)
+	predetermined_input.pop(0)
+	config.predetermined_input = predetermined_input
+
 	session = Session()
 	try:
 		menu(session)
@@ -165,6 +198,7 @@ def main():
 		clear()
 
 if __name__ == '__main__':
+
 	if sys.platform.startswith('win'):
 	# On Windows calling this function is necessary.
 		multiprocessing.freeze_support()
