@@ -98,7 +98,7 @@ _Ikabot is a cross-platform program written in python that grants equal or even 
 	
 22. Attack barbarians
 
-	Now you can attack the barbarians in an automated way. You can send your troops in many rounds and repeat the attack as many times as you want.
+	Now you can attack the barbarians in an automated way. You can send your troops in many rounds and it will automatically collect the resources.
 
 24. Configure Proxy
 
@@ -212,11 +212,13 @@ When you want to use a functionality that requires Telegram, such as _Alert atta
 **If you are concerned about privacy, set up your own bot, so that only you have the bot's token**
 
 
-#### Automation with Expect
+### Automation with Expect
 
 You can use [Expect](https://en.wikipedia.org/wiki/Expect) to automate some actions on _ikabot_.  
 There is an example [here](https://github.com/physics-sp/ikabot/wiki/Using-Expect-example:-distribute_wine_evenly.exp).  
 In Linux, you can use cron to run it.  
+
+### Using pre-defined input
 
 You can also run ikabot with command line arguments to make it automatically run a task with pre-determined input.  
 An example of running the login daily function with predetermined input is:  
@@ -228,4 +230,3 @@ Interactivity is returned to the user as soon as the list of pre-determined inpu
 python3 -m ikabot [email] [password]
 ```
 **Take into account that running _ikabot_ with pre-determined input will leave your username and password in the command line history**  
-**Take into account that writing your password in plaintext can be very dangerous**  
