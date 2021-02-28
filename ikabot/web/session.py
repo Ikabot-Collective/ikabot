@@ -121,11 +121,11 @@ class Session:
 		js = r.text
 		gameEnvironmentId = re.search(r'"gameEnvironmentId":"(.*?)"', js)
 		if gameEnvironmentId is None:
-			exit('gameEnvironmentId not found')
+			sys.exit('gameEnvironmentId not found')
 		gameEnvironmentId = gameEnvironmentId.group(1)
 		platformGameId = re.search(r'"platformGameId":"(.*?)"', js)
 		if platformGameId is None:
-			exit('platformGameId not found')
+			sys.exit('platformGameId not found')
 		platformGameId = platformGameId.group(1)
 
 		# get __cfduid cookie
@@ -136,7 +136,7 @@ class Session:
 		html = r.text
 		captcha = re.search(r'Attention Required', html)
 		if captcha is not None:
-			exit('Captcha error!')
+			sys.exit('Captcha error!')
 
 		# update __cfduid cookie
 		self.headers = {'Host': 'gameforge.com', 'User-Agent': user_agent, 'Accept': '*/*', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'Referer': 'https://lobby.ikariam.gameforge.com/', 'Origin': 'https://lobby.ikariam.gameforge.com', 'DNT': '1', 'Connection': 'close'}
@@ -176,9 +176,9 @@ class Session:
 		data = {"identity": self.mail, "password": self.password, "locale":"es_AR", "gfLang":"ar", "platformGameId": platformGameId, "gameEnvironmentId": gameEnvironmentId, "autoGameAccountCreation": "false"}
 		r = self.s.post('https://gameforge.com/api/v1/auth/thin/sessions', json=data)
 		if 'gf-challenge-id' in r.headers:
-			exit(_('Captcha error! (Interactive)'))
+			sys.exit(_('Captcha error! (Interactive)'))
 		if r.status_code == 403:
-			exit(_('Wrong email or password\n'))
+			sys.exit(_('Wrong email or password\n'))
 
 		# get the authentication token and set the cookie
 		ses_json = json.loads(r.text, strict=False)
@@ -278,14 +278,14 @@ class Session:
 					msg = 'Login Error: ' + str(resp)
 					if self.padre:
 						print(msg)
-						exit()
+						sys.exit()
 					else:
-						exit(msg)
+						sys.exit(msg)
 
 			url = resp['url']
 			match = re.search(r'https://s\d+-\w{2}\.ikariam\.gameforge\.com/index\.php\?', url)
 			if match is None:
-				exit('Error')
+				sys.exit('Error')
 
 			# set the headers
 			self.s.headers.clear()
@@ -349,13 +349,13 @@ class Session:
 	def __proxy_error(self):
 		sessionData = self.getSessionData()
 		if 'proxy' not in sessionData or sessionData['proxy']['set'] is False:
-			exit('network error')
+			sys.exit('network error')
 		if self.padre is True:
 			print(_('There seems to be a problem connecting to ikariam.'))
 			print(_('Do you want to disable the proxy? [Y/n]'))
 			rta = read(values=['y', 'Y', 'n', 'N', ''])
 			if rta.lower() == 'n':
-				exit()
+				sys.exit()
 			else:
 				sessionData['proxy'] = {}
 				sessionData['proxy']['conf'] = {}
@@ -363,11 +363,11 @@ class Session:
 				self.setSessionData(sessionData)
 				print(_('Proxy disabled, try again.'))
 				enter()
-				exit()
+				sys.exit()
 		else:
 			msg = _('Network error. Consider disabling the proxy.')
 			sendToBot(self, msg)
-			exit()
+			sys.exit()
 
 	def __update_proxy(self, *, obj=None, sessionData=None):
 		# set the proxy
