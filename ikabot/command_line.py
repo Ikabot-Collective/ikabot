@@ -149,15 +149,14 @@ def menu(session, checkUpdate=True):
 	if selected != 0:
 		try:
 			event = multiprocessing.Event() #creates a new event
-			process = multiprocessing.Process(target=menu_actions[selected], args=(session, event, sys.stdin.fileno(), config.predetermined_input), name=menu_actions[selected].__name__)
+			process = multiprocessing.Process(target=menu_actions[selected], args=(session, event, sys.stdin.fileno()), name=menu_actions[selected].__name__)
 			process.start()
 			process_list.append({'pid': process.pid, 'action': menu_actions[selected].__name__, 'date' : time.time() })
 			updateProcessList(session, programprocesslist=process_list)
 			event.wait() #waits for the process to fire the event that's been given to it. When it does  this process gets back control of the command line and asks user for more input
 		except KeyboardInterrupt:
 			pass
-		menu(session, checkUpdate=False)
-	else:
+	if selected == 0 or config.has_predetermined_input:
 		if isWindows:
 			# in unix, you can exit ikabot and close the terminal and the processes will continue to execute
 			# in windows, you can exit ikabot but if you close the terminal, the processes will die
@@ -165,6 +164,8 @@ def menu(session, checkUpdate=True):
 			enter()
 		clear()
 		os._exit(0) #kills the process which executes this statement, but it does not kill it's child processes
+
+	menu(session, checkUpdate=False)
 
 def init():
 	home = 'USERPROFILE' if isWindows else 'HOME'
@@ -181,6 +182,7 @@ def start():
 		except ValueError:
 			config.predetermined_input.append(arg)
 	config.predetermined_input.pop(0)
+	config.has_predetermined_input = len(config.predetermined_input) > 0
 
 	session = Session()
 	try:
@@ -201,6 +203,5 @@ if __name__ == '__main__':
 	# On Windows calling this function is necessary.
 		multiprocessing.freeze_support()
 	manager = multiprocessing.Manager()
-	predetermined_input = manager.list()
-	config.predetermined_input = predetermined_input
+	config.predetermined_input = manager.list()
 	main()

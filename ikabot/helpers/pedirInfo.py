@@ -45,7 +45,7 @@ def read(min=None, max=None, digit=False, msg=prompt, values=None, empty=False, 
 		int representing the user's choice
 	"""
 	try:
-		if len(config.predetermined_input) !=0:
+		if len(config.predetermined_input) != 0:
 			return config.predetermined_input.pop(0)
 	except Exception:
 		pass

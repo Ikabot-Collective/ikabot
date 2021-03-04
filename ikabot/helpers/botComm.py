@@ -130,7 +130,7 @@ def checkTelegramData(session):
 		else:
 			return updateTelegramData(session)
 
-def updateTelegramData(session, event=None, stdin_fd=None, predetermined_input = []):
+def updateTelegramData(session, event=None, stdin_fd=None):
 	"""This function asks the user to input the Telegram bot's token and the user's own Telegram chat id. After the user has inputted the neccessary data, this function will generate a random 4 digit number, send it to the user as a Telegram message using the token the user provided. It will then ask the user to input that number as validation.
 	Parameters
 	----------
@@ -140,8 +140,6 @@ def updateTelegramData(session, event=None, stdin_fd=None, predetermined_input =
 		an event which, when fired, gives back control of the terminal to the main process
 	stdin_fd : int
 		the standard input file descriptor passed to the function as a means of gaining control of the terminal
-	predetermined_input : multiprocessing.managers.SyncManager.list
-		a process synced list of predetermined inputs
 
 	Returns
 	-------
@@ -150,7 +148,6 @@ def updateTelegramData(session, event=None, stdin_fd=None, predetermined_input =
 	"""
 	if event is not None and stdin_fd is not None:
 		sys.stdin = os.fdopen(stdin_fd) # give process access to terminal
-	config.predetermined_input = predetermined_input
 	banner()
 	botToken = read(msg=_('Bot\'s token:'))
 	chat_id = read(msg=_('Chat_id:'))
