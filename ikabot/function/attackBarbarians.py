@@ -156,7 +156,7 @@ def plan_attack(session, city, babarians_info):
 
 		attack_round = {}
 		attack_round['units'] = {}
-		print(_('Which troops do you want to send?').format(len(plan)+1))
+		print(_('Which troops do you want to send?'))
 		for unit_id in units_available:
 			unit_amount = units_available[unit_id]['amount']
 			unit_name   = units_available[unit_id]['name']
@@ -207,17 +207,15 @@ def plan_attack(session, city, babarians_info):
 	plan.sort(key=lambda ar:ar['round'])
 	return plan
 
-def attackBarbarians(session, event, stdin_fd, predetermined_input):
+def attackBarbarians(session, event, stdin_fd):
 	"""
 	Parameters
 	----------
 	session : ikabot.web.session.Session
 	event : multiprocessing.Event
 	stdin_fd: int
-	predetermined_input : multiprocessing.managers.SyncManager.list
 	"""
 	sys.stdin = os.fdopen(stdin_fd)
-	config.predetermined_input = predetermined_input
 	try:
 		banner()
 
