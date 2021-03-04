@@ -220,13 +220,9 @@ In Linux, you can use cron to run it.
 
 ### Using pre-defined input
 
-You can also run ikabot with command line arguments to make it automatically run a task with pre-determined input.  
+You can also run ikabot with command line arguments to make it automatically run **a single task** with pre-determined input.  
 An example of running the login daily function with predetermined input is:  
 ```bash
 python3 -m ikabot [email] [password] [account number] 7 0
-```
-Interactivity is returned to the user as soon as the list of pre-determined input arguments is exhausted, allowing _ikabot_ to be run like so:  
-```bash
-python3 -m ikabot [email] [password]
 ```
 **Take into account that running _ikabot_ with pre-determined input will leave your username and password in the command line history**  
