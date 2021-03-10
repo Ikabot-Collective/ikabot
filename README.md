@@ -98,7 +98,7 @@ _Ikabot is a cross-platform program written in python that grants equal or even 
 	
 22. Attack barbarians
 
-	Now you can attack the barbarians in an automated way. You can send your troops in many rounds and repeat the attack as many times as you want.
+	Now you can attack the barbarians in an automated way. You can send your troops in many rounds and it will automatically collect the resources.
 
 24. Configure Proxy
 
