@@ -64,13 +64,13 @@ def menu(session, checkUpdate=True):
 
 	process_list = updateProcessList(session)
 	if len(process_list) > 0:
-		print('|{:^5}|{:^35}|{:^15}|'.format('pid','task','date'))
-		print('_'*59)
+		print('|{:^6}|{:^35}|{:^15}|'.format('pid','task','date'))
+		print('_'*60)
 		for process in process_list:
 			if 'date' in process:
-				print('|{:^5}|{:^35}|{:^15}|'.format(process['pid'],process['action'],datetime.datetime.fromtimestamp(process['date']).strftime('%b %d %H:%M:%S')))
+				print('|{:^6}|{:^35}|{:^15}|'.format(process['pid'],process['action'],datetime.datetime.fromtimestamp(process['date']).strftime('%b %d %H:%M:%S')))
 			else:
-				print('|{:^5}|{:^35}|'.format(process['pid'],process['action']))
+				print('|{:^6}|{:^35}|'.format(process['pid'],process['action']))
 
 		print('')
 
@@ -190,17 +190,19 @@ def start():
 		session.logout()
 
 def main():
+	manager = multiprocessing.Manager()
+	predetermined_input = manager.list()
+	config.predetermined_input = predetermined_input
 	try:
 		start()
 	except KeyboardInterrupt:
 		clear()
+
+
 
 if __name__ == '__main__':
 
 	if sys.platform.startswith('win'):
 	# On Windows calling this function is necessary.
 		multiprocessing.freeze_support()
-	manager = multiprocessing.Manager()
-	predetermined_input = manager.list()
-	config.predetermined_input = predetermined_input
 	main()
