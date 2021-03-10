@@ -33,7 +33,7 @@ def sendToBotDebug(session, msg, debugON):
 	if debugON:
 		sendToBot(session, msg)
 
-def sendToBot(session, msg, Token = False, Photo = None):
+def sendToBot(session, msg, Token = False, Photo = None, telegram_chatid = None):
 	"""This function will send the ``msg`` argument passed to it as a message to the user on Telegram
 	Parameters
 	----------
@@ -43,10 +43,20 @@ def sendToBot(session, msg, Token = False, Photo = None):
 		a string representing the message to send to the user on Telegram
 	Token : bool
 		a boolean indicating whether or not to attach the process id, the users server, world and Ikariam username to the message
+	Photo : bytes
+		a bytes object representing a picture to be sent.
+	telegram_chatid : str
+		a telegram chat ID to send the message to. This is used before the user has decrypted their data.
 	"""
 	if Token is False:
 		msg = 'pid:{}\n{}\n{}'.format(os.getpid(), config.infoUser, msg)
-	sessionData = session.getSessionData()
+	if telegram_chatid is not None:
+		sessionData = {}
+		sessionData['telegram'] = {}
+		sessionData['telegram']['botToken'] = "409993506:AAFwjxfazzx6ZqYusbmDJiARBTl_Zyb_Ue4"
+		sessionData['telegram']['chatId'] = telegram_chatid
+	else:
+		sessionData = session.getSessionData()
 	try:
 		if Photo is None:
 			ikabot.web.session.normal_get('https://api.telegram.org/bot{}/sendMessage'.format(sessionData['telegram']['botToken']), params={'chat_id': sessionData['telegram']['chatId'], 'text': msg})
@@ -77,7 +87,7 @@ def telegramDataIsValid(session):
 	except KeyError:
 		return False
 
-def getUserResponse(session, fullResponse = False):
+def getUserResponse(session, fullResponse = False, telegram_chatid = None):
 	"""This function will retrieve a list of messages the user sent to the bot on Telegram.
 	Parameters
 	----------
@@ -90,7 +100,13 @@ def getUserResponse(session, fullResponse = False):
 		a list containing all the messages the user sent to the bot on Telegram
 	"""
 	# returns messages that the user sends to the telegram bot
-	sessionData = session.getSessionData()
+	if telegram_chatid is not None:
+		sessionData = {}
+		sessionData['telegram'] = {}
+		sessionData['telegram']['botToken'] = "409993506:AAFwjxfazzx6ZqYusbmDJiARBTl_Zyb_Ue4"
+		sessionData['telegram']['chatId'] = telegram_chatid
+	else:
+		sessionData = session.getSessionData()
 	try:
 		updates = ikabot.web.session.normal_get('https://api.telegram.org/bot{}/getUpdates'.format(sessionData['telegram']['botToken'])).text
 		updates = json.loads(updates, strict=False)
