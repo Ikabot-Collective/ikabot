@@ -61,7 +61,7 @@ def sendToBot(session, msg, Token = False, Photo = None, telegram_chatid = None)
 		if Photo is None:
 			ikabot.web.session.normal_get('https://api.telegram.org/bot{}/sendMessage'.format(sessionData['telegram']['botToken']), params={'chat_id': sessionData['telegram']['chatId'], 'text': msg})
 		else:
-			resp = session.s.post('https://api.telegram.org/bot{}/sendPhoto?chat_id={}&caption={}'.format(sessionData['telegram']['botToken'], sessionData['telegram']['chatId'], msg), files = {'photo' : Photo})
+			resp = session.s.post('https://api.telegram.org/bot{}/sendDocument?chat_id={}&caption={}'.format(sessionData['telegram']['botToken'], sessionData['telegram']['chatId'], msg), files = {'document' : ('captcha.png',Photo)})
 			pass
 
 	except KeyError:
