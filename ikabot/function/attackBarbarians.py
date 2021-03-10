@@ -156,7 +156,7 @@ def plan_attack(session, city, babarians_info):
 
 		attack_round = {}
 		attack_round['units'] = {}
-		print(_('Which troops do you want to send?').format(len(plan)+1))
+		print(_('Which troops do you want to send?'))
 		for unit_id in units_available:
 			unit_amount = units_available[unit_id]['amount']
 			unit_name   = units_available[unit_id]['name']

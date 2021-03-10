@@ -51,7 +51,7 @@ def vacationMode(session, event, stdin_fd, predetermined_input):
 		enter()
 		event.set()
 		clear()
-		exit()
+		sys.exit()
 	except KeyboardInterrupt:
 		event.set()
 		return
