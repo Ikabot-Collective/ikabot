@@ -40,9 +40,8 @@ def alertAttacks(session, event, stdin_fd, predetermined_input):
 
 		banner()
 		default = 20
-		minutes = read(msg=_('How often should I search for attacks?(min:3, default: {:d}): ').format(default), min=3, empty=True)
-		if minutes == '':
-			minutes = default
+		minutes = read(msg=_('How often should I search for attacks?(min:3, default: {:d}): ').format(default), min=3, default=default)
+		min_units = read(msg=_('Attacks with less than how many units should be ignored? (default: 0): '), digit=True, default=0)
 		print(_('I will check for attacks every {:d} minutes').format(minutes))
 		enter()
 	except KeyboardInterrupt:
@@ -55,7 +54,7 @@ def alertAttacks(session, event, stdin_fd, predetermined_input):
 	info = _('\nI check for attacks every {:d} minutes\n').format(minutes)
 	setInfoSignal(session, info)
 	try:
-		do_it(session, minutes)
+		do_it(session, minutes, min_units)
 	except:
 		msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
 		sendToBot(session, msg)
@@ -94,7 +93,7 @@ def respondToAttack(session):
 			else:
 				sendToBot(session, _('Invalid command: {:d}').format(action))
 
-def do_it(session, minutes):
+def do_it(session, minutes, min_units):
 	"""
 	Parameters
 	----------
@@ -133,17 +132,18 @@ def do_it(session, minutes):
 				amountFleets = militaryMovement['fleet']['amount']
 				timeLeft = int(militaryMovement['eventTime']) - timeNow
 
-				# send alert
-				msg  = _('-- ALERT --\n')
-				msg += missionText + '\n'
-				msg += _('from the city {} of {}\n').format(origin['name'], origin['avatarName'])
-				msg += _('a {}\n').format(target['name'])
-				msg += _('{} units\n').format(amountTroops)
-				msg += _('{} fleet\n').format(amountFleets)
-				msg += _('arrival in: {}\n').format(daysHoursMinutes(timeLeft))
-				msg += _('If you want to put the account in vacation mode send:\n')
-				msg += _('{:d}:1').format(os.getpid())
-				sendToBot(session, msg)
+				if int(amountTroops) + int(amountFleets) >= min_units:
+					# send alert
+					msg  = _('-- ALERT --\n')
+					msg += missionText + '\n'
+					msg += _('from the city {} of {}\n').format(origin['name'], origin['avatarName'])
+					msg += _('a {}\n').format(target['name'])
+					msg += _('{} units\n').format(amountTroops)
+					msg += _('{} fleet\n').format(amountFleets)
+					msg += _('arrival in: {}\n').format(daysHoursMinutes(timeLeft))
+					msg += _('If you want to put the account in vacation mode send:\n')
+					msg += _('{:d}:1').format(os.getpid())
+					sendToBot(session, msg)
 
 		# remove old attacks from knownAttacks
 		for event_id in list(knownAttacks):
