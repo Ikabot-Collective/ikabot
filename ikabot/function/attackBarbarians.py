@@ -480,7 +480,7 @@ def loot(session, island, city, units_data, loot_round):
 		if len(attacks) > 0:
 			return
 
-		attack_data, ships_needed, travel_time = load_troops(session, city, island, attack_round, units_data, attack_data, sum(resources))
+		attack_data, ships_needed, travel_time = load_troops(session, city, island, loot_round, units_data, attack_data, sum(resources))
 		attack_data['transporter'] = min(ships_available, ships_needed)
 
 		# make sure we have time to send the attack
