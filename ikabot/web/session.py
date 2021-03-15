@@ -111,7 +111,8 @@ class Session:
 			banner()
 
 		self.s = requests.Session()
-		#self.s.proxies.update({'https':'socks5://127.0.0.1:5555'}) added for testing purposes
+		# self.s.proxies.update({'https':'socks5://127.0.0.1:5555'}) # added for testing purposes
+		# This is the proxy you want to set if you want to use the proxy for the lobby login
 
 		# get gameEnvironmentId and platformGameId
 		self.headers = {'Host': 'lobby.ikariam.gameforge.com', 'User-Agent': user_agent, 'Accept': '*/*', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/'}
@@ -203,13 +204,17 @@ class Session:
 				self.s.headers.update(self.headers)
 				request1 = self.s.get('https://challenge.gameforge.com/challenge/{}'.format(challenge_id))
 				request2 = self.s.get('https://image-drop-challenge.gameforge.com/index.js')
-				request3 = self.s.post('https://pixelzirkus.gameforge.com/do2/simple')
+				try:
+					request3 = self.s.post('https://pixelzirkus.gameforge.com/do2/simple')
+				except Exception as e:
+					pass
 				captcha_time = self.s.get('https://image-drop-challenge.gameforge.com/challenge/{}/en-GB'.format(challenge_id)).json()['lastUpdated']
 				text_image = self.s.get('https://image-drop-challenge.gameforge.com/challenge/' + challenge_id + '/en-GB/text?' + str(captcha_time)).content
 				drag_icons = self.s.get('https://image-drop-challenge.gameforge.com/challenge/' + challenge_id + '/en-GB/drag-icons?' + str(captcha_time)).content
 				drop_target = self.s.get('https://image-drop-challenge.gameforge.com/challenge/' + challenge_id + '/en-GB/drop-target?' + str(captcha_time)).content
 				sendToBot(self,'', Photo = text_image, telegram_chatid = telegram_chatid)
 				sendToBot(self, 'Please send the number of the correct image (1, 2, 3 or 4)', Photo = drag_icons, telegram_chatid = telegram_chatid)
+				print('Check your Telegram and do it fast. The captcha expires quickly!')
 				captcha_time = time.time()
 				while(True):
 					response = getUserResponse(self, fullResponse = True, telegram_chatid = telegram_chatid)
