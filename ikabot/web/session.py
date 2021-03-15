@@ -111,6 +111,8 @@ class Session:
 			banner()
 
 		self.s = requests.Session()
+		# self.s.proxies.update({'https':'socks5://127.0.0.1:5555'}) # added for testing purposes
+		# This is the proxy you want to set if you want to use the proxy for the lobby login
 
 		# get gameEnvironmentId and platformGameId
 		self.headers = {'Host': 'lobby.ikariam.gameforge.com', 'User-Agent': user_agent, 'Accept': '*/*', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/'}
@@ -176,7 +178,85 @@ class Session:
 		data = {"identity": self.mail, "password": self.password, "locale":"es_AR", "gfLang":"ar", "platformGameId": platformGameId, "gameEnvironmentId": gameEnvironmentId, "autoGameAccountCreation": "false"}
 		r = self.s.post('https://gameforge.com/api/v1/auth/thin/sessions', json=data)
 		if 'gf-challenge-id' in r.headers:
-			sys.exit(_('Captcha error! (Interactive)'))
+			print('The interactive captcha has been presented.')
+			print('Do you want to solve it via Telegram?(y|n)')
+			config.predetermined_input[:] = [] # Unholy way to clear a ListProxy object
+			answer = read(values=['y','Y','n','N'])
+			if answer.lower() == 'n':
+				sys.exit(_('Captcha error! (Interactive)'))
+			print('Please type in your telegram chat id')
+			print('This is necessary because of security')
+			telegram_chatid = read()
+
+			while(True):
+				self.headers = {'Host': 'gameforge.com','User-Agent': user_agent,'Accept': '*/*','Accept-Language': 'en-US,en;q=0.5','Accept-Encoding': 'gzip, deflate, br','Referer': 'https://lobby.ikariam.gameforge.com/es_AR/','TNT-Installation-Id': '','Content-Type': 'application/json','Origin': 'https://lobby.ikariam.gameforge.com','DNT': '1','Connection': 'keep-alive','Pragma': 'no-cache','Cache-Control': 'no-cache','TE': 'Trailers'}
+				self.s.headers.clear()
+				self.s.headers.update(self.headers)
+				data = {"identity": self.mail, "password": self.password, "locale":"es_AR", "gfLang":"ar", "platformGameId": platformGameId, "gameEnvironmentId": gameEnvironmentId, "autoGameAccountCreation": "false"}
+				r = self.s.post('https://gameforge.com/api/v1/auth/thin/sessions', json=data)
+				
+				challenge_id = r.headers['gf-challenge-id'].split(';')[0]
+				self.headers = {'accept': '*/*', 'accept-encoding': 'gzip, deflate, br',
+							'accept-language': 'en-GB,el;q=0.9', 'dnt': '1', 'origin': 'https://lobby.ikariam.gameforge.com',
+							'referer': 'https://lobby.ikariam.gameforge.com/', 'sec-fetch-dest': 'empty',
+							'sec-fetch-mode': 'cors', 'sec-fetch-site': 'same-site', 'user-agent': user_agent}
+				self.s.headers.clear()
+				self.s.headers.update(self.headers)
+				request1 = self.s.get('https://challenge.gameforge.com/challenge/{}'.format(challenge_id))
+				request2 = self.s.get('https://image-drop-challenge.gameforge.com/index.js')
+				try:
+					request3 = self.s.post('https://pixelzirkus.gameforge.com/do2/simple')
+				except Exception as e:
+					pass
+				captcha_time = self.s.get('https://image-drop-challenge.gameforge.com/challenge/{}/en-GB'.format(challenge_id)).json()['lastUpdated']
+				text_image = self.s.get('https://image-drop-challenge.gameforge.com/challenge/' + challenge_id + '/en-GB/text?' + str(captcha_time)).content
+				drag_icons = self.s.get('https://image-drop-challenge.gameforge.com/challenge/' + challenge_id + '/en-GB/drag-icons?' + str(captcha_time)).content
+				drop_target = self.s.get('https://image-drop-challenge.gameforge.com/challenge/' + challenge_id + '/en-GB/drop-target?' + str(captcha_time)).content
+				sendToBot(self,'', Photo = text_image, telegram_chatid = telegram_chatid)
+				sendToBot(self, 'Please send the number of the correct image (1, 2, 3 or 4)', Photo = drag_icons, telegram_chatid = telegram_chatid)
+				print('Check your Telegram and do it fast. The captcha expires quickly!')
+				captcha_time = time.time()
+				while(True):
+					response = getUserResponse(self, fullResponse = True, telegram_chatid = telegram_chatid)
+					if response == []:
+						time.sleep(5)
+						continue
+					response = response[-1]
+					if response['date'] < captcha_time:
+						time.sleep(5)
+						continue
+					else:
+						captcha = response['text']
+						try:
+							int(captcha)
+						except ValueError:
+							print('You sent ' + captcha + '. Please send only a number! (1, 2, 3 or 4)')
+							time.sleep(5)
+							continue
+						break
+					time.sleep(5)
+				captcha = int(captcha) - 1
+				data = {'answer': captcha}
+				captcha_sent = self.s.post('https://image-drop-challenge.gameforge.com/challenge/' + challenge_id + '/en-GB', json = data).json()
+				if captcha_sent['status'] == 'solved':
+					self.headers = {'Host': 'gameforge.com','User-Agent': user_agent,'Accept': '*/*','Accept-Language': 'en-US,en;q=0.5','Accept-Encoding': 'gzip, deflate, br','Referer': 'https://lobby.ikariam.gameforge.com/es_AR/','TNT-Installation-Id': '','Content-Type': 'application/json','Origin': 'https://lobby.ikariam.gameforge.com','DNT': '1','Connection': 'keep-alive','Pragma': 'no-cache','Cache-Control': 'no-cache','TE': 'Trailers'}
+					self.s.headers.clear()
+					self.s.headers.update(self.headers)
+					data = {"identity": self.mail, "password": self.password, "locale":"es_AR", "gfLang":"ar", "platformGameId": platformGameId, "gameEnvironmentId": gameEnvironmentId, "autoGameAccountCreation": "false"}
+					r = self.s.post('https://gameforge.com/api/v1/auth/thin/sessions', json=data)
+					if 'gf-challenge-id' in r.headers:
+						continue
+					else:
+						break
+
+
+
+
+
+
+
+
+			
 		if r.status_code == 403:
 			sys.exit(_('Wrong email or password\n'))
 
