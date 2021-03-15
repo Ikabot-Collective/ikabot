@@ -9,31 +9,29 @@ from ikabot.config import *
 from ikabot.helpers.botComm import *
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
-t = gettext.translation('aesCipher',
-                        localedir,
-                        languages=languages,
-                        fallback=True)
+t = gettext.translation('aesCipher', localedir, languages=languages, fallback=True)
 _ = t.gettext
+
 
 class AESCipher:
 
 	def __init__(self, mail, username, password):
-		self.key = hashlib.sha256( mail.encode('utf-8') + b'\x00' + password.encode('utf-8') ).digest()
+		self.key = hashlib.sha256(mail.encode('utf-8') + b'\x00' + password.encode('utf-8')).digest()
 		for i in range(0xfff):
-			self.key = hashlib.sha256( self.key ).digest()
+			self.key = hashlib.sha256(self.key).digest()
 
 	def encrypt(self, plaintext):
 		aesgcm = AESGCM(self.key)
 		nonce = os.urandom(16)
 		ciphertext = aesgcm.encrypt(nonce, plaintext.encode('utf-8'), None)
-		return base64.b64encode( nonce + ciphertext ).decode('utf-8')
+		return base64.b64encode(nonce + ciphertext).decode('utf-8')
 
 	def decrypt(self, ciphertext):
 		ciphertext = base64.b64decode(ciphertext)
-		nonce      = ciphertext[:16]
+		nonce = ciphertext[:16]
 		ciphertext = ciphertext[16:]
 		aesgcm = AESGCM(self.key)
-		plaintext  = aesgcm.decrypt(nonce, ciphertext, None)
+		plaintext = aesgcm.decrypt(nonce, ciphertext, None)
 		return plaintext.decode('utf-8')
 
 	def getEntryKey(self, session):
@@ -83,7 +81,7 @@ class AESCipher:
 				ciphertext = ciphertext[64:]
 				try:
 					plaintext = self.decrypt(ciphertext)
-				except:
+				except Exception:
 					msg = _('Error while decrypting session data\nSaved data will be deleted.')
 					if session.padre:
 						print(msg)
@@ -96,12 +94,17 @@ class AESCipher:
 					return data_dict
 				else:
 					try:
-						return data_dict[session.username][session.mundo][session.servidor]
+						try:
+							session_data = data_dict[session.username][session.mundo][session.servidor]
+						except Exception:
+							session_data = {}
+						session_data['shared'] = data_dict['shared']
+						return session_data
 					except KeyError:
 						return {}
 		return {}
 
-	def setSessionData(self, session, data):
+	def setSessionData(self, session, data, shared=False):
 		"""
 		Parameters
 		----------
@@ -116,16 +119,21 @@ class AESCipher:
 			session_data[session.username][session.mundo] = {}
 		if session.servidor not in session_data[session.username][session.mundo]:
 			session_data[session.username][session.mundo][session.servidor] = {}
+		if 'shared' not in session_data:
+			session_data['shared'] = {}
 
-		session_data[session.username][session.mundo][session.servidor] = data
+		if shared:
+			session_data['shared'] = {**session_data['shared'], **data}
+		else:
+			session_data[session.username][session.mundo][session.servidor] = data
 
-		plaintext  = json.dumps(session_data)
+		plaintext = json.dumps(session_data)
 		ciphertext = self.encrypt(plaintext)
 
 		with open(ikaFile, 'r') as filehandler:
 			data = filehandler.read()
 
-		entry_key  = self.getEntryKey(session)
+		entry_key = self.getEntryKey(session)
 		newFile = ''
 		newline = entry_key + ' ' + ciphertext
 		for line in data.split('\n'):

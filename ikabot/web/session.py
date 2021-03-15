@@ -20,10 +20,7 @@ from ikabot.helpers.aesCipher import *
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.getJson import getCity
 
-t = gettext.translation('session',
-                        localedir,
-                        languages=languages,
-                        fallback=True)
+t = gettext.translation('session', localedir, languages=languages, fallback=True)
 _ = t.gettext
 
 
@@ -71,8 +68,8 @@ class Session:
 
 	def __isExpired(self, html):
 		return 'index.php?logout' in html
-	
-	def isExpired(self,html):
+
+	def isExpired(self, html):
 		return self.__isExpired(html)
 
 	def __saveNewCookies(self):
@@ -111,8 +108,6 @@ class Session:
 			banner()
 
 		self.s = requests.Session()
-		# self.s.proxies.update({'https':'socks5://127.0.0.1:5555'}) # added for testing purposes
-		# This is the proxy you want to set if you want to use the proxy for the lobby login
 
 		# get gameEnvironmentId and platformGameId
 		self.headers = {'Host': 'lobby.ikariam.gameforge.com', 'User-Agent': user_agent, 'Accept': '*/*', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/'}
@@ -163,43 +158,37 @@ class Session:
 			data = {'product': 'ikariam', 'server_id': '1', 'language': 'en', 'location': 'fp_eval', 'fp_eval_id': __fp_eval_id_2, 'fingerprint': '2175408712', 'fp2_config_id': '1', 'page': 'https%3A%2F%2Flobby.ikariam.gameforge.com%2F', 'referrer': '', 'fp2_value': '921af958be7cf2f76db1e448c8a5d89d', 'fp2_exec_time': '96.00'}
 			r = self.s.post('https://pixelzirkus.gameforge.com/do/simple', data=data)
 		except Exception:
-			pass # These cookies are not required and sometimes cause issues for people logging in
+			pass  # These cookies are not required and sometimes cause issues for people logging in
 
 		# options req (not really needed)
-		self.headers = {'Host': 'gameforge.com','User-Agent': user_agent,'Accept': '*/*','Accept-Language': 'en-US,en;q=0.5','Accept-Encoding': 'gzip, deflate','Access-Control-Request-Method': 'POST','Access-Control-Request-Headers': 'content-type,tnt-installation-id','Referer': 'https://lobby.ikariam.gameforge.com/es_AR/','Origin': 'https://lobby.ikariam.gameforge.com','DNT': '1','Connection': 'close'}
+		self.headers = {'Host': 'gameforge.com', 'User-Agent': user_agent, 'Accept': '*/*', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'Access-Control-Request-Method': 'POST', 'Access-Control-Request-Headers': 'content-type,tnt-installation-id', 'Referer': 'https://lobby.ikariam.gameforge.com/es_AR/', 'Origin': 'https://lobby.ikariam.gameforge.com', 'DNT': '1', 'Connection': 'close'}
 		self.s.headers.clear()
 		self.s.headers.update(self.headers)
 		r = self.s.options('https://gameforge.com/api/v1/auth/thin/sessions')
 
 		# send creds
-		self.headers = {'Host': 'gameforge.com','User-Agent': user_agent,'Accept': '*/*','Accept-Language': 'en-US,en;q=0.5','Accept-Encoding': 'gzip, deflate, br','Referer': 'https://lobby.ikariam.gameforge.com/es_AR/','TNT-Installation-Id': '','Content-Type': 'application/json','Origin': 'https://lobby.ikariam.gameforge.com','DNT': '1','Connection': 'keep-alive','Pragma': 'no-cache','Cache-Control': 'no-cache','TE': 'Trailers'}
+		self.headers = {'Host': 'gameforge.com', 'User-Agent': user_agent, 'Accept': '*/*', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate, br', 'Referer': 'https://lobby.ikariam.gameforge.com/es_AR/', 'TNT-Installation-Id': '', 'Content-Type': 'application/json', 'Origin': 'https://lobby.ikariam.gameforge.com', 'DNT': '1', 'Connection': 'keep-alive', 'Pragma': 'no-cache', 'Cache-Control': 'no-cache', 'TE': 'Trailers'}
 		self.s.headers.clear()
 		self.s.headers.update(self.headers)
-		data = {"identity": self.mail, "password": self.password, "locale":"es_AR", "gfLang":"ar", "platformGameId": platformGameId, "gameEnvironmentId": gameEnvironmentId, "autoGameAccountCreation": "false"}
+		data = {"identity": self.mail, "password": self.password, "locale": "es_AR", "gfLang": "ar", "platformGameId": platformGameId, "gameEnvironmentId": gameEnvironmentId, "autoGameAccountCreation": "false"}
 		r = self.s.post('https://gameforge.com/api/v1/auth/thin/sessions', json=data)
 		if 'gf-challenge-id' in r.headers:
 			print('The interactive captcha has been presented.')
-			print('Do you want to solve it via Telegram?(y|n)')
-			config.predetermined_input[:] = [] # Unholy way to clear a ListProxy object
-			answer = read(values=['y','Y','n','N'])
+			print('Do you want to solve it via Telegram? (Y/n)')
+			config.predetermined_input[:] = []  # Unholy way to clear a ListProxy object
+			answer = read(values=['y', 'Y', 'n', 'N'], default='y')
 			if answer.lower() == 'n':
 				sys.exit(_('Captcha error! (Interactive)'))
-			print('Please type in your telegram chat id')
-			print('This is necessary because of security')
-			telegram_chatid = read()
 
-			while(True):
-				self.headers = {'Host': 'gameforge.com','User-Agent': user_agent,'Accept': '*/*','Accept-Language': 'en-US,en;q=0.5','Accept-Encoding': 'gzip, deflate, br','Referer': 'https://lobby.ikariam.gameforge.com/es_AR/','TNT-Installation-Id': '','Content-Type': 'application/json','Origin': 'https://lobby.ikariam.gameforge.com','DNT': '1','Connection': 'keep-alive','Pragma': 'no-cache','Cache-Control': 'no-cache','TE': 'Trailers'}
+			while True:
+				self.headers = {'Host': 'gameforge.com', 'User-Agent': user_agent, 'Accept': '*/*', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate, br', 'Referer': 'https://lobby.ikariam.gameforge.com/es_AR/', 'TNT-Installation-Id': '', 'Content-Type': 'application/json', 'Origin': 'https://lobby.ikariam.gameforge.com', 'DNT': '1', 'Connection': 'keep-alive', 'Pragma': 'no-cache', 'Cache-Control': 'no-cache', 'TE': 'Trailers'}
 				self.s.headers.clear()
 				self.s.headers.update(self.headers)
-				data = {"identity": self.mail, "password": self.password, "locale":"es_AR", "gfLang":"ar", "platformGameId": platformGameId, "gameEnvironmentId": gameEnvironmentId, "autoGameAccountCreation": "false"}
+				data = {"identity": self.mail, "password": self.password, "locale": "es_AR", "gfLang": "ar", "platformGameId": platformGameId, "gameEnvironmentId": gameEnvironmentId, "autoGameAccountCreation": "false"}
 				r = self.s.post('https://gameforge.com/api/v1/auth/thin/sessions', json=data)
-				
+
 				challenge_id = r.headers['gf-challenge-id'].split(';')[0]
-				self.headers = {'accept': '*/*', 'accept-encoding': 'gzip, deflate, br',
-							'accept-language': 'en-GB,el;q=0.9', 'dnt': '1', 'origin': 'https://lobby.ikariam.gameforge.com',
-							'referer': 'https://lobby.ikariam.gameforge.com/', 'sec-fetch-dest': 'empty',
-							'sec-fetch-mode': 'cors', 'sec-fetch-site': 'same-site', 'user-agent': user_agent}
+				self.headers = {'accept': '*/*', 'accept-encoding': 'gzip, deflate, br', 'accept-language': 'en-GB,el;q=0.9', 'dnt': '1', 'origin': 'https://lobby.ikariam.gameforge.com', 'referer': 'https://lobby.ikariam.gameforge.com/', 'sec-fetch-dest': 'empty', 'sec-fetch-mode': 'cors', 'sec-fetch-site': 'same-site', 'user-agent': user_agent}
 				self.s.headers.clear()
 				self.s.headers.update(self.headers)
 				request1 = self.s.get('https://challenge.gameforge.com/challenge/{}'.format(challenge_id))
@@ -208,16 +197,17 @@ class Session:
 					request3 = self.s.post('https://pixelzirkus.gameforge.com/do2/simple')
 				except Exception as e:
 					pass
+
 				captcha_time = self.s.get('https://image-drop-challenge.gameforge.com/challenge/{}/en-GB'.format(challenge_id)).json()['lastUpdated']
-				text_image = self.s.get('https://image-drop-challenge.gameforge.com/challenge/' + challenge_id + '/en-GB/text?' + str(captcha_time)).content
-				drag_icons = self.s.get('https://image-drop-challenge.gameforge.com/challenge/' + challenge_id + '/en-GB/drag-icons?' + str(captcha_time)).content
-				drop_target = self.s.get('https://image-drop-challenge.gameforge.com/challenge/' + challenge_id + '/en-GB/drop-target?' + str(captcha_time)).content
-				sendToBot(self,'', Photo = text_image, telegram_chatid = telegram_chatid)
-				sendToBot(self, 'Please send the number of the correct image (1, 2, 3 or 4)', Photo = drag_icons, telegram_chatid = telegram_chatid)
-				print('Check your Telegram and do it fast. The captcha expires quickly!')
+				text_image = self.s.get('https://image-drop-challenge.gameforge.com/challenge/{}/en-GB/text?{}'.format(challenge_id, captcha_time)).content
+				drag_icons = self.s.get('https://image-drop-challenge.gameforge.com/challenge/{}/en-GB/drag-icons?{}'.format(challenge_id, captcha_time)).content
+				drop_target = self.s.get('https://image-drop-challenge.gameforge.com/challenge/{}/en-GB/drop-target?{}'.format(challenge_id, captcha_time)).content
+				sendToBot(self, '', Photo=text_image)
+				sendToBot(self, 'Please send the number of the correct image (1, 2, 3 or 4)', Photo=drag_icons)
+				print(_('Check your Telegram and do it fast. The captcha expires quickly'))
 				captcha_time = time.time()
-				while(True):
-					response = getUserResponse(self, fullResponse = True, telegram_chatid = telegram_chatid)
+				while True:
+					response = getUserResponse(self, fullResponse=True)
 					if response == []:
 						time.sleep(5)
 						continue
@@ -228,35 +218,26 @@ class Session:
 					else:
 						captcha = response['text']
 						try:
-							int(captcha)
+							captcha = int(captcha) - 1
+							data = {'answer': captcha}
+							break
 						except ValueError:
-							print('You sent ' + captcha + '. Please send only a number! (1, 2, 3 or 4)')
+							print(_('You sent {}. Please send only a number (1, 2, 3 or 4)').format(captcha))
 							time.sleep(5)
 							continue
-						break
 					time.sleep(5)
-				captcha = int(captcha) - 1
-				data = {'answer': captcha}
-				captcha_sent = self.s.post('https://image-drop-challenge.gameforge.com/challenge/' + challenge_id + '/en-GB', json = data).json()
+				captcha_sent = self.s.post('https://image-drop-challenge.gameforge.com/challenge/{}/en-GB'.format(challenge_id), json=data).json()
 				if captcha_sent['status'] == 'solved':
-					self.headers = {'Host': 'gameforge.com','User-Agent': user_agent,'Accept': '*/*','Accept-Language': 'en-US,en;q=0.5','Accept-Encoding': 'gzip, deflate, br','Referer': 'https://lobby.ikariam.gameforge.com/es_AR/','TNT-Installation-Id': '','Content-Type': 'application/json','Origin': 'https://lobby.ikariam.gameforge.com','DNT': '1','Connection': 'keep-alive','Pragma': 'no-cache','Cache-Control': 'no-cache','TE': 'Trailers'}
+					self.headers = {'Host': 'gameforge.com', 'User-Agent': user_agent, 'Accept': '*/*', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate, br', 'Referer': 'https://lobby.ikariam.gameforge.com/es_AR/', 'TNT-Installation-Id': '', 'Content-Type': 'application/json', 'Origin': 'https://lobby.ikariam.gameforge.com', 'DNT': '1', 'Connection': 'keep-alive', 'Pragma': 'no-cache', 'Cache-Control': 'no-cache', 'TE': 'Trailers'}
 					self.s.headers.clear()
 					self.s.headers.update(self.headers)
-					data = {"identity": self.mail, "password": self.password, "locale":"es_AR", "gfLang":"ar", "platformGameId": platformGameId, "gameEnvironmentId": gameEnvironmentId, "autoGameAccountCreation": "false"}
+					data = {"identity": self.mail, "password": self.password, "locale": "es_AR", "gfLang": "ar", "platformGameId": platformGameId, "gameEnvironmentId": gameEnvironmentId, "autoGameAccountCreation": "false"}
 					r = self.s.post('https://gameforge.com/api/v1/auth/thin/sessions', json=data)
 					if 'gf-challenge-id' in r.headers:
 						continue
 					else:
 						break
 
-
-
-
-
-
-
-
-			
 		if r.status_code == 403:
 			sys.exit(_('Wrong email or password\n'))
 
@@ -282,31 +263,30 @@ class Session:
 
 		if not self.logged:
 
-			if len([ account for account in accounts if account['blocked'] is False ]) == 1:
-				self.account  = [ account for account in accounts if account['blocked'] is False ][0]
+			if len([account for account in accounts if account['blocked'] is False]) == 1:
+				self.account = [account for account in accounts if account['blocked'] is False][0]
 			else:
 				print(_('With which account do you want to log in?\n'))
 
-				max_name = max( [ len(account['name']) for account in accounts if account['blocked'] is False ] )
+				max_name = max([len(account['name']) for account in accounts if account['blocked'] is False])
 				i = 0
-				for account in [ account for account in accounts if account['blocked'] is False ]:
+				for account in [account for account in accounts if account['blocked'] is False]:
 					server = account['server']['language']
 					mundo = account['server']['number']
-					world = [ srv['name'] for srv in servers if srv['language'] == server and srv['number'] == mundo ][0]
+					world = [srv['name'] for srv in servers if srv['language'] == server and srv['number'] == mundo][0]
 					i += 1
 					pad = ' ' * (max_name - len(account['name']))
 					print('({:d}) {}{} [{} - {}]'.format(i, account['name'], pad, server, world))
 				num = read(min=1, max=i)
-				self.account  = [ account for account in accounts if account['blocked'] is False ][num - 1]
+				self.account = [account for account in accounts if account['blocked'] is False][num - 1]
 			self.username = self.account['name']
 			self.servidor = self.account['server']['language']
-			self.mundo    = str(self.account['server']['number'])
-			self.word     = [ srv['name'] for srv in servers if srv['language'] == self.servidor and srv['number'] == int(self.mundo) ][0]
+			self.mundo = str(self.account['server']['number'])
+			self.word = [srv['name'] for srv in servers if srv['language'] == self.servidor and srv['number'] == int(self.mundo)][0]
 			config.infoUser = _('Server:{}').format(self.servidor)
 			config.infoUser += _(', World:{}').format(self.word)
 			config.infoUser += _(', Player:{}').format(self.username)
 			banner()
-
 
 		self.host = 's{}-{}.ikariam.gameforge.com'.format(self.mundo, self.servidor)
 		self.urlBase = 'https://{}/index.php?'.format(self.host)
@@ -331,7 +311,7 @@ class Session:
 			try:
 				# make a request to check the connection
 				html = old_s.get(self.urlBase).text
-			except:
+			except Exception:
 				self.__proxy_error()
 
 			cookies_are_valid = self.__isExpired(html) is False
@@ -377,7 +357,7 @@ class Session:
 			# use the new cookies instead, invalidate the old ones
 			try:
 				html = self.s.get(url).text
-			except:
+			except Exception:
 				self.__proxy_error()
 
 		if self.__isInVacation(html):
@@ -439,7 +419,7 @@ class Session:
 			else:
 				sessionData['proxy'] = {}
 				sessionData['proxy']['conf'] = {}
-				sessionData['proxy']['set']  = False
+				sessionData['proxy']['set'] = False
 				self.setSessionData(sessionData)
 				print(_('Proxy disabled, try again.'))
 				enter()
@@ -512,7 +492,7 @@ class Session:
 				if fullResponse:
 					response = self.s.get(url, params=params)
 				else:
-					response = self.s.get(url, params=params).text #this isn't recursion, this get is different from the one it's in
+					response = self.s.get(url, params=params).text  # this isn't recursion, this get is different from the one it's in
 				html = response
 				if ignoreExpire is False:
 					assert self.__isExpired(html) is False
@@ -547,7 +527,7 @@ class Session:
 		params_original = params
 		self.__checkCookie()
 		self.__update_proxy()
-		
+
 		# add the request id
 		token = self.__token()
 		url = url.replace(actionRequest, token)
@@ -583,19 +563,22 @@ class Session:
 		if self.padre is False:
 			os._exit(0)
 
-	def setSessionData(self, sessionData):
+	def setSessionData(self, sessionData, shared=False):
 		"""Encrypts relevant session data and writes it to the .ikabot file
 		Parameters
 		----------
 		sessionData : dict
 			dictionary containing relevant session data, data is written to file using AESCipher.setSessionData
+		shared : bool
+			Indicates if the new data should be shared among all accounts asociated with the user-password
 		"""
-		self.cipher.setSessionData(self, sessionData)
+		self.cipher.setSessionData(self, sessionData, shared=shared)
 
 	def getSessionData(self):
 		"""Gets relevant session data from the .ikabot file
 		"""
 		return self.cipher.getSessionData(self)
+
 
 def normal_get(url, params={}):
 	"""Sends a get request to provided url

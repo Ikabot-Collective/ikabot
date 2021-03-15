@@ -7,11 +7,9 @@ import gettext
 from ikabot import config
 from ikabot.config import *
 
-t = gettext.translation('gui',
-                        localedir,
-                        languages=languages,
-                        fallback=True)
+t = gettext.translation('gui', localedir, languages=languages, fallback=True)
 _ = t.gettext
+
 
 def enter():
 	"""Wait for the user to press Enter
@@ -22,9 +20,10 @@ def enter():
 	except Exception:
 		pass
 	if isWindows:
-		input(_('\n[Enter]')) # TODO improve this
+		input(_('\n[Enter]'))  # TODO improve this
 	else:
 		getpass.getpass(_('\n[Enter]'))
+
 
 def clear():
 	"""Clears all text on the console
@@ -33,6 +32,7 @@ def clear():
 		os.system('cls')
 	else:
 		os.system('clear')
+
 
 def banner():
 	"""Clears all text on the console and displays the Ikabot ASCII art banner
@@ -47,7 +47,8 @@ def banner():
 	  MM      MM `Mb.   8M   MM          MM    ,9   YA.   ,A9     MM    
 	.JMML.  .JMML. YA.  `Moo9^Yo.      .JMMmmmd9     `Ybmd9'      `Mbmo
 	"""
-	print('\n{}\n\n{}\n{}'.format(bner, infoUser, update_msg))
+	print('\n{}\n\n{}\n{}'.format(bner, config.infoUser, config.update_msg))
+
 
 class bcolors:
 	HEADER = '\033[95m'
