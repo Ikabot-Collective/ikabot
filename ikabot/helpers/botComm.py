@@ -115,9 +115,9 @@ def getUserResponse(session, fullResponse = False, telegram_chatid = None):
 		updates = updates['result']
 		# only return messages from the chatId of our user
 		if fullResponse:
-			return [update['message'] for update in updates if update['message']['chat']['id'] == int(sessionData['telegram']['chatId'])]
+			return [update['message'] for update in updates if 'message' in update and update['message']['chat']['id'] == int(sessionData['telegram']['chatId'])]
 		else:
-			return [update['message']['text'] for update in updates if update['message']['chat']['id'] == int(sessionData['telegram']['chatId'])]
+			return [update['message']['text'] for update in updates if 'message' in update and update['message']['chat']['id'] == int(sessionData['telegram']['chatId'])]
 	except KeyError:
 		return []
 
