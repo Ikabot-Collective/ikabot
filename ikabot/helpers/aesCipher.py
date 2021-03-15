@@ -112,20 +112,24 @@ class AESCipher:
 		data : dict
 		"""
 		session_data = self.getSessionData(session, True)
-
-		if session.username not in session_data:
-			session_data[session.username] = {}
-		if session.mundo not in session_data[session.username]:
-			session_data[session.username][session.mundo] = {}
-		if session.servidor not in session_data[session.username][session.mundo]:
-			session_data[session.username][session.mundo][session.servidor] = {}
-		if 'shared' not in session_data:
-			session_data['shared'] = {}
-
+		
 		if shared:
+			if 'shared' not in session_data:
+				session_data['shared'] = {}
 			session_data['shared'] = {**session_data['shared'], **data}
 		else:
+			if session.username not in session_data:
+				session_data[session.username] = {}
+			if session.mundo not in session_data[session.username]:
+				session_data[session.username][session.mundo] = {}
+			if session.servidor not in session_data[session.username][session.mundo]:
+				session_data[session.username][session.mundo][session.servidor] = {}
+			if 'shared' not in session_data:
+				session_data['shared'] = {}
 			session_data[session.username][session.mundo][session.servidor] = data
+
+
+		
 
 		plaintext = json.dumps(session_data)
 		ciphertext = self.encrypt(plaintext)
