@@ -108,7 +108,7 @@ class Session:
 			banner()
 
 		self.s = requests.Session()
-		self.cipher = AESCipher(self.mail, 'placeholder', self.password)
+		self.cipher = AESCipher(self.mail, self.password)
 
 		# get gameEnvironmentId and platformGameId
 		self.headers = {'Host': 'lobby.ikariam.gameforge.com', 'User-Agent': user_agent, 'Accept': '*/*', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/'}

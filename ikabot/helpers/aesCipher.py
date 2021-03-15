@@ -15,7 +15,7 @@ _ = t.gettext
 
 class AESCipher:
 
-	def __init__(self, mail, username, password):
+	def __init__(self, mail, password):
 		self.key = hashlib.sha256(mail.encode('utf-8') + b'\x00' + password.encode('utf-8')).digest()
 		for i in range(0xfff):
 			self.key = hashlib.sha256(self.key).digest()
@@ -112,7 +112,7 @@ class AESCipher:
 		data : dict
 		"""
 		session_data = self.getSessionData(session, True)
-		
+
 		if shared:
 			if 'shared' not in session_data:
 				session_data['shared'] = {}
@@ -127,9 +127,6 @@ class AESCipher:
 			if 'shared' not in session_data:
 				session_data['shared'] = {}
 			session_data[session.username][session.mundo][session.servidor] = data
-
-
-		
 
 		plaintext = json.dumps(session_data)
 		ciphertext = self.encrypt(plaintext)
