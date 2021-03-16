@@ -3,6 +3,7 @@
 
 import re
 
+
 def getAvailableShips(session):
 	"""Function that returns the total number of free (available) ships
 	Parameters
@@ -17,6 +18,7 @@ def getAvailableShips(session):
 	"""
 	html = session.get()
 	return int(re.search(r'GlobalMenu_freeTransporters">(\d+)<', html).group(1))
+
 
 def getTotalShips(session):
 	"""Function that returns the total number of ships, regardless of if they're available or not

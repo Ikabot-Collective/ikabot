@@ -8,6 +8,7 @@ import subprocess
 from ikabot.config import *
 from ikabot.helpers.signals import deactivate_sigint
 
+
 def set_child_mode(session):
 	"""
 	Parameters
@@ -17,14 +18,16 @@ def set_child_mode(session):
 	session.padre = False
 	deactivate_sigint()
 
+
 def run(command):
 	ret = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.read()
 	try:
 		return ret.decode('utf-8').strip()
-	except:
+	except Exception:
 		return ret
 
-def updateProcessList(session, programprocesslist = []):
+
+def updateProcessList(session, programprocesslist=[]):
 	"""This function will return data about all the active ikabot processes. If it is passed the ``programprocesslist`` argument, it will write new processes from that list to the .ikabot file
 	Parameters
 	----------
@@ -47,10 +50,10 @@ def updateProcessList(session, programprocesslist = []):
 
 	# check it's still running
 	runningIkabotProcessList = []
-	ika_process = psutil.Process(pid = os.getpid()).name()
+	ika_process = psutil.Process(pid=os.getpid()).name()
 	for process in fileList:
 		try:
-			proc = psutil.Process(pid = process['pid'])
+			proc = psutil.Process(pid=process['pid'])
 		except psutil.NoSuchProcess:
 			continue
 

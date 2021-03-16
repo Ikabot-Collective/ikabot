@@ -11,6 +11,7 @@ from ikabot.helpers.varios import wait
 from ikabot.helpers.getJson import getCity
 from ikabot.helpers.naval import *
 
+
 def sendGoods(session, originCityId, destinationCityId, islandId, ships, send):
 	"""This function will execute one route
 	Parameters
@@ -51,6 +52,7 @@ def sendGoods(session, originCityId, destinationCityId, islandId, ships, send):
 		elif resp[3][1][0]['type'] == 11:
 			wait(getMinimumWaitingTime(session))
 		time.sleep(5)
+
 
 def executeRoutes(session, routes):
 	"""This function will execute all the routes passed to it, regardless if there are enough ships available to do so
@@ -97,6 +99,7 @@ def executeRoutes(session, routes):
 			available_ships = int(math.ceil((Decimal(resources_to_send) / Decimal(500))))
 			sendGoods(session, origin_city['id'], destination_city_id, island_id, available_ships, send)
 
+
 def getMinimumWaitingTime(session):
 	"""This function returns the time needed to wait for the closest fleet to arrive. If all ships are unavailable, this represents the minimum time needed to wait for any ships to become available. A random waiting time between 0 and 10 seconds is added to the waiting time to avoid race conditions between multiple concurrently running processes.
 	Parameters
@@ -117,13 +120,14 @@ def getMinimumWaitingTime(session):
 	militaryMovements = postdata[1][1][2]['viewScriptParams']['militaryAndFleetMovements']
 	current_time = int(postdata[0][1]['time'])
 	delivered_times = []
-	for militaryMovement in [ mv for mv in militaryMovements if mv['isOwnArmyOrFleet'] ]:
+	for militaryMovement in [mv for mv in militaryMovements if mv['isOwnArmyOrFleet']]:
 		remaining_time = int(militaryMovement['eventTime']) - current_time
 		delivered_times.append(remaining_time)
 	if delivered_times:
-		return min(delivered_times) + random.uniform(0,10)
+		return min(delivered_times) + random.uniform(0, 10)
 	else:
 		return 0
+
 
 def waitForArrival(session):
 	"""This function will return the number of available ships, and if there aren't any, it will wait for the closest fleet to arrive and then return the number of available ships
@@ -140,6 +144,6 @@ def waitForArrival(session):
 	available_ships = getAvailableShips(session)
 	while available_ships == 0:
 		minimum_waiting_time_for_ship = getMinimumWaitingTime(session)
-		wait( minimum_waiting_time_for_ship )
+		wait(minimum_waiting_time_for_ship)
 		available_ships = getAvailableShips(session)
 	return available_ships

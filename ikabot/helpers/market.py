@@ -7,6 +7,7 @@ from ikabot.config import *
 from ikabot.helpers.getJson import getCity
 from ikabot.helpers.pedirInfo import getIdsOfCities
 
+
 def getCommercialCities(session):
 	"""
 	Parameters
@@ -32,6 +33,7 @@ def getCommercialCities(session):
 				break
 	return commercial_cities
 
+
 def getMarketHtml(session, city):
 	"""
 	Parameters
@@ -44,6 +46,7 @@ def getMarketHtml(session, city):
 	json_data = json.loads(data, strict=False)
 	return json_data[1][1][1]
 
+
 def storageCapacityOfMarket(html):
 	match = re.search(r'var\s*storageCapacity\s*=\s*(\d+);', html)
 	if match:
@@ -51,9 +54,11 @@ def storageCapacityOfMarket(html):
 	else:
 		return 0
 
+
 def onSellInMarket(html):
 	mad, vin, mar, cri, azu = re.findall(r'<input type="text" class="textfield"\s*size="\d+"\s*name=".*?"\s*id=".*?"\s*value="(\d+)"', html)
 	return [int(mad), int(vin), int(mar), int(cri), int(azu)]
+
 
 def getGold(session, city):
 	"""
@@ -71,5 +76,5 @@ def getGold(session, city):
 	gold = json_data[0][1]['headerData']['gold']
 	gold = gold.split('.')[0]
 	gold = int(gold)
-	gold_production = json_data[0][1]['headerData']['scientistsUpkeep'] + json_data[0][1]['headerData']['income'] +json_data[0][1]['headerData']['upkeep']
+	gold_production = json_data[0][1]['headerData']['scientistsUpkeep'] + json_data[0][1]['headerData']['income'] + json_data[0][1]['headerData']['upkeep']
 	return gold, int(gold_production)
