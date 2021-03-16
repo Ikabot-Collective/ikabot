@@ -5,6 +5,7 @@ import re
 import json
 from ikabot.helpers.resources import *
 
+
 def getFreeCitizens(html):
 	"""This function is used in the ``getCity`` function to determine the amount of free (idle) citizens in the given city.
 	Parameters
@@ -20,6 +21,7 @@ def getFreeCitizens(html):
 	ciudadanosDisp = re.search(r'js_GlobalMenu_citizens">(.*?)</span>', html).group(1)
 	return int(ciudadanosDisp.replace(',', '').replace('.', ''))
 
+
 def onSale(html):
 	"""This function is used in the ``getCity`` function to determine the amount of each resource which is on sale in the branch office
 	Parameters
@@ -34,9 +36,10 @@ def onSale(html):
 	"""
 	rta = re.search(r'branchOfficeResources: JSON\.parse\(\'{\\"resource\\":\\"(\d+)\\",\\"1\\":\\"(\d+)\\",\\"2\\":\\"(\d+)\\",\\"3\\":\\"(\d+)\\",\\"4\\":\\"(\d+)\\"}\'\)', html)
 	if rta:
-		return [ int(rta.group(1)), int(rta.group(2)), int(rta.group(3)), int(rta.group(4)), int(rta.group(5))]
+		return [int(rta.group(1)), int(rta.group(2)), int(rta.group(3)), int(rta.group(4)), int(rta.group(5))]
 	else:
 		return [0, 0, 0, 0, 0]
+
 
 def getIsland(html):
 	"""This function uses the html passed to it as a string to extract, parse and return an Island object
@@ -57,7 +60,6 @@ def getIsland(html):
 	isla = isla.replace('yCoord', 'y')
 	isla = isla.replace(',"owner', ',"')
 
-
 	# {"id":idIsla,"name":nombreIsla,"x":,"y":,"good":numeroBien,"woodLv":,"goodLv":,"wonder":numeroWonder, "wonderName": "nombreDelMilagro","wonderLv":"5","cities":[{"type":"city","name":cityName,"id":cityId,"level":lvIntendencia,"Id":playerId,"Name":playerName,"AllyId":,"AllyTag":,"state":"vacation"},...}}
 	isla = json.loads(isla, strict=False)
 	isla['tipo'] = re.search(r'"tradegood":"(\d)"', html).group(1)
@@ -65,6 +67,7 @@ def getIsland(html):
 	isla['y'] = int(isla['y'])
 
 	return isla
+
 
 def getCity(html):
 	"""This function uses the ``html`` passed to it as a string to extract, parse and return a City object
@@ -112,6 +115,6 @@ def getCity(html):
 	city['enventa'] = onSale(html)
 	city['freeSpaceForResources'] = []
 	for i in range(5):
-		city['freeSpaceForResources'].append( city['storageCapacity'] - city['recursos'][i] - city['enventa'][i] )
+		city['freeSpaceForResources'].append(city['storageCapacity'] - city['recursos'][i] - city['enventa'][i])
 
 	return city

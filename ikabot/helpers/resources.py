@@ -8,6 +8,7 @@ from ikabot.config import *
 
 getcontext().prec = 30
 
+
 def getAvailableResources(html, num=False):
 	"""
 	Parameters
@@ -24,6 +25,7 @@ def getAvailableResources(html, num=False):
 	else:
 		return [resources.group(1), resources.group(3), resources.group(2), resources.group(5), resources.group(4)]
 
+
 def getWarehouseCapacity(html):
 	"""
 	Parameters
@@ -35,6 +37,7 @@ def getWarehouseCapacity(html):
 	"""
 	capacity = re.search(r'maxResources:\s*JSON\.parse\(\'{\\"resource\\":(\d+),', html).group(1)
 	return int(capacity)
+
 
 def getWineConsumption(html):
 	"""
@@ -50,6 +53,7 @@ def getWineConsumption(html):
 		return int(result.group(1))
 	return 0
 
+
 def getProductionPerSecond(session, city_id):
 	"""
 	Parameters
@@ -64,8 +68,8 @@ def getProductionPerSecond(session, city_id):
 	prod = session.post(payloadPost={'action': 'header', 'function': 'changeCurrentCity', 'actionRequest': actionRequest, 'cityId': city_id, 'ajax': '1'})
 	prod = json.loads(prod, strict=False)
 	prod = prod[0][1]['headerData']
-	wood_production = Decimal( prod['resourceProduction'] )
-	luxury_production = Decimal( prod['tradegoodProduction'] )
-	luxury_resource_type = int( prod['producedTradegood'] )
+	wood_production = Decimal(prod['resourceProduction'])
+	luxury_production = Decimal(prod['tradegoodProduction'])
+	luxury_resource_type = int(prod['producedTradegood'])
 
 	return wood_production, luxury_production, luxury_resource_type

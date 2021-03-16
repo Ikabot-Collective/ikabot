@@ -8,6 +8,7 @@ from decimal import *
 
 getcontext().prec = 30
 
+
 def addThousandSeparator(num, character = '.'):
 	"""Formats the number into a string and adds a `character` for every thousand (eg. 3000 -> 3.000)
 	Parameters
@@ -23,6 +24,7 @@ def addThousandSeparator(num, character = '.'):
 		a string representing that number with added `character` for every thousand
 	"""
 	return '{0:,}'.format(int(num)).replace(',', character)
+
 
 def daysHoursMinutes(totalSeconds):
 	"""Formats the total number of seconds into days hours minutes (eg. 321454 -> 3D 17H)
@@ -52,7 +54,8 @@ def daysHoursMinutes(totalSeconds):
 		texto = texto + str(minutos) + 'M '
 	return texto[:-1]
 
-def wait(seconds, maxrandom = 0):
+
+def wait(seconds, maxrandom=0):
 	"""This function will wait the provided number of seconds plus a random number of seconds between 0 and maxrandom
 	Parameters
 	-----------
@@ -64,7 +67,7 @@ def wait(seconds, maxrandom = 0):
 	if seconds <= 0:
 		return
 	randomTime = random.randint(0, maxrandom)
-	ratio = (1 + 5 ** 0.5) / 2 - 1 # 0.6180339887498949
+	ratio = (1 + 5 ** 0.5) / 2 - 1  # 0.6180339887498949
 	comienzo = time.time()
 	fin = comienzo + seconds
 	restantes = seconds
@@ -72,6 +75,7 @@ def wait(seconds, maxrandom = 0):
 		time.sleep(restantes * ratio)
 		restantes = fin - time.time()
 	time.sleep(randomTime)
+
 
 def getCurrentCityId(session):
 	"""

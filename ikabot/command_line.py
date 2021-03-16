@@ -40,12 +40,8 @@ from ikabot.function.proxyConf import proxyConf, show_proxy
 from ikabot.function.killTasks import killTasks 
 from ikabot.function.decaptchaConf import decaptchaConf
 
-t = gettext.translation('command_line',
-                        localedir,
-                        languages=languages,
-                        fallback=True)
+t = gettext.translation('command_line', localedir, languages=languages, fallback=True)
 _ = t.gettext
-
 
 
 def menu(session, checkUpdate=True):
@@ -64,26 +60,26 @@ def menu(session, checkUpdate=True):
 
 	process_list = updateProcessList(session)
 	if len(process_list) > 0:
-		print('|{:^6}|{:^35}|{:^15}|'.format('pid','task','date'))
+		print('|{:^6}|{:^35}|{:^15}|'.format('pid', 'task', 'date'))
 		print('_'*60)
 		for process in process_list:
 			if 'date' in process:
-				print('|{:^6}|{:^35}|{:^15}|'.format(process['pid'],process['action'],datetime.datetime.fromtimestamp(process['date']).strftime('%b %d %H:%M:%S')))
+				print('|{:^6}|{:^35}|{:^15}|'.format(process['pid'], process['action'], datetime.datetime.fromtimestamp(process['date']).strftime('%b %d %H:%M:%S')))
 			else:
-				print('|{:^6}|{:^35}|'.format(process['pid'],process['action']))
+				print('|{:^6}|{:^35}|'.format(process['pid'], process['action']))
 
 		print('')
 
 	menu_actions = {
-		1 :			constructionList,
-		2 :			sendResources,
-		3 :			distributeResources,
-		4 :			getStatus,
-		5 :			donate,
-		6 :			searchForIslandSpaces,
-		7 :			loginDaily,
-		8 :			alertAttacks,
-		9 :			donationBot,
+		1:			constructionList,
+		2:			sendResources,
+		3:			distributeResources,
+		4:			getStatus,
+		5:			donate,
+		6:			searchForIslandSpaces,
+		7:			loginDaily,
+		8:			alertAttacks,
+		9:			donationBot,
 		10:			alertLowWine,
 		11:			buyResources,
 		12:			sellResources,
@@ -142,18 +138,17 @@ def menu(session, checkUpdate=True):
 		print(_('(27) Configure captcha resolver'))
 
 		selected = read(min=0, max=total_options, digit=True)
-		if selected in [0,23]:
-			menu(session, checkUpdate = False)
-		
-		
+		if selected in [0, 23]:
+			menu(session, checkUpdate=False)
+
 	if selected != 0:
 		try:
-			event = multiprocessing.Event() #creates a new event
+			event = multiprocessing.Event()  # creates a new event
 			process = multiprocessing.Process(target=menu_actions[selected], args=(session, event, sys.stdin.fileno(), config.predetermined_input), name=menu_actions[selected].__name__)
 			process.start()
-			process_list.append({'pid': process.pid, 'action': menu_actions[selected].__name__, 'date' : time.time() })
+			process_list.append({'pid': process.pid, 'action': menu_actions[selected].__name__, 'date': time.time()})
 			updateProcessList(session, programprocesslist=process_list)
-			event.wait() #waits for the process to fire the event that's been given to it. When it does  this process gets back control of the command line and asks user for more input
+			event.wait()  # waits for the process to fire the event that's been given to it. When it does  this process gets back control of the command line and asks user for more input
 		except KeyboardInterrupt:
 			pass
 		menu(session, checkUpdate=False)
@@ -164,7 +159,8 @@ def menu(session, checkUpdate=True):
 			print(_('Closing this console will kill the processes.'))
 			enter()
 		clear()
-		os._exit(0) #kills the process which executes this statement, but it does not kill it's child processes
+		os._exit(0)  # kills the process which executes this statement, but it does not kill it's child processes
+
 
 def init():
 	home = 'USERPROFILE' if isWindows else 'HOME'
@@ -172,6 +168,7 @@ def init():
 	if not os.path.isfile(ikaFile):
 		open(ikaFile, 'w')
 		os.chmod(ikaFile, 0o600)
+
 
 def start():
 	init()
@@ -189,6 +186,7 @@ def start():
 		clear()
 		session.logout()
 
+
 def main():
 	manager = multiprocessing.Manager()
 	predetermined_input = manager.list()
@@ -199,10 +197,8 @@ def main():
 		clear()
 
 
-
 if __name__ == '__main__':
-
-	if sys.platform.startswith('win'):
 	# On Windows calling this function is necessary.
+	if sys.platform.startswith('win'):
 		multiprocessing.freeze_support()
 	main()
