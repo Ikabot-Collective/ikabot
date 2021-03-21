@@ -37,7 +37,7 @@ def show_proxy(session):
 
 def test_proxy(proxy_dict):
 	try:
-		requests.get('https://lobby.ikariam.gameforge.com/', proxies=proxy_dict)
+		requests.get('https://lobby.ikariam.gameforge.com/', proxies=proxy_dict, verify=config.do_ssl_verify)
 	except Exception:
 		return False
 	return True

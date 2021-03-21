@@ -19,6 +19,7 @@ from ikabot.helpers.gui import banner
 from ikabot.helpers.aesCipher import *
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.getJson import getCity
+from urllib3.exceptions import InsecureRequestWarning
 
 t = gettext.translation('session', localedir, languages=languages, fallback=True)
 _ = t.gettext
@@ -33,6 +34,8 @@ class Session:
 		self.log = False
 		self.padre = True
 		self.logged = False
+		# disable ssl verification warning
+		requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 		self.__login()
 
 	def writeLog(self, msg):
@@ -61,7 +64,7 @@ class Session:
 			idCiudad = getCity(html)['id']
 			token = re.search(r'actionRequest"?:\s*"(.*?)"', html).group(1)
 			urlLogout = 'action=logoutAvatar&function=logout&sideBarExt=undefined&startPageShown=1&detectedDevice=1&cityId={0}&backgroundView=city&currentCityId={0}&actionRequest={1}'.format(idCiudad, token)
-			self.s.get(self.urlBase + urlLogout)
+			self.s.get(self.urlBase + urlLogout, verify=config.do_ssl_verify)
 
 	def __isInVacation(self, html):
 		return 'nologin_umod' in html
@@ -310,7 +313,7 @@ class Session:
 			self.__update_proxy(obj=old_s, sessionData=sessionData)
 			try:
 				# make a request to check the connection
-				html = old_s.get(self.urlBase).text
+				html = old_s.get(self.urlBase, verify=config.do_ssl_verify).text
 			except Exception:
 				self.__proxy_error()
 
@@ -356,7 +359,7 @@ class Session:
 
 			# use the new cookies instead, invalidate the old ones
 			try:
-				html = self.s.get(url).text
+				html = self.s.get(url, verify=config.do_ssl_verify).text
 			except Exception:
 				self.__proxy_error()
 
@@ -408,7 +411,7 @@ class Session:
 
 	def __proxy_error(self):
 		sessionData = self.getSessionData()
-		if 'proxy' not in sessionData or sessionData['proxy']['set'] is False:
+		if 'proxy' not in sessionData['shared'] or sessionData['shared']['proxy']['set'] is False:
 			sys.exit('network error')
 		if self.padre is True:
 			print(_('There seems to be a problem connecting to ikariam.'))
@@ -417,10 +420,11 @@ class Session:
 			if rta.lower() == 'n':
 				sys.exit()
 			else:
-				sessionData['proxy'] = {}
-				sessionData['proxy']['conf'] = {}
-				sessionData['proxy']['set'] = False
-				self.setSessionData(sessionData)
+				proxy_conf = {}
+				proxy_conf['proxy'] = {}
+				proxy_conf['proxy']['conf'] = {}
+				proxy_conf['proxy']['set'] = False
+				self.setSessionData(proxy_conf, shared=True)
 				print(_('Proxy disabled, try again.'))
 				enter()
 				sys.exit()
@@ -435,8 +439,10 @@ class Session:
 			obj = self.s
 		if sessionData is None:
 			sessionData = self.getSessionData()
-		if 'proxy' in sessionData:
-			obj.proxies.update(sessionData['proxy']['conf'])
+		if 'proxy' in sessionData['shared'] and sessionData['shared']['proxy']['set'] is True:
+			obj.proxies.update(sessionData['shared']['proxy']['conf'])
+		else:
+			obj.proxies.update({})
 
 	def __checkCookie(self):
 		self.__log('__checkCookie()')
@@ -460,6 +466,7 @@ class Session:
 		"""
 		html = self.get()
 		return re.search(r'actionRequest"?:\s*"(.*?)"', html).group(1)
+
 
 	def get(self, url='', params={}, ignoreExpire=False, noIndex=False, fullResponse=False):
 		"""Sends get request to ikariam
@@ -489,14 +496,14 @@ class Session:
 		self.__log('get({}), params:{}'.format(url, str(params)))
 		while True:
 			try:
-				if fullResponse:
-					response = self.s.get(url, params=params)
-				else:
-					response = self.s.get(url, params=params).text  # this isn't recursion, this get is different from the one it's in
-				html = response
+				response = self.s.get(url, params=params, verify=config.do_ssl_verify)
+				html = response.text
 				if ignoreExpire is False:
 					assert self.__isExpired(html) is False
-				return html
+				if fullResponse:
+					return response
+				else:
+					return html
 			except AssertionError:
 				self.__sessionExpired()
 			except requests.exceptions.ConnectionError:
@@ -543,7 +550,7 @@ class Session:
 		self.__log('post({}), data={}'.format(url, str(payloadPost)))
 		while True:
 			try:
-				resp = self.s.post(url, data=payloadPost, params=params).text
+				resp = self.s.post(url, data=payloadPost, params=params, verify=config.do_ssl_verify).text
 				if ignoreExpire is False:
 					assert self.__isExpired(resp) is False
 				if 'TXT_ERROR_WRONG_REQUEST_ID' in resp:
