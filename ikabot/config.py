@@ -25,6 +25,7 @@ update_msg = ''
 
 isWindows = os.name == 'nt'
 
+do_ssl_verify = True
 ids_cache = None
 cities_cache = None
 menu_cities = ''

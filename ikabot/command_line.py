@@ -129,17 +129,17 @@ def menu(session, checkUpdate=True):
 	if selected == 23:
 		banner()
 		print(_('(0) Back'))
-		print(_('(24) Configure Proxy'))
+		print(_('(1) Configure Proxy'))
 		if telegramDataIsValid(session):
-			print(_('(25) Change the Telegram data'))
+			print(_('(2) Change the Telegram data'))
 		else:
-			print(_('(25) Enter the Telegram data'))
-		print(_('(26) Kill tasks'))
-		print(_('(27) Configure captcha resolver'))
+			print(_('(2) Enter the Telegram data'))
+		print(_('(3) Kill tasks'))
+		print(_('(4) Configure captcha resolver'))
 
-		selected = read(min=0, max=total_options, digit=True)
-		if selected in [0, 23]:
-			menu(session, checkUpdate=False)
+		selected = read(min=0, max=4, digit=True)
+		if selected > 0:
+			selected += 23
 
 	if selected != 0:
 		try:
