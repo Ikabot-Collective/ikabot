@@ -411,7 +411,7 @@ class Session:
 
 	def __proxy_error(self):
 		sessionData = self.getSessionData()
-		if 'proxy' not in sessionData['shared'] or sessionData['shared']['proxy']['set'] is False:
+		if 'shared' not in sessionData or 'proxy' not in sessionData['shared'] or sessionData['shared']['proxy']['set'] is False:
 			sys.exit('network error')
 		if self.padre is True:
 			print(_('There seems to be a problem connecting to ikariam.'))
@@ -439,7 +439,7 @@ class Session:
 			obj = self.s
 		if sessionData is None:
 			sessionData = self.getSessionData()
-		if 'proxy' in sessionData['shared'] and sessionData['shared']['proxy']['set'] is True:
+		if 'shared' in sessionData and 'proxy' in sessionData['shared'] and sessionData['shared']['proxy']['set'] is True:
 			obj.proxies.update(sessionData['shared']['proxy']['conf'])
 		else:
 			obj.proxies.update({})
