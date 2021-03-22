@@ -15,7 +15,7 @@ _ = t.gettext
 def show_proxy(session):
 	session_data = session.getSessionData()
 	msg = _('using proxy:')
-	if 'proxy' in session_data['shared'] and session_data['shared']['proxy']['set'] is True:
+	if 'shared' in session_data and 'proxy' in session_data['shared'] and session_data['shared']['proxy']['set'] is True:
 		proxy_data = session_data['shared']
 		curr_proxy = proxy_data['proxy']['conf']['https']
 		if test_proxy(proxy_data['proxy']['conf']) is False:
@@ -74,7 +74,7 @@ def proxyConf(session, event, stdin_fd, predetermined_input):
 		session_data = session.getSessionData()
 		proxy_data = {}
 		proxy_data['proxy'] = {}
-		if 'proxy' not in session_data['shared'] or session_data['shared']['proxy']['set'] is False:
+		if 'shared' not in session_data or 'proxy' not in session_data['shared'] or session_data['shared']['proxy']['set'] is False:
 			print(_('Right now, there is no proxy configured.'))
 			proxy_dict = read_proxy()
 			if proxy_dict is None:
