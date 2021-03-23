@@ -15,12 +15,11 @@ _ = t.gettext
 def show_proxy(session):
 	session_data = session.getSessionData()
 	msg = _('using proxy:')
-	if 'shared' in session_data and 'proxy' in session_data['shared'] and session_data['shared']['proxy']['set'] is True:
-		proxy_data = session_data['shared']
-		curr_proxy = proxy_data['proxy']['conf']['https']
-		if test_proxy(proxy_data['proxy']['conf']) is False:
-			proxy_data['proxy']['set'] = False
-			session.setSessionData(proxy_data, shared=True)
+	if 'proxy' in session_data and session_data['proxy']['set'] is True:
+		curr_proxy = session_data['proxy']['conf']['https']
+		if test_proxy(session_data['proxy']['conf']) is False:
+			session_data['proxy']['set'] = False
+			session.setSessionData(session_data)
 			sys.exit(_('the {} proxy does not work, it has been removed').format(curr_proxy))
 		if msg not in config.update_msg:
 			# add proxy message
@@ -72,18 +71,17 @@ def proxyConf(session, event, stdin_fd, predetermined_input):
 		print(_('Warning: The proxy does not apply to the requests sent to the lobby!\n'))
 
 		session_data = session.getSessionData()
-		proxy_data = {}
-		proxy_data['proxy'] = {}
-		if 'shared' not in session_data or 'proxy' not in session_data['shared'] or session_data['shared']['proxy']['set'] is False:
+		if 'proxy' not in session_data or session_data['proxy']['set'] is False:
 			print(_('Right now, there is no proxy configured.'))
 			proxy_dict = read_proxy()
 			if proxy_dict is None:
 				event.set()
 				return
-			proxy_data['proxy']['conf'] = proxy_dict
-			proxy_data['proxy']['set'] = True
+			session_data['proxy'] = {}
+			session_data['proxy']['conf'] = proxy_dict
+			session_data['proxy']['set'] = True
 		else:
-			curr_proxy = session_data['shared']['proxy']['conf']['https']
+			curr_proxy = session_data['proxy']['conf']['https']
 			print(_('Current proxy: {}').format(curr_proxy))
 			print(_('What do you want to do?'))
 			print(_('0) Exit'))
@@ -99,15 +97,14 @@ def proxyConf(session, event, stdin_fd, predetermined_input):
 				if proxy_dict is None:
 					event.set()
 					return
-				proxy_data['proxy']['conf'] = proxy_dict
-				proxy_data['proxy']['set'] = True
+				session_data['proxy']['conf'] = proxy_dict
+				session_data['proxy']['set'] = True
 			if rta == 2:
-				proxy_data['proxy']['conf'] = {}
-				proxy_data['proxy']['set'] = False
+				session_data['proxy']['set'] = False
 				print(_('The proxy has been removed.'))
 				enter()
 
-		session.setSessionData(proxy_data, shared=True)
+		session.setSessionData(session_data)
 		event.set()
 	except KeyboardInterrupt:
 		event.set()

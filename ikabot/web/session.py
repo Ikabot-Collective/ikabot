@@ -411,20 +411,17 @@ class Session:
 
 	def __proxy_error(self):
 		sessionData = self.getSessionData()
-		if 'shared' not in sessionData or 'proxy' not in sessionData['shared'] or sessionData['shared']['proxy']['set'] is False:
+		if 'proxy' not in sessionData or sessionData['proxy']['set'] is False:
 			sys.exit('network error')
-		if self.padre is True:
+		elif self.padre is True:
 			print(_('There seems to be a problem connecting to ikariam.'))
 			print(_('Do you want to disable the proxy? [Y/n]'))
 			rta = read(values=['y', 'Y', 'n', 'N', ''])
 			if rta.lower() == 'n':
 				sys.exit()
 			else:
-				proxy_conf = {}
-				proxy_conf['proxy'] = {}
-				proxy_conf['proxy']['conf'] = {}
-				proxy_conf['proxy']['set'] = False
-				self.setSessionData(proxy_conf, shared=True)
+				sessiondata['proxy']['set'] = False
+				self.setSessionData(sessionData)
 				print(_('Proxy disabled, try again.'))
 				enter()
 				sys.exit()
@@ -439,8 +436,8 @@ class Session:
 			obj = self.s
 		if sessionData is None:
 			sessionData = self.getSessionData()
-		if 'shared' in sessionData and 'proxy' in sessionData['shared'] and sessionData['shared']['proxy']['set'] is True:
-			obj.proxies.update(sessionData['shared']['proxy']['conf'])
+		if 'proxy' in sessionData and sessionData['proxy']['set'] is True:
+			obj.proxies.update(sessionData['proxy']['conf'])
 		else:
 			obj.proxies.update({})
 
@@ -466,7 +463,6 @@ class Session:
 		"""
 		html = self.get()
 		return re.search(r'actionRequest"?:\s*"(.*?)"', html).group(1)
-
 
 	def get(self, url='', params={}, ignoreExpire=False, noIndex=False, fullResponse=False):
 		"""Sends get request to ikariam
