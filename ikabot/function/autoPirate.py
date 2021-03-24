@@ -170,33 +170,33 @@ def resolveCaptcha(session, picture):
     
 
 def getPiracyCities(session, pirateMissionChoice):
-	"""Gets all user's cities which have a pirate fortress in them
-	Parameters
-	----------
-	session : ikabot.web.session.Session
+    """Gets all user's cities which have a pirate fortress in them
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
 
-	Returns
-	-------
-	piracyCities : list[dict]
-	"""
-	cities_ids = getIdsOfCities(session)[0]
-	piracyCities = []
-	for city_id in cities_ids:
-		html = session.get(city_url + city_id)
-		city = getCity(html)
-		for pos, building in enumerate(city['position']):
-			if building['building'] == 'pirateFortress' and building['level'] >= piracyMissionToBuildingLevel[pirateMissionChoice]:
-				piracyCities.append(city)
-				break
-	return piracyCities
+    Returns
+    -------
+    piracyCities : list[dict]
+    """
+    cities_ids = getIdsOfCities(session)[0]
+    piracyCities = []
+    for city_id in cities_ids:
+        html = session.get(city_url + city_id)
+        city = getCity(html)
+        for pos, building in enumerate(city['position']):
+            if building['building'] == 'pirateFortress' and building['level'] >= piracyMissionToBuildingLevel[pirateMissionChoice]:
+                piracyCities.append(city)
+                break
+    return piracyCities
 
 def convertCapturePoints(session, piracyCities, convertPerMission):
     """Converts all the users capture points into crew strength
-	Parameters
-	----------
-	session : ikabot.web.session.Session
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
     piracyCities: a list containing all cities which have a pirate fortress
-	"""
+    """
     html = session.get('view=pirateFortress&activeTab=tabCrew&cityId={0}&position=17&backgroundView=city&currentCityId={0}&templateView=pirateFortress'.format(piracyCities[0]['id']))
     rta = re.search(r'\\"capturePoints\\":\\"(\d+)\\"', html)
     capturePoints = int(rta.group(1))

@@ -15,43 +15,43 @@ t = gettext.translation('vacationMode',
 _ = t.gettext
 
 def activateVacationMode(session):
-	"""
-	Parameters
-	----------
-	session : ikabot.web.session.Session
-	"""
-	html = session.get()
-	city = getCity(html)
+    """
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    """
+    html = session.get()
+    city = getCity(html)
 
-	data = {'action': 'Options', 'function': 'activateVacationMode', 'actionRequest': actionRequest, 'backgroundView': 'city', 'currentCityId': city['id'], 'templateView': 'options_umod_confirm'}
-	session.post(params=data, ignoreExpire=True)
+    data = {'action': 'Options', 'function': 'activateVacationMode', 'actionRequest': actionRequest, 'backgroundView': 'city', 'currentCityId': city['id'], 'templateView': 'options_umod_confirm'}
+    session.post(params=data, ignoreExpire=True)
 
 def vacationMode(session, event, stdin_fd, predetermined_input):
-	"""
-	Parameters
-	----------
-	session : ikabot.web.session.Session
-	event : multiprocessing.Event
-	stdin_fd: int
-	predetermined_input : multiprocessing.managers.SyncManager.list
-	"""
-	sys.stdin = os.fdopen(stdin_fd)
-	config.predetermined_input = predetermined_input
-	try:
-		banner()
-		print(_('Activate vacation mode? [Y/n]'))
-		rta = read(values=['y', 'Y', 'n', 'N', ''])
-		if rta.lower() == 'n':
-			event.set()
-			return
+    """
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    event : multiprocessing.Event
+    stdin_fd: int
+    predetermined_input : multiprocessing.managers.SyncManager.list
+    """
+    sys.stdin = os.fdopen(stdin_fd)
+    config.predetermined_input = predetermined_input
+    try:
+        banner()
+        print(_('Activate vacation mode? [Y/n]'))
+        rta = read(values=['y', 'Y', 'n', 'N', ''])
+        if rta.lower() == 'n':
+            event.set()
+            return
 
-		activateVacationMode(session)
+        activateVacationMode(session)
 
-		print(_('Vacation mode has been activated.'))
-		enter()
-		event.set()
-		clear()
-		sys.exit()
-	except KeyboardInterrupt:
-		event.set()
-		return
+        print(_('Vacation mode has been activated.'))
+        enter()
+        event.set()
+        clear()
+        sys.exit()
+    except KeyboardInterrupt:
+        event.set()
+        return

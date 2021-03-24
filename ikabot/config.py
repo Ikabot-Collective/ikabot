@@ -9,9 +9,9 @@ import gettext
 
 local = locale.setlocale(locale.LC_ALL, '')
 if 'es_' in local:
-	languages = ['es']
+    languages = ['es']
 else:
-	languages = ['en']
+    languages = ['en']
 languages = ['none']
 
 localedir = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'locale')
@@ -20,9 +20,9 @@ _ = t.gettext
 
 # only use common browsers
 if random.randint(0, 1) == 0:
-	user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36'
+    user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36'
 else:
-	user_agent = 'Mozilla/5.0 (X11; Linux x86_64; rv:80.0) Gecko/20100101 Firefox/80.0'
+    user_agent = 'Mozilla/5.0 (X11; Linux x86_64; rv:80.0) Gecko/20100101 Firefox/80.0'
 
 update_msg = ''
 
