@@ -16,7 +16,7 @@ def do_nothing(signal, frame):
 
 
 def deactivate_sigint():
-    signal.signal(signal.SIGINT, do_nothing)  #signal.SIGHUP replaced with signal.SIGINT for compatibility
+    signal.signal(signal.SIGINT, do_nothing)
 
 
 def create_handler(s):

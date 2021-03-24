@@ -6,11 +6,9 @@ import gettext
 import ikabot.config as config
 from ikabot.helpers.process import run
 
-t = gettext.translation('checkForUpdate',
-                        config.localedir,
-                        languages=config.languages,
-                        fallback=True)
+t = gettext.translation('checkForUpdate', config.localedir, languages=config.languages, fallback=True)
 _ = t.gettext
+
 
 def checkForUpdate():
     upgrade = run('python3 -m pip search ikabot')

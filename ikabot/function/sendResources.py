@@ -14,11 +14,9 @@ from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.varios import addThousandSeparator
 from ikabot.helpers.resources import *
 
-t = gettext.translation('sendResources',
-                        localedir,
-                        languages=languages,
-                        fallback=True)
+t = gettext.translation('sendResources', localedir, languages=languages, fallback=True)
 _ = t.gettext
+
 
 def sendResources(session, event, stdin_fd, predetermined_input):
     """
@@ -86,11 +84,11 @@ def sendResources(session, event, stdin_fd, predetermined_input):
 
             print(_('Send:'))
             try:
-                max_name = max( [ len(material) for material in materials_names ] )
+                max_name = max([len(material) for material in materials_names])
                 send = []
                 for i in range(len(materials_names)):
                     material_name = materials_names[i]
-                    pad = ' ' * ( max_name - len(material_name) )
+                    pad = ' ' * (max_name - len(material_name))
                     val = askForValue(_('{}{}:'.format(pad, material_name)), resources_left[i])
                     send.append(val)
             except KeyboardInterrupt:
@@ -126,7 +124,7 @@ def sendResources(session, event, stdin_fd, predetermined_input):
     setInfoSignal(session, info)
     try:
         executeRoutes(session, routes)
-    except:
+    except Exception as e:
         msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
         sendToBot(session, msg)
     finally:

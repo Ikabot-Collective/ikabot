@@ -14,11 +14,9 @@ from ikabot.helpers.gui import *
 from ikabot.helpers.naval import *
 from ikabot.helpers.varios import *
 
-t = gettext.translation('shipMovements',
-                        localedir,
-                        languages=languages,
-                        fallback=True)
+t = gettext.translation('shipMovements', localedir, languages=languages, fallback=True)
 _ = t.gettext
+
 
 def isHostile(movement):
     """
@@ -36,6 +34,7 @@ def isHostile(movement):
         if mov['cssClass'] != 'ship_transport':
             return True
     return False
+
 
 def shipMovements(session, event, stdin_fd, predetermined_input):
     """
@@ -76,9 +75,9 @@ def shipMovements(session, event, stdin_fd, predetermined_input):
             elif movement['isSameAlliance']:
                 color = bcolors.GREEN + bcolors.BOLD
 
-            origin      = '{} ({})'.format(movement['origin']['name'], movement['origin']['avatarName'])
+            origin = '{} ({})'.format(movement['origin']['name'], movement['origin']['avatarName'])
             destination = '{} ({})'.format(movement['target']['name'], movement['target']['avatarName'])
-            arrow       = '<-' if movement['event']['isFleetReturning'] else '->'
+            arrow = '<-' if movement['event']['isFleetReturning'] else '->'
             time_left = int(movement['eventTime']) - time_now
             print('{}{} {} {}: {} ({}) {}'.format(color, origin, arrow, destination, movement['event']['missionText'], daysHoursMinutes(time_left), bcolors.ENDC))
 
@@ -106,7 +105,7 @@ def shipMovements(session, event, stdin_fd, predetermined_input):
                     if tradegood != 'gold':
                         index = materials_names_tec.index(tradegood)
                         tradegood = materials_names[index]
-                    total_load += int( amount.replace(',', '').replace('.', '') )
+                    total_load += int(amount.replace(',', '').replace('.', ''))
                     print(_('{} of {}').format(amount, tradegood))
                 ships = int(math.ceil((Decimal(total_load) / Decimal(500))))
                 print(_('{:d} Ships').format(ships))

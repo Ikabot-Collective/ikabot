@@ -16,11 +16,9 @@ from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import daysHoursMinutes
 from ikabot.function.vacationMode import activateVacationMode
 
-t = gettext.translation('alertAttacks',
-                        localedir,
-                        languages=languages,
-                        fallback=True)
+t = gettext.translation('alertAttacks', localedir, languages=languages, fallback=True)
 _ = t.gettext
+
 
 def alertAttacks(session, event, stdin_fd, predetermined_input):
     """
@@ -55,11 +53,12 @@ def alertAttacks(session, event, stdin_fd, predetermined_input):
     setInfoSignal(session, info)
     try:
         do_it(session, minutes, min_units)
-    except:
+    except Exception as e:
         msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
         sendToBot(session, msg)
     finally:
         session.logout()
+
 
 def respondToAttack(session):
     """
@@ -80,7 +79,7 @@ def respondToAttack(session):
                 continue
 
             pid = int(rta.group(1))
-            action     = int(rta.group(2))
+            action = int(rta.group(2))
 
             # if the pid doesn't match, we ignore it
             if pid != os.getpid():
@@ -92,6 +91,7 @@ def respondToAttack(session):
                 activateVacationMode(session)
             else:
                 sendToBot(session, _('Invalid command: {:d}').format(action))
+
 
 def do_it(session, minutes, min_units):
     """
@@ -117,7 +117,7 @@ def do_it(session, minutes, min_units):
         timeNow = int(postdata[0][1]['time'])
 
         currentAttacks = []
-        for militaryMovement in [ mov for mov in militaryMovements if mov['isHostile'] ]:
+        for militaryMovement in [mov for mov in militaryMovements if mov['isHostile']]:
             event_id = militaryMovement['event']['id']
             currentAttacks.append(event_id)
             # if we already alerted this, do nothing
@@ -134,7 +134,7 @@ def do_it(session, minutes, min_units):
 
                 if int(amountTroops) + int(amountFleets) >= min_units:
                     # send alert
-                    msg  = _('-- ALERT --\n')
+                    msg = _('-- ALERT --\n')
                     msg += missionText + '\n'
                     msg += _('from the city {} of {}\n').format(origin['name'], origin['avatarName'])
                     msg += _('a {}\n').format(target['name'])

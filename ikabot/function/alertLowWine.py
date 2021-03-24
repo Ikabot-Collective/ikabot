@@ -16,13 +16,11 @@ from ikabot.helpers.getJson import getCity
 from ikabot.helpers.resources import *
 from ikabot.helpers.botComm import *
 
-t = gettext.translation('alertLowWine',
-                        localedir,
-                        languages=languages,
-                        fallback=True)
+t = gettext.translation('alertLowWine', localedir, languages=languages, fallback=True)
 _ = t.gettext
 
 getcontext().prec = 30
+
 
 def alertLowWine(session, event, stdin_fd, predetermined_input):
     """
@@ -54,11 +52,12 @@ def alertLowWine(session, event, stdin_fd, predetermined_input):
     setInfoSignal(session, info)
     try:
         do_it(session, hours)
-    except:
+    except Exception as e:
         msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
         sendToBot(session, msg)
     finally:
         session.logout()
+
 
 def do_it(session, hours):
     """
@@ -82,7 +81,7 @@ def do_it(session, hours):
             city = getCity(html)
 
             # if the city doesn't even have a tavern built, ignore it
-            if 'tavern' not in [ building['building'] for building in city['position'] ]:
+            if 'tavern' not in [building['building'] for building in city['position']]:
                 continue
 
             consumption_per_hour = city['consumo']

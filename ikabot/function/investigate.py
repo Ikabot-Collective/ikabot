@@ -13,11 +13,9 @@ from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.getJson import getCity
 from ikabot.helpers.signals import setInfoSignal
 
-t = gettext.translation('investigate',
-                        localedir,
-                        languages=languages,
-                        fallback=True)
+t = gettext.translation('investigate', localedir, languages=languages, fallback=True)
 _ = t.gettext
+
 
 def get_studies(session):
     html = session.get()
@@ -28,6 +26,7 @@ def get_studies(session):
     resp = json.loads(resp, strict=False)
     return resp[2][1]
 
+
 def study(session, studies, num_study):
     html = session.get()
     city = getCity(html)
@@ -35,6 +34,7 @@ def study(session, studies, num_study):
     research_type = studies['js_researchAdvisorChangeResearchType{}'.format(num_study)]['ajaxrequest'].split('=')[-1]
     url = 'action=Advisor&function=doResearch&actionRequest={}&type={}&backgroundView=city&currentCityId={}&templateView=researchAdvisor&ajax=1'.format(actionRequest, research_type, city_id)
     session.post(url)
+
 
 def investigate(session, event, stdin_fd, predetermined_input):
     """
@@ -52,7 +52,7 @@ def investigate(session, event, stdin_fd, predetermined_input):
 
         studies = get_studies(session)
         keys = list(studies.keys())
-        num_studies = len( [ key for key in keys if 'js_researchAdvisorChangeResearchTypeTxt' in key ] )
+        num_studies = len([key for key in keys if 'js_researchAdvisorChangeResearchTypeTxt' in key])
 
         available = []
         for num_study in range(num_studies):

@@ -19,13 +19,11 @@ from ikabot.helpers.getJson import getCity
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.planRoutes import waitForArrival
 
-t = gettext.translation('attackBarbarians',
-                        localedir,
-                        languages=languages,
-                        fallback=True)
+t = gettext.translation('attackBarbarians', localedir, languages=languages, fallback=True)
 _ = t.gettext
 
 getcontext().prec = 30
+
 
 def choose_island(session):
     idsIslands = getIslandsIds(session)
@@ -38,13 +36,14 @@ def choose_island(session):
     if len(islands) == 1:
         return islands[0]
 
-    islands.sort(key=lambda island:island['id'])
+    islands.sort(key=lambda island: island['id'])
 
     longest_island_name_length = 0
     for island in islands:
         longest_island_name_length = max(len(island['name']), longest_island_name_length)
 
-    pad = lambda island_name: ' ' * (longest_island_name_length - len(island_name)) + island_name
+    def pad(island_name):
+        return ' ' * (longest_island_name_length - len(island_name)) + island_name
 
     print(_('In which island do you want to attack the barbarians?'))
     print(_(' 0) Exit'))
@@ -62,13 +61,14 @@ def choose_island(session):
     else:
         return islands[index-1]
 
+
 def get_barbarians_lv(session, island):
     params = {"view": "barbarianVillage", "destinationIslandId": island['id'], "oldBackgroundView": "city", "cityWorldviewScale": "1", "islandId": island['id'], "backgroundView": "island", "currentIslandId": island['id'], "actionRequest": actionRequest, "ajax": "1"}
     resp = session.post(params=params)
     resp = json.loads(resp, strict=False)
 
     level = int(resp[2][1]['js_islandBarbarianLevel']['text'])
-    gold  = int(resp[2][1]['js_islandBarbarianResourcegold']['text'].replace(',', ''))
+    gold = int(resp[2][1]['js_islandBarbarianResourcegold']['text'].replace(',', ''))
 
     resources = [0] * len(materials_names)
     for i in range(len(materials_names)):
@@ -94,6 +94,7 @@ def get_barbarians_lv(session, island):
 
     return info
 
+
 def get_units(session, city):
     params = {
         'view': 'cityMilitary',
@@ -111,7 +112,7 @@ def get_units(session, city):
     html = resp[1][1][1]
     html = html.split('<div class="fleet')[0]
 
-    unit_id_names   = re.findall(r'<div class="army (.*?)">\s*<div class="tooltip">(.*?)<\/div>', html)
+    unit_id_names = re.findall(r'<div class="army (.*?)">\s*<div class="tooltip">(.*?)<\/div>', html)
     unit_amounts = re.findall(r'<td>(.*?)\s*</td>', html)
 
     units = {}
@@ -125,10 +126,11 @@ def get_units(session, city):
 
     return units
 
+
 def plan_attack(session, city, babarians_info):
     total_units = get_units(session, city)
 
-    if sum( [ total_units[unit_id]['amount'] for unit_id in total_units ] ) == 0:
+    if sum([total_units[unit_id]['amount'] for unit_id in total_units]) == 0:
         print('You don\'t have any troops in this city!')
         enter()
         return None
@@ -143,11 +145,11 @@ def plan_attack(session, city, babarians_info):
         units_available = {}
         for unit_id in total_units:
 
-            already_sent = sum( [ p['units'][u] for p in plan for u in p['units'] if u == unit_id ] )
+            already_sent = sum([p['units'][u] for p in plan for u in p['units'] if u == unit_id])
             if already_sent < total_units[unit_id]['amount']:
                 units_available[unit_id] = {}
                 units_available[unit_id]['amount'] = total_units[unit_id]['amount'] - already_sent
-                units_available[unit_id]['name']   = total_units[unit_id]['name']
+                units_available[unit_id]['name'] = total_units[unit_id]['name']
 
         if len(units_available) == 0:
             print(_('No more troops available to send'))
@@ -159,7 +161,7 @@ def plan_attack(session, city, babarians_info):
         print(_('Which troops do you want to send?'))
         for unit_id in units_available:
             unit_amount = units_available[unit_id]['amount']
-            unit_name   = units_available[unit_id]['name']
+            unit_name = units_available[unit_id]['name']
             amount_to_send = read(msg='{} (max: {}): '.format(unit_name, addThousandSeparator(unit_amount)), max=unit_amount, default=0)
             if amount_to_send > 0:
                 attack_round['units'][unit_id] = amount_to_send
@@ -176,11 +178,10 @@ def plan_attack(session, city, babarians_info):
                 attack_round['round'] = 1
         print('')
 
-        #max_ships = babarians_info['ships']
         if last is False:
             if total_ships is None:
                 total_ships = getTotalShips(session)
-            max_ships = total_ships - sum( [ ar['ships'] for ar in plan ] )
+            max_ships = total_ships - sum([ar['ships'] for ar in plan])
             if max_ships > 0:
                 attack_round['ships'] = read(msg=_('How many ships do you want to send in this round? (min: 0, max: {:d}): ').format(max_ships), min=0, max=max_ships)
                 print('')
@@ -203,9 +204,9 @@ def plan_attack(session, city, babarians_info):
             else:
                 last = True
 
-
-    plan.sort(key=lambda ar:ar['round'])
+    plan.sort(key=lambda ar: ar['round'])
     return plan
+
 
 def attackBarbarians(session, event, stdin_fd, predetermined_input):
     """
@@ -258,11 +259,12 @@ def attackBarbarians(session, event, stdin_fd, predetermined_input):
     setInfoSignal(session, info)
     try:
         do_it(session, island, city, babarians_info, plan)
-    except:
+    except Exception as e:
         msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
         sendToBot(session, msg)
     finally:
         session.logout()
+
 
 def get_unit_data(session, city_id, unit_id):
     params_w = {
@@ -288,8 +290,10 @@ def get_unit_data(session, city_id, unit_id):
 
     return {'speed': speed, 'weight': weight}
 
+
 def city_is_in_island(city, island):
     return city['x'] == island['x'] and city['y'] == island['y']
+
 
 def get_barbarians_info(session, island_id):
     query = {
@@ -303,6 +307,7 @@ def get_barbarians_info(session, island_id):
     resp = session.post(params=query)
     resp = json.loads(resp, strict=False)
     return resp
+
 
 def wait_until_can_attack(session, city, island, travel_time=0):
     html = session.get(island_url + island['id'])
@@ -318,9 +323,9 @@ def wait_until_can_attack(session, city, island, travel_time=0):
         # a battle is taking place
         attacks = get_current_attacks(session, city['id'], island['id'])
         attacks_fighting = filter_fighting(attacks)
-        eventTimes = [ attack['eventTime'] for attack in attacks_fighting ]
+        eventTimes = [attack['eventTime'] for attack in attacks_fighting]
         if len(eventTimes) > 0:
-            wait_time  = max(eventTimes)
+            wait_time = max(eventTimes)
             wait_time -= time.time()
             wait(wait_time + 5)
         wait_until_can_attack(session, city, island, travel_time)
@@ -329,11 +334,12 @@ def wait_until_can_attack(session, city, island, travel_time=0):
         # the barbarians are destroyed and can't be attacked
         resp = get_barbarians_info(session, island['id'])
         if 'barbarianCityCooldownTimer' in resp[2][1]:
-            wait_time  = resp[2][1]['barbarianCityCooldownTimer']['countdown']['enddate']
+            wait_time = resp[2][1]['barbarianCityCooldownTimer']['countdown']['enddate']
             wait_time -= time.time()
             wait_time -= travel_time
             wait(wait_time + 5)
         wait_until_can_attack(session, city, island, travel_time)
+
 
 def get_movements(session, city_id=None):
     if city_id is None:
@@ -355,6 +361,7 @@ def get_movements(session, city_id=None):
 
     return movements
 
+
 def get_current_attacks(session, city_id, island_id):
 
     movements = get_movements(session, city_id)
@@ -374,25 +381,27 @@ def get_current_attacks(session, city_id, island_id):
 
     return curr_attacks
 
+
 def wait_for_arrival(session, city, island):
     attacks = get_current_attacks(session, city['id'], island['id'])
     attacks = filter_loading(attacks) + filter_traveling(attacks)
-    eventTimes = [ attack['eventTime'] for attack in attacks ]
+    eventTimes = [attack['eventTime'] for attack in attacks]
 
     if len(eventTimes) == 0:
         return
 
-    wait_time  = max(eventTimes)
+    wait_time = max(eventTimes)
     wait_time -= time.time()
     wait(wait_time + 5)
 
     wait_for_arrival(session, city, island)
 
+
 def wait_for_round(session, city, island, travel_time, battle_start, round_number):
     if round_number == 1:
         wait_until_can_attack(session, city, island, travel_time)
     else:
-        wait_time  = battle_start + (round_number - 2) * 15 * 60
+        wait_time = battle_start + (round_number - 2) * 15 * 60
         wait_time -= time.time()
         wait_time -= travel_time
         wait(wait_time + 5)
@@ -402,20 +411,25 @@ def wait_for_round(session, city, island, travel_time, battle_start, round_numbe
             island = getIsland(html)
             assert island['barbarians']['underAttack'] == 1, "the battle ended before expected"
 
+
 def calc_travel_time(city, island, speed):
     if city['x'] == island['x'] and city['y'] == island['y']:
         return math.ceil(36000/speed)
     else:
-        return math.ceil(1200 * math.sqrt( ((city['x'] - island['x']) ** 2) + ((city['y'] - island['y']) ** 2) )) # lior fix
+        return math.ceil(1200 * math.sqrt(((city['x'] - island['x']) ** 2) + ((city['y'] - island['y']) ** 2)))
+
 
 def filter_loading(attacks):
-    return [ attack for attack in attacks if attack['event']['missionState'] == 1 ]
+    return [attack for attack in attacks if attack['event']['missionState'] == 1]
+
 
 def filter_traveling(attacks):
-    return [ attack for attack in attacks if attack['event']['missionState'] == 2 and attack['event']['canAbort'] ]
+    return [attack for attack in attacks if attack['event']['missionState'] == 2 and attack['event']['canAbort']]
+
 
 def filter_fighting(attacks):
-    return [ attack for attack in attacks if attack['event']['missionState'] == 2 and attack['event']['canRetreat'] ]
+    return [attack for attack in attacks if attack['event']['missionState'] == 2 and attack['event']['canRetreat']]
+
 
 def wait_until_attack_is_over(session, city, island):
     html = session.get(island_url + island['id'])
@@ -428,13 +442,14 @@ def wait_until_attack_is_over(session, city, island):
         if len(attacks) == 0:
             return
 
-        eventTimes = [ attack['eventTime'] for attack in attacks ]
-        wait_time  = min(eventTimes)
+        eventTimes = [attack['eventTime'] for attack in attacks]
+        wait_time = min(eventTimes)
         wait_time -= time.time()
         wait(wait_time + 5)
 
         html = session.get(island_url + island['id'])
         island = getIsland(html)
+
 
 def load_troops(session, city, island, attack_round, units_data, attack_data, extra_cargo=0):
     ships_needed = Decimal(extra_cargo) / Decimal(500)
@@ -457,6 +472,7 @@ def load_troops(session, city, island, attack_round, units_data, attack_data, ex
     speed = min(speeds)
     travel_time = calc_travel_time(city, island, speed)
     return attack_data, ships_needed, travel_time
+
 
 def loot(session, island, city, units_data, loot_round):
     while True:
@@ -487,13 +503,14 @@ def loot(session, island, city, units_data, loot_round):
         time_left = None
         resp = get_barbarians_info(session, island['id'])
         if 'barbarianCityCooldownTimer' in resp[2][1]:
-            time_left  = resp[2][1]['barbarianCityCooldownTimer']['countdown']['enddate']
+            time_left = resp[2][1]['barbarianCityCooldownTimer']['countdown']['enddate']
             time_left -= time.time()
         if time_left is not None and travel_time > time_left:
             return
 
         # send attack
         session.post(payloadPost=attack_data)
+
 
 def do_it(session, island, city, babarians_info, plan):
 

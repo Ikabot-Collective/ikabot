@@ -14,11 +14,9 @@ from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.getJson import getCity
 from ikabot.helpers.resources import getAvailableResources
 
-t = gettext.translation('donationBot',
-                        localedir,
-                        languages=languages,
-                        fallback=True)
+t = gettext.translation('donationBot', localedir, languages=languages, fallback=True)
 _ = t.gettext
+
 
 def donationBot(session, event, stdin_fd, predetermined_input):
     """
@@ -35,7 +33,7 @@ def donationBot(session, event, stdin_fd, predetermined_input):
         banner()
         (cities_ids, cities) = getIdsOfCities(session)
         cities_dict = {}
-        initials = [ material_name[0] for material_name in materials_names ]
+        initials = [material_name[0] for material_name in materials_names]
         for cityId in cities_ids:
             tradegood = cities[cityId]['tradegood']
             initial = initials[int(tradegood)]
@@ -58,7 +56,7 @@ def donationBot(session, event, stdin_fd, predetermined_input):
                 percentage = read(min=0, max=100, empty=True)
                 if percentage == '':
                     percentage = 80
-                elif percentage == 100: # if the user is ok with the storage beeing totally full, don't donate at all
+                elif percentage == 100:  # if the user is ok with the storage beeing totally full, don't donate at all
                     donation_type = None
 
             cities_dict[cityId] = {'donation_type': donation_type, 'percentage': percentage}
@@ -76,11 +74,12 @@ def donationBot(session, event, stdin_fd, predetermined_input):
     setInfoSignal(session, info)
     try:
         do_it(session, cities_ids, cities_dict)
-    except:
+    except Exception as e:
         msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
         sendToBot(session, msg)
     finally:
         session.logout()
+
 
 def do_it(session, cities_ids, cities_dict):
     """

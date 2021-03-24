@@ -8,11 +8,9 @@ from ikabot.config import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import *
 
-t = gettext.translation('constructBuilding',
-                        localedir,
-                        languages=languages,
-                        fallback=True)
+t = gettext.translation('constructBuilding', localedir, languages=languages, fallback=True)
 _ = t.gettext
+
 
 def constructBuilding(session, event, stdin_fd, predetermined_input):
     """
@@ -33,14 +31,14 @@ def constructBuilding(session, event, stdin_fd, predetermined_input):
         banner()
 
         # list of free spaces in the selected city
-        free_spaces = [ buildings for buildings in city['position'] if buildings['building'] == 'empty' ]
+        free_spaces = [buildings for buildings in city['position'] if buildings['building'] == 'empty']
 
         # get a list of all the posible buildings that can be built
         buildings = []
         # different buildings can be built in different areas
         type_spaces = ['sea', 'land', 'shore', 'wall']
         for type_space in type_spaces:
-            free_spaces_of_type = [ free_space for free_space in free_spaces if free_space['type'] == type_space ]
+            free_spaces_of_type = [free_space for free_space in free_spaces if free_space['type'] == type_space]
             if len(free_spaces_of_type) > 0:
                 # we take any space in the desired area
                 free_space_of_type = free_spaces_of_type[0]
@@ -73,7 +71,7 @@ def constructBuilding(session, event, stdin_fd, predetermined_input):
         # show posible positions for the selected building
         building = buildings[selected_building_index - 1]
         print('{}\n'.format(building['name']))
-        options = [ position_id for position_id in city['position'] if position_id['building'] == 'empty' and position_id['type'] == building['type'] ]
+        options = [position_id for position_id in city['position'] if position_id['building'] == 'empty' and position_id['type'] == building['type']]
         if len(options) == 1:
             option = options[0]
         else:

@@ -8,11 +8,9 @@ from ikabot.helpers.process import run
 from ikabot.helpers.gui import *
 from ikabot.config import *
 
-t = gettext.translation('update',
-                        localedir,
-                        languages=languages,
-                        fallback=True)
+t = gettext.translation('update', localedir, languages=languages, fallback=True)
 _ = t.gettext
+
 
 def update(session, event, stdin_fd, predetermined_input):
     """

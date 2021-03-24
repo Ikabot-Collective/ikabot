@@ -8,11 +8,9 @@ from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.gui import *
 from ikabot.config import *
 
-t = gettext.translation('insertCookies',
-                        localedir,
-                        languages=languages,
-                        fallback=True)
+t = gettext.translation('insertCookies', localedir, languages=languages, fallback=True)
 _ = t.gettext
+
 
 def importExportCookie(session, event, stdin_fd, predetermined_input):
     """
@@ -42,6 +40,7 @@ def importExportCookie(session, event, stdin_fd, predetermined_input):
         event.set()
         return
 
+
 def importCookie(session):
     banner()
     print('{}⚠️ INSERTING AN INVALID COOKIE WILL LOG YOU OUT OF YOUR OTHER SESSIONS ⚠️{}\n\n'.format(bcolors.WARNING, bcolors.ENDC))
@@ -49,13 +48,13 @@ def importCookie(session):
     print('type your "ikariam" cookie below:')
     newcookie = read()
     newcookie = newcookie.strip()
-    newcookie = newcookie.replace('ikariam=','')
+    newcookie = newcookie.replace('ikariam=', '')
     cookies = session.getSessionData()['cookies']
     cookies['ikariam'] = newcookie
     if session.host in session.s.cookies._cookies:
-        session.s.cookies.set('ikariam', newcookie, domain = session.host, path = '/')
+        session.s.cookies.set('ikariam', newcookie, domain=session.host, path='/')
     else:
-        session.s.cookies.set('ikariam', newcookie, domain = '', path = '/')
+        session.s.cookies.set('ikariam', newcookie, domain='', path='/')
 
     html = session.s.get(session.urlBase).text
 
@@ -70,14 +69,15 @@ def importCookie(session):
         enter()
     session.get()
 
+
 def exportCookie(session):
     banner()
-    session.get() #get valid cookie in case user has logged the bot out before running this feature
+    session.get()  # get valid cookie in case user has logged the bot out before running this feature
     ikariam = session.getSessionData()['cookies']['ikariam']
     print('Use this cookie to synchronise two ikabot instances on 2 different machines\n\n')
     print('ikariam='+ikariam+'\n\n')
 
-    cookie = json.dumps({"ikariam" : ikariam}) #get ikariam cookie, only this cookie is invalidated when the bot logs the user out.
+    cookie = json.dumps({"ikariam": ikariam})  # get ikariam cookie, only this cookie is invalidated when the bot logs the user out.
     cookies_js = 'cookies={};i=0;for(let cookie in cookies){{document.cookie=Object.keys(cookies)[i]+\"=\"+cookies[cookie];i++}}'.format(cookie)
     print("""To prevent ikabot from logging you out while playing Ikariam do the following:
     1. Be on the "Your session has expired" screen

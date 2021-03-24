@@ -13,11 +13,9 @@ from ikabot.helpers.gui import enter
 from ikabot.helpers.pedirInfo import getIdsOfCities
 from ikabot.helpers.varios import wait
 
-t = gettext.translation('loginDaily',
-                        localedir,
-                        languages=languages,
-                        fallback=True)
+t = gettext.translation('loginDaily', localedir, languages=languages, fallback=True)
 _ = t.gettext
+
 
 def loginDaily(session, event, stdin_fd, predetermined_input):
     """
@@ -45,11 +43,12 @@ def loginDaily(session, event, stdin_fd, predetermined_input):
     setInfoSignal(session, info)
     try:
         do_it(session)
-    except:
+    except Exception as e:
         msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
         sendToBot(session, msg)
     finally:
         session.logout()
+
 
 def do_it(session):
     """

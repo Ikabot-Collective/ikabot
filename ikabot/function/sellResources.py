@@ -17,11 +17,9 @@ from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.planRoutes import waitForArrival
 
-t = gettext.translation('sellResources',
-                        localedir,
-                        languages=languages,
-                        fallback=True)
+t = gettext.translation('sellResources', localedir, languages=languages, fallback=True)
 _ = t.gettext
+
 
 def chooseCommercialCity(commercial_cities):
     """
@@ -39,6 +37,7 @@ def chooseCommercialCity(commercial_cities):
     ind = read(min=1, max=len(commercial_cities))
     return commercial_cities[ind - 1]
 
+
 def getMarketInfo(session, city):
     """
     Parameters
@@ -53,6 +52,7 @@ def getMarketInfo(session, city):
     params = {'view': 'branchOfficeOwnOffers', 'activeTab': 'tab_branchOfficeOwnOffers', 'cityId': city['id'], 'position': city['pos'], 'backgroundView': 'city', 'currentCityId': city['id'], 'templateView': 'branchOfficeOwnOffers', 'currentTab': 'tab_branchOfficeOwnOffers', 'actionRequest': actionRequest, 'ajax': '1'}
     resp = session.post(params=params, noIndex=True)
     return json.loads(resp, strict=False)[1][1][1]
+
 
 def getOffers(session, my_market_city, resource_type):
     """
@@ -74,6 +74,7 @@ def getOffers(session, my_market_city, resource_type):
     resp = session.post(payloadPost=data)
     html = json.loads(resp, strict=False)[1][1][1]
     return re.findall(r'<td class=".*?">(.*?)<br/>\((.*?)\)\s*</td>\s*<td>(.*?)</td>\s*<td><img src=".*?"\s*alt=".*?"\s*title=".*?"/></td>\s*<td style="white-space:nowrap;">(\d+)\s*<img src=".*?"\s*class=".*?"/>.*?</td>\s*<td>(\d+)</td>\s*<td><a onclick="ajaxHandlerCall\(this\.href\);return false;"\s*href="\?view=takeOffer&destinationCityId=(\d+)&', html)
+
 
 def sellToOffers(session, city_to_buy_from, resource_type, event):
     """
@@ -151,11 +152,12 @@ def sellToOffers(session, city_to_buy_from, resource_type, event):
     setInfoSignal(session, info)
     try:
         do_it1(session, amount_to_sell, chosen_offers, resource_type, city_to_buy_from)
-    except:
+    except Exception as e:
         msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
         sendToBot(session, msg)
     finally:
         session.logout()
+
 
 def createOffer(session, my_offering_market_city, resource_type, event):
     """
@@ -198,11 +200,12 @@ def createOffer(session, my_offering_market_city, resource_type, event):
     setInfoSignal(session, info)
     try:
         do_it2(session, amount_to_sell, price, resource_type, sell_market_capacity, my_offering_market_city)
-    except:
+    except Exception as e:
         msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
         sendToBot(session, msg)
     finally:
         session.logout()
+
 
 def sellResources(session, event, stdin_fd, predetermined_input):
     """
@@ -245,6 +248,7 @@ def sellResources(session, event, stdin_fd, predetermined_input):
         event.set()
         return
 
+
 def do_it1(session, left_to_sell, offers, resource_type, city_to_buy_from):
     """
     Parameters
@@ -286,6 +290,7 @@ def do_it1(session, left_to_sell, offers, resource_type, city_to_buy_from):
             if amount_to_buy == 0:
                 break
 
+
 def do_it2(session, amount_to_sell, price, resource_type, sell_market_capacity, city):
     """
     Parameters
@@ -325,7 +330,7 @@ def do_it2(session, amount_to_sell, price, resource_type, sell_market_capacity, 
                 break
 
         # sleep for 2 hours
-        wait(60 * 60 *  2)
+        wait(60 * 60 * 2)
 
     # wait until the last of our offer is actualy bought, and let the user know
     while True:
@@ -337,4 +342,4 @@ def do_it2(session, amount_to_sell, price, resource_type, sell_market_capacity, 
             return
 
         # sleep for 2 hours
-        wait(60 * 60 *  2)
+        wait(60 * 60 * 2)

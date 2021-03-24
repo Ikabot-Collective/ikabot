@@ -22,6 +22,7 @@ t = gettext.translation('trainArmy',
                         fallback=True)
 _ = t.gettext
 
+
 def getBuildingInfo(session, city, trainTroops):
     """
     Parameters
@@ -39,6 +40,7 @@ def getBuildingInfo(session, city, trainTroops):
     data = session.post(params=params)
     return json.loads(data, strict=False)
 
+
 def train(session, city, trainings, trainTroops):
     """
     Parameters
@@ -52,8 +54,9 @@ def train(session, city, trainings, trainTroops):
     function = 'buildUnits' if trainTroops else 'buildShips'
     payload = {'action': 'CityScreen', 'function': function, 'actionRequest': 'REQUESTID', 'cityId': city['id'], 'position': city['pos'], 'backgroundView': 'city', 'currentCityId': city['id'], 'templateView': templateView, 'ajax': '1'}
     for training in trainings:
-        payload[ training['unit_type_id'] ] = training['train']
+        payload[training['unit_type_id']] = training['train']
     session.post(payloadPost=payload)
+
 
 def waitForTraining(session, city, trainTroops):
     """
@@ -71,6 +74,7 @@ def waitForTraining(session, city, trainTroops):
         seconds = int(seconds) - data[0][1]['time']
         wait(seconds + 5)
 
+
 def planTrainings(session, city, trainings, trainTroops):
     """
     Parameters
@@ -86,7 +90,7 @@ def planTrainings(session, city, trainings, trainTroops):
     while True:
 
         # total number of units to create
-        total = sum( [ unit['cantidad'] for training in trainings for unit in training ] )
+        total = sum([unit['cantidad'] for training in trainings for unit in training])
         if total == 0:
             return
 
@@ -97,7 +101,7 @@ def planTrainings(session, city, trainings, trainTroops):
             city['pos'] = buildingPos
 
             resourcesAvailable = city['recursos'].copy()
-            resourcesAvailable.append( city['ciudadanosDisp'] )
+            resourcesAvailable.append(city['ciudadanosDisp'])
 
             # for each unit type in training
             for unit in training:
@@ -127,13 +131,14 @@ def planTrainings(session, city, trainings, trainTroops):
                 unit['cantidad'] -= unit['train']
 
             # amount of units that will be trained
-            total = sum( [ unit['train'] for unit in training ] )
+            total = sum([unit['train'] for unit in training])
             if total == 0:
                 msg = _('It was not possible to finish the training due to lack of resources.')
                 sendToBot(session, msg)
                 return
 
             train(session, city, training, trainTroops)
+
 
 def generateArmyData(units_info):
     """
@@ -154,6 +159,7 @@ def generateArmyData(units_info):
         units.append(info)
         i += 1
     return units
+
 
 def trainArmy(session, event, stdin_fd, predetermined_input):
     """
@@ -200,21 +206,21 @@ def trainArmy(session, event, stdin_fd, predetermined_input):
         units_info = data[2][1]
         units = generateArmyData(units_info)
 
-        maxSize = max( [ len(unit['local_name']) for unit in units ] )
+        maxSize = max([len(unit['local_name']) for unit in units])
 
         tranings = []
         while True:
             units = generateArmyData(units_info)
             print(_('Train:'))
             for unit in units:
-                pad = ' ' * ( maxSize - len(unit['local_name']) )
+                pad = ' ' * (maxSize - len(unit['local_name']))
                 amount = read(msg='{}{}:'.format(pad, unit['local_name']), min=0, empty=True)
                 if amount == '':
                     amount = 0
                 unit['cantidad'] = amount
 
             # calculate costs
-            cost = [0] * ( len(materials_names_english) + 3 )
+            cost = [0] * (len(materials_names_english) + 3)
             for unit in units:
                 for i in range(len(materials_names_english)):
                     material_name = materials_names_english[i].lower()
@@ -260,7 +266,7 @@ def trainArmy(session, event, stdin_fd, predetermined_input):
 
         # calculate if the city has enough resources
         resourcesAvailable = city['recursos'].copy()
-        resourcesAvailable.append( city['ciudadanosDisp'] )
+        resourcesAvailable.append(city['ciudadanosDisp'])
 
         for training in tranings:
             for unit in training:
@@ -273,7 +279,7 @@ def trainArmy(session, event, stdin_fd, predetermined_input):
                 if 'citizens' in unit['costs']:
                     resourcesAvailable[len(materials_names_english)] -= unit['costs']['citizens'] * unit['cantidad']
 
-        not_enough = [ elem for elem in resourcesAvailable if elem < 0 ] != []
+        not_enough = [elem for elem in resourcesAvailable if elem < 0] != []
 
         if not_enough:
             print(_('\nThere are not enough resources:'))
@@ -309,7 +315,7 @@ def trainArmy(session, event, stdin_fd, predetermined_input):
     setInfoSignal(session, info)
     try:
         planTrainings(session, city, tranings, trainTroops)
-    except:
+    except Exception as e:
         msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
         sendToBot(session, msg)
     finally:

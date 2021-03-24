@@ -20,11 +20,9 @@ from ikabot.helpers.resources import *
 from ikabot.helpers.market import *
 
 
-t = gettext.translation('buyResources',
-                        localedir,
-                        languages=languages,
-                        fallback=True)
+t = gettext.translation('buyResources', localedir, languages=languages, fallback=True)
 _ = t.gettext
+
 
 def chooseResource(session, city):
     """
@@ -41,25 +39,26 @@ def chooseResource(session, city):
     if resource == 0:
         resource = 'resource'
     data = {
-    'cityId': city['id'],
-    'position': city['pos'],
-    'view': 'branchOffice',
-    'activeTab': 'bargain',
-    'type': 444,
-    'searchResource': resource,
-    'range': city['rango'],
-    'backgroundView' : 'city',
-    'currentCityId': city['id'],
-    'templateView': 'branchOffice',
-    'currentTab': 'bargain',
-    'actionRequest': actionRequest,
-    'ajax': 1
+        'cityId': city['id'],
+        'position': city['pos'],
+        'view': 'branchOffice',
+        'activeTab': 'bargain',
+        'type': 444,
+        'searchResource': resource,
+        'range': city['rango'],
+        'backgroundView': 'city',
+        'currentCityId': city['id'],
+        'templateView': 'branchOffice',
+        'currentTab': 'bargain',
+        'actionRequest': actionRequest,
+        'ajax': 1
     }
     # this will set the chosen resource in the store
     session.post(payloadPost=data)
     resource = choise - 1
     # return the chosen resource
     return resource
+
 
 def getOffers(session, city):
     """
@@ -76,20 +75,21 @@ def getOffers(session, city):
     offers = []
     for hit in hits:
         offer = {
-        'ciudadDestino': hit[0],
-        'jugadorAComprar' : hit[1],
-        'bienesXminuto': int(hit[2]),
-        'amountAvailable': int(hit[3].replace(',', '').replace('.', '').replace('<', '')),
-        'tipo': hit[4],
-        'precio': int(hit[5]),
-        'destinationCityId': hit[6],
-        'cityId': hit[7],
-        'position': hit[8],
-        'type': hit[9],
-        'resource': hit[10]
+            'ciudadDestino': hit[0],
+            'jugadorAComprar': hit[1],
+            'bienesXminuto': int(hit[2]),
+            'amountAvailable': int(hit[3].replace(',', '').replace('.', '').replace('<', '')),
+            'tipo': hit[4],
+            'precio': int(hit[5]),
+            'destinationCityId': hit[6],
+            'cityId': hit[7],
+            'position': hit[8],
+            'type': hit[9],
+            'resource': hit[10]
         }
         offers.append(offer)
     return offers
+
 
 def calculateCost(offers, total_amount_to_buy):
     """
@@ -126,6 +126,7 @@ def chooseCommertialCity(commercial_cities):
         print('({:d}) {}'.format(i + 1, city['name']))
     selected_city_index = read(min=1, max=len(commercial_cities))
     return commercial_cities[selected_city_index - 1]
+
 
 def buyResources(session, event, stdin_fd, predetermined_input):
     """
@@ -168,12 +169,12 @@ def buyResources(session, event, stdin_fd, predetermined_input):
             return
 
         # display offers to the user
-        total_price   = 0
+        total_price = 0
         total_amount = 0
         for offer in offers:
             amount = offer['amountAvailable']
-            price  = offer['precio']
-            cost   = amount * price
+            price = offer['precio']
+            cost = amount * price
             print(_('amount:{}').format(addThousandSeparator(amount)))
             print(_('price :{:d}').format(price))
             print(_('cost  :{}').format(addThousandSeparator(cost)))
@@ -194,7 +195,7 @@ def buyResources(session, event, stdin_fd, predetermined_input):
             return
 
         # calculate the total cost
-        (gold, __)  = getGold(session, city)
+        (gold, __) = getGold(session, city)
         total_cost = calculateCost(offers, amount_to_buy)
 
         print(_('\nCurrent gold: {}.\nTotal cost  : {}.\nFinal gold  : {}.'). format(addThousandSeparator(gold), addThousandSeparator(total_cost), addThousandSeparator(gold - total_cost)))
@@ -217,11 +218,12 @@ def buyResources(session, event, stdin_fd, predetermined_input):
     setInfoSignal(session, info)
     try:
         do_it(session, city, offers, amount_to_buy)
-    except:
+    except Exception as e:
         msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
         sendToBot(session, msg)
     finally:
         session.logout()
+
 
 def buy(session, city, offer, amount_to_buy):
     """
@@ -234,28 +236,28 @@ def buy(session, city, offer, amount_to_buy):
     """
     ships = int(math.ceil((Decimal(amount_to_buy) / Decimal(500))))
     data_dict = {
-    'action': 'transportOperations',
-    'function': 'buyGoodsAtAnotherBranchOffice',
-    'cityId': offer['cityId'],
-    'destinationCityId': offer['destinationCityId'],
-    'oldView': 'branchOffice',
-    'position': city['pos'],
-    'avatar2Name': offer['jugadorAComprar'],
-    'city2Name': offer['ciudadDestino'],
-    'type': int(offer['type']),
-    'activeTab': 'bargain',
-    'transportDisplayPrice': 0,
-    'premiumTransporter': 0,
-    'capacity': 5,
-    'max_capacity': 5,
-    'jetPropulsion': 0,
-    'transporters': ships,
-    'backgroundView': 'city',
-    'currentCityId': offer['cityId'],
-    'templateView': 'takeOffer',
-    'currentTab': 'bargain',
-    'actionRequest': actionRequest,
-    'ajax': 1
+        'action': 'transportOperations',
+        'function': 'buyGoodsAtAnotherBranchOffice',
+        'cityId': offer['cityId'],
+        'destinationCityId': offer['destinationCityId'],
+        'oldView': 'branchOffice',
+        'position': city['pos'],
+        'avatar2Name': offer['jugadorAComprar'],
+        'city2Name': offer['ciudadDestino'],
+        'type': int(offer['type']),
+        'activeTab': 'bargain',
+        'transportDisplayPrice': 0,
+        'premiumTransporter': 0,
+        'capacity': 5,
+        'max_capacity': 5,
+        'jetPropulsion': 0,
+        'transporters': ships,
+        'backgroundView': 'city',
+        'currentCityId': offer['cityId'],
+        'templateView': 'takeOffer',
+        'currentTab': 'bargain',
+        'actionRequest': actionRequest,
+        'ajax': 1
     }
     url = 'view=takeOffer&destinationCityId={}&oldView=branchOffice&activeTab=bargain&cityId={}&position={}&type={}&resource={}&backgroundView=city&currentCityId={}&templateView=branchOffice&actionRequest={}&ajax=1'.format(offer['destinationCityId'], offer['cityId'], offer['position'], offer['type'], offer['resource'], offer['cityId'], actionRequest)
     data = session.post(url)
@@ -277,6 +279,7 @@ def buy(session, city, offer, amount_to_buy):
     msg = _('I buy {} to {} from {}').format(addThousandSeparator(amount_to_buy), offer['ciudadDestino'], offer['jugadorAComprar'])
     sendToBotDebug(session, msg, debugON_buyResources)
 
+
 def do_it(session, city, offers, amount_to_buy):
     """
     Parameters
@@ -294,7 +297,7 @@ def do_it(session, city, offers, amount_to_buy):
                 continue
 
             ships_available = waitForArrival(session)
-            storageCapacity  = ships_available * 500
+            storageCapacity = ships_available * 500
             buy_amount = min(amount_to_buy, storageCapacity, offer['amountAvailable'])
 
             amount_to_buy -= buy_amount

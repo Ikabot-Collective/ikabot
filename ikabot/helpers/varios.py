@@ -9,7 +9,7 @@ from decimal import *
 getcontext().prec = 30
 
 
-def addThousandSeparator(num, character = '.'):
+def addThousandSeparator(num, character='.'):
     """Formats the number into a string and adds a `character` for every thousand (eg. 3000 -> 3.000)
     Parameters
     ----------

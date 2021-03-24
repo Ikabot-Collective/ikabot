@@ -14,11 +14,9 @@ from ikabot.helpers.pedirInfo import getIslandsIds
 from ikabot.helpers.getJson import getIsland
 from ikabot.helpers.process import set_child_mode
 
-t = gettext.translation('searchForIslandSpaces',
-                        localedir,
-                        languages=languages,
-                        fallback=True)
+t = gettext.translation('searchForIslandSpaces', localedir, languages=languages, fallback=True)
 _ = t.gettext
+
 
 def searchForIslandSpaces(session, event, stdin_fd, predetermined_input):
     """
@@ -40,7 +38,7 @@ def searchForIslandSpaces(session, event, stdin_fd, predetermined_input):
         print('(0) Exit')
         print('(1) Search all islands I have colonised')
         print('(2) Search a specific set of islands')
-        choice = read(min=0, max = 2)
+        choice = read(min=0, max=2)
         islandList = []
         if choice == 0:
             event.set()
@@ -62,7 +60,7 @@ def searchForIslandSpaces(session, event, stdin_fd, predetermined_input):
 
         banner()
         print('How frequently should the islands be searched in minutes (minimum is 3)?')
-        time = read(min = 3, digit = True)
+        time = read(min=3, digit=True)
 
         banner()
         print(_('I will search for changes in the selected islands'))
@@ -78,11 +76,12 @@ def searchForIslandSpaces(session, event, stdin_fd, predetermined_input):
     setInfoSignal(session, info)
     try:
         do_it(session, islandList, time)
-    except:
+    except Exception as e:
         msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
         sendToBot(session, msg)
     finally:
         session.logout()
+
 
 def do_it(session, islandList, time):
     """
@@ -110,7 +109,7 @@ def do_it(session, islandList, time):
             html = session.get(island_url + islandId)
             island = getIsland(html)
             # cities in the current island
-            cities_now = [city_space for city_space in island['cities'] if city_space['type'] != 'empty'] #loads the islands non empty cities into ciudades
+            cities_now = [city_space for city_space in island['cities'] if city_space['type'] != 'empty']  # loads the islands non empty cities into ciudades
 
             # if we haven't scaned this island before,
             # save it and do nothing
@@ -121,18 +120,18 @@ def do_it(session, islandList, time):
 
                 # someone disappeared
                 for city_before in cities_before:
-                    if city_before['id'] not in [ city_now['id'] for city_now in cities_now ]:
+                    if city_before['id'] not in [city_now['id'] for city_now in cities_now]:
                         # we didn't find the city_before in the cities_now
                         msg = _('the city {} of the player {} disappeared in {} {}:{} {}').format(city_before['name'], city_before['Name'], materials_names[int(island['tradegood'])], island['x'], island['y'], island['name'])
                         sendToBot(session, msg)
-                        cities_before_per_island[islandId] = cities_now.copy() #update cities_before_per_island for the current island
+                        cities_before_per_island[islandId] = cities_now.copy()  # update cities_before_per_island for the current island
 
                 # someone colonised
                 for city_now in cities_now:
-                    if city_now['id'] not in [ city_before['id'] for city_before in cities_before ]:
+                    if city_now['id'] not in [city_before['id'] for city_before in cities_before]:
                         # we didn't find the city_now in the cities_before
                         msg = _('{} founded {} in {} {}:{} {}').format(city_now['Name'], city_now['name'], materials_names[int(island['tradegood'])], island['x'], island['y'], island['name'])
                         sendToBot(session, msg)
-                        cities_before_per_island[islandId] = cities_now.copy() #update cities_before_per_island for the current island
+                        cities_before_per_island[islandId] = cities_now.copy()  # update cities_before_per_island for the current island
 
         wait(time * 60)

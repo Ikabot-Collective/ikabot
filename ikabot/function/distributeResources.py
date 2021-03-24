@@ -14,11 +14,9 @@ from ikabot.helpers.varios import addThousandSeparator
 from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.gui import banner
 
-t = gettext.translation('distributeResources',
-                        localedir,
-                        languages=languages,
-                        fallback=True)
+t = gettext.translation('distributeResources', localedir, languages=languages, fallback=True)
 _ = t.gettext
+
 
 def distributeResources(session, event, stdin_fd, predetermined_input):
     """
@@ -40,7 +38,7 @@ def distributeResources(session, event, stdin_fd, predetermined_input):
             print('({:d}) {}'.format(i+1, materials_names[i]))
         resource = read(min=0, max=5)
         if resource == 0:
-            event.set() #give main process control before exiting
+            event.set()  # give main process control before exiting
             return
         resource -= 1
 
@@ -65,7 +63,7 @@ def distributeResources(session, event, stdin_fd, predetermined_input):
         banner()
         print(_('\nThe following shipments will be made:\n'))
         for route in routes:
-            print('{} -> {} : {} {}'.format(route[0]['name'], route[1]['name'], route[resource+3], materials_names[resource])) #displays all routes to be executed in console
+            print('{} -> {} : {} {}'.format(route[0]['name'], route[1]['name'], route[resource+3], materials_names[resource]))  # displays all routes to be executed in console
 
         print(_('\nProceed? [Y/n]'))
         rta = read(values=['y', 'Y', 'n', 'N', ''])
@@ -78,18 +76,19 @@ def distributeResources(session, event, stdin_fd, predetermined_input):
         return
 
     set_child_mode(session)
-    event.set() #this is where we give back control to main process
+    event.set()  # this is where we give back control to main process
 
     info = _('\nDistribute {}\n').format(materials_names[resource])
     setInfoSignal(session, info)
 
     try:
-        executeRoutes(session, routes) #plan trips for all the routes
-    except:
+        executeRoutes(session, routes)  # plan trips for all the routes
+    except Exception as e:
         msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
-        sendToBot(session, msg) #sends message to telegram bot
+        sendToBot(session, msg)  # sends message to telegram bot
     finally:
         session.logout()
+
 
 def distribute_evenly(session, resource_type):
     """
@@ -106,12 +105,11 @@ def distribute_evenly(session, resource_type):
     allCities = {}
     for cityID in cityIDs:
 
-        html = session.get(city_url + cityID) #load html from the get request for that particular city
-        city = getCity(html) #convert the html to a city object
+        html = session.get(city_url + cityID)  # load html from the get request for that particular city
+        city = getCity(html)  # convert the html to a city object
 
-        resourceTotal += city['recursos'][resource_type] #the cities resources are added to the total
-        allCities[cityID] = city #adds the city to all cities
-
+        resourceTotal += city['recursos'][resource_type]  # the cities resources are added to the total
+        allCities[cityID] = city  # adds the city to all cities
 
     # if a city doesn't have enough storage to fit resourceAverage
     # ikabot will send enough resources to fill the store to the max
@@ -129,7 +127,7 @@ def distribute_evenly(session, resource_type):
                 destinationCities[cityID] = freeStorage
                 resourceTotal -= storage
 
-        resourceAverage = resourceTotal // ( len(allCities) - len(destinationCities) )
+        resourceAverage = resourceTotal // (len(allCities) - len(destinationCities))
 
         if len_prev == len(destinationCities):
             for cityID in allCities:
@@ -141,21 +139,21 @@ def distribute_evenly(session, resource_type):
                     destinationCities[cityID] = resourceAverage - allCities[cityID]['recursos'][resource_type]
             break
 
-    originCities = {k: v for k, v in sorted(originCities.items(), key=lambda item: item[1],reverse=True)} #sort origin cities in descending order
-    destinationCities = {k: v for k, v in sorted(destinationCities.items(), key=lambda item: item[1])}    #sort destination cities in ascending order
+    originCities = {k: v for k, v in sorted(originCities.items(), key=lambda item: item[1], reverse=True)}  # sort origin cities in descending order
+    destinationCities = {k: v for k, v in sorted(destinationCities.items(), key=lambda item: item[1])}  # sort destination cities in ascending order
 
     routes = []
 
-    for originCityID in originCities: #iterate through all origin city ids
+    for originCityID in originCities:  # iterate through all origin city ids
 
-        for destinationCityID in destinationCities: #iterate through all destination city ids
+        for destinationCityID in destinationCities:  # iterate through all destination city ids
             if originCities[originCityID] == 0 or destinationCities[destinationCityID] == 0:
                 continue
 
-            if originCities[originCityID] > destinationCities[destinationCityID]: #if there's more resources above average in the origin city than resources below average in the destination city (origin city needs to have a surplus and destination city needs to have a deficit of resources for a route to be considered)
-                toSend = destinationCities[destinationCityID] #number of resources to send is the number of resources below average in destination city
+            if originCities[originCityID] > destinationCities[destinationCityID]:  # if there's more resources above average in the origin city than resources below average in the destination city (origin city needs to have a surplus and destination city needs to have a deficit of resources for a route to be considered)
+                toSend = destinationCities[destinationCityID]  # number of resources to send is the number of resources below average in destination city
             else:
-                toSend = originCities[originCityID] #send the amount of resources above average of the current origin city
+                toSend = originCities[originCityID]  # send the amount of resources above average of the current origin city
 
             if toSend == 0:
                 continue
@@ -167,13 +165,14 @@ def distribute_evenly(session, resource_type):
 
             # ROUTE BLOCK
             if originCities[originCityID] > destinationCities[destinationCityID]:
-                originCities[originCityID] -= destinationCities[destinationCityID] #remove the sent amount from the origin city's surplus
-                destinationCities[destinationCityID] = 0 #set the amount of resources below average in destination city to 0
+                originCities[originCityID] -= destinationCities[destinationCityID]  # remove the sent amount from the origin city's surplus
+                destinationCities[destinationCityID] = 0  # set the amount of resources below average in destination city to 0
             else:
-                destinationCities[destinationCityID] -= originCities[originCityID] #remove the sent amount from the amount of resources below average in current destination city
-                originCities[originCityID] = 0 #set the amount of resources above average in origin city to 0
+                destinationCities[destinationCityID] -= originCities[originCityID]  # remove the sent amount from the amount of resources below average in current destination city
+                originCities[originCityID] = 0  # set the amount of resources above average in origin city to 0
 
     return routes
+
 
 def distribute_unevenly(session, resource_type):
     """
@@ -191,7 +190,7 @@ def distribute_unevenly(session, resource_type):
         if is_city_mining_this_resource:
             html = session.get(city_url + destination_city_id)
             city = getCity(html)
-            if resource_type == 1: # wine
+            if resource_type == 1:  # wine
                 city['available_amount_of_resource'] = city['recursos'][resource_type] - city['consumo'] - 1
             else:
                 city['available_amount_of_resource'] = city['recursos'][resource_type]
@@ -235,13 +234,12 @@ def distribute_unevenly(session, resource_type):
                     toSend[city_id] = remaining_resources_to_be_sent_to_each_city
             break
 
-        free_storage_available_per_city = [ destination_cities[city]['free_storage_for_resource'] for city in destination_cities if city not in toSend ]
+        free_storage_available_per_city = [destination_cities[city]['free_storage_for_resource'] for city in destination_cities if city not in toSend]
         if len(free_storage_available_per_city) == 0:
             break
-        total_free_storage_available_in_all_cities = sum( free_storage_available_per_city )
+        total_free_storage_available_in_all_cities = sum(free_storage_available_per_city)
         remaining_resources_to_send = min(remaining_resources_to_send, total_free_storage_available_in_all_cities)
         remaining_resources_to_be_sent_to_each_city = remaining_resources_to_send // len(free_storage_available_per_city)
-
 
     routes = []
     for destination_city_id in destination_cities:

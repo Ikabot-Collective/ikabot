@@ -14,13 +14,11 @@ from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.getJson import getCity
 from ikabot.helpers.market import getGold
 
-t = gettext.translation('getStatus',
-                        localedir,
-                        languages=languages,
-                        fallback=True)
+t = gettext.translation('getStatus', localedir, languages=languages, fallback=True)
 _ = t.gettext
 
 getcontext().prec = 30
+
 
 def getStatus(session, event, stdin_fd, predetermined_input):
     """
@@ -44,15 +42,15 @@ def getStatus(session, event, stdin_fd, predetermined_input):
         available_ships = 0
         total_ships = 0
         for id in ids:
-            session.get('view=city&cityId={}'.format(id), noIndex = True)
-            data = session.get("view=updateGlobalData&ajax=1", noIndex = True)
+            session.get('view=city&cityId={}'.format(id), noIndex=True)
+            data = session.get("view=updateGlobalData&ajax=1", noIndex=True)
             json_data = json.loads(data, strict=False)
             json_data = json_data[0][1]['headerData']
             if json_data['relatedCity']['owncity'] != 1:
                 continue
-            wood = Decimal( json_data['resourceProduction'] )
-            good = Decimal( json_data['tradegoodProduction'] )
-            typeGood = int( json_data['producedTradegood'] )
+            wood = Decimal(json_data['resourceProduction'])
+            good = Decimal(json_data['tradegoodProduction'])
+            typeGood = int(json_data['producedTradegood'])
             total_production[0] += wood * 3600
             total_production[typeGood] += good * 3600
             total_wine_consumption += json_data['wineSpendings']
@@ -69,19 +67,18 @@ def getStatus(session, event, stdin_fd, predetermined_input):
         print(_("\nTotal:"))
         print('{:>10}'.format(' '), end='|')
         for i in range(len(materials_names)):
-            print('{:>12}'.format(materials_names_english[i]), end = '|')
+            print('{:>12}'.format(materials_names_english[i]), end='|')
         print()
-        print('{:>10}'.format('Available'), end = '|')
+        print('{:>10}'.format('Available'), end='|')
         for i in range(len(materials_names)):
-            print('{:>12}'.format(addThousandSeparator(total_resources[i], ' ')), end = '|')
+            print('{:>12}'.format(addThousandSeparator(total_resources[i], ' ')), end='|')
         print()
-        print('{:>10}'.format('Production'), end = '|')
+        print('{:>10}'.format('Production'), end='|')
         for i in range(len(materials_names)):
-            print('{:>12}'.format(addThousandSeparator(total_production[i], ' ')), end = '|')
+            print('{:>12}'.format(addThousandSeparator(total_production[i], ' ')), end='|')
         print()
         print("Gold : {}, Gold production : {}".format(addThousandSeparator(total_gold, ' '), addThousandSeparator(total_gold_production, ' ')))
         print("Wine consumption : {}".format(addThousandSeparator(total_wine_consumption, ' ')), end='')
-
 
         print(_('\nOf which city do you want to see the state?'))
         city = chooseCity(session)
@@ -108,7 +105,7 @@ def getStatus(session, event, stdin_fd, predetermined_input):
         print(_('Production:'))
         print('{}:{} {}:{}'.format(materials_names[0], addThousandSeparator(wood*3600), materials_names[typeGood], addThousandSeparator(good*3600)))
 
-        hasTavern = 'tavern' in [ building['building'] for building in city['position'] ]
+        hasTavern = 'tavern' in [building['building'] for building in city['position']]
         if hasTavern:
             consumption_per_hour = city['consumo']
             if consumption_per_hour == 0:
@@ -122,7 +119,7 @@ def getStatus(session, event, stdin_fd, predetermined_input):
                     elapsed_time_run_out = daysHoursMinutes(remaining_resources_to_consume)
                 print(_('There is wine for: {}').format(elapsed_time_run_out))
 
-        for building in [ building for building in city['position'] if building['name'] != 'empty' ]:
+        for building in [building for building in city['position'] if building['name'] != 'empty']:
             if building['isMaxLevel'] is True:
                 color = bcolors.BLACK
             elif building['canUpgrade'] is True:

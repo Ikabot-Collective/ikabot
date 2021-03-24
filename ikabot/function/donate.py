@@ -11,11 +11,9 @@ from ikabot.helpers.resources import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.varios import *
 
-t = gettext.translation('donate',
-                        localedir,
-                        languages=languages,
-                        fallback=True)
+t = gettext.translation('donate', localedir, languages=languages, fallback=True)
 _ = t.gettext
+
 
 def donate(session, event, stdin_fd, predetermined_input):
     """
@@ -41,7 +39,7 @@ def donate(session, event, stdin_fd, predetermined_input):
         island = getIsland(html)
 
         island_type = island['tipo']
-        resource_name  = tradegoods_names[0]
+        resource_name = tradegoods_names[0]
         tradegood_name = tradegoods_names[int(island_type)]
 
         # get resource information
@@ -49,7 +47,7 @@ def donate(session, event, stdin_fd, predetermined_input):
         resp = session.post(url)
         resp = json.loads(resp, strict=False)
 
-        resourceLevel  = resp[0][1]['backgroundData']['resourceLevel']
+        resourceLevel = resp[0][1]['backgroundData']['resourceLevel']
         tradegoodLevel = resp[0][1]['backgroundData']['tradegoodLevel']
         resourceEndUpgradeTime = resp[0][1]['backgroundData']['resourceEndUpgradeTime']
         resourceUpgrading = resourceEndUpgradeTime > 0
