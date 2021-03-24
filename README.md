@@ -191,21 +191,18 @@ python3 -m pip uninstall ikabot
 
 Some features (such as alerting attacks) are communicated to you via Telegram messages.  
 Setting this up is highly recommended, since it allows you to enjoy all the functionality of _ikabot_.  
-To configure this, you just need to enter two pieces of information:  
+To configure this, you just need to enter the token of the Telegram bot you are going to use  
 
-1) The token of the bot you are going to use
+#### Create your Telegram bot
 
-	You will need to create your own Telegram Bot. To do that, talk to `@BotFather` on Telegram, send `/newbot` and choose the name of your bot.  
-	Make sure to first talk to your new bot and type in `/start` before inserting it's token into _ikabot_.  
-	You can find more information about the bot creation process here : `https://core.telegram.org/bots#3-how-do-i-create-a-bot`
+You will need to create your own Telegram Bot. To do that, talk to `@BotFather` on Telegram, send `/newbot` and choose the name of your bot.  
+Make sure to first talk to your new bot and type in `/start` before entering the token into _ikabot_.  
+You can find more information about the bot creation process here : `https://core.telegram.org/bots#3-how-do-i-create-a-bot`
 
-2) Your chat_id
+#### Enter the Telegram bot's token
 
-	This identifier is unique to each Telegram user and you can get it by talking by telegram to @get_id_bot.
-
-Once you have everything, go to `Options / Settings`, then `Enter the Telegram data` and enter your information.
-
-**If you are concerned about privacy, set up your own bot, so that only you have the bot's token**
+Once you have your new bot token, go to `Options / Settings`, then `Enter the Telegram data` and enter it.  
+**Do not share this token with others!**
 
 
 ### Pre-defined input
