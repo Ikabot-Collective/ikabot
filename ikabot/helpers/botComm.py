@@ -161,6 +161,10 @@ def updateTelegramData(session, event=None, stdin_fd=None, predetermined_input=[
 		sys.stdin = os.fdopen(stdin_fd)  # give process access to terminal
 	config.predetermined_input = predetermined_input
 	banner()
+	print(_('To create your own Telegram Bot, read this: https://core.telegram.org/bots#3-how-do-i-create-a-bot'))
+	print(_('Just talk to @botfather in Telegram, send /newbot and then choose the bot\'s name.'))
+	print(_('Talk to your new bot and send /start'))
+	print(_('Remember to keep the token secret!\n'))
 	botToken = read(msg=_('Bot\'s token:'))
 	chat_id = read(msg=_('Chat_id:'))
 
