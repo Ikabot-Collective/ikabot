@@ -37,7 +37,7 @@ from ikabot.function.autoPirate import autoPirate
 from ikabot.function.investigate import investigate
 from ikabot.function.attackBarbarians import attackBarbarians
 from ikabot.function.proxyConf import proxyConf, show_proxy
-from ikabot.function.killTasks import killTasks 
+from ikabot.function.killTasks import killTasks
 from ikabot.function.decaptchaConf import decaptchaConf
 
 t = gettext.translation('command_line', localedir, languages=languages, fallback=True)
