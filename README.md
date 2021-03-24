@@ -190,22 +190,18 @@ python3 -m pip uninstall ikabot
 ### Telegram
 
 Some features (such as alerting attacks) are communicated to you via Telegram messages.  
-This messages are only visible for you.  
 Setting this up is highly recommended, since it allows you to enjoy all the functionality of _ikabot_.  
 To configure this, you just need to enter two pieces of information:  
 
 1) The token of the bot you are going to use
 
-	If you want to use the 'official' bot of _ikabot_, enter Telegram and search with the magnifying glass @DaHackerBot, talk to it and you will see that a /start is sent. Once this is done you can close Telegram.
-	
-	Then, when _ikabot_ asks you to enter the bot's token, use the following: `409993506: AAFwjxfazzx6ZqYusbmDJiARBTl_Zyb_Ue4`.
-	
-	If you want to use your own bot, talk to @BotFather on Telegram and he will give you the token to a new bot once you give him the name of your new bot. Make sure to first talk to your new bot and type in /start before inserting it's token into _ikabot_.
-	You can find more information about the bot creation process here : https://core.telegram.org/bots
+	You will need to create your own Telegram Bot. To do that, talk to `@BotFather` on Telegram, send `/newbot` and choose the name of your bot.  
+	Make sure to first talk to your new bot and type in `/start` before inserting it's token into _ikabot_.  
+	You can find more information about the bot creation process here : `https://core.telegram.org/bots#3-how-do-i-create-a-bot`
 
 2) Your chat_id
 
-	This identifier is unique to each Telegram user and you can get it by talking by telegram to @get_id_bot (the one with the bow in the photo).
+	This identifier is unique to each Telegram user and you can get it by talking by telegram to @get_id_bot.
 
 When you want to use a functionality that requires Telegram, such as _Alert attacks_, _ikabot_ will ask you for the bot's token and your chat_id. Once entered, they will be saved in a file and will not be asked again.
 
