@@ -166,12 +166,56 @@ def updateTelegramData(session, event=None, stdin_fd=None, predetermined_input=[
 	print(_('Talk to your new bot and send /start'))
 	print(_('Remember to keep the token secret!\n'))
 	botToken = read(msg=_('Bot\'s token:'))
-	chat_id = read(msg=_('Chat_id:'))
+
+	updates = ikabot.web.session.normal_get('https://api.telegram.org/bot{}/getUpdates'.format(botToken)).json()
+	if 'ok' not in updates or updates['ok'] is False:
+		print(_('invalid telegram bot, try again.'))
+		enter()
+		if event is not None and stdin_fd is not None:
+			event.set()
+		return
+
+	user_ids = []
+	users = []
+	for update in updates['result']:
+		user = update['message']['from']
+		if user['id'] not in user_ids:
+			users.append(user)
+			user_ids.append(user['id'])
+
+	if len(users) == 0:
+		print(_('talk to your bot and try again'))
+		enter()
+		if event is not None and stdin_fd is not None:
+			event.set()
+		return
+	elif len(users) == 1:
+		resp = read(msg=_('is your username {}? [Y/n]').format(users[0]['username']), default='y', values=['y', 'Y', 'N', 'n'])
+		if resp.lower() == 'n':
+			print(_('talk to your bot and try again'))
+			if event is not None and stdin_fd is not None:
+				event.set()
+			return
+		else:
+			chat_id = users[0]['id']
+	else:
+		print(_('select your username:'))
+		print(_('0) My username is not listed'))
+		for i, user in enumerate(users):
+			print(_('{:d}) {}').format(i+1, user['username']))
+		resp = read(min=0, max=len(users))
+		if resp == 0:
+			print(_('talk to your bot and try again'))
+			if event is not None and stdin_fd is not None:
+				event.set()
+			return
+		else:
+			chat_id = users[resp - 1]['id']
 
 	telegram_data = {}
 	telegram_data['telegram'] = {}
-	telegram_data['telegram']['botToken'] = botToken.replace(' ', '').replace('.', '')
-	telegram_data['telegram']['chatId'] = chat_id
+	telegram_data['telegram']['botToken'] = botToken.replace(' ', '')
+	telegram_data['telegram']['chatId'] = str(chat_id)
 	session.setSessionData(telegram_data, shared=True)
 
 	rand = str(random.randint(0, 9999)).zfill(4)
