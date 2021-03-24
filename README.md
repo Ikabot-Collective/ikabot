@@ -203,7 +203,7 @@ To configure this, you just need to enter two pieces of information:
 
 	This identifier is unique to each Telegram user and you can get it by talking by telegram to @get_id_bot.
 
-When you want to use a functionality that requires Telegram, such as _Alert attacks_, _ikabot_ will ask you for the bot's token and your chat_id. Once entered, they will be saved in a file and will not be asked again.
+Once you have everything, go to `Options / Settings`, then `Enter the Telegram data` and enter your information.
 
 **If you are concerned about privacy, set up your own bot, so that only you have the bot's token**
 
