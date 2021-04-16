@@ -179,12 +179,12 @@ def updateTelegramData(session, event=None, stdin_fd=None, predetermined_input=[
     users = []
     for update in updates['result']:
         user = update['message']['from']
-        if user['id'] not in user_ids:
+        if user['id'] not in user_ids and 'username' in user:
             users.append(user)
             user_ids.append(user['id'])
 
     if len(users) == 0:
-        print(_('talk to your bot and try again'))
+        print(_('talk to your bot and try again, make sure you have a username configured in telegram'))
         enter()
         if event is not None and stdin_fd is not None:
             event.set()
