@@ -165,6 +165,7 @@ def buyResources(session, event, stdin_fd, predetermined_input):
         offers = getOffers(session, city)
         if len(offers) == 0:
             print(_('There are no offers available.'))
+            enter()
             event.set()
             return
 

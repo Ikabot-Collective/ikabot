@@ -5,6 +5,7 @@ import re
 import time
 import math
 import json
+import random
 from decimal import *
 from ikabot.config import *
 from ikabot.helpers.varios import wait
@@ -100,6 +101,10 @@ def executeRoutes(session, routes):
             sendGoods(session, origin_city['id'], destination_city_id, island_id, available_ships, send)
 
 
+def get_random_wait_time():
+    return random.randint(0, 20) * 3
+
+
 def getMinimumWaitingTime(session):
     """This function returns the time needed to wait for the closest fleet to arrive. If all ships are unavailable, this represents the minimum time needed to wait for any ships to become available. A random waiting time between 0 and 10 seconds is added to the waiting time to avoid race conditions between multiple concurrently running processes.
     Parameters
@@ -124,7 +129,7 @@ def getMinimumWaitingTime(session):
         remaining_time = int(militaryMovement['eventTime']) - current_time
         delivered_times.append(remaining_time)
     if delivered_times:
-        return min(delivered_times) + random.uniform(0, 10)
+        return min(delivered_times) + get_random_wait_time()
     else:
         return 0
 
