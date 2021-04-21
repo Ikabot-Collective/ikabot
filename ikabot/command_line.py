@@ -137,10 +137,10 @@ def menu(session, checkUpdate=True):
         print(_('(3) Kill tasks'))
         print(_('(4) Configure captcha resolver'))
 
-        if selected == 0:
-            menu()
-            return
         selected = read(min=0, max=4, digit=True)
+        if selected == 0:
+            menu(session)
+            return
         if selected > 0:
             selected += 23
 
