@@ -508,6 +508,14 @@ def constructionList(session, event, stdin_fd, predetermined_input):
             event.set()
             return
 
+        print('\nMaterials needed:')
+        for i, name in enumerate(materials_names):
+            amount = resourcesNeeded[i]
+            if amount == 0:
+                continue
+            print('- {}: {}'.format(name, addThousandSeparator(amount)))
+        print('')
+
         # calculate the resources that are missing
         missing = [0] * len(materials_names)
         for i in range(len(materials_names)):
