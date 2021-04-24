@@ -187,6 +187,19 @@ Any change you make to that directory now will be reflected once you run _ikabot
 python3 -m pip uninstall ikabot
 ```
 
+### Using docker
+
+First, buildd the container
+```
+docker build -t <name> .
+```
+Then, run it using
+```
+docker run -it <name>
+```
+In order to keep the processes running, detach from the container using `CTRL-p + CTRL-q`. If you want to open the menu again, just attach to the running container. The menu wont show up again, but you can select the request number, because its still running.
+
+
 ### Telegram
 
 Some features (such as alerting attacks) are communicated to you via Telegram messages.  
