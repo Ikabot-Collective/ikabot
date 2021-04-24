@@ -189,7 +189,7 @@ python3 -m pip uninstall ikabot
 
 ### Using docker
 
-First, buildd the container
+First, build the container
 ```
 docker build -t <name> .
 ```
