@@ -173,7 +173,7 @@ def updateTelegramData(session, event=None, stdin_fd=None, predetermined_input=[
         enter()
         if event is not None and stdin_fd is not None:
             event.set()
-        return
+        return False
 
     user_ids = []
     users = []
@@ -188,14 +188,14 @@ def updateTelegramData(session, event=None, stdin_fd=None, predetermined_input=[
         enter()
         if event is not None and stdin_fd is not None:
             event.set()
-        return
+        return False
     elif len(users) == 1:
         resp = read(msg=_('is your username {}? [Y/n]').format(users[0]['username']), default='y', values=['y', 'Y', 'N', 'n'])
         if resp.lower() == 'n':
             print(_('talk to your bot and try again'))
             if event is not None and stdin_fd is not None:
                 event.set()
-            return
+            return False
         else:
             chat_id = users[0]['id']
     else:
@@ -208,7 +208,7 @@ def updateTelegramData(session, event=None, stdin_fd=None, predetermined_input=[
             print(_('talk to your bot and try again'))
             if event is not None and stdin_fd is not None:
                 event.set()
-            return
+            return False
         else:
             chat_id = users[resp - 1]['id']
 
@@ -246,3 +246,4 @@ def updateTelegramData(session, event=None, stdin_fd=None, predetermined_input=[
     if event is not None and stdin_fd is not None:
         event.set()  # give main process control before exiting
     return valid
+
