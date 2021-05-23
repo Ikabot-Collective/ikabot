@@ -202,14 +202,14 @@ def chooseForeignCity(session):
     return city
 
 
-def askForValue(text, max):
+def askForValue(text, max_val):
     """Displays text and asks the user to enter a value between 0 and max
 
     Parameters
     ----------
     text : str
         text to be displayed when asking the user for input
-    max : int
+    max_val : int
         integer representing the number of input options
 
     Returns
@@ -218,9 +218,11 @@ def askForValue(text, max):
         integer representing the user's input
         if the user has inputed nothing, 0 will be returned instead
     """
-    var = read(msg=text, min=0, max=max, empty=True)
-    if var == '':
-        var = 0
+    var = read(msg=text, min=0, max=max_val, default=0, additionalValues=['all', 'half'])
+    if var == 'all':
+        var = max_val
+    elif var == 'half':
+        var = max_val // 2
     return var
 
 

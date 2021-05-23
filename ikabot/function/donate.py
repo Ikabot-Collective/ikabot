@@ -112,14 +112,19 @@ def donate(session, event, stdin_fd, predetermined_input):
 
         donation_type = 'resource' if donation_type == 1 else 'tradegood'
 
-        amount = read(min=0, max=woodAvailable, msg=_('Amount:'))
-        if amount == 0:
+        amount = read(min=0, max=woodAvailable, default=0, additionalValues=['all','half'], msg=_('Amount (number, all, half):'))
+        if amount == 'all':
+            amount = woodAvailable
+        elif amount == 'half':
+            amount = woodAvailable // 2
+        elif amount == 0:
             event.set()
             return
         print(_('Will donate {} to the {}?').format(addThousandSeparator(amount), name))
         print(_('\nProceed? [Y/n]'))
         rta = read(values=['y', 'Y', 'n', 'N', ''])
         if rta.lower() == 'n':
+            event.set()
             return
 
         # do the donation
