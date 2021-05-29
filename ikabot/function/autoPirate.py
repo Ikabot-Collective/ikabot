@@ -127,7 +127,11 @@ def resolveCaptcha(session, picture):
     session_data = session.getSessionData()
     if 'decaptcha' not in session_data or session_data['decaptcha']['name'] == 'default':
         text = run('nslookup -q=txt ikagod.twilightparadox.com ns2.afraid.org')
-        address = text.split('"')[1]
+        parts = text.split('"')
+        if len(parts) < 2:
+            # the DNS output is not well formed
+            return 'Error'
+        address = parts[1]
 
         files = {'upload_file': picture}
         captcha = requests.post('http://{0}'.format(address), files=files).text
