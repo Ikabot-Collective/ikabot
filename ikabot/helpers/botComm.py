@@ -178,7 +178,8 @@ def updateTelegramData(session, event=None, stdin_fd=None, predetermined_input=[
     user_ids = []
     users = []
     for update in updates['result']:
-        user = update['message']['from']
+        if 'message' in update:
+            user = update['message']['from']
         if user['id'] not in user_ids and 'username' in user:
             users.append(user)
             user_ids.append(user['id'])
