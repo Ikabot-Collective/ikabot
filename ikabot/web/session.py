@@ -70,7 +70,7 @@ class Session:
         return 'nologin_umod' in html
 
     def __isExpired(self, html):
-        return 'index.php?logout' in html
+        return 'index.php?logout' in html or '<a class="logout"' in html
 
     def isExpired(self, html):
         return self.__isExpired(html)
