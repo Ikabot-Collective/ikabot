@@ -438,7 +438,7 @@ class Session:
             if rta.lower() == 'n':
                 sys.exit()
             else:
-                sessiondata['proxy']['set'] = False
+                sessionData['proxy']['set'] = False
                 self.setSessionData(sessionData)
                 print(_('Proxy disabled, try again.'))
                 enter()
