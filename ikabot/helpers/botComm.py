@@ -55,7 +55,12 @@ def sendToBot(session, msg, Token=False, Photo=None):
     if Photo is None:
         ikabot.web.session.normal_get('https://api.telegram.org/bot{}/sendMessage'.format(telegram_data['botToken']), params={'chat_id': telegram_data['chatId'], 'text': msg})
     else:
-        resp = session.s.post('https://api.telegram.org/bot{}/sendDocument?chat_id={}&caption={}'.format(telegram_data['botToken'], telegram_data['chatId'], msg), files={'document': ('captcha.png', Photo)})
+        # we need to clear the headers here because telegram doesn't like keep-alive, might as well get rid of all headers
+        headers = session.s.headers.copy()
+        session.s.headers.clear()
+        resp = session.s.post('https://api.telegram.org/bot{}/sendDocument'.format(telegram_data['botToken']), files={'document': ('captcha.png', Photo)}, data={'chat_id': telegram_data['chatId'],'caption': msg})
+        session.s.headers = headers
+        pass
 
 
 def telegramDataIsValid(session):

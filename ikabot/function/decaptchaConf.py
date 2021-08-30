@@ -51,7 +51,7 @@ def decaptchaConf(session, event, stdin_fd, predetermined_input):
             print("API key : {}".format(session_data['decaptcha']['relevant_data']['apiKey']))
         elif session_data['decaptcha']['name'] == 'telegram':
             print('You are currently using Telegram as your decaptcha service')
-            print("Telegram ID : {}".format(session_data['telegram']['chatId']))
+            print("Telegram ID : {}".format(session_data['shared']['telegram']['chatId']))
         print()
         print('(0) Exit')
         print('(1) Default')
