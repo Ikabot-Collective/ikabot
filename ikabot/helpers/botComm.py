@@ -60,7 +60,6 @@ def sendToBot(session, msg, Token=False, Photo=None):
         session.s.headers.clear()
         resp = session.s.post('https://api.telegram.org/bot{}/sendDocument'.format(telegram_data['botToken']), files={'document': ('captcha.png', Photo)}, data={'chat_id': telegram_data['chatId'],'caption': msg})
         session.s.headers = headers
-        pass
 
 
 def telegramDataIsValid(session):
