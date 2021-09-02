@@ -189,7 +189,7 @@ def updateTelegramData(session, event=None, stdin_fd=None, predetermined_input=[
                 user_ids.append(user['id'])
 
     if len(users) == 0:
-        print(_('talk to your bot and try again, make sure you have a username configured in telegram'))
+        print(_('talk to your bot and try again, make sure your personal Telegram account has a username configured'))
         enter()
         if event is not None and stdin_fd is not None:
             event.set()
