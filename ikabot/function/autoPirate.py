@@ -155,7 +155,7 @@ def resolveCaptcha(session, picture):
         captcha_time = time.time()
         while(True):
             response = getUserResponse(session, fullResponse=True)
-            if response is []:
+            if len(response) == 0:
                 time.sleep(5)
                 continue
             response = response[-1]
