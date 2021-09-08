@@ -175,6 +175,7 @@ def init():
 
 def start():
     init()
+    config.has_params = len(sys.argv) > 1
     for arg in sys.argv:
         try:
             config.predetermined_input.append(int(arg))

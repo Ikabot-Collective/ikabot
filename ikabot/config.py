@@ -31,6 +31,7 @@ isWindows = os.name == 'nt'
 do_ssl_verify = True
 ids_cache = None
 cities_cache = None
+has_params = False
 menu_cities = ''
 infoUser = ''
 ikaFile = '.ikabot'

@@ -15,7 +15,7 @@ def enter():
     """Wait for the user to press Enter
     """
     try:
-        if len(config.predetermined_input) != 0:
+        if config.has_params:
             return
     except Exception:
         pass
