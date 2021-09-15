@@ -255,7 +255,7 @@ class Session:
                     r = self.s.post('https://gameforge.com/api/v1/auth/thin/sessions', json=data)
                     if 'gf-challenge-id' in r.headers:
                         self.writeLog("Failed to solve interactive captcha!")
-                        print("Failed to solve interactive captcha automatically, trying again!")
+                        print("Failed to solve interactive captcha, trying again!")
                         continue
                     else:
                         break
