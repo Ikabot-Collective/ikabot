@@ -34,6 +34,10 @@ def donationBot(session, event, stdin_fd, predetermined_input):
         (cities_ids, cities) = getIdsOfCities(session)
         cities_dict = {}
         initials = [material_name[0] for material_name in materials_names]
+        print('Enter how often you want to donate in minutes. (min = 1, default = 1 day)')
+        waiting_time = read(min=1, digit=True, default= 1 * 24 * 60)
+        print('Enter a maximum additional random waiting time between donations in minutes. (min = 0, default = 1 hour)')
+        max_random_waiting_time = read(min=0, digit=True, default = 1 * 60)
         for cityId in cities_ids:
             tradegood = cities[cityId]['tradegood']
             initial = initials[int(tradegood)]
@@ -61,7 +65,7 @@ def donationBot(session, event, stdin_fd, predetermined_input):
 
             cities_dict[cityId] = {'donation_type': donation_type, 'percentage': percentage}
 
-        print(_('I will donate every day.'))
+        print(_('I will donate every {} minutes.'.format(waiting_time)))
         enter()
     except KeyboardInterrupt:
         event.set()
@@ -70,10 +74,10 @@ def donationBot(session, event, stdin_fd, predetermined_input):
     set_child_mode(session)
     event.set()
 
-    info = _('\nI donate every day\n')
+    info = _('\nI donate every {} minutes\n'.format(waiting_time))
     setInfoSignal(session, info)
     try:
-        do_it(session, cities_ids, cities_dict)
+        do_it(session, cities_ids, cities_dict, waiting_time, max_random_waiting_time)
     except Exception as e:
         msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
         sendToBot(session, msg)
@@ -81,13 +85,15 @@ def donationBot(session, event, stdin_fd, predetermined_input):
         session.logout()
 
 
-def do_it(session, cities_ids, cities_dict):
+def do_it(session, cities_ids, cities_dict, waiting_time, max_random_waiting_time):
     """
     Parameters
     ----------
     session : ikabot.web.session.Session
     cities_ids : list[int]
     cities_dict : dict[int, dict]
+    waiting_time: int
+    max_random_waiting_time: int
     """
     for cityId in cities_ids:
         html = session.get(city_url + cityId)
@@ -128,4 +134,4 @@ def do_it(session, cities_ids, cities_dict):
         sendToBotDebug(session, msg, debugON_donationBot)
 
         # sleep a day
-        wait(24*60*60, maxrandom=60*60)
+        wait(waiting_time*60, maxrandom=max_random_waiting_time*60)
