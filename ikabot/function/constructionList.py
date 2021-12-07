@@ -26,7 +26,7 @@ _ = t.gettext
 
 sendResources = True
 expand = True
-
+thread = None
 
 def waitForConstruction(session, city_id):
     """
@@ -390,6 +390,7 @@ def sendResourcesMenu(session, city_id, missing):
     city_id : int
     missing : list[int, int]
     """
+    global thread
     cities_ids, cities = getIdsOfCities(session)
     origins = {}
     # for each missing resource, choose providers
@@ -565,6 +566,8 @@ def constructionList(session, event, stdin_fd, predetermined_input):
     try:
         if expand:
             expandBuilding(session, cityId, building, wait_resources)
+        elif thread:
+            thread.join()
     except Exception as e:
         msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
         sendToBot(session, msg)
