@@ -49,9 +49,9 @@ def donate(session, event, stdin_fd, predetermined_input):
 
         resourceLevel = resp[0][1]['backgroundData']['resourceLevel']
         tradegoodLevel = resp[0][1]['backgroundData']['tradegoodLevel']
-        resourceEndUpgradeTime = resp[0][1]['backgroundData']['resourceEndUpgradeTime']
+        resourceEndUpgradeTime = int(resp[0][1]['backgroundData']['resourceEndUpgradeTime'])
         resourceUpgrading = resourceEndUpgradeTime > 0
-        tradegoodEndUpgradeTime = resp[0][1]['backgroundData']['tradegoodEndUpgradeTime']
+        tradegoodEndUpgradeTime = int(resp[0][1]['backgroundData']['tradegoodEndUpgradeTime'])
         tradegoodUpgrading = tradegoodEndUpgradeTime > 0
 
         if resourceUpgrading:
