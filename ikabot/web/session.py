@@ -295,16 +295,22 @@ class Session:
                 for account in [account for account in accounts if account['blocked'] is False]:
                     server = account['server']['language']
                     mundo = account['server']['number']
-                    world = [srv['name'] for srv in servers if srv['language'] == server and srv['number'] == mundo][0]
+                    account_group = account['accountGroup']
+                    server_lang = None
+                    world, server_lang = [(srv['name'], srv['language']) for srv in servers if srv['accountGroup'] == account_group][0]
+
                     i += 1
                     pad = ' ' * (max_name - len(account['name']))
-                    print('({:d}) {}{} [{} - {}]'.format(i, account['name'], pad, server, world))
+                    print('({:d}) {}{} [{} - {}]'.format(i, account['name'], pad, server_lang, world))
                 num = read(min=1, max=i)
                 self.account = [account for account in accounts if account['blocked'] is False][num - 1]
             self.username = self.account['name']
-            self.servidor = self.account['server']['language']
+            self.login_servidor = self.account['server']['language']
+            self.account_group = self.account['accountGroup']
             self.mundo = str(self.account['server']['number'])
-            self.word = [srv['name'] for srv in servers if srv['language'] == self.servidor and srv['number'] == int(self.mundo)][0]
+            
+            self.word, self.servidor = [(srv['name'], srv['language']) for srv in servers if srv['accountGroup'] == self.account_group][0]
+            
             config.infoUser = _('Server:{}').format(self.servidor)
             config.infoUser += _(', World:{}').format(self.word)
             config.infoUser += _(', Player:{}').format(self.username)
@@ -350,7 +356,7 @@ class Session:
         # login as normal and get new cookies
         if used_old_cookies is False:
             self.__log('using new cookies')
-            resp = self.s.get('https://lobby.ikariam.gameforge.com/api/users/me/loginLink?id={}&server[language]={}&server[number]={}'.format(self.account['id'], self.servidor, self.mundo)).text
+            resp = self.s.get('https://lobby.ikariam.gameforge.com/api/users/me/loginLink?id={}&server[language]={}&server[number]={}'.format(self.account['id'], self.login_servidor, self.mundo)).text
             resp = json.loads(resp, strict=False)
             if 'url' not in resp:
                 if retries > 0:
