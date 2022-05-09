@@ -244,7 +244,20 @@ def getResourcesNeeded(session, city, building, current_level, final_level):
         # get the costs for the current level
         costs = re.findall(r'<td class="costs">([\d,\.]*)</td>', match)
         for i in range(len(costs)):
-            resource_type = resources_types[i]
+            
+            #Parse CDN Images to material type
+            if resources_types[i] == '//gf2.geo.gfsrv.net/cdn19/c3527b2f694fb882563c04df6d8972':
+                resource_type = 'wood'
+            elif resources_types[i] == '//gf3.geo.gfsrv.net/cdnbf/fc258b990c1a2a36c5aeb9872fc08a':
+                resource_type = 'marble'
+            elif resources_types[i] == '//gf2.geo.gfsrv.net/cdn1e/417b4059940b2ae2680c070a197d8c':
+                resource_type = 'glass'
+            elif resources_types[i] == '//gf1.geo.gfsrv.net/cdn9b/5578a7dfa3e98124439cca4a387a61':
+                resource_type = 'sulfur'
+            else:
+                continue
+                
+            #resource_type = resources_types[i]
             for j in range(len(materials_names_tec)):
                 name = materials_names_tec[j]
                 if resource_type == name:
