@@ -222,7 +222,7 @@ def getResourcesNeeded(session, city, building, current_level, final_level):
     costs_reductions = getCostsReducers(city)
 
     # get the type of resources that this upgrade will cost (wood, marble, etc)
-    resources_types = re.findall(r'<th class="costs"><img src="skin/resources/icon_(.*?)\.png"/></th>', html_costs)[:-1]
+    resources_types = re.findall(r'<th class="costs"><img src="(.*?)\.png"/></th>', html_costs)[:-1]
 
     # get the actual cost of each upgrade
     matches = re.findall(r'<td class="level">\d+</td>(?:\s+<td class="costs">.*?</td>)+', html_costs)
