@@ -41,6 +41,7 @@ prompt = ' >>  '
 materials_names = [_('Wood'), _('Wine'), _('Marble'), _('Cristal'), _('Sulfur')]
 materials_names_english = ['Wood', 'Wine', 'Marble', 'Cristal', 'Sulfur']
 materials_names_tec = ['wood', 'wine', 'marble', 'glass', 'sulfur']
+material_img_hash = ['19c3527b2f694fb882563c04df6d8972', 'c694ddfda045a8f5ced3397d791fd064', 'bffc258b990c1a2a36c5aeb9872fc08a', '1e417b4059940b2ae2680c070a197d8c', '9b5578a7dfa3e98124439cca4a387a61']
 tradegoods_names = [_('Saw mill'), _('Vineyard'), _('Quarry'), _('Crystal Mine'), _('Sulfur Pit')]
 ConnectionError_wait = 5 * 60
 actionRequest = 'REQUESTID'
