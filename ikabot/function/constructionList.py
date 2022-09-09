@@ -9,6 +9,8 @@ import random
 import gettext
 import traceback
 import threading
+import hashlib
+import requests
 from decimal import *
 from ikabot.config import *
 from ikabot.helpers.gui import *
@@ -240,24 +242,13 @@ def getResourcesNeeded(session, city, building, current_level, final_level):
             break
 
         levels_to_upgrade += 1
-
         # get the costs for the current level
         costs = re.findall(r'<td class="costs">([\d,\.]*)</td>', match)
+
         for i in range(len(costs)):
-            
-            #Parse CDN Images to material type
-            if resources_types[i] == '//gf2.geo.gfsrv.net/cdn19/c3527b2f694fb882563c04df6d8972':
-                resource_type = 'wood'
-            elif resources_types[i] == '//gf3.geo.gfsrv.net/cdnbf/fc258b990c1a2a36c5aeb9872fc08a':
-                resource_type = 'marble'
-            elif resources_types[i] == '//gf2.geo.gfsrv.net/cdn1e/417b4059940b2ae2680c070a197d8c':
-                resource_type = 'glass'
-            elif resources_types[i] == '//gf1.geo.gfsrv.net/cdn9b/5578a7dfa3e98124439cca4a387a61':
-                resource_type = 'sulfur'
-            else:
-                continue
-                
-            #resource_type = resources_types[i]
+            #get hash from CDN images to identify the resource type
+            resource_type = checkhash("https:" + resources_types[i] + ".png")
+
             for j in range(len(materials_names_tec)):
                 name = materials_names_tec[j]
                 if resource_type == name:
@@ -482,7 +473,24 @@ def getBuildingToExpand(session, cityId):
     building['upgradeTo'] = final_level
 
     return building
-
+def checkhash(url):
+    m = hashlib.md5()
+    r = requests.get(url)
+    for data in r.iter_content(8192):
+        m.update(data)
+        if m.hexdigest() == config.material_img_hash[0]:
+            material = 'wood'
+        elif m.hexdigest() == config.material_img_hash[1]:
+            material = 'wine'
+        elif m.hexdigest() == config.material_img_hash[2]:
+            material = 'marble'
+        elif m.hexdigest() == config.material_img_hash[3]:
+            material = 'glass'
+        elif m.hexdigest() == config.material_img_hash[4]:
+            material = 'sulfur'
+        else:
+            continue
+    return material
 
 def constructionList(session, event, stdin_fd, predetermined_input):
     """
