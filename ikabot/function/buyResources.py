@@ -87,6 +87,19 @@ def getOffers(session, city):
             'type': hit[9],
             'resource': hit[10]
         }
+        
+        #Parse CDN Images to material type
+        if offer["tipo"] == '//gf2.geo.gfsrv.net/cdn19/c3527b2f694fb882563c04df6d8972':
+             offer["tipo"] = 'wood'
+        elif  offer["tipo"] == '//gf3.geo.gfsrv.net/cdnbf/fc258b990c1a2a36c5aeb9872fc08a':
+             offer["tipo"] = 'marble'
+        elif  offer["tipo"] == '//gf2.geo.gfsrv.net/cdn1e/417b4059940b2ae2680c070a197d8c':
+             offer["tipo"] = 'glass'
+        elif  offer["tipo"] == '//gf1.geo.gfsrv.net/cdn9b/5578a7dfa3e98124439cca4a387a61':
+             offer["tipo"] = 'sulfur'
+        else:
+            continue
+            
         offers.append(offer)
     return offers
 
