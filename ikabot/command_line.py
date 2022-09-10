@@ -39,6 +39,8 @@ from ikabot.function.attackBarbarians import attackBarbarians
 from ikabot.function.proxyConf import proxyConf, show_proxy
 from ikabot.function.killTasks import killTasks
 from ikabot.function.decaptchaConf import decaptchaConf
+from rich import print
+from rich.table import Table
 
 t = gettext.translation('command_line', localedir, languages=languages, fallback=True)
 _ = t.gettext
@@ -57,18 +59,17 @@ def menu(session, checkUpdate=True):
     show_proxy(session)
 
     banner()
-
+    table = Table(title="Processes")
+    table.add_column('pid')
+    table.add_column('task')
+    table.add_column('date')
     process_list = updateProcessList(session)
-    if len(process_list) > 0:
-        print('|{:^6}|{:^35}|{:^15}|'.format('pid', 'task', 'date'))
-        print('_'*60)
-        for process in process_list:
-            if 'date' in process:
-                print('|{:^6}|{:^35}|{:^15}|'.format(process['pid'], process['action'], datetime.datetime.fromtimestamp(process['date']).strftime('%b %d %H:%M:%S')))
-            else:
-                print('|{:^6}|{:^35}|'.format(process['pid'], process['action']))
-
-        print('')
+    for process in process_list:
+        if 'date' in process:
+            table.add_row(f"{process['pid']}", f"{process['action']}", f"{datetime.datetime.fromtimestamp(process['date']).strftime('%b %d %H:%M:%S')}")
+        else:
+            table.add_row(f"{process['pid']}", f"{process['action']}")
+    print(table)
 
     menu_actions = {
         1:            constructionList,

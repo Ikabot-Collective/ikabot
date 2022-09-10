@@ -11,6 +11,7 @@ from decimal import *
 from ikabot.config import *
 from ikabot.helpers.getJson import *
 from ikabot.helpers.gui import *
+from rich import print
 
 t = gettext.translation('pedirInfo', localedir, languages=languages, fallback=True)
 _ = t.gettext
@@ -110,6 +111,7 @@ def chooseCity(session, foreign=False):
             return ' ' * (longest_city_name_length - len(city_name) + 2)
 
         resources_abbreviations = {'1': _('(W)'), '2': _('(M)'), '3': _('(C)'), '4': _('(S)')}
+        rich_colors = {'1':'purple', '2': 'gray', '3':'blue', '4':'yellow'}
 
         i = 0
         if foreign:
@@ -127,7 +129,7 @@ def chooseCity(session, foreign=False):
                 to_unicode = to_unicode.encode().decode('unicode-escape')
                 city_name = city_name.replace(match, to_unicode)
             num = ' ' + str(i) if i < 10 else str(i)
-            menu_cities += '{}: {}{}{}\n'.format(num, city_name, pad(city_name), resource_abb)
+            menu_cities += f"{num}: [{rich_colors[resource_index]}]{city_name}{pad(city_name)}{resource_abb}[/{rich_colors[resource_index]}]\n "
         menu_cities = menu_cities[:-1]
     if foreign:
         print(_(' 0: foreign city'))

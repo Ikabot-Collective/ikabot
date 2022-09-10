@@ -13,6 +13,7 @@ from ikabot.helpers.resources import *
 from ikabot.helpers.varios import addThousandSeparator
 from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.gui import banner
+from rich import print
 
 t = gettext.translation('distributeResources', localedir, languages=languages, fallback=True)
 _ = t.gettext
@@ -63,7 +64,7 @@ def distributeResources(session, event, stdin_fd, predetermined_input):
         banner()
         print(_('\nThe following shipments will be made:\n'))
         for route in routes:
-            print('{} -> {} : {} {}'.format(route[0]['name'], route[1]['name'], route[resource+3], materials_names[resource]))  # displays all routes to be executed in console
+            print('{} -> {} : {} {}'.format(route[0]['name'], route[1]['name'], '{:,}'.format(route[resource+3]).replace(',', '.'), materials_names[resource]))  # displays all routes to be executed in console
 
         print(_('\nProceed? [Y/n]'))
         rta = read(values=['y', 'Y', 'n', 'N', ''])

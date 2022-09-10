@@ -13,6 +13,8 @@ from ikabot.helpers.resources import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.getJson import getCity
 from ikabot.helpers.market import getGold
+from rich import print as rich_print
+from rich.table import Table
 
 t = gettext.translation('getStatus', localedir, languages=languages, fallback=True)
 _ = t.gettext
@@ -33,7 +35,6 @@ def getStatus(session, event, stdin_fd, predetermined_input):
     config.predetermined_input = predetermined_input
     try:
         banner()
-        color_arr = [bcolors.ENDC, bcolors.HEADER, bcolors.STONE, bcolors.BLUE, bcolors.WARNING]
 
         (ids, __) = getIdsOfCities(session)
         total_resources = [0] * len(materials_names)
@@ -62,22 +63,44 @@ def getStatus(session, event, stdin_fd, predetermined_input):
             available_ships = json_data['freeTransporters']
             total_ships = json_data['maxTransporters']
             total_gold = int(Decimal(json_data['gold']))
-            total_gold_production = int(Decimal(json_data['scientistsUpkeep'] + json_data['income'] + json_data['upkeep']))
-        print(_('Ships {:d}/{:d}').format(int(available_ships), int(total_ships)))
-        print(_("\nTotal:"))
-        print('{:>10}'.format(' '), end='|')
+            total_gold_production = int(
+                Decimal(json_data['scientistsUpkeep'] + json_data['income'] + json_data['upkeep']))
+        rich_print(_('Ships {:d}/{:d}').format(int(available_ships), int(total_ships)))
+
+        # Available table
+        available_table = Table(title="Available")
+
         for i in range(len(materials_names)):
-            print('{:>12}'.format(materials_names_english[i]), end='|')
-        print()
-        print('{:>10}'.format('Available'), end='|')
+            available_table.add_column(f"{materials_names_english[i]}")
+
+        available_table.add_row(f"{'{:>10,}'.format(total_resources[0]).replace(',', '.')}",
+                                f"{'{:>10,}'.format(total_resources[1]).replace(',', '.')}",
+                                f"{'{:>10,}'.format(total_resources[2]).replace(',', '.')}",
+                                f"{'{:>10,}'.format(total_resources[3]).replace(',', '.')}",
+                                f"{'{:>10,}'.format(total_resources[4]).replace(',', '.')}")
+
+        rich_print(available_table)
+
+        def get_production_str(number) -> str:
+            raw = f"{'{:>10,}'.format(number).replace(',', '.')}"
+            spl = raw.split('.')
+            final_string = None
+            if len(spl) >= 1:
+                spl[len(spl) - 1] = spl[len(spl) - 1][:2]  # keep only 2 digits from the floating number
+                final_string = ".".join(spl)
+            return final_string if final_string is not None else raw
+
+        production_table = Table(title="Production")
         for i in range(len(materials_names)):
-            print('{:>12}'.format(addThousandSeparator(total_resources[i], ' ')), end='|')
-        print()
-        print('{:>10}'.format('Production'), end='|')
-        for i in range(len(materials_names)):
-            print('{:>12}'.format(addThousandSeparator(total_production[i], ' ')), end='|')
-        print()
-        print("Gold : {}, Gold production : {}".format(addThousandSeparator(total_gold, ' '), addThousandSeparator(total_gold_production, ' ')))
+            production_table.add_column(f"{materials_names_english[i]}")
+        production_table.add_row(get_production_str(total_production[0]), get_production_str(total_production[1]),
+                                 get_production_str(total_production[2]), get_production_str(total_production[3]),
+                                 get_production_str(total_production[4]))
+
+        rich_print(production_table)
+
+        print("Gold : {}, Gold production : {}".format(addThousandSeparator(total_gold, ' '),
+                                                       addThousandSeparator(total_gold_production, ' ')))
         print("Wine consumption : {}".format(addThousandSeparator(total_wine_consumption, ' ')), end='')
 
         print(_('\nOf which city do you want to see the state?'))
@@ -85,7 +108,12 @@ def getStatus(session, event, stdin_fd, predetermined_input):
         banner()
 
         (wood, good, typeGood) = getProductionPerSecond(session, city['id'])
-        print('\033[1m{}{}{}'.format(color_arr[int(typeGood)], city['cityName'], color_arr[0]))
+
+        resources_abbreviations = {1: _('(W)'), 2: _('(M)'), 3: _('(C)'), 4: _('(S)')}
+        rich_colors = {1: 'purple', 2: 'gray', 3: 'blue', 4: 'yellow'}
+        resource_abb = resources_abbreviations[typeGood]
+
+        rich_print(f"[{rich_colors[typeGood]}]{city['cityName']} {resource_abb}[/{rich_colors[typeGood]}]")
 
         resources = city['recursos']
         storageCapacity = city['storageCapacity']
@@ -95,37 +123,43 @@ def getStatus(session, event, stdin_fd, predetermined_input):
                 color_resources.append(bcolors.RED)
             else:
                 color_resources.append(bcolors.ENDC)
-        print(_('Storage:'))
-        print(addThousandSeparator(storageCapacity))
-        print(_('Resources:'))
-        for i in range(len(materials_names)):
-            print('{} {}{}{} '.format(materials_names[i], color_resources[i], addThousandSeparator(resources[i]), bcolors.ENDC), end='')
-        print('')
+        rich_print(_('Storage:'))
+        rich_print(addThousandSeparator(storageCapacity))
 
-        print(_('Production:'))
-        print('{}:{} {}:{}'.format(materials_names[0], addThousandSeparator(wood*3600), materials_names[typeGood], addThousandSeparator(good*3600)))
+        resources_table = Table(title="Resources")
+        for i in materials_names:
+            resources_table.add_column(i)
+        resources_table.add_row(f"{addThousandSeparator(resources[0])}", f"{addThousandSeparator(resources[1])}",
+                                f"{addThousandSeparator(resources[2])}", f"{addThousandSeparator(resources[3])}",
+                                f"{addThousandSeparator(resources[4])}")
+        rich_print(resources_table)
+
+        rich_print(_('Production:'))
+        rich_print(
+            '{}:{} {}:{}'.format(materials_names[0], addThousandSeparator(wood * 3600), materials_names[typeGood],
+                                 addThousandSeparator(good * 3600)))
 
         hasTavern = 'tavern' in [building['building'] for building in city['position']]
         if hasTavern:
             consumption_per_hour = city['consumo']
             if consumption_per_hour == 0:
-                print(_('{}{}Does not consume wine!{}').format(bcolors.RED, bcolors.BOLD, bcolors.ENDC))
+                rich_print('[red bold]Does not consume wine![/red bold]')
             else:
-                if typeGood == 1 and (good*3600) > consumption_per_hour:
+                if typeGood == 1 and (good * 3600) > consumption_per_hour:
                     elapsed_time_run_out = '∞'
                 else:
                     consumption_per_second = Decimal(consumption_per_hour) / Decimal(3600)
                     remaining_resources_to_consume = Decimal(resources[1]) / Decimal(consumption_per_second)
                     elapsed_time_run_out = daysHoursMinutes(remaining_resources_to_consume)
-                print(_('There is wine for: {}').format(elapsed_time_run_out))
+                rich_print(f"There is wine for: {elapsed_time_run_out}")
 
         for building in [building for building in city['position'] if building['name'] != 'empty']:
             if building['isMaxLevel'] is True:
                 color = bcolors.BLACK
             elif building['canUpgrade'] is True:
-                color = bcolors.GREEN
+                color = 'green'
             else:
-                color = bcolors.RED
+                color = 'red'
 
             level = building['level']
             if level < 10:
@@ -135,7 +169,7 @@ def getStatus(session, event, stdin_fd, predetermined_input):
             if building['isBusy'] is True:
                 level = level + '+'
 
-            print(_('lv:{}\t{}{}{}').format(level, color, building['name'], bcolors.ENDC))
+            rich_print(f"lv:{level}\t[{color}]{building['name']}[/{color}]")
 
         enter()
         print('')
