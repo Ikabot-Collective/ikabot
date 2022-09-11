@@ -129,6 +129,7 @@ def chooseCity(session, foreign=False):
                 to_unicode = to_unicode.encode().decode('unicode-escape')
                 city_name = city_name.replace(match, to_unicode)
             num = ' ' + str(i) if i < 10 else str(i)
+            num = str(i)
             menu_cities += f"{num}: [{rich_colors[resource_index]}]{city_name}{pad(city_name)}{resource_abb}[/{rich_colors[resource_index]}]\n "
         menu_cities = menu_cities[:-1]
     if foreign:

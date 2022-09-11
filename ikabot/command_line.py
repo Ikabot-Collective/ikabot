@@ -59,7 +59,7 @@ def menu(session, checkUpdate=True):
     show_proxy(session)
 
     banner()
-    table = Table(title="Processes")
+    table = Table(title="Processes", highlight=True, row_styles=["dim", ""])
     table.add_column('pid')
     table.add_column('task')
     table.add_column('date')

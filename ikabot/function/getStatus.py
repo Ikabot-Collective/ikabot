@@ -68,10 +68,10 @@ def getStatus(session, event, stdin_fd, predetermined_input):
         rich_print(_('Ships {:d}/{:d}').format(int(available_ships), int(total_ships)))
 
         # Available table
-        available_table = Table(title="Available")
+        available_table = Table(title="Available", highlight=True, min_width=100)
 
         for i in range(len(materials_names)):
-            available_table.add_column(f"{materials_names_english[i]}")
+            available_table.add_column(f"{materials_names_english[i]}", justify="center", min_width=10, vertical="middle")
 
         available_table.add_row(f"{'{:>10,}'.format(total_resources[0]).replace(',', '.')}",
                                 f"{'{:>10,}'.format(total_resources[1]).replace(',', '.')}",
@@ -90,9 +90,9 @@ def getStatus(session, event, stdin_fd, predetermined_input):
                 final_string = ".".join(spl)
             return final_string if final_string is not None else raw
 
-        production_table = Table(title="Production")
+        production_table = Table(title="Production", highlight=True, min_width=100)
         for i in range(len(materials_names)):
-            production_table.add_column(f"{materials_names_english[i]}")
+            production_table.add_column(f"{materials_names_english[i]}", justify="center", min_width=10, vertical="middle")
         production_table.add_row(get_production_str(total_production[0]), get_production_str(total_production[1]),
                                  get_production_str(total_production[2]), get_production_str(total_production[3]),
                                  get_production_str(total_production[4]))
@@ -126,9 +126,9 @@ def getStatus(session, event, stdin_fd, predetermined_input):
         rich_print(_('Storage:'))
         rich_print(addThousandSeparator(storageCapacity))
 
-        resources_table = Table(title="Resources")
+        resources_table = Table(title="Resources", highlight=True)
         for i in materials_names:
-            resources_table.add_column(i)
+            resources_table.add_column(i, justify="center", min_width=10, vertical="middle")
         resources_table.add_row(f"{addThousandSeparator(resources[0])}", f"{addThousandSeparator(resources[1])}",
                                 f"{addThousandSeparator(resources[2])}", f"{addThousandSeparator(resources[3])}",
                                 f"{addThousandSeparator(resources[4])}")
