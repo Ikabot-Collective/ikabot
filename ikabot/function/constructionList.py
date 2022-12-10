@@ -410,13 +410,15 @@ def chooseResourceProviders(session, cities_ids, cities, city_id, resource, miss
         # ask the user it this city should provide resources
         tradegood_initial = tradegood_initials[int(cities[cityId]["tradegood"])]
         pad = " " * (maxName - len(cities[cityId]["name"]))
-        msg = "{}{} ({}): {} [Y/n]:".format(
+        is_producer = (int(cities[cityId]["tradegood"]) == int(resource))
+        msg = "{}{} ({}): {} [{}]:".format(
             pad,
             cities[cityId]["name"],
             tradegood_initial,
             addThousandSeparator(available),
+            ("y/N", "Y/n")[is_producer == True]
         )
-        choice = read(msg=msg, values=["Y", "y", "N", "n", ""])
+        choice = read(msg=msg, values=["Y", "y", "N", "n", ""], default=("N", "Y")[is_producer == True])
         if choice.lower() == "n":
             continue
 
