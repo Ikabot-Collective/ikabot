@@ -39,6 +39,7 @@ from ikabot.function.attackBarbarians import attackBarbarians
 from ikabot.function.proxyConf import proxyConf, show_proxy
 from ikabot.function.killTasks import killTasks
 from ikabot.function.decaptchaConf import decaptchaConf
+from ikabot.function.millitaryOverview import get_city_troops, military_overview
 from rich import print
 from rich.table import Table
 
@@ -98,7 +99,9 @@ def menu(session, checkUpdate=True):
         25:            updateTelegramData,
         26:            killTasks,
         27:            decaptchaConf,
-                    }
+        28:            get_city_troops,
+        29:            military_overview,
+    }
 
     print(_('(0)  Exit'))
     print(_('(1)  Construction list'))
@@ -124,6 +127,10 @@ def menu(session, checkUpdate=True):
     print(_('(21) Investigate'))
     print(_('(22) Attack barbarians'))
     print(_('(23) Options / Settings'))
+    print(_('(28) city troops'))
+    print(_('(29) military overview'))
+
+
     total_options = len(menu_actions) + 1
     selected = read(min=0, max=total_options, digit=True)
 
