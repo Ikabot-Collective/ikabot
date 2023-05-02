@@ -47,7 +47,7 @@ body:
       required: true
   - type: input
     id: python-version
-    attributes:s
+    attributes:
       label: Python version
       description: What version of Python are you running? (Not required if you are using Docker)
       placeholder: "Example: Python 3.9.2"
