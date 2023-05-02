@@ -1,0 +1,55 @@
+name: Bug report
+description: File a bug report
+labels: ["bug", "evaluation required"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+  - type: textarea
+    id: bug-explanation
+    attributes:
+      label: Bug explanation
+      description: |
+        - Tell us what is the problem and what did you expect to happen.
+        - Explain the different steps to reproduce the bug.
+        - If you have any suggestions for solving the bug, please let us know.
+        
+        You can attach some screenshots or/and videos to better illustrate the problem.
+      placeholder: Explain the problem...
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating System
+      description: What Operating System are you running?
+      placeholder: "Example: Windows 11"
+    validations:
+      required: true
+  - type: dropdown
+    id: ikabot-installation
+    attributes:
+      label: Ikabot installation
+      description: How did you install Ikabot?
+      options:
+        - I downloaded the pre-built Windows binary
+        - I installed Ikabot with pip
+        - I built Ikabot from sources
+        - I'm using Docker
+  - type: input
+    id: ikabot-version
+    attributes:
+      label: Ikabot version
+      description: What version of Ikabot are you running?
+      placeholder: "Example: v6.5.34"
+    validations:
+      required: true
+  - type: input
+    id: python-version
+    attributes:s
+      label: Python version
+      description: What version of Python are you running? (Not required if you are using Docker)
+      placeholder: "Example: Python 3.9.2"
+    validations:
+      required: false
