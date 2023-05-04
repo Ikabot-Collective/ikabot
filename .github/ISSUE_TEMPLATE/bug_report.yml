@@ -37,6 +37,8 @@ body:
         - I installed Ikabot with pip
         - I built Ikabot from sources
         - I'm using Docker
+      validations:
+        required: true
   - type: input
     id: ikabot-version
     attributes:
