@@ -110,7 +110,9 @@ class Session:
             self.headers = {'Host': 'lobby.ikariam.gameforge.com', 'User-Agent': user_agent, 'Accept': '*/*', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/', 'Authorization': 'Bearer ' + self.s.cookies['gf-token-production']}
             self.s.headers.clear()
             self.s.headers.update(self.headers)
-            return self.s.get('https://lobby.ikariam.gameforge.com/api/users/me').status_code == 200
+            if self.s.get('https://lobby.ikariam.gameforge.com/api/users/me').status_code == 200:
+                return True
+            self.s.cookies.clear()
         return False
 
     def __login(self, retries=0):
