@@ -401,6 +401,7 @@ class Session:
         # login as normal and get new cookies
         if used_old_cookies is False:
             self.__log('using new cookies')
+            self.blackbox = 'tra:' + random.choice(blackbox_tokens)
             self.headers = {'authority': 'lobby.ikariam.gameforge.com',
                             'method': 'POST',
                             'path': '/api/users/me/loginLink',
