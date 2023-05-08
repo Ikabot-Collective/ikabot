@@ -55,7 +55,7 @@ def train(session, city, trainings, trainTroops):
     payload = {'action': 'CityScreen', 'function': function, 'actionRequest': 'REQUESTID', 'cityId': city['id'], 'position': city['pos'], 'backgroundView': 'city', 'currentCityId': city['id'], 'templateView': templateView, 'ajax': '1'}
     for training in trainings:
         payload[training['unit_type_id']] = training['train']
-    session.post(payloadPost=payload)
+    session.post(params=payload)
 
 
 def waitForTraining(session, city, trainTroops):

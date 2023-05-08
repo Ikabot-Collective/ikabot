@@ -50,7 +50,7 @@ def sendGoods(session, originCityId, destinationCityId, islandId, ships, send):
             'ajax': '1'
         }
 
-        session.post(payloadPost=data)
+        session.post(params=data)
 
         # Request to send the resources from the origin to the target
         data = {
@@ -84,7 +84,7 @@ def sendGoods(session, originCityId, destinationCityId, islandId, ships, send):
                 key = 'cargo_resource' if i == 0 else 'cargo_tradegood{:d}'.format(i)
                 data[key] = send[i]
 
-        resp = session.post(payloadPost=data)
+        resp = session.post(params=data)
         resp = json.loads(resp, strict=False)
         if resp[3][1][0]['type'] == 10:
             break

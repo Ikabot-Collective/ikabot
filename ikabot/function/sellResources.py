@@ -71,7 +71,7 @@ def getOffers(session, my_market_city, resource_type):
     else:
         resource_type = str(resource_type)
     data = {'cityId': my_market_city['id'], 'position': my_market_city['pos'], 'view': 'branchOffice', 'activeTab': 'bargain', 'type': '333', 'searchResource': resource_type, 'range': my_market_city['rango'], 'backgroundView': 'city', 'currentCityId': my_market_city['id'], 'templateView': 'branchOffice', 'currentTab': 'bargain', 'actionRequest': actionRequest, 'ajax': '1'}
-    resp = session.post(payloadPost=data)
+    resp = session.post(params=data)
     html = json.loads(resp, strict=False)[1][1][1]
     return re.findall(r'<td class=".*?">(.*?)<br/>\((.*?)\)\s*</td>\s*<td>(.*?)</td>\s*<td><img src=".*?"\s*alt=".*?"\s*title=".*?"/></td>\s*<td style="white-space:nowrap;">(\d+)\s*<img src=".*?"\s*class=".*?"/>.*?</td>\s*<td>(\d+)</td>\s*<td><a onclick="ajaxHandlerCall\(this\.href\);return false;"\s*href="\?view=takeOffer&destinationCityId=(\d+)&', html)
 
@@ -283,7 +283,7 @@ def do_it1(session, left_to_sell, offers, resource_type, city_to_buy_from):
                 data['cargo_tradegood{:d}'.format(resource_type)] = amount_to_sell
 
             session.get(city_url + city_to_buy_from['id'], noIndex=True)
-            session.post(payloadPost=data)
+            session.post(params=data)
 
             if left_to_sell == 0:
                 return
@@ -323,7 +323,7 @@ def do_it2(session, amount_to_sell, price, resource_type, sell_market_capacity, 
             else:
                 payloadPost['tradegood{:d}'.format(resource_type)] = new_offer
                 payloadPost['tradegood{:d}Price'.format(resource_type)] = price
-            session.post(payloadPost=payloadPost)
+            session.post(params=payloadPost)
 
             # if we don't have any more to add to the offer, leave the loop
             if amount_to_sell == 0:

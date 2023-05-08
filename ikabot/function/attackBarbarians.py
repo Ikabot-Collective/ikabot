@@ -509,7 +509,7 @@ def loot(session, island, city, units_data, loot_round):
             return
 
         # send attack
-        session.post(payloadPost=attack_data)
+        session.post(params=attack_data)
 
 
 def do_it(session, island, city, babarians_info, plan):
@@ -544,7 +544,7 @@ def do_it(session, island, city, babarians_info, plan):
         attack_data['transporter'] = min(babarians_info['ships'], attack_round['ships'], ships_available)
 
         # send new round
-        session.post(payloadPost=attack_data)
+        session.post(params=attack_data)
 
         if attack_round['round'] == 1:
             battle_start = time.time() + travel_time

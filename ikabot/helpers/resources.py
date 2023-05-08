@@ -65,7 +65,7 @@ def getProductionPerSecond(session, city_id):
     -------
     production: tuple[Decimal, Decimal, int]
     """
-    prod = session.post(payloadPost={'action': 'header', 'function': 'changeCurrentCity', 'actionRequest': actionRequest, 'cityId': city_id, 'ajax': '1'})
+    prod = session.post(params={'action': 'header', 'function': 'changeCurrentCity', 'actionRequest': actionRequest, 'cityId': city_id, 'ajax': '1'})
     prod = json.loads(prod, strict=False)
     prod = prod[0][1]['headerData']
     wood_production = Decimal(prod['resourceProduction'])

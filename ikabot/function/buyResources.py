@@ -54,7 +54,7 @@ def chooseResource(session, city):
         'ajax': 1
     }
     # this will set the chosen resource in the store
-    session.post(payloadPost=data)
+    session.post(params=data)
     resource = choise - 1
     # return the chosen resource
     return resource
@@ -289,7 +289,7 @@ def buy(session, city, offer, amount_to_buy):
         data_dict['cargo_resource'] = amount_to_buy
     else:
         data_dict['cargo_tradegood{}'.format(resource)] = amount_to_buy
-    session.post(payloadPost=data_dict)
+    session.post(params=data_dict)
     msg = _('I buy {} to {} from {}').format(addThousandSeparator(amount_to_buy), offer['ciudadDestino'], offer['jugadorAComprar'])
     sendToBotDebug(session, msg, debugON_buyResources)
 
