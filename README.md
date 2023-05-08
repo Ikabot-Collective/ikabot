@@ -93,6 +93,11 @@ python3 -m pip install --user -e .
 ```
 Any change you make to that directory now will be reflected once you run _ikabot_ using the command `python3 -m ikabot`
 
+Alternatively, if you simply wish to install _ikabot_ from github without creating a specific directory for it and without installing git, you can do so using the following one-liner:
+```
+python3 -m pip install https://github.com/physics-sec/ikabot/archive/refs/heads/master.zip
+```
+
 # <img src="https://user-images.githubusercontent.com/54487782/236309220-b257d870-6846-4740-a855-dba89deeacaf.png" width="30" height="30"> Uninstall
 
 ```
