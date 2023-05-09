@@ -61,3 +61,6 @@ class bcolors:
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
+    DARK_RED = '\033[31m'
+    DARK_BLUE = '\033[34m'
+    DARK_GREEN = '\033[32m'

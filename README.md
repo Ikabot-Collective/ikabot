@@ -31,14 +31,15 @@ Ikabot is a cross-platform program written in python that grants equal or even m
 | 16 | See movements | Let's you see movements coming to/from your cities. This includes attacks, transports, etc. |
 | 17 | Construct building | It allows you to contruct a building (WOW!, again). |
 | 18 | Update Ikabot | It tells you how to update _ikabot_ |
-| 19 | Import / Export cookie | You can use this feature to insert your _ikabot_ cookie into your browser or other _ikabot_ instances running on a different machine. This will result in _ikabot_ not logging you out of your browser Ikariam session. Keep in mind that logging into Ikariam from another browser will invalidate all prevous cookies, and you will need to do this again if that happens. |
-| 20 | Auto-Pirate | This feature will run the 'Smugglers' piracy mission as many times as you need it to. It will also attempt to automatically solve the captcha should it be presented with one. |
+| 19 | Import / Export cookie | You can use this feature to insert your _ikabot_ cookie into your browser or other _ikabot_ instances running on a different machine. This will result in _ikabot_ not logging you out of your browser Ikariam session. Keep in mind that logging into Ikariam from another browser will invalidate all previous cookies, and you will need to do this again if that happens. |
+| 20 | Auto-Pirate | This feature will run any available piracy mission as many times as you need it to. It will also attempt to automatically solve the captcha should it be presented with one. |
 | 21 | Investigate | It allows you to investigate an available research. |
 | 22 | Attack barbarians | Now you can attack the barbarians in an automated way. You can send your troops in many rounds and it will automatically collect the resources. |
-| 24 | Configure Proxy | It lets you configure a proxy that will be used to all request except those sent to the lobby (during login). The proxy affects immediately all processes associated with the current ikariam username. |
-| 25 | Update the Telegram data | It allows you to set or change the Telegram data. |
-| 26 | Kill tasks | It allows you to end a currently-running ikabot task |
-| 27 | Configure captcha resolver | It allows you to configure your desired captcha resolver for the Auto-pirate task. The options you have to choose from are: <ol><li>Default </li><li>Custom</li><li>9kw.eu</li><li>Telegram</li></ol> |
+| 23 | Dump / View world | Create a dump file containing all data about the world you are playing on. You can also search this dump later for a specific player's cities or islands with specific miracles and forest / luxury resource levels. |
+| 25 | Configure Proxy | It lets you configure a proxy that will be used to all request except those sent to the lobby (during login). The proxy affects immediately all processes associated with the current ikariam username. |
+| 26 | Update the Telegram data | It allows you to set or change the Telegram data. |
+| 27 | Kill tasks | It allows you to end a currently-running ikabot task |
+| 28 | Configure captcha resolver | It allows you to configure your desired captcha resolver for the Auto-Pirate task. The options you have to choose from are: <ol><li>Default </li><li>Custom</li><li>9kw.eu</li><li>Telegram</li></ol> |
 
 # <img src="https://user-images.githubusercontent.com/54487782/236309220-b257d870-6846-4740-a855-dba89deeacaf.png" width="30" height="30"> Install
 
@@ -91,6 +92,11 @@ cd ikabot
 python3 -m pip install --user -e .
 ```
 Any change you make to that directory now will be reflected once you run _ikabot_ using the command `python3 -m ikabot`
+
+Alternatively, if you simply wish to install _ikabot_ from github without creating a specific directory for it and without installing git, you can do so using the following one-liner:
+```
+python3 -m pip install https://github.com/physics-sec/ikabot/archive/refs/heads/master.zip
+```
 
 # <img src="https://user-images.githubusercontent.com/54487782/236309220-b257d870-6846-4740-a855-dba89deeacaf.png" width="30" height="30"> Uninstall
 
