@@ -4,6 +4,8 @@ import gettext
 import json
 import sys
 import requests
+import pyperclip as pc
+import os
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.gui import *
 from ikabot.config import *
@@ -86,4 +88,18 @@ def exportCookie(session):
     4. Press F5
     """)
     print(cookies_js)
-    enter()
+    if os.path.isfile("cookie.txt"):
+        os.remove("cookie.txt")
+        f = open("cookie.txt", "a")
+        print(cookies_js, file=f)
+        f.close()
+        pc.copy(cookies_js)
+        print('\n\nCookie has been copied to the system clipboard and cookie.txt!')
+        #enter()
+    else:
+        f = open("cookie.txt", "a")
+        print(cookies_js, file=f)
+        f.close()
+        pc.copy(cookies_js)
+        print('\n\nCookie has been copied to the system clipboard and cookie.txt!')
+        #enter()
