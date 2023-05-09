@@ -24,9 +24,7 @@ def update(session, event, stdin_fd, predetermined_input):
     sys.stdin = os.fdopen(stdin_fd)
     config.predetermined_input = predetermined_input
     try:
-        print(_('To update ikabot run:'))
-        print('python3 -m pip install --user --upgrade ikabot')
-        enter()
+        print('Task list has been updated.')
         event.set()
     except KeyboardInterrupt:
         event.set()

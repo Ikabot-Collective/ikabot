@@ -76,7 +76,7 @@ def menu(session, checkUpdate=True):
         2:            sendResources,
         3:            distributeResources,
         4:            getStatus,
-        5:            donate,
+        5:            update,
         6:            searchForIslandSpaces,
         7:            loginDaily,
         8:            alertAttacks,
@@ -89,7 +89,7 @@ def menu(session, checkUpdate=True):
         15:            trainArmy,
         16:            shipMovements,
         17:            constructBuilding,
-        18:            update,
+        18:            donate,
         19:            importExportCookie,
         20:            autoPirate,
         21:            investigate,
@@ -106,7 +106,7 @@ def menu(session, checkUpdate=True):
     print(_('(2)  Send resources'))
     print(_('(3)  Distribute resources'))
     print(_('(4)  Account status'))
-    print(_('(5)  Donate'))
+    print(_('(5)  Update tasklist'))
     print(_('(6)  Search for new spaces'))
     print(_('(7)  Login daily'))
     print(_('(8)  Alert attacks'))
@@ -119,7 +119,7 @@ def menu(session, checkUpdate=True):
     print(_('(15) Train army'))
     print(_('(16) See movements'))
     print(_('(17) Construct building'))
-    print(_('(18) Update Ikabot'))
+    print(_('(18) Donate'))
     print(_('(19) Import / Export cookie'))
     print(_('(20) Auto-Pirate'))
     print(_('(21) Investigate'))
