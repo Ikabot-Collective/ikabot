@@ -72,7 +72,7 @@ def autoPirate(session, event, stdin_fd, predetermined_input):
             return
 
         print('YAAAAAR!')  # get data for options such as auto-convert to crew strength, time intervals, number of piracy attempts... ^^
-        enter()
+        #enter()
     except KeyboardInterrupt:
         event.set()
         return

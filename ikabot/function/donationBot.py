@@ -66,7 +66,7 @@ def donationBot(session, event, stdin_fd, predetermined_input):
             cities_dict[cityId] = {'donation_type': donation_type, 'percentage': percentage}
 
         print(_('I will donate every {} minutes.'.format(waiting_time)))
-        enter()
+        #enter()
     except KeyboardInterrupt:
         event.set()
         return

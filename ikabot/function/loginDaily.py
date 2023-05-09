@@ -31,7 +31,7 @@ def loginDaily(session, event, stdin_fd, predetermined_input):
     try:
         banner()
         print(_('I will enter every day.'))
-        enter()
+        #enter()
     except KeyboardInterrupt:
         event.set()
         return

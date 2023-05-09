@@ -40,7 +40,7 @@ def alertLowWine(session, event, stdin_fd, predetermined_input):
         banner()
         hours = read(msg=_('How many hours should be left until the wine runs out in a city so that it\'s alerted?'), min=1)
         print(_('It will be alerted when the wine runs out in less than {:d} hours in any city').format(hours))
-        enter()
+        #enter()
     except KeyboardInterrupt:
         event.set()
         return
