@@ -33,7 +33,7 @@ Ikabot is a cross-platform program written in python that grants equal or even m
 | 18 | Update Ikabot | It tells you how to update _ikabot_ |
 | 19 | Import / Export cookie | You can use this feature to insert your _ikabot_ cookie into your browser or other _ikabot_ instances running on a different machine. This will result in _ikabot_ not logging you out of your browser Ikariam session. Keep in mind that logging into Ikariam from another browser will invalidate all prevous cookies, and you will need to do this again if that happens. |
 | 20 | Auto-Pirate | This feature will run the 'Smugglers' piracy mission as many times as you need it to. It will also attempt to automatically solve the captcha should it be presented with one. |
-| 21 | Investigate | It allows you to investigate an available research. |
+| 21 | Investigate | It allows you to investigate an available research or perform recurrent experiments based on the total amount of glass for a city |
 | 22 | Attack barbarians | Now you can attack the barbarians in an automated way. You can send your troops in many rounds and it will automatically collect the resources. |
 | 24 | Configure Proxy | It lets you configure a proxy that will be used to all request except those sent to the lobby (during login). The proxy affects immediately all processes associated with the current ikariam username. |
 | 25 | Update the Telegram data | It allows you to set or change the Telegram data. |
