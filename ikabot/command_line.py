@@ -169,8 +169,11 @@ def menu(session, checkUpdate=True):
 
 
 def init():
-    home = 'USERPROFILE' if isWindows else 'HOME'
-    os.chdir(os.getenv(home))
+    if getattr(sys, 'frozen', False):
+        home = os.path.dirname(sys.executable)#'USERPROFILE' if isWindows else 'HOME'
+    elif __file__:
+        home = os.path.dirname(__file__)
+    os.chdir(str(home))
     if not os.path.isfile(ikaFile):
         open(ikaFile, 'w')
         os.chmod(ikaFile, 0o600)
