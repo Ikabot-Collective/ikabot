@@ -1,41 +1,129 @@
-name: Publish
+name: Publish Release
+permissions: write-all
 
 on:
-  push:
-    tags:
-      - '*'
+  workflow_dispatch:
+    inputs:
+      milestone:
+        description: 'The milestone to generate a release for'
+        required: true
+        type: string
+
+env:
+  # Needed for GitHub CLI
+  GH_TOKEN: ${{ github.token }}
+
+defaults:
+  run:
+    shell: pwsh
 
 jobs:
-  build:
-    name: Publish binaries
-    runs-on: windows-latest
+  build_release_notes:
+    runs-on: ubuntu-latest
+    name: Generate Release Notes
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.7
-      uses: actions/setup-python@v2
-      with:
-        python-version: "3.7"
-    - name: get-pip
-      run: Invoke-WebRequest https://bootstrap.pypa.io/get-pip.py
-    - name: Install PyInstaller
-      run: python -m pip install PyInstaller
-    - name: Install ikabot
-      run: python -m pip install ikabot
-    - name: Build
-      run: python -m PyInstaller --onedir ikabot/command_line.py
-    - name: Rename
-      run: |
-        mv dist/command_line dist/ikabot
-        mv dist/ikabot/command_line.exe dist/ikabot/ikabot.exe
-    - name: Zip
-      run: Compress-Archive dist ikabot.zip
-    - name: Upload binaries to release
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: ikabot.zip
-        asset_name: ikabot.zip
-        tag: ${{ github.ref }}
-        overwrite: true
-        body: "Ikabot binary"
+      - name: Get Contributors
+        id: get-contribs
+        uses: Keboo/GitHubHelper@master
+        with:
+          milestone: '${{ inputs.milestone }}'
+          repository: 'ikabot'
+          repository-owner: 'physics-sec'
+          token: ${{ github.token }}
+
+      - name: Generate Release Notes
+        run: |
+          $response = gh api --method POST -H "Accept: application/vnd.github+json" /repos/${{ github.repository }}/releases/generate-notes -f tag_name='v${{ inputs.milestone }}'
+          $json = $response | ConvertFrom-Json
+          $releaseNotes = $json.body
+          $contributors = "${{ steps.get-contribs.outputs.contributors }}"
+          $releaseNotes | Out-File -Append "ReleaseNotes.md"
+          "`n" | Out-File -Append "ReleaseNotes.md"
+          $contributors | Out-File -Append "ReleaseNotes.md"
+          cat "ReleaseNotes.md"
+
+      - name: Upload Release Notes
+        uses: actions/upload-artifact@v3
+        with:
+          name: ReleaseNotes
+          path: "ReleaseNotes.md"
+
+  update_version_number:
+    runs-on: ubuntu-latest
+    name: Update Version Number
+
+    steps:
+      - uses: actions/checkout@v3
+      
+      # Find and replace version
+      - name: Replace version value in setup.py
+        run: sed -i 's/version=".\+",/version="\"${{ inputs.milestone }}\"",/' setup.py
+
+      - name: Push changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add setup.py
+          git commit -m "Bump Ikabot version ${{ inputs.milestone }}"
+          git push
+
+  build_artifacts:
+    needs: [update_version_number]
+    name: Build artifacts
+    uses: ./.github/workflows/build_artifacts.yml
+
+  create_release:
+    needs: [build_artifacts, build_release_notes]
+    runs-on: ubuntu-latest
+    name: Create Draft Release
+
+    steps:
+      - name: Download Pre-Compiled Ikabot Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: PreCompiledIkabot
+          path: pre-compiled-ikabot
+
+      - name: Zip Ikabot
+        run: |
+          cd pre-compiled-ikabot
+          zip -r ../Ikabot.zip ikabot/*
+          cd ..
+
+      - name: Download Release Notes
+        uses: actions/download-artifact@v3
+        with:
+          name: ReleaseNotes
+
+      - name: Create Release
+        run: |
+          # We can't use glob pattern because of this bug https://github.com/cli/cli/issues/5099
+          gh release create v${{ inputs.milestone }} --repo '${{ github.repository }}' --draft --latest --title "${{ inputs.milestone }}" --notes-file ReleaseNotes.md '${{ github.workspace }}/Ikabot.zip'
+
+  publish_release:
+    needs: [create_release]
+    runs-on: ubuntu-latest
+    name: Publish Release
+
+    steps:
+      - name: Publish Release
+        run: |
+          gh release edit v${{ inputs.milestone }} --repo '${{ github.repository }}' --draft=false          
+
+  close_milestone:
+    needs: [create_release]
+    runs-on: ubuntu-latest
+    name: Close Milestone
+
+    steps:
+      # Doing a checkout, until this issue is resolved.
+      # https://github.com/valeriobelli/gh-milestone/issues/15
+      - uses: actions/checkout@v3
+
+      - name: Close Milestone
+        run: |
+          gh extension install valeriobelli/gh-milestone
+          $milestones = $(gh milestone list --json number,title) | ConvertFrom-Json
+          $milestoneNumber = ($milestones | Where-Object { $_.title -eq "${{ inputs.milestone }}" }).number
+          gh milestone edit $milestoneNumber --state closed
