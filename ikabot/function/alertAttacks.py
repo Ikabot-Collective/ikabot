@@ -1,20 +1,16 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import re
-import os
-import time
-import json
-import traceback
 import threading
-import sys
-from ikabot.config import *
+import time
+import traceback
+
+from ikabot.function.vacationMode import activateVacationMode
 from ikabot.helpers.botComm import *
 from ikabot.helpers.gui import enter
 from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import daysHoursMinutes
-from ikabot.function.vacationMode import activateVacationMode
 
 t = gettext.translation('alertAttacks', localedir, languages=languages, fallback=True)
 _ = t.gettext
@@ -38,7 +34,8 @@ def alertAttacks(session, event, stdin_fd, predetermined_input):
 
         banner()
         default = 20
-        minutes = read(msg=_('How often should I search for attacks?(min:3, default: {:d}): ').format(default), min=3, default=default)
+        minutes = read(msg=_('How often should I search for attacks?(min:3, default: {:d}): ').format(default), min=3,
+                       default=default)
         # min_units = read(msg=_('Attacks with less than how many units should be ignored? (default: 0): '), digit=True, default=0)
         print(_('I will check for attacks every {:d} minutes').format(minutes))
         enter()
@@ -107,42 +104,50 @@ def do_it(session, minutes):
 
     knownAttacks = []
     while True:
-        # get the militaryMovements
-        html = session.get()
-        city_id = re.search(r'currentCityId:\s(\d+),', html).group(1)
-        url = 'view=militaryAdvisor&oldView=city&oldBackgroundView=city&backgroundView=city&currentCityId={}&actionRequest={}&ajax=1'.format(city_id, actionRequest)
-        movements_response = session.post(url)
-        postdata = json.loads(movements_response, strict=False)
-        militaryMovements = postdata[1][1][2]['viewScriptParams']['militaryAndFleetMovements']
-        timeNow = int(postdata[0][1]['time'])
-
+        ##Catch errors inside the function to not exit for any reason.
         currentAttacks = []
-        for militaryMovement in [mov for mov in militaryMovements if mov['isHostile']]:
-            event_id = militaryMovement['event']['id']
-            currentAttacks.append(event_id)
-            # if we already alerted this, do nothing
-            if event_id not in knownAttacks:
-                knownAttacks.append(event_id)
+        try:
+            # get the militaryMovements
+            html = session.get()
+            city_id = re.search(r'currentCityId:\s(\d+),', html).group(1)
+            url = 'view=militaryAdvisor&oldView=city&oldBackgroundView=city&backgroundView=city&currentCityId={}&actionRequest={}&ajax=1'.format(
+                city_id, actionRequest)
+            movements_response = session.post(url)
+            postdata = json.loads(movements_response, strict=False)
+            militaryMovements = postdata[1][1][2]['viewScriptParams']['militaryAndFleetMovements']
+            timeNow = int(postdata[0][1]['time'])
 
-                # get information about the attack
-                missionText = militaryMovement['event']['missionText']
-                origin = militaryMovement['origin']
-                target = militaryMovement['target']
-                amountTroops = militaryMovement['army']['amount']
-                amountFleets = militaryMovement['fleet']['amount']
-                timeLeft = int(militaryMovement['eventTime']) - timeNow
+            for militaryMovement in [mov for mov in militaryMovements if mov['isHostile']]:
+                event_id = militaryMovement['event']['id']
+                currentAttacks.append(event_id)
+                # if we already alerted this, do nothing
+                if event_id not in knownAttacks:
+                    knownAttacks.append(event_id)
 
-                # send alert
-                msg = _('-- ALERT --\n')
-                msg += missionText + '\n'
-                msg += _('from the city {} of {}\n').format(origin['name'], origin['avatarName'])
-                msg += _('a {}\n').format(target['name'])
-                msg += _('{} units\n').format(amountTroops)
-                msg += _('{} fleet\n').format(amountFleets)
-                msg += _('arrival in: {}\n').format(daysHoursMinutes(timeLeft))
-                msg += _('If you want to put the account in vacation mode send:\n')
-                msg += _('{:d}:1').format(os.getpid())
-                sendToBot(session, msg)
+                    # get information about the attack
+                    missionText = militaryMovement['event']['missionText']
+                    origin = militaryMovement['origin']
+                    target = militaryMovement['target']
+                    amountTroops = militaryMovement['army']['amount']
+                    amountFleets = militaryMovement['fleet']['amount']
+                    timeLeft = int(militaryMovement['eventTime']) - timeNow
+
+                    # send alert
+                    msg = _('-- ALERT --\n')
+                    msg += missionText + '\n'
+                    msg += _('from the city {} of {}\n').format(origin['name'], origin['avatarName'])
+                    msg += _('a {}\n').format(target['name'])
+                    msg += _('{} units\n').format(amountTroops)
+                    msg += _('{} fleet\n').format(amountFleets)
+                    msg += _('arrival in: {}\n').format(daysHoursMinutes(timeLeft))
+                    msg += _('If you want to put the account in vacation mode send:\n')
+                    msg += _('{:d}:1').format(os.getpid())
+                    sendToBot(session, msg)
+
+        except Exception as e:
+            info = _('\nI check for attacks every {:d} minutes\n').format(minutes)
+            msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
+            sendToBot(session, msg)
 
         # remove old attacks from knownAttacks
         for event_id in list(knownAttacks):
