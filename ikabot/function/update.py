@@ -3,6 +3,7 @@
 
 import gettext
 import sys
+import time
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.process import run
 from ikabot.helpers.gui import *
@@ -24,7 +25,8 @@ def update(session, event, stdin_fd, predetermined_input):
     sys.stdin = os.fdopen(stdin_fd)
     config.predetermined_input = predetermined_input
     try:
-        print('Task list has been updated.')
+        print(f'Task list has been updated.\n{config.version}')
+        time.sleep(1)
         event.set()
     except KeyboardInterrupt:
         event.set()

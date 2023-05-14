@@ -50,6 +50,27 @@ def banner():
     print('\n{}\n\n{}\n{}'.format(bner, config.infoUser, config.update_msg))
 
 
+def statusbanner(session):
+
+    session_data = session.getSessionData()
+    if 'status' not in session_data:
+        session_data['status'] = {}
+        session_data['status']['data'] = config.default_bner
+        session_data['status']['set'] = False
+        session.setSessionData(session_data)
+        
+    if session_data['status']['set'] is False:
+        session_data['status']['data'] = config.default_bner
+        session.setSessionData(session_data)
+        
+    if 'status' in session_data and session_data['status']['set'] is True:
+        bner = session_data['status']['data']
+    else:
+        bner = config.default_bner
+    clear()
+    print('{}\n\n{}\n{}'.format(bner, config.infoUser, config.update_msg))
+
+
 class bcolors:
     HEADER = '\033[95m'
     STONE = '\033[37m'
