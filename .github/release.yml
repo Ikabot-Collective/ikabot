@@ -1,0 +1,15 @@
+# .github/release.yml
+
+changelog:
+  exclude:
+    labels:
+      - ignore-for-release
+    authors:
+      - github-actions[bot]
+  categories:
+    - title: Key Changes 
+      labels:
+        - release notes
+    - title: Breaking Changes 
+      labels:
+        - breaking change
