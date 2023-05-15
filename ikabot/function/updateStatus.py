@@ -41,7 +41,7 @@ def updateStatus(session, event, stdin_fd, predetermined_input):
         session_data['status']['data'] = "Updating status, please wait..."
         session.setSessionData(session_data)
         statusbanner(session)
-        print(_('I will update the status banner every 10 minutes.'))
+        print(_('I will update the status banner every 30 minutes.'))
     except KeyboardInterrupt:
         event.set()
         return
@@ -49,7 +49,7 @@ def updateStatus(session, event, stdin_fd, predetermined_input):
     set_child_mode(session)
     event.set()
 
-    info = _('\nI will update the status banner every 10 minutes\n')
+    info = _('\nI will update the status banner every 30 minutes\n')
     setInfoSignal(session, info)
     try:
         do_it(session)
@@ -126,4 +126,4 @@ def do_it(session):
             session_data['status']['set'] = False
             session_data['status']['data'] = config.default_bner
             session.setSessionData(session_data)
-    time.sleep(60*10)
+    time.sleep(60*30)
