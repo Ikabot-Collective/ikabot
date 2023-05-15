@@ -79,26 +79,26 @@ def menu(session, checkUpdate=True):
         5:            donate,
         6:            searchForIslandSpaces,
         7:            loginDaily,
-        8:            alertAttacks,
+        101:            alertAttacks,
         9:            donationBot,
-        10:            alertLowWine,
-        11:            buyResources,
-        12:            sellResources,
-        13:            vacationMode,
-        14:            activateMiracle,
-        15:            trainArmy,
-        16:            shipMovements,
-        17:            constructBuilding,
-        18:            update,
-        19:            importExportCookie,
-        20:            autoPirate,
-        21:            investigate,
-        22:            attackBarbarians,
-        23:            dumpWorld,
-        25:            proxyConf,
-        26:            updateTelegramData,
-        27:            killTasks,
-        28:            decaptchaConf,
+        102:            alertLowWine,
+        111:            buyResources,
+        112:            sellResources,
+        11:            vacationMode,
+        12:            activateMiracle,
+        13:            trainArmy,
+        14:            shipMovements,
+        15:            constructBuilding,
+        16:            update,
+        17:            importExportCookie,
+        18:            autoPirate,
+        19:            investigate,
+        20:            attackBarbarians,
+        21:            dumpWorld,
+        23:            proxyConf,
+        24:            updateTelegramData,
+        25:            killTasks,
+        26:            decaptchaConf,
                     }
 
     print(_('(0)  Exit'))
@@ -107,29 +107,53 @@ def menu(session, checkUpdate=True):
     print(_('(3)  Distribute resources'))
     print(_('(4)  Account status'))
     print(_('(5)  Donate'))
-    print(_('(6)  Search for new spaces'))
+    print(_('(6)  Monitor islands'))
     print(_('(7)  Login daily'))
-    print(_('(8)  Alert attacks'))
+    print(_('(8)  Alerts / Notifications'))
     print(_('(9)  Donate automatically'))
-    print(_('(10) Alert wine running out'))
-    print(_('(11) Buy resources'))
-    print(_('(12) Sell resources'))
-    print(_('(13) Activate vacation mode'))
-    print(_('(14) Activate miracle'))
-    print(_('(15) Train army'))
-    print(_('(16) See movements'))
-    print(_('(17) Construct building'))
-    print(_('(18) Update Ikabot'))
-    print(_('(19) Import / Export cookie'))
-    print(_('(20) Auto-Pirate'))
-    print(_('(21) Investigate'))
-    print(_('(22) Attack barbarians'))
-    print(_('(23) Dump / View world'))
-    print(_('(24) Options / Settings'))
+    print(_('(10) Marketplace'))
+    print(_('(11) Activate vacation mode'))
+    print(_('(12) Activate miracle'))
+    print(_('(13) Train army'))
+    print(_('(14) See movements'))
+    print(_('(15) Construct building'))
+    print(_('(16) Update Ikabot'))
+    print(_('(17) Import / Export cookie'))
+    print(_('(18) Auto-Pirate'))
+    print(_('(19) Investigate'))
+    print(_('(20) Attack barbarians'))
+    print(_('(21) Dump / View world'))
+    print(_('(22) Options / Settings'))
     total_options = len(menu_actions) + 1
     selected = read(min=0, max=total_options, digit=True)
+    
+    if selected == 8:
+        banner()
+        print(_('(0) Back'))
+        print(_('(1) Alert attacks'))
+        print(_('(2) Alert wine running out'))
 
-    if selected == 24:
+        selected = read(min=0, max=2, digit=True)
+        if selected == 0:
+            menu(session)
+            return
+        if selected > 0:
+            selected += 100
+    
+    if selected == 10:
+        banner()
+        print(_('(0) Back'))
+        print(_('(1) Buy resources'))
+        print(_('(2) Sell resources'))
+
+        selected = read(min=0, max=2, digit=True)
+        if selected == 0:
+            menu(session)
+            return
+        if selected > 0:
+            selected += 110
+
+    if selected == 22:
         banner()
         print(_('(0) Back'))
         print(_('(1) Configure Proxy'))
@@ -145,7 +169,7 @@ def menu(session, checkUpdate=True):
             menu(session)
             return
         if selected > 0:
-            selected += 24
+            selected += 22
 
     if selected != 0:
         try:
