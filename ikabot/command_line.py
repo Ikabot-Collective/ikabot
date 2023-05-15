@@ -32,6 +32,7 @@ from ikabot.function.loginDaily import loginDaily
 from ikabot.function.sendResources import sendResources
 from ikabot.function.constructBuilding import constructBuilding
 from ikabot.function.shipMovements import shipMovements
+from ikabot.function.searchInactive import searchInactive
 from ikabot.function.importExportCookie import importExportCookie
 from ikabot.function.autoPirate import autoPirate
 from ikabot.function.investigate import investigate
@@ -93,10 +94,11 @@ def menu(session, checkUpdate=True):
         20:            autoPirate,
         21:            investigate,
         22:            attackBarbarians,
-        24:            proxyConf,
-        25:            updateTelegramData,
-        26:            killTasks,
-        27:            decaptchaConf,
+        23:            searchInactive,
+        25:            proxyConf,
+        26:            updateTelegramData,
+        27:            killTasks,
+        28:            decaptchaConf,
                     }
 
     print(_('(0)  Exit'))
@@ -122,11 +124,12 @@ def menu(session, checkUpdate=True):
     print(_('(20) Auto-Pirate'))
     print(_('(21) Investigate'))
     print(_('(22) Attack barbarians'))
-    print(_('(23) Options / Settings'))
+    print(_('(23) Search Inactive players'))
+    print(_('(24) Options / Settings'))
     total_options = len(menu_actions) + 1
     selected = read(min=0, max=total_options, digit=True)
 
-    if selected == 23:
+    if selected == 24:
         banner()
         print(_('(0) Back'))
         print(_('(1) Configure Proxy'))
@@ -142,7 +145,7 @@ def menu(session, checkUpdate=True):
             menu(session)
             return
         if selected > 0:
-            selected += 23
+            selected += 24
 
     if selected != 0:
         try:

@@ -35,10 +35,11 @@ Ikabot is a cross-platform program written in python that grants equal or even m
 | 20 | Auto-Pirate | This feature will run the 'Smugglers' piracy mission as many times as you need it to. It will also attempt to automatically solve the captcha should it be presented with one. |
 | 21 | Investigate | It allows you to investigate an available research. |
 | 22 | Attack barbarians | Now you can attack the barbarians in an automated way. You can send your troops in many rounds and it will automatically collect the resources. |
-| 24 | Configure Proxy | It lets you configure a proxy that will be used to all request except those sent to the lobby (during login). The proxy affects immediately all processes associated with the current ikariam username. |
-| 25 | Update the Telegram data | It allows you to set or change the Telegram data. |
-| 26 | Kill tasks | It allows you to end a currently-running ikabot task |
-| 27 | Configure captcha resolver | It allows you to configure your desired captcha resolver for the Auto-pirate task. The options you have to choose from are: <ol><li>Default </li><li>Custom</li><li>9kw.eu</li><li>Telegram</li></ol> |
+| 23 | Search Inactive Players | Scan based on coordinates and transport time and will look up for inactive players, will send message once a player change from active/vacations to inactivity |
+| 25 | Configure Proxy | It lets you configure a proxy that will be used to all request except those sent to the lobby (during login). The proxy affects immediately all processes associated with the current ikariam username. |
+| 26 | Update the Telegram data | It allows you to set or change the Telegram data. |
+| 27 | Kill tasks | It allows you to end a currently-running ikabot task |
+| 28 | Configure captcha resolver | It allows you to configure your desired captcha resolver for the Auto-pirate task. The options you have to choose from are: <ol><li>Default </li><li>Custom</li><li>9kw.eu</li><li>Telegram</li></ol> |
 
 # <img src="https://user-images.githubusercontent.com/54487782/236309220-b257d870-6846-4740-a855-dba89deeacaf.png" width="30" height="30"> Install
 
