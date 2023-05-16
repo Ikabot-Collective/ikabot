@@ -40,7 +40,6 @@ from ikabot.function.proxyConf import proxyConf, show_proxy
 from ikabot.function.killTasks import killTasks
 from ikabot.function.decaptchaConf import decaptchaConf
 from ikabot.function.dumpWorld import dumpWorld
-from ikabot.function.updateStatus import updateStatus
 
 t = gettext.translation('command_line', localedir, languages=languages, fallback=True)
 _ = t.gettext
@@ -58,7 +57,7 @@ def menu(session, checkUpdate=True):
 
     show_proxy(session)
 
-    statusbanner(session)
+    banner()
 
     process_list = updateProcessList(session)
     if len(process_list) > 0:
@@ -77,30 +76,29 @@ def menu(session, checkUpdate=True):
         2:            sendResources,
         3:            distributeResources,
         4:            getStatus,
-        5:            update,
+        5:            donate,
         6:            searchForIslandSpaces,
         7:            loginDaily,
-        8:            alertAttacks,
+        101:            alertAttacks,
         9:            donationBot,
-        10:            alertLowWine,
-        11:            buyResources,
-        12:            sellResources,
-        13:            vacationMode,
-        14:            activateMiracle,
-        15:            trainArmy,
-        16:            shipMovements,
-        17:            constructBuilding,
-        18:            donate,
-        19:            importExportCookie,
-        20:            autoPirate,
-        21:            investigate,
-        22:            attackBarbarians,
-        23:            dumpWorld,
-        25:            proxyConf,
-        26:            updateTelegramData,
-        27:            killTasks,
-        28:            decaptchaConf,
-        29:            updateStatus,
+        102:            alertLowWine,
+        111:            buyResources,
+        112:            sellResources,
+        11:            vacationMode,
+        12:            activateMiracle,
+        13:            trainArmy,
+        14:            shipMovements,
+        15:            constructBuilding,
+        16:            update,
+        17:            importExportCookie,
+        18:            autoPirate,
+        19:            investigate,
+        20:            attackBarbarians,
+        21:            dumpWorld,
+        23:            proxyConf,
+        24:            updateTelegramData,
+        25:            killTasks,
+        26:            decaptchaConf,
                     }
 
     print(_('(0)  Exit'))
@@ -108,30 +106,54 @@ def menu(session, checkUpdate=True):
     print(_('(2)  Send resources'))
     print(_('(3)  Distribute resources'))
     print(_('(4)  Account status'))
-    print(_('(5)  Update tasklist'))
-    print(_('(6)  Search for new spaces'))
+    print(_('(5)  Donate'))
+    print(_('(6)  Monitor islands'))
     print(_('(7)  Login daily'))
-    print(_('(8)  Alert attacks'))
+    print(_('(8)  Alerts / Notifications'))
     print(_('(9)  Donate automatically'))
-    print(_('(10) Alert wine running out'))
-    print(_('(11) Buy resources'))
-    print(_('(12) Sell resources'))
-    print(_('(13) Activate vacation mode'))
-    print(_('(14) Activate miracle'))
-    print(_('(15) Train army'))
-    print(_('(16) See movements'))
-    print(_('(17) Construct building'))
-    print(_('(18) Donate'))
-    print(_('(19) Import / Export cookie'))
-    print(_('(20) Auto-Pirate'))
-    print(_('(21) Investigate'))
-    print(_('(22) Attack barbarians'))
-    print(_('(23) Dump / View world'))
-    print(_('(24) Options / Settings'))
+    print(_('(10) Marketplace'))
+    print(_('(11) Activate vacation mode'))
+    print(_('(12) Activate miracle'))
+    print(_('(13) Train army'))
+    print(_('(14) See movements'))
+    print(_('(15) Construct building'))
+    print(_('(16) Update Ikabot'))
+    print(_('(17) Import / Export cookie'))
+    print(_('(18) Auto-Pirate'))
+    print(_('(19) Investigate'))
+    print(_('(20) Attack barbarians'))
+    print(_('(21) Dump / View world'))
+    print(_('(22) Options / Settings'))
     total_options = len(menu_actions) + 1
     selected = read(min=0, max=total_options, digit=True)
+    
+    if selected == 8:
+        banner()
+        print(_('(0) Back'))
+        print(_('(1) Alert attacks'))
+        print(_('(2) Alert wine running out'))
 
-    if selected == 24:
+        selected = read(min=0, max=2, digit=True)
+        if selected == 0:
+            menu(session)
+            return
+        if selected > 0:
+            selected += 100
+    
+    if selected == 10:
+        banner()
+        print(_('(0) Back'))
+        print(_('(1) Buy resources'))
+        print(_('(2) Sell resources'))
+
+        selected = read(min=0, max=2, digit=True)
+        if selected == 0:
+            menu(session)
+            return
+        if selected > 0:
+            selected += 110
+
+    if selected == 22:
         banner()
         print(_('(0) Back'))
         print(_('(1) Configure Proxy'))
@@ -141,14 +163,13 @@ def menu(session, checkUpdate=True):
             print(_('(2) Enter the Telegram data'))
         print(_('(3) Kill tasks'))
         print(_('(4) Configure captcha resolver'))
-        print(_('(5) Status Banner'))
 
-        selected = read(min=0, max=5, digit=True)
+        selected = read(min=0, max=4, digit=True)
         if selected == 0:
             menu(session)
             return
         if selected > 0:
-            selected += 24
+            selected += 22
 
     if selected != 0:
         try:
@@ -168,19 +189,12 @@ def menu(session, checkUpdate=True):
             print(_('Closing this console will kill the processes.'))
             enter()
         clear()
-        session_data = session.getSessionData()
-        session_data['status']['data'] = config.default_bner
-        session_data['status']['set'] = False
-        session.setSessionData(session_data)
         os._exit(0)  # kills the process which executes this statement, but it does not kill it's child processes
 
 
 def init():
-    if getattr(sys, 'frozen', False):
-        home = os.path.dirname(sys.executable)#'USERPROFILE' if isWindows else 'HOME'
-    elif __file__:
-        home = os.path.dirname(__file__)
-    os.chdir(str(home))
+    home = 'USERPROFILE' if isWindows else 'HOME'
+    os.chdir(os.getenv(home))
     if not os.path.isfile(ikaFile):
         open(ikaFile, 'w')
         os.chmod(ikaFile, 0o600)
