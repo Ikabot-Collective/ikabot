@@ -170,7 +170,7 @@ def do_it(session, waiting_time, start_id, shallow):
     
     dump_path = os.getenv(home) + '/ikabot_world_dumps/s' + str(session.mundo) + '-' + str(session.servidor) + '/'
     dump_path = dump_path.replace('\\','/')
-    dump_name = datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d_%H-%M-%S') + '.json.gz'
+    dump_name = getDateTime() + '.json.gz'
 
     if shallow in ['y','Y']:
         dump_name = dump_name.replace('.json.gz', '_shallow') + '.json.gz'
