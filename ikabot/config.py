@@ -28,7 +28,7 @@ update_msg = ''
 
 isWindows = os.name == 'nt'
 
-version = "Ikabot version: 6.1.1 - 1.1.1"
+version = "Ikabot version: 6.1.1 - 1.2.1"
 
 default_bner = """
 `7MMF'  `7MM                       `7MM\"""Yp,                 mm
@@ -40,6 +40,7 @@ default_bner = """
 .JMML.  .JMML. YA.  `Moo9^Yo.      .JMMmmmd9     `Ybmd9'      `Mbmo
 """
 
+firstrun = True
 do_ssl_verify = True
 ids_cache = None
 cities_cache = None
@@ -70,3 +71,5 @@ debugON_sendResources = False
 debugON_constructionList = False
 debugON_buyResources = False
 debugON_activateMiracle = False
+debugON_setStatus = False
+debugON_updateStatus = False

@@ -40,7 +40,7 @@ from ikabot.function.proxyConf import proxyConf, show_proxy
 from ikabot.function.killTasks import killTasks
 from ikabot.function.decaptchaConf import decaptchaConf
 from ikabot.function.dumpWorld import dumpWorld
-from ikabot.function.updateStatus import updateStatus
+from ikabot.function.updateStatus import updateStatus, setStatus
 
 t = gettext.translation('command_line', localedir, languages=languages, fallback=True)
 _ = t.gettext
@@ -58,7 +58,7 @@ def menu(session, checkUpdate=True):
 
     show_proxy(session)
 
-    banner()
+    statusbanner(session)
 
     process_list = updateProcessList(session)
     if len(process_list) > 0:
@@ -101,6 +101,7 @@ def menu(session, checkUpdate=True):
         25:            killTasks,
         26:            decaptchaConf,
         27:            updateStatus,
+        28:            setStatus,
                     }
 
     print(_('(0)  Exit'))
@@ -165,9 +166,10 @@ def menu(session, checkUpdate=True):
             print(_('(2) Enter the Telegram data'))
         print(_('(3) Kill tasks'))
         print(_('(4) Configure captcha resolver'))
-        print(_('(5) Status Banner'))
+        print(_('(5) Toggle Status Banner'))
+        print(_('(6) Update Status Banner'))
 
-        selected = read(min=0, max=5, digit=True)
+        selected = read(min=0, max=6, digit=True)
         if selected == 0:
             menu(session)
             return
@@ -192,6 +194,10 @@ def menu(session, checkUpdate=True):
             print(_('Closing this console will kill the processes.'))
             enter()
         clear()
+        session_data = session.getSessionData()
+        session_data['status']['data'] = config.default_bner
+        session_data['status']['set'] = False
+        session.setSessionData(session_data)
         os._exit(0)  # kills the process which executes this statement, but it does not kill it's child processes
 
 
