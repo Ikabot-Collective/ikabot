@@ -40,6 +40,7 @@ from ikabot.function.proxyConf import proxyConf, show_proxy
 from ikabot.function.killTasks import killTasks
 from ikabot.function.decaptchaConf import decaptchaConf
 from ikabot.function.dumpWorld import dumpWorld
+from ikabot.function.updateStatus import updateStatus
 
 t = gettext.translation('command_line', localedir, languages=languages, fallback=True)
 _ = t.gettext
