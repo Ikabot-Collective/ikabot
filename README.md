@@ -18,13 +18,13 @@ Ikabot is a cross-platform program written in python that grants equal or even m
 | 3 | Distribute resources | It lets you distribute the type of resource in two possible ways: from the cities that produce it to cities that do not (very useful to send wine) and to distribute it evenly among all cities. |
 | 4 | Account status | It shows information such as levels of the buildings, time until the wine runs out, resources among other things from all the cities. |
 | 5 | Donate | It allows you to donate (WOW!). |
-| 6 | Search for new spaces | This functionality alerts by telegram, if a city disappears or if someone founds in any of the islands where the user has at least one city or any user defined island or set of islands. |
+| 6 | Monitor islands | This functionality alerts by telegram, if a city disappears or if someone founds in any of the islands where the user has at least one city or any user defined island or set of islands. |
 | 7 | Login Daily | For those who do not want to spend a day without their account login. This feature also collects the ambrosia fountain if it is available. |
-| 8 | Alerts / Notifications | Alarm attacks, it alerts by Telegram if you are going to be attacked. You can configure how often _ikabot_ checks for incoming attacks. |
-| 8 | Alerts / Notifications | Alert wine running out, it warns you by Telegram when less than N hours are needed for a city to run out of wine. The number of hours is specified by the user. |
+| 8 / 101 | Alerts / Notifications | Alert attacks, it alerts by Telegram if you are going to be attacked. You can configure how often _ikabot_ checks for incoming attacks. |
+| 8 / 102 | Alerts / Notifications | Alert wine running out, it warns you by Telegram when less than N hours are needed for a city to run out of wine. The number of hours is specified by the user. |
 | 9 | Donate automatically | _Ikabot_ enters once a day and donates a percentage of the available wood from the selected cities to the luxury good or the forest. |
-| 10 | Marketplace | Buy resources, it allows you to choose what type of resource to buy and how much. It automatically purchases the different offers from the cheapest to the most expensive. |
-| 10 | Marketplace | Sell resources, it allows you to choose what type of resource to sell and how much. It does not matter how much storage you have, it automatically updates the offers as pĺayers buy from you. When it sells all the resources, it lets you know via Telegram. |
+| 10 / 111 | Marketplace | Buy resources, it allows you to choose what type of resource to buy and how much. It automatically purchases the different offers from the cheapest to the most expensive. |
+| 10 / 112 | Marketplace | Sell resources, it allows you to choose what type of resource to sell and how much. It does not matter how much storage you have, it automatically updates the offers as pĺayers buy from you. When it sells all the resources, it lets you know via Telegram. |
 | 11 | Activate Vacation Mode | Sets the account in vacation mode and closes _ikabot_. |
 | 12 | Activate miracle | It allows you to activate any miracle you have available as many times in a row as you want. |
 | 13 | Train army | It allows you to easily create large amounts of troops or fleets in one city. If there are not enough resources to train all of them, it will train all the units it can and when it finishes it will try to train the rest. It also allows you to build your army in multiple small steps so that you can use it as fast as possible. |
