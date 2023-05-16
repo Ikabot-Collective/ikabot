@@ -11,14 +11,17 @@ import getpass
 import datetime
 import gettext
 import requests
+import traceback
 import base64
 from ikabot import config
 from ikabot.config import *
+from collections import deque
 from ikabot.helpers.botComm import *
 from ikabot.helpers.gui import banner
 from ikabot.helpers.aesCipher import *
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.getJson import getCity
+from ikabot.helpers.varios import getDateTime
 from urllib3.exceptions import InsecureRequestWarning
 
 t = gettext.translation('session', localedir, languages=languages, fallback=True)
@@ -38,26 +41,49 @@ class Session:
             self.logfile = os.getenv('temp') + '/ikabot.log'
         else:
             self.logfile = '/tmp/ikabot.log'
-        self.log = False
         self.padre = True
         self.logged = False
         self.blackbox = 'tra:' + random.choice(blackbox_tokens)
-
+        self.requestHistory = deque(maxlen=5) #keep last 5 requests in history
+        self.updateLogLevel()
         # disable ssl verification warning
         requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
         self.__login()
 
-    def writeLog(self, msg):
-        return self.__log(msg)
-
-    def __log(self, msg):
-        if self.log is False:
+    def writeLog(self, msg, level = logLevels.INFO, logTraceback = False, logRequestHistory = False):
+        """Writes a log entry.
+        Parameters
+        ----------
+        msg : str
+            The message to be logged, usually the reason for writing to log file
+        level : str
+            The severity of the message (can be ERROR, WARN, INFO, DEBUG). If it's lower than the currently set log level, the entry **WILL NOT BE CREATED**
+        logTraceback : bool
+            Boolean indicating whether or not to include the call stack printout in the log entry
+        logRequestHistory : bool
+            Boolean indicating whether or not to attach last 5 requests and their responses to this log entry.
+        """
+        if not (type(level) is int and level >= self.logLevel):
             return
-        now = datetime.datetime.now()
-        entry = '{}.{:02}.{:02} {:02d}:{:02}:{:02}\t{:d}: {}\n'.format(now.year, now.month, now.day, now.hour, now.minute, now.second, os.getpid(), msg)
-        fh = open(self.logfile, 'a')
-        fh.write(entry)
-        fh.close()
+        entry = {'level': level, 'date': getDateTime(), 'pid': os.getpid(), 'message': msg, 'traceback': traceback.format_exc() if logTraceback else None, 'request_history': list(self.requestHistory) if logRequestHistory else None}
+        with open(self.logfile,'a') as file:
+            json.dump(entry, file)
+            file.write('\n')
+    
+    def updateLogLevel(self, level = None):
+        """Updates the sessions logging level, WARN by default. If none is passed, will load level from session data."""
+        sessionData = self.getSessionData()
+        if 'shared' not in sessionData:
+            sessionData['shared'] = {}
+        if not level and 'logLevel' in sessionData['shared']:
+            self.logLevel = sessionData['shared']['logLevel']
+            return
+        elif not level and 'logLevel' not in sessionData['shared']:
+            #set to warn by default
+            level = logLevels.WARN            
+        self.logLevel = level
+        sessionData['shared']['logLevel'] = level
+        self.setSessionData(sessionData, shared = True)
 
     def __genRand(self):
         return hex(random.randint(0, 65535))[2:]
@@ -89,6 +115,7 @@ class Session:
 
         cookie_dict = dict(self.s.cookies.items())
         sessionData['cookies'] = cookie_dict
+        
 
         self.setSessionData(sessionData)
 
@@ -116,7 +143,6 @@ class Session:
         return False
 
     def __login(self, retries=0):
-        self.__log('__login()')
         if not self.logged:
             banner()
 
@@ -131,6 +157,8 @@ class Session:
 
         self.s = requests.Session()
         self.cipher = AESCipher(self.mail, self.password)
+        self.updateLogLevel()
+        self.writeLog('__login()')
 
         #test to see if the lobby cookie in the session file is valid, this will save time on login and will reduce use of blackbox token
         sessionData = self.getSessionData()
@@ -140,6 +168,8 @@ class Session:
 
         
         if not self.__test_lobby_cookie():
+
+            self.writeLog('Getting new lobby cookie', level = logLevels.WARN)
 
             # get gameEnvironmentId and platformGameId
             self.headers = {'Host': 'lobby.ikariam.gameforge.com', 'User-Agent': user_agent, 'Accept': '*/*', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/'}
@@ -283,7 +313,7 @@ class Session:
                         data = {"identity": self.mail, "password": self.password, "locale": "en_GB", "gfLang": "en", "platformGameId": platformGameId, "gameEnvironmentId": gameEnvironmentId, "autoGameAccountCreation": False, 'blackbox': self.blackbox}
                         r = self.s.post('https://gameforge.com/api/v1/auth/thin/sessions', json=data)
                         if 'gf-challenge-id' in r.headers:
-                            self.writeLog("Failed to solve interactive captcha!")
+                            self.writeLog("Failed to solve interactive captcha!", level=logLevels.ERROR)
                             print("Failed to solve interactive captcha, trying again!")
                             continue
                         else:
@@ -313,6 +343,8 @@ class Session:
             lobby_data['lobby'] = dict()
             lobby_data['lobby']['gf-token-production'] = auth_token
             self.setSessionData(lobby_data, shared = True)
+        else:
+            self.writeLog('Using old lobby cookie')
 
         # get accounts
         self.headers = {'Host': 'lobby.ikariam.gameforge.com', 'User-Agent': user_agent, 'Accept': 'application/json', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'Referer': 'https://lobby.ikariam.gameforge.com/es_AR/hub', 'Authorization': 'Bearer {}'.format(self.s.cookies['gf-token-production']), 'DNT': '1', 'Connection': 'close'}
@@ -388,7 +420,7 @@ class Session:
 
             cookies_are_valid = self.__isExpired(html) is False
             if cookies_are_valid:
-                self.__log('using old cookies')
+                self.writeLog('using old cookies')
                 used_old_cookies = True
                 # assign the old cookies to the session object
                 requests.cookies.cookiejar_from_dict(cookie_dict, cookiejar=self.s.cookies, overwrite=True)
@@ -400,8 +432,7 @@ class Session:
 
         # login as normal and get new cookies
         if used_old_cookies is False:
-            self.__log('using new cookies')
-            self.blackbox = 'tra:' + random.choice(blackbox_tokens)
+            self.writeLog('using new cookies', level = logLevels.WARN)
             self.headers = {'authority': 'lobby.ikariam.gameforge.com',
                             'method': 'POST',
                             'path': '/api/users/me/loginLink',
@@ -416,6 +447,7 @@ class Session:
                             'user-agent': user_agent}
             self.s.headers.clear()
             self.s.headers.update(self.headers)
+            self.blackbox = 'tra:' + random.choice(blackbox_tokens)
             data = {
                     "server": {
                         "language": self.login_servidor,
@@ -432,6 +464,7 @@ class Session:
                     return self.__login(retries-1)
                 else:
                     msg = 'Login Error: ' + str(resp.status_code) + ' ' + str(resp.reason) + ' ' + str(resp.text)
+                    self.writeLog(msg, logLevels.ERROR)
                     if self.padre:
                         print(msg)
                         sys.exit()
@@ -478,12 +511,12 @@ class Session:
         self.logged = True
 
     def __backoff(self):
-        self.__log('__backoff()')
+        self.writeLog('__backoff()')
         if self.padre is False:
             time.sleep(5 * random.randint(0, 10))
 
     def __sessionExpired(self):
-        self.__log('__sessionExpired()')
+        self.writeLog('__sessionExpired()')
         self.__backoff()
 
         sessionData = self.getSessionData()
@@ -535,7 +568,7 @@ class Session:
             obj.proxies.update({})
 
     def __checkCookie(self):
-        self.__log('__checkCookie()')
+        self.writeLog('__checkCookie()')
         sessionData = self.getSessionData()
 
         try:
@@ -569,6 +602,8 @@ class Session:
             if set to True it will ignore if the current session is expired and will simply return whatever response it gets. If it's set to False, it will make sure that the current session is not expired before sending the get request, if it's expired it will login again
         noIndex : bool
             if set to True it will remove 'index.php' from the end of urlBase before appending url params and sending the get request
+        fullResponse : bool
+            if set to True it will retrn the full response object instead of the string containing html or json data
 
         Returns
         -------
@@ -582,10 +617,12 @@ class Session:
             url = self.urlBase.replace('index.php', '') + url
         else:
             url = self.urlBase + url
-        self.__log('get({}), params:{}'.format(url, str(params)))
         while True:
             try:
+                self.requestHistory.append({'method': 'GET', 'url': url, 'params': params, 'payload': None, 'proxies': self.s.proxies, 'headers': dict(self.s.headers), 'response': None})
+                self.writeLog('About to send: {}'.format(str(self.requestHistory[-1])))
                 response = self.s.get(url, params=params, verify=config.do_ssl_verify)
+                self.requestHistory[-1]['response'] = {'status': response.status_code, 'elapsed': response.elapsed, 'headers': response.headers, 'text': response.text}
                 html = response.text
                 if ignoreExpire is False:
                     assert self.__isExpired(html) is False
@@ -636,16 +673,18 @@ class Session:
             url = self.urlBase.replace('index.php', '') + url
         else:
             url = self.urlBase + url
-        self.__log('post({}), data={}'.format(url, str(payloadPost)))
         while True:
             try:
-                resp = self.s.post(url, data=payloadPost, params=params, verify=config.do_ssl_verify).text
+                self.requestHistory.append({'method': 'POST', 'url': url, 'params': params, 'payload': payloadPost, 'proxies': self.s.proxies, 'headers': dict(self.s.headers), 'response': None})
+                self.writeLog('About to send: {}'.format(str(self.requestHistory[-1])))
+                response = self.s.post(url, data=payloadPost, params=params, verify=config.do_ssl_verify)
+                self.requestHistory[-1]['response'] = {'status': response.status_code, 'elapsed': response.elapsed, 'headers': response.headers, 'text': response.text}
+                resp = response.text
                 if ignoreExpire is False:
                     assert self.__isExpired(resp) is False
                 if 'TXT_ERROR_WRONG_REQUEST_ID' in resp:
-                    self.__log(_('got TXT_ERROR_WRONG_REQUEST_ID'))
+                    self.writeLog(_('got TXT_ERROR_WRONG_REQUEST_ID, bad actionRequest'), logLevels.WARN, logRequestHistory = True)
                     return self.post(url=url_original, payloadPost=payloadPost_original, params=params_original, ignoreExpire=ignoreExpire, noIndex=noIndex)
-                self.__log(resp)
                 return resp
             except AssertionError:
                 self.__sessionExpired()
@@ -655,7 +694,7 @@ class Session:
     def logout(self):
         """This function kills the current (chlid) process
         """
-        self.__log('logout({})')
+        self.writeLog('logout({})')
         if self.padre is False:
             os._exit(0)
 

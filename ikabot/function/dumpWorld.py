@@ -16,7 +16,7 @@ from pathlib import Path
 from datetime import datetime
 from ikabot.config import *
 from ikabot.helpers.gui import enter, banner, bcolors
-from ikabot.helpers.varios import wait
+from ikabot.helpers.varios import wait, getDateTime
 from ikabot.helpers.botComm import sendToBot
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.pedirInfo import read

@@ -20,9 +20,9 @@ _ = t.gettext
 
 # only use common browsers
 if random.randint(0, 1) == 0:
-    user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.83 Safari/537.36'
+    user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36'
 else:
-    user_agent = 'Mozilla/5.0 (X11; Linux x86_64; rv:80.0) Gecko/20100101 Firefox/80.0'
+    user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/110.0'
 
 update_msg = ''
 
@@ -48,6 +48,12 @@ actionRequest = 'REQUESTID'
 piracyMissionToBuildingLevel = {1: 1, 2: 3, 3: 5, 4: 7, 5: 9, 6: 11, 7: 13, 8: 15, 9: 17}
 piracyMissionWaitingTime = {1: 150, 2: 450, 3: 900, 4: 1800, 5: 3600, 6: 7200, 7: 14400, 8: 28800, 9: 57600}
 predetermined_input = []
+class logLevels:
+    DEBUG = 0
+    INFO  = 1
+    WARN  = 2
+    ERROR = 3
+logLevel = logLevels.WARN
 debugON_alertAttacks = False
 debugON_alertLowWine = False
 debugON_donationBot = False
