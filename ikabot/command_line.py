@@ -76,7 +76,7 @@ def menu(session, checkUpdate=True):
         2:            sendResources,
         3:            distributeResources,
         4:            getStatus,
-        5:            donate,
+        5:            update,
         6:            searchForIslandSpaces,
         7:            loginDaily,
         101:            alertAttacks,
@@ -89,7 +89,7 @@ def menu(session, checkUpdate=True):
         13:            trainArmy,
         14:            shipMovements,
         15:            constructBuilding,
-        16:            update,
+        16:            donate,
         17:            importExportCookie,
         18:            autoPirate,
         19:            investigate,
@@ -99,6 +99,7 @@ def menu(session, checkUpdate=True):
         24:            updateTelegramData,
         25:            killTasks,
         26:            decaptchaConf,
+        27:            updateStatus,
                     }
 
     print(_('(0)  Exit'))
@@ -106,7 +107,7 @@ def menu(session, checkUpdate=True):
     print(_('(2)  Send resources'))
     print(_('(3)  Distribute resources'))
     print(_('(4)  Account status'))
-    print(_('(5)  Donate'))
+    print(_('(5)  Update tasklist'))
     print(_('(6)  Monitor islands'))
     print(_('(7)  Login daily'))
     print(_('(8)  Alerts / Notifications'))
@@ -117,7 +118,7 @@ def menu(session, checkUpdate=True):
     print(_('(13) Train army'))
     print(_('(14) See movements'))
     print(_('(15) Construct building'))
-    print(_('(16) Update Ikabot'))
+    print(_('(16) Donate'))
     print(_('(17) Import / Export cookie'))
     print(_('(18) Auto-Pirate'))
     print(_('(19) Investigate'))
@@ -163,8 +164,9 @@ def menu(session, checkUpdate=True):
             print(_('(2) Enter the Telegram data'))
         print(_('(3) Kill tasks'))
         print(_('(4) Configure captcha resolver'))
+        print(_('(5) Status Banner'))
 
-        selected = read(min=0, max=4, digit=True)
+        selected = read(min=0, max=5, digit=True)
         if selected == 0:
             menu(session)
             return
@@ -193,8 +195,11 @@ def menu(session, checkUpdate=True):
 
 
 def init():
-    home = 'USERPROFILE' if isWindows else 'HOME'
-    os.chdir(os.getenv(home))
+    if getattr(sys, 'frozen', False):
+        home = os.path.dirname(sys.executable)#'USERPROFILE' if isWindows else 'HOME'
+    elif __file__:
+        home = os.path.dirname(__file__)
+    os.chdir(str(home))
     if not os.path.isfile(ikaFile):
         open(ikaFile, 'w')
         os.chmod(ikaFile, 0o600)
