@@ -45,7 +45,6 @@ class Session:
         self.logged = False
         self.blackbox = 'tra:' + random.choice(blackbox_tokens)
         self.requestHistory = deque(maxlen=5) #keep last 5 requests in history
-        self.updateLogLevel()
         # disable ssl verification warning
         requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
         self.__login()
