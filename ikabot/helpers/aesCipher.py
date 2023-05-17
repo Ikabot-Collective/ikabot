@@ -89,9 +89,9 @@ class AESCipher:
                         print(msg)
                     else:
                         sendToBot(session, msg)
-                    print(_('\nWould you like to format .ikabot userdata? [y/N]'))
-                    rta = read(values=['n', 'N', 'y', 'Y', ''])
-                    if rta.lower() == 'n' or rta == '':
+                    print(_('\nWould you like to delete the ikabot session data associated with this email address? [y/N]'))
+                    rta = read(values=['n', 'N', 'y', 'Y'])
+                    if rta.lower() == 'n':
                         os._exit(0)
                     self.deleteSessionData(session)
                     os._exit(0)
