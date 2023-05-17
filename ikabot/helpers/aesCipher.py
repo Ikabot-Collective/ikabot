@@ -84,11 +84,15 @@ class AESCipher:
                 try:
                     plaintext = self.decrypt(ciphertext)
                 except Exception:
-                    msg = _('Error while decrypting session data\nSaved data will be deleted.')
+                    msg = _('Error while decrypting session data.\nYou may have entered a wrong password.')
                     if session.padre:
                         print(msg)
                     else:
                         sendToBot(session, msg)
+                    print(_('\nWould you like to delete the ikabot session data associated with this email address? [y/N]'))
+                    rta = read(values=['n', 'N', 'y', 'Y'])
+                    if rta.lower() == 'n':
+                        os._exit(0)
                     self.deleteSessionData(session)
                     os._exit(0)
                 data_dict = json.loads(plaintext, strict=False)
