@@ -17,27 +17,26 @@ Ikabot is a cross-platform program written in python that grants equal or even m
 | 2 | Send resources |  It sends unlimited amount of resources from one city to another. It doesn't matter how many boats you have, _ikabot_ will send all the trips that were necessary. The destination city can be own by the user or by other. |
 | 3 | Distribute resources | It lets you distribute the type of resource in two possible ways: from the cities that produce it to cities that do not (very useful to send wine) and to distribute it evenly among all cities. |
 | 4 | Account status | It shows information such as levels of the buildings, time until the wine runs out, resources among other things from all the cities. |
-| 5 | Donate | It allows you to donate (WOW!). |
-| 6 | Monitor islands | This functionality alerts by telegram, if a city disappears or if someone creates a city in any of the islands where the user has at least one city or any user defined island or set of islands. |
-| 7 | Login Daily | For those who do not want to spend a day without their account login. This feature also collects the ambrosia fountain if it is available. |
-| 8 | Alerts / Notifications | **- Alert attacks**, it alerts by Telegram if you are going to be attacked. You can configure how often _ikabot_ checks for incoming attacks. <br /> **- Alert wine running out**, it warns you by Telegram when less than N hours are needed for a city to run out of wine. The number of hours is specified by the user.|
-| 9 | Donate automatically | _Ikabot_ enters once a day and donates a percentage of the available wood from the selected cities to the luxury good or the forest. |
-| 10 | Marketplace | **- Buy resources**, it allows you to choose what type of resource to buy and how much. It automatically purchases the different offers from the cheapest to the most expensive. <br /> **- Sell resources**, it allows you to choose what type of resource to sell and how much. It does not matter how much storage you have, it automatically updates the offers as players buy from you. When it sells all the resources, it lets you know via Telegram. |
-| 11 | Activate Vacation Mode | Sets the account in vacation mode and closes _ikabot_. |
-| 12 | Activate miracle | It allows you to activate any miracle you have available as many times in a row as you want. |
-| 13 | Train army | It allows you to easily create large amounts of troops or fleets in one city. If there are not enough resources to train all of them, it will train all the units it can and when it finishes it will try to train the rest. It also allows you to build your army in multiple small steps so that you can use it as fast as possible. |
-| 14 | See movements | Let's you see movements coming to/from your cities. This includes attacks, transports, etc. |
-| 15 | Construct building | It allows you to contruct a building (WOW!, again). |
-| 16 | Update Ikabot | It tells you how to update _ikabot_ |
-| 17 | Import / Export cookie | You can use this feature to insert your _ikabot_ cookie into your browser or other _ikabot_ instances running on a different machine. This will result in _ikabot_ not logging you out of your browser Ikariam session. Keep in mind that logging into Ikariam from another browser will invalidate all previous cookies, and you will need to do this again if that happens. |
-| 18 | Auto-Pirate | This feature will run any available piracy mission as many times as you need it to. It will also attempt to automatically solve the captcha should it be presented with one. |
-| 19 | Investigate | It allows you to investigate an available research. |
-| 20 | Attack barbarians | Now you can attack the barbarians in an automated way. You can send your troops in many rounds and it will automatically collect the resources. |
-| 21 | Dump / View world | Create a dump file containing all data about the world you are playing on. You can also search this dump later for a specific player's cities or islands with specific miracles and forest / luxury resource levels. |
-| 23 | Configure Proxy | It lets you configure a proxy that will be used to all request except those sent to the lobby (during login). The proxy affects immediately all processes associated with the current ikariam username. |
-| 24 | Update the Telegram data | It allows you to set or change the Telegram data. |
-| 25 | Kill tasks | It allows you to end a currently-running ikabot task |
-| 26 | Configure captcha resolver | It allows you to configure your desired captcha resolver for the Auto-Pirate task. The options you have to choose from are: <ol><li>Default </li><li>Custom</li><li>9kw.eu</li><li>Telegram</li></ol> |
+| 5 | Monitor islands | This functionality alerts by telegram, if a city disappears or if someone creates a city in any of the islands where the user has at least one city or any user defined island or set of islands. |
+| 6 | Login Daily | For those who do not want to spend a day without their account login. This feature also collects the ambrosia fountain if it is available. |
+| 7 | Alerts / Notifications | **- Alert attacks**, it alerts by Telegram if you are going to be attacked. You can configure how often _ikabot_ checks for incoming attacks. <br /> **- Alert wine running out**, it warns you by Telegram when less than N hours are needed for a city to run out of wine. The number of hours is specified by the user.|
+| 8 | Marketplace | **- Buy resources**, it allows you to choose what type of resource to buy and how much. It automatically purchases the different offers from the cheapest to the most expensive. <br /> **- Sell resources**, it allows you to choose what type of resource to sell and how much. It does not matter how much storage you have, it automatically updates the offers as players buy from you. When it sells all the resources, it lets you know via Telegram. |
+| 9 | Donate | **- Donate**, it allows you to donate (WOW!). <br /> **- Donate automatically**, _Ikabot_ enters once a day and donates a percentage of the available wood from the selected cities to the luxury good or the forest. |
+| 10 | Activate Vacation Mode | Sets the account in vacation mode and closes _ikabot_. |
+| 11 | Activate miracle | It allows you to activate any miracle you have available as many times in a row as you want. |
+| 12 | Train army | It allows you to easily create large amounts of troops or fleets in one city. If there are not enough resources to train all of them, it will train all the units it can and when it finishes it will try to train the rest. It also allows you to build your army in multiple small steps so that you can use it as fast as possible. |
+| 13 | See movements | Let's you see movements coming to/from your cities. This includes attacks, transports, etc. |
+| 14 | Construct building | It allows you to contruct a building (WOW!, again). |
+| 15 | Update Ikabot | It tells you how to update _ikabot_ |
+| 16 | Import / Export cookie | You can use this feature to insert your _ikabot_ cookie into your browser or other _ikabot_ instances running on a different machine. This will result in _ikabot_ not logging you out of your browser Ikariam session. Keep in mind that logging into Ikariam from another browser will invalidate all previous cookies, and you will need to do this again if that happens. |
+| 17 | Auto-Pirate | This feature will run any available piracy mission as many times as you need it to. It will also attempt to automatically solve the captcha should it be presented with one. |
+| 18 | Investigate | It allows you to investigate an available research. |
+| 19 | Attack barbarians | Now you can attack the barbarians in an automated way. You can send your troops in many rounds and it will automatically collect the resources. |
+| 20 | Dump / View world | Create a dump file containing all data about the world you are playing on. You can also search this dump later for a specific player's cities or islands with specific miracles and forest / luxury resource levels. |
+| 22 | Configure Proxy | It lets you configure a proxy that will be used to all request except those sent to the lobby (during login). The proxy affects immediately all processes associated with the current ikariam username. |
+| 23 | Update the Telegram data | It allows you to set or change the Telegram data. |
+| 24 | Kill tasks | It allows you to end a currently-running ikabot task |
+| 25 | Configure captcha resolver | It allows you to configure your desired captcha resolver for the Auto-Pirate task. The options you have to choose from are: <ol><li>Default </li><li>Custom</li><li>9kw.eu</li><li>Telegram</li></ol> |
 
 # <img src="https://user-images.githubusercontent.com/54487782/236309220-b257d870-6846-4740-a855-dba89deeacaf.png" width="30" height="30"> Install
 
