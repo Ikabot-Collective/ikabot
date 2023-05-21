@@ -9,6 +9,7 @@ import os
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.gui import *
 from ikabot.config import *
+from ikabot.function.cookieConf import saveCookie
 
 t = gettext.translation('insertCookies', localedir, languages=languages, fallback=True)
 _ = t.gettext
@@ -88,6 +89,7 @@ def exportCookie(session):
     4. Press F5
     """)
     print(cookies_js)
+    saveCookie(session)
     if os.path.isfile("cookie.txt"):
         os.remove("cookie.txt")
         f = open("cookie.txt", "a")

@@ -41,6 +41,7 @@ from ikabot.function.killTasks import killTasks
 from ikabot.function.decaptchaConf import decaptchaConf
 from ikabot.function.dumpWorld import dumpWorld
 from ikabot.function.updateStatus import updateStatus, setStatus
+from ikabot.function.cookieConf import cookieConf
 
 t = gettext.translation('command_line', localedir, languages=languages, fallback=True)
 _ = t.gettext
@@ -58,6 +59,7 @@ def menu(session, checkUpdate=True):
 
     show_proxy(session)
 
+    cookiechecker(session)
     statusbanner(session)
 
     process_list = updateProcessList(session)
@@ -102,6 +104,7 @@ def menu(session, checkUpdate=True):
         25:            decaptchaConf,
         26:            updateStatus,
         27:            setStatus,
+        28:            cookieConf,
                     }
 
     print(_('(0)  Exit'))
@@ -181,8 +184,9 @@ def menu(session, checkUpdate=True):
         print(_('(4) Configure captcha resolver'))
         print(_('(5) Toggle Status Banner'))
         print(_('(6) Update Status Banner'))
+        print(_('(7) Cookie data file'))
 
-        selected = read(min=0, max=6, digit=True)
+        selected = read(min=0, max=7, digit=True)
         if selected == 0:
             menu(session)
             return
