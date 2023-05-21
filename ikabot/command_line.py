@@ -81,27 +81,27 @@ def menu(session, checkUpdate=True):
         6:            searchForIslandSpaces,
         7:            loginDaily,
         101:            alertAttacks,
-        9:            donationBot,
         102:            alertLowWine,
         111:            buyResources,
         112:            sellResources,
+        121:            donate,
+        122:            donationBot,
         11:            vacationMode,
         12:            activateMiracle,
         13:            trainArmy,
         14:            shipMovements,
         15:            constructBuilding,
-        16:            donate,
-        17:            importExportCookie,
-        18:            autoPirate,
-        19:            investigate,
-        20:            attackBarbarians,
-        21:            dumpWorld,
-        23:            proxyConf,
-        24:            updateTelegramData,
-        25:            killTasks,
-        26:            decaptchaConf,
-        27:            updateStatus,
-        28:            setStatus,
+        16:            importExportCookie,
+        17:            autoPirate,
+        18:            investigate,
+        19:            attackBarbarians,
+        20:            dumpWorld,
+        22:            proxyConf,
+        23:            updateTelegramData,
+        24:            killTasks,
+        25:            decaptchaConf,
+        26:            updateStatus,
+        27:            setStatus,
                     }
 
     print(_('(0)  Exit'))
@@ -113,20 +113,20 @@ def menu(session, checkUpdate=True):
     print(_('(6)  Monitor islands'))
     print(_('(7)  Login daily'))
     print(_('(8)  Alerts / Notifications'))
-    print(_('(9)  Donate automatically'))
-    print(_('(10) Marketplace'))
+    print(_('(9)  Marketplace'))
+    print(_('(10) Donate'))
     print(_('(11) Activate vacation mode'))
     print(_('(12) Activate miracle'))
     print(_('(13) Train army'))
     print(_('(14) See movements'))
     print(_('(15) Construct building'))
-    print(_('(16) Donate'))
-    print(_('(17) Import / Export cookie'))
-    print(_('(18) Auto-Pirate'))
-    print(_('(19) Investigate'))
-    print(_('(20) Attack barbarians'))
-    print(_('(21) Dump / View world'))
-    print(_('(22) Options / Settings'))
+    print(_('(16) Import / Export cookie'))
+    print(_('(17) Auto-Pirate'))
+    print(_('(18) Investigate'))
+    print(_('(19) Attack barbarians'))
+    print(_('(20) Dump / View world'))
+    print(_('(21) Options / Settings'))
+
     total_options = len(menu_actions) + 1
     selected = read(min=0, max=total_options, digit=True)
     
@@ -142,8 +142,8 @@ def menu(session, checkUpdate=True):
             return
         if selected > 0:
             selected += 100
-    
-    if selected == 10:
+            
+    if selected == 9:
         banner()
         print(_('(0) Back'))
         print(_('(1) Buy resources'))
@@ -155,8 +155,21 @@ def menu(session, checkUpdate=True):
             return
         if selected > 0:
             selected += 110
+            
+    if selected == 10:
+        banner()
+        print(_('(0) Back'))
+        print(_('(1) Donate once'))
+        print(_('(2) Donate automatically'))
 
-    if selected == 22:
+        selected = read(min=0, max=2, digit=True)
+        if selected == 0:
+            menu(session)
+            return
+        if selected > 0:
+            selected += 120
+
+    if selected == 21:
         banner()
         print(_('(0) Back'))
         print(_('(1) Configure Proxy'))
@@ -174,7 +187,7 @@ def menu(session, checkUpdate=True):
             menu(session)
             return
         if selected > 0:
-            selected += 22
+            selected += 21
 
     if selected != 0:
         try:
