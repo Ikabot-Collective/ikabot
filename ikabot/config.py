@@ -28,7 +28,7 @@ update_msg = ''
 
 isWindows = os.name == 'nt'
 
-version = "Ikabot version: 6.1.1 - 1.3.2"
+version = "Ikabot version: 6.1.1 - 1.3.4"
 
 default_bner = """
 `7MMF'  `7MM                       `7MM\"""Yp,                 mm
@@ -40,7 +40,6 @@ default_bner = """
 .JMML.  .JMML. YA.  `Moo9^Yo.      .JMMmmmd9     `Ybmd9'      `Mbmo
 """
 
-firstrun = True
 do_ssl_verify = True
 ids_cache = None
 cities_cache = None

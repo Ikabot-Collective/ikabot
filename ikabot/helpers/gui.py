@@ -44,19 +44,6 @@ def banner():
 def statusbanner(session):
 
     session_data = session.getSessionData()
-    if 'status' not in session_data:
-        session_data['status'] = {}
-        session_data['status']['data'] = config.default_bner
-        session_data['status']['set'] = False
-        session.setSessionData(session_data)
-    
-    if config.firstrun is True:
-        session_data['status']['data'] = config.default_bner
-        session_data['status']['set'] = False
-        session.setSessionData(session_data)
-        bner = config.default_bner
-        config.firstrun = False
-    
     if session_data['status']['set'] is False:
         session_data['status']['data'] = config.default_bner
         session.setSessionData(session_data)
@@ -66,19 +53,6 @@ def statusbanner(session):
 
     clear()
     print('{}\n\n{}\n{}'.format(bner, config.infoUser, config.update_msg))
-    
-def cookiechecker(session):
-
-    session_data = session.getSessionData()
-    if 'cookie' not in session_data:
-        session_data['cookie'] = {}
-        session_data['cookie']['conf'] = ''
-        session_data['cookie']['user'] = config.infoUser
-        session_data['cookie']['set'] = False
-        session.setSessionData(session_data)
-    else:
-        session_data['cookie']['user'] = config.infoUser
-        session.setSessionData(session_data)
 
 
 class bcolors:

@@ -42,12 +42,13 @@ from ikabot.function.decaptchaConf import decaptchaConf
 from ikabot.function.dumpWorld import dumpWorld
 from ikabot.function.updateStatus import updateStatus, setStatus
 from ikabot.function.cookieConf import cookieConf
+from ikabot.helpers.checker import checker
 
 t = gettext.translation('command_line', localedir, languages=languages, fallback=True)
 _ = t.gettext
 
 
-def menu(session, checkUpdate=True):
+def menu(session, checkUpdate=False):
     """
     Parameters
     ----------
@@ -55,11 +56,11 @@ def menu(session, checkUpdate=True):
     checkUpdate : bool
     """
     if checkUpdate:
+        checker(session)
         checkForUpdate()
 
     show_proxy(session)
 
-    cookiechecker(session)
     statusbanner(session)
 
     process_list = updateProcessList(session)
@@ -241,7 +242,7 @@ def start():
 
     session = Session()
     try:
-        menu(session)
+        menu(session, checkUpdate=True)
     finally:
         clear()
         session.logout()
