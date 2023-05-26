@@ -109,9 +109,11 @@ def chooseIsland(islands):
     island : dict
     """
     print(_('Which miracle do you want to activate?'))
+    # Ordenar ilhas por nome
+    sorted_islands = sorted(islands, key=lambda x: x['wonderName'])
     i = 0
     print(_('(0) Exit'))
-    for island in islands:
+    for island in sorted_islands:
         i += 1
         if island['available']:
             print('({:d}) {}'.format(i, island['wonderName']))
@@ -121,9 +123,8 @@ def chooseIsland(islands):
     index = read(min=0, max=i)
     if index == 0:
         return None
-    island = islands[index - 1]
+    island = sorted_islands[index - 1]
     return island
-
 
 def activateMiracle(session, event, stdin_fd, predetermined_input):
     """
