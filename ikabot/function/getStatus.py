@@ -39,6 +39,8 @@ def getStatus(session, event, stdin_fd, predetermined_input):
         total_resources = [0] * len(materials_names)
         total_production = [0] * len(materials_names)
         total_wine_consumption = 0
+        housing_space = 0
+        citizens = 0
         available_ships = 0
         total_ships = 0
         for id in ids:
@@ -54,6 +56,8 @@ def getStatus(session, event, stdin_fd, predetermined_input):
             total_production[0] += wood * 3600
             total_production[typeGood] += good * 3600
             total_wine_consumption += json_data['wineSpendings']
+            housing_space += int(json_data['currentResources']['population'])
+            citizens += int(json_data['currentResources']['citizens'])
             total_resources[0] += json_data['currentResources']['resource']
             total_resources[1] += json_data['currentResources']['1']
             total_resources[2] += json_data['currentResources']['2']
@@ -95,6 +99,8 @@ def getStatus(session, event, stdin_fd, predetermined_input):
                 color_resources.append(bcolors.RED)
             else:
                 color_resources.append(bcolors.ENDC)
+        print(_('Population:'))
+        print('{}:{} {}:{}'.format('Housing space', addThousandSeparator(housing_space), 'Citizens', addThousandSeparator(citizens)))
         print(_('Storage:'))
         print(addThousandSeparator(storageCapacity))
         print(_('Resources:'))
@@ -118,7 +124,7 @@ def getStatus(session, event, stdin_fd, predetermined_input):
                     remaining_resources_to_consume = Decimal(resources[1]) / Decimal(consumption_per_second)
                     elapsed_time_run_out = daysHoursMinutes(remaining_resources_to_consume)
                 print(_('There is wine for: {}').format(elapsed_time_run_out))
-
+        
         for building in [building for building in city['position'] if building['name'] != 'empty']:
             if building['isMaxLevel'] is True:
                 color = bcolors.BLACK
