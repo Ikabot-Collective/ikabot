@@ -98,6 +98,8 @@ def autoPirate(session, event, stdin_fd, predetermined_input):
                 try:
                     for i in range(20):
                         if i == 19:
+                            msg = 'Failed to resolve captcha too many times, autoPirate has been terminated.'
+                            sendToBot(session, msg)
                             raise Exception("Failed to resolve captcha too many times")
                         picture = session.get('action=Options&function=createCaptcha', fullResponse=True).content
                         captcha = resolveCaptcha(session, picture)
