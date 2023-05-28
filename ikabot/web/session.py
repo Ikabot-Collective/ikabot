@@ -35,7 +35,7 @@ blackbox_tokens = [
 class Session:
     def __init__(self):
         if isWindows:
-            self.logfile = os.getenv('temp') + '/ikabot.log'
+            self.logfile = os.getenv('temp') + '\ikabot.log'
         else:
             self.logfile = '/tmp/ikabot.log'
         self.log = False
