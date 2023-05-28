@@ -109,7 +109,7 @@ def chooseIsland(islands):
     island : dict
     """
     print(_('Which miracle do you want to activate?'))
-    # Ordenar ilhas por nome
+    # Sort islands by name
     sorted_islands = sorted(islands, key=lambda x: x['wonderName'])
     i = 0
     print(_('(0) Exit'))
