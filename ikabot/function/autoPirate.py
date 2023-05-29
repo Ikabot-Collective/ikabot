@@ -45,18 +45,88 @@ def autoPirate(session, event, stdin_fd, predetermined_input):
         print('{}⚠️ USING THIS FEATURE WILL EXPOSE YOUR IP ADDRESS TO A THIRD PARTY FOR CAPTCHA SOLVING ⚠️{}\n\n'.format(bcolors.WARNING, bcolors.ENDC))
         print('How many pirate missions should I do? (min = 1)')
         pirateCount = read(min=1, digit=True)
-        print("""Which pirate mission should I do?
-    (1) 2m 30s
-    (2) 7m 30s
-    (3) 15m
-    (4) 30m
-    (5) 1h
-    (6) 2h
-    (7) 4h
-    (8) 8h
-    (9) 16h
-    """)
-        pirateMissionChoice = read(min=1, max=9, digit=True)
+        print('Should I schedule pirate missions by the time of day? (y/N)')
+        scheduleInput = read(values=['y', 'Y', 'n', 'N', ''])
+        if scheduleInput.lower() == 'y':
+            pirateSchedule = True
+            print("""Which pirate mission should I do at daytime? (Default mission)
+        (1) 2m 30s
+        (2) 7m 30s
+        (3) 15m
+        (4) 30m
+        (5) 1h
+        (6) 2h
+        (7) 4h
+        (8) 8h
+        (9) 16h
+        """)
+            pirateMissionDayChoice = read(min=1, max=9, digit=True)
+            print("""At which hours should I operate at daytime? (Default: 9 hours from 10 till 18)
+            """)
+            print("From: ")
+            dayStart = read()
+            if dayStart == '':
+                dayStart = 10
+            else:
+                dayStart = int(dayStart)
+
+            print("Till: ")
+            dayEnd = read()
+            if dayEnd == '':
+                dayEnd = 18
+            else:
+                dayEnd = int(dayEnd)
+
+            print("""Which pirate mission should I do at night time?
+            (1) 2m 30s
+            (2) 7m 30s
+            (3) 15m
+            (4) 30m
+            (5) 1h
+            (6) 2h
+            (7) 4h
+            (8) 8h
+            (9) 16h
+            """)
+            pirateMissionNightChoice = read(min=1, max=9, digit=True)
+
+            print("""At which hours should I operate at night time? (Default: 15 hours from 19 till 9): 
+            """)
+            print("From: ")
+            nightStart = read()
+            if nightStart == '':
+                nightStart = 19
+            else:
+                nightStart = int(nightStart)
+
+            print("Till: ")
+            nightEnd = read()
+            if nightEnd == '':
+                nightEnd = 9
+            else:
+                nightEnd = int(nightEnd)
+        else:
+            pirateSchedule = False
+            print("""Which pirate mission should I do?
+        (1) 2m 30s
+        (2) 7m 30s
+        (3) 15m
+        (4) 30m
+        (5) 1h
+        (6) 2h
+        (7) 4h
+        (8) 8h
+        (9) 16h
+        """)
+            pirateMissionChoice = read(min=1, max=9, digit=True)
+        if pirateSchedule == True:
+            current_hour = int(time.strftime("%H"))
+            if current_hour >= dayStart and current_hour <= dayEnd:
+                pirateMissionChoice = pirateMissionDayChoice
+            elif current_hour >= nightStart or current_hour <= nightEnd:
+                pirateMissionChoice = pirateMissionNightChoice
+            else:
+                pirateMissionChoice = pirateMissionDayChoice
         print('Do you want me to automatically convert capture points to crew strength? (Y|N)')
         autoConvert = read(values=['y', 'Y', 'n', 'N'])
         if autoConvert.lower() == 'y':
@@ -79,6 +149,14 @@ def autoPirate(session, event, stdin_fd, predetermined_input):
     event.set()
     try:
         while (pirateCount > 0):
+            if pirateSchedule == True:
+                current_hour = int(time.strftime("%H"))
+                if current_hour >= dayStart and current_hour <= dayEnd:
+                    pirateMissionChoice = pirateMissionDayChoice
+                elif current_hour >= nightStart or current_hour <= nightEnd:
+                    pirateMissionChoice = pirateMissionNightChoice
+                else:
+                    pirateMissionChoice = pirateMissionDayChoice
             pirateCount -= 1
             piracyCities = getPiracyCities(session, pirateMissionChoice)  # this is done again inside the loop in case the user destroys / creates another pirate fortress while this module is running
             if piracyCities == []:
@@ -98,6 +176,8 @@ def autoPirate(session, event, stdin_fd, predetermined_input):
                 try:
                     for i in range(20):
                         if i == 19:
+                            msg = 'Failed to resolve captcha too many times, autoPirate has been terminated.'
+                            sendToBot(session, msg)
                             raise Exception("Failed to resolve captcha too many times")
                         picture = session.get('action=Options&function=createCaptcha', fullResponse=True).content
                         captcha = resolveCaptcha(session, picture)
@@ -119,6 +199,9 @@ def autoPirate(session, event, stdin_fd, predetermined_input):
             wait(piracyMissionWaitingTime[pirateMissionChoice], maxRandomWaitingTime)
 
     except Exception:
+        info = ''
+        msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
+        sendToBot(session, msg)
         event.set()
         return
 
