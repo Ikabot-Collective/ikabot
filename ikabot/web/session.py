@@ -466,9 +466,10 @@ class Session:
         if self.__isExpired(html):
             if retries > 0:
                 return self.__login(retries-1)
+            msg = _('Login error.')
             if self.padre:
-                msg = _('Login error.')
                 print(msg)
+                sendToBot(self, msg)
                 os._exit(0)
             raise Exception('Couldn\'t log in')
 
