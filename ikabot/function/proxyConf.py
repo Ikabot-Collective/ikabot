@@ -6,6 +6,7 @@ import gettext
 import requests
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.gui import *
+from ikabot.function.proxyList import network_check, enable_proxy
 import ikabot.config as config
 
 t = gettext.translation('proxy', config.localedir, languages=config.languages, fallback=True)
@@ -18,9 +19,14 @@ def show_proxy(session):
     if 'proxy' in session_data and session_data['proxy']['set'] is True:
         curr_proxy = session_data['proxy']['conf']['https']
         if test_proxy(session_data['proxy']['conf']) is False:
-            session_data['proxy']['set'] = False
-            session.setSessionData(session_data)
-            sys.exit(_('the {} proxy does not work, it has been removed').format(curr_proxy))
+            check = network_check(session)
+            if check is False:
+                return
+            else:
+                return show_proxy(session)
+            #session_data['proxy']['set'] = False
+            #session.setSessionData(session_data)
+            #sys.exit(_('the {} proxy does not work, it has been removed').format(curr_proxy))
         if msg not in config.update_msg:
             # add proxy message
             config.update_msg += '{} {}\n'.format(msg, curr_proxy)

@@ -43,6 +43,7 @@ from ikabot.function.dumpWorld import dumpWorld
 from ikabot.function.updateStatus import updateStatus, setStatus
 from ikabot.function.cookieConf import cookieConf
 from ikabot.helpers.checker import checker
+from ikabot.function.proxyList import proxyList
 
 t = gettext.translation('command_line', localedir, languages=languages, fallback=True)
 _ = t.gettext
@@ -106,6 +107,7 @@ def menu(session, checkUpdate=False):
         26:            updateStatus,
         27:            setStatus,
         28:            cookieConf,
+        29:            proxyList,
                     }
 
     print(_('(0)  Exit'))
@@ -186,8 +188,9 @@ def menu(session, checkUpdate=False):
         print(_('(5) Toggle Status Banner'))
         print(_('(6) Update Status Banner'))
         print(_('(7) Cookie data file'))
+        print(_('(8) Proxy list'))
 
-        selected = read(min=0, max=7, digit=True)
+        selected = read(min=0, max=8, digit=True)
         if selected == 0:
             menu(session)
             return
