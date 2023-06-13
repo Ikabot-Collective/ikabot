@@ -48,7 +48,7 @@ def getWineConsumption(html):
     -------
     capacity : int
     """
-    result = re.search(r'GlobalMenu_WineConsumption"\s*class="rightText">\s*(\d+)\s', html)
+    result = re.search(r'wineSpendings:\s(\d+)', html)
     if result:
         return int(result.group(1))
     return 0
