@@ -40,6 +40,7 @@ from ikabot.function.proxyConf import proxyConf, show_proxy
 from ikabot.function.killTasks import killTasks
 from ikabot.function.decaptchaConf import decaptchaConf
 from ikabot.function.dumpWorld import dumpWorld
+from ikabot.function.sendTroopsShips import army_station
 
 t = gettext.translation('command_line', localedir, languages=languages, fallback=True)
 _ = t.gettext
@@ -95,10 +96,11 @@ def menu(session, checkUpdate=True):
         18:            investigate,
         19:            attackBarbarians,
         20:            dumpWorld,
-        22:            proxyConf,
-        23:            updateTelegramData,
-        24:            killTasks,
-        25:            decaptchaConf,
+        131:            proxyConf,
+        132:            updateTelegramData,
+        133:            killTasks,
+        134:            decaptchaConf,
+        22:            army_station,
                     }
 
     print(_('(0)  Exit'))
@@ -123,6 +125,7 @@ def menu(session, checkUpdate=True):
     print(_('(19) Attack barbarians'))
     print(_('(20) Dump / View world'))
     print(_('(21) Options / Settings'))
+    print(_('(22) Send Troops/Ships'))
     total_options = len(menu_actions) + 1
     selected = read(min=0, max=total_options, digit=True)
     
@@ -181,7 +184,7 @@ def menu(session, checkUpdate=True):
             menu(session)
             return
         if selected > 0:
-            selected += 21
+            selected += 130
 
     if selected != 0:
         try:
