@@ -1,4 +1,5 @@
 import gettext
+from ikabot.command_line import menu
 from ikabot.config import *
 from ikabot.helpers.botComm import sendToBot
 from ikabot.helpers.pedirInfo import *
@@ -14,6 +15,16 @@ t = gettext.translation('buyResources', localedir, languages=languages, fallback
 _ = t.gettext
 
 def get_city_military_data(session, city_id):
+    """
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    city_id : int
+    
+    returns
+    -------
+    data : dict
+    """
     params = {
         "view": "cityMilitary",
         "activeTab": "tabUnits",
@@ -86,19 +97,16 @@ def get_army_available(session, type_army, destination_city_id, origin_city_id, 
             if type_army and weight_results and int(weight_results[i]) > 0:
                 weight_total_army += int(quantity) * int(weight_results[i])
     
-        if type_army and weight_results and weight_total_army == 0:
+        if type_army and weight_total_army > weight_total_ships:
             banner()
-            print('Weight of army is zero. Cannot transport army.')
+            print('Not enough ships to transport all the units!')
             enter()
-            event.set()
+            return None
         return army_available
-    banner()
-    print('You don`t have enough warships!')
-    enter()
-    event.set()
+    return None
 
 
-def send_army(session, origin_city, destination_city, type_army, army_available, event):
+def send_army(session, origin_city, destination_city, type_army, army_available):
     params = {
         "action": "transportOperations",
         "function": "deployArmy" if type_army else "deployFleet",
@@ -115,20 +123,12 @@ def send_army(session, origin_city, destination_city, type_army, army_available,
     for army in army_available:
         params[army] = army_available[army]
 
-
     session.post(params=params)
-    banner()
-    
-    if type_army:
-        print('Army dispatched!!')
-    else:
-        print('Maritime fleet dispatched!!')
-    enter()
-    event.set()
 
 def army_station(session,event, stdin_fd, predetermined_input):
     sys.stdin = os.fdopen(stdin_fd)
     config.predetermined_input = predetermined_input
+    type_army = True
     try:
         banner()
 
@@ -145,28 +145,69 @@ def army_station(session,event, stdin_fd, predetermined_input):
             
             print('{:>19}|{:>19}|{:>19}|'.format(city['name'], total_units, total_ships))
         
-        print('Origin city:')
-        origin_city = chooseCity(session)
-        
         print()
-        print('Destination city:')
-        destination_city = chooseCity(session)
-        if origin_city['id'] == destination_city['id']:
-            banner()
-            print('The city of origin and the destination city cannot be the same!')
+        print(_('(0) Back'))
+        print(_('(1) Move troops'))
+        print(_('(2) Move ships'))
+        print(_('(3) Move all ground units to a city.'))
+        print(_('(4) Move all maritime units to a city.'))
+        print(_('(5) Move all units to a city.'))
+        
+        selected = read(min=0, max=5, digit=True)
+        if selected == 0:
+            menu(session)
+            return
+        elif selected in (1, 2):
+            print('Origin city:')
+            origin_city = chooseCity(session)
+            print()
+            print('Destination city:')
+            destination_city = chooseCity(session)
+            if origin_city['id'] == destination_city['id']:
+                banner()
+                print('The city of origin and the destination city cannot be the same!')
+                enter()
+                event.set()
+            else:
+                type_army = selected == 1
+                army_available = get_army_available(session, type_army, destination_city['id'], origin_city['id'], event)
+                if army_available != None:
+                    send_army(session, origin_city, destination_city, type_army, army_available)
+                    print('Army sent!')
+                    enter()
+                    event.set()
+                else:
+                    print()
+                    print('No {} units available in {}.'.format('ground' if type_army else 'maritime', origin_city['name']))
+                    enter()
+                    event.set()
+        elif selected in (3,4,5):
+            print('Destination city:')
+            destination_city = chooseCity(session)
+            ids, cities = getIdsOfCities(session)
+            
+            if selected in (3,5):
+                type_army = True
+                for city_id in cities:
+                    if city_id != destination_city['id']:
+                        city = cities[city_id]
+                        army_available = get_army_available(session, type_army, destination_city['id'], city['id'], event)
+                        if army_available != None:
+                            send_army(session, city, destination_city, type_army, army_available)
+                        else:
+                            print('No ground units available in {}.'.format(city['name']))
+            if selected in (4,5):
+                type_army = False
+                for city_id in cities:
+                    if city_id != destination_city['id']:
+                        city = cities[city_id]
+                        army_available = get_army_available(session, type_army, destination_city['id'], city['id'], event)
+                        if army_available != None:
+                            send_army(session, city, destination_city, type_army, army_available)
+                        else:
+                            print('No maritime units available in {}.'.format(city['name']))
             enter()
-            event.set()
-
-        print(_('Do you want to move troops (1) or ships (2)?'))
-        response = read(min=1, max=2)
-        type_army = response == 1
-
-        if type_army:
-            army_available = get_army_available(session, type_army, destination_city['id'], origin_city['id'], event)
-        else:
-            army_available = get_army_available(session, type_army, destination_city['id'], origin_city['id'], event)
-        send_army(session, origin_city, destination_city, type_army, army_available, event)
-
+            event.set()               
     except KeyboardInterrupt:
         event.set()
-        return
+        return  
