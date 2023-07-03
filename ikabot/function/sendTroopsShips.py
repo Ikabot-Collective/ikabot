@@ -1,15 +1,7 @@
 import gettext
-from ikabot.command_line import menu
 from ikabot.config import *
-from ikabot.helpers.botComm import sendToBot
 from ikabot.helpers.pedirInfo import *
-from ikabot.function.trainArmy import generateArmyData, getBuildingInfo
-from ikabot.helpers.planRoutes import executeRoutes
-from ikabot.helpers.process import set_child_mode
-from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.naval import getAvailableShips
-
-
 
 t = gettext.translation('buyResources', localedir, languages=languages, fallback=True)
 _ = t.gettext
@@ -155,7 +147,7 @@ def army_station(session,event, stdin_fd, predetermined_input):
         
         selected = read(min=0, max=5, digit=True)
         if selected == 0:
-            menu(session)
+            event.set()
             return
         elif selected in (1, 2):
             print('Origin city:')
