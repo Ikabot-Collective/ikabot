@@ -24,7 +24,7 @@ Ikabot is a cross-platform program written in python that grants equal or even m
 | 9 | Donate | **- Donate**, it allows you to donate (WOW!). <br /> **- Donate automatically**, _Ikabot_ enters once a day and donates a percentage of the available wood from the selected cities to the luxury good or the forest. |
 | 10 | Activate Vacation Mode | Sets the account in vacation mode and closes _ikabot_. |
 | 11 | Activate miracle | It allows you to activate any miracle you have available as many times in a row as you want. |
-| 12 | Train army | It allows you to easily create large amounts of troops or fleets in one city. If there are not enough resources to train all of them, it will train all the units it can and when it finishes it will try to train the rest. It also allows you to build your army in multiple small steps so that you can use it as fast as possible. |
+| 12 | Military actions | **- Train army** It allows you to easily create large amounts of troops or fleets in one city. If there are not enough resources to train all of them, it will train all the units it can and when it finishes it will try to train the rest. It also allows you to build your army in multiple small steps so that you can use it as fast as possible. <br /> **- Send troops/ships** It allows you to move your troops or ships from one city to another, or concentrate your entire army into one city (if they are spread out between multiple cities)|
 | 13 | See movements | Let's you see movements coming to/from your cities. This includes attacks, transports, etc. |
 | 14 | Construct building | It allows you to contruct a building (WOW!, again). |
 | 15 | Update Ikabot | It tells you how to update _ikabot_ |
