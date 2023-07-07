@@ -40,7 +40,7 @@ from ikabot.function.proxyConf import proxyConf, show_proxy
 from ikabot.function.killTasks import killTasks
 from ikabot.function.decaptchaConf import decaptchaConf
 from ikabot.function.dumpWorld import dumpWorld
-from ikabot.function.sendTroopsShips import army_station
+from ikabot.function.sendTroopsShips import stationArmy
 
 t = gettext.translation('command_line', localedir, languages=languages, fallback=True)
 _ = t.gettext
@@ -88,7 +88,7 @@ def menu(session, checkUpdate=True):
         10:            vacationMode,
         11:            activateMiracle,
         131:            trainArmy,
-        132:            army_station,
+        132:            stationArmy,
         13:            shipMovements,
         14:            constructBuilding,
         15:            update,

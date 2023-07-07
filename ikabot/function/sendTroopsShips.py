@@ -6,7 +6,7 @@ from ikabot.helpers.naval import getAvailableShips
 t = gettext.translation('buyResources', localedir, languages=languages, fallback=True)
 _ = t.gettext
 
-def get_city_military_data(session, city_id):
+def getCityMilitaryData(session, city_id):
     """
     Parameters
     ----------
@@ -31,12 +31,12 @@ def get_city_military_data(session, city_id):
     data = json.loads(data, strict=False)
     return data[1][1][1]
 
-def extract_tooltips_and_values(data):
+def extractTooltipsAndValues(data):
     tooltips = re.findall(r'<div class="tooltip">(.*?)</div>', data)
     values = re.findall(r'<td>\s*([\d.-]+)\s*</td>', data)
     return tooltips, values
 
-def calculate_totals(tooltips, values):
+def calculateTotals(tooltips, values):
     total_units = 0
     total_ships = 0
 
@@ -52,7 +52,7 @@ def calculate_totals(tooltips, values):
 
     return desc_value_dict, total_units, total_ships
 
-def get_army_available(session, type_army, destination_city_id, origin_city_id, event):
+def getArmyAvailable(session, type_army, destination_city_id, origin_city_id, event):
     params = {
         "view": "deployment",
         "deploymentType": "army" if type_army else "fleet",
@@ -98,7 +98,7 @@ def get_army_available(session, type_army, destination_city_id, origin_city_id, 
     return None
 
 
-def send_army(session, origin_city, destination_city, type_army, army_available):
+def sendArmy(session, origin_city, destination_city, type_army, army_available):
     params = {
         "action": "transportOperations",
         "function": "deployArmy" if type_army else "deployFleet",
@@ -117,7 +117,7 @@ def send_army(session, origin_city, destination_city, type_army, army_available)
 
     session.post(params=params)
 
-def army_station(session,event, stdin_fd, predetermined_input):
+def stationArmy(session,event, stdin_fd, predetermined_input):
     sys.stdin = os.fdopen(stdin_fd)
     config.predetermined_input = predetermined_input
     type_army = True
@@ -131,9 +131,9 @@ def army_station(session,event, stdin_fd, predetermined_input):
 
         for city_id in cities:
             city = cities[city_id]
-            data = get_city_military_data(session, city['id'])
-            desc, values = extract_tooltips_and_values(data)
-            army, total_units, total_ships = calculate_totals(desc, values)
+            data = getCityMilitaryData(session, city['id'])
+            desc, values = extractTooltipsAndValues(data)
+            army, total_units, total_ships = calculateTotals(desc, values)
             
             print('{:>19}|{:>19}|{:>19}|'.format(city['name'], total_units, total_ships))
         
@@ -162,9 +162,9 @@ def army_station(session,event, stdin_fd, predetermined_input):
                 event.set()
             else:
                 type_army = selected == 1
-                army_available = get_army_available(session, type_army, destination_city['id'], origin_city['id'], event)
+                army_available = getArmyAvailable(session, type_army, destination_city['id'], origin_city['id'], event)
                 if army_available != None:
-                    send_army(session, origin_city, destination_city, type_army, army_available)
+                    sendArmy(session, origin_city, destination_city, type_army, army_available)
                     print('Army sent!')
                     enter()
                     event.set()
@@ -183,9 +183,9 @@ def army_station(session,event, stdin_fd, predetermined_input):
                 for city_id in cities:
                     if city_id != destination_city['id']:
                         city = cities[city_id]
-                        army_available = get_army_available(session, type_army, destination_city['id'], city['id'], event)
+                        army_available = getArmyAvailable(session, type_army, destination_city['id'], city['id'], event)
                         if army_available != None:
-                            send_army(session, city, destination_city, type_army, army_available)
+                            sendArmy(session, city, destination_city, type_army, army_available)
                         else:
                             print('No ground units available in {}.'.format(city['name']))
             if selected in (4,5):
@@ -193,9 +193,9 @@ def army_station(session,event, stdin_fd, predetermined_input):
                 for city_id in cities:
                     if city_id != destination_city['id']:
                         city = cities[city_id]
-                        army_available = get_army_available(session, type_army, destination_city['id'], city['id'], event)
+                        army_available = getArmyAvailable(session, type_army, destination_city['id'], city['id'], event)
                         if army_available != None:
-                            send_army(session, city, destination_city, type_army, army_available)
+                            sendArmy(session, city, destination_city, type_army, army_available)
                         else:
                             print('No maritime units available in {}.'.format(city['name']))
             enter()
