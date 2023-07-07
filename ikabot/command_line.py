@@ -40,6 +40,7 @@ from ikabot.function.proxyConf import proxyConf, show_proxy
 from ikabot.function.killTasks import killTasks
 from ikabot.function.decaptchaConf import decaptchaConf
 from ikabot.function.dumpWorld import dumpWorld
+from ikabot.function.stationArmy import stationArmy
 
 t = gettext.translation('command_line', localedir, languages=languages, fallback=True)
 _ = t.gettext
@@ -86,7 +87,8 @@ def menu(session, checkUpdate=True):
         122:            donationBot,
         10:            vacationMode,
         11:            activateMiracle,
-        12:            trainArmy,
+        131:            trainArmy,
+        132:            stationArmy,
         13:            shipMovements,
         14:            constructBuilding,
         15:            update,
@@ -95,10 +97,10 @@ def menu(session, checkUpdate=True):
         18:            investigate,
         19:            attackBarbarians,
         20:            dumpWorld,
-        22:            proxyConf,
-        23:            updateTelegramData,
-        24:            killTasks,
-        25:            decaptchaConf,
+        141:            proxyConf,
+        142:            updateTelegramData,
+        143:            killTasks,
+        144:            decaptchaConf,
                     }
 
     print(_('(0)  Exit'))
@@ -113,7 +115,7 @@ def menu(session, checkUpdate=True):
     print(_('(9)  Donate'))
     print(_('(10) Activate vacation mode'))
     print(_('(11) Activate miracle'))
-    print(_('(12) Train army'))
+    print(_('(12) Military actions'))
     print(_('(13) See movements'))
     print(_('(14) Construct building'))
     print(_('(15) Update Ikabot'))
@@ -164,6 +166,18 @@ def menu(session, checkUpdate=True):
             return
         if selected > 0:
             selected += 120
+            
+    if selected == 12:
+        banner()
+        print(_('(0) Back'))
+        print(_('(1) Train Army'))
+        print(_('(2) Send Troops/Ships'))
+        selected = read(min=0, max=2, digit=True)
+        if selected == 0:
+            menu(session)
+            return
+        if selected > 0:
+            selected += 130
 
     if selected == 21:
         banner()
@@ -181,7 +195,9 @@ def menu(session, checkUpdate=True):
             menu(session)
             return
         if selected > 0:
-            selected += 21
+            selected += 140
+        
+
 
     if selected != 0:
         try:
