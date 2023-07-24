@@ -14,6 +14,7 @@ from ikabot.helpers.getJson import getCity
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.planRoutes import waitForArrival
 from ikabot.helpers.pedirInfo import getIdsOfCities, read
+from ikabot.helpers.naval import getTotalShips
 from ikabot.config import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.resources import *
@@ -206,6 +207,7 @@ def buyResources(session, event, stdin_fd, predetermined_input):
             total_amount = available
         print('')
         amount_to_buy = read(msg=_('How much do you want to buy?: '), min=0, max=total_amount)
+        transportersMax = getTotalShips(session)
         if amount_to_buy == 0:
             event.set()
             return
@@ -233,7 +235,7 @@ def buyResources(session, event, stdin_fd, predetermined_input):
     info = _('\nI will buy {} from {} to {}\n').format(addThousandSeparator(amount_to_buy), materials_names[resource], city['cityName'])
     setInfoSignal(session, info)
     try:
-        do_it(session, city, offers, amount_to_buy)
+        do_it(session, city, offers, amount_to_buy, transportersMax)
     except Exception as e:
         msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
         sendToBot(session, msg)
@@ -241,7 +243,7 @@ def buyResources(session, event, stdin_fd, predetermined_input):
         session.logout()
 
 
-def buy(session, city, offer, amount_to_buy):
+def buy(session, city, offer, amount_to_buy, transportersMax):
     """
     Parameters
     ----------
@@ -264,6 +266,7 @@ def buy(session, city, offer, amount_to_buy):
         'activeTab': 'bargain',
         'transportDisplayPrice': 0,
         'premiumTransporter': 0,
+        'normalTransportersMax':transportersMax,
         'capacity': 5,
         'max_capacity': 5,
         'jetPropulsion': 0,
@@ -296,7 +299,7 @@ def buy(session, city, offer, amount_to_buy):
     sendToBotDebug(session, msg, debugON_buyResources)
 
 
-def do_it(session, city, offers, amount_to_buy):
+def do_it(session, city, offers, amount_to_buy, transportersMax):
     """
     Parameters
     ----------
@@ -304,6 +307,7 @@ def do_it(session, city, offers, amount_to_buy):
     city : dict
     offers : list[dict]
     amount_to_buy : int
+    transportersMax: int
     """
     while True:
         for offer in offers:
@@ -318,6 +322,6 @@ def do_it(session, city, offers, amount_to_buy):
 
             amount_to_buy -= buy_amount
             offer['amountAvailable'] -= buy_amount
-            buy(session, city, offer, buy_amount)
+            buy(session, city, offer, buy_amount, transportersMax)
             # start from the beginning again, so that we always buy from the cheapest offers fisrt
             break
