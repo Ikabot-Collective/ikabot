@@ -177,7 +177,7 @@ def menu(session, checkUpdate=False):
         if selected > 0:
             selected += 120
             
-    if selected == 12:
+    if selected == 13:
         banner()
         print(_('(0) Back'))
         print(_('(1) Train Army'))
