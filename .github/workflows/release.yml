@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       milestone:
-        description: 'The milestone to generate a release for'
+        description: 'The milestone to generate a release for (ex: 6.5.1)'
         required: true
         type: string
 
@@ -112,7 +112,7 @@ jobs:
           gh release edit v${{ inputs.milestone }} --repo '${{ github.repository }}' --draft=false          
 
   close_milestone:
-    needs: [create_release]
+    needs: [publish_release]
     runs-on: ubuntu-latest
     name: Close Milestone
 
@@ -127,3 +127,13 @@ jobs:
           $milestones = $(gh milestone list --json number,title) | ConvertFrom-Json
           $milestoneNumber = ($milestones | Where-Object { $_.title -eq "${{ inputs.milestone }}" }).number
           gh milestone edit $milestoneNumber --state closed
+
+  publish_docker:
+    needs: [publish_release]
+    name: Publish Docker Image
+    uses: ./.github/workflows/publish_docker.yml
+    with:
+      tag_name: 'v${{ inputs.milestone }}'
+    permissions:
+      contents: read
+      packages: write
