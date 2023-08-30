@@ -1,6 +1,6 @@
 
 # <img src="https://user-images.githubusercontent.com/54487782/236309220-b257d870-6846-4740-a855-dba89deeacaf.png" width="65" height="65"> Ikabot - (Ikariam Bot)
-[![Downloads](https://pepy.tech/badge/ikabot)](https://pepy.tech/project/ikabot) ![stars](https://img.shields.io/github/stars/physics-sec/ikabot) ![licence](https://img.shields.io/github/license/physics-sec/ikabot)
+[![Downloads](https://static.pepy.tech/badge/ikabot)](https://pepy.tech/project/ikabot) ![stars](https://img.shields.io/github/stars/physics-sec/ikabot) ![licence](https://img.shields.io/github/license/physics-sec/ikabot)
 
 Ikabot is a cross-platform program written in python that grants equal or even more functionality than a premium account in ikariam, without spending ambrosia!
 
