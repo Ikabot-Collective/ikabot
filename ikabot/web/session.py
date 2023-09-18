@@ -49,12 +49,14 @@ class Session:
         requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
         self.__login()
 
-    def writeLog(self, msg, level = logLevels.INFO, logTraceback = False, logRequestHistory = False):
+    def writeLog(self, msg, module = __name__, level = logLevels.INFO, logTraceback = False, logRequestHistory = False):
         """Writes a log entry.
         Parameters
         ----------
         msg : str
             The message to be logged, usually the reason for writing to log file
+        module : str
+            Name of module from which function is called
         level : str
             The severity of the message (can be ERROR, WARN, INFO, DEBUG). If it's lower than the currently set log level, the entry **WILL NOT BE CREATED**
         logTraceback : bool
@@ -64,25 +66,56 @@ class Session:
         """
         if not (type(level) is int and level >= self.logLevel):
             return
-        entry = {'level': level, 'date': getDateTime(), 'pid': os.getpid(), 'message': msg, 'traceback': traceback.format_exc() if logTraceback else None, 'request_history': list(self.requestHistory) if logRequestHistory else None}
-        with open(self.logfile,'a') as file:
-            json.dump(entry, file)
-            file.write('\n')
+        entry = {'level': level, 'date': getDateTime(), 'pid': os.getpid(), 'message': msg, 'module': module, 'traceback': traceback.format_exc() if logTraceback else None, 'request_history': list(json.loads(json.dumps(self.requestHistory).replace(session.s.cookies['ikariam'], '[REDACTED]').replace(session.s.cookies['gf-token-production'], '[REDACTED]'))) if logRequestHistory else None}
+        try:
+            with open(self.logfile,'a') as file:
+                json.dump(entry, file)
+                file.write('\n')
+        except:
+            pass # If we can't write to the file, then do nothing. feelsbadman
     
     def updateLogLevel(self, level = None):
         """Updates the sessions logging level, WARN by default. If none is passed, will load level from session data."""
         sessionData = self.getSessionData()
         if 'shared' not in sessionData:
             sessionData['shared'] = {}
-        if not level and 'logLevel' in sessionData['shared']:
+        if level is None and 'logLevel' in sessionData['shared']:
             self.logLevel = sessionData['shared']['logLevel']
             return
-        elif not level and 'logLevel' not in sessionData['shared']:
+        elif level is None and 'logLevel' not in sessionData['shared']:
             #set to warn by default
-            level = logLevels.WARN            
+            level = config.logLevel #logLevels.WARN
         self.logLevel = level
         sessionData['shared']['logLevel'] = level
-        self.setSessionData(sessionData, shared = True)
+        
+        self.setSessionData(sessionData['shared'], shared = True)
+
+    def getLogs(self, level = 0, page = 0, perPage = 25, sort = 'date'):
+        """Gets logs from logfile.
+        Parameters
+        ----------
+        level : int
+            Returns only logs of this level or higher
+        page : int
+            Page of logs to return
+        perPage : int
+            Number of log entries to return per page
+        sort : str
+            String that indicates by which property of log to sort. Attack - to the beginning for reverse order
+            
+        Returns
+        -------
+        logs :  [dict]
+            List of log entry objects with properties: "level", "date", "pid", "message", "module", "traceback", "request_history"
+        """
+        with open(self.logfile, 'r') as f:
+            logs = [json.loads(line) for line in f]
+        logs = [log for log in logs if log['level'] >= level]
+        reverse = False if sort.count('-') % 2 == 0 else True  # check how many minuses sort has, even = correct order, odd = reverse order
+        sort = sort.replace('-','')                            # remove - from sort
+        logs.sort(key=lambda log: log[sort], reverse = reverse)
+        logs = logs[page * perPage : page * perPage + perPage]
+        return logs
 
     def __genRand(self):
         return hex(random.randint(0, 65535))[2:]
@@ -115,7 +148,6 @@ class Session:
         cookie_dict = dict(self.s.cookies.items())
         sessionData['cookies'] = cookie_dict
         
-
         self.setSessionData(sessionData)
 
     def __getCookie(self, sessionData=None):
@@ -463,7 +495,7 @@ class Session:
                     return self.__login(retries-1)
                 else:
                     msg = 'Login Error: ' + str(resp.status_code) + ' ' + str(resp.reason) + ' ' + str(resp.text)
-                    self.writeLog(msg, logLevels.ERROR)
+                    self.writeLog(msg, level = logLevels.ERROR)
                     if self.padre:
                         print(msg)
                         sys.exit()
@@ -682,7 +714,7 @@ class Session:
                 if ignoreExpire is False:
                     assert self.__isExpired(resp) is False
                 if 'TXT_ERROR_WRONG_REQUEST_ID' in resp:
-                    self.writeLog(_('got TXT_ERROR_WRONG_REQUEST_ID, bad actionRequest'), logLevels.WARN, logRequestHistory = True)
+                    self.writeLog(_('got TXT_ERROR_WRONG_REQUEST_ID, bad actionRequest'), level = logLevels.WARN, logRequestHistory = True)
                     return self.post(url=url_original, payloadPost=payloadPost_original, params=params_original, ignoreExpire=ignoreExpire, noIndex=noIndex)
                 return resp
             except AssertionError:
