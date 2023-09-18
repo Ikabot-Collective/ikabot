@@ -64,14 +64,15 @@ def menu(session, checkUpdate=True):
 
     process_list = updateProcessList(session)
     if len(process_list) > 0:
-        print('|{:^6}|{:^35}|{:^15}|'.format('pid', 'task', 'date'))
-        print('_'*60)
-        for process in process_list:
-            if 'date' in process:
-                print('|{:^6}|{:^35}|{:^15}|'.format(process['pid'], process['action'], datetime.datetime.fromtimestamp(process['date']).strftime('%b %d %H:%M:%S')))
-            else:
-                print('|{:^6}|{:^35}|'.format(process['pid'], process['action']))
-
+        # Insert table header
+        table = process_list.copy()
+        table.insert(0,{'pid':'pid', 'action':'task','date':'date','status':'status'})
+        # Get max length of strings in each category (date is always going to be 15)
+        maxPid, maxAction, maxStatus = [max(i) for i in [[len(str(r['pid'])) for r in table], [len(str(r['action'])) for r in table], [len(str(r['status'])) for r in table]]]
+        # Print header
+        print('|{:^{maxPid}}|{:^{maxAction}}|{:^15}|{:^{maxStatus}}|'.format(table[0]['pid'], table[0]['action'], table[0]['date'], table[0]['status'], maxPid=maxPid, maxAction=maxAction, maxStatus=maxStatus))
+        # Print process list
+        [print('|{:^{maxPid}}|{:^{maxAction}}|{:^15}|{:^{maxStatus}}|'.format(r['pid'], r['action'], datetime.datetime.fromtimestamp(r['date']).strftime('%b %d %H:%M:%S'), r['status'], maxPid=maxPid, maxAction=maxAction, maxStatus=maxStatus)) for r in process_list]
         print('')
 
     menu_actions = {
@@ -208,7 +209,7 @@ def menu(session, checkUpdate=True):
             event = multiprocessing.Event()  # creates a new event
             process = multiprocessing.Process(target=menu_actions[selected], args=(session, event, sys.stdin.fileno(), config.predetermined_input), name=menu_actions[selected].__name__)
             process.start()
-            process_list.append({'pid': process.pid, 'action': menu_actions[selected].__name__, 'date': time.time()})
+            process_list.append({'pid': process.pid, 'action': menu_actions[selected].__name__, 'date': time.time(), 'status': 'started'})
             updateProcessList(session, programprocesslist=process_list)
             event.wait()  # waits for the process to fire the event that's been given to it. When it does  this process gets back control of the command line and asks user for more input
         except KeyboardInterrupt:

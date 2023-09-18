@@ -7,6 +7,7 @@ import psutil
 import subprocess
 from ikabot.config import *
 from ikabot.helpers.signals import deactivate_sigint
+from ikabot.helpers.varios import normalizeDicts
 
 
 def set_child_mode(session):
@@ -72,4 +73,5 @@ def updateProcessList(session, programprocesslist=[]):
     sessionData['processList'] = runningIkabotProcessList
     session.setSessionData(sessionData)
 
-    return runningIkabotProcessList
+    #normalize process list (all processes must have properties pid, action, date and status)
+    return normalizeDicts(runningIkabotProcessList)    
