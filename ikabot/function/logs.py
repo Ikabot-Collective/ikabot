@@ -3,8 +3,10 @@
 import gettext
 import sys
 import pprint
-import base64
 import requests
+import base64
+import gzip
+import io
 from ikabot.helpers.pedirInfo import read, enter
 from ikabot.helpers.gui import *
 from ikabot.config import *
@@ -58,17 +60,17 @@ def logs(session, event, stdin_fd, predetermined_input):
         return
     
 
-def viewLogs(session, sort = 'date', page = 0):
+def viewLogs(session, sort = '-date', page = 0):
     while True:
 
         banner()
         logs = session.getLogs(sort = sort, page = page)
 
         displayLogs = [
-                        '[' + bcolors.RED + 'ERROR' + bcolors.ENDC + ']' + ' ' + log['date'] + ' ' + log['message'][:50] if log['level'] == 3 else \
-                        '[' + bcolors.WARNING + 'WARN ' + bcolors.ENDC + ']' + ' ' + log['date'] + ' ' + log['message'][:50] if log['level'] == 2 else \
-                        '[' + bcolors.BLUE + 'INFO ' + bcolors.ENDC + ']' + ' ' + log['date'] + ' ' + log['message'][:50] if log['level'] == 1 else \
-                        '[' + bcolors.GREEN + 'DEBUG' + bcolors.ENDC + ']' + ' ' + log['date'] + ' ' + log['message'][:50] \
+                        '[' + bcolors.RED + 'ERROR' + bcolors.ENDC + ']' + ' ' + log['date'] + ' ' + log['message'][:50].replace('\n','') if log['level'] == 3 else \
+                        '[' + bcolors.WARNING + 'WARN ' + bcolors.ENDC + ']' + ' ' + log['date'] + ' ' + log['message'][:50].replace('\n','') if log['level'] == 2 else \
+                        '[' + bcolors.BLUE + 'INFO ' + bcolors.ENDC + ']' + ' ' + log['date'] + ' ' + log['message'][:50].replace('\n','') if log['level'] == 1 else \
+                        '[' + bcolors.GREEN + 'DEBUG' + bcolors.ENDC + ']' + ' ' + log['date'] + ' ' + log['message'][:50].replace('\n','') \
                         for log in logs ]
 
         printChoiceList(displayLogs)
@@ -102,7 +104,7 @@ def viewLogDetails(session, page, log_number, sort):
             pass
         choice = read(msg="Do you wish to ommit the request history from the log before uploading it to pastebin? [Y|n]: ", values=['n','N','Y','y'])
         if choice in ['y','Y']:
-            del log['request_history']
+            log['request_history'] = 'None'
         print('Posting to pastebin...')
         print(post_to_pastebin(session, log))
         enter()
@@ -111,8 +113,29 @@ def viewLogDetails(session, page, log_number, sort):
 
 def post_to_pastebin(session, log):
     try:                                                                                                                                             
+
+        log['request_history'] = compress_str(log['request_history'])
         response = requests.post("https://pastebin.com/api/api_post.php", data={"api_dev_key": base64.b64decode(key).decode("utf-8"), "api_option": "paste", "api_paste_code": pprint.pformat(log, indent=4)})
         assert response.status_code == 200, "Access code is not 200: {}\n text is: {}".format(response.status_code, response.text)
         return 'Access this log at ' + response.text
     except:
         return 'Error, paste failed!'
+    
+def compress_str(str):
+    """Compresses string str and returns base64 value
+    """
+    s_bytes = str.encode('utf-8')
+    out = io.BytesIO()
+    with gzip.GzipFile(fileobj=out, mode='w') as f:
+        f.write(s_bytes)
+    return base64.b64encode(out.getvalue()).decode('utf-8')
+
+def decompress_str(str):
+    """Takes in a compressed string in base64 form and decompresses and decodes it
+        Use this function to decode the request history that is pasted in the pastebin!
+    """
+    s_bytes = base64.b64decode(str)
+    inp = io.BytesIO(s_bytes)
+    with gzip.GzipFile(fileobj=inp, mode='r') as f:
+        decompressed_bytes = f.read()
+    return decompressed_bytes.decode('utf-8')

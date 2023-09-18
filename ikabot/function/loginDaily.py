@@ -11,7 +11,7 @@ from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.gui import enter
 from ikabot.helpers.pedirInfo import getIdsOfCities
-from ikabot.helpers.varios import wait
+from ikabot.helpers.varios import wait, getDateTime
 
 t = gettext.translation('loginDaily', localedir, languages=languages, fallback=True)
 _ = t.gettext
@@ -67,4 +67,5 @@ def do_it(session):
                     url = 'action=AmbrosiaFountainActions&function=collect&backgroundView=city&currentCityId={0}&templateView=ambrosiaFountain&actionRequest={1}&ajax=1'.format(id, actionRequest)
                     session.post(url)
                 break
+        session.setStatus(f'Last login @{getDateTime()}')
         wait(24*60*60, 60)
