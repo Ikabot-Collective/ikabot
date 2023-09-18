@@ -66,7 +66,7 @@ class Session:
         """
         if not (type(level) is int and level >= self.logLevel):
             return
-        entry = {'level': level, 'date': getDateTime(), 'pid': os.getpid(), 'message': msg, 'module': module, 'traceback': traceback.format_exc() if logTraceback else None, 'request_history': list(json.loads(json.dumps(self.requestHistory).replace(session.s.cookies['ikariam'], '[REDACTED]').replace(session.s.cookies['gf-token-production'], '[REDACTED]'))) if logRequestHistory else None}
+        entry = {'level': level, 'date': getDateTime(), 'pid': os.getpid(), 'message': msg, 'module': module, 'traceback': traceback.format_exc() if logTraceback else None, 'request_history': list(json.loads(json.dumps(self.requestHistory).replace(self.s.cookies['ikariam'], '[REDACTED]').replace(self.s.cookies['gf-token-production'], '[REDACTED]'))) if logRequestHistory else None}
         try:
             with open(self.logfile,'a') as file:
                 json.dump(entry, file)
