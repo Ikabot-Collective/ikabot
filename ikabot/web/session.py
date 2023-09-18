@@ -49,6 +49,26 @@ class Session:
         requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
         self.__login()
 
+    def setStatus(self, message):
+        """This function will modify the current tasks status message that appears in the table on the main menu
+        Parameters
+        ----------
+        message : Message to be displayed in the table in main menu
+        """
+        self.writeLog('Changing status to {message}', __name__, level=logLevels.INFO, logRequestHistory=True)
+
+        # read from file
+        sessionData = self.getSessionData()
+        try:
+            fileList = sessionData['processList']
+        except KeyError:
+            fileList = []
+        # modify current process' status message
+        [p.update({'status': message}) for p in fileList if p['pid'] == os.getpid()]
+        # dump back to session data
+        sessionData['processList'] = fileList
+        self.setSessionData(sessionData)
+
     def writeLog(self, msg, module = __name__, level = logLevels.INFO, logTraceback = False, logRequestHistory = False):
         """Writes a log entry.
         Parameters
@@ -66,7 +86,7 @@ class Session:
         """
         if not (type(level) is int and level >= self.logLevel):
             return
-        entry = {'level': level, 'date': getDateTime(), 'pid': os.getpid(), 'message': msg, 'module': module, 'traceback': traceback.format_exc() if logTraceback else None, 'request_history': list(json.loads(json.dumps(self.requestHistory).replace(self.s.cookies['ikariam'], '[REDACTED]').replace(self.s.cookies['gf-token-production'], '[REDACTED]'))) if logRequestHistory else None}
+        entry = {'level': level, 'date': getDateTime(), 'pid': os.getpid(), 'message': msg, 'module': module, 'traceback': traceback.format_exc() if logTraceback else None, 'request_history': json.dumps(list(self.requestHistory)) if logRequestHistory else None}
         try:
             with open(self.logfile,'a') as file:
                 json.dump(entry, file)
@@ -653,7 +673,7 @@ class Session:
                 self.requestHistory.append({'method': 'GET', 'url': url, 'params': params, 'payload': None, 'proxies': self.s.proxies, 'headers': dict(self.s.headers), 'response': None})
                 self.writeLog('About to send: {}'.format(str(self.requestHistory[-1])))
                 response = self.s.get(url, params=params, verify=config.do_ssl_verify)
-                self.requestHistory[-1]['response'] = {'status': response.status_code, 'elapsed': response.elapsed, 'headers': response.headers, 'text': response.text}
+                self.requestHistory[-1]['response'] = {'status': response.status_code, 'elapsed': response.elapsed.total_seconds(), 'headers': dict(response.headers), 'text': response.text}
                 html = response.text
                 if ignoreExpire is False:
                     assert self.__isExpired(html) is False
@@ -709,7 +729,7 @@ class Session:
                 self.requestHistory.append({'method': 'POST', 'url': url, 'params': params, 'payload': payloadPost, 'proxies': self.s.proxies, 'headers': dict(self.s.headers), 'response': None})
                 self.writeLog('About to send: {}'.format(str(self.requestHistory[-1])))
                 response = self.s.post(url, data=payloadPost, params=params, verify=config.do_ssl_verify)
-                self.requestHistory[-1]['response'] = {'status': response.status_code, 'elapsed': response.elapsed, 'headers': response.headers, 'text': response.text}
+                self.requestHistory[-1]['response'] = {'status': response.status_code, 'elapsed': response.elapsed.total_seconds(), 'headers': dict(response.headers), 'text': response.text}
                 resp = response.text
                 if ignoreExpire is False:
                     assert self.__isExpired(resp) is False
