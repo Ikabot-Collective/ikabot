@@ -43,6 +43,7 @@ from ikabot.function.dumpWorld import dumpWorld
 from ikabot.function.stationArmy import stationArmy
 from ikabot.function.logs import logs
 
+
 t = gettext.translation('command_line', localedir, languages=languages, fallback=True)
 _ = t.gettext
 

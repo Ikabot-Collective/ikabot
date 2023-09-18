@@ -11,6 +11,7 @@ from ikabot.config import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.market import *
 from ikabot.helpers.botComm import *
+from ikabot.helpers.naval import getTotalShips
 from ikabot.helpers.varios import addThousandSeparator, wait
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.signals import setInfoSignal
@@ -274,7 +275,7 @@ def do_it1(session, left_to_sell, offers, resource_type, city_to_buy_from):
             left_to_sell -= amount_to_sell
             amount_to_buy -= amount_to_sell
 
-            data = {'action': 'transportOperations', 'function': 'sellGoodsAtAnotherBranchOffice', 'cityId': city_to_buy_from['id'], 'destinationCityId': destination_city_id, 'oldView': 'branchOffice', 'position': city_to_buy_from['pos'], 'avatar2Name': username, 'city2Name': cityname, 'type': '333', 'activeTab': 'bargain', 'transportDisplayPrice': '0', 'premiumTransporter': '0', 'capacity': '5', 'max_capacity': '5', 'jetPropulsion': '0', 'transporters': str(ships_used), 'backgroundView': 'city', 'currentCityId': city_to_buy_from['id'], 'templateView': 'takeOffer', 'currentTab': 'bargain', 'actionRequest': actionRequest, 'ajax': '1'}
+            data = {'action': 'transportOperations', 'function': 'sellGoodsAtAnotherBranchOffice', 'cityId': city_to_buy_from['id'], 'destinationCityId': destination_city_id, 'oldView': 'branchOffice', 'position': city_to_buy_from['pos'], 'avatar2Name': username, 'city2Name': cityname, 'type': '333', 'activeTab': 'bargain', 'transportDisplayPrice': '0', 'premiumTransporter': '0', 'normalTransportersMax': ships_available, 'capacity': '5', 'max_capacity': '5', 'jetPropulsion': '0', 'transporters': str(ships_used), 'backgroundView': 'city', 'currentCityId': city_to_buy_from['id'], 'templateView': 'takeOffer', 'currentTab': 'bargain', 'actionRequest': actionRequest, 'ajax': '1'}
             if resource_type == 0:
                 data['cargo_resource'] = amount_to_sell
                 data['resourcePrice'] = precio
