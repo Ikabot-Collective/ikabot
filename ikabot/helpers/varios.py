@@ -5,6 +5,7 @@ import re
 import time
 import random
 from decimal import *
+from datetime import datetime
 
 getcontext().prec = 30
 
@@ -85,3 +86,19 @@ def getCurrentCityId(session):
     """
     html = session.get()
     return re.search(r'currentCityId:\s(\d+),', html).group(1)
+
+def getDateTime(timestamp = None):
+    """Returns a string of the current date and time in the YYYY-mm-dd_HH-MM-SS, if `timestamp` is provided then it converts it into the given format.
+    Parameters
+    ----------
+    timestamp : int
+        Unix timestamp to be converted
+    
+    Returns
+    -------
+    text : str
+        Formatted string YYYY-mm-dd_HH-MM-SS
+    """
+    timestamp = timestamp if timestamp else time.time()
+    return datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d_%H-%M-%S')
+    

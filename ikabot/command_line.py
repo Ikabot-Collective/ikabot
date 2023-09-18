@@ -41,6 +41,8 @@ from ikabot.function.killTasks import killTasks
 from ikabot.function.decaptchaConf import decaptchaConf
 from ikabot.function.dumpWorld import dumpWorld
 from ikabot.function.stationArmy import stationArmy
+from ikabot.function.logs import logs
+
 
 t = gettext.translation('command_line', localedir, languages=languages, fallback=True)
 _ = t.gettext
@@ -101,6 +103,7 @@ def menu(session, checkUpdate=True):
         142:            updateTelegramData,
         143:            killTasks,
         144:            decaptchaConf,
+        145:            logs,
                     }
 
     print(_('(0)  Exit'))
@@ -189,8 +192,9 @@ def menu(session, checkUpdate=True):
             print(_('(2) Enter the Telegram data'))
         print(_('(3) Kill tasks'))
         print(_('(4) Configure captcha resolver'))
+        print(_('(5) Logs'))
 
-        selected = read(min=0, max=4, digit=True)
+        selected = read(min=0, max=5, digit=True)
         if selected == 0:
             menu(session)
             return
