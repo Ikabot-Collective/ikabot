@@ -40,6 +40,8 @@ from ikabot.function.proxyConf import proxyConf, show_proxy
 from ikabot.function.killTasks import killTasks
 from ikabot.function.decaptchaConf import decaptchaConf
 from ikabot.function.dumpWorld import dumpWorld
+from ikabot.function.stationArmy import stationArmy
+from ikabot.function.logs import logs
 
 t = gettext.translation('command_line', localedir, languages=languages, fallback=True)
 _ = t.gettext
@@ -76,29 +78,31 @@ def menu(session, checkUpdate=True):
         2:            sendResources,
         3:            distributeResources,
         4:            getStatus,
-        5:            donate,
-        6:            searchForIslandSpaces,
-        7:            loginDaily,
+        5:            searchForIslandSpaces,
+        6:            loginDaily,
         101:            alertAttacks,
-        9:            donationBot,
         102:            alertLowWine,
         111:            buyResources,
         112:            sellResources,
-        11:            vacationMode,
-        12:            activateMiracle,
-        13:            trainArmy,
-        14:            shipMovements,
-        15:            constructBuilding,
-        16:            update,
-        17:            importExportCookie,
-        18:            autoPirate,
-        19:            investigate,
-        20:            attackBarbarians,
-        21:            dumpWorld,
-        23:            proxyConf,
-        24:            updateTelegramData,
-        25:            killTasks,
-        26:            decaptchaConf,
+        121:            donate,
+        122:            donationBot,
+        10:            vacationMode,
+        11:            activateMiracle,
+        131:            trainArmy,
+        132:            stationArmy,
+        13:            shipMovements,
+        14:            constructBuilding,
+        15:            update,
+        16:            importExportCookie,
+        17:            autoPirate,
+        18:            investigate,
+        19:            attackBarbarians,
+        20:            dumpWorld,
+        141:            proxyConf,
+        142:            updateTelegramData,
+        143:            killTasks,
+        144:            decaptchaConf,
+        145:            logs,
                     }
 
     print(_('(0)  Exit'))
@@ -106,28 +110,27 @@ def menu(session, checkUpdate=True):
     print(_('(2)  Send resources'))
     print(_('(3)  Distribute resources'))
     print(_('(4)  Account status'))
-    print(_('(5)  Donate'))
-    print(_('(6)  Monitor islands'))
-    print(_('(7)  Login daily'))
-    print(_('(8)  Alerts / Notifications'))
-    print(_('(9)  Donate automatically'))
-    print(_('(10) Marketplace'))
-    print(_('(11) Activate vacation mode'))
-    print(_('(12) Activate miracle'))
-    print(_('(13) Train army'))
-    print(_('(14) See movements'))
-    print(_('(15) Construct building'))
-    print(_('(16) Update Ikabot'))
-    print(_('(17) Import / Export cookie'))
-    print(_('(18) Auto-Pirate'))
-    print(_('(19) Investigate'))
-    print(_('(20) Attack barbarians'))
-    print(_('(21) Dump / View world'))
-    print(_('(22) Options / Settings'))
+    print(_('(5)  Monitor islands'))
+    print(_('(6)  Login daily'))
+    print(_('(7)  Alerts / Notifications'))
+    print(_('(8)  Marketplace'))
+    print(_('(9)  Donate'))
+    print(_('(10) Activate vacation mode'))
+    print(_('(11) Activate miracle'))
+    print(_('(12) Military actions'))
+    print(_('(13) See movements'))
+    print(_('(14) Construct building'))
+    print(_('(15) Update Ikabot'))
+    print(_('(16) Import / Export cookie'))
+    print(_('(17) Auto-Pirate'))
+    print(_('(18) Investigate'))
+    print(_('(19) Attack barbarians'))
+    print(_('(20) Dump / View world'))
+    print(_('(21) Options / Settings'))
     total_options = len(menu_actions) + 1
     selected = read(min=0, max=total_options, digit=True)
     
-    if selected == 8:
+    if selected == 7:
         banner()
         print(_('(0) Back'))
         print(_('(1) Alert attacks'))
@@ -139,8 +142,8 @@ def menu(session, checkUpdate=True):
             return
         if selected > 0:
             selected += 100
-    
-    if selected == 10:
+            
+    if selected == 8:
         banner()
         print(_('(0) Back'))
         print(_('(1) Buy resources'))
@@ -152,8 +155,33 @@ def menu(session, checkUpdate=True):
             return
         if selected > 0:
             selected += 110
+            
+    if selected == 9:
+        banner()
+        print(_('(0) Back'))
+        print(_('(1) Donate once'))
+        print(_('(2) Donate automatically'))
 
-    if selected == 22:
+        selected = read(min=0, max=2, digit=True)
+        if selected == 0:
+            menu(session)
+            return
+        if selected > 0:
+            selected += 120
+            
+    if selected == 12:
+        banner()
+        print(_('(0) Back'))
+        print(_('(1) Train Army'))
+        print(_('(2) Send Troops/Ships'))
+        selected = read(min=0, max=2, digit=True)
+        if selected == 0:
+            menu(session)
+            return
+        if selected > 0:
+            selected += 130
+
+    if selected == 21:
         banner()
         print(_('(0) Back'))
         print(_('(1) Configure Proxy'))
@@ -163,13 +191,16 @@ def menu(session, checkUpdate=True):
             print(_('(2) Enter the Telegram data'))
         print(_('(3) Kill tasks'))
         print(_('(4) Configure captcha resolver'))
+        print(_('(5) Logs'))
 
-        selected = read(min=0, max=4, digit=True)
+        selected = read(min=0, max=5, digit=True)
         if selected == 0:
             menu(session)
             return
         if selected > 0:
-            selected += 22
+            selected += 140
+        
+
 
     if selected != 0:
         try:
