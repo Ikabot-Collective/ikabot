@@ -37,6 +37,7 @@ Ikabot is a cross-platform program written in python that grants equal or even m
 | 23 | Update the Telegram data | It allows you to set or change the Telegram data. |
 | 24 | Kill tasks | It allows you to end a currently-running ikabot task |
 | 25 | Configure captcha resolver | It allows you to configure your desired captcha resolver for the Auto-Pirate task. The options you have to choose from are: <ol><li>Default </li><li>Custom</li><li>9kw.eu</li><li>Telegram</li></ol> |
+| 26 | Logs | It allows you to see logs and upload them to pastebin |
 
 # <img src="https://user-images.githubusercontent.com/54487782/236309220-b257d870-6846-4740-a855-dba89deeacaf.png" width="30" height="30"> Install
 
