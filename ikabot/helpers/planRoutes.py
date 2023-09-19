@@ -107,6 +107,7 @@ def executeRoutes(session, routes):
         destination_city_id = destination_city['id']
 
         while sum(toSend) > 0:
+            session.setStatus(f'Sending {toSend[0]}W, {toSend[1]}V, {toSend[2]}M, {toSend[3]}C, {toSend[4]}S ---> {destination_city["name"]}')
             ships_available = waitForArrival(session)
             storageCapacityInShips = ships_available * 500
 

@@ -54,6 +54,14 @@ def statusbanner(session):
     clear()
     print('{}\n\n{}\n{}'.format(bner, config.infoUser, config.update_msg))
 
+def printChoiceList(list):
+    """Prints the list with padded numbers next to each list entry.
+    Parameters
+    ----------
+    list : list
+        list to be printed
+    """
+    [print('{:>{pad}}) '.format(str(i+1), pad=len(str(len(list)))) + str(item)) for i, item in enumerate(list)]
 
 class bcolors:
     HEADER = '\033[95m'

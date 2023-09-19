@@ -8,7 +8,7 @@ import sys
 from ikabot.config import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.gui import enter, enter
-from ikabot.helpers.varios import wait
+from ikabot.helpers.varios import wait, getDateTime
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.pedirInfo import getIslandsIds
 from ikabot.helpers.getJson import getIsland
@@ -147,5 +147,5 @@ def do_it(session, islandList, time, fights):
                         sendToBot(session, msg)
                         
                 cities_before_per_island[islandId] = cities_now.copy() # update cities_before_per_island for the current island
-
+        session.setStatus(f'Checked islands {str([int(i) for i in islandsIds]).replace(" ","")} @ {getDateTime()[-8:]}')
         wait(time * 60)

@@ -13,10 +13,9 @@ import os
 import ast
 import ikabot.config as config
 from pathlib import Path
-from datetime import datetime
 from ikabot.config import *
 from ikabot.helpers.gui import enter, banner, bcolors
-from ikabot.helpers.varios import wait
+from ikabot.helpers.varios import wait, getDateTime
 from ikabot.helpers.botComm import sendToBot
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.pedirInfo import read
@@ -28,9 +27,9 @@ _ = t.gettext
 
 LINE_UP = '\033[1A'
 LINE_CLEAR = '\x1b[2K'
+#              status, history, start_time
 stop_updating = threading.Event()
 lock = threading.Lock()
-#              status, history, start_time
 shared_data = ['','',0,stop_updating, lock]
 home = 'USERPROFILE' if isWindows else 'HOME'
 selected_islands = set()
@@ -55,7 +54,9 @@ def dumpWorld(session, event, stdin_fd, predetermined_input):
             print('2) Load existing dump')
             choice = read(min=1, max=2, digit=True)
             if choice == 2:
-                return view_dump(session, event)
+                view_dump(session, event)
+                event.set()
+                return
         banner()
         print('{}⚠️ BEWARE - THE RESULTING DUMP CONTAINS ACCOUNT IDENTIFYING INFORMATION ⚠️{}\n'.format(bcolors.WARNING, bcolors.ENDC))
         print('This action will take a couple of hours to complete. Are you sure you want to initiate a data dump now? (Y|N)')
@@ -170,7 +171,7 @@ def do_it(session, waiting_time, start_id, shallow):
     
     dump_path = os.getenv(home) + '/ikabot_world_dumps/s' + str(session.mundo) + '-' + str(session.servidor) + '/'
     dump_path = dump_path.replace('\\','/')
-    dump_name = datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d_%H-%M-%S') + '.json.gz'
+    dump_name = getDateTime() + '.json.gz'
 
     if shallow in ['y','Y']:
         dump_name = dump_name.replace('.json.gz', '_shallow') + '.json.gz'

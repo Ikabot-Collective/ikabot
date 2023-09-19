@@ -45,7 +45,10 @@ def sendToBot(session, msg, Token=False, Photo=None):
     Photo : bytes
         a bytes object representing a picture to be sent.
     """
+    
+    session.writeLog(msg = 'MESSAGE TO TG BOT: ' + msg, module = __name__, level = logLevels.WARN, logTraceback = True, logRequestHistory = True )
     if checkTelegramData(session) is False:
+        session.writeLog(msg = 'Tried to message TG bot without correct tg data!', module=__name__, level = logLevels.ERROR)
         return
     if Token is False:
         msg = 'pid:{}\n{}\n{}'.format(os.getpid(), config.infoUser, msg)

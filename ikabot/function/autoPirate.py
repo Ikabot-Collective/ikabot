@@ -149,6 +149,7 @@ def autoPirate(session, event, stdin_fd, predetermined_input):
     event.set()
     try:
         while (pirateCount > 0):
+            session.setStatus('Pirating for '+str(pirateCount)+' more runs')
             if pirateSchedule == True:
                 current_hour = int(time.strftime("%H"))
                 if current_hour >= dayStart and current_hour <= dayEnd:
@@ -175,12 +176,14 @@ def autoPirate(session, event, stdin_fd, predetermined_input):
             if 'function=createCaptcha' in html:
                 try:
                     for i in range(20):
+                        session.setStatus('Resolving captcha '+str(i)+'/20')
                         if i == 19:
                             msg = 'Failed to resolve captcha too many times, autoPirate has been terminated.'
                             sendToBot(session, msg)
                             raise Exception("Failed to resolve captcha too many times")
                         picture = session.get('action=Options&function=createCaptcha', fullResponse=True).content
                         captcha = resolveCaptcha(session, picture)
+                        session.setStatus('Got captcha: '+captcha)
                         if captcha == 'Error':
                             continue
                         session.post(city_url + str(piracyCities[0]['id']))
