@@ -85,7 +85,6 @@ def menu(session, checkUpdate=False):
         2:            sendResources,
         3:            distributeResources,
         4:            getStatus,
-        5:            update,
         6:            searchForIslandSpaces,
         7:            loginDaily,
         101:            alertAttacks,
@@ -141,6 +140,12 @@ def menu(session, checkUpdate=False):
 
     total_options = len(menu_actions) + 1
     selected = read(min=0, max=total_options, digit=True)
+    
+    if selected == 5:
+        print(f'Task list has been updated.\n{config.version}')
+        time.sleep(1)
+        menu(session)
+        return
     
     if selected == 8:
         banner()
