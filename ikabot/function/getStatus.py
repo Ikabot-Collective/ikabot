@@ -21,14 +21,14 @@ getcontext().prec = 30
 
 
 def getStatus(session, event, stdin_fd, predetermined_input):
-    """
+    '''
     Parameters
     ----------
     session : ikabot.web.session.Session
     event : multiprocessing.Event
     stdin_fd: int
     predetermined_input : multiprocessing.managers.SyncManager.list
-    """
+    '''
     sys.stdin = os.fdopen(stdin_fd)
     config.predetermined_input = predetermined_input
     try:
@@ -41,11 +41,13 @@ def getStatus(session, event, stdin_fd, predetermined_input):
         total_wine_consumption = 0
         housing_space = 0
         citizens = 0
+        total_housing_space = 0
+        total_citizens = 0
         available_ships = 0
         total_ships = 0
         for id in ids:
             session.get('view=city&cityId={}'.format(id), noIndex=True)
-            data = session.get("view=updateGlobalData&ajax=1", noIndex=True)
+            data = session.get('view=updateGlobalData&ajax=1', noIndex=True)
             json_data = json.loads(data, strict=False)
             json_data = json_data[0][1]['headerData']
             if json_data['relatedCity']['owncity'] != 1:
@@ -56,8 +58,10 @@ def getStatus(session, event, stdin_fd, predetermined_input):
             total_production[0] += wood * 3600
             total_production[typeGood] += good * 3600
             total_wine_consumption += json_data['wineSpendings']
-            housing_space += int(json_data['currentResources']['population'])
-            citizens += int(json_data['currentResources']['citizens'])
+            housing_space = int(json_data['currentResources']['population'])
+            citizens = int(json_data['currentResources']['citizens'])
+            total_housing_space += housing_space
+            total_citizens += citizens
             total_resources[0] += json_data['currentResources']['resource']
             total_resources[1] += json_data['currentResources']['1']
             total_resources[2] += json_data['currentResources']['2']
@@ -68,21 +72,22 @@ def getStatus(session, event, stdin_fd, predetermined_input):
             total_gold = int(Decimal(json_data['gold']))
             total_gold_production = int(Decimal(json_data['scientistsUpkeep'] + json_data['income'] + json_data['upkeep']))
         print(_('Ships {:d}/{:d}').format(int(available_ships), int(total_ships)))
-        print(_("\nTotal:"))
+        print(_('\nTotal:'))
         print('{:>10}'.format(' '), end='|')
         for i in range(len(materials_names)):
             print('{:>12}'.format(materials_names_english[i]), end='|')
         print()
         print('{:>10}'.format('Available'), end='|')
         for i in range(len(materials_names)):
-            print('{:>12}'.format(addThousandSeparator(total_resources[i], ' ')), end='|')
+            print('{:>12}'.format(addThousandSeparator(total_resources[i])), end='|')
         print()
         print('{:>10}'.format('Production'), end='|')
         for i in range(len(materials_names)):
-            print('{:>12}'.format(addThousandSeparator(total_production[i], ' ')), end='|')
+            print('{:>12}'.format(addThousandSeparator(total_production[i])), end='|')
         print()
-        print("Gold : {}, Gold production : {}".format(addThousandSeparator(total_gold, ' '), addThousandSeparator(total_gold_production, ' ')))
-        print("Wine consumption : {}".format(addThousandSeparator(total_wine_consumption, ' ')), end='')
+        print('Housing Space: {}, Citizens: {}'.format(addThousandSeparator(total_housing_space), addThousandSeparator(citizens)))
+        print('Gold: {}, Gold production: {}'.format(addThousandSeparator(total_gold), addThousandSeparator(total_gold_production)))
+        print('Wine consumption: {}'.format(addThousandSeparator(total_wine_consumption)), end='')
 
         print(_('\nOf which city do you want to see the state?'))
         city = chooseCity(session)
@@ -100,16 +105,15 @@ def getStatus(session, event, stdin_fd, predetermined_input):
             else:
                 color_resources.append(bcolors.ENDC)
         print(_('Population:'))
-        print('{}:{} {}:{}'.format('Housing space', addThousandSeparator(housing_space), 'Citizens', addThousandSeparator(citizens)))
-        print(_('Storage:'))
-        print(addThousandSeparator(storageCapacity))
+        print('{}: {} {}: {}'.format('Housing space', addThousandSeparator(housing_space), 'Citizens', addThousandSeparator(citizens)))
+        print(_('Storage: {}'.format(addThousandSeparator(storageCapacity))))
         print(_('Resources:'))
         for i in range(len(materials_names)):
             print('{} {}{}{} '.format(materials_names[i], color_resources[i], addThousandSeparator(resources[i]), bcolors.ENDC), end='')
         print('')
 
         print(_('Production:'))
-        print('{}:{} {}:{}'.format(materials_names[0], addThousandSeparator(wood*3600), materials_names[typeGood], addThousandSeparator(good*3600)))
+        print('{}: {} {}: {}'.format(materials_names[0], addThousandSeparator(wood*3600), materials_names[typeGood], addThousandSeparator(good*3600)))
 
         hasTavern = 'tavern' in [building['building'] for building in city['position']]
         if hasTavern:

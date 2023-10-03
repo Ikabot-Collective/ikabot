@@ -1,7 +1,10 @@
+import re
 import gettext
 from ikabot.config import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.naval import getAvailableShips
+from ikabot.helpers.varios import addThousandSeparator
+
 
 t = gettext.translation('buyResources', localedir, languages=languages, fallback=True)
 _ = t.gettext
@@ -25,7 +28,7 @@ def getCityMilitaryData(session, city_id):
         "currentCityId": city_id,
         "templateView": "cityMilitary",
         "actionRequest": actionRequest,
-        "ajax": "1"
+        "ajax": "1",
     }
     data = session.post(params=params)
     data = json.loads(data, strict=False)
@@ -33,7 +36,7 @@ def getCityMilitaryData(session, city_id):
 
 def extractTooltipsAndValues(data):
     tooltips = re.findall(r'<div class="tooltip">(.*?)</div>', data)
-    values = re.findall(r'<td>\s*([\d.-]+)\s*</td>', data)
+    values = re.findall(r'<td>\s*([\d.,-]+)\s*</td>', data)
     return tooltips, values
 
 def calculateTotals(tooltips, values):
@@ -43,12 +46,17 @@ def calculateTotals(tooltips, values):
     desc_value_dict = {}
 
     for i, (tooltip, value) in enumerate(zip(tooltips, values)):
-        desc_value_dict.setdefault(tooltip, []).append(value)
+        value = value.replace(',', '')
+        is_digit = value.isdigit()
+        int_value = int(value) if is_digit else 0
+        
+        if value.isdigit() and int_value > 0:
+            desc_value_dict.setdefault(tooltip, []).append(int_value)
 
-        if value.isdigit() and i <= 14:
-            total_units += int(value)
-        elif value.isdigit():
-            total_ships += int(value)
+            if i <= 14:
+                total_units += int_value
+            else:
+                total_ships += int_value
 
     return desc_value_dict, total_units, total_ships
 
@@ -135,7 +143,7 @@ def stationArmy(session,event, stdin_fd, predetermined_input):
             desc, values = extractTooltipsAndValues(data)
             army, total_units, total_ships = calculateTotals(desc, values)
             
-            print('{:>19}|{:>19}|{:>19}|'.format(city['name'], total_units, total_ships))
+            print('{:>19}|{:>19}|{:>19}|'.format(city['name'], addThousandSeparator(total_units), addThousandSeparator(total_ships)))
         
         print()
         print(_('(0) Back'))
