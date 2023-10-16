@@ -11,13 +11,13 @@ from ikabot.helpers.gui import *
 
 def checker(session):
     session_data = session.getSessionData()
-    if 'status' not in session_data:
-        session_data['status'] = {}
-        session_data['status']['data'] = config.default_bner
-        session_data['status']['set'] = False
-    else:
-        session_data['status']['data'] = config.default_bner
-        session_data['status']['set'] = False
+    #if 'status' not in session_data:
+    #    session_data['status'] = {}
+    #    session_data['status']['data'] = config.default_bner
+    #    session_data['status']['set'] = False
+    #else:
+    #    session_data['status']['data'] = config.default_bner
+    #    session_data['status']['set'] = False
     if 'cookie' not in session_data:
         session_data['cookie'] = {}
         session_data['cookie']['conf'] = ''

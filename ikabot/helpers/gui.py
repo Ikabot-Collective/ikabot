@@ -40,7 +40,7 @@ def banner():
     clear()
     print('{}\n\n{}\n{}'.format(config.default_bner, config.infoUser, config.update_msg))
 
-
+"""
 def statusbanner(session):
 
     session_data = session.getSessionData()
@@ -53,6 +53,7 @@ def statusbanner(session):
 
     clear()
     print('{}\n\n{}\n{}'.format(bner, config.infoUser, config.update_msg))
+"""
 
 def printChoiceList(list):
     """Prints the list with padded numbers next to each list entry.

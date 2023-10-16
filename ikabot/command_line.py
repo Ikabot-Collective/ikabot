@@ -65,7 +65,8 @@ def menu(session, checkUpdate=False):
 
     show_proxy(session)
 
-    statusbanner(session)
+    #statusbanner(session) # DISABLED DUE TO A BUG
+    banner()
 
     process_list = updateProcessList(session)
     if len(process_list) > 0:
@@ -218,7 +219,17 @@ def menu(session, checkUpdate=False):
         if selected == 0:
             menu(session)
             return
-        if selected > 0:
+        if selected == 5:
+            print(" This function has been disabled due to a bug.")
+            time.sleep(1)
+            menu(session)
+            return
+        if selected == 6:
+            print(" This function has been disabled due to a bug.")
+            time.sleep(1)
+            menu(session)
+            return
+        if selected != 0 and selected != 5 and selected != 6:
             selected += 140
         
 
