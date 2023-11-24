@@ -62,7 +62,7 @@ def getIsland(html):
 
     # {"id":idIsla,"name":nombreIsla,"x":,"y":,"good":numeroBien,"woodLv":,"goodLv":,"wonder":numeroWonder, "wonderName": "nombreDelMilagro","wonderLv":"5","cities":[{"type":"city","name":cityName,"id":cityId,"level":lvIntendencia,"Id":playerId,"Name":playerName,"AllyId":,"AllyTag":,"state":"vacation"},...}}
     isla = json.loads(isla, strict=False)
-    isla['tipo'] = re.search(r'"tradegood":"(\d)"', html).group(1)
+    isla['tipo'] = re.search(r'"tradegood":(\d)', html).group(1)
     isla['x'] = int(isla['x'])
     isla['y'] = int(isla['y'])
 
