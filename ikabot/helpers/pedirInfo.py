@@ -118,7 +118,7 @@ def chooseCity(session, foreign=False):
             print('')
         for city_id in ids:
             i += 1
-            resource_index = cities[city_id]['tradegood']
+            resource_index = str(cities[city_id]['tradegood'])
             resource_abb = resources_abbreviations[resource_index]
             city_name = cities[city_id]['name']
             matches = re.findall(r'u[0-9a-f]{4}', city_name)
