@@ -186,7 +186,7 @@ def distribute_unevenly(session, resource_type):
     origin_cities = {}
     destination_cities = {}
     for destination_city_id in cities_ids:
-        is_city_mining_this_resource = cities[destination_city_id]['tradegood'] == str(resource_type)
+        is_city_mining_this_resource = cities[destination_city_id]['tradegood'] == resource_type
         if is_city_mining_this_resource:
             html = session.get(city_url + destination_city_id)
             city = getCity(html)
