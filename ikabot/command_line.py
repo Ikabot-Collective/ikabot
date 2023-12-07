@@ -237,6 +237,7 @@ def menu(session, checkUpdate=False):
     if selected != 0:
         try:
             event = multiprocessing.Event()  # creates a new event
+            config.has_params = len(config.predetermined_input) > 0
             process = multiprocessing.Process(target=menu_actions[selected], args=(session, event, sys.stdin.fileno(), config.predetermined_input), name=menu_actions[selected].__name__)
             process.start()
             process_list.append({'pid': process.pid, 'action': menu_actions[selected].__name__, 'date': time.time(), 'status': 'started'})
