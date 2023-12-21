@@ -14,7 +14,8 @@ setuptools.setup(
         'requests',
         'requests[socks]',
         'cryptography',
-        'psutil'
+        'psutil',
+        'beautifulsoup4',
     ],
     entry_points={
         'console_scripts': ['ikabot=ikabot.command_line:main'],

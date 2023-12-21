@@ -1,16 +1,31 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import os
+import re
+import gettext
+from dataclasses import dataclass
+from decimal import *
+from ikabot.config import *
+from ikabot.helpers.gui import *
+from ikabot.helpers.naval import *
 from ikabot.helpers.varios import *
+from ikabot.helpers.resources import *
 from ikabot.helpers.pedirInfo import *
+from ikabot.helpers.getJson import getCity
+from ikabot.helpers.market import printGoldForAllCities
 
 t = gettext.translation('getStatus', localedir, languages=languages, fallback=True)
 _ = t.gettext
 
 getcontext().prec = 30
 
+SECONDS_IN_HOUR = 3600
+COLUMN_MAX_LENGTH = 25
 
-def getStatus(session, event, stdin_fd, predetermined_input):
+
+
+def getStatusImproved(session, event, stdin_fd, predetermined_input):
     '''
     Parameters
     ----------
@@ -25,7 +40,8 @@ def getStatus(session, event, stdin_fd, predetermined_input):
         banner()
         color_arr = [bcolors.ENDC, bcolors.HEADER, bcolors.STONE, bcolors.BLUE, bcolors.WARNING]
 
-        (ids, __) = getIdsOfCities(session)
+        [city_ids, _] = getIdsOfCities(session, False)
+
         total_resources = [0] * len(materials_names)
         total_production = [0] * len(materials_names)
         total_wine_consumption = 0
@@ -35,13 +51,39 @@ def getStatus(session, event, stdin_fd, predetermined_input):
         total_citizens = 0
         available_ships = 0
         total_ships = 0
-        for id in ids:
-            session.get('view=city&cityId={}'.format(id), noIndex=True)
+
+        print("gold for city {}".format(city_ids[0]))
+        printGoldForAllCities(session, city_ids[0])
+        print("ok?")
+
+        for city_id in city_ids:
+
+
+            print("\n\n=================================\nCity ID: {}\n".format(city_id))
+            html = session.get(city_url + city_id)
+
+
+            city = getCity(html)
+            resource_production = getProductionPerSecond(session, city_id)
+            resource_production_per_second = [int(resource_production[0] * SECONDS_IN_HOUR), 0, 0, 0, 0]
+            resource_production_per_second[int(resource_production[2])] = int(resource_production[1] * SECONDS_IN_HOUR)
+            city['resourceProductionPerHour'] = resource_production_per_second
+
+
+            # print(getCity(session.get('view=city&cityId={}'.format(cityId), noIndex=True)))
+
             data = session.get('view=updateGlobalData&ajax=1', noIndex=True)
             json_data = json.loads(data, strict=False)
+            # print("\n\n\ndata\n")
+            # print(data)
+            # print("\n\n\n\n")
+
+            print(city)
+
             json_data = json_data[0][1]['headerData']
             if json_data['relatedCity']['owncity'] != 1:
                 continue
+            # print(json_data)
             wood = Decimal(json_data['resourceProduction'])
             good = Decimal(json_data['tradegoodProduction'])
             typeGood = int(json_data['producedTradegood'])
@@ -61,6 +103,8 @@ def getStatus(session, event, stdin_fd, predetermined_input):
             total_ships = json_data['maxTransporters']
             total_gold = int(Decimal(json_data['gold']))
             total_gold_production = int(Decimal(json_data['scientistsUpkeep'] + json_data['income'] + json_data['upkeep']))
+
+        print("\n\n\n\n\n\n\n\n")
         print(_('Ships {:d}/{:d}').format(int(available_ships), int(total_ships)))
         print(_('\nTotal:'))
         print('{:>10}'.format(' '), end='|')
@@ -78,6 +122,39 @@ def getStatus(session, event, stdin_fd, predetermined_input):
         print('Housing Space: {}, Citizens: {}'.format(addThousandSeparator(total_housing_space), addThousandSeparator(citizens)))
         print('Gold: {}, Gold production: {}'.format(addThousandSeparator(total_gold), addThousandSeparator(total_gold_production)))
         print('Wine consumption: {}'.format(addThousandSeparator(total_wine_consumption)), end='')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         print(_('\nOf which city do you want to see the state?'))
         city = chooseCity(session)
@@ -107,7 +184,7 @@ def getStatus(session, event, stdin_fd, predetermined_input):
 
         hasTavern = 'tavern' in [building['building'] for building in city['position']]
         if hasTavern:
-            consumption_per_hour = city['wineConsumptionPerHour']
+            consumption_per_hour = city['wineConsumption']
             if consumption_per_hour == 0:
                 print(_('{}{}Does not consume wine!{}').format(bcolors.RED, bcolors.BOLD, bcolors.ENDC))
             else:
