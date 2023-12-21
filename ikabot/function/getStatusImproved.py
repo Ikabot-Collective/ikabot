@@ -23,6 +23,12 @@ getcontext().prec = 30
 SECONDS_IN_HOUR = 3600
 COLUMN_MAX_LENGTH = 25
 
+def printProgressBar(msg, current, total):
+    banner()
+    loaded = "#" * (total - current - 1)
+    waiting = "." * (total - current)
+    print("{}: [{}={}] {}/{}".format(msg, loaded, waiting, current, total))
+
 
 
 def getStatusImproved(session, event, stdin_fd, predetermined_input):
@@ -56,14 +62,20 @@ def getStatusImproved(session, event, stdin_fd, predetermined_input):
         printGoldForAllCities(session, city_ids[0])
         print("ok?")
 
+        i = 0
         for city_id in city_ids:
-
-
-            print("\n\n=================================\nCity ID: {}\n".format(city_id))
+            i += 1
+            printProgressBar("Retrieving cities data", i, len(city_ids))
             html = session.get(city_url + city_id)
+
+            if i == 1:
+                print(html)
+                print(json.loads(html, strict=False))
+                return
 
 
             city = getCity(html)
+
             resource_production = getProductionPerSecond(session, city_id)
             resource_production_per_second = [int(resource_production[0] * SECONDS_IN_HOUR), 0, 0, 0, 0]
             resource_production_per_second[int(resource_production[2])] = int(resource_production[1] * SECONDS_IN_HOUR)
@@ -77,55 +89,53 @@ def getStatusImproved(session, event, stdin_fd, predetermined_input):
             # print("\n\n\ndata\n")
             # print(data)
             # print("\n\n\n\n")
-
-            print(city)
-
-            json_data = json_data[0][1]['headerData']
-            if json_data['relatedCity']['owncity'] != 1:
-                continue
-            # print(json_data)
-            wood = Decimal(json_data['resourceProduction'])
-            good = Decimal(json_data['tradegoodProduction'])
-            typeGood = int(json_data['producedTradegood'])
-            total_production[0] += wood * 3600
-            total_production[typeGood] += good * 3600
-            total_wine_consumption += json_data['wineSpendings']
-            housing_space = int(json_data['currentResources']['population'])
-            citizens = int(json_data['currentResources']['citizens'])
-            total_housing_space += housing_space
-            total_citizens += citizens
-            total_resources[0] += json_data['currentResources']['resource']
-            total_resources[1] += json_data['currentResources']['1']
-            total_resources[2] += json_data['currentResources']['2']
-            total_resources[3] += json_data['currentResources']['3']
-            total_resources[4] += json_data['currentResources']['4']
-            available_ships = json_data['freeTransporters']
-            total_ships = json_data['maxTransporters']
-            total_gold = int(Decimal(json_data['gold']))
-            total_gold_production = int(Decimal(json_data['scientistsUpkeep'] + json_data['income'] + json_data['upkeep']))
-
-        print("\n\n\n\n\n\n\n\n")
-        print(_('Ships {:d}/{:d}').format(int(available_ships), int(total_ships)))
-        print(_('\nTotal:'))
-        print('{:>10}'.format(' '), end='|')
-        for i in range(len(materials_names)):
-            print('{:>12}'.format(materials_names_english[i]), end='|')
-        print()
-        print('{:>10}'.format('Available'), end='|')
-        for i in range(len(materials_names)):
-            print('{:>12}'.format(addThousandSeparator(total_resources[i])), end='|')
-        print()
-        print('{:>10}'.format('Production'), end='|')
-        for i in range(len(materials_names)):
-            print('{:>12}'.format(addThousandSeparator(total_production[i])), end='|')
-        print()
-        print('Housing Space: {}, Citizens: {}'.format(addThousandSeparator(total_housing_space), addThousandSeparator(citizens)))
-        print('Gold: {}, Gold production: {}'.format(addThousandSeparator(total_gold), addThousandSeparator(total_gold_production)))
-        print('Wine consumption: {}'.format(addThousandSeparator(total_wine_consumption)), end='')
-
-
-
-
+        #
+        #     print(city)
+        #
+        #     json_data = json_data[0][1]['headerData']
+        #     if json_data['relatedCity']['owncity'] != 1:
+        #         continue
+        #     # print(json_data)
+        #     wood = Decimal(json_data['resourceProduction'])
+        #     good = Decimal(json_data['tradegoodProduction'])
+        #     typeGood = int(json_data['producedTradegood'])
+        #     total_production[0] += wood * 3600
+        #     total_production[typeGood] += good * 3600
+        #     total_wine_consumption += json_data['wineSpendings']
+        #     housing_space = int(json_data['currentResources']['population'])
+        #     citizens = int(json_data['currentResources']['citizens'])
+        #     total_housing_space += housing_space
+        #     total_citizens += citizens
+        #     total_resources[0] += json_data['currentResources']['resource']
+        #     total_resources[1] += json_data['currentResources']['1']
+        #     total_resources[2] += json_data['currentResources']['2']
+        #     total_resources[3] += json_data['currentResources']['3']
+        #     total_resources[4] += json_data['currentResources']['4']
+        #     available_ships = json_data['freeTransporters']
+        #     total_ships = json_data['maxTransporters']
+        #     total_gold = int(Decimal(json_data['gold']))
+        #     total_gold_production = int(Decimal(json_data['scientistsUpkeep'] + json_data['income'] + json_data['upkeep']))
+        #
+        # print("\n\n\n\n\n\n\n\n")
+        # print(_('Ships {:d}/{:d}').format(int(available_ships), int(total_ships)))
+        # print(_('\nTotal:'))
+        # print('{:>10}'.format(' '), end='|')
+        # for i in range(len(materials_names)):
+        #     print('{:>12}'.format(materials_names_english[i]), end='|')
+        # print()
+        # print('{:>10}'.format('Available'), end='|')
+        # for i in range(len(materials_names)):
+        #     print('{:>12}'.format(addThousandSeparator(total_resources[i])), end='|')
+        # print()
+        # print('{:>10}'.format('Production'), end='|')
+        # for i in range(len(materials_names)):
+        #     print('{:>12}'.format(addThousandSeparator(total_production[i])), end='|')
+        # print()
+        # print('Housing Space: {}, Citizens: {}'.format(addThousandSeparator(total_housing_space), addThousandSeparator(citizens)))
+        # print('Gold: {}, Gold production: {}'.format(addThousandSeparator(total_gold), addThousandSeparator(total_gold_production)))
+        # print('Wine consumption: {}'.format(addThousandSeparator(total_wine_consumption)), end='')
+        #
+        #
 
 
 
@@ -154,65 +164,67 @@ def getStatusImproved(session, event, stdin_fd, predetermined_input):
 
 
 
-
-
-        print(_('\nOf which city do you want to see the state?'))
-        city = chooseCity(session)
-        banner()
-
-        (wood, good, typeGood) = getProductionPerSecond(session, city['id'])
-        print('\033[1m{}{}{}'.format(color_arr[int(typeGood)], city['cityName'], color_arr[0]))
-
-        resources = city['availableResources']
-        storageCapacity = city['storageCapacity']
-        color_resources = []
-        for i in range(len(materials_names)):
-            if resources[i] == storageCapacity:
-                color_resources.append(bcolors.RED)
-            else:
-                color_resources.append(bcolors.ENDC)
-        print(_('Population:'))
-        print('{}: {} {}: {}'.format('Housing space', addThousandSeparator(housing_space), 'Citizens', addThousandSeparator(citizens)))
-        print(_('Storage: {}'.format(addThousandSeparator(storageCapacity))))
-        print(_('Resources:'))
-        for i in range(len(materials_names)):
-            print('{} {}{}{} '.format(materials_names[i], color_resources[i], addThousandSeparator(resources[i]), bcolors.ENDC), end='')
-        print('')
-
-        print(_('Production:'))
-        print('{}: {} {}: {}'.format(materials_names[0], addThousandSeparator(wood*3600), materials_names[typeGood], addThousandSeparator(good*3600)))
-
-        hasTavern = 'tavern' in [building['building'] for building in city['position']]
-        if hasTavern:
-            consumption_per_hour = city['wineConsumption']
-            if consumption_per_hour == 0:
-                print(_('{}{}Does not consume wine!{}').format(bcolors.RED, bcolors.BOLD, bcolors.ENDC))
-            else:
-                if typeGood == 1 and (good*3600) > consumption_per_hour:
-                    elapsed_time_run_out = '∞'
-                else:
-                    consumption_per_second = Decimal(consumption_per_hour) / Decimal(3600)
-                    remaining_resources_to_consume = Decimal(resources[1]) / Decimal(consumption_per_second)
-                    elapsed_time_run_out = daysHoursMinutes(remaining_resources_to_consume)
-                print(_('There is wine for: {}').format(elapsed_time_run_out))
-        
-        for building in [building for building in city['position'] if building['name'] != 'empty']:
-            if building['isMaxLevel'] is True:
-                color = bcolors.BLACK
-            elif building['canUpgrade'] is True:
-                color = bcolors.GREEN
-            else:
-                color = bcolors.RED
-
-            level = building['level']
-            if level < 10:
-                level = ' ' + str(level)
-            else:
-                level = str(level)
-            if building['isBusy'] is True:
-                level = level + '+'
-
-            print(_('lv:{}\t{}{}{}').format(level, color, building['name'], bcolors.ENDC))
+        #
+        #
+        #
+        #
+        # print(_('\nOf which city do you want to see the state?'))
+        # city = chooseCity(session)
+        # banner()
+        #
+        # (wood, good, typeGood) = getProductionPerSecond(session, city['id'])
+        # print('\033[1m{}{}{}'.format(color_arr[int(typeGood)], city['cityName'], color_arr[0]))
+        #
+        # resources = city['availableResources']
+        # storageCapacity = city['storageCapacity']
+        # color_resources = []
+        # for i in range(len(materials_names)):
+        #     if resources[i] == storageCapacity:
+        #         color_resources.append(bcolors.RED)
+        #     else:
+        #         color_resources.append(bcolors.ENDC)
+        # print(_('Population:'))
+        # print('{}: {} {}: {}'.format('Housing space', addThousandSeparator(housing_space), 'Citizens', addThousandSeparator(citizens)))
+        # print(_('Storage: {}'.format(addThousandSeparator(storageCapacity))))
+        # print(_('Resources:'))
+        # for i in range(len(materials_names)):
+        #     print('{} {}{}{} '.format(materials_names[i], color_resources[i], addThousandSeparator(resources[i]), bcolors.ENDC), end='')
+        # print('')
+        #
+        # print(_('Production:'))
+        # print('{}: {} {}: {}'.format(materials_names[0], addThousandSeparator(wood*3600), materials_names[typeGood], addThousandSeparator(good*3600)))
+        #
+        # hasTavern = 'tavern' in [building['building'] for building in city['position']]
+        # if hasTavern:
+        #     consumption_per_hour = city['wineConsumption']
+        #     if consumption_per_hour == 0:
+        #         print(_('{}{}Does not consume wine!{}').format(bcolors.RED, bcolors.BOLD, bcolors.ENDC))
+        #     else:
+        #         if typeGood == 1 and (good*3600) > consumption_per_hour:
+        #             elapsed_time_run_out = '∞'
+        #         else:
+        #             consumption_per_second = Decimal(consumption_per_hour) / Decimal(3600)
+        #             remaining_resources_to_consume = Decimal(resources[1]) / Decimal(consumption_per_second)
+        #             elapsed_time_run_out = daysHoursMinutes(remaining_resources_to_consume)
+        #         print(_('There is wine for: {}').format(elapsed_time_run_out))
+        #
+        # for building in [building for building in city['position'] if building['name'] != 'empty']:
+        #     if building['isMaxLevel'] is True:
+        #         color = bcolors.BLACK
+        #     elif building['canUpgrade'] is True:
+        #         color = bcolors.GREEN
+        #     else:
+        #         color = bcolors.RED
+        #
+        #     level = building['level']
+        #     if level < 10:
+        #         level = ' ' + str(level)
+        #     else:
+        #         level = str(level)
+        #     if building['isBusy'] is True:
+        #         level = level + '+'
+        #
+        #     print(_('lv:{}\t{}{}{}').format(level, color, building['name'], bcolors.ENDC))
 
         enter()
         print('')

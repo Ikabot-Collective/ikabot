@@ -14,6 +14,7 @@ from ikabot.function.donate import donate
 from ikabot.function.update import update
 from ikabot.helpers.pedirInfo import read
 from ikabot.function.getStatus import getStatus
+from ikabot.function.getStatusImproved import getStatusImproved
 from ikabot.function.donationBot import donationBot
 from ikabot.helpers.botComm import updateTelegramData, telegramDataIsValid
 from ikabot.helpers.process import updateProcessList
@@ -80,7 +81,8 @@ def menu(session, checkUpdate=True):
         1:            constructionList,
         2:            sendResources,
         3:            distributeResources,
-        4:            getStatus,
+        # 4:            getStatus,
+        4:            getStatusImproved,
         5:            searchForIslandSpaces,
         6:            loginDaily,
         101:            alertAttacks,
