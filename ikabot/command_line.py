@@ -14,6 +14,7 @@ from ikabot.function.donate import donate
 from ikabot.function.update import update
 from ikabot.helpers.pedirInfo import read
 from ikabot.function.getStatus import getStatus
+from ikabot.function.getStatusImproved import getStatusImproved
 from ikabot.function.donationBot import donationBot
 from ikabot.helpers.botComm import updateTelegramData, telegramDataIsValid
 from ikabot.helpers.process import IkabotProcessListManager
@@ -58,7 +59,10 @@ _global_menu = [
     ['Construction list', constructionList],
     ['Send resources', sendResources],
     ['Distribute resources', distributeResources],
-    ['Account status', getStatus],
+    ['Account status', [
+      ['Simplified', getStatus],
+      ['Full', getStatusImproved],
+    ]],
     ['Monitor islands', searchForIslandSpaces],
     ['Login daily', loginDaily],
     ['Alerts / Notifications', [
