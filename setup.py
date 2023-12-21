@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="ikabot",
-    version="6.6.5",
+    version="6.6.6",
     author="physics-sp",
     author_email="physics-sp@protonmail.com",
     license='MIT',
@@ -14,7 +14,8 @@ setuptools.setup(
         'requests',
         'requests[socks]',
         'cryptography',
-        'psutil'
+        'psutil',
+        'beautifulsoup4'
     ],
     entry_points={
         'console_scripts': ['ikabot=ikabot.command_line:main'],
