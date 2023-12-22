@@ -119,7 +119,7 @@ def investigate(session, event, stdin_fd, predetermined_input):
             banner()
             print('Pick city: ')
             city = chooseCity(session)
-            total_glass = int(city['recursos'][3])
+            total_glass = int(city['availableResources'][3])
             
             # Check if enough glass
             if (total_glass < 300000 ):

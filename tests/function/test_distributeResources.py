@@ -31,12 +31,12 @@ def cities():
         "y": "1",
         "cityName": "City with wine",
         "id": "1",
-        "propia": True,
-        "recursos": [100, 800, 300, 400, 500],
+        "isOwnCity": True,
+        "availableResources": [100, 800, 300, 400, 500],
         "storageCapacity": 1000,
-        "ciudadanosDisp": 10,
-        "consumo": 10,
-        "enventa": [0, 0, 0, 0, 0],
+        "freeCitizens": 10,
+        "wineConsumptionPerHour": 10,
+        "resourcesListedForSale": [0, 0, 0, 0, 0],
         "freeSpaceForResources": [],
         "islandId": "100",
     }
@@ -47,12 +47,12 @@ def cities():
         "y": "2",
         "cityName": "City #2",
         "id": "2",
-        "propia": True,
-        "recursos": [100, 200, 300, 400, 500],
+        "isOwnCity": True,
+        "availableResources": [100, 200, 300, 400, 500],
         "storageCapacity": 1000,
-        "ciudadanosDisp": 10,
-        "consumo": 10,
-        "enventa": [0, 0, 0, 0, 0],
+        "freeCitizens": 10,
+        "wineConsumptionPerHour": 10,
+        "resourcesListedForSale": [0, 0, 0, 0, 0],
         "freeSpaceForResources": [],
         "islandId": "200",
     }
@@ -63,12 +63,12 @@ def cities():
         "y": "3",
         "cityName": "City #3",
         "id": "3",
-        "propia": True,
-        "recursos": [100, 200, 300, 400, 500],
+        "isOwnCity": True,
+        "availableResources": [100, 200, 300, 400, 500],
         "storageCapacity": 1000,
-        "ciudadanosDisp": 10,
-        "consumo": 10,
-        "enventa": [0, 0, 0, 0, 0],
+        "freeCitizens": 10,
+        "wineConsumptionPerHour": 10,
+        "resourcesListedForSale": [0, 0, 0, 0, 0],
         "freeSpaceForResources": [],
         "islandId": "300",
     }
@@ -80,7 +80,7 @@ def cities():
     ]
     for city in cities:
         for i in range(5):
-            city['freeSpaceForResources'].append(city['storageCapacity'] - city['recursos'][i] - city['enventa'][i]),
+            city['freeSpaceForResources'].append(city['storageCapacity'] - city['availableResources'][i] - city['resourcesListedForSale'][i]),
 
     return cities
 

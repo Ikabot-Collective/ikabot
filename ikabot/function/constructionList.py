@@ -305,7 +305,7 @@ def sendResourcesNeeded(session, destination_city_id, city_origins, missing_reso
                 if missing == 0:
                     break
 
-                available = cityOrigin['recursos'][i]
+                available = cityOrigin['availableResources'][i]
                 send = min(available, missing)
                 missing -= send
                 toSend = [0] * len(materials_names)
@@ -350,7 +350,7 @@ def chooseResourceProviders(session, cities_ids, cities, city_id, resource, miss
         html = session.get(city_url + cityId)
         city = getCity(html)
 
-        available = city['recursos'][resource]
+        available = city['availableResources'][resource]
         if available == 0:
             continue
 
@@ -541,8 +541,8 @@ def constructionList(session, event, stdin_fd, predetermined_input):
         # calculate the resources that are missing
         missing = [0] * len(materials_names)
         for i in range(len(materials_names)):
-            if city['recursos'][i] < resourcesNeeded[i]:
-                missing[i] = resourcesNeeded[i] - city['recursos'][i]
+            if city['availableResources'][i] < resourcesNeeded[i]:
+                missing[i] = resourcesNeeded[i] - city['availableResources'][i]
 
         # show missing resources to the user
         if sum(missing) > 0:

@@ -39,7 +39,7 @@ def getWarehouseCapacity(html):
     return int(capacity)
 
 
-def getWineConsumption(html):
+def getWineConsumptionPerHour(html):
     """
     Parameters
     ----------

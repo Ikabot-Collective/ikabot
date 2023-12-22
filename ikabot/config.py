@@ -65,3 +65,6 @@ debugON_sendResources = False
 debugON_constructionList = False
 debugON_buyResources = False
 debugON_activateMiracle = False
+
+MAXIMUM_CITY_NAME_LENGTH = 20
+SECONDS_IN_HOUR = 60 * 60
