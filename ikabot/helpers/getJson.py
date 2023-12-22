@@ -4,6 +4,7 @@
 import re
 import json
 from ikabot.helpers.resources import *
+from ikabot.helpers.varios import decodeUnicodeEscape
 
 
 def getFreeCitizens(html):
@@ -86,10 +87,10 @@ def getCity(html):
     city = json.loads(city, strict=False)
 
     city['Id'] = city.pop('ownerId')
-    city['Name'] = city.pop('ownerName')
+    city['Name'] = decodeUnicodeEscape(city.pop('ownerName'))
     city['x'] = int(city.pop('islandXCoord'))
     city['y'] = int(city.pop('islandYCoord'))
-    city['cityName'] = city['name']
+    city['cityName'] = decodeUnicodeEscape(city['name'])
 
     i = 0
     for position in city['position']:

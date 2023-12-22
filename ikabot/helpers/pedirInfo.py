@@ -11,6 +11,7 @@ from decimal import *
 from ikabot.config import *
 from ikabot.helpers.getJson import *
 from ikabot.helpers.gui import *
+from ikabot.helpers.varios import decodeUnicodeEscape
 
 t = gettext.translation('pedirInfo', localedir, languages=languages, fallback=True)
 _ = t.gettext
@@ -120,14 +121,8 @@ def chooseCity(session, foreign=False):
             i += 1
             resource_index = str(cities[city_id]['tradegood'])
             resource_abb = resources_abbreviations[resource_index]
-            city_name = cities[city_id]['name']
-            matches = re.findall(r'u[0-9a-f]{4}', city_name)
-            for match in matches:
-                to_unicode = '\\' + match
-                to_unicode = to_unicode.encode().decode('unicode-escape')
-                city_name = city_name.replace(match, to_unicode)
-            num = ' ' + str(i) if i < 10 else str(i)
-            menu_cities += '{}: {}{}{}\n'.format(num, city_name, pad(city_name), resource_abb)
+            city_name = decodeUnicodeEscape(cities[city_id]['name'])
+            menu_cities += '{: >2}: {}{}{}\n'.format(i, city_name, pad(city_name), resource_abb)
         menu_cities = menu_cities[:-1]
     if foreign:
         print(_(' 0: foreign city'))
