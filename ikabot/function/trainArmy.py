@@ -102,8 +102,8 @@ def planTrainings(session, city, trainings, trainTroops):
             city = getCity(html)
             city['pos'] = buildingPos
 
-            resourcesAvailable = city['recursos'].copy()
-            resourcesAvailable.append(city['ciudadanosDisp'])
+            resourcesAvailable = city['availableResources'].copy()
+            resourcesAvailable.append(city['freeCitizens'])
 
             # for each unit type in training
             for unit in training:
@@ -319,8 +319,8 @@ def trainArmy(session, event, stdin_fd, predetermined_input):
                     cityTrainings.append(cityId)
 
         # calculate if the city has enough resources
-        resourcesAvailable = city['recursos'].copy()
-        resourcesAvailable.append(city['ciudadanosDisp'])
+        resourcesAvailable = city['availableResources'].copy()
+        resourcesAvailable.append(city['freeCitizens'])
 
         for training in tranings:
             for unit in training:

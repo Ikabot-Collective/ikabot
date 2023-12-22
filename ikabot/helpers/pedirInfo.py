@@ -168,22 +168,14 @@ def chooseForeignCity(session):
         return chooseCity(session, foreign=True)
     html = session.get(island_url + island_id)
     island = getIsland(html)
-    longest_city_name_length = 0
-    for city in island['cities']:
-        if city['type'] == 'city':
-            city_name_length = len(city['name'])
-            if city_name_length > longest_city_name_length:
-                longest_city_name_length = city_name_length
 
-    def pad(name):
-        return ' ' * (longest_city_name_length - len(name) + 2)
     i = 0
     city_options = []
     for city in island['cities']:
-        if city['type'] == 'city' and city['state'] == '' and city['Name'] != session.username:
+        if city['type'] == 'city' and city['state'] == '' and city['ownerName'] != session.username:
             i += 1
             num = ' ' + str(i) if i < 10 else str(i)
-            print('{}: {}{}({})'.format(num, city['name'], pad(city['name']), city['Name']))
+            print('{: >2}: {: >{max_city_name_length}} ({})'.format(num, decodeUnicodeEscape(city['name']), decodeUnicodeEscape(city['Name']), max_city_name_length=MAXIMUM_CITY_NAME_LENGTH))
             city_options.append(city)
     if i == 0:
         print(_('There are no cities where to send resources on this island'))
@@ -192,8 +184,8 @@ def chooseForeignCity(session):
     selected_city_index = read(min=1, max=i)
     city = city_options[selected_city_index - 1]
     city['islandId'] = island['id']
-    city['cityName'] = city['name']
-    city['propia'] = False
+    city['cityName'] = decodeUnicodeEscape(city['name'])
+    city['isOwnCity'] = False
     return city
 
 

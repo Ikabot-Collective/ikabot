@@ -119,7 +119,7 @@ def sellToOffers(session, city_to_buy_from, resource_type, event):
         event.set()
         return
 
-    available = city_to_buy_from['recursos'][resource_type]
+    available = city_to_buy_from['availableResources'][resource_type]
     amount_to_sell = min(available, total_amount)
 
     banner()
@@ -173,7 +173,7 @@ def createOffer(session, my_offering_market_city, resource_type, event):
 
     html = getMarketInfo(session, my_offering_market_city)
     sell_market_capacity = storageCapacityOfMarket(html)
-    total_available_amount_of_resource = my_offering_market_city['recursos'][resource_type]
+    total_available_amount_of_resource = my_offering_market_city['availableResources'][resource_type]
 
     print(_('How much do you want to sell? [max = {}]').format(addThousandSeparator(total_available_amount_of_resource)))
     amount_to_sell = read(min=0, max=total_available_amount_of_resource)

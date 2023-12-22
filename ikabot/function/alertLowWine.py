@@ -84,12 +84,11 @@ def do_it(session, hours):
             if 'tavern' not in [building['building'] for building in city['position']]:
                 continue
 
-            consumption_per_hour = city['consumo']
+            consumption_per_hour = city['wineConsumptionPerHour']
 
             # is a wine city
             if cities[cityId]['tradegood'] == '1':
-                wine_production = getProductionPerSecond(session, cityId)[1]
-                wine_production = wine_production * 60 * 60
+                wine_production = getProductionPerSecond(session, cityId)[1] * SECONDS_IN_HOUR
                 if consumption_per_hour > wine_production:
                     consumption_per_hour -= wine_production
                 else:
@@ -97,7 +96,7 @@ def do_it(session, hours):
                     continue
 
             consumption_per_seg = Decimal(consumption_per_hour) / Decimal(3600)
-            wine_available = city['recursos'][1]
+            wine_available = city['availableResources'][1]
 
             if consumption_per_seg == 0:
                 if was_alerted[cityId] is False:
