@@ -42,6 +42,7 @@ from ikabot.function.decaptchaConf import decaptchaConf
 from ikabot.function.dumpWorld import dumpWorld
 from ikabot.function.stationArmy import stationArmy
 from ikabot.function.logs import logs
+from ikabot.function.testTelegramBot import testTelegramBot
 
 
 t = gettext.translation('command_line', localedir, languages=languages, fallback=True)
@@ -105,6 +106,7 @@ def menu(session, checkUpdate=True):
         143:            killTasks,
         144:            decaptchaConf,
         145:            logs,
+        146:            testTelegramBot,
                     }
 
     print(_('(0)  Exit'))
@@ -194,8 +196,9 @@ def menu(session, checkUpdate=True):
         print(_('(3) Kill tasks'))
         print(_('(4) Configure captcha resolver'))
         print(_('(5) Logs'))
+        print(_('(6) Message Telegram Bot'))
 
-        selected = read(min=0, max=5, digit=True)
+        selected = read(min=0, max=6, digit=True)
         if selected == 0:
             menu(session)
             return
