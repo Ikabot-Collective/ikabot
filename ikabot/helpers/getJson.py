@@ -22,6 +22,21 @@ def getFreeCitizens(html):
     freeCitizens = re.search(r'js_GlobalMenu_citizens">(.*?)</span>', html).group(1)
     return int(freeCitizens.replace(',', '').replace('.', ''))
 
+def getPopulation(html):
+    """This function is used in the ``getCity`` function to determine the population in the given city.
+    Parameters
+    ----------
+    html : str
+        a string representing html which is returned when sending a get request to view a city.
+
+    Returns
+    -------
+    freeCitizens : int
+        an integer representing the amount of free citizens in the given city.
+    """
+    freeCitizens = re.search(r'js_GlobalMenu_population">(.*?)</span>', html).group(1)
+    return int(freeCitizens.replace(',', '').replace('.', ''))
+
 
 def getResourcesListedForSale(html):
     """This function is used in the ``getCity`` function to determine the amount of each resource which is listed for sale in the branch office
@@ -112,6 +127,7 @@ def getCity(html):
     city['availableResources'] = getAvailableResources(html, num=True)
     city['storageCapacity'] = getWarehouseCapacity(html)
     city['freeCitizens'] = getFreeCitizens(html)
+    city['population'] = getPopulation(html)
     city['wineConsumptionPerHour'] = getWineConsumptionPerHour(html)
     city['resourcesListedForSale'] = getResourcesListedForSale(html)
     city['freeSpaceForResources'] = []
