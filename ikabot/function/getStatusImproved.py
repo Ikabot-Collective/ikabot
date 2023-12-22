@@ -20,7 +20,7 @@ def printProgressBar(msg, current, total):
 
 
 
-def getStatusImproved(session, event, stdin_fd, predetermined_input):
+def getStatusForAllCities(session, event, stdin_fd, predetermined_input):
     '''
     Parameters
     ----------
