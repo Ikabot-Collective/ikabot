@@ -20,12 +20,9 @@ _ = t.gettext
 
 getcontext().prec = 30
 
-SECONDS_IN_HOUR = 3600
-COLUMN_MAX_LENGTH = 25
-
 def printProgressBar(msg, current, total):
     banner()
-    loaded = "#" * (total - current - 1)
+    loaded = "#" * (current - 1)
     waiting = "." * (total - current)
     print("{}: [{}={}] {}/{}".format(msg, loaded, waiting, current, total))
 
@@ -42,50 +39,108 @@ def getStatusImproved(session, event, stdin_fd, predetermined_input):
     '''
     sys.stdin = os.fdopen(stdin_fd)
     config.predetermined_input = predetermined_input
+
+    # region Config
+    COLUMN_SEPARATOR = ' | '
+    STORAGE_COLUMN_MAX_LENGTH = 10
+    RESOURCE_COLUMN_MAX_LENGTH = 10
+    RESOURCE_COLORS = [bcolors.WOOD, bcolors.HEADER, bcolors.STONE, bcolors.BLUE, bcolors.WARNING]
+    TABLE_WIDTH = MAXIMUM_CITY_NAME_LENGTH + RESOURCE_COLUMN_MAX_LENGTH + len(materials_names) * RESOURCE_COLUMN_MAX_LENGTH + (len(materials_names) + 2 - 1) * len(COLUMN_SEPARATOR)
+    TABLE_ROW_SEPARATOR = '-' * TABLE_WIDTH
+    TOTAL = 'TOTAL'
+
+    def get_increment(incr):
+        if incr == 0:
+            return " " * RESOURCE_COLUMN_MAX_LENGTH
+        color = bcolors.GREEN if incr > 0 else bcolors.RED
+        res_incr = "{: >{len}}".format(str(format(incr, '+,')), len=RESOURCE_COLUMN_MAX_LENGTH)
+        return color + res_incr + bcolors.ENDC
+
+    def get_storage(capacity, available):
+        res = "{: >{len}}".format(str(format(available, ',')), len=RESOURCE_COLUMN_MAX_LENGTH)
+        if capacity * 0.2 > capacity - available:
+            res = bcolors.WARNING + res + bcolors.ENDC
+        return res
+    # endregion
+
     try:
         banner()
-        color_arr = [bcolors.ENDC, bcolors.HEADER, bcolors.STONE, bcolors.BLUE, bcolors.WARNING]
 
         [city_ids, _] = getIdsOfCities(session, False)
+        cities = []
 
-        total_resources = [0] * len(materials_names)
-        total_production = [0] * len(materials_names)
-        total_wine_consumption = 0
-        housing_space = 0
-        citizens = 0
-        total_housing_space = 0
-        total_citizens = 0
-        available_ships = 0
-        total_ships = 0
+        # available_ships = 0
+        # total_ships = 0
 
-        print("gold for city {}".format(city_ids[0]))
-        printGoldForAllCities(session, city_ids[0])
-        print("ok?")
-
-        i = 0
-        for city_id in city_ids:
-            i += 1
-            printProgressBar("Retrieving cities data", i, len(city_ids))
+        # region Retrieve cities data
+        for res_ind, city_id in enumerate(city_ids):
+            printProgressBar("Retrieving cities data", res_ind+1, len(city_ids))
             html = session.get(city_url + city_id)
-
-            if i == 1:
-                print(html)
-                print(json.loads(html, strict=False))
-                return
-
-
+            print(html.replace("\n", "").replace("  ", "").replace("  ", "").replace("  ", ""))
+            return
             city = getCity(html)
 
             resource_production = getProductionPerSecond(session, city_id)
-            resource_production_per_second = [int(resource_production[0] * SECONDS_IN_HOUR), 0, 0, 0, 0]
-            resource_production_per_second[int(resource_production[2])] = int(resource_production[1] * SECONDS_IN_HOUR)
-            city['resourceProductionPerHour'] = resource_production_per_second
+            resource_production_per_hour = [int(resource_production[0] * SECONDS_IN_HOUR), 0, 0, 0, 0]
+            resource_production_per_hour[int(resource_production[2])] = int(resource_production[1] * SECONDS_IN_HOUR)
+            city['resourceProductionPerHour'] = resource_production_per_hour
+            cities.append(city)
+        # endregion
 
+        banner()
+        printGoldForAllCities(session, city_ids[0])
+
+        # region Print resources table
+        # city |  storage | wood | wine | stone | crystal | sulfur
+        print("\n\nResources:\n")
+        materials = [(RESOURCE_COLORS[ind] + "{: ^{len}}".format(r, len=RESOURCE_COLUMN_MAX_LENGTH) + bcolors.ENDC) for ind, r in enumerate(materials_names)]
+
+        city_name_header_column = " " * MAXIMUM_CITY_NAME_LENGTH
+        storage_header_column = "{: ^{len}}".format("Storage", len=STORAGE_COLUMN_MAX_LENGTH)
+        print(COLUMN_SEPARATOR.join([city_name_header_column, storage_header_column] + materials))
+
+        total = {
+            'cityName': TOTAL,
+            'storageCapacity': sum(c['storageCapacity'] for c in cities),
+            'availableResources': [sum(x) for x in zip(*[c['availableResources'] for c in cities])],
+            'resourceProductionPerHour': [sum(x) for x in zip(*[c['resourceProductionPerHour'] for c in cities])],
+            'wineConsumptionPerHour': sum(c['wineConsumptionPerHour'] for c in cities)
+        }
+
+        for city in cities + [total]:
+            city_name = city['cityName']
+            if city_name == TOTAL:
+                print(TABLE_ROW_SEPARATOR.replace("-", "="))
+            else:
+                print(TABLE_ROW_SEPARATOR)
+
+            storage_capacity = city['storageCapacity']
+            available_resources = city['availableResources']
+            row1 = [
+                "{: >{len}}".format(city_name, len=MAXIMUM_CITY_NAME_LENGTH),
+                "{: >{len}}".format(str(format(storage_capacity, ',')), len=STORAGE_COLUMN_MAX_LENGTH),
+            ]
+            row2 = [
+                " " * MAXIMUM_CITY_NAME_LENGTH,
+                " " * STORAGE_COLUMN_MAX_LENGTH,
+            ]
+            for res_ind, resource in enumerate(materials_names):
+                res_in_storage = available_resources[res_ind]
+                row1.append(get_storage(storage_capacity, res_in_storage))
+
+                res_incr = city['resourceProductionPerHour'][res_ind]
+                if res_ind == 1:
+                    res_incr -= city['wineConsumptionPerHour']
+                row2.append(get_increment(res_incr))
+
+            print(COLUMN_SEPARATOR.join(row1))
+            print(COLUMN_SEPARATOR.join(row2))
+        # endregion
 
             # print(getCity(session.get('view=city&cityId={}'.format(cityId), noIndex=True)))
 
-            data = session.get('view=updateGlobalData&ajax=1', noIndex=True)
-            json_data = json.loads(data, strict=False)
+            # data = session.get('view=updateGlobalData&ajax=1', noIndex=True)
+            # json_data = json.loads(data, strict=False)
             # print("\n\n\ndata\n")
             # print(data)
             # print("\n\n\n\n")
