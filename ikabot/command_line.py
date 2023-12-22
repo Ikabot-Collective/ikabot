@@ -14,7 +14,7 @@ from ikabot.function.donate import donate
 from ikabot.function.update import update
 from ikabot.helpers.pedirInfo import read
 from ikabot.function.getStatus import getStatus
-from ikabot.function.getStatusImproved import getStatusImproved
+from ikabot.function.getStatusImproved import getStatusForAllCities
 from ikabot.function.donationBot import donationBot
 from ikabot.helpers.botComm import updateTelegramData, telegramDataIsValid
 from ikabot.helpers.process import updateProcessList
@@ -81,8 +81,8 @@ def menu(session, checkUpdate=True):
         1:            constructionList,
         2:            sendResources,
         3:            distributeResources,
-        # 4:            getStatus,
-        4:            getStatusImproved,
+        151:            getStatus,
+        152:            getStatusForAllCities,
         5:            searchForIslandSpaces,
         6:            loginDaily,
         101:            alertAttacks,
@@ -136,6 +136,19 @@ def menu(session, checkUpdate=True):
     total_options = len(menu_actions) + 1
     selected = read(min=0, max=total_options, digit=True)
     
+    if selected == 4:
+        banner()
+        print(_('(0) Back'))
+        print(_('(1) Old version'))
+        print(_('(2) New version'))
+
+        selected = read(min=0, max=2, digit=True)
+        if selected == 0:
+            menu(session)
+            return
+        if selected > 0:
+            selected += 150
+
     if selected == 7:
         banner()
         print(_('(0) Back'))
