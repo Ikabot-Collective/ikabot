@@ -440,19 +440,18 @@ def getBuildingToExpand(session, cityId):
     banner()
     # show the buildings available to expand (ignore empty spaces)
     print(_('Which building do you want to expand?\n'))
-    print(_('(0)\t\texit'))
+    print(_('(0)\tExit'))
     buildings = [building for building in city['position'] if building['name'] != 'empty']
-    for i in range(len(buildings)):
-        building = buildings[i]
-
-        level = building['level']
-        if level < 10:
-            level = ' ' + str(level)
+    for i, building in enumerate(buildings):
+        if building['isMaxLevel'] is True:
+            color = bcolors.BLACK
+        elif building['canUpgrade'] is True:
+            color = bcolors.GREEN
         else:
-            level = str(level)
-        if building['isBusy']:
-            level = level + '+'
-        print(_('({:d})\tlv:{}\t{}').format(i+1, level, building['name']))
+            color = bcolors.RED
+
+        upgrading = '+' if building['isBusy'] is True else ' '
+        print("({})\tlvl {: >2}{}  {}{}{}".format(i+1, building['level'], upgrading, color, building['name'], bcolors.ENDC))
 
     selected_building_id = read(min=0, max=len(buildings))
     if selected_building_id == 0:
