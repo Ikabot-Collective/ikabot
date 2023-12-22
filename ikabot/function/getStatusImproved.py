@@ -1,21 +1,11 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import os
-import re
-import gettext
-from dataclasses import dataclass
-from decimal import *
-from ikabot.config import *
 from ikabot.function.constructBuilding import constructBuilding
 from ikabot.function.constructionList import constructionList
-from ikabot.helpers.gui import *
-from ikabot.helpers.naval import *
-from ikabot.helpers.varios import *
-from ikabot.helpers.resources import *
-from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.getJson import getCity
 from ikabot.helpers.market import printGoldForAllCities
+from ikabot.helpers.pedirInfo import *
 
 t = gettext.translation('getStatus', localedir, languages=languages, fallback=True)
 _ = t.gettext
@@ -112,10 +102,7 @@ def getStatusImproved(session, event, stdin_fd, predetermined_input):
         # region Retrieve cities data
         for res_ind, city_id in enumerate(city_ids):
             printProgressBar("Retrieving cities data", res_ind+1, len(city_ids))
-            html = session.get(city_url + city_id)
-            # print(html.replace("\n", "").replace("  ", "").replace("  ", "").replace("  ", ""))
-            # return
-            city = getCity(html)
+            city = getCity(session.get(city_url + city_id))
 
             resource_production = getProductionPerSecond(session, city_id)
             resource_production_per_hour = [int(resource_production[0] * SECONDS_IN_HOUR), 0, 0, 0, 0]
