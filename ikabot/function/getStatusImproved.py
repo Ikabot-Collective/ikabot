@@ -7,6 +7,8 @@ import gettext
 from dataclasses import dataclass
 from decimal import *
 from ikabot.config import *
+from ikabot.function.constructBuilding import constructBuilding
+from ikabot.function.constructionList import constructionList
 from ikabot.helpers.gui import *
 from ikabot.helpers.naval import *
 from ikabot.helpers.varios import *
@@ -37,6 +39,7 @@ def getStatusImproved(session, event, stdin_fd, predetermined_input):
     stdin_fd: int
     predetermined_input : multiprocessing.managers.SyncManager.list
     '''
+    duplicated_input_stdin_fd = os.dup(stdin_fd)
     sys.stdin = os.fdopen(stdin_fd)
     config.predetermined_input = predetermined_input
 
@@ -121,8 +124,8 @@ def getStatusImproved(session, event, stdin_fd, predetermined_input):
             cities.append(city)
         # endregion
 
+        # Remove progressbar
         banner()
-        printGoldForAllCities(session, city_ids[0])
 
         # region Print resources table
         # city |  storage | wood | wine | stone | crystal | sulfur
@@ -172,6 +175,7 @@ def getStatusImproved(session, event, stdin_fd, predetermined_input):
         # endregion
 
         # region Print buildings
+        print("\n\n\n\nBuildings:\n")
         buildings_column_width = 5
         constructed_building_names = get_building_names(cities)
         max_building_name_length = max(len(b) for b in constructed_building_names)
@@ -216,101 +220,27 @@ def getStatusImproved(session, event, stdin_fd, predetermined_input):
 
             buildings_in_city_count.update({building_name: encounters})
             print(COLUMN_SEPARATOR.join(row))
+        # endregion
 
+        # region Actions
+        while True:
+            print("\n\n\nActions:")
+            print("(0) Exit")
+            print("(1) Show gold")
+            print("(2) Construction List")
+            print("(3) Construct Building")
+            action = read(min=0, max=3, digit=True)
+            if action == 0:
+                break
+            elif action == 1:
+                printGoldForAllCities(session, city_ids[0])
+            elif action == 2:
+                return constructionList(session, event, duplicated_input_stdin_fd, predetermined_input)
+            elif action == 3:
+                return constructBuilding(session, event, duplicated_input_stdin_fd, predetermined_input)
 
-    # endregion
+        # endregion
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        #
-        #
-        #
-        #
-        # print(_('\nOf which city do you want to see the state?'))
-        # city = chooseCity(session)
-        # banner()
-        #
-        # (wood, good, typeGood) = getProductionPerSecond(session, city['id'])
-        # print('\033[1m{}{}{}'.format(color_arr[int(typeGood)], city['cityName'], color_arr[0]))
-        #
-        # resources = city['availableResources']
-        # storageCapacity = city['storageCapacity']
-        # color_resources = []
-        # for i in range(len(materials_names)):
-        #     if resources[i] == storageCapacity:
-        #         color_resources.append(bcolors.RED)
-        #     else:
-        #         color_resources.append(bcolors.ENDC)
-        # print(_('Population:'))
-        # print('{}: {} {}: {}'.format('Housing space', addThousandSeparator(housing_space), 'Citizens', addThousandSeparator(citizens)))
-        # print(_('Storage: {}'.format(addThousandSeparator(storageCapacity))))
-        # print(_('Resources:'))
-        # for i in range(len(materials_names)):
-        #     print('{} {}{}{} '.format(materials_names[i], color_resources[i], addThousandSeparator(resources[i]), bcolors.ENDC), end='')
-        # print('')
-        #
-        # print(_('Production:'))
-        # print('{}: {} {}: {}'.format(materials_names[0], addThousandSeparator(wood*3600), materials_names[typeGood], addThousandSeparator(good*3600)))
-        #
-        # hasTavern = 'tavern' in [building['building'] for building in city['position']]
-        # if hasTavern:
-        #     consumption_per_hour = city['wineConsumption']
-        #     if consumption_per_hour == 0:
-        #         print(_('{}{}Does not consume wine!{}').format(bcolors.RED, bcolors.BOLD, bcolors.ENDC))
-        #     else:
-        #         if typeGood == 1 and (good*3600) > consumption_per_hour:
-        #             elapsed_time_run_out = '∞'
-        #         else:
-        #             consumption_per_second = Decimal(consumption_per_hour) / Decimal(3600)
-        #             remaining_resources_to_consume = Decimal(resources[1]) / Decimal(consumption_per_second)
-        #             elapsed_time_run_out = daysHoursMinutes(remaining_resources_to_consume)
-        #         print(_('There is wine for: {}').format(elapsed_time_run_out))
-        #
-        # for building in [building for building in city['position'] if building['name'] != 'empty']:
-        #     if building['isMaxLevel'] is True:
-        #         color = bcolors.BLACK
-        #     elif building['canUpgrade'] is True:
-        #         color = bcolors.GREEN
-        #     else:
-        #         color = bcolors.RED
-        #
-        #     level = building['level']
-        #     if level < 10:
-        #         level = ' ' + str(level)
-        #     else:
-        #         level = str(level)
-        #     if building['isBusy'] is True:
-        #         level = level + '+'
-        #
-        #     print(_('lv:{}\t{}{}{}').format(level, color, building['name'], bcolors.ENDC))
-
-        enter()
-        print('')
         event.set()
     except KeyboardInterrupt:
         event.set()
