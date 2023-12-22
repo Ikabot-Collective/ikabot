@@ -63,18 +63,26 @@ def getStatusImproved(session, event, stdin_fd, predetermined_input):
         return res
 
     def get_building_names(cities):
-        constructed_buildings = []
+        '''
+        Returns a list of buildings names with unique and maximum number of
+        buildings for all towns. e.g. [townHall, academy, storage, storage].
+        Keep in mind that we allow duplicates in te response.
+        :param cities: city
+        :return: list of maximum number of unique buildings across all cities
+        '''
+        constructed_buildings = {}
         for city in cities:
+            buildings = dict()
             for pos in city['position']:
                 name = pos['name']
                 if pos['position'] != 0 and name is not None and name != 'empty':
-                    constructed_buildings.append(name)
+                    count = buildings.get(name, 0)
+                    buildings.update({name: count + 1})
+            constructed_buildings = {key: max(buildings.get(key, 0), constructed_buildings.get(key, 0)) for key in set(buildings) | set(constructed_buildings)}
 
-        constructed_buildings = list(set(constructed_buildings))
-        constructed_buildings.sort()
         town_hall_name = [p['name'] for p in cities[0]['position'] if p['position'] == 0][0]
 
-        return [town_hall_name] + constructed_buildings
+        return [town_hall_name] + sorted([key for key, value in constructed_buildings.items() for _ in range(value)])
 
     def print_vertical(prefix_length, words, separator = COLUMN_SEPARATOR):
         max_length = max(len(word) for word in words)
@@ -164,18 +172,34 @@ def getStatusImproved(session, event, stdin_fd, predetermined_input):
         # endregion
 
         # region Print buildings
+        buildings_column_width = 5
         constructed_building_names = get_building_names(cities)
-        print_vertical(MAXIMUM_CITY_NAME_LENGTH, constructed_building_names, ' ' + COLUMN_SEPARATOR + ' ')
+        max_building_name_length = max(len(b) for b in constructed_building_names)
+        city_names = [c['name'] for c in cities]
+        print_vertical(max_building_name_length - 1, city_names, ' ' * buildings_column_width)
+        print("-" * (max_building_name_length + (buildings_column_width+1) * len(cities)))
 
-        for city in cities:
-            row = ["{: >{len}}".format(city['cityName'], len=MAXIMUM_CITY_NAME_LENGTH)]
-            for building_name in constructed_building_names:
+        # gow many times we've encountered a building in the city. This is being
+        # done to display the duplicates
+        # {townHall: {city1: 1}, storage: {city1: 2}}
+        buildings_in_city_count = {}
+        for building_name in constructed_building_names:
+            row = ["{: >{len}}".format(building_name, len=max_building_name_length)]
+            encounters = buildings_in_city_count.get(building_name, {})
+            for city in cities:
+                required_number = encounters.get(city['cityName'], 0)
+                current_number = 0
+
                 building = None
                 for pos in city['position']:
                     if building_name == pos['name']:
-                        building = pos
-                        break
+                        if current_number == required_number:
+                            building = pos
+                            break
+                        else:
+                            current_number += 1
 
+                encounters.update({city['cityName']: current_number+1})
                 if building is None:
                     row.append(" - ")
                     continue
@@ -190,6 +214,7 @@ def getStatusImproved(session, event, stdin_fd, predetermined_input):
                 additional = '+' if building['isBusy'] is True else ' '
                 row.append("{}{: >2}{}{}".format(color, building['level'], additional, bcolors.ENDC))
 
+            buildings_in_city_count.update({building_name: encounters})
             print(COLUMN_SEPARATOR.join(row))
 
 
