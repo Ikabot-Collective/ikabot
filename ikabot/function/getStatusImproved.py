@@ -61,6 +61,32 @@ def getStatusImproved(session, event, stdin_fd, predetermined_input):
         if capacity * 0.2 > capacity - available:
             res = bcolors.WARNING + res + bcolors.ENDC
         return res
+
+    def get_building_names(cities):
+        constructed_buildings = []
+        for city in cities:
+            for pos in city['position']:
+                name = pos['name']
+                if pos['position'] != 0 and name is not None and name != 'empty':
+                    constructed_buildings.append(name)
+
+        constructed_buildings = list(set(constructed_buildings))
+        constructed_buildings.sort()
+        town_hall_name = [p['name'] for p in cities[0]['position'] if p['position'] == 0][0]
+
+        return [town_hall_name] + constructed_buildings
+
+    def print_vertical(prefix_length, words, separator = COLUMN_SEPARATOR):
+        max_length = max(len(word) for word in words)
+        # Pad each word with spaces to make them equal in length
+        padded_words = [word.rjust(max_length) for word in words]
+
+        # Create a matrix with characters aligned
+        matrix = [list(row) for row in zip(*padded_words)]
+
+        # Print the matrix
+        for row in matrix:
+            print(separator.join([" " * prefix_length] + row))
     # endregion
 
     try:
@@ -76,8 +102,8 @@ def getStatusImproved(session, event, stdin_fd, predetermined_input):
         for res_ind, city_id in enumerate(city_ids):
             printProgressBar("Retrieving cities data", res_ind+1, len(city_ids))
             html = session.get(city_url + city_id)
-            print(html.replace("\n", "").replace("  ", "").replace("  ", "").replace("  ", ""))
-            return
+            # print(html.replace("\n", "").replace("  ", "").replace("  ", "").replace("  ", ""))
+            # return
             city = getCity(html)
 
             resource_production = getProductionPerSecond(session, city_id)
@@ -137,60 +163,37 @@ def getStatusImproved(session, event, stdin_fd, predetermined_input):
             print(COLUMN_SEPARATOR.join(row2))
         # endregion
 
-            # print(getCity(session.get('view=city&cityId={}'.format(cityId), noIndex=True)))
+        # region Print buildings
+        constructed_building_names = get_building_names(cities)
+        print_vertical(MAXIMUM_CITY_NAME_LENGTH, constructed_building_names, ' ' + COLUMN_SEPARATOR + ' ')
 
-            # data = session.get('view=updateGlobalData&ajax=1', noIndex=True)
-            # json_data = json.loads(data, strict=False)
-            # print("\n\n\ndata\n")
-            # print(data)
-            # print("\n\n\n\n")
-        #
-        #     print(city)
-        #
-        #     json_data = json_data[0][1]['headerData']
-        #     if json_data['relatedCity']['owncity'] != 1:
-        #         continue
-        #     # print(json_data)
-        #     wood = Decimal(json_data['resourceProduction'])
-        #     good = Decimal(json_data['tradegoodProduction'])
-        #     typeGood = int(json_data['producedTradegood'])
-        #     total_production[0] += wood * 3600
-        #     total_production[typeGood] += good * 3600
-        #     total_wine_consumption += json_data['wineSpendings']
-        #     housing_space = int(json_data['currentResources']['population'])
-        #     citizens = int(json_data['currentResources']['citizens'])
-        #     total_housing_space += housing_space
-        #     total_citizens += citizens
-        #     total_resources[0] += json_data['currentResources']['resource']
-        #     total_resources[1] += json_data['currentResources']['1']
-        #     total_resources[2] += json_data['currentResources']['2']
-        #     total_resources[3] += json_data['currentResources']['3']
-        #     total_resources[4] += json_data['currentResources']['4']
-        #     available_ships = json_data['freeTransporters']
-        #     total_ships = json_data['maxTransporters']
-        #     total_gold = int(Decimal(json_data['gold']))
-        #     total_gold_production = int(Decimal(json_data['scientistsUpkeep'] + json_data['income'] + json_data['upkeep']))
-        #
-        # print("\n\n\n\n\n\n\n\n")
-        # print(_('Ships {:d}/{:d}').format(int(available_ships), int(total_ships)))
-        # print(_('\nTotal:'))
-        # print('{:>10}'.format(' '), end='|')
-        # for i in range(len(materials_names)):
-        #     print('{:>12}'.format(materials_names_english[i]), end='|')
-        # print()
-        # print('{:>10}'.format('Available'), end='|')
-        # for i in range(len(materials_names)):
-        #     print('{:>12}'.format(addThousandSeparator(total_resources[i])), end='|')
-        # print()
-        # print('{:>10}'.format('Production'), end='|')
-        # for i in range(len(materials_names)):
-        #     print('{:>12}'.format(addThousandSeparator(total_production[i])), end='|')
-        # print()
-        # print('Housing Space: {}, Citizens: {}'.format(addThousandSeparator(total_housing_space), addThousandSeparator(citizens)))
-        # print('Gold: {}, Gold production: {}'.format(addThousandSeparator(total_gold), addThousandSeparator(total_gold_production)))
-        # print('Wine consumption: {}'.format(addThousandSeparator(total_wine_consumption)), end='')
-        #
-        #
+        for city in cities:
+            row = ["{: >{len}}".format(city['cityName'], len=MAXIMUM_CITY_NAME_LENGTH)]
+            for building_name in constructed_building_names:
+                building = None
+                for pos in city['position']:
+                    if building_name == pos['name']:
+                        building = pos
+                        break
+
+                if building is None:
+                    row.append(" - ")
+                    continue
+
+                if building['isMaxLevel'] is True:
+                    color = bcolors.BLACK
+                elif building['canUpgrade'] is True:
+                    color = bcolors.GREEN
+                else:
+                    color = bcolors.RED
+
+                additional = '+' if building['isBusy'] is True else ' '
+                row.append("{}{: >2}{}{}".format(color, building['level'], additional, bcolors.ENDC))
+
+            print(COLUMN_SEPARATOR.join(row))
+
+
+    # endregion
 
 
 
