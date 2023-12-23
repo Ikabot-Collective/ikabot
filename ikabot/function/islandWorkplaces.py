@@ -14,6 +14,11 @@ from ikabot.helpers.varios import *
 t = gettext.translation('donate', localedir, languages=languages, fallback=True)
 _ = t.gettext
 
+def get_number(s):
+    return int(s.replace(',', '').replace('.', ''))
+
+def rightAligh(data, len):
+    return "{:>{len}}".format(data, len=len)
 
 def printProgressBar(msg, current, total):
     banner()
@@ -35,6 +40,62 @@ def islandWorkplaces(session, event, stdin_fd, predetermined_input):
     config.predetermined_input = predetermined_input
 
     # region Config
+    column_separator = ' | '
+    columns = [
+        'Id',
+        'City',
+        'Resource',
+        'Production',
+        'Workers',
+        'Overcharged',
+        'level',
+        'Upgrade wood required',
+    ]
+    column_length = [3, MAXIMUM_CITY_NAME_LENGTH, 13, 13, 13, 13, 5, 23]
+    resource_colors = [
+        '\033[0;33m',
+        bcolors.HEADER,
+        bcolors.STONE,
+        bcolors.BLUE,
+        bcolors.WARNING
+    ]
+    def get_view(material_ind):
+        return 'resource' if material_ind == 0 else 'tradegood'
+
+    def extract_workplace_data(init_data, material_ind, json):
+        '''
+        Extracts data from json
+        :param init_data: dict with basic city data
+        :param material_ind: int
+        :param json:
+        :return:
+        '''
+        view = get_view(material_ind)
+        data = dict(init_data)
+        background_data = json[0][1]['backgroundData']
+        template_data = json[2][1]
+        slider_data = template_data['js_ResourceSlider']['slider']
+        end_upgrade_time = int(background_data[view + 'EndUpgradeTime'])  # resourceEndUpgradeTime / tradegoodEndUpgradeTime
+        data.update({
+            'level': background_data[view + 'Level'],  # resourceLevel / tradegoodLevel
+            'upgradeEndTime': end_upgrade_time,
+            'upgrading': end_upgrade_time > 0,
+            'requiredWoodForNextLevel': 0,
+            'material': material_ind,
+            'totalWorkers': template_data['valueWorkers'],
+            'freeCitizens': template_data['valueCitizens'],
+            'production': template_data['js_resource_tooltip_total_production']['text'],
+            'maxWorkers': slider_data['max_value'],
+            'overchargedWorkers': slider_data['overcharge'],
+        })
+
+        if not data['upgrading'] and json[1][0] == 'changeView':
+            # changeView -> resources
+            needed, donated = re.findall(r'<li class="wood">(.*?)</li>', json[1][1][1])
+            data['requiredWoodForNextLevel'] = get_number(needed) - get_number(donated)
+
+        return data
+
     def get_workplace_data(init_data, material_ind, island_id):
         '''
         Retrieves data for workplace / resource information
@@ -43,31 +104,11 @@ def islandWorkplaces(session, event, stdin_fd, predetermined_input):
         :param island_id: for which island to get data
         :return: resource dict
         '''
-        type = 'resource' if material_ind == 0 else material_ind
-        view = 'resource' if material_ind == 0 else 'tradegood'
-        url = 'view={view}&type={type}&islandId={islandId}&backgroundView=island&currentIslandId={islandId}&actionRequest={actionRequest}&ajax=1'.format(view=view, type=type, islandId=island_id, actionRequest=actionRequest)
+        res_type = 'resource' if material_ind == 0 else material_ind
+        view = get_view(material_ind)
+        url = 'view={view}&type={type}&islandId={islandId}&backgroundView=island&currentIslandId={islandId}&actionRequest={actionRequest}&ajax=1'.format(view=view, type=res_type, islandId=island_id, actionRequest=actionRequest)
         resp = json.loads(session.post(url), strict=False)
-        data = dict(init_data)
-        end_upgrade_time = int(resp[0][1]['backgroundData'][view + 'EndUpgradeTime'])  # resourceEndUpgradeTime / tradegoodEndUpgradeTime
-        data.update({
-            'level': resp[0][1]['backgroundData'][view + 'Level'],  # resourceLevel / tradegoodLevel
-            'upgradeEndTime': end_upgrade_time,
-            'upgrading': end_upgrade_time > 0,
-            'requiredWoodForNextLevel': 0,
-        })
-
-        if not data['upgrading']:
-            html = resp[1][1][1]
-            wood_total_needed, wood_donated = re.findall(r'<li class="wood">(.*?)</li>', html)
-            wood_total_needed = wood_total_needed.replace(',', '').replace('.', '')
-            wood_total_needed = int(wood_total_needed)
-            wood_donated = wood_donated.replace(',', '').replace('.', '')
-            wood_donated = int(wood_donated)
-            data['requiredWoodForNextLevel'] = wood_total_needed - wood_donated
-
-        print(data)
-        return data
-
+        return extract_workplace_data(init_data, material_ind, resp)
 
     def get_workplaces():
         [city_ids, cities] = getIdsOfCities(session, False)
@@ -92,13 +133,69 @@ def islandWorkplaces(session, event, stdin_fd, predetermined_input):
             printProgressBar(loading_msg, city_ind*3+3, all_workplaces)
             workplaces.append(get_workplace_data(city_data, cities[city_id]['tradegood'], island_id))
 
+        banner()
         return workplaces
+
+    def print_workplaces(workplaces):
+        # Print header
+        print(column_separator.join([rightAligh(c, cl) for c, cl in zip(columns, column_length)]))
+
+        # Print table
+        for ind, workplace in enumerate(workplaces):
+            if ind % 2 == 0:
+                # print separator between cities
+                print('-' * (sum(column_length) + (len(column_length) - 1) * len(column_separator)))
+
+            total_workers = workplace['totalWorkers']
+            max_workers = workplace['maxWorkers']
+            material = workplace['material']
+            upgrading = workplace['upgrading']
+            overcharged = workplace['overchargedWorkers']
+
+            # Construct colors for data
+            colors = [
+                '',
+                '',
+                resource_colors[material],
+                '',
+                bcolors.GREEN if total_workers >= max_workers else bcolors.RED,
+                bcolors.WARNING if total_workers > max_workers else '',
+                bcolors.GREEN if upgrading else '',
+                bcolors.WARNING if upgrading else '',
+            ]
+
+            # Construct data
+            row = [
+                str(ind+1) + ")",
+                workplace['cityName'] if ind % 2 == 0 else '',
+                materials_names[material],
+                '+{}/h'.format(addThousandSeparator(workplace['production'])),
+                "{} / {}".format(
+                    addThousandSeparator(min(total_workers, max_workers)),
+                    addThousandSeparator(max_workers)
+                ),
+                "{} / {}".format(
+                    0 if overcharged == 0 else min(0, total_workers - max_workers),
+                    overcharged
+                ),
+                workplace['level'] + ('+' if upgrading else ' '),
+                addThousandSeparator(workplace['requiredWoodForNextLevel']) if not upgrading else "Upgrading for " + daysHoursMinutes(workplace['upgradeEndTime'])
+            ]
+
+            # Combine and print
+            print(column_separator.join([
+                (color + rightAligh(data, length) + bcolors.ENDC)
+                for color, data, length in zip(colors, row, column_length)
+            ]))
+
     # endregion
 
     try:
         workplaces = get_workplaces()
-        print(workplaces)
-        return
+
+        while True:
+            print_workplaces(workplaces)
+            return
 
         city = chooseCity(session)
 
