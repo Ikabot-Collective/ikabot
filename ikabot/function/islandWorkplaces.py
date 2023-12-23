@@ -15,7 +15,14 @@ t = gettext.translation('donate', localedir, languages=languages, fallback=True)
 _ = t.gettext
 
 
-def donate(session, event, stdin_fd, predetermined_input):
+def printProgressBar(msg, current, total):
+    banner()
+    loaded = "#" * (current - 1)
+    waiting = "." * (total - current)
+    print("{}: [{}={}] {}/{}".format(msg, loaded, waiting, current, total))
+
+
+def islandWorkplaces(session, event, stdin_fd, predetermined_input):
     """
     Parameters
     ----------
@@ -26,24 +33,85 @@ def donate(session, event, stdin_fd, predetermined_input):
     """
     sys.stdin = os.fdopen(stdin_fd)
     config.predetermined_input = predetermined_input
+
+    # region Config
+    def get_workplace_data(init_data, material_ind, island_id):
+        '''
+        Retrieves data for workplace / resource information
+        :param init_data: dict with city data
+        :param material_ind: for which material to get data
+        :param island_id: for which island to get data
+        :return: resource dict
+        '''
+        type = 'resource' if material_ind == 0 else material_ind
+        view = 'resource' if material_ind == 0 else 'tradegood'
+        url = 'view={view}&type={type}&islandId={islandId}&backgroundView=island&currentIslandId={islandId}&actionRequest={actionRequest}&ajax=1'.format(view=view, type=type, islandId=island_id, actionRequest=actionRequest)
+        resp = json.loads(session.post(url), strict=False)
+        data = dict(init_data)
+        end_upgrade_time = int(resp[0][1]['backgroundData'][view + 'EndUpgradeTime'])  # resourceEndUpgradeTime / tradegoodEndUpgradeTime
+        data.update({
+            'level': resp[0][1]['backgroundData'][view + 'Level'],  # resourceLevel / tradegoodLevel
+            'upgradeEndTime': end_upgrade_time,
+            'upgrading': end_upgrade_time > 0,
+            'requiredWoodForNextLevel': 0,
+        })
+
+        if not data['upgrading']:
+            html = resp[1][1][1]
+            wood_total_needed, wood_donated = re.findall(r'<li class="wood">(.*?)</li>', html)
+            wood_total_needed = wood_total_needed.replace(',', '').replace('.', '')
+            wood_total_needed = int(wood_total_needed)
+            wood_donated = wood_donated.replace(',', '').replace('.', '')
+            wood_donated = int(wood_donated)
+            data['requiredWoodForNextLevel'] = wood_total_needed - wood_donated
+
+        print(data)
+        return data
+
+
+    def get_workplaces():
+        [city_ids, cities] = getIdsOfCities(session, False)
+        loading_msg = "Loading workplaces for cities"
+        all_workplaces = 3 * len(city_ids)
+        workplaces = []
+
+        for city_ind, city_id in enumerate(city_ids):
+            printProgressBar(loading_msg, city_ind*3+1, all_workplaces)
+            city = getCity(session.get(city_url + city_id))
+
+            island_id = city['islandId']
+            city_data = {
+                'cityId': city['id'],
+                'cityName': city['cityName'],
+                'islandId': island_id,
+            }
+
+            printProgressBar(loading_msg, city_ind*3+2, all_workplaces)
+            workplaces.append(get_workplace_data(city_data, 0, island_id))
+
+            printProgressBar(loading_msg, city_ind*3+3, all_workplaces)
+            workplaces.append(get_workplace_data(city_data, cities[city_id]['tradegood'], island_id))
+
+        return workplaces
+    # endregion
+
     try:
-        banner()
+        workplaces = get_workplaces()
+        print(workplaces)
+        return
 
         city = chooseCity(session)
+
         banner()
-
-        woodAvailable = city['availableResources'][0]
-
-        islandId = city['islandId']
-        html = session.get(island_url + islandId)
-        island = getIsland(html)
+        island_id = city['islandId']
+        island = getIsland(session.get(island_url + island_id))
 
         island_type = island['tipo']
         resource_name = tradegoods_names[0]
         tradegood_name = tradegoods_names[int(island_type)]
 
         # get resource information
-        url = 'view=resource&type=resource&islandId={0}&backgroundView=island&currentIslandId={0}&actionRequest={1}&ajax=1'.format(islandId, actionRequest)
+        url = 'view=resource&type=resource&islandId={0}&backgroundView=island&currentIslandId={0}&actionRequest={1}&ajax=1'.format(island_id, actionRequest)
         resp = session.post(url)
         resp = json.loads(resp, strict=False)
 
@@ -80,7 +148,7 @@ def donate(session, event, stdin_fd, predetermined_input):
         print('{} / {} ({}%)\n'.format(addThousandSeparator(wood_donated), addThousandSeparator(wood_total_needed), addThousandSeparator(int((100 * wood_donated) / wood_total_needed))))
 
         # get tradegood information
-        url = 'view=tradegood&type={0}&islandId={1}&backgroundView=island&currentIslandId={1}&actionRequest={2}&ajax=1'.format(island_type, islandId, actionRequest)
+        url = 'view=tradegood&type={0}&islandId={1}&backgroundView=island&currentIslandId={1}&actionRequest={2}&ajax=1'.format(island_type, island_id, actionRequest)
         resp = session.post(url)
 
         resp = json.loads(resp, strict=False)
@@ -128,7 +196,7 @@ def donate(session, event, stdin_fd, predetermined_input):
             return
 
         # do the donation
-        session.post(params={'islandId': islandId, 'type': donation_type, 'action': 'IslandScreen', 'function': 'donate', 'donation': amount, 'backgroundView': 'island', 'templateView': 'resource', 'actionRequest': actionRequest, 'ajax': '1'})
+        session.post(params={'islandId': island_id, 'type': donation_type, 'action': 'IslandScreen', 'function': 'donate', 'donation': amount, 'backgroundView': 'island', 'templateView': 'resource', 'actionRequest': actionRequest, 'ajax': '1'})
 
         print('\nDonation successful.')
         enter()

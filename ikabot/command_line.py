@@ -10,7 +10,7 @@ import datetime
 from ikabot.config import *
 from ikabot.web.session import *
 from ikabot.helpers.gui import *
-from ikabot.function.donate import donate
+from ikabot.function.islandWorkplaces import islandWorkplaces
 from ikabot.function.update import update
 from ikabot.helpers.pedirInfo import read
 from ikabot.function.getStatus import getStatus
@@ -77,7 +77,7 @@ _global_menu = [
     ]],
     ['Donate', [
         __command_back,
-        ['Donate once', donate],
+        ['Donate once', islandWorkplaces],
         ['Donate automatically', donationBot],
     ]],
     ['Activate vacation mode', vacationMode],
