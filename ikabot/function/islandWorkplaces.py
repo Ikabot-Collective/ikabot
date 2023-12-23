@@ -96,6 +96,7 @@ def islandWorkplaces(session, event, stdin_fd, predetermined_input):
             'production': template_data['js_resource_tooltip_total_production']['text'],
             'maxWorkers': slider_data['max_value'],
             'overchargedWorkers': slider_data['overcharge'],
+            'availableWood': json[0][1]['headerData']['currentResources']['resource']
         })
 
         if not data['upgrading'] and json[1][0] == 'changeView':
@@ -185,7 +186,8 @@ def islandWorkplaces(session, event, stdin_fd, predetermined_input):
 
         # Print table
         for ind, workplace in enumerate(workplaces):
-            if ind % 2 == 0:
+            print_city_name = ind % 2 == 0
+            if print_city_name:
                 # print separator between cities
                 print('-' * (sum(column_length) + (len(column_length) - 1) * len(column_separator)))
 
@@ -198,7 +200,7 @@ def islandWorkplaces(session, event, stdin_fd, predetermined_input):
             # Construct colors for data
             colors = [
                 '',
-                '',
+                '' if print_city_name else resource_colors[0],
                 resource_colors[material],
                 '',
                 bcolors.GREEN if total_workers >= max_workers else bcolors.RED,
@@ -207,10 +209,17 @@ def islandWorkplaces(session, event, stdin_fd, predetermined_input):
                 bcolors.WARNING if upgrading else '',
             ]
 
+            second_column = workplace['cityName']
+            if not print_city_name:
+                second_column = "{} free {}".format(
+                    addThousandSeparator(workplace['availableWood']),
+                    materials_names[0]
+                )
+
             # Construct data
             row = [
                 str(ind+1) + ")",
-                workplace['cityName'] if ind % 2 == 0 else '',
+                second_column,
                 materials_names[material],
                 '+{}/h'.format(addThousandSeparator(workplace['production'])),
                 "{} / {}".format(
@@ -240,14 +249,32 @@ def islandWorkplaces(session, event, stdin_fd, predetermined_input):
         print("\n\nActions:\n")
         for i, a in enumerate(actions):
             print(" {: >2}) {}".format(i, a))
+        print()
         action = read(min=0, max=len(actions), digit=True)
         if action == action_exit:
             return [action_exit, action_exit]
 
-        msg = "Select target workplace between 1 and {}".format(workplaces_length)
+        msg = "Select target workplace between 1 and {}: ".format(workplaces_length)
         workplace = read(msg=msg, min=1, max=workplaces_length, digit=True)
 
         return [action, workplace]
+
+    def donate(workplace):
+        """
+        Perform the donation
+        :param workplace: where to donate
+        :return: json workplace (after the update)
+        """
+
+        return workplace
+
+    def set_workers(workplace):
+        """
+        Set the new workers
+        :param workplace: where to set the new workers
+        :return: json workplace (after the update)
+        """
+        return workplace
     # endregion
 
     try:
@@ -261,10 +288,27 @@ def islandWorkplaces(session, event, stdin_fd, predetermined_input):
             if action == action_exit:
                 break
 
-            workplace = workplaces[workplace_id - 1]
+            workplace_ind = workplace_id - 1
+            workplace = workplaces[workplace_ind]
 
+            # Simulate person
+            open_island_window(workplace['islandId'])
+            workplace = get_workplace_data(
+                workplace,
+                workplace['material'],
+                workplace['islandId']
+            )
 
-            return
+            if action == action_donate:
+                workplace = donate(workplace)
+            elif action == action_change_workers:
+                workplace = set_workers(workplace)
+            else:
+                print("Unknown action ", action)
+
+            workplaces[workplace_ind] = workplace
+            print("\nOperation is successful!")
+            enter()
         #
         # city = chooseCity(session)
         #
