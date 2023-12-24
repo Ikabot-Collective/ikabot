@@ -53,6 +53,7 @@ def islandWorkplaces(session, event, stdin_fd, predetermined_input):
     columns = [
         'Id',
         'City',
+        'City Stats',
         'Resource',
         'Production',
         'Workers',
@@ -60,7 +61,7 @@ def islandWorkplaces(session, event, stdin_fd, predetermined_input):
         'level',
         'Upgrade wood required',
     ]
-    column_length = [3, MAXIMUM_CITY_NAME_LENGTH, 13, 13, 13, 13, 5, 23]
+    column_length = [3, MAXIMUM_CITY_NAME_LENGTH, 17, 8, 10, 13, 11, 5, 23]
     resource_colors = [
         '\033[0;33m',
         bcolors.HEADER,
@@ -94,10 +95,11 @@ def islandWorkplaces(session, event, stdin_fd, predetermined_input):
             'material': material_ind,
             'totalWorkers': template_data['valueWorkers'],
             'freeCitizens': template_data['valueCitizens'],
+            'goldPerHour': template_data['valueWorkCosts'],
             'production': template_data['js_resource_tooltip_total_production']['text'],
             'maxWorkers': slider_data['max_value'],
             'overchargedWorkers': slider_data['overcharge'],
-            'availableWood': json[0][1]['headerData']['currentResources']['resource']
+            'availableWood': json[0][1]['headerData']['currentResources']['resource'],
         })
 
         if not data['upgrading'] and json[1][0] == 'changeView':
@@ -173,7 +175,6 @@ def islandWorkplaces(session, event, stdin_fd, predetermined_input):
             printProgressBar(loading_msg, city_ind*3+3, all_workplaces)
             workplaces.append(get_workplace_data(city_data, cities[city_id]['tradegood'], island_id))
 
-        banner()
         return workplaces
 
     def print_workplaces(workplaces):
@@ -182,7 +183,12 @@ def islandWorkplaces(session, event, stdin_fd, predetermined_input):
         :param workplaces: json workplaces list
         :return: None
         """
-        # Print header
+        banner()
+
+        print(workplaces)
+        print()
+
+        # Print table header
         print(column_separator.join([rightAligh(c, cl) for c, cl in zip(columns, column_length)]))
 
         # Print table
@@ -197,11 +203,24 @@ def islandWorkplaces(session, event, stdin_fd, predetermined_input):
             material = workplace['material']
             upgrading = workplace['upgrading']
             overcharged = workplace['overchargedWorkers']
+            free_citizens = workplace['freeCitizens']
+            gold_per_hour = workplace['goldPerHour']
+
+            city_stats_color = ''
+            if print_city_name:
+                if free_citizens > 0:
+                    city_stats_color = bcolors.GREEN
+            else:
+                if gold_per_hour < 0:
+                    city_stats_color = bcolors.RED
+                else:
+                    city_stats_color = bcolors.WARNING
 
             # Construct colors for data
             colors = [
                 '',
                 '' if print_city_name else resource_colors[0],
+                city_stats_color,
                 resource_colors[material],
                 '',
                 bcolors.GREEN if total_workers >= max_workers else bcolors.RED,
@@ -210,16 +229,24 @@ def islandWorkplaces(session, event, stdin_fd, predetermined_input):
                 bcolors.WARNING if upgrading else '',
             ]
 
-            second_column = workplace['cityName']
+            city_column = workplace['cityName']
             if not print_city_name:
-                second_column = "{} free Wood".format(
+                city_column = "{} free Wood".format(
                     addThousandSeparator(workplace['availableWood'])
+                )
+
+            if print_city_name:
+                city_stats_column = "{} Idle People".format(free_citizens)
+            else:
+                city_stats_column = "{} gold/h".format(
+                    addThousandSeparator(gold_per_hour, include_sign=True)
                 )
 
             # Construct data
             row = [
                 str(ind+1) + ")",
-                second_column,
+                city_column,
+                city_stats_column,
                 materials_names[material],
                 '+{}/h'.format(addThousandSeparator(workplace['production'])),
                 "{} / {}".format(
@@ -254,7 +281,7 @@ def islandWorkplaces(session, event, stdin_fd, predetermined_input):
         if actions[action_id] == action_exit:
             return [action_id, action_id]
 
-        msg = "Select target workplace between 1 and {}: ".format(workplaces_length)
+        msg = "\nSelect target workplace between 1 and {}: ".format(workplaces_length)
         workplace = read(msg=msg, min=1, max=workplaces_length, digit=True)
 
         return [action_id, workplace]
@@ -272,7 +299,7 @@ def islandWorkplaces(session, event, stdin_fd, predetermined_input):
             return workplace
 
         print(
-            "\nFree wood in town: ",
+            "Free wood in town: ",
             addThousandSeparator(workplace['availableWood'])
         )
         maximum_donation = min(
@@ -280,6 +307,7 @@ def islandWorkplaces(session, event, stdin_fd, predetermined_input):
             workplace['requiredWoodForNextLevel']
         )
 
+        print()
         print('Enter donation amount between 1 and {}.'.format(
             addThousandSeparator(maximum_donation))
         )
@@ -290,7 +318,7 @@ def islandWorkplaces(session, event, stdin_fd, predetermined_input):
         if donation == input_max:
             donation = maximum_donation
 
-        print("Donating {} wood".format(donation))
+        print("\nDonating {} wood".format(donation))
         
         return extract_workplace_data(
             workplace,
@@ -328,6 +356,8 @@ def islandWorkplaces(session, event, stdin_fd, predetermined_input):
             workplace['maxWorkers'] + workplace['overchargedWorkers']
         )
 
+        print(workplace)
+
         print('Free citizens  :', free_citizens)
         print('Current workers:', current_workers)
         print('Maximum workers:', max_workers)
@@ -346,7 +376,7 @@ def islandWorkplaces(session, event, stdin_fd, predetermined_input):
         elif workers == input_max_hands:
             workers = max_workers
 
-        print("Setting {} to work!".format(workers))
+        print("\nSetting {} to work!".format(workers))
 
         return extract_workplace_data(
             workplace,
@@ -386,6 +416,8 @@ def islandWorkplaces(session, event, stdin_fd, predetermined_input):
             workplace_ind = workplace_id - 1
             workplace = workplaces[workplace_ind]
 
+            print(workplace_id, workplace_ind)
+            print(workplace)
             # Simulate person
             open_island_window(workplace['islandId'])
             workplace = get_workplace_data(
@@ -393,6 +425,8 @@ def islandWorkplaces(session, event, stdin_fd, predetermined_input):
                 workplace['material'],
                 workplace['islandId']
             )
+
+            print(workplace)
 
             print("\n")
             print("     City: ", workplace['cityName'])

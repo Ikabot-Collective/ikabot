@@ -10,7 +10,7 @@ from datetime import datetime
 getcontext().prec = 30
 
 
-def addThousandSeparator(num, character='.'):
+def addThousandSeparator(num, character='.', include_sign=False):
     """Formats the number into a string and adds a `character` for every thousand (eg. 3000 -> 3.000)
     Parameters
     ----------
@@ -18,13 +18,15 @@ def addThousandSeparator(num, character='.'):
         integer number to format
     character : str
         character to act as the thousand separator
-
+    include_sign : bool
+        Show + infront of the number
     Returns
     -------
     number : str
         a string representing that number with added `character` for every thousand
     """
-    return '{0:,}'.format(int(num)).replace(',', character)
+    sign = '+' if include_sign else ''
+    return format(int(num), sign+',').replace(',', character)
 
 
 def daysHoursMinutes(totalSeconds):
