@@ -249,7 +249,7 @@ def islandWorkplaces(session, event, stdin_fd, predetermined_input):
                     addThousandSeparator(max_workers)
                 ),
                 "{} / {}".format(
-                    0 if overcharged == 0 else min(0, total_workers - max_workers),
+                    0 if overcharged == 0 else max(0, total_workers - max_workers),
                     overcharged
                 ),
                 workplace['level'] + ('+' if upgrading else ' '),
