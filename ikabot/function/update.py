@@ -1,12 +1,10 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import gettext
 import sys
-from ikabot.helpers.pedirInfo import read
-from ikabot.helpers.process import run
-from ikabot.helpers.gui import *
+
 from ikabot.config import *
+from ikabot.helpers.gui import *
 
 t = gettext.translation('update', localedir, languages=languages, fallback=True)
 _ = t.gettext

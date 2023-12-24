@@ -1,28 +1,17 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import re
-import os
-import sys
-import json
 import time
-import random
-import getpass
-import datetime
-import gettext
-import requests
 import traceback
-import base64
-from ikabot import config
-from ikabot.config import *
 from collections import deque
-from ikabot.helpers.botComm import *
-from ikabot.helpers.gui import banner
-from ikabot.helpers.aesCipher import *
-from ikabot.helpers.pedirInfo import read
-from ikabot.helpers.getJson import getCity
-from ikabot.helpers.varios import getDateTime
+
+import requests
 from urllib3.exceptions import InsecureRequestWarning
+
+from ikabot.helpers.aesCipher import *
+from ikabot.helpers.getJson import getCity
+from ikabot.helpers.pedirInfo import read
+from ikabot.helpers.varios import getDateTime
 
 t = gettext.translation('session', localedir, languages=languages, fallback=True)
 _ = t.gettext
