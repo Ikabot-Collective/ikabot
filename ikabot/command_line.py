@@ -1,12 +1,14 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+import logging
 import os
 import sys
 import gettext
 import multiprocessing
 import time
 import datetime
+from logging.handlers import TimedRotatingFileHandler
+
 from ikabot.config import *
 from ikabot.web.session import *
 from ikabot.helpers.gui import *
@@ -254,6 +256,21 @@ def start():
         clear()
         session.logout()
 
+def setup_logging():
+    if isWindows:
+        logfile = os.getenv('temp') + '/ikabot.log'
+    else:
+        logfile = '/var/log/ikabot.log'
+
+    # Configure logging
+    logging.basicConfig(
+        level=logging.INFO,
+        datefmt='%Y-%m-%dT%H:%M:%S.%f',
+        format='%(asctime)s pid:%(process)-5s %(levelname)-5s %(module)s- %(message)s',
+        handlers=[
+            TimedRotatingFileHandler(logfile, when='midnight'),
+        ]
+    )
 
 def main():
     manager = multiprocessing.Manager()

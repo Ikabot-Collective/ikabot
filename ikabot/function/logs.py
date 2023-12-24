@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 import gettext
+import logging
 import sys
 import pprint
 import requests
@@ -42,14 +43,20 @@ def logs(session, event, stdin_fd, predetermined_input):
                 return
             elif choice == 1:
                 banner()
-                print("The current log level is: " + logLevelsText[session.logLevel] + "\n")
-                print("0) DEBUG")
-                print("1) INFO")
-                print("2) WARN")
-                print("3) ERROR")
-                choice = read(min = 0, max = 3, digit = True)
-                session.updateLogLevel(choice)
-                print("The log level has been set to: " + logLevelsText[session.logLevel] + "\n")
+                print(
+                    "The current log level is: ",
+                    logging.getLevelName(logging.getLogger().getEffectiveLevel())
+                )
+
+                _levels = ['DEBUG', 'INFO', 'WARN', 'ERROR']
+                for i, l in enumerate(_levels):
+                    print("{}) {}".format(i, l))
+                choice = read(min=0, max=len(_levels) - 1, digit=True)
+                logging.getLogger().setLevel(logging.getLevelName(_levels[choice]))
+                print(
+                    "The log level has been set to: ",
+                    logging.getLevelName(logging.getLogger().getEffectiveLevel()),
+                )
                 enter()
             else:    
                 viewLogs(session)

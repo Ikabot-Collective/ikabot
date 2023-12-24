@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+import logging
 import re
 import os
 import json
@@ -45,10 +45,10 @@ def sendToBot(session, msg, Token=False, Photo=None):
     Photo : bytes
         a bytes object representing a picture to be sent.
     """
-    
-    session.writeLog(msg = 'MESSAGE TO TG BOT: ' + msg, module = __name__, level = logLevels.WARN, logTraceback = True, logRequestHistory = True )
+
+    logging.info('Messaging Telegram bot: %s', msg, extra={'module': __name__})
     if checkTelegramData(session) is False:
-        session.writeLog(msg = 'Tried to message TG bot without correct tg data!', module=__name__, level = logLevels.ERROR)
+        logging.error('Telegram data is not correct.', extra={'module': __name__})
         return
     if Token is False:
         msg = 'pid:{}\n{}\n{}'.format(os.getpid(), config.infoUser, msg)
