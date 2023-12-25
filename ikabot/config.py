@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+import logging
 import os
 import random
 import locale
@@ -27,6 +27,12 @@ else:
 update_msg = ''
 
 isWindows = os.name == 'nt'
+if isWindows:
+    LOG_DIR = os.getenv('temp')
+else:
+    LOG_DIR = '/tmp'
+LOG_DIR = os.path.join(LOG_DIR, 'ikabot')
+LOG_FILE = os.path.join(LOG_DIR, 'ikabot.log')
 
 do_ssl_verify = True
 ids_cache = None
@@ -48,13 +54,8 @@ actionRequest = 'REQUESTID'
 piracyMissionToBuildingLevel = {1: 1, 2: 3, 3: 5, 4: 7, 5: 9, 6: 11, 7: 13, 8: 15, 9: 17}
 piracyMissionWaitingTime = {1: 150, 2: 450, 3: 900, 4: 1800, 5: 3600, 6: 7200, 7: 14400, 8: 28800, 9: 57600}
 predetermined_input = []
-logLevelsText = ["DEBUG", "INFO", "WARN", "ERROR"]
-class logLevels:
-    DEBUG = 0
-    INFO  = 1
-    WARN  = 2
-    ERROR = 3
-logLevel = logLevels.WARN
+
+logLevel = logging.INFO
 debugON_alertAttacks = False
 debugON_alertLowWine = False
 debugON_donationBot = False
