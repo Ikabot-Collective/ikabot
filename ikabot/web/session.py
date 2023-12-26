@@ -39,7 +39,7 @@ class Session:
         ----------
         message : Message to be displayed in the table in main menu
         """
-        logging.info('Changing status to {message}', message, extra={'module': __name__})
+        logging.info('Changing status to %s', message)
 
         # read from file
         sessionData = self.getSessionData()

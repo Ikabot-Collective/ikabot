@@ -46,9 +46,9 @@ def sendToBot(session, msg, Token=False, Photo=None):
         a bytes object representing a picture to be sent.
     """
 
-    logging.info('Messaging Telegram bot: %s', msg, extra={'module': __name__})
+    logging.info('Messaging Telegram bot: %s', msg)
     if checkTelegramData(session) is False:
-        logging.error('Telegram data is not correct.', extra={'module': __name__})
+        logging.error('Telegram data is not correct.')
         return
     if Token is False:
         msg = 'pid:{}\n{}\n{}'.format(os.getpid(), config.infoUser, msg)
