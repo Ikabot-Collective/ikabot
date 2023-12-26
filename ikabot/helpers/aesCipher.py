@@ -122,8 +122,6 @@ class AESCipher:
         if shared:
             if 'shared' not in session_data:
                 session_data['shared'] = {}
-            if 'logLevel' not in session_data['shared']:
-                session_data['shared']['logLevel'] = 2 # Warn by default
             session_data['shared'] = {**session_data['shared'], **data}
         else:
             if session.username not in session_data:
