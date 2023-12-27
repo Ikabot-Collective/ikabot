@@ -77,14 +77,18 @@ def islandWorkplaces(session, event, stdin_fd, predetermined_input):
         """
         view = get_view(material_ind)
         data = dict(init_data)
+        time_now = int(json[0][1]['time'])
         background_data = json[0][1]['backgroundData']
         template_data = json[2][1]
         slider_data = template_data['js_ResourceSlider']['slider']
         end_upgrade_time = int(background_data[view + 'EndUpgradeTime'])  # resourceEndUpgradeTime / tradegoodEndUpgradeTime
+        upgrading = end_upgrade_time > 0
+        if upgrading:
+            end_upgrade_time = daysHoursMinutes(int(end_upgrade_time) - time_now)
         data.update({
             'level': background_data[view + 'Level'],  # resourceLevel / tradegoodLevel
-            'upgradeEndTime': daysHoursMinutes(end_upgrade_time),
-            'upgrading': end_upgrade_time > 0,
+            'upgradeEndTime': end_upgrade_time,
+            'upgrading': upgrading,
             'material': material_ind,
             'totalWorkers': template_data['valueWorkers'],
             'freeCitizens': template_data['valueCitizens'],
