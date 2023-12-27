@@ -86,17 +86,19 @@ def islandWorkplaces(session, event, stdin_fd, predetermined_input):
         if upgrading:
             end_upgrade_time = daysHoursMinutes(int(end_upgrade_time) - time_now)
         data.update({
-            'level': background_data[view + 'Level'],  # resourceLevel / tradegoodLevel
-            'upgradeEndTime': end_upgrade_time,
-            'upgrading': upgrading,
+            # workplace related
             'material': material_ind,
-            'totalWorkers': template_data['valueWorkers'],
-            'freeCitizens': template_data['valueCitizens'],
-            'goldPerHour': template_data['valueWorkCosts'],
+            'level': background_data[view + 'Level'],  # resourceLevel / tradegoodLevel
+            'upgrading': upgrading,
+            'upgradeEndTime': end_upgrade_time,
             'production': template_data['js_resource_tooltip_total_production']['text'],
+            'totalWorkers': template_data['valueWorkers'],
             'maxWorkers': slider_data['max_value'],
             'overchargedWorkers': slider_data['overcharge'],
+            # city related
             'availableWood': json[0][1]['headerData']['currentResources']['resource'],
+            'freeCitizens': template_data['valueCitizens'],
+            'goldPerHour': template_data['valueWorkCosts'],
         })
 
         if not data['upgrading'] and json[1][0] == 'changeView':
@@ -281,9 +283,9 @@ def islandWorkplaces(session, event, stdin_fd, predetermined_input):
             return [action_id, action_id]
 
         msg = "\nSelect target workplace between 1 and {}: ".format(workplaces_length)
-        workplace = read(msg=msg, min=1, max=workplaces_length, digit=True)
+        workplace_id = read(msg=msg, min=1, max=workplaces_length, digit=True)
 
-        return [action_id, workplace]
+        return [action_id, workplace_id]
 
     def donate(workplace):
         """
@@ -317,7 +319,20 @@ def islandWorkplaces(session, event, stdin_fd, predetermined_input):
         if donation == input_max:
             donation = maximum_donation
 
-        print("\nDonating {} wood".format(donation))
+        execute = read(
+            msg="{} wood will be donated. Continue? [Y/N]".format(addThousandSeparator(donation)),
+            values=['y', 'Y', 'n', 'N']
+        )
+
+        if execute.lower() == 'n':
+            print("Aborting...")
+            return workplace
+
+        print("\nDonating {} wood to {} workplace from {}".format(
+            addThousandSeparator(donation),
+            materials_names[workplace['material']],
+            workplace['cityName']
+        ))
         
         return extract_workplace_data(
             workplace,
@@ -433,7 +448,16 @@ def islandWorkplaces(session, event, stdin_fd, predetermined_input):
             else:
                 print("Unknown action ", action)
 
+            # update all other workplaces related to this city
+            for ind, wp in enumerate(workplaces):
+                if wp['cityId'] == workplace['cityId'] and ind != workplace_ind:
+                    wp['availableWood'] = workplace['availableWood']
+                    wp['freeCitizens'] = workplace['freeCitizens']
+                    wp['goldPerHour'] = workplace['goldPerHour']
+
+            # update operational workplace
             workplaces[workplace_ind] = workplace
+
             print("\nOperation is successful!")
             enter()
 
