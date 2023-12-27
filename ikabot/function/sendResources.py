@@ -54,7 +54,7 @@ def sendResources(session, event, stdin_fd, predetermined_input):
             if cityO['id'] == cityD['id']:
                 continue
 
-            resources_left = cityO['recursos']
+            resources_left = cityO['availableResources']
             for route in routes:
                 (origin_city, destination_city, __, *toSend) = route
                 if origin_city['id'] == cityO['id']:
@@ -62,13 +62,13 @@ def sendResources(session, event, stdin_fd, predetermined_input):
                         resources_left[i] -= toSend[i]
 
                 # the destination city might be from another player
-                if cityD['propia'] and destination_city['id'] == cityD['id']:
+                if cityD['isOwnCity'] and destination_city['id'] == cityD['id']:
                     for i in range(len(materials_names)):
                         cityD['freeSpaceForResources'][i] -= toSend[i]
 
             banner()
             # the destination city might be from another player
-            if cityD['propia']:
+            if cityD['isOwnCity']:
                 msg = ''
                 for i in range(len(materials_names)):
                     if resources_left[i] > cityD['freeSpaceForResources'][i]:

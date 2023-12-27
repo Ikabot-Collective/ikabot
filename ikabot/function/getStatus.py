@@ -96,7 +96,7 @@ def getStatus(session, event, stdin_fd, predetermined_input):
         (wood, good, typeGood) = getProductionPerSecond(session, city['id'])
         print('\033[1m{}{}{}'.format(color_arr[int(typeGood)], city['cityName'], color_arr[0]))
 
-        resources = city['recursos']
+        resources = city['availableResources']
         storageCapacity = city['storageCapacity']
         color_resources = []
         for i in range(len(materials_names)):
@@ -117,7 +117,7 @@ def getStatus(session, event, stdin_fd, predetermined_input):
 
         hasTavern = 'tavern' in [building['building'] for building in city['position']]
         if hasTavern:
-            consumption_per_hour = city['consumo']
+            consumption_per_hour = city['wineConsumptionPerHour']
             if consumption_per_hour == 0:
                 print(_('{}{}Does not consume wine!{}').format(bcolors.RED, bcolors.BOLD, bcolors.ENDC))
             else:

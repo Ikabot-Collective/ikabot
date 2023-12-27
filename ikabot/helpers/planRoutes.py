@@ -66,7 +66,7 @@ def sendGoods(session, originCityId, destinationCityId, islandId, ships, send):
 
         # add amounts of resources to send
         for i in range(len(send)):
-            if city['recursos'][i] > 0:
+            if city['availableResources'][i] > 0:
                 key = 'cargo_resource' if i == 0 else 'cargo_tradegood{:d}'.format(i)
                 data[key] = send[i]
 
@@ -120,10 +120,10 @@ def executeRoutes(session, routes):
             send = []
             for i in range(len(toSend)):
                 if foreign is False:
-                    min_val = min(origin_city['recursos'][i], toSend[i], storageCapacityInShips,
+                    min_val = min(origin_city['availableResources'][i], toSend[i], storageCapacityInShips,
                                   storageCapacityInCity[i])
                 else:
-                    min_val = min(origin_city['recursos'][i], toSend[i], storageCapacityInShips)
+                    min_val = min(origin_city['availableResources'][i], toSend[i], storageCapacityInShips)
                 send.append(min_val)
                 storageCapacityInShips -= send[i]
                 toSend[i] -= send[i]

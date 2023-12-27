@@ -79,3 +79,5 @@ debugON_buyResources = False
 debugON_activateMiracle = False
 debugON_setStatus = False
 debugON_updateStatus = False
+MAXIMUM_CITY_NAME_LENGTH = 20
+SECONDS_IN_HOUR = 60 * 60

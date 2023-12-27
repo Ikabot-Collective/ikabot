@@ -11,6 +11,7 @@ from decimal import *
 from ikabot.config import *
 from ikabot.helpers.getJson import *
 from ikabot.helpers.gui import *
+from ikabot.helpers.varios import decodeUnicodeEscape
 
 t = gettext.translation('pedirInfo', localedir, languages=languages, fallback=True)
 _ = t.gettext
@@ -120,14 +121,8 @@ def chooseCity(session, foreign=False):
             i += 1
             resource_index = str(cities[city_id]['tradegood'])
             resource_abb = resources_abbreviations[resource_index]
-            city_name = cities[city_id]['name']
-            matches = re.findall(r'u[0-9a-f]{4}', city_name)
-            for match in matches:
-                to_unicode = '\\' + match
-                to_unicode = to_unicode.encode().decode('unicode-escape')
-                city_name = city_name.replace(match, to_unicode)
-            num = ' ' + str(i) if i < 10 else str(i)
-            menu_cities += '{}: {}{}{}\n'.format(num, city_name, pad(city_name), resource_abb)
+            city_name = decodeUnicodeEscape(cities[city_id]['name'])
+            menu_cities += '{: >2}: {}{}{}\n'.format(i, city_name, pad(city_name), resource_abb)
         menu_cities = menu_cities[:-1]
     if foreign:
         print(_(' 0: foreign city'))
@@ -173,22 +168,14 @@ def chooseForeignCity(session):
         return chooseCity(session, foreign=True)
     html = session.get(island_url + island_id)
     island = getIsland(html)
-    longest_city_name_length = 0
-    for city in island['cities']:
-        if city['type'] == 'city':
-            city_name_length = len(city['name'])
-            if city_name_length > longest_city_name_length:
-                longest_city_name_length = city_name_length
 
-    def pad(name):
-        return ' ' * (longest_city_name_length - len(name) + 2)
     i = 0
     city_options = []
     for city in island['cities']:
-        if city['type'] == 'city' and city['state'] == '' and city['Name'] != session.username:
+        if city['type'] == 'city' and city['state'] == '' and city['ownerName'] != session.username:
             i += 1
             num = ' ' + str(i) if i < 10 else str(i)
-            print('{}: {}{}({})'.format(num, city['name'], pad(city['name']), city['Name']))
+            print('{: >2}: {: >{max_city_name_length}} ({})'.format(num, decodeUnicodeEscape(city['name']), decodeUnicodeEscape(city['Name']), max_city_name_length=MAXIMUM_CITY_NAME_LENGTH))
             city_options.append(city)
     if i == 0:
         print(_('There are no cities where to send resources on this island'))
@@ -197,8 +184,8 @@ def chooseForeignCity(session):
     selected_city_index = read(min=1, max=i)
     city = city_options[selected_city_index - 1]
     city['islandId'] = island['id']
-    city['cityName'] = city['name']
-    city['propia'] = False
+    city['cityName'] = decodeUnicodeEscape(city['name'])
+    city['isOwnCity'] = False
     return city
 
 

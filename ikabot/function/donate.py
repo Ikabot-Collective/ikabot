@@ -32,7 +32,7 @@ def donate(session, event, stdin_fd, predetermined_input):
         city = chooseCity(session)
         banner()
 
-        woodAvailable = city['recursos'][0]
+        woodAvailable = city['availableResources'][0]
 
         islandId = city['islandId']
         html = session.get(island_url + islandId)

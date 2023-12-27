@@ -116,3 +116,15 @@ def normalizeDicts(list_of_dicts):
     """
     all_keys = set().union(*[d.keys() for d in list_of_dicts])
     return [ {k: (d[k] if k in d else None) for k in all_keys} for d in list_of_dicts]
+
+def decodeUnicodeEscape(input_string):
+    """
+    Replace Unicode escape sequences (e.g., u043c) with corresponding UTF-8 characters.
+
+    Parameters:
+    - input_string (str): The original string.
+
+    Returns:
+    - str: The string with replaced Unicode escape sequences.
+    """
+    return re.sub(r'u([0-9a-fA-F]{4})', lambda x: chr(int(x.group(1), 16)), input_string)

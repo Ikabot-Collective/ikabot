@@ -4,6 +4,7 @@
 import re
 import json
 from ikabot.helpers.resources import *
+from ikabot.helpers.varios import decodeUnicodeEscape
 
 
 def getFreeCitizens(html):
@@ -18,12 +19,12 @@ def getFreeCitizens(html):
     freeCitizens : int
         an integer representing the amount of free citizens in the given city.
     """
-    ciudadanosDisp = re.search(r'js_GlobalMenu_citizens">(.*?)</span>', html).group(1)
-    return int(ciudadanosDisp.replace(',', '').replace('.', ''))
+    freeCitizens = re.search(r'js_GlobalMenu_citizens">(.*?)</span>', html).group(1)
+    return int(freeCitizens.replace(',', '').replace('.', ''))
 
 
-def onSale(html):
-    """This function is used in the ``getCity`` function to determine the amount of each resource which is on sale in the branch office
+def getResourcesListedForSale(html):
+    """This function is used in the ``getCity`` function to determine the amount of each resource which is listed for sale in the branch office
     Parameters
     ----------
     html : str
@@ -85,11 +86,11 @@ def getCity(html):
     city = re.search(r'"updateBackgroundData",\s?([\s\S]*?)\],\["updateTemplateData"', html).group(1)
     city = json.loads(city, strict=False)
 
-    city['Id'] = city.pop('ownerId')
-    city['Name'] = city.pop('ownerName')
+    city['ownerId'] = city.pop('ownerId')
+    city['ownerName'] = decodeUnicodeEscape(city.pop('ownerName'))
     city['x'] = int(city.pop('islandXCoord'))
     city['y'] = int(city.pop('islandYCoord'))
-    city['cityName'] = city['name']
+    city['cityName'] = decodeUnicodeEscape(city['name'])
 
     i = 0
     for position in city['position']:
@@ -107,14 +108,14 @@ def getCity(html):
             position['building'] = 'empty'
 
     city['id'] = str(city['id'])
-    city['propia'] = True
-    city['recursos'] = getAvailableResources(html, num=True)
+    city['isOwnCity'] = True
+    city['availableResources'] = getAvailableResources(html, num=True)
     city['storageCapacity'] = getWarehouseCapacity(html)
-    city['ciudadanosDisp'] = getFreeCitizens(html)
-    city['consumo'] = getWineConsumption(html)
-    city['enventa'] = onSale(html)
+    city['freeCitizens'] = getFreeCitizens(html)
+    city['wineConsumptionPerHour'] = getWineConsumptionPerHour(html)
+    city['resourcesListedForSale'] = getResourcesListedForSale(html)
     city['freeSpaceForResources'] = []
     for i in range(5):
-        city['freeSpaceForResources'].append(city['storageCapacity'] - city['recursos'][i] - city['enventa'][i])
+        city['freeSpaceForResources'].append(city['storageCapacity'] - city['availableResources'][i] - city['resourcesListedForSale'][i])
 
     return city

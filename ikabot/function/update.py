@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import gettext
 import sys
 import time
 from ikabot.helpers.pedirInfo import read

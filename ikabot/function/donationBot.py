@@ -132,7 +132,7 @@ def do_it(session, cities_ids, cities_dict, waiting_time, max_random_waiting_tim
             # get the storageCapacity and the wood this city has
             html = session.get(city_url + cityId)
             city = getCity(html)
-            wood = city['recursos'][0]
+            wood = city['availableResources'][0]
             storageCapacity = city['storageCapacity']
 
             # get the percentage

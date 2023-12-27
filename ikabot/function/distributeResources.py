@@ -108,7 +108,7 @@ def distribute_evenly(session, resource_type):
         html = session.get(city_url + cityID)  # load html from the get request for that particular city
         city = getCity(html)  # convert the html to a city object
 
-        resourceTotal += city['recursos'][resource_type]  # the cities resources are added to the total
+        resourceTotal += city['availableResources'][resource_type]  # the cities resources are added to the total
         allCities[cityID] = city  # adds the city to all cities
 
     # if a city doesn't have enough storage to fit resourceAverage
@@ -133,10 +133,10 @@ def distribute_evenly(session, resource_type):
             for cityID in allCities:
                 if cityID in destinationCities:
                     continue
-                if allCities[cityID]['recursos'][resource_type] > resourceAverage:
-                    originCities[cityID] = allCities[cityID]['recursos'][resource_type] - resourceAverage
+                if allCities[cityID]['availableResources'][resource_type] > resourceAverage:
+                    originCities[cityID] = allCities[cityID]['availableResources'][resource_type] - resourceAverage
                 else:
-                    destinationCities[cityID] = resourceAverage - allCities[cityID]['recursos'][resource_type]
+                    destinationCities[cityID] = resourceAverage - allCities[cityID]['availableResources'][resource_type]
             break
 
     originCities = {k: v for k, v in sorted(originCities.items(), key=lambda item: item[1], reverse=True)}  # sort origin cities in descending order
@@ -191,9 +191,9 @@ def distribute_unevenly(session, resource_type):
             html = session.get(city_url + destination_city_id)
             city = getCity(html)
             if resource_type == 1:  # wine
-                city['available_amount_of_resource'] = city['recursos'][resource_type] - city['consumo'] - 1
+                city['available_amount_of_resource'] = city['availableResources'][resource_type] - city['wineConsumptionPerHour'] - 1
             else:
-                city['available_amount_of_resource'] = city['recursos'][resource_type]
+                city['available_amount_of_resource'] = city['availableResources'][resource_type]
             if city['available_amount_of_resource'] < 0:
                 city['available_amount_of_resource'] = 0
             total_available_resources_from_all_cities += city['available_amount_of_resource']
