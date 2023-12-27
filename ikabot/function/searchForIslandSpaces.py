@@ -1,18 +1,15 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import time
-import gettext
 import traceback
-import sys
-from ikabot.config import *
+
 from ikabot.helpers.botComm import *
-from ikabot.helpers.gui import enter, enter
-from ikabot.helpers.varios import wait, getDateTime
-from ikabot.helpers.signals import setInfoSignal
-from ikabot.helpers.pedirInfo import getIslandsIds
 from ikabot.helpers.getJson import getIsland
+from ikabot.helpers.gui import enter
+from ikabot.helpers.pedirInfo import getIslandsIds
 from ikabot.helpers.process import set_child_mode
+from ikabot.helpers.signals import setInfoSignal
+from ikabot.helpers.varios import wait, getDateTime, decodeUnicodeEscape
 
 t = gettext.translation('searchForIslandSpaces', localedir, languages=languages, fallback=True)
 _ = t.gettext
@@ -34,12 +31,13 @@ def searchForIslandSpaces(session, event, stdin_fd, predetermined_input):
             event.set()
             return
         banner()
+
         print('Do you want to search for spaces on your islands or a specific set of islands?')
         print('(0) Exit')
         print('(1) Search all islands I have colonised')
         print('(2) Search a specific set of islands')
         choice = read(min=0, max=2)
-        islandList = []
+        island_ids = []
         if choice == 0:
             event.set()
             return
@@ -54,13 +52,13 @@ def searchForIslandSpaces(session, event, stdin_fd, predetermined_input):
                 coord = coord.replace(':', '&ycoord=')
                 html = session.get('view=island' + coord)
                 island = getIsland(html)
-                islandList.append(island['id'])
+                island_ids.append(island['id'])
         else:
             pass
 
         banner()
         print('How frequently should the islands be searched in minutes (minimum is 3)?')
-        time = read(min=3, digit=True)
+        waiting_minutes = read(min=3, digit=True)
         banner()
         print('Do you wish to be notified when a fight breaks out and stops on a city on these islands? (Y|N)')
         fights = read(values=['y', 'Y', 'n', 'N'])
@@ -74,10 +72,10 @@ def searchForIslandSpaces(session, event, stdin_fd, predetermined_input):
     set_child_mode(session)
     event.set()
 
-    info = _('\nI search for new spaces each hour\n')
+    info = '\nI search for new spaces every {} minutes\n'.format(waiting_minutes)
     setInfoSignal(session, info)
     try:
-        do_it(session, islandList, time, fights)
+        __execute_monitoring(session, island_ids, waiting_minutes, fights.lower() == 'y')
     except Exception as e:
         msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
         sendToBot(session, msg)
@@ -85,67 +83,135 @@ def searchForIslandSpaces(session, event, stdin_fd, predetermined_input):
         session.logout()
 
 
-def do_it(session, islandList, time, fights):
+def __execute_monitoring(session, specified_island_ids, waiting_minutes, check_fights):
     """
     Parameters
     ----------
     session : ikabot.web.session.Session
         Session object
-    islandList : list[dict]
+    specified_island_ids : list[dict]
         A list containing island objects which should be searched, if an empty list is passed, all the user's colonised islands are searched
-    time : int
-        The time in minutes between two consecutive seraches
-    fights : str
-        String that can either be y or n. Indicates whether or not to scan for fight activity on islands
+    waiting_minutes : int
+        The time in minutes between two consecutive searches
+    check_fights : bool
+        Indicates whether to scan for fight activity on islands
     """
 
     # this dict will contain all the cities from each island
-    # as they where in last scan
+    # as they were in last scan
+    # {islandId: {cityId: city}}
     cities_before_per_island = {}
 
     while True:
-        # this is done inside the loop because the user may colonize in a new island
-        if islandList != []:
-            islandsIds = islandList
-        else:
-            islandsIds = getIslandsIds(session)
-        for islandId in islandsIds:
-            html = session.get(island_url + islandId)
+        islands_ids = specified_island_ids
+        if not islands_ids:
+            # this is done inside the loop because the user may have colonized
+            # a city in a new island
+            islands_ids = getIslandsIds(session)
+
+        for island_id in islands_ids:
+            html = session.get(island_url + island_id)
             island = getIsland(html)
             # cities in the current island
-            cities_now = [city_space for city_space in island['cities'] if city_space['type'] != 'empty']  # loads the islands non empty cities into ciudades
+            cities_now = __extract_cities(island)
 
-            # if we haven't scaned this island before,
-            # save it and do nothing
-            if islandId not in cities_before_per_island:
-                cities_before_per_island[islandId] = cities_now.copy()
+            if island_id in cities_before_per_island:
+                __compare_island_cities(
+                    session,
+                    cities_before=cities_before_per_island[island_id],
+                    cities_now=cities_now,
+                    check_fights=check_fights
+                )
+
+            # update cities_before_per_island for the current island
+            cities_before_per_island[island_id] = dict(cities_now)
+
+        session.setStatus(f'Checked islands {str([int(i) for i in islands_ids]).replace(" ","")} @ {getDateTime()[-8:]}')
+        wait(waiting_minutes * 60)
+
+def __extract_cities(island):
+    '''
+    Extract the cities from island
+    :param island: dict[]
+    :return: dict[dict] cityId -> city
+    '''
+    _res = {}
+
+    _island_name = decodeUnicodeEscape(island['name'])
+    for city in island['cities']:
+        if city['type'] != 'city':
+            continue
+
+        city['islandX'] = island['x']
+        city['islandY'] = island['y']
+        city['tradegood'] = island['tradegood']
+        city['material'] = materials_names[island['tradegood']]
+        city['islandName'] = _island_name
+        city['cityName'] = decodeUnicodeEscape(city['name'])
+        city['ownerName'] = decodeUnicodeEscape(city['Name'])
+        if city['AllyId'] > 0:
+            city['allianceName'] = decodeUnicodeEscape(city['AllyTag'])
+            city['hasAlliance'] = True
+            city['player'] = "{} [{}]".format(city['ownerName'], city['allianceName'])
+        else:
+            city['alliance'] = ''
+            city['hasAlliance'] = False
+            city['player'] = city['ownerName']
+
+        _res[city['id']] = city
+
+    return _res
+
+def __compare_island_cities(session, cities_before, cities_now, check_fights):
+    """
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+        Session object
+    cities_before : dict[dict]
+        A dict of cities on the island on the previous check
+    cities_now : dict[dict]
+        A dict of cities on the island on the current check
+    check_fights : bool
+        Indicates whether to scan for fight activity on islands
+    """
+    __island_info = ' on [{islandX}:{islandY}] {islandName} ({material})'
+
+    # someone disappeared
+    for disappeared_id in __search_additional_keys(cities_before, cities_now):
+        msg = 'The city {cityName} of {player} disappeared' + __island_info
+        sendToBot(session, msg.format(**cities_before[disappeared_id]))
+
+    # someone colonised
+    for colonized_id in __search_additional_keys(cities_now, cities_before):
+        msg = 'Player {player} created a new city {cityName}' + __island_info
+        sendToBot(session, msg.format(**cities_now[colonized_id]))
+
+    if check_fights:
+        for city_id, city_before in cities_before.items():
+            city_now = cities_now.get(city_id, None)
+            if city_now is None:
+                continue
+
+            _before_army_action = (city_before.get('infos', {})).get('armyAction', None)
+            _now_army_action = (city_now.get('infos', {})).get('armyAction', None)
+
+            if _before_army_action is None and _now_army_action == 'fight':
+                _fight_status = 'started'
+            elif _before_army_action == 'fight' and _now_army_action is None:
+                _fight_status = 'stopped'
             else:
-                cities_before = cities_before_per_island[islandId]
+                continue
 
-                # someone disappeared
-                for city_before in cities_before:
-                    if city_before['id'] not in [city_now['id'] for city_now in cities_now]:
-                        # we didn't find the city_before in the cities_now
-                        msg = _('The city {} of the player {} disappeared in {} {}:{} {}').format(city_before['name'], city_before['ownerName'], materials_names[int(island['tradegood'])], island['x'], island['y'], island['name'])
-                        sendToBot(session, msg)
+            msg = ('A fight {fightStatus} in the city {cityName} '
+                   'of the player {player}') + __island_info
+            sendToBot(session, msg.format(fightStatus=_fight_status, **city_now))
 
-                    if fights.lower() == 'y':
-                        for city_now in cities_now:
-                            if city_now['id'] == city_before['id']:
-                                if 'infos' in city_now and 'infos' not in city_before and 'armyAction' in city_now['infos'] and city_now['infos']['armyAction'] == 'fight':
-                                    msg = _('A fight started in the city {} of the player {} on island {} {}:{} {}').format(city_before['name'], city_before['ownerName'], materials_names[int(island['tradegood'])], island['x'], island['y'], island['name'])
-                                    sendToBot(session, msg)
-                                if 'infos' not in city_now and 'infos' in city_before and 'armyAction' in city_before['infos'] and city_before['infos']['armyAction'] == 'fight':
-                                    msg = _('A fight stopped in the city {} of the player {} on island {} {}:{} {}').format(city_before['name'], city_before['ownerName'], materials_names[int(island['tradegood'])], island['x'], island['y'], island['name'])
-                                    sendToBot(session, msg)
-
-                # someone colonised
-                for city_now in cities_now:
-                    if city_now['id'] not in [city_before['id'] for city_before in cities_before]:
-                        # we didn't find the city_now in the cities_before
-                        msg = _('Player {} created a new city {} in {} {}:{} {}').format(city_now['ownerName'], city_now['name'], materials_names[int(island['tradegood'])], island['x'], island['y'], island['name'])
-                        sendToBot(session, msg)
-                        
-                cities_before_per_island[islandId] = cities_now.copy() # update cities_before_per_island for the current island
-        session.setStatus(f'Checked islands {str([int(i) for i in islandsIds]).replace(" ","")} @ {getDateTime()[-8:]}')
-        wait(time * 60)
+def __search_additional_keys(source, target):
+    '''
+    Search for keys that were in source but are not in the target dictionary
+    :param source: dict[dict]
+    :param target: dict[dict]
+    :return: list[int] ids of the additional keys in the source
+    '''
+    return [k for k in source.keys() if k not in target]
