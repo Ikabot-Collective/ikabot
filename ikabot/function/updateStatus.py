@@ -11,7 +11,7 @@ from decimal import *
 from ikabot.config import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.signals import setInfoSignal
-from ikabot.helpers.process import set_child_mode, updateProcessList, run
+from ikabot.helpers.process import run
 from ikabot.helpers.gui import *
 from ikabot.helpers.resources import *
 from ikabot.helpers.pedirInfo import *
