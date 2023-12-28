@@ -14,6 +14,12 @@ from ikabot.helpers.varios import wait, getDateTime, decodeUnicodeEscape
 t = gettext.translation('searchForIslandSpaces', localedir, languages=languages, fallback=True)
 _ = t.gettext
 
+__inform_fights = 'inform-fights'
+__inform_inactive = 'inform-inactive'
+__inform_vacation = 'inform-vacation'
+__yes_no_values = ['y', 'Y', 'n', 'N']
+__state_inactive = 'inactive'
+__state_vacation = 'vacation'
 
 def searchForIslandSpaces(session, event, stdin_fd, predetermined_input):
     """
@@ -56,13 +62,22 @@ def searchForIslandSpaces(session, event, stdin_fd, predetermined_input):
         else:
             pass
 
-        banner()
         print('How frequently should the islands be searched in minutes (minimum is 3)?')
         waiting_minutes = read(min=3, digit=True)
-        banner()
-        print('Do you wish to be notified when a fight breaks out and stops on a city on these islands? (Y|N)')
-        fights = read(values=['y', 'Y', 'n', 'N'])
-        banner()
+
+        print('Do you wish to be notified if on these islands')
+        inform_list = []
+        for val, msg in [
+            [__inform_fights, 'A fight breaks out or stops'],
+            [__inform_inactive, 'A player becomes active/inactive'],
+            [__inform_vacation, 'A player activates/deactivates vacation'],
+        ]:
+            if read(
+                msg=' - {}? (Y|N)'.format(msg),
+                values=['y', 'Y', 'n', 'N'],
+              ).lower() == 'y':
+                inform_list.append(val)
+
         print(_('I will search for changes in the selected islands'))
         enter()
     except KeyboardInterrupt:
@@ -75,15 +90,14 @@ def searchForIslandSpaces(session, event, stdin_fd, predetermined_input):
     info = '\nI search for new spaces every {} minutes\n'.format(waiting_minutes)
     setInfoSignal(session, info)
     try:
-        __execute_monitoring(session, island_ids, waiting_minutes, fights.lower() == 'y')
+        __execute_monitoring(session, island_ids, waiting_minutes, inform_list)
     except Exception as e:
         msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
         sendToBot(session, msg)
     finally:
         session.logout()
 
-
-def __execute_monitoring(session, specified_island_ids, waiting_minutes, check_fights):
+def __execute_monitoring(session, specified_island_ids, waiting_minutes, inform_list):
     """
     Parameters
     ----------
@@ -93,8 +107,8 @@ def __execute_monitoring(session, specified_island_ids, waiting_minutes, check_f
         A list containing island objects which should be searched, if an empty list is passed, all the user's colonised islands are searched
     waiting_minutes : int
         The time in minutes between two consecutive searches
-    check_fights : bool
-        Indicates whether to scan for fight activity on islands
+    inform_list : list[]
+        List of notification types to send
     """
 
     # this dict will contain all the cities from each island
@@ -120,7 +134,7 @@ def __execute_monitoring(session, specified_island_ids, waiting_minutes, check_f
                     session,
                     cities_before=cities_before_per_island[island_id],
                     cities_now=cities_now,
-                    check_fights=check_fights
+                    inform_list=inform_list
                 )
 
             # update cities_before_per_island for the current island
@@ -130,11 +144,11 @@ def __execute_monitoring(session, specified_island_ids, waiting_minutes, check_f
         wait(waiting_minutes * 60)
 
 def __extract_cities(island):
-    '''
+    """
     Extract the cities from island
     :param island: dict[]
     :return: dict[dict] cityId -> city
-    '''
+    """
     _res = {}
 
     _island_name = decodeUnicodeEscape(island['name'])
@@ -162,7 +176,7 @@ def __extract_cities(island):
 
     return _res
 
-def __compare_island_cities(session, cities_before, cities_now, check_fights):
+def __compare_island_cities(session, cities_before, cities_now, inform_list):
     """
     Parameters
     ----------
@@ -172,8 +186,8 @@ def __compare_island_cities(session, cities_before, cities_now, check_fights):
         A dict of cities on the island on the previous check
     cities_now : dict[dict]
         A dict of cities on the island on the current check
-    check_fights : bool
-        Indicates whether to scan for fight activity on islands
+    inform_list : list[]
+        List of notification types to send
     """
     __island_info = ' on [{islandX}:{islandY}] {islandName} ({material})'
 
@@ -187,31 +201,87 @@ def __compare_island_cities(session, cities_before, cities_now, check_fights):
         msg = 'Player {player} created a new city {cityName}' + __island_info
         sendToBot(session, msg.format(**cities_now[colonized_id]))
 
-    if check_fights:
-        for city_id, city_before in cities_before.items():
-            city_now = cities_now.get(city_id, None)
-            if city_now is None:
+    if __inform_inactive in inform_list:
+        for city, state_before, state_now in __search_state_change(
+            cities_before,
+            cities_now,
+            lambda c: c['state']
+        ):
+            if state_before == __state_inactive:
+                _status = 'active again'
+            elif state_now == __state_inactive:
+                _status = 'inactive'
+            else:
                 continue
 
-            _before_army_action = (city_before.get('infos', {})).get('armyAction', None)
-            _now_army_action = (city_now.get('infos', {})).get('armyAction', None)
+            msg = ('The player {player} with the city {cityName} '
+                   'became {status}!') + __island_info
+            sendToBot(session, msg.format(status=_status, **city))
 
-            if _before_army_action is None and _now_army_action == 'fight':
+    if __inform_vacation in inform_list:
+        for city, state_before, state_now in __search_state_change(
+            cities_before,
+            cities_now,
+            lambda c: c['state']
+        ):
+            if state_before == __state_vacation:
+                _status = 'returned from'
+            elif state_now == __state_vacation:
+                _status = 'went on'
+            else:
+                continue
+
+            msg = ('The player {player} with the city {cityName} '
+                   '{status} vacation!') + __island_info
+            sendToBot(session, msg.format(status=_status, **city))
+
+    if __inform_fights in inform_list:
+        for city, _before_army_action, _now_army_action in __search_state_change(
+            cities_before,
+            cities_now,
+            lambda c: c.get('infos', {}).get('armyAction', None)
+        ):
+
+            if _now_army_action == 'fight':
                 _fight_status = 'started'
-            elif _before_army_action == 'fight' and _now_army_action is None:
+            elif _before_army_action == 'fight':
                 _fight_status = 'stopped'
             else:
                 continue
 
             msg = ('A fight {fightStatus} in the city {cityName} '
                    'of the player {player}') + __island_info
-            sendToBot(session, msg.format(fightStatus=_fight_status, **city_now))
+            sendToBot(session, msg.format(fightStatus=_fight_status, **city))
 
 def __search_additional_keys(source, target):
-    '''
+    """
     Search for keys that were in source but are not in the target dictionary
     :param source: dict[dict]
     :param target: dict[dict]
     :return: list[int] ids of the additional keys in the source
-    '''
+    """
     return [k for k in source.keys() if k not in target]
+
+def __search_state_change(cities_before, cities_now, state_getter):
+    """
+    Searches for change in state between cities_before and cities_now with the
+    state_getter function.
+    Returns list of changes (city, old_state, new_state)
+    !!!IMPORTANT!!! old_state != new_state
+    :param cities_before: dict[dict[]]
+    :param cities_now:    dict[dict[]]
+    :param state_getter:  dict[] -> string
+    :return: list[[city_now, old_state, new_state]]
+    """
+    _res = []
+    for city_id, city_before in cities_before.items():
+        city_now = cities_now.get(city_id, None)
+        if city_now is None:
+            continue
+
+        _state_before = state_getter(city_before)
+        _state_now = state_getter(city_now)
+        if _state_before != _state_now:
+            _res.append([city_now, _state_before, _state_now])
+
+    return _res
