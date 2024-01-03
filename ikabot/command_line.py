@@ -16,7 +16,7 @@ from ikabot.helpers.pedirInfo import read
 from ikabot.function.getStatus import getStatus
 from ikabot.function.donationBot import donationBot
 from ikabot.helpers.botComm import updateTelegramData, telegramDataIsValid
-from ikabot.helpers.process import IkabotProcessListManager
+from ikabot.helpers.process import updateProcessList
 from ikabot.function.constructionList import constructionList
 from ikabot.function.searchForIslandSpaces import searchForIslandSpaces
 from ikabot.function.alertAttacks import alertAttacks
@@ -63,8 +63,18 @@ def menu(session, checkUpdate=True):
 
     banner()
 
-    process_list_manager = IkabotProcessListManager(session)
-    process_list_manager.print_proces_table()
+    process_list = updateProcessList(session)
+    if len(process_list) > 0:
+        # Insert table header
+        table = process_list.copy()
+        table.insert(0,{'pid':'pid', 'action':'task','date':'date','status':'status'})
+        # Get max length of strings in each category (date is always going to be 15)
+        maxPid, maxAction, maxStatus = [max(i) for i in [[len(str(r['pid'])) for r in table], [len(str(r['action'])) for r in table], [len(str(r['status'])) for r in table]]]
+        # Print header
+        print('|{:^{maxPid}}|{:^{maxAction}}|{:^15}|{:^{maxStatus}}|'.format(table[0]['pid'], table[0]['action'], table[0]['date'], table[0]['status'], maxPid=maxPid, maxAction=maxAction, maxStatus=maxStatus))
+        # Print process list
+        [print('|{:^{maxPid}}|{:^{maxAction}}|{:^15}|{:^{maxStatus}}|'.format(r['pid'], r['action'], datetime.datetime.fromtimestamp(r['date']).strftime('%b %d %H:%M:%S'), r['status'], maxPid=maxPid, maxAction=maxAction, maxStatus=maxStatus)) for r in process_list]
+        print('')
 
     menu_actions = {
         1:            constructionList,
@@ -201,24 +211,11 @@ def menu(session, checkUpdate=True):
         try:
             event = multiprocessing.Event()  # creates a new event
             config.has_params = len(config.predetermined_input) > 0
-            process = multiprocessing.Process(
-                target=menu_actions[selected],
-                args=(session, event, sys.stdin.fileno(), config.predetermined_input),
-                name=menu_actions[selected].__name__
-            )
-
+            process = multiprocessing.Process(target=menu_actions[selected], args=(session, event, sys.stdin.fileno(), config.predetermined_input), name=menu_actions[selected].__name__)
             process.start()
-            process_list_manager.add_process({
-                'pid': process.pid,
-                'action': menu_actions[selected].__name__,
-                'date': time.time(),
-                'status': 'started'
-            })
-
-            # waits for the process to fire the event that's been given to it.
-            # When it does  this process gets back control of the command line
-            # and asks user for more input
-            event.wait()
+            process_list.append({'pid': process.pid, 'action': menu_actions[selected].__name__, 'date': time.time(), 'status': 'started'})
+            updateProcessList(session, programprocesslist=process_list)
+            event.wait()  # waits for the process to fire the event that's been given to it. When it does  this process gets back control of the command line and asks user for more input
         except KeyboardInterrupt:
             pass
         menu(session, checkUpdate=False)

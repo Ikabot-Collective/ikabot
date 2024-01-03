@@ -1,10 +1,14 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
+import gettext
+import sys
+import requests
 import base64
 import time
-
-import requests
-
+from ikabot.helpers.pedirInfo import read, enter
+from ikabot.helpers.gui import *
+from ikabot.config import *
+from ikabot.helpers.process import updateProcessList, run
 from ikabot.helpers.botComm import *
 
 t = gettext.translation('killTasks', localedir, languages=languages, fallback=True)
