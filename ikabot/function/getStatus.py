@@ -1,18 +1,8 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import os
-import re
-import gettext
-from decimal import *
-from ikabot.config import *
-from ikabot.helpers.gui import *
-from ikabot.helpers.naval import *
 from ikabot.helpers.varios import *
-from ikabot.helpers.resources import *
 from ikabot.helpers.pedirInfo import *
-from ikabot.helpers.getJson import getCity
-from ikabot.helpers.market import getGold
 
 t = gettext.translation('getStatus', localedir, languages=languages, fallback=True)
 _ = t.gettext
