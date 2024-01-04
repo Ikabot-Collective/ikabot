@@ -532,7 +532,7 @@ class Session:
                             print('• Press F12 to open up the dev tools')
                             print('• In the dev tools click the tab "Application" if on Chrome or "Storage" if on Firefox')
                             print('• Within this window, there should be a dropdown menu called "Cookies" on the far left')
-                            print('• Select the row "https://s54-fr.ikariam.gameforge.com"')
+                            print('• Select the row "https://s[nubmer]-[region].ikariam.gameforge.com"')
                             print('• Look in the table on the right for the entry named "ikariam"')
                             print('• Copy its value and paste it just below')
                             
