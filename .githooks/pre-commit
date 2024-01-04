@@ -1,10 +1,8 @@
 #!/bin/bash
 
-branch_name=$(git rev-parse --abbrev-ref HEAD)
 release='dev'
-if [ "$current_branch" == "main" ] || [ "$current_branch" == "master" ]; then
-    echo Remove the branch name if main/master
-    release=''
+if [ "$1" == 'release' ]; then
+  release=''
 fi
 
 export TZ=UTC
