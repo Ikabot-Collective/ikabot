@@ -1,28 +1,30 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import re
-import os
-import sys
-import json
-import time
-import random
-import getpass
-import datetime
-import gettext
-import requests
-import traceback
 import base64
+import datetime
+import getpass
+import gettext
+import json
+import os
+import random
+import re
+import sys
+import time
+import traceback
+from collections import deque
+
+import requests
+from urllib3.exceptions import InsecureRequestWarning
+
 from ikabot import config
 from ikabot.config import *
-from collections import deque
-from ikabot.helpers.botComm import *
-from ikabot.helpers.gui import banner
 from ikabot.helpers.aesCipher import *
-from ikabot.helpers.pedirInfo import read
+from ikabot.helpers.botComm import *
 from ikabot.helpers.getJson import getCity
+from ikabot.helpers.gui import banner
+from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.varios import getDateTime
-from urllib3.exceptions import InsecureRequestWarning
 
 t = gettext.translation('session', localedir, languages=languages, fallback=True)
 _ = t.gettext
@@ -525,10 +527,14 @@ class Session:
                         if choice in ['n','N']:
                             sys.exit(msg)
                         while True:
-                            print('Log into the account via browser and then press F12 to open up the dev tools')
-                            print('In the dev tools click the tab "Application" if on Chrome or "Storage" if on Firefox')
-                            print('Within this window, there should be a dropdown menu called "Cookies" on the far left.')
-                            print('Find the "ikariam" cookie and paste it below:')
+                            print('• Log into the account via browser')
+                            print('• Load your city view')
+                            print('• Press F12 to open up the dev tools')
+                            print('• In the dev tools click the tab "Application" if on Chrome or "Storage" if on Firefox')
+                            print('• Within this window, there should be a dropdown menu called "Cookies" on the far left')
+                            print('• Select the row "https://s54-fr.ikariam.gameforge.com"')
+                            print('• Look in the table on the right for the entry named "ikariam"')
+                            print('• Copy its value and paste it just below')
                             
                             ikariam_cookie = read(msg='\nEnter ikariam cookie manually: ').split('=')[-1]
                             cookie_obj = requests.cookies.create_cookie(domain=self.host, name='ikariam', value=ikariam_cookie)
