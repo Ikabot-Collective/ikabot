@@ -339,7 +339,6 @@ def chooseResourceProviders(session, cities_ids, cities, city_id, resource, miss
     print(_('From what cities obtain {}?').format(materials_names[resource].lower()))
 
     tradegood_initials = [material_name[0] for material_name in materials_names]
-    maxName = max([len(cities[city]['name']) for city in cities if cities[city]['id'] != city_id])
 
     origin_cities = []
     total_available = 0
@@ -356,8 +355,11 @@ def chooseResourceProviders(session, cities_ids, cities, city_id, resource, miss
 
         # ask the user it this city should provide resources
         tradegood_initial = tradegood_initials[int(cities[cityId]['tradegood'])]
-        pad = ' ' * (maxName - len(cities[cityId]['name']))
-        msg = '{}{} ({}): {} [Y/n]:'.format(pad, cities[cityId]['name'], tradegood_initial, addThousandSeparator(available))
+        city_name_padded = "{: >{len}}".format(
+            decodeUnicodeEscape(cities[cityId]['name']),
+            len=MAXIMUM_CITY_NAME_LENGTH,
+        )
+        msg = '{} ({}): {} [Y/n]:'.format(city_name_padded, tradegood_initial, addThousandSeparator(available))
         choice = read(msg=msg, values=['Y', 'y', 'N', 'n', ''])
         if choice.lower() == 'n':
             continue
