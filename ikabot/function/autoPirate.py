@@ -1,17 +1,13 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import gettext
-import sys
-import requests
-import re
-import traceback
 import time
-from ikabot.helpers.pedirInfo import *
-from ikabot.helpers.gui import *
-from ikabot.config import *
-from ikabot.helpers.getJson import *
+import traceback
+
+import requests
+
 from ikabot.helpers.botComm import *
+from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.varios import wait
 from ikabot.helpers.process import run, set_child_mode
 

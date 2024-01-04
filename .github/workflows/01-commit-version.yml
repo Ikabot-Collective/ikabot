@@ -1,0 +1,23 @@
+name: Set Version on Main/Master
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  set-version:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set Version
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          version=$(.githooks/pre-commit release)
+          git commit -m "Set release version to $version"
+          git push

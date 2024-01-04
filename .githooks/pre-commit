@@ -1,0 +1,27 @@
+#!/bin/bash
+
+release='dev'
+if [ "$1" == 'release' ]; then
+  release=''
+fi
+
+export TZ=UTC
+year=$(date +%Y)
+month=$(date +%m)
+day=$(date +%d)
+current_time=$(date +"%H%M%S")
+version="$year.$month$day.$release$current_time"
+
+REPO_ROOT=$(git rev-parse --show-toplevel)
+setup_file=$REPO_ROOT/setup.py
+
+expression="s/version=.*$/version='$version',/"
+
+echo $version
+
+case "$(uname -s)" in
+    Darwin*)        sed -i '' $expression $setup_file ;;
+    Linux* | *)     sed -i $expression $setup_file ;;
+esac
+
+git add $setup_file
