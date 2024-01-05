@@ -128,3 +128,32 @@ def decodeUnicodeEscape(input_string):
     - str: The string with replaced Unicode escape sequences.
     """
     return re.sub(r'u([0-9a-fA-F]{4})', lambda x: chr(int(x.group(1), 16)), input_string)
+
+def timeStringToSec(time_string):
+    """Returns number of seconds from a time string (eg. 5h 35m -> 20100s)
+    Parameters
+    ----------
+    time_string : str
+        String that needs to be converted to number of seconds
+    
+    Returns
+    -------
+    seconds : int
+        Number of seconds
+    """
+    hours = re.search(r'(\d+)h', time_string)
+    if hours is None:
+        hours = 0
+    else:
+        hours = int(hours.group(1)) * 3600
+    minutes = re.search(r'(\d+)m', time_string)
+    if minutes is None:
+        minutes = 0
+    else:
+        minutes = int(minutes.group(1)) * 60
+    seconds = re.search(r'(\d+)s', time_string)
+    if seconds is None:
+        seconds = 0
+    else:
+        seconds = int(seconds.group(1)) * 1
+    return hours + minutes + seconds
