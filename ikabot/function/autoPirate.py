@@ -12,7 +12,7 @@ from ikabot.helpers.gui import *
 from ikabot.config import *
 from ikabot.helpers.getJson import *
 from ikabot.helpers.botComm import *
-from ikabot.helpers.varios import wait
+from ikabot.helpers.varios import wait, timeStringToSec
 from ikabot.helpers.process import run, set_child_mode
 
 t = gettext.translation('buyResources', localedir, languages=languages, fallback=True)
@@ -298,19 +298,4 @@ def getCurrentMissionWaitingTime(html):
         return 0
     else:
         time_string = match.group(1)
-        hours = re.search(r'(\d+)h', time_string)
-        if hours is None:
-            hours = 0
-        else:
-            hours = int(hours.group(1)) * 3600
-        minutes = re.search(r'(\d+)m', time_string)
-        if minutes is None:
-            minutes = 0
-        else:
-            minutes = int(minutes.group(1)) * 60
-        seconds = re.search(r'(\d+)s', time_string)
-        if seconds is None:
-            seconds = 0
-        else:
-            seconds = int(seconds.group(1)) * 1
-        return hours + minutes + seconds
+        return timeStringToSec(time_string)
