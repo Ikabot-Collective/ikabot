@@ -1,22 +1,23 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import gettext
 import re
 import time
 import traceback
-import gettext
 from decimal import *
+
 from ikabot.config import *
-from ikabot.helpers.signals import setInfoSignal
-from ikabot.helpers.process import set_child_mode
+from ikabot.helpers.botComm import *
+from ikabot.helpers.getJson import getCity
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import getIdsOfCities
-from ikabot.helpers.varios import daysHoursMinutes
-from ikabot.helpers.getJson import getCity
+from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.resources import *
-from ikabot.helpers.botComm import *
+from ikabot.helpers.signals import setInfoSignal
+from ikabot.helpers.varios import daysHoursMinutes
 
-t = gettext.translation('alertLowWine', localedir, languages=languages, fallback=True)
+t = gettext.translation("alertLowWine", localedir, languages=languages, fallback=True)
 _ = t.gettext
 
 getcontext().prec = 30
@@ -38,8 +39,17 @@ def alertLowWine(session, event, stdin_fd, predetermined_input):
             event.set()
             return
         banner()
-        hours = read(msg=_('How many hours should be left until the wine runs out in a city so that it\'s alerted?'), min=1)
-        print(_('It will be alerted when the wine runs out in less than {:d} hours in any city').format(hours))
+        hours = read(
+            msg=_(
+                "How many hours should be left until the wine runs out in a city so that it's alerted?"
+            ),
+            min=1,
+        )
+        print(
+            _(
+                "It will be alerted when the wine runs out in less than {:d} hours in any city"
+            ).format(hours)
+        )
         enter()
     except KeyboardInterrupt:
         event.set()
@@ -48,12 +58,12 @@ def alertLowWine(session, event, stdin_fd, predetermined_input):
     set_child_mode(session)
     event.set()
 
-    info = _('\nI alert if the wine runs out in less than {:d} hours\n').format(hours)
+    info = _("\nI alert if the wine runs out in less than {:d} hours\n").format(hours)
     setInfoSignal(session, info)
     try:
         do_it(session, hours)
     except Exception as e:
-        msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
+        msg = _("Error in:\n{}\nCause:\n{}").format(info, traceback.format_exc())
         sendToBot(session, msg)
     finally:
         session.logout()
@@ -81,14 +91,16 @@ def do_it(session, hours):
             city = getCity(html)
 
             # if the city doesn't even have a tavern built, ignore it
-            if 'tavern' not in [building['building'] for building in city['position']]:
+            if "tavern" not in [building["building"] for building in city["position"]]:
                 continue
 
-            consumption_per_hour = city['wineConsumptionPerHour']
+            consumption_per_hour = city["wineConsumptionPerHour"]
 
             # is a wine city
-            if cities[cityId]['tradegood'] == '1':
-                wine_production = getProductionPerSecond(session, cityId)[1] * SECONDS_IN_HOUR
+            if cities[cityId]["tradegood"] == "1":
+                wine_production = (
+                    getProductionPerSecond(session, cityId)[1] * SECONDS_IN_HOUR
+                )
                 if consumption_per_hour > wine_production:
                     consumption_per_hour -= wine_production
                 else:
@@ -96,23 +108,25 @@ def do_it(session, hours):
                     continue
 
             consumption_per_seg = Decimal(consumption_per_hour) / Decimal(3600)
-            wine_available = city['availableResources'][1]
+            wine_available = city["availableResources"][1]
 
             if consumption_per_seg == 0:
                 if was_alerted[cityId] is False:
-                    msg = _('The city {} is not consuming wine!').format(city['name'])
+                    msg = _("The city {} is not consuming wine!").format(city["name"])
                     sendToBot(session, msg)
                     was_alerted[cityId] = True
                 continue
 
             seconds_left = Decimal(wine_available) / Decimal(consumption_per_seg)
-            if seconds_left < hours*60*60:
+            if seconds_left < hours * 60 * 60:
                 if was_alerted[cityId] is False:
                     time_left = daysHoursMinutes(seconds_left)
-                    msg = _('In {}, the wine will run out in {}').format(time_left, city['name'])
+                    msg = _("In {}, the wine will run out in {}").format(
+                        time_left, city["name"]
+                    )
                     sendToBot(session, msg)
                     was_alerted[cityId] = True
             else:
                 was_alerted[cityId] = False
 
-        time.sleep(20*60)
+        time.sleep(20 * 60)

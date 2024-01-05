@@ -1,25 +1,35 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import gettext
+import json
+import os
 import re
 import sys
-import json
-import gettext
-import os
-from ikabot import config
 from decimal import *
+
+from ikabot import config
 from ikabot.config import *
 from ikabot.helpers.getJson import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.varios import decodeUnicodeEscape
 
-t = gettext.translation('pedirInfo', localedir, languages=languages, fallback=True)
+t = gettext.translation("pedirInfo", localedir, languages=languages, fallback=True)
 _ = t.gettext
 
 getcontext().prec = 30
 
 
-def read(min=None, max=None, digit=False, msg=prompt, values=None, empty=False, additionalValues=None, default=None):  # user input
+def read(
+    min=None,
+    max=None,
+    digit=False,
+    msg=prompt,
+    values=None,
+    empty=False,
+    additionalValues=None,
+    default=None,
+):  # user input
     """Reads input from user
     Parameters
     ----------
@@ -50,7 +60,7 @@ def read(min=None, max=None, digit=False, msg=prompt, values=None, empty=False, 
         pass
 
     def _invalid():
-        print('\033[1A\033[K', end="")  # remove line
+        print("\033[1A\033[K", end="")  # remove line
         return read(min, max, digit, msg, values, additionalValues=additionalValues)
 
     try:
@@ -61,10 +71,10 @@ def read(min=None, max=None, digit=False, msg=prompt, values=None, empty=False, 
     if additionalValues is not None and read_input in additionalValues:
         return read_input
 
-    if read_input == '' and default is not None:
+    if read_input == "" and default is not None:
         return default
 
-    if read_input == '' and empty is True:
+    if read_input == "" and empty is True:
         return read_input
 
     if digit is True or min is not None or max is not None:
@@ -100,32 +110,39 @@ def chooseCity(session, foreign=False):
     """
     global menu_cities
     (ids, cities) = getIdsOfCities(session)
-    if menu_cities == '':
+    if menu_cities == "":
         longest_city_name_length = 0
         for city_id in ids:
-            length = len(cities[city_id]['name'])
+            length = len(cities[city_id]["name"])
             if length > longest_city_name_length:
                 longest_city_name_length = length
 
         def pad(city_name):
-            return ' ' * (longest_city_name_length - len(city_name) + 2)
+            return " " * (longest_city_name_length - len(city_name) + 2)
 
-        resources_abbreviations = {'1': _('(W)'), '2': _('(M)'), '3': _('(C)'), '4': _('(S)')}
+        resources_abbreviations = {
+            "1": _("(W)"),
+            "2": _("(M)"),
+            "3": _("(C)"),
+            "4": _("(S)"),
+        }
 
         i = 0
         if foreign:
-            print(_(' 0: foreign city'))
+            print(_(" 0: foreign city"))
         else:
-            print('')
+            print("")
         for city_id in ids:
             i += 1
-            resource_index = str(cities[city_id]['tradegood'])
+            resource_index = str(cities[city_id]["tradegood"])
             resource_abb = resources_abbreviations[resource_index]
-            city_name = decodeUnicodeEscape(cities[city_id]['name'])
-            menu_cities += '{: >2}: {}{}{}\n'.format(i, city_name, pad(city_name), resource_abb)
+            city_name = decodeUnicodeEscape(cities[city_id]["name"])
+            menu_cities += "{: >2}: {}{}{}\n".format(
+                i, city_name, pad(city_name), resource_abb
+            )
         menu_cities = menu_cities[:-1]
     if foreign:
-        print(_(' 0: foreign city'))
+        print(_(" 0: foreign city"))
     print(menu_cities)
 
     if foreign:
@@ -152,17 +169,19 @@ def chooseForeignCity(session):
         a city object representing the city the user chose
     """
     banner()
-    x = read(msg='coordinate x:', digit=True)
-    y = read(msg='coordinate y:', digit=True)
-    print('')
-    url = 'view=worldmap_iso&islandX={}&islandY={}&oldBackgroundView=island&islandWorldviewScale=1'.format(x, y)
+    x = read(msg="coordinate x:", digit=True)
+    y = read(msg="coordinate y:", digit=True)
+    print("")
+    url = "view=worldmap_iso&islandX={}&islandY={}&oldBackgroundView=island&islandWorldviewScale=1".format(
+        x, y
+    )
     html = session.get(url)
     try:
-        islands_json = re.search(r'jsonData = \'(.*?)\';', html).group(1)
+        islands_json = re.search(r"jsonData = \'(.*?)\';", html).group(1)
         islands_json = json.loads(islands_json, strict=False)
-        island_id = islands_json['data'][str(x)][str(y)][0]
+        island_id = islands_json["data"][str(x)][str(y)][0]
     except Exception:
-        print(_('Incorrect coordinates'))
+        print(_("Incorrect coordinates"))
         enter()
         banner()
         return chooseCity(session, foreign=True)
@@ -171,21 +190,32 @@ def chooseForeignCity(session):
 
     i = 0
     city_options = []
-    for city in island['cities']:
-        if city['type'] == 'city' and city['state'] == '' and city['ownerName'] != session.username:
+    for city in island["cities"]:
+        if (
+            city["type"] == "city"
+            and city["state"] == ""
+            and city["ownerName"] != session.username
+        ):
             i += 1
-            num = ' ' + str(i) if i < 10 else str(i)
-            print('{: >2}: {: >{max_city_name_length}} ({})'.format(num, decodeUnicodeEscape(city['name']), decodeUnicodeEscape(city['Name']), max_city_name_length=MAXIMUM_CITY_NAME_LENGTH))
+            num = " " + str(i) if i < 10 else str(i)
+            print(
+                "{: >2}: {: >{max_city_name_length}} ({})".format(
+                    num,
+                    decodeUnicodeEscape(city["name"]),
+                    decodeUnicodeEscape(city["Name"]),
+                    max_city_name_length=MAXIMUM_CITY_NAME_LENGTH,
+                )
+            )
             city_options.append(city)
     if i == 0:
-        print(_('There are no cities where to send resources on this island'))
+        print(_("There are no cities where to send resources on this island"))
         enter()
         return chooseCity(session, foreign=True)
     selected_city_index = read(min=1, max=i)
     city = city_options[selected_city_index - 1]
-    city['islandId'] = island['id']
-    city['cityName'] = decodeUnicodeEscape(city['name'])
-    city['isOwnCity'] = False
+    city["islandId"] = island["id"]
+    city["cityName"] = decodeUnicodeEscape(city["name"])
+    city["isOwnCity"] = False
     return city
 
 
@@ -205,10 +235,12 @@ def askForValue(text, max_val):
         integer representing the user's input
         if the user has inputed nothing, 0 will be returned instead
     """
-    var = read(msg=text, min=0, max=max_val, default=0, additionalValues=['all', 'half'])
-    if var == 'all':
+    var = read(
+        msg=text, min=0, max=max_val, default=0, additionalValues=["all", "half"]
+    )
+    if var == "all":
         var = max_val
-    elif var == 'half':
+    elif var == "half":
         var = max_val // 2
     return var
 
@@ -231,9 +263,14 @@ def getIdsOfCities(session, all=False):
     global ids_cache
     if ids_cache is None or cities_cache is None or session.padre is False:
         html = session.get()
-        cities_cache = re.search(r'relatedCityData:\sJSON\.parse\(\'(.+?),\\"additionalInfo', html).group(1) + '}'
-        cities_cache = cities_cache.replace('\\', '')
-        cities_cache = cities_cache.replace('city_', '')
+        cities_cache = (
+            re.search(
+                r'relatedCityData:\sJSON\.parse\(\'(.+?),\\"additionalInfo', html
+            ).group(1)
+            + "}"
+        )
+        cities_cache = cities_cache.replace("\\", "")
+        cities_cache = cities_cache.replace("city_", "")
         cities_cache = json.loads(cities_cache, strict=False)
 
         ids_cache = [city_id for city_id in cities_cache]
@@ -241,8 +278,16 @@ def getIdsOfCities(session, all=False):
 
     # {'coords': '[x:y] ', 'id': idCiudad, 'tradegood': '..', 'name': 'nomberCiudad', 'relationship': 'ownCity'|'occupiedCities'|..}
     if all is False:
-        ids_own = [city_id for city_id in cities_cache if cities_cache[city_id]['relationship'] == 'ownCity']
-        ids_other = [city_id for city_id in cities_cache if cities_cache[city_id]['relationship'] != 'ownCity']
+        ids_own = [
+            city_id
+            for city_id in cities_cache
+            if cities_cache[city_id]["relationship"] == "ownCity"
+        ]
+        ids_other = [
+            city_id
+            for city_id in cities_cache
+            if cities_cache[city_id]["relationship"] != "ownCity"
+        ]
         own_cities = cities_cache.copy()
         for id in ids_other:
             del own_cities[id]
@@ -268,6 +313,6 @@ def getIslandsIds(session):
     for city_id in cities_ids:
         html = session.get(city_url + city_id)
         city = getCity(html)
-        island_id = city['islandId']
+        island_id = city["islandId"]
         islands_ids.add(island_id)
     return list(islands_ids)
