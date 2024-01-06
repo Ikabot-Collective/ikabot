@@ -97,10 +97,11 @@ def do_it(session, wine_city, wood_city, luxury_city, favour_tasks):
     ----------
     session : ikabot.web.session.Session
     """
+    message_sent = False
     while True:
         (ids, cities) = getIdsOfCities(session)
         global earliest_wakeup_time
-
+        earliest_wakeup_time = 24*60*60
         #collect daily bonus wine
         html = session.post(city_url + str(wine_city['id']))
         url = 'action=AvatarAction&function=giveDailyActivityBonus&dailyActivityBonusCitySelect={0}&startPageShown=1&detectedDevice=1&autoLogin=on&cityId={0}&activeTab=multiTab2&backgroundView=city&currentCityId={0}&actionRequest={1}&ajax=1'.format(wine_city['id'], actionRequest)
@@ -182,6 +183,15 @@ def do_it(session, wine_city, wood_city, luxury_city, favour_tasks):
         for task in favour_tasks:
             html = session.post(city_url + str(wine_city['id']))
             html = session.post(f"view=dailyTasks&backgroundView=city&currentCityId={wine_city['id']}&actionRequest={actionRequest}&ajax=1")
+            #check if favour is full (2500)
+            match = re.search(r'currentFavor([\S\s]*?)(\d+)\s*<', html)
+            assert match, 'Can not obtain current favour amount'
+            if match.group(2) == '2500':
+                #send notification we are full on favour
+                # if not message_sent: #this is commented out because if the user hasn't set the telegram token it will hang the entire module
+                #     sendToBot(session, 'Favour was not collected as you are full on it')
+                #     message_sent = True #we don't want to spam the message, only once is enough
+                break
             rows = html.split('table01')[1].split('table')[0].split('tr')
             rows = [rows[3], rows[5], rows[9], rows[11], rows[15], rows[17], rows[21], rows[23]]
             tasks[task](session, rows)
@@ -190,7 +200,6 @@ def do_it(session, wine_city, wood_city, luxury_city, favour_tasks):
             sec_remaining = ( int(match.group(1)) - int(match.group(2)) ) - 600
             earliest_wakeup_time = sec_remaining if sec_remaining < earliest_wakeup_time else earliest_wakeup_time 
             
-
         #find capital and get ambro bonus from fountain if it's active
         for id in ids:
             html = session.post(city_url + str(id))
