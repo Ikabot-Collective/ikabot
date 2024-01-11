@@ -132,11 +132,11 @@ def checkTelegramData(session):
     valid : bool
         a boolean indicating whether or not there is valid Telegram data in the .ikabot file.
     """
-    if not session.padre: #stop asking people if process is detached
-        return False
     if telegramDataIsValid(session):
         return True
     else:
+        if not session.padre: #stop asking people if process is detached
+            return False
         banner()
         print(_('You must provide valid credentials to communicate by telegram.'))
         print(_('You require the token of the bot you are going to use and your chat_id'))
