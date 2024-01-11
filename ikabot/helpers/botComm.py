@@ -132,6 +132,8 @@ def checkTelegramData(session):
     valid : bool
         a boolean indicating whether or not there is valid Telegram data in the .ikabot file.
     """
+    if not session.padre: #stop asking people if process is detached
+        return False
     if telegramDataIsValid(session):
         return True
     else:
