@@ -290,6 +290,7 @@ def view_dump(session, event):
             print('resource_type : [1,2,3,4] // these are  Wine, Marble, Cristal, Sulfur')
             print('miracle_type : [1,2,3,4,5,6,7,8] // hephaistos forge is number 5')
             print('wood_lvl : [1..] // this is the forest level on the island')
+            print('luxury_lvl : [1..] // this is the level of the luxury resource on the island (Only available in full dumps)')
             print('players : [0..] // number of players on the island')
             print('ex. If I wanted to find all islands with less than 10 players and forest level 30 with hephaistos I would type in:')
             print('players < 10 and wood_lvl == 30 and miracle_type == 5\n')
@@ -298,7 +299,7 @@ def view_dump(session, event):
             try:
                 filtered_islands = [island for island in filter(lambda x: filter_on_condition(x, condition), selected_dump['islands'] if selected_dump['shallow'] else convert_to_shallow(selected_dump['islands']))]
             except (SyntaxError, KeyError):
-                print('Condition is bad, please use only the available island properties and use python standard conditional sytnax (and, or, <, >, ==, (, ), etc... )')
+                print('Condition is bad, please use only the available island properties and use python standard conditional sytnax (and, or, <, >, ==, (, ), etc... )\nRemember luxury_lvl is only available in full dumps!')
                 enter()
                 continue
             
@@ -425,7 +426,7 @@ def convert_to_shallow(islands):
     islands : [object]
         List of objects that represent the stripped-down version of an island 
     """
-    return [{'x': str(island['x']), 'y': str(island['y']), 'id': island['id'], 'name': island['name'], 'resource_type': island['tradegood'], 'miracle_type': island['wonder'], 'wood_lvl': island['resourceLevel'], 'players': len([city for city in island['cities'] if city['type'] != 'empty'])} for island in islands]
+    return [{'x': str(island['x']), 'y': str(island['y']), 'id': island['id'], 'name': island['name'], 'resource_type': island['tradegood'], 'miracle_type': island['wonder'], 'wood_lvl': island['resourceLevel'], 'luxury_lvl': island['tradegoodLevel'], 'players': len([city for city in island['cities'] if city['type'] != 'empty'])} for island in islands]
 
 def unique_tuples(tuples):
     """Iterates over tuples with a unique first element
