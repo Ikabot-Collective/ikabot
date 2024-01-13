@@ -278,7 +278,17 @@ def look(session, table):
                 else:
                     session.post(f"view=inventory&backgroundView=city&currentCityId={wine_city['id']}&templateView=dailyTasks&actionRequest={actionRequest}&ajax=1")
                     wait(1)
-                    session.post(f"action=CollectDailyTasksFavor&taskId=28&ajax=1&backgroundView=city&currentCityId={wine_city['id']}&templateView=dailyTasks&actionRequest={actionRequest}&ajax=1")
+                    session.post(f"action=CollectDailyTasksFavor&taskId=27&ajax=1&backgroundView=city&currentCityId={wine_city['id']}&templateView=dailyTasks&actionRequest={actionRequest}&ajax=1")
+                    wait(1)
+
+        if 'task_amount_26' in r: #look at highscore
+                if is_collectable(r):
+                    session.post(f"action=CollectDailyTasksFavor&taskId=26&ajax=1&backgroundView=city&currentCityId={wine_city['id']}&templateView=dailyTasks&actionRequest={actionRequest}&ajax=1")
+                    wait(1)
+                else:
+                    session.post(f"view=highscore&showMe=1&backgroundView=city&currentCityId={wine_city['id']}&actionRequest={actionRequest}&ajax=1")
+                    wait(1)
+                    session.post(f"action=CollectDailyTasksFavor&taskId=26&ajax=1&backgroundView=city&currentCityId={wine_city['id']}&templateView=dailyTasks&actionRequest={actionRequest}&ajax=1")
                     wait(1)
         
         #TODO ADD OPEN HIGHSCORE, missing taskid
