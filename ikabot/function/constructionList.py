@@ -60,7 +60,7 @@ def waitForConstruction(session, city_id, final_lvl):
 
         msg = _('{}: I wait {:d} seconds so that {} gets to the level {:d}').format(city['cityName'], seconds_to_wait, construction_building['name'], construction_building['level'] + 1)
         sendToBotDebug(session, msg, debugON_constructionList)
-        session.setStatus(f"Waiting until {getDateTime(time.time()+seconds_to_wait+10)[8:]}, {construction_building['name']} {construction_building['level']} -> {construction_building['level']+1}, final lvl: {final_lvl}")
+        session.setStatus(f"Waiting until {getDateTime(time.time()+seconds_to_wait+10)[8:]}, {construction_building['name']} {construction_building['level']} -> {construction_building['level']+1} in {city['name']}, final lvl: {final_lvl}")
         wait(seconds_to_wait + 10)
 
     html = session.get(city_url + city_id)
