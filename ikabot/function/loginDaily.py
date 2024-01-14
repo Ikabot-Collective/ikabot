@@ -246,7 +246,7 @@ def collect_resource_favour(session, table):
         session.post(f"action=CollectDailyTasksFavor&taskId={taskId}&ajax=1&backgroundView=city&currentCityId={wine_city['id']}&templateView=dailyTasks&actionRequest={actionRequest}&ajax=1")
         wait(1)
 def look(session, table):
-    #send request to look at all three (can't be bothered to check which one has to be done exactly), collect bonus
+    #collect if collectable, otherwise look at specified view then collect
     global earliest_wakeup_time, wine_city
     for r in table:
         if 'task_amount_28' in r: #visit shop
@@ -285,6 +285,7 @@ def donate_wood(session, table):
     #find city with most wood and donate number of it to lux resource or wood production (randomly chosen), collect bonus
     pass
 def stay_online_30_mins(session, table):
+    #collect if possible, otherwise earliest wake time is 31 mins from now, then it will be collected in the next pass
     global earliest_wakeup_time, wine_city
     for r in table:
         if 'task_amount_23' in r: # stay online for 30 mins
