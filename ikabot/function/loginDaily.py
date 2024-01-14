@@ -109,24 +109,13 @@ def do_it(session, wine_city, wood_city, luxury_city, favour_tasks):
 
         def get_remaining_time_cinetheatre(features):
             ewt = 999999999
-            if features[0] and 'js_nextPossibleResource' in features[0]:
-                remaining_time_str = re.search(r'js_nextPossibleResource\\">([\S\s]*?)<', features[0]) 
-                assert remaining_time_str, 'Could not get remaining time for wood cultural feature'
-                remaining_time_str = remaining_time_str.group(1).strip()
-                sec_to_wait = timeStringToSec(remaining_time_str) + 60 #add 60s because of rounding errors
-                ewt = sec_to_wait if sec_to_wait < ewt else ewt
-            if features[1] and 'js_nextPossibleTradegood' in features[1]:
-                remaining_time_str = re.search(r'js_nextPossibleTradegood\\">([\S\s]*?)<', features[1])
-                assert remaining_time_str, 'Could not get remaining time for luxury good cultural feature'
-                remaining_time_str = remaining_time_str.group(1).strip()
-                sec_to_wait = timeStringToSec(remaining_time_str) + 60 #add 60s because of rounding errors
-                ewt = sec_to_wait if sec_to_wait < ewt else ewt
-            if features[2] and 'js_nextPossibleFavour' in features[2]:
-                remaining_time_str = re.search(r'js_nextPossibleFavour\\">([\S\s]*?)<', features[2])
-                assert remaining_time_str, 'Could not get remaining time for favour cultural feature'
-                remaining_time_str = remaining_time_str.group(1).strip()
-                sec_to_wait = timeStringToSec(remaining_time_str) + 60 #add 60s because of rounding errors
-                ewt = sec_to_wait if sec_to_wait < ewt else ewt
+            for i, feature in enumerate(['Resource','Tradegood','Favour']):
+                if features[i] and f'js_nextPossible{feature}' in features[i]:
+                    remaining_time_str = re.search(fr'js_nextPossible{feature}\\">([\S\s]*?)<', features[i]) 
+                    assert remaining_time_str, f'Could not get remaining time for {feature} cultural feature'
+                    remaining_time_str = remaining_time_str.group(1).strip()
+                    sec_to_wait = timeStringToSec(remaining_time_str) + 60 #add 60s because of rounding errors
+                    ewt = sec_to_wait if sec_to_wait < ewt else ewt
             return ewt
 
 
@@ -256,7 +245,6 @@ def collect_resource_favour(session, table):
         taskId=re.search(r'taskId=([\S\s]*?)\\"', passive2).group(1)
         session.post(f"action=CollectDailyTasksFavor&taskId={taskId}&ajax=1&backgroundView=city&currentCityId={wine_city['id']}&templateView=dailyTasks&actionRequest={actionRequest}&ajax=1")
         wait(1)
-
 def look(session, table):
     #send request to look at all three (can't be bothered to check which one has to be done exactly), collect bonus
     global earliest_wakeup_time, wine_city
@@ -290,9 +278,6 @@ def look(session, table):
                     wait(1)
                     session.post(f"action=CollectDailyTasksFavor&taskId=26&ajax=1&backgroundView=city&currentCityId={wine_city['id']}&templateView=dailyTasks&actionRequest={actionRequest}&ajax=1")
                     wait(1)
-        
-        #TODO ADD OPEN HIGHSCORE, missing taskid
-    pass
 def capture_runs(session, table):
     #divide number of point by 115, take top integer, invoke autopirate for that many runs, collect bonus
     pass
@@ -324,7 +309,7 @@ tasks = {'Collect resource favour': collect_resource_favour,
          'Look at hightscore/shop/inventory': look,
          'Stay online for 30 mins': stay_online_30_mins,
 
-         #'Conduct capture runs': capture_runs, #coming soon
+         #'Conduct capture runs': capture_runs,
          #'Donate wood': donate_wood,
 
          'Complete 2/all tasks': complete_tasks, # must be last
