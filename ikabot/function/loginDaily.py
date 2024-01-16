@@ -204,8 +204,8 @@ def do_it(session, wine_city, wood_city, luxury_city, favour_tasks):
                     sendToBot(session, 'Favour was not collected as you are full on it')
                     message_sent = True #we don't want to spam the message, only once is enough
                 break
-            rows = html.split('table01')[1].split('table')[0].split('tr')
-            rows = [rows[3], rows[5], rows[9], rows[11], rows[15], rows[17], rows[21], rows[23]]
+            matches = re.findall('<tr([\S\s]*?)tr>',html)
+            rows = [matches[1], matches[2], matches[4], matches[5], matches[7], matches[8], matches[10], matches[11]]
             tasks[task](session, rows)
             match = re.search(r'"dailyTasksCountdown":{"countdown":{"enddate":(\d+),"currentdate":(\d+),"timeout_ajax', html)
             assert match, 'Can not get remaning daily tasks time'
@@ -295,16 +295,13 @@ def stay_online_30_mins(session, table):
             else:
                 earliest_wakeup_time = 31 * 60 if 31 * 60 < earliest_wakeup_time else earliest_wakeup_time 
 def complete_tasks(session, table):
-    #collect the last two tasks if they're available, this one should always run last
+    #collect any still collectable tasks, this one should always run last
     global wine_city
-    passive1 = table[6]
-    passive2 = table[7]
-    if is_collectable(passive1):
-        session.post(f"action=CollectDailyTasksFavor&taskId=30&ajax=1&backgroundView=city&currentCityId={wine_city['id']}&templateView=dailyTasks&actionRequest={actionRequest}&ajax=1")
-        wait(1)
-    if is_collectable(passive2):
-        session.post(f"action=CollectDailyTasksFavor&taskId=31&ajax=1&backgroundView=city&currentCityId={wine_city['id']}&templateView=dailyTasks&actionRequest={actionRequest}&ajax=1")
-        wait(1)
+    for row in table:
+        if is_collectable(row):
+            taskId=re.search(r'taskId=([\S\s]*?)\\"', row).group(1)
+            session.post(f"action=CollectDailyTasksFavor&taskId={taskId}&ajax=1&backgroundView=city&currentCityId={wine_city['id']}&templateView=dailyTasks&actionRequest={actionRequest}&ajax=1")
+            wait(1)
 
 tasks = {'Collect resource favour': collect_resource_favour,
          'Look at hightscore/shop/inventory': look,
