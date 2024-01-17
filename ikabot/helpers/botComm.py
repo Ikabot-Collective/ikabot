@@ -4,6 +4,7 @@
 import re
 import os
 import json
+import time
 import random
 import gettext
 import sys
@@ -177,6 +178,7 @@ def updateTelegramData(session, event=None, stdin_fd=None, predetermined_input=[
     botToken = read(msg=_('Bot\'s token: '))
 
     updates = ikabot.web.session.normal_get('https://api.telegram.org/bot{}/getUpdates'.format(botToken)).json()
+    me = ikabot.web.session.normal_get('https://api.telegram.org/bot{}/getMe'.format(botToken)).json()
     if 'ok' not in updates or updates['ok'] is False:
         print(_('Invalid Telegram bot, try again.'))
         enter()
@@ -186,21 +188,26 @@ def updateTelegramData(session, event=None, stdin_fd=None, predetermined_input=[
     
     rand = str(random.randint(0, 9999)).zfill(4)
     print(f'\n{bcolors.GREEN}SUCCESS!{bcolors.ENDC} Telegram token is good!')
-    print(f'\n4. Now send your bot the command {bcolors.BLUE}/ikabot {rand}{bcolors.ENDC} on Telegram and press [Enter] once you\'re done')
-    enter()
-
-    updates = ikabot.web.session.normal_get('https://api.telegram.org/bot{}/getUpdates'.format(botToken)).json()
-
-    user_id = None
-    for update in updates['result']:
-        if 'message' in update:
-            if 'text' in update['message']:
-                if update['message']['text'].strip() == f'/ikabot {rand}':
-                    user_id = update['message']['from']['id']
-
+    print(f"\n4. Now send your bot the command {bcolors.BLUE}/ikabot {rand}{bcolors.ENDC} on Telegram.\nYour bot\'s username is @{me['result']['username']}")
     
+    start = time.time()
+    user_id = None
+    try:
+        while True:
+            print(f'Waiting to receive the command on Telegram... Press CTRL + C to abort.\tdt:{round(time.time()-start)}s',end='\r')
+            updates = ikabot.web.session.normal_get('https://api.telegram.org/bot{}/getUpdates'.format(botToken)).json()
 
-    if not user_id:
+            for update in updates['result']:
+                if 'message' in update:
+                    if 'text' in update['message']:
+                        if update['message']['text'].strip() == f'/ikabot {rand}':
+                            user_id = update['message']['from']['id']
+                            break
+            time.sleep(2)
+            print(' '*100, end='\r')
+            if user_id:
+                break
+    except KeyboardInterrupt:
         print(f'{bcolors.RED}FAILURE!{bcolors.ENDC} Did not find command {bcolors.BLUE}/ikabot {rand}{bcolors.ENDC} among received messages!\n\n{str(updates)}')
         enter()
         if event is not None and stdin_fd is not None:
