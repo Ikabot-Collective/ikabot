@@ -221,9 +221,9 @@ def do_it(session, wine_city, wood_city, luxury_city, favour_tasks):
                     session.post(url)
                 break
             wait(1)
-
+        earliest_wakeup_time = abs(earliest_wakeup_time) # funnily enough, it's possible to have the earliest wakeup time be a negative number, this happens if there is less than 10 minutes remaning until tasks reset
         session.setStatus(f'Last activity @{getDateTime()}, next activity @{getDateTime(time.time()+earliest_wakeup_time)}')
-        wait(abs(earliest_wakeup_time), 20) # funnily enough, it's possible to have the earliest wakeup time be a negative number, this happens if there is less than 10 minutes remaning until tasks reset
+        wait(earliest_wakeup_time, 20) 
 
 def is_collectable(row):
     progress_left = re.search(r'smallright progress details([\S\s]*?)>([\S\s]*?)<', row).group(2).strip().replace(',','')
