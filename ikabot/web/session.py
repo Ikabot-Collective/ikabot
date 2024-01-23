@@ -194,6 +194,14 @@ class Session:
             self.s.cookies.clear()
         return False
 
+    def __test_server_maintenace(self, html):
+        match = re.search(r'\[\["provideFeedback",\[{"location":1,"type":11,"text":([\S\s]*)}\]\]\]',html)
+        if match and '[["provideFeedback",[{"location":1,"type":11,"text":' + match.group(1) + '}]]]' == html:
+            return True
+        if 'backupLockTimer' in html:
+            return True
+        return False
+
     def __login(self, retries=0):
         if not self.logged:
             banner()
@@ -708,9 +716,13 @@ class Session:
             try:
                 self.requestHistory.append({'method': 'GET', 'url': url, 'params': params, 'payload': None, 'proxies': self.s.proxies, 'headers': dict(self.s.headers), 'response': None})
                 self.writeLog('About to send: {}'.format(str(self.requestHistory[-1])))
-                response = self.s.get(url, params=params, verify=config.do_ssl_verify)
+                response = self.s.get(url, params=params, verify=config.do_ssl_verify, timeout=300)
                 self.requestHistory[-1]['response'] = {'status': response.status_code, 'elapsed': response.elapsed.total_seconds(), 'headers': dict(response.headers), 'text': response.text}
                 html = response.text
+                if self.__test_server_maintenace(html):
+                    self.writeLog('Ikariam world backup is in progress, waiting 10 mins.', module=__name__, level = logLevels.WARN)
+                    time.sleep(10*60)
+                    raise requests.exceptions.ConnectionError #repeat after 10 minutes
                 if ignoreExpire is False:
                     assert self.__isExpired(html) is False
                 if fullResponse:
@@ -720,6 +732,10 @@ class Session:
             except AssertionError:
                 self.__sessionExpired()
             except requests.exceptions.ConnectionError:
+                self.writeLog(f"Connection error occured, retrying in {ConnectionError_wait}s\n{str(params) + ' --> ' + url}", module=__name__, level = logLevels.WARN)
+                time.sleep(ConnectionError_wait)
+            except requests.exceptions.Timeout:
+                self.writeLog(f"5 minute timeout occured on request, retrying in {ConnectionError_wait}s\n{str(params) + ' --> ' + url}", module=__name__, level = logLevels.WARN)
                 time.sleep(ConnectionError_wait)
 
     def post(self, url='', payloadPost={}, params={}, ignoreExpire=False, noIndex=False):
@@ -764,9 +780,13 @@ class Session:
             try:
                 self.requestHistory.append({'method': 'POST', 'url': url, 'params': params, 'payload': payloadPost, 'proxies': self.s.proxies, 'headers': dict(self.s.headers), 'response': None})
                 self.writeLog('About to send: {}'.format(str(self.requestHistory[-1])))
-                response = self.s.post(url, data=payloadPost, params=params, verify=config.do_ssl_verify)
+                response = self.s.post(url, data=payloadPost, params=params, verify=config.do_ssl_verify, timeout=300)
                 self.requestHistory[-1]['response'] = {'status': response.status_code, 'elapsed': response.elapsed.total_seconds(), 'headers': dict(response.headers), 'text': response.text}
                 resp = response.text
+                if self.__test_server_maintenace(resp):
+                    self.writeLog('Ikariam world backup is in progress, waiting 10 mins.', module=__name__, level = logLevels.WARN)
+                    time.sleep(10*60)
+                    raise requests.exceptions.ConnectionError #repeat after 10 minutes
                 if ignoreExpire is False:
                     assert self.__isExpired(resp) is False
                 if 'TXT_ERROR_WRONG_REQUEST_ID' in resp:
@@ -776,6 +796,10 @@ class Session:
             except AssertionError:
                 self.__sessionExpired()
             except requests.exceptions.ConnectionError:
+                self.writeLog(f"Connection error occured, retrying in {ConnectionError_wait}s\n{str(params) + ' --> ' + url}", module=__name__, level = logLevels.WARN)
+                time.sleep(ConnectionError_wait)
+            except requests.exceptions.Timeout:
+                self.writeLog(f"5 minute timeout occured on request, retrying in {ConnectionError_wait}s\n{str(params) + ' --> ' + url}", module=__name__, level = logLevels.WARN)
                 time.sleep(ConnectionError_wait)
 
     def logout(self):
