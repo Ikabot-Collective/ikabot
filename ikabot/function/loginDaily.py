@@ -54,14 +54,14 @@ def loginDaily(session, event, stdin_fd, predetermined_input):
                 banner()
                 print('Choose which daily tasks will be done/collected by Ikabot automatically.')
                 print(f'Tasks in {bcolors.BLUE}blue{bcolors.ENDC} WILL be done automatically, tasks in {bcolors.STONE}grey{bcolors.ENDC} WILL NOT be done.')
-                print('Press [ENTER] to confirm selection')
+                print('Press [ENTER] or type in [Y] to confirm selection')
                 for i, task in enumerate(tasks):
                     if task in favour_tasks:
                         print(i+1,') ',bcolors.BLUE,task,bcolors.ENDC)
                     else:
                         print(i+1,') ',bcolors.STONE,task,bcolors.ENDC)
-                choice = read(min=1, max=len(tasks), empty=True, digit=True)
-                if not choice:
+                choice = read(min=1, max=len(tasks), empty=True, digit=True, additionalValues=['y','Y'])
+                if not choice or choice.lower() == 'y':
                     return
                 choice -= 1
                 if list(tasks)[choice] in favour_tasks:
