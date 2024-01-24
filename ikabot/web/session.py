@@ -29,12 +29,6 @@ from ikabot.helpers.varios import getDateTime
 t = gettext.translation('session', localedir, languages=languages, fallback=True)
 _ = t.gettext
 
-#blackbox tokens
-blackbox_tokens = [ #ch, chi, ffi
-    'JVqc1fosb5TG-D2yJJMDaI2_BU2yHpH6aNM8YZPF6hxfxSaSBWqPwQQpW43PO6QSfaLUBitdoMX3KYDpV7sqoRQ5a53C9DdcjsADa91MuR5DdafM_kFmmMoRgO9WwidMfq73Zcj2G01_pNYZSXes0QNGeJ3PEjdpmwBum-IkSXut0gRHbJ7QNJnNAzdszQA0baDQAjJixwAwYZT4L2XIADBpzf84aqABNmfKLmab0TKXzwg8oNcPQnesD3XZDD2f1DlrodM0bZLE9htNkLXnGWDPPqURdpvN_Ua0F0VqnMz0QpjhJW6v2P0vcrMBSJTZ_jBgiNYsdbkCQ2ia3QI0ZLIIUZXeH0R2pu1SmAd53EFmmMgPY7vgEkJzqd8PNGaW6lN4qtoCMqraCjpqnM0FN2CFt-crlAZrzkJ1ueobQHKiGIvqH36u0wU1pRh3rAs7YJLV-ixcoNMXSHmix_krUILF6hxOhbfuUYHnHE2Bue4nYJL2J17D-zFpogY5aqPaEHGj1QprnM0GOG2i2xJ4rhJ23Aw-odIJb9ILbtAAYsP6W5LDJkt9r9QGSW6g0jZv0DZtzi9gxPQkirzsHoO77SZXvSJWj_EqXZHFK2Ga0QU7caTZPqMEOWzRCG3OMZbMBGeYyC5hkcMmicL1KImu4BI3aazdFkh4nc8SQ3On1_wucaPX_C5xlsj6K5HB9FaNxCqO7yJVjMDyJFqL7VKz40d5sBVLf7HkRqzeEHSmCG6j2kClB2qf0jOYzwRmn9UHbaMIPW-iBWiYyu8hU3iq7RJEdqsMPKEHOW_VOXLYPm6n3RNLhOpPsBF1pQk9dtw-dqvgEUl7rRJzqQs-oAU8cNEBM2qj1zpszS5fj_RVueoeT7XaDD5jldj9L2HFKmLE9Vi97U6y6BxSuBt-s-lKf7MVSn7hFUd-4kR12j6i1jpv0QJkm9QHOm_RAjuf0AU4aJn8YMMoWY7yU4a33A5AZZfa_zFjx_8vZJjRNpfKLpDF-Sxelc0yY5fNM2rQADmb0QprngAzlvldviOIwfpejsAjV42_-C2OxPoukMX6L2Wd0gU-pMn7LVKEx_gqXoy87yJZjcD0KmKY0QY5a5DCBSpcjvAihOhLsOQagLkbUIjuU7TmH1W7IFG0F0eA4xxQiepOg7bnG1S27lOHvSBZv_VXje5RhLTkG37hGk-w4xqAtegNP3GWyAs4bqXVC0Fzq-MXPG6x1gg6bJzOAS5fkL3tJXmq3gM2d6fgBTh5qdsJPXOqBClbjbLkJ0x-sBtMuTCfF4L0X5j8auMUjsEiVI32XJXNPqzlGD1vocb4O22k2wAydZrM_i9fhLboDT-Cp9kLYMpCdtcJUrsLeakYfelZittEt-4_cLEZer8BZrH3K6L8U6kNYLX3ZbMIcLcGWYq6BUmT9EaZ0hNtnw9ov_EznvU5arEARYvdQa3uVqz0aKoOZKbZI4_3UaoBVsYfY8oDTpMDZLXmH5noUpvLGYLMQ5kHTcMRe7D4Tsf4Zsr6XpTlXsIKYssMhNI8p9wqbsM8it4vp_Ruv-8URnidzxI3aZvoV9E6phJzmMoQRXOjyPoqUqkSgORTyj1ilMQSZou97R5OfKzRBEZrnc0kjfsxZYq9_yRWhv40aJG26BhZyTmlCmHGKHPcUHWn7SJVjLrtI0h6qtIdZbkGUnep7BFDc99Isxg9b5_mS64ZiLHWCDh741XEMZa77TNklc78LFqKuOgNP2_CI4nqXMXqHGKXygEvYpi97yFGeLvgEkR2ptgLOGmax_cvg7ToDUCBseoPQoOz5RNDc6P9IlSGq90gjgNv2wA1eQ',
-    'JVqc1fosb5TG-D2yJJMDaI2_BU2yHpH6aNM8YZPF6hxfxSaSBWqPwQQpW43PO6QSfaLUBitdoMX3KYDpV7sqoRQ5a53C9DdcjsADa91MuR5DdafM_kFmmMoRgO9WwidMfq73Zcj2G01_pNYZSXes0QNGeJ3PEjdpmwBum-IkSXut0gRHbJ7QNJnNAzdszQA0baDQAjJixwAwYZT4L2XIADBpzf84aqABNmfKLmab0TKXzwg8oNcPQnesD3XZDD2f1DlrodM0bZLE9htNkLXnGWDPPqURdpvN_Ua0F0VqnMz0QpjhJW6v2P0vcrMBSJTZ_jBgiNYsdbkCQ2ia3QI0ZLIIUZXeH0R2pu1SmAd53EFmmMgPY7vgEkJzqd8PNGaW6lN4qtoCMqraCjpqnM0FN2CFt-crlAZrzkJ1ueobQHKiGIvqH36u0wU1pRh3rAs7YJLV-ixcoNMXSHmix_krUILF6hxOguNGqg5z1TdpnM8AMGPG_DWaygA3bdAyaJ7QATJqntQMbdMKPJ7O_zZuoNMGOZz_Npf9MJbK_TOXzAJllsctZIm77RJEh6zeEHStDnSrDG2eAjJiyPoqXMH5K2SV-2CUzS9om88DaZ_YD0N5r-IXfOFCd6oPRqsMb9QKQqXWBmyfzwFkxwAzZsfsHlB1p-obVIa22w1QgbHlFTpsr-EVOmyv1AY4ac__MpTLAmjMLWCTyv4wYpjJK5DxIYW37lOJve8ihOocTrLkRqzhGH7jRajdEHHWDUKk3RNFq-FGe63gQ6bWCC1fkbboK1CCtOlKet9Fd60Td7AWfKzlG1GJwiiN7k-z40d7tBp8tOkeT4e561Cx50l83kN6rg8_cajhFXiqC2ydzTKT9yhcjfMYSnyh0xY7bZ8DaKACM5b7K4zwJlqQ9lm88SeIvfFTiLwfU4W8IIKzGHzgFHitD0Ci2RJFeK0PQHndDkN2ptc6ngFml8wwkcT1Gkx-o9UYPW-hBT1totYPdNUIbM4DN2qc0wtwodULcagOPnfZD0ip3D5x1Deb_GHG_ziczP5hlcv9NmvMAjhszgM4baPbEEN84gc5a5DCBTZonMr6LWCXy_4yaKDWD0R3qc4AQ2iazC5gwiaJ7iJYvvdZjsYskfIkXZP5Xo_yVYW-IVqOxyiMwfQlWZL0LJHF-16X_TOVyyyPwvIiWbwfWI3uIVi-8yZLfa_UBkl2rOMTSX-x6SFVeqzvFEZ4qtoMP2ydzvsrY7foHEF0teYWO26v4RdFfa7nQWaYyu8hZIm77ViJ9m3cVL8xnNU5pyBRy_5fkcozmdIKe-kiVXqs3gM1eKrfEzhqrdIENmeXvO4gRXe63xFDk9tDtQ53wOUXWb8SerAHdcsOWdNHi-Ajadgpb6MSatQWgtwyY63-RajZLHHK_0uj9GOwHIzSHk6Q_l_LM5XuNYfgMIXeEmO5_zGGyQ9kyfk_cMUNcN00euZOqPtnzh1hkQBTvy9zy_5Lgc44ibsEcrQLbsX9L3_qTqbySa3gMmXVGWOT91y1Lm_nNZ8KP43RJp_tV6DRH4neVXqs3gM1eJ3PAU69N6AMeNn-MHar2QkuYJC4D3jmSrkwo8j6KnjM8SNThLTiEjdqrNEDM4rzYZfL8CNlirzsZJrO9xxOfr8vnwtwxyyO2UK22w1TiLvyIFOJruAQOIPLH2y43Q9Sd6nZRa4ZfqPVBUyxFH_uFzxunuFJuyqX_CFTmcr7NGKSwPAeTnOl1SiJ71DCK1CCyP0wZ5XI_iNVh6zeIUZ4qtwMPnGezwAtXZXpGk5zpucYSG2g4RNJd6fXB2GGuOoPQYTyZ9M_ZJnd',
-    'JVqc1fosb5TG-D2yJJMDaI2_BU2yHpH6aNM8YZPF6hxfxSaSBWqPwQQpW43PO6QSfaLUBitdoMX3KYDpV7sqoRQ5a53C9DdcjsADa91MuR5DdafM_kFmmMoRgO9WwidMfq73Zcj2G01_pNYZSXes0QNGeJ3PEjdpmwBum-IkSXut0gRHbJ7QNJnNAzdszQA0baDQAjJixwAwYZT4L2XIADBpzf84aqABNmfKLmab0TKXzwg8oNcPQnesD3XZDD2f1DlrodM0bZLE9htNkLXnGWDPPqURdpvN_Ua0F0VqnMz0QpjhJW6v2P0vcrMBSJTZ_jBgiNYsdbkCQ2ia3QI0ZLIIUZXeH0R2pu1SmAd53EFmmMgPY7vgEkJzqd8PNGaW6lN4qtoCMqraCjpqnM0FN2CFt-crlAZrzkJ1ueobQHKiGIvqH36u0wU1pRh3rAs7YJLV-ixcoNMXSHmix_krUILF6hxOguNGqg5z1TdpnM8AMGPG_DWaygA3bdAyaJ7QATJqntQMbdMKPJ7O_zZuoNMGOZz_Npf9MJbK_TOXzAJllsctZIm77RJEh6zeEHStDnSrDG2eAjJiyPoqXMH5K2SV-2CUzS9om88DaZ_YD0N5r-IXfOFCd6oPRqsMb9QKQqXWBmyfzwFkxwAzZsfsHlB1p-obVIa22w1QgbHlFTpsr-EVOmyv1AY4ac__MpTLAmjMLWCTyv4wYpjJK5DxIYW37lOJve8ihOocTrLkRqzhGH7jRajdEHHWDUKk3RNFq-FGe63gQ6bWCC1fkbboK1CCtOlKet9Fd60Td7AWfKzlG1GJwiiN7k-z40d7tBp8tOkeT4e561Cx50l83kN6rg8_cajhFXiqC2ydzTKT9yhcjfMYSnyh0xY7bZ8DaKACM5b7K4zwJlqQ9lm88SeIvfFTiLwfU4W8IIKzGHzgFHitD0Ci2RJFeK0PQHndDkN2ptc6ngFml8wwkcT1Gkx-o9UYPW-hBT1totYPdNUIbM4DN2qc0wtwodULcagOPnfZD0ip3D5x1Deb_GHG_ziczP5hlcv9NmvMAjhszgM4baPbEEN84gc5a5DCBTZonMr6LWCXy_4yaKDWD0R3qc4AQ2iazC5gwiaJ7iJYvvdZjsYskfIkXZP5Xo_yVYW-IVqOxyiMwfQlWZL0LJHF-16X_TOVyyyPwvIiWbwfWI3uIVi-8yZLfa_UBkl2rOMTSX-x6SFVeqzvFEZ4qtoMP2ydzvsrY7foHEF0teYWO26v5BxKgLnyTHGj1fosb5TG-GOUAXjnX8o8p-BEsitc1glqnNU-pN0VhvQtYIW36Q5Ag7XrH0R2ud4QQnOjyPosUYPG6x1PtPtv2CGLwPlEjPxdwRZf0SBQnu84j_c4kPlhxhNasBx0yTV20Eqg6TulEIToK5ILYs0imOkwlAVcohZ91x2EvQ954SN40Cp7xBpso_RMovNX0CqD2jF34y6FxvpKnQVQpxJgximjEovZHXbfQojiWrw2j7TmKHqrDoLcD3O7IIvYRpjJ_mi2H2DYJpD7MH7CF5DeSJ3RHmKzK1CCtNkLTnOl1ySTDXbiTq_UBkyBr98ENmaO5U68II8GeZ7QAE6ix_kpWoq46A1AgqfZCWDJN22hxvk7YJLCOnCkzfIkVJUFdeFGnQJkrxiMseMpXpHI9ilfhLbmDlmh9UKOs-UoTX-vG4TvVHmr2yKH6lXE7RJEdLcfkQBt0vcpb6DRCjholsb0JEl7q_5fxSaYASZYntMGPWue1PkrXYK09xxOgLLiFEd0pdYDM2u_8CRJfL3uHkN2t-wkUoKy4jxhk8XqHF_NQq4aP3S4',
-]# Tokens updated 8.11.2023
 
 class Session:
     def __init__(self):
@@ -44,7 +38,7 @@ class Session:
             self.logfile = '/tmp/ikabot.log'
         self.padre = True
         self.logged = False
-        self.blackbox = 'tra:' + random.choice(blackbox_tokens)
+        self.blackbox = None
         self.requestHistory = deque(maxlen=5) #keep last 5 requests in history
         # disable ssl verification warning
         requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
@@ -202,6 +196,26 @@ class Session:
             return True
         return False
 
+    def __load_new_blackbox_token(self):
+        try:
+            if self.padre:
+                print('Obtaining new blackbox token, please wait...')
+            from ikabot.helpers.process import run
+            text = run('nslookup -q=txt ikagod.twilightparadox.com ns2.afraid.org')
+            parts = text.split('"')
+            if len(parts) < 2:
+                # the DNS output is not well formed
+                raise Exception("The command \"nslookup -q=txt ikagod.twilightparadox.com ns2.afraid.org\" returned bad data: {}".format(text))
+            address = 'http://' + parts[1] + '/token'
+            blackbox_token = 'tra:' + requests.get(address, verify=config.do_ssl_verify, timeout=900).text
+            assert any(c.isupper() for c in blackbox_token), "The token must contain uppercase letters."
+            assert any(c.islower() for c in blackbox_token), "The token must contain lowercase letters."
+            assert any(c.isdigit() for c in blackbox_token), "The token must contain digits."
+            self.blackbox = blackbox_token
+        except Exception as e:
+            self.writeLog("Failed to obtain new blackbox token from API: " + str(e), level=logLevels.ERROR, module= __name__, logTraceback=True, logRequestHistory=True)
+            sys.exit('Failed to regenerate blackbox token')
+
     def __login(self, retries=0):
         if not self.logged:
             banner()
@@ -230,6 +244,7 @@ class Session:
         if not self.__test_lobby_cookie():
 
             self.writeLog('Getting new lobby cookie', level = logLevels.WARN)
+            self.__load_new_blackbox_token()
 
             # get gameEnvironmentId and platformGameId
             self.headers = {'Host': 'lobby.ikariam.gameforge.com', 'User-Agent': user_agent, 'Accept': '*/*', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'DNT': '1', 'Connection': 'close', 'Referer': 'https://lobby.ikariam.gameforge.com/'}
@@ -494,6 +509,7 @@ class Session:
 
         # login as normal and get new cookies
         if used_old_cookies is False:
+            self.__load_new_blackbox_token()
             self.writeLog('using new cookies', level = logLevels.WARN)
             self.headers = {'authority': 'lobby.ikariam.gameforge.com',
                             'method': 'POST',
@@ -509,7 +525,6 @@ class Session:
                             'user-agent': user_agent}
             self.s.headers.clear()
             self.s.headers.update(self.headers)
-            self.blackbox = 'tra:' + random.choice(blackbox_tokens)
             data = {
                     "server": {
                         "language": self.login_servidor,
