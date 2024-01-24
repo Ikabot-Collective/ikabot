@@ -187,11 +187,13 @@ def autoPirate(session, event, stdin_fd, predetermined_input):
                         captcha = resolveCaptcha(session, picture)
                         session.setStatus('Got captcha: '+captcha)
                         if captcha == 'Error':
+                            time.sleep(5)
                             continue
                         session.post(city_url + str(piracyCities[0]['id']))
                         params = {'action': 'PiracyScreen', 'function': 'capture', 'cityId': piracyCities[0]['id'], 'position': '17', 'captchaNeeded': '1', 'buildingLevel': str(piracyMissionToBuildingLevel[pirateMissionChoice]), 'captcha': captcha, 'activeTab': 'tabBootyQuest', 'backgroundView': 'city', 'currentCityId': piracyCities[0]['id'], 'templateView': 'pirateFortress', 'actionRequest': actionRequest, 'ajax': '1'}
                         html = session.post(params=params, noIndex=True)
                         if '"showPirateFortressShip":1' in html:  # if this is true, then the crew is still in the town, that means that the request didn't succeed
+                            time.sleep(5)
                             continue
                         break
                 except Exception:
