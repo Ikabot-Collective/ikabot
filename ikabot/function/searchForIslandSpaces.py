@@ -126,24 +126,24 @@ def do_it(session, islandList, time, fights):
                 for city_before in cities_before:
                     if city_before['id'] not in [city_now['id'] for city_now in cities_now]:
                         # we didn't find the city_before in the cities_now
-                        msg = _('The city {} of the player {} disappeared in {} {}:{} {}').format(city_before['name'], city_before['ownerName'], materials_names[int(island['tradegood'])], island['x'], island['y'], island['name'])
+                        msg = _('The city {} of the player {} disappeared in {} {}:{} {}').format(city_before['name'], city_before['Name'], materials_names[int(island['tradegood'])], island['x'], island['y'], island['name'])
                         sendToBot(session, msg)
 
                     if fights.lower() == 'y':
                         for city_now in cities_now:
                             if city_now['id'] == city_before['id']:
                                 if 'infos' in city_now and 'infos' not in city_before and 'armyAction' in city_now['infos'] and city_now['infos']['armyAction'] == 'fight':
-                                    msg = _('A fight started in the city {} of the player {} on island {} {}:{} {}').format(city_before['name'], city_before['ownerName'], materials_names[int(island['tradegood'])], island['x'], island['y'], island['name'])
+                                    msg = _('A fight started in the city {} of the player {} on island {} {}:{} {}').format(city_before['name'], city_before['Name'], materials_names[int(island['tradegood'])], island['x'], island['y'], island['name'])
                                     sendToBot(session, msg)
                                 if 'infos' not in city_now and 'infos' in city_before and 'armyAction' in city_before['infos'] and city_before['infos']['armyAction'] == 'fight':
-                                    msg = _('A fight stopped in the city {} of the player {} on island {} {}:{} {}').format(city_before['name'], city_before['ownerName'], materials_names[int(island['tradegood'])], island['x'], island['y'], island['name'])
+                                    msg = _('A fight stopped in the city {} of the player {} on island {} {}:{} {}').format(city_before['name'], city_before['Name'], materials_names[int(island['tradegood'])], island['x'], island['y'], island['name'])
                                     sendToBot(session, msg)
 
                 # someone colonised
                 for city_now in cities_now:
                     if city_now['id'] not in [city_before['id'] for city_before in cities_before]:
                         # we didn't find the city_now in the cities_before
-                        msg = _('Player {} created a new city {} in {} {}:{} {}').format(city_now['ownerName'], city_now['name'], materials_names[int(island['tradegood'])], island['x'], island['y'], island['name'])
+                        msg = _('Player {} created a new city {} in {} {}:{} {}').format(city_now['Name'], city_now['name'], materials_names[int(island['tradegood'])], island['x'], island['y'], island['name'])
                         sendToBot(session, msg)
                         
                 cities_before_per_island[islandId] = cities_now.copy() # update cities_before_per_island for the current island
