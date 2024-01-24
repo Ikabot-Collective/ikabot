@@ -78,4 +78,7 @@ def updateProcessList(session, programprocesslist=[]):
     session.setSessionData(sessionData)
 
     #normalize process list (all processes must have properties pid, action, date and status)
-    return normalizeDicts(runningIkabotProcessList)    
+    normalized_processes = normalizeDicts(runningIkabotProcessList)
+    #remove dupes by pid
+    return list({d['pid']: d for d in normalized_processes}.values())
+    

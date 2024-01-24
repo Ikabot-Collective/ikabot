@@ -12,9 +12,8 @@ from ikabot.helpers.gui import *
 from ikabot.config import *
 from ikabot.helpers.getJson import *
 from ikabot.helpers.botComm import *
-from ikabot.helpers.varios import wait
-from ikabot.helpers.process import run
-
+from ikabot.helpers.varios import wait, timeStringToSec
+from ikabot.helpers.process import run, set_child_mode
 
 t = gettext.translation('buyResources', localedir, languages=languages, fallback=True)
 _ = t.gettext
@@ -146,7 +145,10 @@ def autoPirate(session, event, stdin_fd, predetermined_input):
     except KeyboardInterrupt:
         event.set()
         return
+
+    set_child_mode(session)
     event.set()
+
     try:
         while (pirateCount > 0):
             session.setStatus('Pirating for '+str(pirateCount)+' more runs')
@@ -185,11 +187,13 @@ def autoPirate(session, event, stdin_fd, predetermined_input):
                         captcha = resolveCaptcha(session, picture)
                         session.setStatus('Got captcha: '+captcha)
                         if captcha == 'Error':
+                            time.sleep(5)
                             continue
                         session.post(city_url + str(piracyCities[0]['id']))
                         params = {'action': 'PiracyScreen', 'function': 'capture', 'cityId': piracyCities[0]['id'], 'position': '17', 'captchaNeeded': '1', 'buildingLevel': str(piracyMissionToBuildingLevel[pirateMissionChoice]), 'captcha': captcha, 'activeTab': 'tabBootyQuest', 'backgroundView': 'city', 'currentCityId': piracyCities[0]['id'], 'templateView': 'pirateFortress', 'actionRequest': actionRequest, 'ajax': '1'}
                         html = session.post(params=params, noIndex=True)
                         if '"showPirateFortressShip":1' in html:  # if this is true, then the crew is still in the town, that means that the request didn't succeed
+                            time.sleep(5)
                             continue
                         break
                 except Exception:
@@ -296,19 +300,4 @@ def getCurrentMissionWaitingTime(html):
         return 0
     else:
         time_string = match.group(1)
-        hours = re.search(r'(\d+)h', time_string)
-        if hours is None:
-            hours = 0
-        else:
-            hours = int(hours.group(1)) * 3600
-        minutes = re.search(r'(\d+)m', time_string)
-        if minutes is None:
-            minutes = 0
-        else:
-            minutes = int(minutes.group(1)) * 60
-        seconds = re.search(r'(\d+)s', time_string)
-        if seconds is None:
-            seconds = 0
-        else:
-            seconds = int(seconds.group(1)) * 1
-        return hours + minutes + seconds
+        return timeStringToSec(time_string)

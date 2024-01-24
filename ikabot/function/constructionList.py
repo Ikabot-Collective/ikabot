@@ -30,12 +30,13 @@ sendResources = True
 expand = True
 thread = None
 
-def waitForConstruction(session, city_id):
+def waitForConstruction(session, city_id, final_lvl):
     """
     Parameters
     ----------
     session : ikabot.web.session.Session
     city_id : int
+    final_lvl : int
 
     Returns
     -------
@@ -59,7 +60,7 @@ def waitForConstruction(session, city_id):
 
         msg = _('{}: I wait {:d} seconds so that {} gets to the level {:d}').format(city['cityName'], seconds_to_wait, construction_building['name'], construction_building['level'] + 1)
         sendToBotDebug(session, msg, debugON_constructionList)
-
+        session.setStatus(f"Waiting until {getDateTime(time.time()+seconds_to_wait+10)[8:]}, {construction_building['name']} {construction_building['level']} -> {construction_building['level']+1} in {city['name']}, final lvl: {final_lvl}")
         wait(seconds_to_wait + 10)
 
     html = session.get(city_url + city_id)
@@ -85,7 +86,7 @@ def expandBuilding(session, cityId, building, waitForResources):
     time.sleep(random.randint(5, 15))  # to avoid race conditions with sendResourcesNeeded
 
     for lv in range(levels_to_upgrade):
-        city = waitForConstruction(session, cityId)
+        city = waitForConstruction(session, cityId, building['upgradeTo'])
         building = city['position'][position]
 
         if building['canUpgrade'] is False and waitForResources is True:
