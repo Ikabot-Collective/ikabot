@@ -172,7 +172,7 @@ def chooseForeignCity(session):
     i = 0
     city_options = []
     for city in island['cities']:
-        if city['type'] == 'city' and city['state'] == '' and city['ownerName'] != session.username:
+        if city['type'] == 'city' and city['state'] == '' and city['Name'] != session.username:
             i += 1
             num = ' ' + str(i) if i < 10 else str(i)
             print('{: >2}: {: >{max_city_name_length}} ({})'.format(num, decodeUnicodeEscape(city['name']), decodeUnicodeEscape(city['Name']), max_city_name_length=MAXIMUM_CITY_NAME_LENGTH))

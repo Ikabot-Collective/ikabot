@@ -316,7 +316,7 @@ def view_dump(session, event):
             players = []
             for island in selected_dump['islands']:
                 for city in island['cities']:
-                    if city['type'] != 'empty' and player_name in city['ownerName']:
+                    if city['type'] != 'empty' and player_name in city['Name']:
                         players.append((player_name, island['id']))
             # return if none are found
             if not len(players):
@@ -345,9 +345,9 @@ def view_dump(session, event):
             print('The nearest 25 inactive players are: ')
             #below follows the unholiest way to get the first n cities which are contained in an island object which is contained in a list of islands without duplicates in one line of code using python list comprehension
             seen = set()
-            inactives = [city for island in islands_sorted for city in island['cities'] if city['type'] != 'empty' and city['state'] == 'inactive' and isinstance([(seen.add(city['ownerName']),) if city['ownerName'] not in seen else None][0],tuple)][:number_of_inactives]
+            inactives = [city for island in islands_sorted for city in island['cities'] if city['type'] != 'empty' and city['state'] == 'inactive' and isinstance([(seen.add(city['Name']),) if city['Name'] not in seen else None][0],tuple)][:number_of_inactives]
             for i, city in enumerate(inactives):
-                print(str(i+1) + ') ' + city['ownerName'])
+                print(str(i+1) + ') ' + city['Name'])
             enter()
 
 
