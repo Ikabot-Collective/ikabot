@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="ikabot",
-    version="6.6.5",
+    version="6.7.0",
     author="physics-sp",
     author_email="physics-sp@protonmail.com",
     license='MIT',
