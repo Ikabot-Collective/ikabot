@@ -194,8 +194,7 @@ def do_it(session, waiting_time, coords, radius, shallow):
         island_id = int(island['id'])
         x = int(island['x'])
         y = int(island['y'])
-        distance = ((x - coords[0]) ** 2 + (y - coords[1]) ** 2) ** 0.5
-        if coords and radius and distance>radius:
+        if coords and radius and  ((x - coords[0]) ** 2 + (y - coords[1]) ** 2) ** 0.5 > radius:
             continue
         all_island.add((island_id, x, y))
         total_settlements += int(island['players'])
