@@ -61,7 +61,7 @@ def loginDaily(session, event, stdin_fd, predetermined_input):
                     else:
                         print(i+1,') ',bcolors.STONE,task,bcolors.ENDC)
                 choice = read(min=1, max=len(tasks), empty=True, digit=True, additionalValues=['y','Y'])
-                if not choice or choice.lower() == 'y':
+                if not choice or ( not choice.isdigit() and choice.lower() == 'y' ):
                     return
                 choice -= 1
                 if list(tasks)[choice] in favour_tasks:
