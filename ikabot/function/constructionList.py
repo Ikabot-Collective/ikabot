@@ -82,11 +82,11 @@ def expandBuilding(session, cityId, building, waitForResources):
         current_level += 1
     levels_to_upgrade = building['upgradeTo'] - current_level
     position = building['position']
-
+    upgradeTo = building['upgradeTo']
     time.sleep(random.randint(5, 15))  # to avoid race conditions with sendResourcesNeeded
 
     for lv in range(levels_to_upgrade):
-        city = waitForConstruction(session, cityId, building['upgradeTo'])
+        city = waitForConstruction(session, cityId, upgradeTo)
         building = city['position'][position]
 
         if building['canUpgrade'] is False and waitForResources is True:
