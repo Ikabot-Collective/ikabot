@@ -8,11 +8,11 @@ from ikabot.function.distributeResources import distribute_evenly
 
 
 def test_distribute_evenly(monkeypatch, session, cities):
-    monkeypatch.setattr(ikabot.function.distributeResources, "getIdsOfCities", lambda s: ([city["id"] for city in cities], cities))
+    cities_ids = [city["id"] for city in cities]
     monkeypatch.setattr(ikabot.function.distributeResources, "getCity", lambda city: city)
 
     # test
-    routes = distribute_evenly(session, materials_names_tec.index("wine"))
+    routes = distribute_evenly(session, materials_names_tec.index("wine"), cities_ids, cities)
 
     sorted_routes = sorted(routes, key=lambda route: route[1]["id"])
 

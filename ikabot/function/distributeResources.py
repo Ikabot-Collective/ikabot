@@ -51,10 +51,30 @@ def distributeResources(session, event, stdin_fd, predetermined_input):
             type_distribution = read(min=1, max=2)
             evenly = type_distribution == 2
 
+        (cities_ids, cities) = getIdsOfCities(session)
+        choice = None
+        ignored_cities = []
+        while True:
+            banner()
+            displayed_string = f'(currently ignoring: {", ".join(ignored_cities)})' if ignored_cities else ''
+            print(f'Select cities to ignore. {displayed_string}')
+            print('0) Continue')
+            choice_to_cityid_map = []
+            for i, city in enumerate(cities.values()):
+                choice_to_cityid_map.append(city['id'])
+                print(f'{i + 1}) {city["name"]} - {materials_names[city["tradegood"]]}')
+            choice = read(min=0, max=len(cities_ids))
+            if choice == 0:
+                break
+            city_id = choice_to_cityid_map[choice - 1]
+            cities_ids = list(filter(lambda x: x != str(city_id), cities_ids))
+            ignored_cities.append(cities[str(city_id)]["name"])
+            del cities[str(city_id)]
+
         if evenly:
-            routes = distribute_evenly(session, resource)
+            routes = distribute_evenly(session, resource, cities_ids, cities)
         else:
-            routes = distribute_unevenly(session, resource)
+            routes = distribute_unevenly(session, resource, cities_ids, cities)
 
         if routes is None:
             event.set()
@@ -90,7 +110,7 @@ def distributeResources(session, event, stdin_fd, predetermined_input):
         session.logout()
 
 
-def distribute_evenly(session, resource_type):
+def distribute_evenly(session, resource_type, cities_ids, cities):
     """
     Parameters
     ----------
@@ -98,12 +118,11 @@ def distribute_evenly(session, resource_type):
     resource_type : int
     """
     resourceTotal = 0
-    (cityIDs, cities) = getIdsOfCities(session)
 
     originCities = {}
     destinationCities = {}
     allCities = {}
-    for cityID in cityIDs:
+    for cityID in cities_ids:
 
         html = session.get(city_url + cityID)  # load html from the get request for that particular city
         city = getCity(html)  # convert the html to a city object
@@ -174,7 +193,7 @@ def distribute_evenly(session, resource_type):
     return routes
 
 
-def distribute_unevenly(session, resource_type):
+def distribute_unevenly(session, resource_type, cities_ids, cities):
     """
     Parameters
     ----------
@@ -182,7 +201,6 @@ def distribute_unevenly(session, resource_type):
     resource_type : int
     """
     total_available_resources_from_all_cities = 0
-    (cities_ids, cities) = getIdsOfCities(session)
     origin_cities = {}
     destination_cities = {}
     for destination_city_id in cities_ids:
