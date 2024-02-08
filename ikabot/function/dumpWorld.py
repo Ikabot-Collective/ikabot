@@ -67,12 +67,20 @@ def dumpWorld(session, event, stdin_fd, predetermined_input):
         print('Type in the waiting time between each request in miliseconds (default = 1500): ')
         choice = read(min=0, max=10000, digit=True, default=1500)
         waiting_time = int(choice)/1000
-        print('Start scan form island id (0 to start from beginning) (default = 0): ')
-        choice = read(min=0, digit=True, default=0)
-        start_id = int(choice)
         print('Do you want only shallow data about the islands? If yes you will not be able to search the dump by player names but the dump will be quick. (Y|N): ')
         choice = read(values=['y', 'Y', 'n', 'N'])
-        shallow = choice
+        shallow = choice in ['y', 'Y']
+        coords = None
+        radius = None
+        if not shallow:
+            print('Do you want to only dump a part of the map? (Y|N)')
+            choice = read(values=['y', 'Y', 'n', 'N'])
+            if (choice in ['y','Y']):
+                print('Type in a center point (x,y):')
+                coords = read().replace('(','').replace(')','').split(',')
+                coords = (int(coords[0]), int(coords[1]))
+                print('Type in a max distance from the center point: (default = 15)')
+                radius = read(min=0, max=200, digit=True, default=15)
         
         thread = threading.Thread(target=update_terminal, args=(shared_data,))
         thread.start()
@@ -80,7 +88,7 @@ def dumpWorld(session, event, stdin_fd, predetermined_input):
         info = _('\nDumped world data\n')
         setInfoSignal(session, info)
 
-        dump_path = do_it(session, waiting_time, start_id, shallow)
+        dump_path = do_it(session, waiting_time, coords, radius, shallow)
 
         shared_data[3].set()
         shared_data[4].acquire()
@@ -100,7 +108,7 @@ def dumpWorld(session, event, stdin_fd, predetermined_input):
         return
 
 
-def do_it(session, waiting_time, start_id, shallow):
+def do_it(session, waiting_time, coords, radius, shallow):
     """
     Parameters
     ----------
@@ -124,7 +132,7 @@ def do_it(session, waiting_time, start_id, shallow):
              'dump_start_date': time.time(),
              'dump_end_date': 0,
              'islands': [],
-             'shallow': shallow in ['y', 'Y']
+             'shallow': shallow
             }
     shared_data.append(world)
     #scan 0 to 50 x and y
@@ -173,30 +181,34 @@ def do_it(session, waiting_time, start_id, shallow):
     dump_path = dump_path.replace('\\','/')
     dump_name = getDateTime() + '.json.gz'
 
-    if shallow in ['y','Y']:
+    if shallow:
         dump_name = dump_name.replace('.json.gz', '_shallow') + '.json.gz'
         update_status('Shallow dump is on. Dumping data...', 100, 100, True)
         world['islands'] = shallow_islands
         dump(world, dump_path, dump_name)
         return dump_path + dump_name
 
-    all_island_ids = set()
+    all_island = set()
     total_settlements = 0
     for island in shallow_islands:
-        all_island_ids.add(island['id'])
+        island_id = int(island['id'])
+        x = int(island['x'])
+        y = int(island['y'])
+        if coords and radius and  ((x - coords[0]) ** 2 + (y - coords[1]) ** 2) ** 0.5 > radius:
+            continue
+        all_island.add((island_id, x, y))
         total_settlements += int(island['players'])
 
-    update_status('Got {} islands with {} towns in total'.format(len(all_island_ids), str(total_settlements)), 100, 5, True)
+    update_status('Got {} islands with {} towns in total'.format(len(all_island), str(total_settlements)), 100, 5, True)
     update_status('Getting data for each island. This will take a while...', 0, 5, True)
 
     #scan each island
 
-    world_islands_number = len(all_island_ids)
-    all_island_ids = list(split(sorted(map(int, all_island_ids)), 1))
+    all_island = sorted(all_island)
     
-    dump_islands(shared_data, all_island_ids[0], waiting_time, start_id, session, world_islands_number)
+    dump_islands(shared_data, all_island, waiting_time, session)
 
-    update_status('Got {} individual islands'.format(world_islands_number), 100, 100, True)
+    update_status('Got {} individual islands'.format(len(all_island)), 100, 100, True)
 
     update_status('Dumping data to {}'.format(dump_path + dump_name), 100, 100, True)
 
@@ -205,9 +217,6 @@ def do_it(session, waiting_time, start_id, shallow):
 
     return dump_path + dump_name
 
-def split(a, n):
-    k, m = divmod(len(a), n)
-    return (a[i*k+min(i, m):(i+1)*k+min(i+1, m)] for i in range(n))
 
 def dump(world, dump_path, dump_name):
     world['dump_end_date'] = time.time()
@@ -217,11 +226,12 @@ def dump(world, dump_path, dump_name):
         json_string = json.dumps(world).encode('utf-8')
         file.write(json_string)
        
-def dump_islands(shared_data, all_island_ids, waiting_time, start_id, session, world_islands_number):
-    for i, island_id in enumerate(sorted(map(int, all_island_ids))):
-        if(int(island_id) < start_id):
-            continue
-        update_status('Getting island id {}'.format(island_id), len(shared_data[5]['islands'])/world_islands_number*100, 5+(len(shared_data[5]['islands'])/world_islands_number * 95))
+def dump_islands(shared_data, all_island, waiting_time, session):
+    world_islands_number = len(all_island)
+    for island in all_island:
+        island_id = island[0]
+        island_coords = (island[1], island[2])
+        update_status('Getting island id: {}, x: {}, y: {}'.format(island_id, island_coords[0], island_coords[1]), len(shared_data[5]['islands'])/world_islands_number*100, 5+(len(shared_data[5]['islands'])/world_islands_number * 95))
         html = ''
         try:
             html = session.get('view=island&islandId=' + str(island_id))
