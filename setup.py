@@ -6,8 +6,8 @@ setuptools.setup(
     author="physics-sp",
     author_email="physics-sp@protonmail.com",
     license='MIT',
-    description="A bot for ikariam",
-    url="https://github.com/physics-sp/ikabot",
+    description="A Python-based bot designed for automating tasks in the game Ikariam",
+    url="https://github.com/Ikabot-Collective/ikabot",
     include_package_data=True,
     packages=setuptools.find_packages(),
     install_requires=[
