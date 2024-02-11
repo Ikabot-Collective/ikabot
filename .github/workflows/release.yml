@@ -137,3 +137,8 @@ jobs:
     permissions:
       contents: read
       packages: write
+
+  publish_pypi:
+    needs: [publish_release]
+    name: Publish Python Package
+    uses: ./.github/workflows/publish_pypi.yml

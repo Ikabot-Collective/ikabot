@@ -1,0 +1,9 @@
+name: Publish PyPI package Manually
+
+on:
+  workflow_dispatch:
+
+jobs:
+  publish_pypi:
+    name: Publish PyPI package
+    uses: ./.github/workflows/publish_pypi.yml
