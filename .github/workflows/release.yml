@@ -29,7 +29,7 @@ jobs:
         with:
           milestone: '${{ inputs.milestone }}'
           repository: 'ikabot'
-          repository-owner: 'physics-sec'
+          repository-owner: 'Ikabot-Collective'
           token: ${{ github.token }}
 
       - name: Generate Release Notes
