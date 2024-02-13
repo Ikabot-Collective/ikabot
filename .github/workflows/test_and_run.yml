@@ -1,8 +1,12 @@
-name: Run ikabot
+name: Test and Run Ikabot
 
 on:
   pull_request:
+    branches:
+      - master
   push:
+    branches:
+      - master
 
 jobs:
   build:
@@ -31,12 +35,14 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         python -m pip install -e .
-    - name: Run unit tests
+    - name: Install Test Dependencies
       run: |
         pip install pytest
-        export PYTHONPATH="$PYTHONPATH;$(pwd)"
-        pytest tests -vvvvvvvvvv
-    - name: Just run ikabot
+        pip install pytest-mock
+    - name: Run Tests
+      run: |
+        python -m pytest tests/ikabot
+    - name: Run ikabot
       run: |
         printf "\n\n" | python -m ikabot &> log.log || cat log.log
-        grep "Failed to log in..." log.log && exit 0 || exit 1
+        grep "Obtaining new blackbox token, please wait..." log.log && exit 0 || exit 1
