@@ -1,4 +1,4 @@
-name: Run API Tests
+name: Run API Tests manually
 
 on:
   workflow_dispatch:
