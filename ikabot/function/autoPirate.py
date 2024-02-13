@@ -283,7 +283,16 @@ def convertCapturePoints(session, piracyCities, convertPerMission):
     session : ikabot.web.session.Session
     piracyCities: a list containing all cities which have a pirate fortress
     """
-    html = session.get('view=pirateFortress&activeTab=tabCrew&cityId={0}&position=17&backgroundView=city&currentCityId={0}&templateView=pirateFortress'.format(piracyCities[0]['id']))
+    params = {'view': "pirateFortress",
+              'activeTab': "tabCrew",
+              'cityId': piracyCities[0]['id'],
+              'position': 17,
+              'backgroundView': "city",
+              'currentCityId': piracyCities[0]['id'],
+              'templateView': "pirateFortress",
+              'actionRequest': actionRequest,
+              'ajax': 1}
+    html = session.post(params=params)
     rta = re.search(r'\\"capturePoints\\":\\"(\d+)\\"', html)
     capturePoints = int(rta.group(1))
     if convertPerMission == 'all':
