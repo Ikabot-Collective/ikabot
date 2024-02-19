@@ -1,20 +1,21 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import re
-import os
-import json
-import time
-import random
 import gettext
+import json
+import os
+import random
+import re
 import sys
+import time
+
+import ikabot.config as config
 import ikabot.web.session
 from ikabot.config import *
-import ikabot.config as config
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import read
 
-t = gettext.translation('botComm', localedir, languages=languages, fallback=True)
+t = gettext.translation("botComm", localedir, languages=languages, fallback=True)
 _ = t.gettext
 
 
@@ -46,23 +47,44 @@ def sendToBot(session, msg, Token=False, Photo=None):
     Photo : bytes
         a bytes object representing a picture to be sent.
     """
-    
-    session.writeLog(msg = 'MESSAGE TO TG BOT: ' + msg, module = __name__, level = logLevels.WARN, logTraceback = True, logRequestHistory = True )
+
+    session.writeLog(
+        msg="MESSAGE TO TG BOT: " + msg,
+        module=__name__,
+        level=logLevels.WARN,
+        logTraceback=True,
+        logRequestHistory=True,
+    )
     if checkTelegramData(session) is False:
-        session.writeLog(msg = 'Tried to message TG bot without correct tg data!', module=__name__, level = logLevels.ERROR)
+        session.writeLog(
+            msg="Tried to message TG bot without correct tg data!",
+            module=__name__,
+            level=logLevels.ERROR,
+        )
         return
     if Token is False:
-        msg = 'pid:{}\n{}\n{}'.format(os.getpid(), config.infoUser, msg)
+        msg = "pid:{}\n{}\n{}".format(os.getpid(), config.infoUser, msg)
 
     sessionData = session.getSessionData()
-    telegram_data = sessionData['shared']['telegram']
+    telegram_data = sessionData["shared"]["telegram"]
     if Photo is None:
-        return ikabot.web.session.normal_get('https://api.telegram.org/bot{}/sendMessage'.format(telegram_data['botToken']), params={'chat_id': telegram_data['chatId'], 'text': msg})
+        return ikabot.web.session.normal_get(
+            "https://api.telegram.org/bot{}/sendMessage".format(
+                telegram_data["botToken"]
+            ),
+            params={"chat_id": telegram_data["chatId"], "text": msg},
+        )
     else:
         # we need to clear the headers here because telegram doesn't like keep-alive, might as well get rid of all headers
         headers = session.s.headers.copy()
         session.s.headers.clear()
-        resp = session.s.post('https://api.telegram.org/bot{}/sendDocument'.format(telegram_data['botToken']), files={'document': ('captcha.png', Photo)}, data={'chat_id': telegram_data['chatId'],'caption': msg})
+        resp = session.s.post(
+            "https://api.telegram.org/bot{}/sendDocument".format(
+                telegram_data["botToken"]
+            ),
+            files={"document": ("captcha.png", Photo)},
+            data={"chat_id": telegram_data["chatId"], "caption": msg},
+        )
         session.s.headers = headers
         return resp
 
@@ -82,7 +104,10 @@ def telegramDataIsValid(session):
     """
     sessionData = session.getSessionData()
     try:
-        return len(sessionData['shared']['telegram']['botToken']) > 0 and len(sessionData['shared']['telegram']['chatId']) > 0
+        return (
+            len(sessionData["shared"]["telegram"]["botToken"]) > 0
+            and len(sessionData["shared"]["telegram"]["chatId"]) > 0
+        )
     except KeyError:
         return False
 
@@ -105,21 +130,36 @@ def getUserResponse(session, fullResponse=False):
         return []
 
     sessionData = session.getSessionData()
-    telegram_data = sessionData['shared']['telegram']
+    telegram_data = sessionData["shared"]["telegram"]
 
     try:
-        updates = ikabot.web.session.normal_get('https://api.telegram.org/bot{}/getUpdates'.format(telegram_data['botToken'])).text
+        updates = ikabot.web.session.normal_get(
+            "https://api.telegram.org/bot{}/getUpdates".format(
+                telegram_data["botToken"]
+            )
+        ).text
         updates = json.loads(updates, strict=False)
-        if updates['ok'] is False:
+        if updates["ok"] is False:
             return []
-        updates = updates['result']
+        updates = updates["result"]
         # only return messages from the chatId of our user
         if fullResponse:
-            return [update['message'] for update in updates if 'message' in update and update['message']['chat']['id'] == int(telegram_data['chatId'])]
+            return [
+                update["message"]
+                for update in updates
+                if "message" in update
+                and update["message"]["chat"]["id"] == int(telegram_data["chatId"])
+            ]
         else:
-            return [update['message']['text'] for update in updates if 'message' in update and update['message']['chat']['id'] == int(telegram_data['chatId'])]
+            return [
+                update["message"]["text"]
+                for update in updates
+                if "message" in update
+                and update["message"]["chat"]["id"] == int(telegram_data["chatId"])
+            ]
     except KeyError:
         return []
+
 
 def checkTelegramData(session):
     """This function doesn't actually check any data itself, that is done by the ``telegramDataIsValid`` function. This function returns ``True`` if there is any Telegram data in the .ikabot file, and if there is none, it will ask the user to input it.
@@ -136,14 +176,21 @@ def checkTelegramData(session):
     if telegramDataIsValid(session):
         return True
     else:
-        if not session.padre: #stop asking people if process is detached
+        if not session.padre:  # stop asking people if process is detached
             return False
         banner()
-        print(_('You must provide valid credentials to communicate by telegram.'))
-        print(_('You require the token of the bot you are going to use.'))
-        print(_('For more information about how to obtain them read the readme at https://github.com/physics-sp/ikabot'))
-        rta = read(msg=_('Will you provide the credentials now? [y/N]'), values=['y', 'Y', 'n', 'N', ''])
-        if rta.lower() != 'y':
+        print(_("You must provide valid credentials to communicate by telegram."))
+        print(_("You require the token of the bot you are going to use."))
+        print(
+            _(
+                "For more information about how to obtain them read the readme at https://github.com/physics-sp/ikabot"
+            )
+        )
+        rta = read(
+            msg=_("Will you provide the credentials now? [y/N]"),
+            values=["y", "Y", "n", "N", ""],
+        )
+        if rta.lower() != "y":
             return False
         else:
             return updateTelegramData(session)
@@ -171,62 +218,86 @@ def updateTelegramData(session, event=None, stdin_fd=None, predetermined_input=[
         sys.stdin = os.fdopen(stdin_fd)  # give process access to terminal
     config.predetermined_input = predetermined_input
     banner()
-    print(_('To create your own Telegram bot, read this: https://core.telegram.org/bots#3-how-do-i-create-a-bot'))
-    print(_('1. Just talk to @botfather in Telegram, send /newbot and then choose the bot\'s name.'))
-    print(_('2. Obtain your new bot\'s token'))
-    print(_('3. Remember to keep the token secret!\n'))
-    botToken = read(msg=_('Bot\'s token: '))
+    print(
+        _(
+            "To create your own Telegram bot, read this: https://core.telegram.org/bots#3-how-do-i-create-a-bot"
+        )
+    )
+    print(
+        _(
+            "1. Just talk to @botfather in Telegram, send /newbot and then choose the bot's name."
+        )
+    )
+    print(_("2. Obtain your new bot's token"))
+    print(_("3. Remember to keep the token secret!\n"))
+    botToken = read(msg=_("Bot's token: "))
 
-    updates = ikabot.web.session.normal_get('https://api.telegram.org/bot{}/getUpdates'.format(botToken)).json()
-    me = ikabot.web.session.normal_get('https://api.telegram.org/bot{}/getMe'.format(botToken)).json()
-    if 'ok' not in updates or updates['ok'] is False:
-        print(_('Invalid Telegram bot, try again.'))
+    updates = ikabot.web.session.normal_get(
+        "https://api.telegram.org/bot{}/getUpdates".format(botToken)
+    ).json()
+    me = ikabot.web.session.normal_get(
+        "https://api.telegram.org/bot{}/getMe".format(botToken)
+    ).json()
+    if "ok" not in updates or updates["ok"] is False:
+        print(_("Invalid Telegram bot, try again."))
         enter()
         if event is not None and stdin_fd is not None:
             event.set()
         return False
-    
+
     rand = str(random.randint(0, 9999)).zfill(4)
-    print(f'\n{bcolors.GREEN}SUCCESS!{bcolors.ENDC} Telegram token is good!')
-    print(f"\n4. Now send your bot the command {bcolors.BLUE}/ikabot {rand}{bcolors.ENDC} on Telegram.\nYour bot\'s username is @{me['result']['username']}")
-    
+    print(f"\n{bcolors.GREEN}SUCCESS!{bcolors.ENDC} Telegram token is good!")
+    print(
+        f"\n4. Now send your bot the command {bcolors.BLUE}/ikabot {rand}{bcolors.ENDC} on Telegram.\nYour bot's username is @{me['result']['username']}"
+    )
+
     start = time.time()
     user_id = None
     try:
         while True:
-            print(f'Waiting to receive the command on Telegram... Press CTRL + C to abort.\tdt:{round(time.time()-start)}s',end='\r')
-            updates = ikabot.web.session.normal_get('https://api.telegram.org/bot{}/getUpdates'.format(botToken)).json()
+            print(
+                f"Waiting to receive the command on Telegram... Press CTRL + C to abort.\tdt:{round(time.time()-start)}s",
+                end="\r",
+            )
+            updates = ikabot.web.session.normal_get(
+                "https://api.telegram.org/bot{}/getUpdates".format(botToken)
+            ).json()
 
-            for update in updates['result']:
-                if 'message' in update:
-                    if 'text' in update['message']:
-                        if update['message']['text'].strip() == f'/ikabot {rand}':
-                            user_id = update['message']['from']['id']
+            for update in updates["result"]:
+                if "message" in update:
+                    if "text" in update["message"]:
+                        if update["message"]["text"].strip() == f"/ikabot {rand}":
+                            user_id = update["message"]["from"]["id"]
                             break
             time.sleep(2)
-            print(' '*100, end='\r')
+            print(" " * 100, end="\r")
             if user_id:
                 break
     except KeyboardInterrupt:
-        print(f'{bcolors.RED}FAILURE!{bcolors.ENDC} Did not find command {bcolors.BLUE}/ikabot {rand}{bcolors.ENDC} among received messages!\n\n{str(updates)}')
+        print(
+            f"{bcolors.RED}FAILURE!{bcolors.ENDC} Did not find command {bcolors.BLUE}/ikabot {rand}{bcolors.ENDC} among received messages!\n\n{str(updates)}"
+        )
         enter()
         if event is not None and stdin_fd is not None:
             event.set()
         return False
 
     telegram_data = {}
-    telegram_data['telegram'] = {}
-    telegram_data['telegram']['botToken'] = botToken.replace(' ', '')
-    telegram_data['telegram']['chatId'] = str(user_id)
+    telegram_data["telegram"] = {}
+    telegram_data["telegram"]["botToken"] = botToken.replace(" ", "")
+    telegram_data["telegram"]["chatId"] = str(user_id)
     session.setSessionData(telegram_data, shared=True)
 
-    sendToBot(session, 'You have successfully set up Telegram with ikabot.', Token=True)
+    sendToBot(session, "You have successfully set up Telegram with ikabot.", Token=True)
 
-    print('\nA message was sent to you on Telegram informing you about the successful setup of the Telegram bot.')
-    print('If you did not receive any message on Telegram then something has gone wrong and you will need to set up the Telegram data again!')
+    print(
+        "\nA message was sent to you on Telegram informing you about the successful setup of the Telegram bot."
+    )
+    print(
+        "If you did not receive any message on Telegram then something has gone wrong and you will need to set up the Telegram data again!"
+    )
     enter()
 
     if event is not None and stdin_fd is not None:
         event.set()  # give main process control before exiting
     return True
-

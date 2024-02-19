@@ -1,4 +1,5 @@
 from collections import namedtuple
+
 import pytest
 
 import ikabot.config
@@ -9,10 +10,14 @@ from ikabot.function.distributeResources import distribute_evenly
 
 def test_distribute_evenly(monkeypatch, session, cities):
     cities_ids = [city["id"] for city in cities]
-    monkeypatch.setattr(ikabot.function.distributeResources, "getCity", lambda city: city)
+    monkeypatch.setattr(
+        ikabot.function.distributeResources, "getCity", lambda city: city
+    )
 
     # test
-    routes = distribute_evenly(session, materials_names_tec.index("wine"), cities_ids, cities)
+    routes = distribute_evenly(
+        session, materials_names_tec.index("wine"), cities_ids, cities
+    )
 
     sorted_routes = sorted(routes, key=lambda route: route[1]["id"])
 
@@ -80,7 +85,11 @@ def cities():
     ]
     for city in cities:
         for i in range(5):
-            city['freeSpaceForResources'].append(city['storageCapacity'] - city['availableResources'][i] - city['resourcesListedForSale'][i]),
+            city["freeSpaceForResources"].append(
+                city["storageCapacity"]
+                - city["availableResources"][i]
+                - city["resourcesListedForSale"][i]
+            ),
 
     return cities
 

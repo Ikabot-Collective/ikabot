@@ -1,8 +1,9 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import re
 import json
+import re
+
 from ikabot.config import *
 from ikabot.helpers.getJson import getCity
 from ikabot.helpers.pedirInfo import getIdsOfCities
@@ -23,12 +24,12 @@ def getCommercialCities(session):
     for city_id in cities_ids:
         html = session.get(city_url + city_id)
         city = getCity(html)
-        for pos, building in enumerate(city['position']):
-            if building['building'] == 'branchOffice':
-                city['pos'] = pos
+        for pos, building in enumerate(city["position"]):
+            if building["building"] == "branchOffice":
+                city["pos"] = pos
                 html = getMarketHtml(session, city)
-                positions = re.findall(r'<option.*?>(\d+)</option>', html)
-                city['rango'] = int(positions[-1])
+                positions = re.findall(r"<option.*?>(\d+)</option>", html)
+                city["rango"] = int(positions[-1])
                 commercial_cities.append(city)
                 break
     return commercial_cities
@@ -41,14 +42,16 @@ def getMarketHtml(session, city):
     session : ikabot.web.session.Session
     city : dict
     """
-    url = 'view=branchOffice&cityId={}&position={:d}&currentCityId={}&backgroundView=city&actionRequest={}&ajax=1'.format(city['id'], city['pos'], city['id'], actionRequest)
+    url = "view=branchOffice&cityId={}&position={:d}&currentCityId={}&backgroundView=city&actionRequest={}&ajax=1".format(
+        city["id"], city["pos"], city["id"], actionRequest
+    )
     data = session.post(url)
     json_data = json.loads(data, strict=False)
     return json_data[1][1][1]
 
 
 def storageCapacityOfMarket(html):
-    match = re.search(r'var\s*storageCapacity\s*=\s*(\d+);', html)
+    match = re.search(r"var\s*storageCapacity\s*=\s*(\d+);", html)
     if match:
         return int(match.group(1))
     else:
@@ -56,7 +59,10 @@ def storageCapacityOfMarket(html):
 
 
 def onSellInMarket(html):
-    mad, vin, mar, cri, azu = re.findall(r'<input type="text" class="textfield"\s*size="\d+"\s*name=".*?"\s*id=".*?"\s*value="(\d+)"', html)
+    mad, vin, mar, cri, azu = re.findall(
+        r'<input type="text" class="textfield"\s*size="\d+"\s*name=".*?"\s*id=".*?"\s*value="(\d+)"',
+        html,
+    )
     return [int(mad), int(vin), int(mar), int(cri), int(azu)]
 
 
@@ -70,11 +76,17 @@ def getGold(session, city):
     -------
     gold : int
     """
-    url = 'view=finances&backgroundView=city&currentCityId={}&templateView=finances&actionRequest={}&ajax=1'.format(city['id'], actionRequest)
+    url = "view=finances&backgroundView=city&currentCityId={}&templateView=finances&actionRequest={}&ajax=1".format(
+        city["id"], actionRequest
+    )
     data = session.post(url)
     json_data = json.loads(data, strict=False)
-    gold = json_data[0][1]['headerData']['gold']
-    gold = gold.split('.')[0]
+    gold = json_data[0][1]["headerData"]["gold"]
+    gold = gold.split(".")[0]
     gold = int(gold)
-    gold_production = json_data[0][1]['headerData']['scientistsUpkeep'] + json_data[0][1]['headerData']['income'] + json_data[0][1]['headerData']['upkeep']
+    gold_production = (
+        json_data[0][1]["headerData"]["scientistsUpkeep"]
+        + json_data[0][1]["headerData"]["income"]
+        + json_data[0][1]["headerData"]["upkeep"]
+    )
     return gold, int(gold_production)
