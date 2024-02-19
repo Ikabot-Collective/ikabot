@@ -3,8 +3,9 @@
 import sys
 
 from ikabot.helpers.botComm import sendToBot
-from ikabot.helpers.pedirInfo import read, enter
 from ikabot.helpers.gui import *
+from ikabot.helpers.pedirInfo import enter, read
+
 
 def testTelegramBot(session, event, stdin_fd, predetermined_input):
     """
@@ -17,8 +18,8 @@ def testTelegramBot(session, event, stdin_fd, predetermined_input):
     """
     sys.stdin = os.fdopen(stdin_fd)
     config.predetermined_input = predetermined_input
-    try :
-        input = read(msg='Enter the massage you wish to see: ')
+    try:
+        input = read(msg="Enter the massage you wish to see: ")
         msg = "Test message: {}".format(input)
         sendToBot(session, msg)
         enter()
