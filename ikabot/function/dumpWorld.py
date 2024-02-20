@@ -88,11 +88,15 @@ def dumpWorld(session, event, stdin_fd, predetermined_input):
             print("Do you want to only dump a part of the map? (Y|N)")
             choice = read(values=["y", "Y", "n", "N"])
             if choice in ["y", "Y"]:
-                print("Type in a center point (x,y):")
-                coords = read().replace("(", "").replace(")", "").split(",")
-                coords = (int(coords[0]), int(coords[1]))
-                print("Type in a max distance from the center point: (default = 15)")
-                radius = read(min=0, max=200, digit=True, default=15)
+                print('Type in a center point (x,y): (type "skip" to skip this step)')
+                input = read()
+                if input.strip().lower() != "skip":
+                    coords = input.replace("(", "").replace(")", "").split(",")
+                    coords = (int(coords[0]), int(coords[1]))
+                    print(
+                        "Type in a max distance from the center point: (default = 15)"
+                    )
+                    radius = read(min=0, max=200, digit=True, default=15)
                 print("Do you want to only dump islands with at least 1 town? (Y|N)")
                 choice = read(values=["y", "Y", "n", "N"])
                 non_empty_islands = choice in ["y", "Y"]
@@ -305,7 +309,9 @@ def do_it(session, waiting_time, coords, radius, shallow, non_empty_islands):
     dump_islands(shared_data, all_island, waiting_time, session)
     update_status("Got {} individual islands".format(len(all_island)), 100, 100, True)
 
-    name_suffix = "_partial" if (radius >= 0 and coords) or non_empty_islands else ""
+    name_suffix = (
+        "_partial" if (coords and radius and radius >= 0) or non_empty_islands else ""
+    )
     dump_name = dump_name.replace(".json.gz", name_suffix) + ".json.gz"
     update_status("Dumping data to {}".format(dump_path + dump_name), 100, 100, True)
     dump(shared_data[5], dump_path, dump_name)
