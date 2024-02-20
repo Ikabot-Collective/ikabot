@@ -155,6 +155,9 @@ def do_it(session, waiting_time, coords, radius, shallow, non_empty_islands):
     """
 
     shared_data[2] = time.time()
+    partial = (
+        True if (coords and radius and radius >= 0) or non_empty_islands else False
+    )
     world = {
         "name": "s" + str(session.mundo) + "-" + str(session.servidor),
         "self_name": session.username,
@@ -162,6 +165,7 @@ def do_it(session, waiting_time, coords, radius, shallow, non_empty_islands):
         "dump_end_date": 0,
         "islands": [],
         "shallow": shallow,
+        "partial": partial,
     }
     shared_data.append(world)
     # scan 0 to 50 x and y
@@ -309,9 +313,7 @@ def do_it(session, waiting_time, coords, radius, shallow, non_empty_islands):
     dump_islands(shared_data, all_island, waiting_time, session)
     update_status("Got {} individual islands".format(len(all_island)), 100, 100, True)
 
-    name_suffix = (
-        "_partial" if (coords and radius and radius >= 0) or non_empty_islands else ""
-    )
+    name_suffix = "_partial" if partial else ""
     dump_name = dump_name.replace(".json.gz", name_suffix) + ".json.gz"
     update_status("Dumping data to {}".format(dump_path + dump_name), 100, 100, True)
     dump(shared_data[5], dump_path, dump_name)
