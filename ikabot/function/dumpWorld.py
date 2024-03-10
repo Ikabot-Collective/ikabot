@@ -83,15 +83,23 @@ def dumpWorld(session, event, stdin_fd, predetermined_input):
         shallow = choice in ["y", "Y"]
         coords = None
         radius = None
+        non_empty_islands = False
         if not shallow:
             print("Do you want to only dump a part of the map? (Y|N)")
             choice = read(values=["y", "Y", "n", "N"])
             if choice in ["y", "Y"]:
-                print("Type in a center point (x,y):")
-                coords = read().replace("(", "").replace(")", "").split(",")
-                coords = (int(coords[0]), int(coords[1]))
-                print("Type in a max distance from the center point: (default = 15)")
-                radius = read(min=0, max=200, digit=True, default=15)
+                print('Type in a center point (x,y): (type "skip" to skip this step)')
+                input = read()
+                if input.strip().lower() != "skip":
+                    coords = input.replace("(", "").replace(")", "").split(",")
+                    coords = (int(coords[0]), int(coords[1]))
+                    print(
+                        "Type in a max distance from the center point: (default = 15)"
+                    )
+                    radius = read(min=0, max=200, digit=True, default=15)
+                print("Do you want to only dump islands with at least 1 town? (Y|N)")
+                choice = read(values=["y", "Y", "n", "N"])
+                non_empty_islands = choice in ["y", "Y"]
 
         thread = threading.Thread(target=update_terminal, args=(shared_data,))
         thread.start()
@@ -99,7 +107,9 @@ def dumpWorld(session, event, stdin_fd, predetermined_input):
         info = _("\nDumped world data\n")
         setInfoSignal(session, info)
 
-        dump_path = do_it(session, waiting_time, coords, radius, shallow)
+        dump_path = do_it(
+            session, waiting_time, coords, radius, shallow, non_empty_islands
+        )
 
         shared_data[3].set()
         shared_data[4].acquire()
@@ -126,7 +136,7 @@ def dumpWorld(session, event, stdin_fd, predetermined_input):
         return
 
 
-def do_it(session, waiting_time, coords, radius, shallow):
+def do_it(session, waiting_time, coords, radius, shallow, non_empty_islands):
     """
     Parameters
     ----------
@@ -145,6 +155,9 @@ def do_it(session, waiting_time, coords, radius, shallow):
     """
 
     shared_data[2] = time.time()
+    partial = (
+        True if (coords and radius and radius >= 0) or non_empty_islands else False
+    )
     world = {
         "name": "s" + str(session.mundo) + "-" + str(session.servidor),
         "self_name": session.username,
@@ -152,6 +165,7 @@ def do_it(session, waiting_time, coords, radius, shallow):
         "dump_end_date": 0,
         "islands": [],
         "shallow": shallow,
+        "partial": partial,
     }
     shared_data.append(world)
     # scan 0 to 50 x and y
@@ -272,6 +286,8 @@ def do_it(session, waiting_time, coords, radius, shallow):
         island_id = int(island["id"])
         x = int(island["x"])
         y = int(island["y"])
+        if non_empty_islands and not int(island["players"]):
+            continue
         if (
             coords
             and radius
@@ -294,15 +310,13 @@ def do_it(session, waiting_time, coords, radius, shallow):
     # scan each island
 
     all_island = sorted(all_island)
-
     dump_islands(shared_data, all_island, waiting_time, session)
-
     update_status("Got {} individual islands".format(len(all_island)), 100, 100, True)
 
+    name_suffix = "_partial" if partial else ""
+    dump_name = dump_name.replace(".json.gz", name_suffix) + ".json.gz"
     update_status("Dumping data to {}".format(dump_path + dump_name), 100, 100, True)
-
     dump(shared_data[5], dump_path, dump_name)
-
     return dump_path + dump_name
 
 
