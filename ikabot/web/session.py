@@ -283,9 +283,10 @@ class Session:
                     )
                 )
             address = "http://" + parts[1] + "/token"
+            user_id = base64.b64encode(self.mail.encode()).decode("utf-8")
             blackbox_token = (
                 "tra:"
-                + requests.get(address, verify=config.do_ssl_verify, timeout=900).text
+                + requests.get(address, params={'user_id': user_id}, verify=config.do_ssl_verify, timeout=900).text
             )
             assert any(
                 c.isupper() for c in blackbox_token
