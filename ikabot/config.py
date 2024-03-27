@@ -27,6 +27,7 @@ update_msg = ""
 
 isWindows = os.name == "nt"
 
+publicAPIServerDomain = 'ikagod.twilightparadox.com'
 do_ssl_verify = True
 ids_cache = None
 cities_cache = None

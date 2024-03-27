@@ -25,6 +25,7 @@ from ikabot.helpers.getJson import getCity
 from ikabot.helpers.gui import banner
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.varios import getDateTime
+from ikabot.helpers.dns import getAddress
 
 t = gettext.translation("session", localedir, languages=languages, fallback=True)
 _ = t.gettext
@@ -271,18 +272,7 @@ class Session:
         try:
             if self.padre:
                 print("Obtaining new blackbox token, please wait...")
-            from ikabot.helpers.process import run
-
-            text = run("nslookup -q=txt ikagod.twilightparadox.com ns2.afraid.org")
-            parts = text.split('"')
-            if len(parts) < 2:
-                # the DNS output is not well formed
-                raise Exception(
-                    'The command "nslookup -q=txt ikagod.twilightparadox.com ns2.afraid.org" returned bad data: {}'.format(
-                        text
-                    )
-                )
-            address = "http://" + parts[1] + "/token"
+            address = getAddress(self, publicAPIServerDomain).replace("/ikagod/ikabot", "/token")
             blackbox_token = (
                 "tra:"
                 + requests.get(address, verify=config.do_ssl_verify, timeout=900).text
@@ -614,20 +604,8 @@ class Session:
                     ).content
                     data = {}
                     try:
-                        from ikabot.helpers.process import run
-
-                        text = run(
-                            "nslookup -q=txt ikagod.twilightparadox.com ns2.afraid.org"
-                        )
-                        parts = text.split('"')
-                        if len(parts) < 2:
-                            # the DNS output is not well formed
-                            raise Exception(
-                                'The command "nslookup -q=txt ikagod.twilightparadox.com ns2.afraid.org" returned bad data: {}'.format(
-                                    text
-                                )
-                            )
-                        address = parts[1]
+                        
+                        address = getAddress(self, publicAPIServerDomain)
 
                         files = {"text_image": text_image, "drag_icons": drag_icons}
                         captcha = self.s.post(

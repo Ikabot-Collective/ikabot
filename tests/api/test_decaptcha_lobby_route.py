@@ -3,21 +3,13 @@ import os
 import pytest
 import requests
 
-from ikabot.helpers.process import run
+from ikabot.helpers.dns import getAddress
+from ikabot.config import *
 
 
 @pytest.fixture
 def base_url():
-    text = run("nslookup -q=txt ikagod.twilightparadox.com ns2.afraid.org")
-    parts = text.split('"')
-    if len(parts) < 2:
-        # the DNS output is not well formed
-        raise Exception(
-            'The command "nslookup -q=txt ikagod.twilightparadox.com ns2.afraid.org" returned bad data: {}'.format(
-                text
-            )
-        )
-    address = parts[1]
+    address = getAddress(domain = publicAPIServerDomain)
     # Remove "/ikagod/ikabot" from the URL
     base_url = f"http://{address}".replace("/ikagod/ikabot", "")
     return base_url

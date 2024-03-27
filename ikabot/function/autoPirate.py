@@ -16,6 +16,7 @@ from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.process import run, set_child_mode
 from ikabot.helpers.varios import timeStringToSec, wait
+from ikabot.helpers.dns import getAddress
 
 t = gettext.translation("buyResources", localedir, languages=languages, fallback=True)
 _ = t.gettext
@@ -33,15 +34,7 @@ def autoPirate(session, event, stdin_fd, predetermined_input):
     sys.stdin = os.fdopen(stdin_fd)
     config.predetermined_input = predetermined_input
     banner()
-    try:
-        if not isWindows:
-            path = run("which nslookup")
-            is_installed = re.search(r"/.*?/nslookup", path) is not None
-            if is_installed is False:
-                print("you must first install nslookup")
-                enter()
-                event.set()
-                return
+    try:        
 
         print(
             "{}⚠️ USING THIS FEATURE WILL EXPOSE YOUR IP ADDRESS TO A THIRD PARTY FOR CAPTCHA SOLVING ⚠️{}\n\n".format(
@@ -281,12 +274,7 @@ def resolveCaptcha(session, picture):
         "decaptcha" not in session_data
         or session_data["decaptcha"]["name"] == "default"
     ):
-        text = run("nslookup -q=txt ikagod.twilightparadox.com ns2.afraid.org")
-        parts = text.split('"')
-        if len(parts) < 2:
-            # the DNS output is not well formed
-            return "Error"
-        address = parts[1]
+        address = getAddress(session, publicAPIServerDomain)
 
         files = {"upload_file": picture}
         captcha = requests.post("http://{0}".format(address), files=files).text
