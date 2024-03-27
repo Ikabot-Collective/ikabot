@@ -101,7 +101,7 @@ def dumpWorld(session, event, stdin_fd, predetermined_input):
                 choice = read(values=["y", "Y", "n", "N"])
                 non_empty_islands = choice in ["y", "Y"]
 
-        thread = threading.Thread(target=update_terminal, args=(shared_data,))
+        thread = threading.Thread(target=update_terminal, args=(shared_data,), daemon=True)
         thread.start()
         set_child_mode(session)
         info = _("\nDumped world data\n")
