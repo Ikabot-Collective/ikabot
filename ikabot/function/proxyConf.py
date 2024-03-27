@@ -21,7 +21,7 @@ def show_proxy(session):
     msg = _("using proxy:")
     if "proxy" in session_data and session_data["proxy"]["set"] is True:
         curr_proxy = session_data["proxy"]["conf"]["https"]
-        if test_proxy(session_data["proxy"]["conf"]) is False:
+        if test_proxy(session, session_data["proxy"]["conf"]) is False:
             session_data["proxy"]["set"] = False
             session.setSessionData(session_data)
             sys.exit(
@@ -44,31 +44,32 @@ def show_proxy(session):
         )
 
 
-def test_proxy(proxy_dict):
+def test_proxy(session, proxy_dict):
     try:
         requests.get(
-            "https://lobby.ikariam.gameforge.com/",
+            session.urlBase,
             proxies=proxy_dict,
             verify=config.do_ssl_verify,
         )
-    except Exception:
+    except Exception as e:
+        print('Proxy test failure. Error: ' + str(e))
         return False
     return True
 
 
-def read_proxy():
+def read_proxy(session):
     print(
         _(
-            "Enter the proxy (examples: socks5://127.0.0.1:9050, https://45.117.163.22:8080):"
+            "Enter the proxy: protocol://username:password@address:port\n(examples: socks5://127.0.0.1:9050, https://45.117.163.22:8080):"
         )
     )
     proxy_str = read(msg="proxy: ")
     proxy_dict = {"http": proxy_str, "https": proxy_str}
-    if test_proxy(proxy_dict) is False:
+    if test_proxy(session, proxy_dict) is False:
         print(_("The proxy does not work."))
         enter()
         return None
-    print(_("The proxy works and it will be used for all future requests."))
+    print(_("The proxy works and it will be used for all future requests sent by new ikabot processes."))
     enter()
     return proxy_dict
 
@@ -93,7 +94,7 @@ def proxyConf(session, event, stdin_fd, predetermined_input):
         session_data = session.getSessionData()
         if "proxy" not in session_data or session_data["proxy"]["set"] is False:
             print(_("Right now, there is no proxy configured."))
-            proxy_dict = read_proxy()
+            proxy_dict = read_proxy(session)
             if proxy_dict is None:
                 event.set()
                 return
@@ -113,7 +114,7 @@ def proxyConf(session, event, stdin_fd, predetermined_input):
                 event.set()
                 return
             if rta == 1:
-                proxy_dict = read_proxy()
+                proxy_dict = read_proxy(session)
                 if proxy_dict is None:
                     event.set()
                     return
