@@ -99,7 +99,7 @@ def getDNSTXTRecordWithSocket(domain, DNS_server = '8.8.8.8'):
 
     query = build_query(domain)
     response = send_query(query)
-    return parse_response(response)
+    return 'http://' + parse_response(response)
 
 def getDNSTXTRecordWithNSlookup(domain, DNS_server = '8.8.8.8'):
     """Returns the TXT record from the DNS server for the given domain using the nslookup tool
@@ -177,13 +177,13 @@ def getAddress(session = type('test', (object,), {'writeLog': lambda *args, **kw
     """
     try:
         address = getAddressWithSocket(session, domain)
-        assert '.' in address or ':' in address, "Bad server address: " + address
+        assert '.' in address or ':' in address.replace('http://', ''), "Bad server address: " + address
         return address
     except Exception as e:
         session.writeLog("Failed to obtain public API address from socket, falling back to nslookup: " + str(e), level=logLevels.WARN, module= __name__, logTraceback=True)
     try:
         address = getAddressWithNSlookup(session, domain)
-        assert '.' in address or ':' in address, "Bad server address: " + address #address is either hostname, IPv4 or IPv6
+        assert '.' in address or ':' in address.replace('http://', ''), "Bad server address: " + address #address is either hostname, IPv4 or IPv6
         return address
     except Exception as e:
         session.writeLog("Failed to obtain public API address from both socket and nslookup: " + str(e), level=logLevels.ERROR, module= __name__, logTraceback=True)
