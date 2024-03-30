@@ -8,7 +8,7 @@ import random
 import re
 import sys
 import time
-
+from requests import get
 import ikabot.config as config
 from ikabot.config import *
 from ikabot.helpers.gui import *
@@ -67,7 +67,7 @@ def sendToBot(session, msg, Token=False, Photo=None):
     sessionData = session.getSessionData()
     telegram_data = sessionData["shared"]["telegram"]
     if Photo is None:
-        return ikabot.web.session.normal_get(
+        return get(
             "https://api.telegram.org/bot{}/sendMessage".format(
                 telegram_data["botToken"]
             ),
@@ -132,7 +132,7 @@ def getUserResponse(session, fullResponse=False):
     telegram_data = sessionData["shared"]["telegram"]
 
     try:
-        updates = ikabot.web.session.normal_get(
+        updates = get(
             "https://api.telegram.org/bot{}/getUpdates".format(
                 telegram_data["botToken"]
             )
@@ -231,10 +231,10 @@ def updateTelegramData(session, event=None, stdin_fd=None, predetermined_input=[
     print(_("3. Remember to keep the token secret!\n"))
     botToken = read(msg=_("Bot's token: "))
 
-    updates = ikabot.web.session.normal_get(
+    updates = get(
         "https://api.telegram.org/bot{}/getUpdates".format(botToken)
     ).json()
-    me = ikabot.web.session.normal_get(
+    me = get(
         "https://api.telegram.org/bot{}/getMe".format(botToken)
     ).json()
     if "ok" not in updates or updates["ok"] is False:
@@ -258,7 +258,7 @@ def updateTelegramData(session, event=None, stdin_fd=None, predetermined_input=[
                 f"Waiting to receive the command on Telegram... Press CTRL + C to abort.\tdt:{round(time.time()-start)}s",
                 end="\r",
             )
-            updates = ikabot.web.session.normal_get(
+            updates = get(
                 "https://api.telegram.org/bot{}/getUpdates".format(botToken)
             ).json()
 
