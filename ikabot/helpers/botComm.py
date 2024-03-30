@@ -10,7 +10,6 @@ import sys
 import time
 
 import ikabot.config as config
-import ikabot.web.session
 from ikabot.config import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import read
