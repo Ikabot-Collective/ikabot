@@ -39,6 +39,7 @@ from ikabot.function.testTelegramBot import testTelegramBot
 from ikabot.function.trainArmy import trainArmy
 from ikabot.function.update import update
 from ikabot.function.vacationMode import vacationMode
+from ikabot.function.webServer import webServer
 from ikabot.helpers.botComm import telegramDataIsValid, updateTelegramData
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import read
@@ -141,6 +142,7 @@ def menu(session, checkUpdate=True):
         144: decaptchaConf,
         145: logs,
         146: testTelegramBot,
+        147: webServer,
     }
 
     print(_("(0)  Exit"))
@@ -231,8 +233,9 @@ def menu(session, checkUpdate=True):
         print(_("(4) Configure captcha resolver"))
         print(_("(5) Logs"))
         print(_("(6) Message Telegram Bot"))
+        print(_("(7) Ikabot web server"))
 
-        selected = read(min=0, max=6, digit=True)
+        selected = read(min=0, max=7, digit=True)
         if selected == 0:
             menu(session)
             return

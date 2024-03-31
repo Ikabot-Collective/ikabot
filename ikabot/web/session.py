@@ -1143,7 +1143,7 @@ class Session:
         return re.search(r'actionRequest"?:\s*"(.*?)"', html).group(1)
 
     def get(
-        self, url="", params={}, ignoreExpire=False, noIndex=False, fullResponse=False
+        self, url='', params={}, ignoreExpire=False, noIndex=False, fullResponse=False, noQuery=False, **kwargs
     ):
         """Sends get request to ikariam
         Parameters
@@ -1171,6 +1171,8 @@ class Session:
             url = self.urlBase.replace("index.php", "") + url
         else:
             url = self.urlBase + url
+        if noQuery:
+            url = url.replace('?','')
         while True:
             try:
                 self.requestHistory.append(
@@ -1186,7 +1188,7 @@ class Session:
                 )
                 self.writeLog("About to send: {}".format(str(self.requestHistory[-1])))
                 response = self.s.get(
-                    url, params=params, verify=config.do_ssl_verify, timeout=300
+                    url, params=params, verify=config.do_ssl_verify, timeout=300, **kwargs
                 )
                 self.requestHistory[-1]["response"] = {
                     "status": response.status_code,
@@ -1227,7 +1229,7 @@ class Session:
                 time.sleep(ConnectionError_wait)
 
     def post(
-        self, url="", payloadPost={}, params={}, ignoreExpire=False, noIndex=False
+        self, url='', payloadPost={}, params={}, ignoreExpire=False, noIndex=False, fullResponse = False, noQuery=False, **kwargs
     ):
         """Sends post request to ikariam
         Parameters
@@ -1266,6 +1268,8 @@ class Session:
             url = self.urlBase.replace("index.php", "") + url
         else:
             url = self.urlBase + url
+        if noQuery:
+            url = url.replace('?','')
         while True:
             try:
                 self.requestHistory.append(
@@ -1286,6 +1290,7 @@ class Session:
                     params=params,
                     verify=config.do_ssl_verify,
                     timeout=300,
+                    **kwargs,
                 )
                 self.requestHistory[-1]["response"] = {
                     "status": response.status_code,
@@ -1317,7 +1322,7 @@ class Session:
                         ignoreExpire=ignoreExpire,
                         noIndex=noIndex,
                     )
-                return resp
+                return resp if not fullResponse else response
             except AssertionError:
                 self.__sessionExpired()
             except requests.exceptions.ConnectionError:
