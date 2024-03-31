@@ -5,11 +5,13 @@ from datetime import timedelta, datetime
 import gettext
 from io import BytesIO
 import sys
+import threading
 import requests
 import re
 import logging
 import traceback
 import time
+import pickle
 import base64
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.gui import *
@@ -25,6 +27,10 @@ from ikabot.helpers.process import set_child_mode, run
 t = gettext.translation('webServer', localedir, languages=languages, fallback=True)
 _ = t.gettext
 
+if isWindows:
+    web_cache_file = os.getenv('temp') + '/ikabot.webcache'
+else:
+    web_cache_file = '/tmp/ikabot.webcache'
 
 
 def webServer(session, event, stdin_fd, predetermined_input):
@@ -56,19 +62,60 @@ def webServer(session, event, stdin_fd, predetermined_input):
             enter()
             event.set()
             return
+
+    
+    web_cache = dict()
+    #check if webcache already exists and load it if it does
+    if os.path.isfile(web_cache_file):
+        with open(web_cache_file, 'rb') as f:
+            web_cache = pickle.load(f)
+    else:
+        with open(web_cache_file, 'wb') as f:
+            pickle.dump(web_cache, f)
+    
+    def dump_cache():
+        while True:
+            time.sleep(300)
+            with open(web_cache_file, 'wb') as f:
+                pickle.dump(web_cache, f)
+
+    #dump cache in a spearate thread every 5 minutes
+    threading.Thread(target=dump_cache, daemon=True).start()
     
     log = logging.getLogger('werkzeug')
     log.setLevel(logging.ERROR)
 
     try:
-    
         app = Flask('Ikabot web server')
 
         @app.route('/', defaults={'path': ''}, methods=['GET', 'POST'])
         @app.route('/<path:path>', methods=['GET', 'POST'])
-        def proxy(path):
+        def webServer(path):
             
             dest_url = f'{path}'
+
+            # replace mayor
+            if '/cdn/all/both/layout/advisors/mayor.png' in request.url:
+                image_data = base64.b64decode(woke_mayor)
+                # Convert the bytes data to a BytesIO object that Flask can send
+                image_io = BytesIO(image_data)
+                image_io.seek(0)
+                expires = datetime.utcnow() + timedelta(days=1)
+                headers = dict()
+                headers['Expires'] = expires.strftime('%a, %d %b %Y %H:%M:%S GMT')
+                headers['Cache-Control'] = 'public, max-age=86400'
+                response = Response(image_io, 200, headers)
+                return response
+
+            if '.png' in request.url or '.jpg' in request.url or '.gif' in request.url or '.cur' in request.url:
+                # add caching for images
+                expires = datetime.utcnow() + timedelta(days=1)
+                headers = dict()
+                headers['Expires'] = expires.strftime('%a, %d %b %Y %H:%M:%S GMT')
+                headers['Cache-Control'] = 'public, max-age=86400'
+                name = request.url.split('/')[-1]
+                if name in web_cache:
+                    return Response(BytesIO(web_cache[name]), 200, headers)
             
             new_data = dict()
             try:
@@ -89,20 +136,17 @@ def webServer(session, event, stdin_fd, predetermined_input):
             else:
                 resp = session.get(dest_url, params=new_data, noIndex=True, fullResponse=True, noQuery=True, allow_redirects=False)
 
-            # replace mayor
-            if '/cdn/all/both/layout/advisors/mayor.png' in request.url:
-                image_data = base64.b64decode(woke_mayor)
-                # Convert the bytes data to a BytesIO object that Flask can send
-                image_io = BytesIO(image_data)
-                image_io.seek(0)
-                return send_file(image_io, mimetype='image/png')
 
             if '.png' in request.url or '.jpg' in request.url or '.gif' in request.url or '.cur' in request.url:
-                # add caching for images
-                expires = datetime.utcnow() + timedelta(days=1)
-                resp.headers['Expires'] = expires.strftime('%a, %d %b %Y %H:%M:%S GMT')
-                resp.headers['Cache-Control'] = 'public, max-age=86400'
-                return resp.content
+                # cache was missed, add to cache and send response
+                expires = datetime.utcnow() + timedelta(days=1) 
+                headers = dict()
+                headers['Expires'] = expires.strftime('%a, %d %b %Y %H:%M:%S GMT')  
+                headers['Cache-Control'] = 'public, max-age=86400'
+                response = Response(resp.content, 200, headers)
+                web_cache[request.url.split('/')[-1]] = resp.content
+                return response
+            
             
             # Replace all instances of the target URL with the proxy URL
             modified_content = resp.text.replace(session.urlBase.replace( '/index.php?', ''), 'http://localhost:589').replace(session.host, 'localhost:589')
@@ -131,11 +175,14 @@ def webServer(session, event, stdin_fd, predetermined_input):
                 if header.lower() not in excluded_headers:
                     proxied_response.headers[header] = resp.headers[header]
 
+            
+
+
             return proxied_response
 
         session.setStatus('running on http://localhost:589')
         event.set()
-        app.run(host='0.0.0.0', port=589)
+        app.run(host='0.0.0.0', port=589, threaded = True)
     
     
 
