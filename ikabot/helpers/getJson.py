@@ -3,7 +3,8 @@
 
 import json
 import re
-
+import time
+from math import ceil, floor
 from ikabot.helpers.resources import *
 from ikabot.helpers.varios import decodeUnicodeEscape
 
@@ -140,3 +141,60 @@ def getCity(html):
         )
 
     return city
+
+def getTransportLoadingAndTravelTime(html, totalResources = 0, useFreighters = False, capacityPerTransportPercent = 100, tritonBoostPercent = 0):
+    """Gets total loading and travel time for a shipment.
+    Parameters
+    ----------
+    html : str
+        text of the response obtained when requesting the `transport` view from the trading port
+    totalResources : int
+        total amount of resources that are being sent
+    useFreighters : bool
+        whether or not freighters will be used for this shipment (increases travel time by 20x)
+    capacityPerTransportPercent : int
+        percentage of the total capacity for each transport. Lowering this decreases travel time but also decreases the number of resources that can be sent. 
+        Possible values are 100, 80, 60, 40, 20. These correspond to a 0, 16.7, 33.3, 50, and 66.7 % speed boost respectively
+    tritonBoostPercent : int
+        percentage speed boost gained from triton engines. Possible values are 0, 100, 200 and 300
+
+    Returns
+    -------
+    totalTime : int
+        loading time + travel time + queueTime
+    loadingTime : int
+        seconds it takes to load resources. This only depends on the number of resources and trading port level.
+    travelTime : int
+        seconds it takes to travel to the destination. Depends on distance, transporter type and world, government, triton, poseidon, sea chart archive bonuses
+    queueTime : int
+        seconds it takes for port to load OTHER shipments. 0 if port is not busy currently
+    """
+    assert capacityPerTransportPercent in [100, 80, 60, 40, 20], 'Please enter valid capacityPerTransportPercent, available values are 100, 80, 60, 40, 20'
+    assert tritonBoostPercent in [0, 100, 200, 300], 'Please enter valid tritonBoostPercent, available values are 0, 100, 200, 300'
+    
+    # get relevant bonuses and parmeters from response
+    transporterSpeed = float(re.search(r"'transporterSpeed': ([\d\.]+),", html).group(1))
+    worldBonus = float(re.search(r"'worldBonus': ([\d\.]+),", html).group(1))
+    governmentBonus = float(re.search(r"'governmentBonus': ([\d\.]+),", html).group(1))
+    poseidonEffect = float(re.search(r"'poseidonEffect': ([\d\.]+),", html).group(1))
+    marineChartArchiveBonus = float(re.search(r"'marineChartArchiveBonus': ([\d\.]+),", html).group(1))
+    minimumJourneyDuration = int(re.search(r"'minimumJourneyDuration': (\d+),", html).group(1))
+    distance = float(re.search(r"'distance': ([\d\.]+),", html).group(1))
+    fleetJourneyTime = int(re.search(r"'fleetJourneyTime': (\d+),", html).group(1))
+    queueTime = int(re.search(r"'queueTime': (\d+),", html).group(1))
+    loadingSpeed = float(re.search(r"'loadingSpeed': ([\d\.]+),", html).group(1))
+    
+    # make sure queue time is not in the past
+    queueTime = 0 if queueTime - time.time() <= 0 else int(queueTime - time.time())
+    
+    # calculate loading time
+    loadingTime = int(totalResources / loadingSpeed)
+
+    # calculate travel time            # lower capacity actually speeds up the transporter speed instead of lowering total travel time, this is stupid
+    fleetSpeed = floor(transporterSpeed *  (1.0 + (-0.835 * capacityPerTransportPercent + 83.5) / 100 ) ) * worldBonus * governmentBonus * (1.0 + poseidonEffect + tritonBoostPercent / 100)
+    uncappedDuration = int(ceil(((distance * fleetJourneyTime) / fleetSpeed) * marineChartArchiveBonus))
+    uncappedDuration *= 20 if useFreighters else 1
+
+    travelTime = uncappedDuration if uncappedDuration > minimumJourneyDuration else minimumJourneyDuration
+
+    return  travelTime + loadingTime + queueTime, loadingTime, travelTime, queueTime
