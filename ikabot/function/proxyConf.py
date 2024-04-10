@@ -1,15 +1,17 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import sys
 import gettext
 import requests
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.gui import *
 from ikabot.function.proxyList import network_check, enable_proxy
 import ikabot.config as config
+import sys
 
-t = gettext.translation('proxy', config.localedir, languages=config.languages, fallback=True)
+t = gettext.translation(
+    "proxy", config.localedir, languages=config.languages, fallback=True
+)
 _ = t.gettext
 
 
@@ -29,34 +31,47 @@ def show_proxy(session):
             #sys.exit(_('the {} proxy does not work, it has been removed').format(curr_proxy))
         if msg not in config.update_msg:
             # add proxy message
-            config.update_msg += '{} {}\n'.format(msg, curr_proxy)
+            config.update_msg += "{} {}\n".format(msg, curr_proxy)
         else:
             # delete old proxy message
-            config.update_msg = config.update_msg.replace('\n'.join(config.update_msg.split('\n')[-2:]), '')
+            config.update_msg = config.update_msg.replace(
+                "\n".join(config.update_msg.split("\n")[-2:]), ""
+            )
             # add new proxy message
-            config.update_msg += '{} {}\n'.format(msg, curr_proxy)
+            config.update_msg += "{} {}\n".format(msg, curr_proxy)
     elif msg in config.update_msg:
         # delete old proxy message
-        config.update_msg = config.update_msg.replace('\n'.join(config.update_msg.split('\n')[-2:]), '')
+        config.update_msg = config.update_msg.replace(
+            "\n".join(config.update_msg.split("\n")[-2:]), ""
+        )
 
 
-def test_proxy(proxy_dict):
+def test_proxy(session, proxy_dict):
     try:
-        requests.get('https://lobby.ikariam.gameforge.com/', proxies=proxy_dict, verify=config.do_ssl_verify)
-    except Exception:
+        requests.get(
+            session.urlBase,
+            proxies=proxy_dict,
+            verify=config.do_ssl_verify,
+        )
+    except Exception as e:
+        print('Proxy test failure. Error: ' + str(e))
         return False
     return True
 
 
-def read_proxy():
-    print(_('Enter the proxy (examples: socks5://127.0.0.1:9050, https://45.117.163.22:8080):'))
-    proxy_str = read(msg='proxy: ')
-    proxy_dict = {'http': proxy_str, 'https': proxy_str}
-    if test_proxy(proxy_dict) is False:
-        print(_('The proxy does not work.'))
+def read_proxy(session):
+    print(
+        _(
+            "Enter the proxy: protocol://username:password@address:port\n(examples: socks5://127.0.0.1:9050, https://45.117.163.22:8080):"
+        )
+    )
+    proxy_str = read(msg="proxy: ")
+    proxy_dict = {"http": proxy_str, "https": proxy_str}
+    if test_proxy(session, proxy_dict) is False:
+        print(_("The proxy does not work."))
         enter()
         return None
-    print(_('The proxy works and it will be used for all future requests.'))
+    print(_("The proxy works and it will be used for all future requests sent by new ikabot processes."))
     enter()
     return proxy_dict
 
@@ -74,40 +89,42 @@ def proxyConf(session, event, stdin_fd, predetermined_input):
     config.predetermined_input = predetermined_input
     try:
         banner()
-        print(_('Warning: The proxy does not apply to the requests sent to the lobby!\n'))
+        print(
+            _("Warning: The proxy does not apply to the requests sent to the lobby!\n")
+        )
 
         session_data = session.getSessionData()
-        if 'proxy' not in session_data or session_data['proxy']['set'] is False:
-            print(_('Right now, there is no proxy configured.'))
-            proxy_dict = read_proxy()
+        if "proxy" not in session_data or session_data["proxy"]["set"] is False:
+            print(_("Right now, there is no proxy configured."))
+            proxy_dict = read_proxy(session)
             if proxy_dict is None:
                 event.set()
                 return
-            session_data['proxy'] = {}
-            session_data['proxy']['conf'] = proxy_dict
-            session_data['proxy']['set'] = True
+            session_data["proxy"] = {}
+            session_data["proxy"]["conf"] = proxy_dict
+            session_data["proxy"]["set"] = True
         else:
-            curr_proxy = session_data['proxy']['conf']['https']
-            print(_('Current proxy: {}').format(curr_proxy))
-            print(_('What do you want to do?'))
-            print(_('0) Exit'))
-            print(_('1) Set a new proxy'))
-            print(_('2) Remove the current proxy'))
+            curr_proxy = session_data["proxy"]["conf"]["https"]
+            print(_("Current proxy: {}").format(curr_proxy))
+            print(_("What do you want to do?"))
+            print(_("0) Exit"))
+            print(_("1) Set a new proxy"))
+            print(_("2) Remove the current proxy"))
             rta = read(min=0, max=2)
 
             if rta == 0:
                 event.set()
                 return
             if rta == 1:
-                proxy_dict = read_proxy()
+                proxy_dict = read_proxy(session)
                 if proxy_dict is None:
                     event.set()
                     return
-                session_data['proxy']['conf'] = proxy_dict
-                session_data['proxy']['set'] = True
+                session_data["proxy"]["conf"] = proxy_dict
+                session_data["proxy"]["set"] = True
             if rta == 2:
-                session_data['proxy']['set'] = False
-                print(_('The proxy has been removed.'))
+                session_data["proxy"]["set"] = False
+                print(_("The proxy has been removed."))
                 enter()
 
         session.setSessionData(session_data)

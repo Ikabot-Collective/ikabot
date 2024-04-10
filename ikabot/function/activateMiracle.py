@@ -1,19 +1,22 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import json
 import gettext
+import json
 import traceback
+
 from ikabot.config import *
-from ikabot.helpers.gui import *
-from ikabot.helpers.varios import *
 from ikabot.helpers.botComm import *
+from ikabot.helpers.getJson import getCity
+from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.process import set_child_mode
-from ikabot.helpers.getJson import getCity
 from ikabot.helpers.signals import setInfoSignal
+from ikabot.helpers.varios import *
 
-t = gettext.translation('activateMiracle', localedir, languages=languages, fallback=True)
+t = gettext.translation(
+    "activateMiracle", localedir, languages=languages, fallback=True
+)
 _ = t.gettext
 
 
@@ -32,54 +35,66 @@ def obtainMiraclesAvailable(session):
     for idIsland in idsIslands:
         html = session.get(island_url + idIsland)
         island = getIsland(html)
-        island['activable'] = False
+        island["activable"] = False
         islands.append(island)
 
     ids, cities = getIdsOfCities(session)
     for city_id in cities:
         city = cities[city_id]
         # get the wonder for this city
-        wonder = [island['wonder'] for island in islands if city['coords'] == '[{}:{}] '.format(island['x'], island['y'])][0]
+        wonder = [
+            island["wonder"]
+            for island in islands
+            if city["coords"] == "[{}:{}] ".format(island["x"], island["y"])
+        ][0]
         # if the wonder is not new, continue
-        if wonder in [island['wonder'] for island in islands if island['activable']]:
+        if wonder in [island["wonder"] for island in islands if island["activable"]]:
             continue
 
-        html = session.get(city_url + str(city['id']))
+        html = session.get(city_url + str(city["id"]))
         city = getCity(html)
 
         # make sure that the city has a temple
-        for i in range(len(city['position'])):
-            if city['position'][i]['building'] == 'temple':
-                city['pos'] = str(i)
+        for i in range(len(city["position"])):
+            if city["position"][i]["building"] == "temple":
+                city["pos"] = str(i)
                 break
         else:
             continue
 
         # get wonder information
-        params = {"view": "temple", "cityId": city['id'], "position": city['pos'], "backgroundView": "city", "currentCityId": city['id'], "actionRequest": actionRequest, "ajax": "1"}
+        params = {
+            "view": "temple",
+            "cityId": city["id"],
+            "position": city["pos"],
+            "backgroundView": "city",
+            "currentCityId": city["id"],
+            "actionRequest": actionRequest,
+            "ajax": "1",
+        }
         data = session.post(params=params)
         data = json.loads(data, strict=False)
         data = data[2][1]
-        available = data['js_WonderViewButton']['buttonState'] == 'enabled'
+        available = data["js_WonderViewButton"]["buttonState"] == "enabled"
         if available is False:
             for elem in data:
-                if 'countdown' in data[elem]:
-                    enddate = data[elem]['countdown']['enddate']
-                    currentdate = data[elem]['countdown']['currentdate']
+                if "countdown" in data[elem]:
+                    enddate = data[elem]["countdown"]["enddate"]
+                    currentdate = data[elem]["countdown"]["currentdate"]
                     break
 
         # set the information on the island which wonder we can activate
         for island in islands:
-            if island['id'] == city['islandId']:
-                island['activable'] = True
-                island['ciudad'] = city
-                island['available'] = available
+            if island["id"] == city["islandId"]:
+                island["activable"] = True
+                island["ciudad"] = city
+                island["available"] = available
                 if available is False:
-                    island['available_in'] = enddate - currentdate
+                    island["available_in"] = enddate - currentdate
                 break
 
     # only return island which wonder we can activate
-    return [island for island in islands if island['activable']]
+    return [island for island in islands if island["activable"]]
 
 
 def activateMiracleHttpCall(session, island):
@@ -93,7 +108,17 @@ def activateMiracleHttpCall(session, island):
     -------
     json : dict
     """
-    params = {'action': 'CityScreen', 'cityId': island['ciudad']['id'], 'function': 'activateWonder', 'position': island['ciudad']['pos'], 'backgroundView': 'city', 'currentCityId': island['ciudad']['id'], 'templateView': 'temple', 'actionRequest': actionRequest, 'ajax': '1'}
+    params = {
+        "action": "CityScreen",
+        "cityId": island["ciudad"]["id"],
+        "function": "activateWonder",
+        "position": island["ciudad"]["pos"],
+        "backgroundView": "city",
+        "currentCityId": island["ciudad"]["id"],
+        "templateView": "temple",
+        "actionRequest": actionRequest,
+        "ajax": "1",
+    }
     response = session.post(params=params)
     return json.loads(response, strict=False)
 
@@ -108,23 +133,28 @@ def chooseIsland(islands):
     -------
     island : dict
     """
-    print(_('Which miracle do you want to activate?'))
+    print(_("Which miracle do you want to activate?"))
     # Sort islands by name
-    sorted_islands = sorted(islands, key=lambda x: x['wonderName'])
+    sorted_islands = sorted(islands, key=lambda x: x["wonderName"])
     i = 0
-    print(_('(0) Exit'))
+    print(_("(0) Exit"))
     for island in sorted_islands:
         i += 1
-        if island['available']:
-            print('({:d}) {}'.format(i, island['wonderName']))
+        if island["available"]:
+            print("({:d}) {}".format(i, island["wonderName"]))
         else:
-            print(_('({:d}) {} (available in: {})').format(i, island['wonderName'], daysHoursMinutes(island['available_in'])))
+            print(
+                _("({:d}) {} (available in: {})").format(
+                    i, island["wonderName"], daysHoursMinutes(island["available_in"])
+                )
+            )
 
     index = read(min=0, max=i)
     if index == 0:
         return None
     island = sorted_islands[index - 1]
     return island
+
 
 def activateMiracle(session, event, stdin_fd, predetermined_input):
     """
@@ -142,7 +172,7 @@ def activateMiracle(session, event, stdin_fd, predetermined_input):
 
         islands = obtainMiraclesAvailable(session)
         if islands == []:
-            print(_('There are no miracles available.'))
+            print(_("There are no miracles available."))
             enter()
             event.set()
             return
@@ -162,17 +192,21 @@ def activateMiracle(session, event, stdin_fd, predetermined_input):
 
             miracle_activation_result = activateMiracleHttpCall(session, island)
 
-            if miracle_activation_result[1][1][0] == 'error':
-                print(_('The miracle {} could not be activated.').format(island['wonderName']))
+            if miracle_activation_result[1][1][0] == "error":
+                print(
+                    _("The miracle {} could not be activated.").format(
+                        island["wonderName"]
+                    )
+                )
                 enter()
                 event.set()
                 return
 
             data = miracle_activation_result[2][1]
             for elem in data:
-                if 'countdown' in data[elem]:
-                    enddate = data[elem]['countdown']['enddate']
-                    currentdate = data[elem]['countdown']['currentdate']
+                if "countdown" in data[elem]:
+                    enddate = data[elem]["countdown"]["enddate"]
+                    currentdate = data[elem]["countdown"]["currentdate"]
                     break
             wait_time = enddate - currentdate
 
@@ -200,12 +234,14 @@ def activateMiracle(session, event, stdin_fd, predetermined_input):
     set_child_mode(session)
     event.set()
 
-    info = _('\nI activate the miracle {} {:d} times\n').format(island['wonderName'], iterations)
+    info = _("\nI activate the miracle {} {:d} times\n").format(
+        island["wonderName"], iterations
+    )
     setInfoSignal(session, info)
     try:
         do_it(session, island, iterations)
     except Exception as e:
-        msg = _('Error in:\n{}\nCause:\n{}').format(info, traceback.format_exc())
+        msg = _("Error in:\n{}\nCause:\n{}").format(info, traceback.format_exc())
         sendToBot(session, msg)
     finally:
         session.logout()
@@ -219,25 +255,37 @@ def wait_for_miracle(session, island):
     island : dict
     """
     while True:
-        params = {"view": "temple", "cityId": island['ciudad']['id'], "position": island['ciudad']['pos'], "backgroundView": "city", "currentCityId": island['ciudad']['id'], "actionRequest": actionRequest, "ajax": "1"}
+        params = {
+            "view": "temple",
+            "cityId": island["ciudad"]["id"],
+            "position": island["ciudad"]["pos"],
+            "backgroundView": "city",
+            "currentCityId": island["ciudad"]["id"],
+            "actionRequest": actionRequest,
+            "ajax": "1",
+        }
         temple_response = session.post(params=params)
         temple_response = json.loads(temple_response, strict=False)
         temple_response = temple_response[2][1]
 
         for elem in temple_response:
-            if 'countdown' in temple_response[elem]:
-                enddate = temple_response[elem]['countdown']['enddate']
-                currentdate = temple_response[elem]['countdown']['currentdate']
+            if "countdown" in temple_response[elem]:
+                enddate = temple_response[elem]["countdown"]["enddate"]
+                currentdate = temple_response[elem]["countdown"]["currentdate"]
                 wait_time = enddate - currentdate
                 break
         else:
-            available = temple_response['js_WonderViewButton']['buttonState'] == 'enabled'
+            available = (
+                temple_response["js_WonderViewButton"]["buttonState"] == "enabled"
+            )
             if available:
                 return
             else:
                 wait_time = 60
 
-        msg = _('I wait {:d} seconds to activate the miracle {}').format(wait_time, island['wonderName'])
+        msg = _("I wait {:d} seconds to activate the miracle {}").format(
+            wait_time, island["wonderName"]
+        )
         sendToBotDebug(session, msg, debugON_activateMiracle)
         wait(wait_time + 5)
 
@@ -256,10 +304,12 @@ def do_it(session, island, iterations):
 
         response = activateMiracleHttpCall(session, island)
 
-        if response[1][1][0] == 'error':
-            msg = _('The miracle {} could not be activated.').format(island['wonderName'])
+        if response[1][1][0] == "error":
+            msg = _("The miracle {} could not be activated.").format(
+                island["wonderName"]
+            )
             sendToBot(session, msg)
             return
 
-        msg = _('Miracle {} successfully activated').format(island['wonderName'])
+        msg = _("Miracle {} successfully activated").format(island["wonderName"])
         sendToBotDebug(session, msg, debugON_activateMiracle)

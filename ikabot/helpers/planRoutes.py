@@ -1,16 +1,17 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import json
+import math
+import random
 import re
 import time
-import math
-import json
-import random
 from decimal import *
+
 from ikabot.config import *
-from ikabot.helpers.varios import wait
 from ikabot.helpers.getJson import getCity
 from ikabot.helpers.naval import *
+from ikabot.helpers.varios import wait
 
 
 def sendGoods(session, originCityId, destinationCityId, islandId, ships, send):
@@ -36,38 +37,52 @@ def sendGoods(session, originCityId, destinationCityId, islandId, ships, send):
         html = session.get()
         current_city = getCity(html)  # the city the bot is right now
         city = getCity(session.get(city_url + originCityId))  # the origin city
-        currId = current_city['id']
-        
+        currId = current_city["id"]
+
+        # Change from the city the bot is sitting right now to the city we want to load resources from
+        data = {
+            "action": "header",
+            "function": "changeCurrentCity",
+            "actionRequest": actionRequest,
+            "oldView": "city",
+            "cityId": originCityId,
+            "backgroundView": "city",
+            "currentCityId": currId,
+            "ajax": "1",
+        }
+
+        session.post(params=data)
+
         # Request to send the resources from the origin to the target
         data = {
-            'action': 'transportOperations',
-            'function': 'loadTransportersWithFreight',
-            'destinationCityId': destinationCityId,
-            'islandId': islandId,
-            'oldView': '',
-            'position': '',
-            'avatar2Name': '',
-            'city2Name': '',
-            'type': '',
-            'activeTab': '',
-            'transportDisplayPrice': '0',
-            'premiumTransporter': '0',
-            'transporters': ships,
-            'capacity': '5',
-            'max_capacity': '5',
-            'jetPropulsion': '0',
-            'backgroundView': 'city',
-            'currentCityId': originCityId,
-            'templateView': 'transport',
-            'currentTab': 'tabSendTransporter',
-            'actionRequest': actionRequest,
-            'ajax': '1'
+            "action": "transportOperations",
+            "function": "loadTransportersWithFreight",
+            "destinationCityId": destinationCityId,
+            "islandId": islandId,
+            "oldView": "",
+            "position": "",
+            "avatar2Name": "",
+            "city2Name": "",
+            "type": "",
+            "activeTab": "",
+            "transportDisplayPrice": "0",
+            "premiumTransporter": "0",
+            "transporters": ships,
+            "capacity": "5",
+            "max_capacity": "5",
+            "jetPropulsion": "0",
+            "backgroundView": "city",
+            "currentCityId": originCityId,
+            "templateView": "transport",
+            "currentTab": "tabSendTransporter",
+            "actionRequest": actionRequest,
+            "ajax": "1",
         }
 
         # add amounts of resources to send
         for i in range(len(send)):
-            if city['availableResources'][i] > 0:
-                key = 'cargo_resource' if i == 0 else 'cargo_tradegood{:d}'.format(i)
+            if city["availableResources"][i] > 0:
+                key = "cargo_resource" if i == 0 else "cargo_tradegood{:d}".format(i)
                 data[key] = send[i]
 
         # Change from the city the bot is sitting right now to the city we want to load resources from
@@ -84,9 +99,9 @@ def sendGoods(session, originCityId, destinationCityId, islandId, ships, send):
         session.post(params=senddata)#####MOVED THE TOWN CHECK FROM THE FRONT INTO THE END JUST BEFORE SEND
         resp = session.post(params=data)
         resp = json.loads(resp, strict=False)
-        if resp[3][1][0]['type'] == 10:
+        if resp[3][1][0]["type"] == 10:
             break
-        elif resp[3][1][0]['type'] == 11:
+        elif resp[3][1][0]["type"] == 11:
             wait(getMinimumWaitingTime(session))
         time.sleep(5)
 
@@ -102,28 +117,38 @@ def executeRoutes(session, routes):
     """
     for route in routes:
         (origin_city, destination_city, island_id, *toSend) = route
-        destination_city_id = destination_city['id']
+        destination_city_id = destination_city["id"]
 
         while sum(toSend) > 0:
-            session.setStatus(f'Sending {toSend[0]}W, {toSend[1]}V, {toSend[2]}M, {toSend[3]}C, {toSend[4]}S ---> {destination_city["name"]}')
+            session.setStatus(
+                f'Sending {toSend[0]}W, {toSend[1]}V, {toSend[2]}M, {toSend[3]}C, {toSend[4]}S ---> {destination_city["name"]}'
+            )
             ships_available = waitForArrival(session)
             storageCapacityInShips = ships_available * 500
 
-            html = session.get(city_url + str(origin_city['id']))
+            html = session.get(city_url + str(origin_city["id"]))
             origin_city = getCity(html)
             html = session.get(city_url + str(destination_city_id))
             destination_city = getCity(html)
-            foreign = str(destination_city['id']) != str(destination_city_id)
+            foreign = str(destination_city["id"]) != str(destination_city_id)
             if foreign is False:
-                storageCapacityInCity = destination_city['freeSpaceForResources']
+                storageCapacityInCity = destination_city["freeSpaceForResources"]
 
             send = []
             for i in range(len(toSend)):
                 if foreign is False:
-                    min_val = min(origin_city['availableResources'][i], toSend[i], storageCapacityInShips,
-                                  storageCapacityInCity[i])
+                    min_val = min(
+                        origin_city["availableResources"][i],
+                        toSend[i],
+                        storageCapacityInShips,
+                        storageCapacityInCity[i],
+                    )
                 else:
-                    min_val = min(origin_city['availableResources'][i], toSend[i], storageCapacityInShips)
+                    min_val = min(
+                        origin_city["availableResources"][i],
+                        toSend[i],
+                        storageCapacityInShips,
+                    )
                 send.append(min_val)
                 storageCapacityInShips -= send[i]
                 toSend[i] -= send[i]
@@ -135,8 +160,17 @@ def executeRoutes(session, routes):
                 wait(60 * 60)
                 continue
 
-            available_ships = int(math.ceil((Decimal(resources_to_send) / Decimal(500))))
-            sendGoods(session, origin_city['id'], destination_city_id, island_id, available_ships, send)
+            available_ships = int(
+                math.ceil((Decimal(resources_to_send) / Decimal(500)))
+            )
+            sendGoods(
+                session,
+                origin_city["id"],
+                destination_city_id,
+                island_id,
+                available_ships,
+                send,
+            )
 
 
 def get_random_wait_time():
@@ -156,16 +190,19 @@ def getMinimumWaitingTime(session):
         the minimum waiting time for the closest fleet to arrive
     """
     html = session.get()
-    idCiudad = re.search(r'currentCityId:\s(\d+),', html).group(1)
-    url = 'view=militaryAdvisor&oldView=city&oldBackgroundView=city&backgroundView=city&currentCityId={}&actionRequest={}&ajax=1'.format(
-        idCiudad, actionRequest)
+    idCiudad = re.search(r"currentCityId:\s(\d+),", html).group(1)
+    url = "view=militaryAdvisor&oldView=city&oldBackgroundView=city&backgroundView=city&currentCityId={}&actionRequest={}&ajax=1".format(
+        idCiudad, actionRequest
+    )
     posted = session.post(url)
     postdata = json.loads(posted, strict=False)
-    militaryMovements = postdata[1][1][2]['viewScriptParams']['militaryAndFleetMovements']
-    current_time = int(postdata[0][1]['time'])
+    militaryMovements = postdata[1][1][2]["viewScriptParams"][
+        "militaryAndFleetMovements"
+    ]
+    current_time = int(postdata[0][1]["time"])
     delivered_times = []
-    for militaryMovement in [mv for mv in militaryMovements if mv['isOwnArmyOrFleet']]:
-        remaining_time = int(militaryMovement['eventTime']) - current_time
+    for militaryMovement in [mv for mv in militaryMovements if mv["isOwnArmyOrFleet"]]:
+        remaining_time = int(militaryMovement["eventTime"]) - current_time
         delivered_times.append(remaining_time)
     if delivered_times:
         return min(delivered_times) + get_random_wait_time()

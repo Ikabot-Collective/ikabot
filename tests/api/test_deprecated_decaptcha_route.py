@@ -3,21 +3,13 @@ import os
 import pytest
 import requests
 
-from ikabot.helpers.process import run
+from ikabot.helpers.dns import getAddress
+from ikabot.config import *
 
 
 @pytest.fixture
 def base_url():
-    text = run("nslookup -q=txt ikagod.twilightparadox.com ns2.afraid.org")
-    parts = text.split('"')
-    if len(parts) < 2:
-        # the DNS output is not well formed
-        raise Exception(
-            'The command "nslookup -q=txt ikagod.twilightparadox.com ns2.afraid.org" returned bad data: {}'.format(
-                text
-            )
-        )
-    address = parts[1]
+    address = getAddress(domain = publicAPIServerDomain)
     # Remove "/ikagod/ikabot" from the URL
     base_url = f"http://{address}".replace("/ikagod/ikabot", "")
     return base_url
@@ -96,13 +88,13 @@ def test_decaptcha_login_captcha_with_invalid_image_should_return_error(
 
     file_path1 = os.path.join(current_directory, "img", "login_text_invalid.png")
     file_path2 = os.path.join(current_directory, "img", "login_icons_invalid.png")
-    
+
     with open(file_path1, "rb") as text_image, open(file_path2, "rb") as drag_icons:
         data = {
             "text_image": ("login_text_invalid.png", text_image, "image/png"),
             "drag_icons": ("login_text_invalid.png", drag_icons, "image/png"),
         }
         response = requests.post(f"{base_url}/ikagod/ikabot", files=data)
-        
+
     assert response.status_code == 200
     assert response.text == "Error"

@@ -1,55 +1,55 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import os
-import sys
+import datetime
 import gettext
 import multiprocessing
+import os
+import sys
 import time
-import datetime
+
 from ikabot.config import *
-from ikabot.web.session import *
-from ikabot.helpers.gui import *
-from ikabot.function.donate import donate
-from ikabot.function.update import update
-from ikabot.helpers.pedirInfo import read
-from ikabot.function.getStatus import getStatus
-from ikabot.function.donationBot import donationBot
-from ikabot.helpers.botComm import updateTelegramData, telegramDataIsValid
-from ikabot.helpers.process import updateProcessList
-from ikabot.function.constructionList import constructionList
-from ikabot.function.searchForIslandSpaces import searchForIslandSpaces
-from ikabot.function.alertAttacks import alertAttacks
-from ikabot.function.vacationMode import vacationMode
 from ikabot.function.activateMiracle import activateMiracle
-from ikabot.function.trainArmy import trainArmy
-from ikabot.function.sellResources import sellResources
-from ikabot.function.checkForUpdate import checkForUpdate
-from ikabot.function.distributeResources import distributeResources
+from ikabot.function.alertAttacks import alertAttacks
 from ikabot.function.alertLowWine import alertLowWine
-from ikabot.function.buyResources import buyResources
-from ikabot.function.loginDaily import loginDaily
-from ikabot.function.sendResources import sendResources
-from ikabot.function.constructBuilding import constructBuilding
-from ikabot.function.shipMovements import shipMovements
-from ikabot.function.importExportCookie import importExportCookie
-from ikabot.function.autoPirate import autoPirate
-from ikabot.function.investigate import investigate
 from ikabot.function.attackBarbarians import attackBarbarians
-from ikabot.function.proxyConf import proxyConf, show_proxy
-from ikabot.function.killTasks import killTasks
+from ikabot.function.autoPirate import autoPirate
+from ikabot.function.buyResources import buyResources
+from ikabot.function.checkForUpdate import checkForUpdate
+from ikabot.function.constructBuilding import constructBuilding
+from ikabot.function.constructionList import constructionList
 from ikabot.function.decaptchaConf import decaptchaConf
+from ikabot.function.distributeResources import distributeResources
+from ikabot.function.donate import donate
+from ikabot.function.donationBot import donationBot
 from ikabot.function.dumpWorld import dumpWorld
 from ikabot.function.updateStatus import updateStatus, setStatus
 from ikabot.function.cookieConf import cookieConf
 from ikabot.helpers.checker import checker
 from ikabot.function.proxyList import proxyList
-from ikabot.function.stationArmy import stationArmy
+from ikabot.function.getStatus import getStatus
+from ikabot.function.importExportCookie import importExportCookie
+from ikabot.function.investigate import investigate
+from ikabot.function.killTasks import killTasks
+from ikabot.function.loginDaily import loginDaily
 from ikabot.function.logs import logs
+from ikabot.function.proxyConf import proxyConf, show_proxy
+from ikabot.function.searchForIslandSpaces import searchForIslandSpaces
+from ikabot.function.sellResources import sellResources
+from ikabot.function.sendResources import sendResources
+from ikabot.function.shipMovements import shipMovements
+from ikabot.function.stationArmy import stationArmy
 from ikabot.function.testTelegramBot import testTelegramBot
+from ikabot.function.trainArmy import trainArmy
+from ikabot.function.update import update
+from ikabot.function.vacationMode import vacationMode
+from ikabot.helpers.botComm import telegramDataIsValid, updateTelegramData
+from ikabot.helpers.gui import *
+from ikabot.helpers.pedirInfo import read
+from ikabot.helpers.process import updateProcessList
+from ikabot.web.session import *
 
-
-t = gettext.translation('command_line', localedir, languages=languages, fallback=True)
+t = gettext.translation("command_line", localedir, languages=languages, fallback=True)
 _ = t.gettext
 
 
@@ -73,14 +73,48 @@ def menu(session, checkUpdate=False):
     if len(process_list) > 0:
         # Insert table header
         table = process_list.copy()
-        table.insert(0,{'pid':'pid', 'action':'task','date':'date','status':'status'})
+        table.insert(
+            0, {"pid": "pid", "action": "task", "date": "date", "status": "status"}
+        )
         # Get max length of strings in each category (date is always going to be 15)
-        maxPid, maxAction, maxStatus = [max(i) for i in [[len(str(r['pid'])) for r in table], [len(str(r['action'])) for r in table], [len(str(r['status'])) for r in table]]]
+        maxPid, maxAction, maxStatus = [
+            max(i)
+            for i in [
+                [len(str(r["pid"])) for r in table],
+                [len(str(r["action"])) for r in table],
+                [len(str(r["status"])) for r in table],
+            ]
+        ]
         # Print header
-        print('|{:^{maxPid}}|{:^{maxAction}}|{:^15}|{:^{maxStatus}}|'.format(table[0]['pid'], table[0]['action'], table[0]['date'], table[0]['status'], maxPid=maxPid, maxAction=maxAction, maxStatus=maxStatus))
+        print(
+            "|{:^{maxPid}}|{:^{maxAction}}|{:^15}|{:^{maxStatus}}|".format(
+                table[0]["pid"],
+                table[0]["action"],
+                table[0]["date"],
+                table[0]["status"],
+                maxPid=maxPid,
+                maxAction=maxAction,
+                maxStatus=maxStatus,
+            )
+        )
         # Print process list
-        [print('|{:^{maxPid}}|{:^{maxAction}}|{:^15}|{:^{maxStatus}}|'.format(r['pid'], r['action'], datetime.datetime.fromtimestamp(r['date']).strftime('%b %d %H:%M:%S'), r['status'], maxPid=maxPid, maxAction=maxAction, maxStatus=maxStatus)) for r in process_list]
-        print('')
+        [
+            print(
+                "|{:^{maxPid}}|{:^{maxAction}}|{:^15}|{:^{maxStatus}}|".format(
+                    r["pid"],
+                    r["action"],
+                    datetime.datetime.fromtimestamp(r["date"]).strftime(
+                        "%b %d %H:%M:%S"
+                    ),
+                    r["status"],
+                    maxPid=maxPid,
+                    maxAction=maxAction,
+                    maxStatus=maxStatus,
+                )
+            )
+            for r in process_list
+        ]
+        print("")
 
     menu_actions = {
         1:            constructionList,
@@ -152,9 +186,9 @@ def menu(session, checkUpdate=False):
     
     if selected == 8:
         banner()
-        print(_('(0) Back'))
-        print(_('(1) Alert attacks'))
-        print(_('(2) Alert wine running out'))
+        print(_("(0) Back"))
+        print(_("(1) Alert attacks"))
+        print(_("(2) Alert wine running out"))
 
         selected = read(min=0, max=2, digit=True)
         if selected == 0:
@@ -165,9 +199,9 @@ def menu(session, checkUpdate=False):
             
     if selected == 9:
         banner()
-        print(_('(0) Back'))
-        print(_('(1) Buy resources'))
-        print(_('(2) Sell resources'))
+        print(_("(0) Back"))
+        print(_("(1) Buy resources"))
+        print(_("(2) Sell resources"))
 
         selected = read(min=0, max=2, digit=True)
         if selected == 0:
@@ -178,9 +212,9 @@ def menu(session, checkUpdate=False):
             
     if selected == 10:
         banner()
-        print(_('(0) Back'))
-        print(_('(1) Donate once'))
-        print(_('(2) Donate automatically'))
+        print(_("(0) Back"))
+        print(_("(1) Donate once"))
+        print(_("(2) Donate automatically"))
 
         selected = read(min=0, max=2, digit=True)
         if selected == 0:
@@ -191,9 +225,9 @@ def menu(session, checkUpdate=False):
             
     if selected == 13:
         banner()
-        print(_('(0) Back'))
-        print(_('(1) Train Army'))
-        print(_('(2) Send Troops/Ships'))
+        print(_("(0) Back"))
+        print(_("(1) Train Army"))
+        print(_("(2) Send Troops/Ships"))
         selected = read(min=0, max=2, digit=True)
         if selected == 0:
             menu(session)
@@ -203,20 +237,20 @@ def menu(session, checkUpdate=False):
 
     if selected == 21:
         banner()
-        print(_('(0) Back'))
-        print(_('(1) Configure Proxy'))
+        print(_("(0) Back"))
+        print(_("(1) Configure Proxy"))
         if telegramDataIsValid(session):
-            print(_('(2) Change the Telegram data'))
+            print(_("(2) Change the Telegram data"))
         else:
             print(_('(2) Enter the Telegram data'))
-        print(_('(3) Kill tasks'))
-        print(_('(4) Configure captcha resolver'))
-        print(_('(5) Toggle Status Banner'))
-        print(_('(6) Update Status Banner'))
-        print(_('(7) Cookie data file'))
-        print(_('(8) Proxy list'))
-        print(_('(9) Logs'))
-        print(_('(10) Message Telegram Bot'))
+            print(_('(3) Kill tasks'))
+            print(_('(4) Configure captcha resolver'))
+            print(_('(5) Toggle Status Banner'))
+            print(_('(6) Update Status Banner'))
+            print(_('(7) Cookie data file'))
+            print(_('(8) Proxy list'))
+            print(_('(9) Logs'))
+            print(_('(10) Message Telegram Bot'))
 
         selected = read(min=0, max=10, digit=True)
         
@@ -235,16 +269,25 @@ def menu(session, checkUpdate=False):
             return
         if selected != 0 and selected != 5 and selected != 6:
             selected += 140
-        
-
 
     if selected != 0:
         try:
             event = multiprocessing.Event()  # creates a new event
             config.has_params = len(config.predetermined_input) > 0
-            process = multiprocessing.Process(target=menu_actions[selected], args=(session, event, sys.stdin.fileno(), config.predetermined_input), name=menu_actions[selected].__name__)
+            process = multiprocessing.Process(
+                target=menu_actions[selected],
+                args=(session, event, sys.stdin.fileno(), config.predetermined_input),
+                name=menu_actions[selected].__name__,
+            )
             process.start()
-            process_list.append({'pid': process.pid, 'action': menu_actions[selected].__name__, 'date': time.time(), 'status': 'started'})
+            process_list.append(
+                {
+                    "pid": process.pid,
+                    "action": menu_actions[selected].__name__,
+                    "date": time.time(),
+                    "status": "started",
+                }
+            )
             updateProcessList(session, programprocesslist=process_list)
             event.wait()  # waits for the process to fire the event that's been given to it. When it does  this process gets back control of the command line and asks user for more input
         except KeyboardInterrupt:
@@ -254,7 +297,7 @@ def menu(session, checkUpdate=False):
         if isWindows:
             # in unix, you can exit ikabot and close the terminal and the processes will continue to execute
             # in windows, you can exit ikabot but if you close the terminal, the processes will die
-            print(_('Closing this console will kill the processes.'))
+            print(_("Closing this console will kill the processes."))
             enter()
         clear()
         session_data = session.getSessionData()
@@ -271,7 +314,7 @@ def init():
         home = os.path.dirname(__file__)
     os.chdir(str(home))
     if not os.path.isfile(ikaFile):
-        open(ikaFile, 'w')
+        open(ikaFile, "w")
         os.chmod(ikaFile, 0o600)
 
 
@@ -303,8 +346,8 @@ def main():
         clear()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # On Windows calling this function is necessary.
-    if sys.platform.startswith('win'):
+    if sys.platform.startswith("win"):
         multiprocessing.freeze_support()
     main()
