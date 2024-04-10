@@ -20,7 +20,7 @@ def show_proxy(session):
     msg = _('using proxy:')
     if 'proxy' in session_data and session_data['proxy']['set'] is True:
         curr_proxy = session_data['proxy']['conf']['https']
-        if test_proxy(session_data['proxy']['conf']) is False:
+        if test_proxy(session, session_data['proxy']['conf']) is False:
             check = network_check(session)
             if check is False:
                 return

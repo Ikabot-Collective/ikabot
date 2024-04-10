@@ -300,10 +300,10 @@ def menu(session, checkUpdate=False):
             print(_("Closing this console will kill the processes."))
             enter()
         clear()
-        session_data = session.getSessionData()
-        session_data['status']['data'] = config.default_bner
-        session_data['status']['set'] = False
-        session.setSessionData(session_data)
+        #session_data = session.getSessionData()
+        #session_data['status']['data'] = config.default_bner
+        #session_data['status']['set'] = False
+        #session.setSessionData(session_data)
         os._exit(0)  # kills the process which executes this statement, but it does not kill it's child processes
 
 
