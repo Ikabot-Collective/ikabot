@@ -243,14 +243,14 @@ def menu(session, checkUpdate=False):
             print(_("(2) Change the Telegram data"))
         else:
             print(_('(2) Enter the Telegram data'))
-            print(_('(3) Kill tasks'))
-            print(_('(4) Configure captcha resolver'))
-            print(_('(5) Toggle Status Banner'))
-            print(_('(6) Update Status Banner'))
-            print(_('(7) Cookie data file'))
-            print(_('(8) Proxy list'))
-            print(_('(9) Logs'))
-            print(_('(10) Message Telegram Bot'))
+        print(_('(3) Kill tasks'))
+        print(_('(4) Configure captcha resolver'))
+        print(_('(5) Toggle Status Banner'))
+        print(_('(6) Update Status Banner'))
+        print(_('(7) Cookie data file'))
+        print(_('(8) Proxy list'))
+        print(_('(9) Logs'))
+        print(_('(10) Message Telegram Bot'))
 
         selected = read(min=0, max=10, digit=True)
         
