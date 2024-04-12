@@ -9,7 +9,7 @@ from ikabot.config import *
 def base_url():
     address = getAddress(domain = publicAPIServerDomain)
     # Remove "/ikagod/ikabot" from the URL
-    base_url = f"http://{address}".replace("/ikagod/ikabot", "")
+    base_url = address.replace("/ikagod/ikabot", "")
     return base_url
 
 
