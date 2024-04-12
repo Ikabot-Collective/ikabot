@@ -277,7 +277,7 @@ def resolveCaptcha(session, picture):
         address = getAddress(session, publicAPIServerDomain)
 
         files = {"upload_file": picture}
-        captcha = requests.post("http://{0}".format(address), files=files).text
+        captcha = requests.post(address, files=files).text
         return captcha
     elif session_data["decaptcha"]["name"] == "custom":
         files = {"upload_file": picture}

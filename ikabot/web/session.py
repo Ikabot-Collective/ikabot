@@ -613,7 +613,7 @@ class Session:
 
                         files = {"text_image": text_image, "drag_icons": drag_icons}
                         captcha = self.s.post(
-                            "http://{0}".format(address), files=files
+                            address, files=files
                         ).text
                         if not captcha.isnumeric():
                             raise Exception(
