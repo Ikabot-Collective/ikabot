@@ -363,6 +363,7 @@ def do_it(session, island, iterations):
     island : dict
     iterations : int
     """
+    iterations_left = iterations
     for i in range(iterations):
 
         wait_for_miracle(session, island)
@@ -375,6 +376,9 @@ def do_it(session, island, iterations):
             )
             sendToBot(session, msg)
             return
-
+        iterations_left -= 1
+        session.setStatus(
+            f"Activated {island['wonderName']} @{getDateTime()}, iterations left: {iterations_left}"
+        )
         msg = _("Miracle {} successfully activated").format(island["wonderName"])
         sendToBotDebug(session, msg, debugON_activateMiracle)
