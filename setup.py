@@ -1,8 +1,8 @@
 import setuptools
-
+from ikabot import version
 setuptools.setup(
     name="ikabot",
-    version="6.7.0",
+    version=version,
     author="physics-sp",
     author_email="physics-sp@protonmail.com",
     license="MIT",
