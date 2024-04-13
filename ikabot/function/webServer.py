@@ -340,7 +340,7 @@ window.onload = function() {{
 
     // get span element with title "Version" and replace it's text with current version
     var versionSpan = document.querySelector('span[title="Version"]');
-    versionSpan.innerHTML = '{"Ikabot v7.0.0"}'; // will be replaced
+    versionSpan.innerHTML = 'Ikabot {ikabotVersion}';
     versionSpan.style = 'animation: glow 1s ease-in-out infinite alternate;';
     
 
