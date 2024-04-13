@@ -1,22 +1,22 @@
+import json
 import os
 
 import pytest
 import requests
 
-from ikabot.helpers.dns import getAddress
 from ikabot.config import *
+from ikabot.helpers.dns import getAddress
 
 
 @pytest.fixture
 def base_url():
-    address = getAddress(domain = publicAPIServerDomain)
-    return base_url + '/v1'
+    address = getAddress(domain=publicAPIServerDomain)
+    return address + "/v1"
 
 
-def test_decaptcha_without_data_should_return_error(base_url):
+def test_decaptcha_without_data_should_return_status_code_400(base_url):
     response = requests.post(f"{base_url}/decaptcha/lobby")
-    assert response.status_code == 200
-    assert response.text == "Error"
+    assert response.status_code == 400
 
 
 def test_decaptcha_login_captcha_with_valid_image_should_return_the_right_int(base_url):
@@ -33,7 +33,7 @@ def test_decaptcha_login_captcha_with_valid_image_should_return_the_right_int(ba
         }
         response = requests.post(f"{base_url}/decaptcha/lobby", files=data)
     assert response.status_code == 200
-    assert response.text == "3"
+    assert json.loads(response.text) == 3
 
     # Case 2
     file_path1 = os.path.join(current_directory, "img", "login_text2.png")
@@ -45,10 +45,10 @@ def test_decaptcha_login_captcha_with_valid_image_should_return_the_right_int(ba
         }
         response = requests.post(f"{base_url}/decaptcha/lobby", files=data)
     assert response.status_code == 200
-    assert response.text == "0"
+    assert json.loads(response.text) == 0
 
 
-def test_decaptcha_login_captcha_with_invalid_image_should_return_error(
+def test_decaptcha_login_captcha_with_invalid_image_should_return_status_code_500(
     base_url,
 ):
     current_directory = os.path.dirname(__file__)
@@ -62,5 +62,4 @@ def test_decaptcha_login_captcha_with_invalid_image_should_return_error(
             "icons_image": ("login_text_invalid.png", icons_image, "image/png"),
         }
         response = requests.post(f"{base_url}/decaptcha/lobby", files=data)
-    assert response.status_code == 200
-    assert response.text == "Error"
+    assert response.status_code == 500

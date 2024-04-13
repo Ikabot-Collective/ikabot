@@ -2,9 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import traceback
+
 from requests import get, post
-from ikabot.helpers.dns import getAddress
+
 from ikabot.config import *
+from ikabot.helpers.dns import getAddress
 
 
 def getNewBlackBoxToken(session):
@@ -19,21 +21,32 @@ def getNewBlackBoxToken(session):
     token : str
         blackbox token
     """
-    address = getAddress(session, publicAPIServerDomain) + '/v1/token' + '?user_agent=' + session.user_agent
+    address = (
+        getAddress(session, publicAPIServerDomain)
+        + "/v1/token"
+        + "?user_agent="
+        + session.user_agent
+    )
     response = get(address, verify=do_ssl_verify, timeout=900)
-    assert response.status_code == 200, 'API response code is not OK: ' + str(response.status_code) + '\n' + response.text
+    assert response.status_code == 200, (
+        "API response code is not OK: "
+        + str(response.status_code)
+        + "\n"
+        + response.text
+    )
     response = response.json()
-    if 'status' in response and response['status'] == 'error':
-        raise Exception(response['message'])
-    return 'tra:' + response
+    if "status" in response and response["status"] == "error":
+        raise Exception(response["message"])
+    return "tra:" + response
 
-def getInteractiveCaptchaSolution(session, text_image, drag_icons):
+
+def getInteractiveCaptchaSolution(session, text_image, icons_image):
     """This function returns the solution of the interactive captcha
     Parameters
     ----------
     session : ikabot.web.session.Session
         Session object
-    drag_icons : bytes
+    icons_image : bytes
         the image that contains 4 other images
     text_image : bytes
         the image that contaisn the text
@@ -41,16 +54,22 @@ def getInteractiveCaptchaSolution(session, text_image, drag_icons):
     Returns
     -------
     solution : str
-        solution of the captcha 
+        solution of the captcha
     """
-    address = getAddress(session, publicAPIServerDomain) + '/v1/decaptcha/lobby'
-    files = {'text_image': text_image, 'drag_icons': drag_icons}
+    address = getAddress(session, publicAPIServerDomain) + "/v1/decaptcha/lobby"
+    files = {"text_image": text_image, "icons_image": icons_image}
     response = post(address, files=files, verify=do_ssl_verify, timeout=900)
-    assert response.status_code == 200, 'API response code is not OK: ' + str(response.status_code) + '\n' + response.text
+    assert response.status_code == 200, (
+        "API response code is not OK: "
+        + str(response.status_code)
+        + "\n"
+        + response.text
+    )
     response = response.json()
-    if 'status' in response and response['status'] == 'error':
-        raise Exception(response['message'])
+    if "status" in response and response["status"] == "error":
+        raise Exception(response["message"])
     return response
+
 
 def getPiratesCaptchaSolution(session, image):
     """This function returns the solution of the pirates captcha
@@ -64,14 +83,18 @@ def getPiratesCaptchaSolution(session, image):
     Returns
     -------
     solution : str
-        solution of the captcha 
+        solution of the captcha
     """
-    address = getAddress(session, publicAPIServerDomain) + '/v1/decaptcha/pirate'
-    files = {'image': image}
+    address = getAddress(session, publicAPIServerDomain) + "/v1/decaptcha/pirate"
+    files = {"image": image}
     response = post(address, files=files, verify=do_ssl_verify, timeout=900)
-    assert response.status_code == 200, 'API response code is not OK: ' + str(response.status_code) + '\n' + response.text
+    assert response.status_code == 200, (
+        "API response code is not OK: "
+        + str(response.status_code)
+        + "\n"
+        + response.text
+    )
     response = response.json()
-    if 'status' in response and response['status'] == 'error':
-        raise Exception(response['message'])
+    if "status" in response and response["status"] == "error":
+        raise Exception(response["message"])
     return response
-
