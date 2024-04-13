@@ -25,7 +25,7 @@ from ikabot.helpers.getJson import getCity
 from ikabot.helpers.gui import banner
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.varios import getDateTime
-from ikabot.helpers.dns import getAddress
+from ikabot.helpers.apiComm import getInteractiveCaptchaSolution, getNewBlackBoxToken
 
 t = gettext.translation("session", localedir, languages=languages, fallback=True)
 _ = t.gettext
@@ -230,7 +230,7 @@ class Session:
         if "gf-token-production" in self.s.cookies:
             self.headers = {
                 "Host": "lobby.ikariam.gameforge.com",
-                "User-Agent": user_agent,
+                "User-Agent": self.user_agent,
                 "Accept": "*/*",
                 "Accept-Language": "en-US,en;q=0.5",
                 "Accept-Encoding": "gzip, deflate",
@@ -272,11 +272,7 @@ class Session:
         try:
             if self.padre:
                 print("Obtaining new blackbox token, please wait...")
-            address = getAddress(self, publicAPIServerDomain).replace("/ikagod/ikabot", "/token")
-            blackbox_token = (
-                "tra:"
-                + requests.get(address, verify=config.do_ssl_verify, timeout=900).text
-            )
+            blackbox_token = getNewBlackBoxToken(self)
             assert any(
                 c.isupper() for c in blackbox_token
             ), "The token must contain uppercase letters."
@@ -298,8 +294,10 @@ class Session:
             if not self.padre: # only exit if running in a child process because user won't be looking at the console to provide the cookies
                 sys.exit('Failed to regenerate blackbox token')
             self.blackbox = 'tra:JVqc1fosb5TG-E2h5Ak7bZLEB23OOq0SN2ms0QM1fOFErx5DdafM_kFmmMoXeNsAMmKxBClbi-MIOmyRwwYrXY_VPrAVe-pih7nrEEKFqtwOVcQzmgZrkMLyO6kMOl-Rw-gaXZG26CtcgbP2G01_5FJ_xggtX5G26CtQgrToToO2GX3eD0eq3D6fADCTw_YrX8EjWL73WIvwU7UaT7QYSXvcPnLWDnOk1TeY0Ac6nc81ZpfI_i9hkcMlXpLH7B5QdafqD0FzuimY_2vQ9SdXoA5xn8T2Jk6VBHPaRqvU-Stur_1EkNX6LFyEyzqpEHzhBjh7oNICWM05pAVzmMr6K1mMuuoPQXGZ7GPMMqb5YcImi_0iVITILaMMb9T5K1uD1kutJ4z-bZa77R1Fde0dTX2t8CBkqdL7IFKVuuwcb-ZPtSl85EWpDoCl1wdr3Ua8IZO84RNFapzfBDZonAEyZMf_ZZX2WLvyI4e58CKEue1Ti8H6XsEih7gZSYDjGlGHt-kiVIS981aIuBx-4hR1rOBFqNwUet8XTX6zFjttn8T2OV6QwiOIwPgxZpv_M2fI-y5gkPIqW4_EKovA8SVdjfMjicHxI1uQwvpglcX-M5b6MWmc0TRs0QNmy_9hmvswZp3RNm6TxfccTpHC9CxcgbP2LV-PtOYpW4-05ilOgLIXeKoNQHncEXbZOm6m3kCk20Cl1TZnywJlygBil839LZHyJ43A9leO8SmK6yNcviKH6RlQiL73J43yKmOYyC1jiLrsEUOGq90PQ3iu5BxTuOxRgbHjHE1_tBdHqeATeNxCda7fRabWCG2iBDx1pdtApts9oNM0l8krXpL3Wb73KoztHVG05RhIqc4AMleJzPEjVYnvJFe6Hn-w6Et930Ch0TRkl8wAYsT5X5j5LJH0VrvwVbnqHH3fE3evFEV22DlxqNs-cNYHOGmf0AIyZMb_M2iNv_EWSIuw4hRIgbPrHoO05BV6quJDd63gQqjcDHCp2j-kBmug0Qk_ctM0bNIIOG6k3BF0rBFGf7cbf7EWerLrJInB-ChelPotUoS22w1QgbPnFUV5rOAXTH616htRgbjsEUOGq90Pc6beQXKl2AhpzwU5m9ADaZwCZpvUBDWW9ylav_YsXI_G9luLw_Qmh7_0KI7G_DNqotsUSn7iRaraEUN4rxRNr9QGOF2P0gQ1bp7SAjZrosf5PGGTxfcnWY266h1KfLUJOnGWyQo6bpPGBztvndQFPJa77R9EdrneEEKw4E2CuyWX0D-pF4sDdKcMP3Op3haN-W6gC3GWyPofUZTF_DBmi70AJVeJuuoYSX6j1QcsXqHG-Cp4vSBYuwJcofUmng5fzDeeAESazTGr7TiR-mrgRInbH3jhL2O6I1i9D3rqQpDoOoztRbTpS7kdg-VSh9E0eLnuP4LQA0-U-yBSmPpo3BBdpfpvxzJz3y2EuC6R_mWdAmu5K4XKOnzQSn_EF2qs9UOv5EuY6xxu0RdhyBxkqhF14i9luCVeuAx1ti589juzAXvIQI_TOrMCVrkxVoi63xFUeavdKpkTfOhUtdoMUoe15Qo8bJThQqUOfPBf0jpfktT5K1ukEobrV3yu3iuM7xRGdsUYPW-f9xxOfq_fDT5zmMsNMmSUBnyh1BVGdq_dDTZbjb0Eacw3psv9Q3Wl1gY2Z5fI7R9Plf5w1TuqIkd5v_AhWIa22w0_ZJbZ_jBilMT2KleHuucZUqbXDjNmp9cLMGOk2Aw6aprKJEl7rdIER7UqlgInXKA'
-            print('Failed to obtain new blackbox token from API: ' + str(e))
-            print('Using fallback blackbox token: ' + self.blackbox) # using expired fallback token here so that user can insert cookie manually since blackbox generation failed at this point
+            print(f'{bcolors.RED}[ERROR]{bcolors.ENDC} Failed to obtain new blackbox token from API: ' + str(e)) # using expired fallback token here so that user can insert cookie manually since blackbox generation failed at this point
+            print('Please report this issue to developers on github or the discord server!!')
+            print('Using fallback blackbox token: ' + self.blackbox)
+            enter()
 
     def __login(self, retries=0):
         if not self.logged:
@@ -313,6 +311,9 @@ class Session:
                 self.password = getpass.getpass(_("Password:"))
 
             banner()
+
+        #choose one user agent from user_agents list based on provided mail
+        self.user_agent = user_agents[sum(ord(c) for c in self.mail) % len(user_agents)]
 
         self.s = requests.Session()
         self.cipher = AESCipher(self.mail, self.password)
@@ -337,7 +338,7 @@ class Session:
             # get gameEnvironmentId and platformGameId
             self.headers = {
                 "Host": "lobby.ikariam.gameforge.com",
-                "User-Agent": user_agent,
+                "User-Agent": self.user_agent,
                 "Accept": "*/*",
                 "Accept-Language": "en-US,en;q=0.5",
                 "Accept-Encoding": "gzip, deflate",
@@ -364,7 +365,7 @@ class Session:
             # get __cfduid cookie
             self.headers = {
                 "Host": "gameforge.com",
-                "User-Agent": user_agent,
+                "User-Agent": self.user_agent,
                 "Accept": "*/*",
                 "Accept-Language": "en-US,en;q=0.5",
                 "Accept-Encoding": "gzip, deflate",
@@ -383,7 +384,7 @@ class Session:
             # update __cfduid cookie
             self.headers = {
                 "Host": "gameforge.com",
-                "User-Agent": user_agent,
+                "User-Agent": self.user_agent,
                 "Accept": "*/*",
                 "Accept-Language": "en-US,en;q=0.5",
                 "Accept-Encoding": "gzip, deflate",
@@ -402,7 +403,7 @@ class Session:
                 # get pc_idt cookie
                 self.headers = {
                     "Host": "pixelzirkus.gameforge.com",
-                    "User-Agent": user_agent,
+                    "User-Agent": self.user_agent,
                     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
                     "Accept-Language": "en-US,en;q=0.5",
                     "Accept-Encoding": "gzip, deflate",
@@ -434,7 +435,7 @@ class Session:
                 # update pc_idt cookie
                 self.headers = {
                     "Host": "pixelzirkus.gameforge.com",
-                    "User-Agent": user_agent,
+                    "User-Agent": self.user_agent,
                     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
                     "Accept-Language": "en-US,en;q=0.5",
                     "Accept-Encoding": "gzip, deflate",
@@ -481,7 +482,7 @@ class Session:
                 "Sec-Fetch-Mode": "no-cors",
                 "Sec-Fetch-Site": "same-site",
                 "TE": "trailers",
-                "User-Agent": user_agent,
+                "User-Agent": self.user_agent,
             }
             self.s.headers.clear()
             self.s.headers.update(self.headers)
@@ -503,7 +504,7 @@ class Session:
                 "Sec-Fetch-Site": "same-site",
                 "TE": "trailers",
                 "TNT-Installation-Id": "",
-                "User-Agent": user_agent,
+                "User-Agent": self.user_agent,
             }
             self.s.headers.clear()
             self.s.headers.update(self.headers)
@@ -538,7 +539,7 @@ class Session:
                         "Sec-Fetch-Site": "same-site",
                         "TE": "trailers",
                         "TNT-Installation-Id": "",
-                        "User-Agent": user_agent,
+                        "User-Agent": self.user_agent,
                     }
                     self.s.headers.clear()
                     self.s.headers.update(self.headers)
@@ -567,7 +568,7 @@ class Session:
                         "sec-fetch-dest": "empty",
                         "sec-fetch-mode": "cors",
                         "sec-fetch-site": "same-site",
-                        "user-agent": user_agent,
+                        "user-agent": self.user_agent,
                     }
                     self.s.headers.clear()
                     self.s.headers.update(self.headers)
@@ -608,13 +609,7 @@ class Session:
                     ).content
                     data = {}
                     try:
-                        
-                        address = getAddress(self, publicAPIServerDomain)
-
-                        files = {"text_image": text_image, "drag_icons": drag_icons}
-                        captcha = self.s.post(
-                            address, files=files
-                        ).text
+                        captcha = getInteractiveCaptchaSolution(self, text_image, drag_icons)
                         if not captcha.isnumeric():
                             raise Exception(
                                 "Failed to resolve interactive captcha automatically. Server returned bad data: {}".format(
@@ -694,7 +689,7 @@ class Session:
                             "Sec-Fetch-Site": "same-site",
                             "TE": "trailers",
                             "TNT-Installation-Id": "",
-                            "User-Agent": user_agent,
+                            "User-Agent": self.user_agent,
                         }
                         self.s.headers.clear()
                         self.s.headers.update(self.headers)
@@ -771,7 +766,7 @@ class Session:
         # get accounts
         self.headers = {
             "Host": "lobby.ikariam.gameforge.com",
-            "User-Agent": user_agent,
+            "User-Agent": self.user_agent,
             "Accept": "application/json",
             "Accept-Language": "en-US,en;q=0.5",
             "Accept-Encoding": "gzip, deflate",
@@ -788,7 +783,7 @@ class Session:
         # get servers
         self.headers = {
             "Host": "lobby.ikariam.gameforge.com",
-            "User-Agent": user_agent,
+            "User-Agent": self.user_agent,
             "Accept": "application/json",
             "Accept-Language": "en-US,en;q=0.5",
             "Accept-Encoding": "gzip, deflate",
@@ -867,7 +862,7 @@ class Session:
 
         self.headers = {
             "Host": self.host,
-            "User-Agent": user_agent,
+            "User-Agent": self.user_agent,
             "Accept": "*/*",
             "Accept-Language": "en-US,en;q=0.5",
             "Accept-Encoding": "gzip, deflate, br",
@@ -932,7 +927,7 @@ class Session:
                 "content-type": "application/json",
                 "origin": "https://lobby.ikariam.gameforge.com",
                 "referer": "https://lobby.ikariam.gameforge.com/en_GB/accounts",
-                "user-agent": user_agent,
+                "user-agent": self.user_agent,
             }
             self.s.headers.clear()
             self.s.headers.update(self.headers)

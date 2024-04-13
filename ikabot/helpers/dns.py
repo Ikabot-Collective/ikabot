@@ -178,13 +178,13 @@ def getAddress(session = type('test', (object,), {'writeLog': lambda *args, **kw
     try:
         address = getAddressWithSocket(session, domain)
         assert '.' in address or ':' in address.replace('http://', ''), "Bad server address: " + address
-        return address
+        return address.replace('/ikagod/ikabot','')
     except Exception as e:
         session.writeLog("Failed to obtain public API address from socket, falling back to nslookup: " + str(e), level=logLevels.WARN, module= __name__, logTraceback=True)
     try:
         address = getAddressWithNSlookup(session, domain)
         assert '.' in address or ':' in address.replace('http://', ''), "Bad server address: " + address #address is either hostname, IPv4 or IPv6
-        return address
+        return address.replace('/ikagod/ikabot','')
     except Exception as e:
         session.writeLog("Failed to obtain public API address from both socket and nslookup: " + str(e), level=logLevels.ERROR, module= __name__, logTraceback=True)
         raise e
