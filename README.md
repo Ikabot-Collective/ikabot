@@ -26,3 +26,9 @@ This project exists thanks to all the people who contribute.
 <a href="https://github.com/Ikabot-Collective/ikabot/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=Ikabot-Collective/ikabot" />
 </a>
+
+## Screenshots
+
+![322233496-e47844e7-0054-445d-9680-bc46bccafca0](https://github.com/Ikabot-Collective/ikabot/assets/54487782/400a0c39-6c37-46ac-91d0-042dfdbdc308)
+
+
