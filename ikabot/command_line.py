@@ -131,7 +131,7 @@ def menu(session, checkUpdate=True):
         13: shipMovements,
         14: constructBuilding,
         15: update,
-        16: importExportCookie,
+        16: webServer,
         17: autoPirate,
         18: investigate,
         19: attackBarbarians,
@@ -142,7 +142,7 @@ def menu(session, checkUpdate=True):
         144: decaptchaConf,
         145: logs,
         146: testTelegramBot,
-        147: webServer,
+        147: importExportCookie
     }
 
     print(_("(0)  Exit"))
@@ -161,7 +161,7 @@ def menu(session, checkUpdate=True):
     print(_("(13) See movements"))
     print(_("(14) Construct building"))
     print(_("(15) Update Ikabot"))
-    print(_("(16) Import / Export cookie"))
+    print(_("(16) Ikabot Web Server"))
     print(_("(17) Auto-Pirate"))
     print(_("(18) Investigate"))
     print(_("(19) Attack barbarians"))
@@ -233,7 +233,7 @@ def menu(session, checkUpdate=True):
         print(_("(4) Configure captcha resolver"))
         print(_("(5) Logs"))
         print(_("(6) Message Telegram Bot"))
-        print(_("(7) Ikabot web server"))
+        print(_("(7) Import / Export cookie"))
 
         selected = read(min=0, max=7, digit=True)
         if selected == 0:
