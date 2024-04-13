@@ -230,7 +230,7 @@ class Session:
         if "gf-token-production" in self.s.cookies:
             self.headers = {
                 "Host": "lobby.ikariam.gameforge.com",
-                "User-Agent": user_agent,
+                "User-Agent": self.user_agent,
                 "Accept": "*/*",
                 "Accept-Language": "en-US,en;q=0.5",
                 "Accept-Encoding": "gzip, deflate",
@@ -314,6 +314,9 @@ class Session:
 
             banner()
 
+        #choose one user agent from user_agents list based on provided mail
+        self.user_agent = user_agents[sum(ord(c) for c in self.mail) % len(user_agents)]
+
         self.s = requests.Session()
         self.cipher = AESCipher(self.mail, self.password)
         self.updateLogLevel()
@@ -337,7 +340,7 @@ class Session:
             # get gameEnvironmentId and platformGameId
             self.headers = {
                 "Host": "lobby.ikariam.gameforge.com",
-                "User-Agent": user_agent,
+                "User-Agent": self.user_agent,
                 "Accept": "*/*",
                 "Accept-Language": "en-US,en;q=0.5",
                 "Accept-Encoding": "gzip, deflate",
@@ -364,7 +367,7 @@ class Session:
             # get __cfduid cookie
             self.headers = {
                 "Host": "gameforge.com",
-                "User-Agent": user_agent,
+                "User-Agent": self.user_agent,
                 "Accept": "*/*",
                 "Accept-Language": "en-US,en;q=0.5",
                 "Accept-Encoding": "gzip, deflate",
@@ -383,7 +386,7 @@ class Session:
             # update __cfduid cookie
             self.headers = {
                 "Host": "gameforge.com",
-                "User-Agent": user_agent,
+                "User-Agent": self.user_agent,
                 "Accept": "*/*",
                 "Accept-Language": "en-US,en;q=0.5",
                 "Accept-Encoding": "gzip, deflate",
@@ -402,7 +405,7 @@ class Session:
                 # get pc_idt cookie
                 self.headers = {
                     "Host": "pixelzirkus.gameforge.com",
-                    "User-Agent": user_agent,
+                    "User-Agent": self.user_agent,
                     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
                     "Accept-Language": "en-US,en;q=0.5",
                     "Accept-Encoding": "gzip, deflate",
@@ -434,7 +437,7 @@ class Session:
                 # update pc_idt cookie
                 self.headers = {
                     "Host": "pixelzirkus.gameforge.com",
-                    "User-Agent": user_agent,
+                    "User-Agent": self.user_agent,
                     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
                     "Accept-Language": "en-US,en;q=0.5",
                     "Accept-Encoding": "gzip, deflate",
@@ -481,7 +484,7 @@ class Session:
                 "Sec-Fetch-Mode": "no-cors",
                 "Sec-Fetch-Site": "same-site",
                 "TE": "trailers",
-                "User-Agent": user_agent,
+                "User-Agent": self.user_agent,
             }
             self.s.headers.clear()
             self.s.headers.update(self.headers)
@@ -503,7 +506,7 @@ class Session:
                 "Sec-Fetch-Site": "same-site",
                 "TE": "trailers",
                 "TNT-Installation-Id": "",
-                "User-Agent": user_agent,
+                "User-Agent": self.user_agent,
             }
             self.s.headers.clear()
             self.s.headers.update(self.headers)
@@ -538,7 +541,7 @@ class Session:
                         "Sec-Fetch-Site": "same-site",
                         "TE": "trailers",
                         "TNT-Installation-Id": "",
-                        "User-Agent": user_agent,
+                        "User-Agent": self.user_agent,
                     }
                     self.s.headers.clear()
                     self.s.headers.update(self.headers)
@@ -567,7 +570,7 @@ class Session:
                         "sec-fetch-dest": "empty",
                         "sec-fetch-mode": "cors",
                         "sec-fetch-site": "same-site",
-                        "user-agent": user_agent,
+                        "user-agent": self.user_agent,
                     }
                     self.s.headers.clear()
                     self.s.headers.update(self.headers)
@@ -694,7 +697,7 @@ class Session:
                             "Sec-Fetch-Site": "same-site",
                             "TE": "trailers",
                             "TNT-Installation-Id": "",
-                            "User-Agent": user_agent,
+                            "User-Agent": self.user_agent,
                         }
                         self.s.headers.clear()
                         self.s.headers.update(self.headers)
@@ -771,7 +774,7 @@ class Session:
         # get accounts
         self.headers = {
             "Host": "lobby.ikariam.gameforge.com",
-            "User-Agent": user_agent,
+            "User-Agent": self.user_agent,
             "Accept": "application/json",
             "Accept-Language": "en-US,en;q=0.5",
             "Accept-Encoding": "gzip, deflate",
@@ -788,7 +791,7 @@ class Session:
         # get servers
         self.headers = {
             "Host": "lobby.ikariam.gameforge.com",
-            "User-Agent": user_agent,
+            "User-Agent": self.user_agent,
             "Accept": "application/json",
             "Accept-Language": "en-US,en;q=0.5",
             "Accept-Encoding": "gzip, deflate",
@@ -867,7 +870,7 @@ class Session:
 
         self.headers = {
             "Host": self.host,
-            "User-Agent": user_agent,
+            "User-Agent": self.user_agent,
             "Accept": "*/*",
             "Accept-Language": "en-US,en;q=0.5",
             "Accept-Encoding": "gzip, deflate, br",
@@ -932,7 +935,7 @@ class Session:
                 "content-type": "application/json",
                 "origin": "https://lobby.ikariam.gameforge.com",
                 "referer": "https://lobby.ikariam.gameforge.com/en_GB/accounts",
-                "user-agent": user_agent,
+                "user-agent": self.user_agent,
             }
             self.s.headers.clear()
             self.s.headers.update(self.headers)
