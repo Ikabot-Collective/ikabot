@@ -10,9 +10,7 @@ from ikabot.config import *
 @pytest.fixture
 def base_url():
     address = getAddress(domain = publicAPIServerDomain)
-    # Remove "/ikagod/ikabot" from the URL
-    base_url = address.replace("/ikagod/ikabot", "")
-    return base_url
+    return base_url + '/v1'
 
 
 def test_decaptcha_without_data_should_return_error(base_url):

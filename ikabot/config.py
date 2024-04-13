@@ -20,11 +20,6 @@ localedir = os.path.join(os.path.abspath(os.path.dirname(__file__)), "locale")
 t = gettext.translation("config", localedir, languages=languages, fallback=True)
 _ = t.gettext
 
-# only use common browsers
-if random.randint(0, 1) == 0:
-    default_user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
-else:
-    default_user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/110.0"
 
 update_msg = ""
 

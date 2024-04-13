@@ -16,7 +16,7 @@ from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.process import run, set_child_mode
 from ikabot.helpers.varios import timeStringToSec, wait
-from ikabot.helpers.dns import getAddress
+from ikabot.helpers.apiComm import getPiratesCaptchaSolution
 
 t = gettext.translation("buyResources", localedir, languages=languages, fallback=True)
 _ = t.gettext
@@ -274,10 +274,7 @@ def resolveCaptcha(session, picture):
         "decaptcha" not in session_data
         or session_data["decaptcha"]["name"] == "default"
     ):
-        address = getAddress(session, publicAPIServerDomain)
-
-        files = {"upload_file": picture}
-        captcha = requests.post(address, files=files).text
+        captcha = getPiratesCaptchaSolution(session, picture)
         return captcha
     elif session_data["decaptcha"]["name"] == "custom":
         files = {"upload_file": picture}
