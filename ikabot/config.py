@@ -6,7 +6,7 @@ import locale
 import os
 import random
 
-ikabotVersion = 'v7.0.0'
+ikabotVersion = 'v6.7.0'
 
 local = locale.setlocale(locale.LC_ALL, "")
 if "es_" in local:
