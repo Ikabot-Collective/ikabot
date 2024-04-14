@@ -40,6 +40,7 @@ from ikabot.function.trainArmy import trainArmy
 from ikabot.function.update import update
 from ikabot.function.vacationMode import vacationMode
 from ikabot.function.webServer import webServer
+from ikabot.function.loadCustomModule import loadCustomModule
 from ikabot.helpers.botComm import telegramDataIsValid, updateTelegramData
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import read
@@ -142,7 +143,8 @@ def menu(session, checkUpdate=True):
         144: decaptchaConf,
         145: logs,
         146: testTelegramBot,
-        147: importExportCookie
+        147: importExportCookie,
+        148: loadCustomModule
     }
 
     print(_("(0)  Exit"))
@@ -234,8 +236,9 @@ def menu(session, checkUpdate=True):
         print(_("(5) Logs"))
         print(_("(6) Message Telegram Bot"))
         print(_("(7) Import / Export cookie"))
+        print(_("(8) Load custom ikabot module"))
 
-        selected = read(min=0, max=7, digit=True)
+        selected = read(min=0, max=8, digit=True)
         if selected == 0:
             menu(session)
             return
