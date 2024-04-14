@@ -15,7 +15,11 @@ Ikabot is a cross-platform Python program that enhances your Ikariam game by off
 
 - Before contributing code, read the [Contribution Guidelines](.github/CONTRIBUTING.md)
   - GitHub issues are for bugs and feature requests.
-  - For questions, help and chat in general, join our [Discord community](https://discord.gg/3hyxPRj).
+  - For questions, help and chat in general, join our Discord Server:
+
+     [![Discord server!](https://invidget.switchblade.xyz/3hyxPRj)](http://discord.gg/3hyxPRj)
+
+  
 - Want to say thanks?
   - Hit the :star: Star :star: button
 
