@@ -170,7 +170,11 @@ def menu(session, checkUpdate=True):
     print(_("(20) Dump / View world"))
     print(_("(21) Options / Settings"))
     total_options = len(menu_actions) + 1
-    selected = read(min=0, max=total_options, digit=True)
+    selected = read(min=0, max=total_options, digit=True, empty=True)
+    
+    # refresh main menu on hitting enter
+    if selected == '':
+        return menu(session)
 
     if selected == 7:
         banner()
