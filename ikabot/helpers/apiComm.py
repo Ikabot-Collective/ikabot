@@ -66,8 +66,10 @@ def getInteractiveCaptchaSolution(session, text_image, icons_image):
         + response.text
     )
     response = response.json()
-    if "status" in response and response["status"] == "error":
-        raise Exception(response["message"])
+    if type(response) is not int:
+        raise Exception('Response was not a digit as expected: ' + response)
+#    if "status" in response and response["status"] == "error":
+#        raise Exception(response["message"])
     return response
 
 
