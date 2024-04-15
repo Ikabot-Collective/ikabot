@@ -1,6 +1,5 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
-import gettext
 import sys
 import traceback
 from ikabot.helpers.pedirInfo import read, enter
@@ -8,10 +7,6 @@ from ikabot.helpers.gui import *
 from ikabot.config import *
 
 from importlib.machinery import SourceFileLoader
-
-t = gettext.translation('loadCustomModule', localedir, languages=languages, fallback=True)
-_ = t.gettext
-
 
 def loadCustomModule(session, event, stdin_fd, predetermined_input):
     """
