@@ -56,9 +56,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       
-      # Find and replace version
-      - name: Replace version value in setup.py
-        run: sed -i 's/version=".\+",/version="\"${{ inputs.milestone }}\"",/' setup.py
+      - name: Replace version value in ikabot/__init__.py
+        run: cd ikabot && sed -i 's/version=".\+"/version="\"${{ inputs.milestone }}\""/' __init__.py && cd ..
 
       - name: Push changes
         run: |

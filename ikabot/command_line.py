@@ -23,7 +23,6 @@ from ikabot.function.distributeResources import distributeResources
 from ikabot.function.donate import donate
 from ikabot.function.donationBot import donationBot
 from ikabot.function.dumpWorld import dumpWorld
-from ikabot.function.updateStatus import updateStatus, setStatus
 from ikabot.function.cookieConf import cookieConf
 from ikabot.helpers.checker import checker
 from ikabot.function.proxyList import proxyList
@@ -43,6 +42,7 @@ from ikabot.function.testTelegramBot import testTelegramBot
 from ikabot.function.trainArmy import trainArmy
 from ikabot.function.update import update
 from ikabot.function.vacationMode import vacationMode
+from ikabot.function.webServer import webServer
 from ikabot.helpers.botComm import telegramDataIsValid, updateTelegramData
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import read
@@ -66,7 +66,6 @@ def menu(session, checkUpdate=False):
 
     show_proxy(session)
 
-    #statusbanner(session) # DISABLED DUE TO A BUG
     banner()
 
     process_list = updateProcessList(session)
@@ -117,39 +116,38 @@ def menu(session, checkUpdate=False):
         print("")
 
     menu_actions = {
-        1:            constructionList,
-        2:            sendResources,
-        3:            distributeResources,
-        4:            getStatus,
-        6:            searchForIslandSpaces,
-        7:            loginDaily,
-        101:            alertAttacks,
-        102:            alertLowWine,
-        111:            buyResources,
-        112:            sellResources,
-        121:            donate,
-        122:            donationBot,
-        11:            vacationMode,
-        12:            activateMiracle,
-        131:            trainArmy,
-        132:            stationArmy,
-        14:            shipMovements,
-        15:            constructBuilding,
-        16:            importExportCookie,
-        17:            autoPirate,
-        18:            investigate,
-        19:            attackBarbarians,
-        20:            dumpWorld,
-        141:            proxyConf,
-        142:            updateTelegramData,
-        143:            killTasks,
-        144:            decaptchaConf,
-        145:            updateStatus,
-        146:            setStatus,
-        147:            cookieConf,
-        148:            proxyList,
-        149:            logs,
-        150:            testTelegramBot
+        1: constructionList,
+        2: sendResources,
+        3: distributeResources,
+        4: getStatus,
+        5: webServer,
+        6: searchForIslandSpaces,
+        7: loginDaily,
+        101: alertAttacks,
+        102: alertLowWine,
+        111: buyResources,
+        112: sellResources,
+        121: donate,
+        122: donationBot,
+        11: vacationMode,
+        12: activateMiracle,
+        131: trainArmy,
+        132: stationArmy,
+        14: shipMovements,
+        15: constructBuilding,
+        16: importExportCookie,
+        17: autoPirate,
+        18: investigate,
+        19: attackBarbarians,
+        20: dumpWorld,
+        141: proxyConf,
+        142: updateTelegramData,
+        143: killTasks,
+        144: decaptchaConf,
+        145: cookieConf,
+        146: proxyList,
+        147: logs,
+        148: testTelegramBot
                     }
 
     print(_('(0)  Exit'))
@@ -157,7 +155,7 @@ def menu(session, checkUpdate=False):
     print(_('(2)  Send resources'))
     print(_('(3)  Distribute resources'))
     print(_('(4)  Account status'))
-    print(_('(5)  Update tasklist'))
+    print(_('(5)  Ikabot Web Server'))
     print(_('(6)  Monitor islands'))
     print(_('(7)  Login daily'))
     print(_('(8)  Alerts / Notifications'))
@@ -176,14 +174,12 @@ def menu(session, checkUpdate=False):
     print(_('(21) Options / Settings'))
 
     total_options = len(menu_actions) + 1
-    selected = read(min=0, max=total_options, digit=True)
+    selected = read(min=0, max=total_options, digit=True, empty=True)
     
-    if selected == 5:
-        print(f'Task list has been updated.\n{config.version}')
-        time.sleep(1)
-        menu(session)
-        return
-    
+    # refresh main menu on hitting enter
+    if selected == '':
+        return menu(session)
+
     if selected == 8:
         banner()
         print(_("(0) Back"))
@@ -245,12 +241,10 @@ def menu(session, checkUpdate=False):
             print(_('(2) Enter the Telegram data'))
         print(_('(3) Kill tasks'))
         print(_('(4) Configure captcha resolver'))
-        print(_('(5) Toggle Status Banner'))
-        print(_('(6) Update Status Banner'))
-        print(_('(7) Cookie data file'))
-        print(_('(8) Proxy list'))
-        print(_('(9) Logs'))
-        print(_('(10) Message Telegram Bot'))
+        print(_('(5) Cookie data file'))
+        print(_('(6) Proxy list'))
+        print(_('(7) Logs'))
+        print(_('(8) Message Telegram Bot'))
 
         selected = read(min=0, max=10, digit=True)
         

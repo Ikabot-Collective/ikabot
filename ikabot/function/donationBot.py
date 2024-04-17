@@ -13,7 +13,7 @@ from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.resources import getAvailableResources, getProductionPerSecond
 from ikabot.helpers.signals import setInfoSignal
-from ikabot.helpers.varios import wait
+from ikabot.helpers.varios import wait, getDateTime
 
 t = gettext.translation("donationBot", localedir, languages=languages, fallback=True)
 _ = t.gettext
@@ -170,6 +170,7 @@ def do_it(
         cities_dict[cityId]["island"] = city["islandId"]
 
     while True:
+        total_donated = 0
         for cityId in cities_ids:
             donation_type = cities_dict[cityId]["donation_type"]
             if donation_type is None:
@@ -219,7 +220,7 @@ def do_it(
                     continue
 
             islandId = cities_dict[cityId]["island"]
-
+            
             # donate
             if donation_type is "both":
                 forrest = int(to_donate / 2)
@@ -265,7 +266,10 @@ def do_it(
                         "ajax": "1",
                     }
                 )
-
+            total_donated += to_donate
+        session.setStatus(
+            f"Donated {total_donated} wood @{getDateTime()}"
+        )
         msg = _("I donated automatically.")
         sendToBotDebug(session, msg, debugON_donationBot)
 
