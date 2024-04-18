@@ -7,7 +7,7 @@ import os
 import random
 from ikabot import version
 
-ikabotVersion = 'v' + version
+ikabotVersion = 'v' + version + ' - 18.04.2024'
 
 local = locale.setlocale(locale.LC_ALL, "")
 if "es_" in local:
