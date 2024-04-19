@@ -29,7 +29,7 @@ jobs:
         with:
           milestone: '${{ inputs.milestone }}'
           repository: 'ikabot'
-          repository-owner: 'Ikabot-Collective'
+          repository-owner: 'ElieTaillard'
           token: ${{ github.token }}
 
       - name: Generate Release Notes
