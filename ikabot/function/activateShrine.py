@@ -14,11 +14,12 @@ from ikabot.helpers.varios import *
 from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.botComm import *
 
-wait_time = 60*60*12# 12 hours, wait_time*6 equals total shrine grace time of 72h
+wait_time = 60 * 60 * 12  # 12 hours, wait_time*6 equals total shrine grace time of 72h
 last_donation_status = ""
 last_donation_time = ""
 current_favor = ""
 selected_gods = ""
+
 
 def findShrine(session):
     """Finding the city with Shrine and it's position
@@ -38,8 +39,11 @@ def findShrine(session):
             if building["building"] == "shrineOfOlympus":
                 shrineCity = city_id
                 shrinePos = pos
-                return shrineCity, shrinePos# Return as soon as Shrine and it's position is found
-    return None, None# Return None if not found
+                return (
+                    shrineCity,
+                    shrinePos,
+                )  # Return as soon as Shrine and it's position is found
+    return None, None  # Return None if not found
 
 
 def do_it(session, godids, mode, times):
@@ -52,7 +56,9 @@ def do_it(session, godids, mode, times):
     times : int
     """
     try:
-        favor_needed = len(godids)*100# Calculate the required amount of favor to donate all selected gods at once
+        favor_needed = (
+            len(godids) * 100
+        )  # Calculate the required amount of favor to donate all selected gods at once
         shrineCity, shrinePos = findShrine(session)
         if shrineCity is not None and shrinePos is not None:
             cityid, pos = shrineCity, shrinePos
@@ -61,39 +67,45 @@ def do_it(session, godids, mode, times):
             sendToBot(session, msg)
             event.set()
             return
-        
+
         if mode == 1 or mode == 3:
             for _ in range(times):
                 for godid in godids:
                     favor = getFavor(session, cityid, pos)
                     while favor < favor_needed:
-                        session.setStatus(f"Not enough favor @{getDateTime()}, re-trying in 3h.")
-                        time.sleep(wait_time/4)# 12h / 4 = 3 hours
+                        session.setStatus(
+                            f"Not enough favor @{getDateTime()}, re-trying in 3h."
+                        )
+                        time.sleep(wait_time / 4)  # 12h / 4 = 3 hours
                     donateShrine(session, godid, cityid, pos)
                     time.sleep(2)
-                    
+
             if mode == 1:
                 event.set()
                 return
-            mode = 2# If mode is both, set mode for loop
-        
+            mode = 2  # If mode is both, set mode for loop
+
         if mode == 2:
             while True:
                 for godid in godids:
                     favor = getFavor(session, cityid, pos)
                     while favor < favor_needed:
-                        session.setStatus(f"Not enough favor @{getDateTime()}, re-trying in 3h.")
-                        time.sleep(wait_time/4)# 12h / 4 = 3 hours
+                        session.setStatus(
+                            f"Not enough favor @{getDateTime()}, re-trying in 3h."
+                        )
+                        time.sleep(wait_time / 4)  # 12h / 4 = 3 hours
                     donateShrine(session, godid, cityid, pos)
                     time.sleep(2)
-                for i in range(6):# 12h * 6 = 72 hours
-                    time.sleep(wait_time)# 12h
+                for i in range(6):  # 12h * 6 = 72 hours
+                    time.sleep(wait_time)  # 12h
                     global current_favor
                     current_favor = getFavor(session, cityid, pos)
                     global last_donation_status
                     last_donation_status = f"Activated {selected_gods} @{last_donation_time}, current favor: {current_favor}"
-                    session.setStatus(last_donation_status)# Update only current favor value in the task status message, activation/donation time remains
-                    
+                    session.setStatus(
+                        last_donation_status
+                    )  # Update only current favor value in the task status message, activation/donation time remains
+
     except Exception as e:
         msg = f"Error in activateShrine:\n\n{e}"
         sendToBot(session, msg)
@@ -114,7 +126,7 @@ def activateShrine(session, event, stdin_fd, predetermined_input):
     config.predetermined_input = predetermined_input
     banner()
     godids = []
-    
+
     while True:
         print(
             """Which God(s) would you like to activate autonomously? 
@@ -133,14 +145,14 @@ def activateShrine(session, event, stdin_fd, predetermined_input):
                 event.set()
                 return
             named_gods = [gods(godid) for godid in godids]
-            gods_str = ', '.join(named_gods) if len(named_gods) > 1 else named_gods[0]
+            gods_str = ", ".join(named_gods) if len(named_gods) > 1 else named_gods[0]
             global selected_gods
             selected_gods = gods_str
             break
         else:
             godids.append(god)
             continue
-    
+
     print("")
     print(
         """Would you like to activate the selected God(s) a specific amount of times or autonomously every 70 hours?
@@ -156,10 +168,10 @@ def activateShrine(session, event, stdin_fd, predetermined_input):
     if mode == 2:
         mode = 2
         times = 0
-    
+
     set_child_mode(session)
     event.set()
-    
+
     try:
         do_it(
             session,
@@ -167,7 +179,7 @@ def activateShrine(session, event, stdin_fd, predetermined_input):
             mode,
             times,
         )
-    
+
     except Exception as e:
         msg = f"Error in activateShrine:\n\n{e}"
         sendToBot(session, msg)
@@ -188,10 +200,10 @@ def gods(godid):
         3: "Tyche",
         4: "Plutus",
         5: "Theia",
-        6: "Hephaestus"
+        6: "Hephaestus",
     }
     return names.get(godid, None)
-    
+
 
 def getFavor(session, cityid, pos):
     """Extracts the currentFavor amount from Ikariam
