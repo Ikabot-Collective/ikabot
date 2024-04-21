@@ -43,6 +43,7 @@ from ikabot.function.trainArmy import trainArmy
 from ikabot.function.update import update
 from ikabot.function.vacationMode import vacationMode
 from ikabot.function.webServer import webServer
+from ikabot.function.loadCustomModule import loadCustomModule
 from ikabot.helpers.botComm import telegramDataIsValid, updateTelegramData
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import read
@@ -148,6 +149,7 @@ def menu(session, checkUpdate=False):
         146: proxyList,
         147: logs,
         148: testTelegramBot
+        149: loadCustomModule
                     }
 
     print(_('(0)  Exit'))
@@ -245,6 +247,7 @@ def menu(session, checkUpdate=False):
         print(_('(6) Proxy list'))
         print(_('(7) Logs'))
         print(_('(8) Message Telegram Bot'))
+        print(_("(9) Load custom ikabot module"))
 
         selected = read(min=0, max=10, digit=True)
         
