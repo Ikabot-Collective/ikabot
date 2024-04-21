@@ -11,7 +11,7 @@ import random
 IKABOT_VERSION = "7.0.0"
 BUILD_DATE = "21.04.2024"
 
-IKABOT_VERSION_TAG = "v" + IKABOT_VERSION + BUILD_DATE
+IKABOT_VERSION_TAG = "v" + IKABOT_VERSION + " - " + BUILD_DATE
 
 local = locale.setlocale(locale.LC_ALL, "")
 if "es_" in local:
