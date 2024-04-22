@@ -148,7 +148,7 @@ def menu(session, checkUpdate=False):
         145: cookieConf,
         146: proxyList,
         147: logs,
-        148: testTelegramBot
+        148: testTelegramBot,
         149: loadCustomModule
                     }
 
