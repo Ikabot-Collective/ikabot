@@ -7,7 +7,7 @@ import os
 import random
 
 # Version changed automatically by the release pipeline
-IKABOT_VERSION = "7.0.0"
+IKABOT_VERSION = "7.0.1"
 
 IKABOT_VERSION_TAG = "v" + IKABOT_VERSION
 
