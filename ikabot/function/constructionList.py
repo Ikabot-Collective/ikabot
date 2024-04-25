@@ -536,8 +536,7 @@ def getBuildingToExpand(session, cityId):
         if building["isBusy"]:
             level = level + "+"
         print(_("({:d})\tlv:{}\t{}{}{}").format(i + 1, level, color, building["name"],bcolors.ENDC ))
-        level = building["level"]
- 
+         
     selected_building_id = read(min=0, max=len(buildings))
     if selected_building_id == 0:
         return None
