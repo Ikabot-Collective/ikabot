@@ -3,7 +3,12 @@ name: Publish PyPI package Manually
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   publish_pypi:
     name: Publish PyPI package
     uses: ./.github/workflows/publish_pypi.yml
+    secrets:
+      PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
