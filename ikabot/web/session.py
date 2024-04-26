@@ -609,7 +609,7 @@ class Session:
                     ).content
                     data = {}
                     try:
-                        captcha = getInteractiveCaptchaSolution(self, text_image, drag_icons)
+                        captcha = str(getInteractiveCaptchaSolution(self, text_image, drag_icons))
                         if not captcha.isnumeric():
                             raise Exception(
                                 "Failed to resolve interactive captcha automatically. Server returned bad data: {}".format(
