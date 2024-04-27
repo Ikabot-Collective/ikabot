@@ -43,8 +43,9 @@ def study(session, studies, num_study):
     session.post(url)
 
 
-def experiment(session, experiments):
+def experiment(session, experiments, automatic):
     while experiments["qty"] > 0:
+        if automatic is True: experiments["qty"] = 999999
         # Validate if material is still there..oterwhise log it and send it via bot
         session.get("view=city&cityId={}".format(experiments["cityID"]), noIndex=True)
         data = session.get("view=updateGlobalData&ajax=1", noIndex=True)
@@ -53,19 +54,43 @@ def experiment(session, experiments):
         current_glass = int(json_data["currentResources"]["3"])
 
         if current_glass < 300000:
-            sendToBot(
-                session,
-                f"Experiment process ended on {experiments['cityName']} due lack of glass ({addThousandSeparator(current_glass)})",
-            )
-            break
+            if automatic is False:
+                sendToBot(
+                    session,
+                    f"Experiment process ended on {experiments['cityName']}, not enough crystal ({addThousandSeparator(current_glass)})",
+                )
+                break
+            else:
+                session.setStatus(
+                    f"Experiment skipped in {experiments['cityName']}, not enough crystal ({addThousandSeparator(current_glass)}) @{getDateTime()}"
+                )
+                time.sleep(241 * 60)# Re-try after 4h1m
+                continue
+
+        while True:
+            cooldown_url = f'view=academy&cityId={experiments["cityID"]}&position={experiments["pos"]}&backgroundView=city&currentCityId={experiments["cityID"]}&templateView=academy&actionRequest={actionRequest}&ajax=1'
+            cooldown_html = session.get(cooldown_url)
+            if 'experimentCooldown' in cooldown_html: # Check if a cooldown is still in effect
+                session.setStatus(
+                    f"Cooldown is still in effect in {experiments['cityName']} @{getDateTime()}",
+                )
+                time.sleep(300) # Check again after 5 minutes
+                continue
+            else:
+                break
 
         url = f'action=CityScreen&function=buyResearch&cityId={experiments["cityID"]}&position={experiments["pos"]}&backgroundView=city&currentCityId={experiments["cityID"]}&templateView=academy&actionRequest={actionRequest}&ajax=1'
         session.post(url)
+
         experiments["qty"] = experiments["qty"] - 1
-        sendToBot(
-            session,
-            f"Experiment done on {experiments['cityName']}, left = {experiments['qty']} time (s)",
-        )
+        if automatic is False:
+            session.setStatus(
+                f"Experiment done in {experiments['cityName']} @{getDateTime()}, left = {experiments['qty']} time (s)",
+            )
+        else:
+            session.setStatus(
+                f"Experiment done in {experiments['cityName']} @{getDateTime()}"
+            )
 
         # Terminate it if no of experiments = 0
         if experiments["qty"] == 0:
@@ -92,7 +117,8 @@ def investigate(session, event, stdin_fd, predetermined_input):
         print("\nSelect an option:")
         print("1) Study")
         print("2) Conduct experiment")
-        option = read(min=1, max=2)
+        print("3) Conduct automatically")
+        option = read(min=1, max=3)
 
         if option == 1:
             studies = get_studies(session)
@@ -138,6 +164,11 @@ def investigate(session, event, stdin_fd, predetermined_input):
             enter()
             event.set()
         else:
+            if option == 3:
+                max_experiments = 9999999
+                automatic = True
+            else:
+                automatic = False
             # Experiment
             experiments = {}
             total_glass = 0
@@ -150,14 +181,15 @@ def investigate(session, event, stdin_fd, predetermined_input):
             total_glass = int(city["availableResources"][3])
 
             # Check if enough glass
-            if total_glass < 300000:
-                print(
-                    f"Not enough glass ({addThousandSeparator(total_glass)}), try another city. Min=300k"
-                )
-                time.sleep(2)
-                enter()
-                event.set()
-                return
+            if automatic is False:
+                if total_glass < 300000:
+                    print(
+                        f"Not enough glass ({addThousandSeparator(total_glass)}), try another city. Min=300k"
+                    )
+                    time.sleep(2)
+                    enter()
+                    event.set()
+                    return
 
             # Search for Academy
             for building in city["position"]:
@@ -171,10 +203,15 @@ def investigate(session, event, stdin_fd, predetermined_input):
                 event.set()
                 return
 
-            max_experiments = total_glass // 300000
-            banner()
-            print(f"How many experiments? Min=1, Max={max_experiments}")
-            choice = read(min=1, max=max_experiments)
+            if automatic is False:
+                max_experiments = total_glass // 300000
+                automatic = False
+                banner()
+                print(f"How many experiments? Min=1, Max={max_experiments}")
+                choice = read(min=1, max=max_experiments)
+
+            if automatic is True:
+                choice = 999999
 
             # Build experiments dict
             experiments["cityID"] = city["id"]
@@ -186,11 +223,14 @@ def investigate(session, event, stdin_fd, predetermined_input):
             set_child_mode(session)
             event.set()
 
-            info = f"Process: Experiments\n\nWill excecute {choice} times every 4h"
+            if automatic is False:
+                info = f"Process: Experiments\n\nWill excecute {choice} times every 4h"
+            else:
+                info = f"Process: Experiments\n\nWill excecute every 4h"
 
             try:
                 sendToBot(session, info)
-                experiment(session, experiments)
+                experiment(session, experiments, automatic)
             except Exception as e:
                 error_msg = f"Error in:\n{info}\nCause:\n{traceback.format_exc()}"
                 sendToBot(session, error_msg)

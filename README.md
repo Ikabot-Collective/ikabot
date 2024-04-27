@@ -1,5 +1,6 @@
 <div align="center">
-<img src="https://github.com/Ikabot-Collective/ikabot/assets/54487782/96f36fff-fac3-4c6f-aeae-db6ef0ddcc6b.png">
+
+![Ikabot Banner](assets/banner.png)
 
 [![Downloads](https://static.pepy.tech/badge/ikabot)](https://pepy.tech/project/ikabot) ![GitHub Repo stars](https://img.shields.io/github/stars/Ikabot-Collective/ikabot?style=flat) ![licence](https://img.shields.io/github/license/Ikabot-Collective/ikabot?style=flat)
 
@@ -33,6 +34,4 @@ This project exists thanks to all the people who contribute.
 
 ## Screenshots
 
-![322233496-e47844e7-0054-445d-9680-bc46bccafca0](https://github.com/Ikabot-Collective/ikabot/assets/54487782/400a0c39-6c37-46ac-91d0-042dfdbdc308)
-
-
+![Ikabot Screenshot](assets/screenshot-1.jpg)

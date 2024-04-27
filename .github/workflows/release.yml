@@ -56,14 +56,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       
-      - name: Replace version value in ikabot/__init__.py
-        run: cd ikabot && sed -i 's/version=".\+"/version="\"${{ inputs.milestone }}\""/' __init__.py && cd ..
+      - name: Replace version value
+        run: sed -i 's/IKABOT_VERSION = ".\+"/IKABOT_VERSION = "${{ inputs.milestone }}"/' ikabot/config.py
 
       - name: Push changes
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add setup.py
+          git add ikabot/config.py
           git commit -m "Bump Ikabot version ${{ inputs.milestone }}"
           git push
 
@@ -141,3 +141,5 @@ jobs:
     needs: [publish_release]
     name: Publish Python Package
     uses: ./.github/workflows/publish_pypi.yml
+    secrets:
+      PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}

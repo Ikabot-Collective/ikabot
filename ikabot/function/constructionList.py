@@ -13,6 +13,7 @@ import traceback
 from decimal import *
 
 import requests
+from functools import cache
 
 from ikabot.config import *
 from ikabot.helpers.botComm import *
@@ -522,14 +523,21 @@ def getBuildingToExpand(session, cityId):
         building = buildings[i]
 
         level = building["level"]
+        
+        if building["isMaxLevel"] is True:
+                color = bcolors.BLACK
+        elif building["canUpgrade"] is True:
+                color = bcolors.GREEN
+        else:
+                color = bcolors.RED
         if level < 10:
             level = " " + str(level)
         else:
             level = str(level)
         if building["isBusy"]:
             level = level + "+"
-        print(_("({:d})\tlv:{}\t{}").format(i + 1, level, building["name"]))
-
+        print(_("({:d})\tlv:{}\t{}{}{}").format(i + 1, level, color, building["name"],bcolors.ENDC ))
+         
     selected_building_id = read(min=0, max=len(buildings))
     if selected_building_id == 0:
         return None
@@ -550,7 +558,7 @@ def getBuildingToExpand(session, cityId):
 
     return building
 
-
+@cache
 def checkhash(url):
     m = hashlib.md5()
     r = requests.get(url)
