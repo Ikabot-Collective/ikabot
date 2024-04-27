@@ -17,7 +17,9 @@ jobs:
       url: https://pypi.org/p/ikabot
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.ref }}
     
     - name: Set up Python
       uses: actions/setup-python@v3

@@ -21,7 +21,9 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
 
       # The repository name must be in lower case in order to be pushed to the registry
       - name: Set lower case owner name
