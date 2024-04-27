@@ -13,6 +13,7 @@ import traceback
 from decimal import *
 
 import requests
+from functools import cache
 
 from ikabot.config import *
 from ikabot.helpers.botComm import *
@@ -557,7 +558,7 @@ def getBuildingToExpand(session, cityId):
 
     return building
 
-
+@cache
 def checkhash(url):
     m = hashlib.md5()
     r = requests.get(url)
