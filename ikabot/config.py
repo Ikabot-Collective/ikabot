@@ -8,8 +8,8 @@ import random
 
 
 # Version changed automatically by the release pipeline
-IKABOT_VERSION = "7.0.1"
-BUILD_DATE = "25.04.2024"
+IKABOT_VERSION = "7.0.2"
+BUILD_DATE = "27.04.2024"
 
 IKABOT_VERSION_TAG = "v" + IKABOT_VERSION + " - " + BUILD_DATE
 

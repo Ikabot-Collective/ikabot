@@ -44,6 +44,7 @@ from ikabot.function.update import update
 from ikabot.function.vacationMode import vacationMode
 from ikabot.function.webServer import webServer
 from ikabot.function.loadCustomModule import loadCustomModule
+from ikabot.function.activateShrine import activateShrine
 from ikabot.helpers.botComm import telegramDataIsValid, updateTelegramData
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import read
@@ -121,60 +122,60 @@ def menu(session, checkUpdate=False):
         2: sendResources,
         3: distributeResources,
         4: getStatus,
-        5: webServer,
-        6: searchForIslandSpaces,
-        7: loginDaily,
-        101: alertAttacks,
-        102: alertLowWine,
-        111: buyResources,
-        112: sellResources,
-        121: donate,
-        122: donationBot,
-        11: vacationMode,
-        12: activateMiracle,
-        131: trainArmy,
-        132: stationArmy,
-        14: shipMovements,
-        15: constructBuilding,
+        5: activateShrine,
+        6: loginDaily,
+        701: alertAttacks,
+        702: alertLowWine,
+        801: buyResources,
+        802: sellResources,
+        901: donate,
+        902: donationBot,
+        10: vacationMode,
+        11: activateMiracle,
+        1201: trainArmy,
+        1202: stationArmy,
+        13: shipMovements,
+        14: constructBuilding,
+        15: update,
         16: importExportCookie,
         17: autoPirate,
         18: investigate,
         19: attackBarbarians,
-        20: dumpWorld,
-        141: proxyConf,
-        142: updateTelegramData,
-        143: killTasks,
-        144: decaptchaConf,
-        145: cookieConf,
-        146: proxyList,
-        147: logs,
-        148: testTelegramBot,
-        149: loadCustomModule
-                    }
+        2001: searchForIslandSpaces,
+        2002: dumpWorld,
+        2101: proxyConf,
+        2102: updateTelegramData,
+        2103: killTasks,
+        2104: decaptchaConf,
+        2105: cookieConf,
+        2107: logs,
+        2108: testTelegramBot,
+        2109: loadCustomModule,
+        2110: webServer
+    }
 
-    print(_('(0)  Exit'))
-    print(_('(1)  Construction list'))
-    print(_('(2)  Send resources'))
-    print(_('(3)  Distribute resources'))
-    print(_('(4)  Account status'))
-    print(_('(5)  Ikabot Web Server'))
-    print(_('(6)  Monitor islands'))
-    print(_('(7)  Login daily'))
-    print(_('(8)  Alerts / Notifications'))
-    print(_('(9)  Marketplace'))
-    print(_('(10) Donate'))
-    print(_('(11) Activate vacation mode'))
-    print(_('(12) Activate miracle'))
-    print(_('(13) Military actions'))
-    print(_('(14) See movements'))
-    print(_('(15) Construct building'))
-    print(_('(16) Import / Export cookie'))
-    print(_('(17) Auto-Pirate'))
-    print(_('(18) Investigate'))
-    print(_('(19) Attack barbarians'))
-    print(_('(20) Dump / View world'))
-    print(_('(21) Options / Settings'))
-
+    print(_("(0)  Exit"))
+    print(_("(1)  Construction list"))
+    print(_("(2)  Send resources"))
+    print(_("(3)  Distribute resources"))
+    print(_("(4)  Account status"))
+    print(_("(5)  Activate Shrine"))
+    print(_("(6)  Login daily"))
+    print(_("(7)  Alerts / Notifications"))
+    print(_("(8)  Marketplace"))
+    print(_("(9)  Donate"))
+    print(_("(10) Activate vacation mode"))
+    print(_("(11) Activate miracle"))
+    print(_("(12) Military actions"))
+    print(_("(13) See movements"))
+    print(_("(14) Construct building"))
+    print(_("(15) Update Ikabot"))
+    print(_("(16) Import / Export cookie"))
+    print(_("(17) Auto-Pirate"))
+    print(_("(18) Investigate"))
+    print(_("(19) Attack barbarians"))
+    print(_("(20) Dump / Monitor world"))
+    print(_("(21) Options / Settings"))
     total_options = len(menu_actions) + 1
     selected = read(min=0, max=total_options, digit=True, empty=True)
     
@@ -182,7 +183,7 @@ def menu(session, checkUpdate=False):
     if selected == '':
         return menu(session)
 
-    if selected == 8:
+    if selected == 7:
         banner()
         print(_("(0) Back"))
         print(_("(1) Alert attacks"))
@@ -193,9 +194,9 @@ def menu(session, checkUpdate=False):
             menu(session)
             return
         if selected > 0:
-            selected += 100
-            
-    if selected == 9:
+            selected += 700
+
+    if selected == 8:
         banner()
         print(_("(0) Back"))
         print(_("(1) Buy resources"))
@@ -206,9 +207,9 @@ def menu(session, checkUpdate=False):
             menu(session)
             return
         if selected > 0:
-            selected += 110
-            
-    if selected == 10:
+            selected += 800
+
+    if selected == 9:
         banner()
         print(_("(0) Back"))
         print(_("(1) Donate once"))
@@ -219,9 +220,9 @@ def menu(session, checkUpdate=False):
             menu(session)
             return
         if selected > 0:
-            selected += 120
-            
-    if selected == 13:
+            selected += 900
+
+    if selected == 12:
         banner()
         print(_("(0) Back"))
         print(_("(1) Train Army"))
@@ -231,7 +232,19 @@ def menu(session, checkUpdate=False):
             menu(session)
             return
         if selected > 0:
-            selected += 130
+            selected += 1200
+
+    if selected == 20:
+        print(_("(0) Back"))
+        print(_("(1) Monitor islands"))
+        print(_("(2) Dump & Search world"))
+        
+        selected = read(min=0, max=8, digit=True)
+        if selected == 0:
+            menu(session)
+            return
+        if selected > 0:
+            selected += 2000
 
     if selected == 21:
         banner()
@@ -248,6 +261,7 @@ def menu(session, checkUpdate=False):
         print(_('(7) Logs'))
         print(_('(8) Message Telegram Bot'))
         print(_("(9) Load custom ikabot module"))
+        print(_("(10) Ikabot Web Server"))
 
         selected = read(min=0, max=10, digit=True)
         
@@ -264,8 +278,8 @@ def menu(session, checkUpdate=False):
             time.sleep(1)
             menu(session)
             return
-        if selected != 0 and selected != 5 and selected != 6:
-            selected += 140
+        if selected > 0:
+            selected += 2100
 
     if selected != 0:
         try:
