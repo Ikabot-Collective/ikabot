@@ -44,7 +44,7 @@ jobs:
           cat "ReleaseNotes.md"
 
       - name: Upload Release Notes
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ReleaseNotes
           path: "ReleaseNotes.md"
@@ -54,7 +54,7 @@ jobs:
     name: Update Version Number
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
       - name: Replace version value
         run: sed -i 's/IKABOT_VERSION = ".\+"/IKABOT_VERSION = "${{ inputs.milestone }}"/' ikabot/config.py
@@ -91,7 +91,7 @@ jobs:
           cd ..
 
       - name: Download Release Notes
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ReleaseNotes
 
@@ -118,7 +118,7 @@ jobs:
     steps:
       # Doing a checkout, until this issue is resolved.
       # https://github.com/valeriobelli/gh-milestone/issues/15
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Close Milestone
         run: |

@@ -10,7 +10,7 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Set up Python 3.11
       uses: actions/setup-python@v4
@@ -35,7 +35,7 @@ jobs:
         mv dist/ikabot/command_line.exe dist/ikabot/ikabot.exe
 
     - name: Upload Pre-compiled Ikabot
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: PreCompiledIkabot
         path: "dist"
