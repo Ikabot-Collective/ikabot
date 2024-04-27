@@ -145,7 +145,8 @@ def menu(session, checkUpdate=True):
         2104: decaptchaConf,
         2105: logs,
         2106: testTelegramBot,
-        2107: importExportCookie
+        2107: importExportCookie,
+        2108: loadCustomModule
     }
 
     print(_("(0)  Exit"))
