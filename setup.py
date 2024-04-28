@@ -14,6 +14,7 @@ setuptools.setup(
     include_package_data=True,
     packages=setuptools.find_packages(),
     install_requires=["requests", "requests[socks]", "cryptography", "psutil"],
+    extras_require={"webServer": ["flask"]},
     entry_points={
         "console_scripts": ["ikabot=ikabot.command_line:main"],
     },

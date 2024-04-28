@@ -339,3 +339,10 @@ if __name__ == "__main__":
     if sys.platform.startswith("win"):
         multiprocessing.freeze_support()
     main()
+
+#############################################################
+# This is necessary to ensure that flask is frozen together #
+# with other requirements when creating ikabot.exe          #
+try: import flask                                           #
+except: pass                                                #
+#############################################################
