@@ -234,12 +234,12 @@ def menu(session, checkUpdate=True):
         print(_("(1) Monitor islands"))
         print(_("(2) Dump & Search world"))
         
-        selected = read(min=0, max=8, digit=True)
+        selected = read(min=0, max=2, digit=True)
         if selected == 0:
             menu(session)
             return
         if selected > 0:
-            selected += 2100
+            selected += 2000
 
     if selected == 21:
         banner()
