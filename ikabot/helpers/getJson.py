@@ -7,9 +7,223 @@ import time
 from math import ceil, floor
 from ikabot.helpers.resources import *
 from ikabot.helpers.varios import decodeUnicodeEscape
+from ikabot.config import *
+from typing import Dict, TypedDict, NotRequired, Any
+
+LinkDict = TypedDict("LinkDict", {"onclick": str, "href": str, "tooltip": str})
+
+FlyingTraderDict = TypedDict("FlyingTraderDict", {"link": LinkDict, "banner": str})
+
+VisibilityDict = TypedDict(
+    "VisibilityDict",
+    {
+        "military": int,
+        "espionage": int,
+        "resourceShop": int,
+        "slot1": int,
+        "slot2": int,
+        "slot3": int,
+        "slot4": int,
+    },
+)
+
+CityLeftMenuDict = TypedDict("CityLeftMenuDict", {"visibility": VisibilityDict, "ownCity": int})
+
+PositionDict = TypedDict(
+    "PositionDict",
+    {
+        "name": str,
+        "level": NotRequired[int],
+        "isBusy": bool,
+        "canUpgrade": NotRequired[bool],
+        "isMaxLevel": NotRequired[bool],
+        "building": str,
+        "shipIsAtDockyard": NotRequired[int],
+
+        # Added for compatibility
+        "position": int,
+        "type": NotRequired[str],
+    },
+)
+
+FullCityDict = TypedDict(
+    "FullCityDict",
+    {
+        "name": str,
+        "id": str,
+        "phase": int,
+        "isCapital": bool,
+        "ownerId": str,
+        "ownerName": str,
+        "islandId": str,
+        "islandName": str,
+        "islandXCoord": str,
+        "islandYCoord": str,
+        "buildingSpeedupActive": int,
+        "showPirateFortressBackground": int,
+        "showPirateFortressShip": int,
+        "underConstruction": int,
+        "endUpgradeTime": int,
+        "startUpgradeTime": int,
+        "position": list[PositionDict],
+        "beachboys": str,
+        "spiesInside": None,
+        "cityLeftMenu": CityLeftMenuDict,
+        "walkers": list[Any],
+        "displayStaticPlague": bool,
+        "dailyTasks": str,
+        "cityCinema": str,
+        "flyingTrader": FlyingTraderDict,
+
+        # Added for compatibility
+        "x": str,
+        "y": str,
+        "cityName": str,
+        "isOwnCity": bool,
+        "availableResources": list[int],
+        "storageCapacity": int,
+        "freeCitizens": int,
+        "wineConsumptionPerHour": int,
+        "resourcesListedForSale": list[int],
+        "freeSpaceForResources": list[int],
+    },
+)
 
 
-def getFreeCitizens(html):
+AvatarScoreDict = TypedDict(
+    "AvatarScoreDict",
+    {
+        "avatar_id": str,
+        "place": str,
+        "building_score_main": str,
+        "research_score_main": str,
+        "army_score_main": str,
+        "trader_score_secondary": str,
+    },
+)
+
+AvatarScoresDict = Dict[str, AvatarScoreDict]
+
+BarbariansDict = TypedDict(
+    "BarbariansDict",
+    {
+        "invisible": int,
+        "actionTitle": str,
+        "actionClass": str,
+        "actionLink": str,
+        "count": int,
+        "wallLevel": int,
+        "level": int,
+        "underAttack": int,
+        "isTradegoodSiege": int,
+        "city": str,
+        "destroyed": int,
+    },
+)
+
+CityDict = TypedDict(
+    "CityDict",
+    {
+        "type": str,
+        "name": str,
+        "id": int,
+        "level": int,
+        "ownerId": NotRequired[str],
+        "ownerName": NotRequired[str],
+        "ownerAllyId": NotRequired[int],
+        "ownerAllyTag": NotRequired[str],
+        "hasTreaties": NotRequired[int],
+        "actions": NotRequired[list[Any]],
+        "state": NotRequired[str],
+        "viewAble": int,
+        "infestedByPlague": NotRequired[bool],
+        "buildplace_type": NotRequired[str],
+
+        # Added for compatibility
+
+        "Id": NotRequired[str],
+        "Name": NotRequired[str],
+        "AllyId": NotRequired[int],
+        "AllyTag": NotRequired[str],
+        "_type": NotRequired[str],
+    },
+)
+
+IslandDict = TypedDict(
+    "IslandDict",
+    {
+        "id": str,
+        "type": int,
+        "name": str,
+        "xCoord": str,
+        "yCoord": str,
+        "tradegood": int,
+        "tradegoodTarget": str,
+        "resourceLevel": str,
+        "tradegoodLevel": str,
+        "wonder": str,
+        "wonderLevel": str,
+        "wonderName": str,
+        "showResourceWorkers": int,
+        "showTradegoodWorkers": int,
+        "showAgora": int,
+        "canEnterResource": int,
+        "canEnterTradegood": int,
+        "tradegoodEndUpgradeTime": int,
+        "resourceEndUpgradeTime": int,
+        "wonderEndUpgradeTime": int,
+        "isOwnCityOnIsland": bool,
+        "cities": list[CityDict],
+        "barbarians": BarbariansDict,
+        "avatarScores": AvatarScoresDict,
+        "specialServerBadges": list[Any],
+        "selectedCityParameters": list[Any],
+        "island": int,
+        "isHeliosTowerBuilt": bool,
+        "heliosTop": int,
+        "heliosMid": int,
+        "heliosBase": int,
+        "heliosName": str,
+        "heliosTooltip": str,
+        "heliosActive": int,
+        "showResourceBonusIcon": int,
+        "showTradegoodBonusIcon": int,
+        "walkers": list[Any],
+
+        # Added for compatibility
+
+        "x": str,
+        "y": str,
+        "tipo": str,
+    },
+)
+
+WorldMapIslandDict = TypedDict(
+    "WorldMapIslandDict",
+    {
+        "x": int,
+        "y": int,
+        "id": int,
+        "name": str,
+        "resourceType": int,
+        "miracleType": int,
+        "unknownValue1": int,
+        "unknownValue2": int,
+        "woodLvl": int,
+        "cityCount": int,
+        "piracyInRange": bool,
+        "heliosTower": bool,
+        "red": bool,
+        "blue": bool,
+        
+        # Added for ease of use
+        "resourceName": str,
+        "miracleName": str,
+    },
+)
+
+
+def getFreeCitizens(html: str) -> int:
     """This function is used in the ``getCity`` function to determine the amount of free (idle) citizens in the given city.
     Parameters
     ----------
@@ -25,7 +239,7 @@ def getFreeCitizens(html):
     return int(freeCitizens.replace(",", "").replace(".", ""))
 
 
-def getResourcesListedForSale(html):
+def getResourcesListedForSale(html: str) -> list[int]:
     """This function is used in the ``getCity`` function to determine the amount of each resource which is listed for sale in the branch office
     Parameters
     ----------
@@ -52,8 +266,62 @@ def getResourcesListedForSale(html):
     else:
         return [0, 0, 0, 0, 0]
 
+def getWorldMapIslands(html: str) -> list[WorldMapIslandDict]:
+    """This function uses the html passed to it as a string to extract, parse and return a list of WorldMapIsland objects
+    Parameters
+    ----------
+    html : str
+        the html or json returned when a get request is made to the `view=worldmap_iso` or `action=WorldMap&function=getJSONArea` endpoints respectively. 
 
-def getIsland(html):
+    Returns
+    -------
+    islands : list[WorldMapIsland]
+        this function returns a json parsed list of WorldMapIsland objects.
+    """
+
+    isla = re.search(r"jsonData = '([\S\s]*?)'", html).group(1) if '!DOCTYPE html' in html else html
+
+    worldMapIslands = []
+
+    data = json.loads(isla)['data']
+    for x in data:
+        for y in data[x]:
+            worldMapIslands.append({
+                'x': int(x),
+                'y': int(y),
+                'id': int(data[x][y][0]),
+                'name': data[x][y][1],
+                'resourceType': int(data[x][y][2]),
+                'miracleType': int(data[x][y][3]),
+                'unknownValue1': int(data[x][y][4]),
+                'unknownValue2': int(data[x][y][5]),
+                'woodLvl': int(data[x][y][6]),
+                'cityCount': int(data[x][y][7]),
+                'piracyInRange': bool(data[x][y][8]),
+                'heliosTower': bool(int(data[x][y][9])),
+                'red': bool(int(data[x][y][10])),
+                'blue': bool(int(data[x][y][11])),
+                'resourceName': materials_names_english[int(data[x][y][2])],
+                'miracleName': miracle_names_english[int(data[x][y][3])]
+            })
+
+    return worldMapIslands
+# [
+# "58",         //id 0
+# "Phytios",    //name 1
+# "1",          //resource type 2
+# "2",          //type of miracle 3
+# "5",          // ?? 4
+# "4",          // ?? 5
+# "9",          // lumber level  6
+# "12",         // number of people 7
+# 0,            // piracy in range 8
+# "0",          // helios tower 9
+# "0",          // red 10
+# "0"           // blue 11
+# ]
+
+def getIsland(html: str) -> IslandDict:
     """This function uses the html passed to it as a string to extract, parse and return an Island object
     Parameters
     ----------
@@ -63,30 +331,48 @@ def getIsland(html):
     Returns
     -------
     island : Island
-        this function returns a json parsed Island object. For more information about this object refer to the github wiki page of Ikabot.
+        this function returns a json parsed Island object.
     """
-    isla = (
-        re.search(
-            r'\[\["updateBackgroundData",([\s\S]*?),"specialServerBadges', html
-        ).group(1)
-        + "}"
-    )
+    isla = re.search(r'ajax.Responder, (\[\[[\S\s]*?\]\])\)\;', html).group(1)
 
-    isla = isla.replace("buildplace", "empty")
-    isla = isla.replace("xCoord", "x")
-    isla = isla.replace("yCoord", "y")
-    isla = isla.replace(',"owner', ',"')
+    island: IslandDict = json.loads(isla)[0][1]
 
-    # {"id":idIsla,"name":nombreIsla,"x":,"y":,"good":numeroBien,"woodLv":,"goodLv":,"wonder":numeroWonder, "wonderName": "nombreDelMilagro","wonderLv":"5","cities":[{"type":"city","name":cityName,"id":cityId,"level":lvIntendencia,"Id":playerId,"Name":playerName,"AllyId":,"AllyTag":,"state":"vacation"},...}}
-    isla = json.loads(isla, strict=False)
-    isla["tipo"] = re.search(r'"tradegood":(\d)', html).group(1)
-    isla["x"] = int(isla["x"])
-    isla["y"] = int(isla["y"])
+    # Must add aliases for different properties to maintain backwards compatibility with old code
 
-    return isla
+    island["x"] = island["xCoord"]
+    island["y"] = island["yCoord"]
+    island["tipo"] = island["tradegood"]
+
+    for city in island["cities"]:
+        for key in ["Id", "Name", "AllyId", "AllyTag"]:
+            if ('owner'+key) in city:
+                city[key] = city['owner'+key]
+        
+        if "buildplace_type" in city:
+            city["_type"] = city["buildplace_type"]
+        
+        if city["type"] == 'buildplace':
+            city["type"] = 'empty'
+
+    return island
 
 
-def getCity(html):
+
+    # isla = isla.replace("buildplace", "empty")
+    # isla = isla.replace("xCoord", "x")
+    # isla = isla.replace("yCoord", "y")
+    # isla = isla.replace(',"owner', ',"')
+
+    # # {"id":idIsla,"name":nombreIsla,"x":,"y":,"good":numeroBien,"woodLv":,"goodLv":,"wonder":numeroWonder, "wonderName": "nombreDelMilagro","wonderLv":"5","cities":[{"type":"city","name":cityName,"id":cityId,"level":lvIntendencia,"Id":playerId,"Name":playerName,"AllyId":,"AllyTag":,"state":"vacation"},...}}
+    # isla = json.loads(isla, strict=False)
+    # isla["tipo"] = re.search(r'"tradegood":(\d)', html).group(1)
+    # isla["x"] = int(isla["x"])
+    # isla["y"] = int(isla["y"])
+
+    # return isla
+
+
+def getCity(html: str) -> FullCityDict:
     """This function uses the ``html`` passed to it as a string to extract, parse and return a City object
     Parameters
     ----------
@@ -99,16 +385,15 @@ def getCity(html):
         this function returns a json parsed City object. For more information about this object refer to the github wiki page of Ikabot.
     """
 
-    city = re.search(
-        r'"updateBackgroundData",\s?([\s\S]*?)\],\["updateTemplateData"', html
-    ).group(1)
-    city = json.loads(city, strict=False)
+    city = re.search(r'ajax.Responder, (\[\[[\S\s]*?\]\])\)\;', html).group(1)
+    city = json.loads(city)[0][1]
 
     city["ownerId"] = city.pop("ownerId")
-    city["ownerName"] = decodeUnicodeEscape(city.pop("ownerName"))
-    city["x"] = int(city.pop("islandXCoord"))
-    city["y"] = int(city.pop("islandYCoord"))
+    city["ownerName"] = decodeUnicodeEscape(city["ownerName"])
+    city["x"] = int(city["islandXCoord"])
+    city["y"] = int(city["islandYCoord"])
     city["cityName"] = decodeUnicodeEscape(city["name"])
+    city["name"] = decodeUnicodeEscape(city["name"])
 
     i = 0
     for position in city["position"]:
@@ -142,7 +427,7 @@ def getCity(html):
 
     return city
 
-def getTransportLoadingAndTravelTime(html, totalResources = 0, useFreighters = False, capacityPerTransportPercent = 100, tritonBoostPercent = 0):
+def getTransportLoadingAndTravelTime(html: str, totalResources = 0, useFreighters = False, capacityPerTransportPercent = 100, tritonBoostPercent = 0) -> int:
     """Gets total loading and travel time for a shipment.
     Parameters
     ----------
