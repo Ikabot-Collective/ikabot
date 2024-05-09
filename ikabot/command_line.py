@@ -239,7 +239,7 @@ def menu(session, checkUpdate=False):
         print(_("(1) Monitor islands"))
         print(_("(2) Dump & Search world"))
         
-        selected = read(min=0, max=8, digit=True)
+        selected = read(min=0, max=2, digit=True)
         if selected == 0:
             menu(session)
             return
@@ -362,3 +362,10 @@ if __name__ == "__main__":
     if sys.platform.startswith("win"):
         multiprocessing.freeze_support()
     main()
+
+#############################################################
+# This is necessary to ensure that flask is frozen together #
+# with other requirements when creating ikabot.exe          #
+try: import flask                                           #
+except: pass                                                #
+#############################################################
