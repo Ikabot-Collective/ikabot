@@ -660,7 +660,8 @@ def view_dump(session, event):
                     if not player_data:
                         print(f"No players in this island")
                     else:
-                        print(f"Players:\n{'\n'.join(player_data.values())}")
+                        player_data_str = '\n'.join(player_data.values())
+                        print(f"Players:\n{player_data_str}")
                 else:
                     print(f"No such island was found.")
                 # Ask if the user wants to search again
