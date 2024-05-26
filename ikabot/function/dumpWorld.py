@@ -12,7 +12,6 @@ import threading
 import time
 import traceback
 from pathlib import Path
-from colorama import init, Fore, Back, Style
 import ikabot.config as config
 from ikabot.config import *
 from ikabot.helpers.botComm import sendToBot
@@ -396,10 +395,6 @@ def update_status(message, percent, percent_total, add_history=False):
 
 def view_dump(session, event):
 
-    cyan = "\033[36m"
-    resetC = "\033[0m"
-    yellow = "\033[33m"
-    white = "\033[37m"
 
     files = [
         file.replace("\\", "/")
@@ -576,9 +571,9 @@ def view_dump(session, event):
                             alliance_found = True # Set FLag to True if alliance has been found
                 if alliance_found:
                     for user_name, infe in user_islands.items():
-                        print(f"Player:{cyan} {user_name}{resetC}, Alliance:{cyan} {alliance}{resetC}")
+                        print(f"Player:{bcolors.CYAN} {user_name}{bcolors.ENDC}, Alliance:{bcolors.CYAN} {alliance}{bcolors.ENDC}")
                         island_coordss = ", ".join([f"{x}:{y}" for x, y in infe['islands']])
-                        print(f"- {white}Islands{resetC}: {yellow}{island_coordss}{resetC}")
+                        print(f"- {bcolors.STONE}Islands{bcolors.ENDC}: {bcolors.YELLOW}{island_coordss}{bcolors.ENDC}")
                 else:
                     print("No alliance with this tag was found.")
                 # Ask if the user wants to search again
@@ -645,7 +640,7 @@ def view_dump(session, event):
                                     player_score_int = int(player_score_raw.replace(',', ''))
                                     player_score = "{:,}".format(player_score_int // 100)
                                     city_count = player_city_count[player_id]  # Get the number of cities for this player
-                                    player_data[player_id] = f"{cyan}{player_name}{resetC} - Score: {yellow}{player_score}{resetC}, Cities: {yellow}{city_count}{resetC}, State: {cyan}{player_state}{resetC}, Alliance: {cyan}{player_alliance}{resetC}"
+                                    player_data[player_id] = f"{bcolors.CYAN}{player_name}{bcolors.ENDC} - Score: {bcolors.YELLOW}{player_score}{bcolors.ENDC}, Cities: {bcolors.YELLOW}{city_count}{bcolors.ENDC}, State: {bcolors.CYAN}{player_state}{bcolors.ENDC}, Alliance: {bcolors.CYAN}{player_alliance}{bcolors.ENDC}"
                         isl_name = island['name']
                         cities_of_type_city = [city for city in island['cities'] if city['type'] == 'city']
                         sum_cities = len(cities_of_type_city) if cities_of_type_city else 0
@@ -658,8 +653,10 @@ def view_dump(session, event):
                         island_found = True # Set flag to True if island has been found
                         break  # Exit the loop once the island is found
                 if island_found:
-                    print(f"Island Name: {cyan}{isl_name}{resetC}, Number of cities: {yellow}{sum_cities}{resetC}, Wonder: {cyan}{wonder}{resetC}, Wonder Level: {yellow}{wonder_lvl}{resetC}")
-                    print(f"Forrest Level: {yellow}{wood_lvl}{resetC}, Luxury Mine Level: {yellow}{luxury_lvl}{resetC}, Island ID: {yellow}{isl_id}{resetC}, Island Type: {cyan}{isl_type}{resetC}")
+                    print(
+                        f"Island Name: {bcolors.CYAN}{isl_name}{bcolors.ENDC}, Number of cities: {bcolors.YELLOW}{sum_cities}{bcolors.ENDC}, Wonder: {bcolors.CYAN}{wonder}{bcolors.ENDC}, Wonder Level: {bcolors.YELLOW}{wonder_lvl}{bcolors.ENDC}")
+                    print(
+                        f"Forrest Level: {bcolors.YELLOW}{wood_lvl}{bcolors.ENDC}, Luxury Mine Level: {bcolors.YELLOW}{luxury_lvl}{bcolors.ENDC}, Island ID: {bcolors.YELLOW}{isl_id}{bcolors.ENDC}, Island Type: {bcolors.CYAN}{isl_type}{bcolors.ENDC}")
                     if not player_data:
                         print(f"No players in this island")
                     else:
