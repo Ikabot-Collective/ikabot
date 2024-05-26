@@ -75,3 +75,5 @@ class bcolors:
     DARK_RED = "\033[31m"
     DARK_BLUE = "\033[34m"
     DARK_GREEN = "\033[32m"
+    CYAN = "\033[36m"
+    YELLOW = "\033[33m"
