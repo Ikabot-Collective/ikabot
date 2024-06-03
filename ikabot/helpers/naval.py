@@ -34,3 +34,35 @@ def getTotalShips(session):
     """
     html = session.get()
     return int(re.search(r'maxTransporters">(\d+)<', html).group(1))
+
+
+def getAvailableFreighters(session):
+    """Function that returns the total number of free (available) ships
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+        Session object
+
+    Returns
+    -------
+    ships : int
+        number of currently available ships
+    """
+    html = session.get()
+    return int(re.search(r'GlobalMenu_freeFreighters">(\d+)<', html).group(1))
+
+
+def getTotalFreighters(session):
+    """Function that returns the total number of ships, regardless of if they're available or not
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+        Session object
+
+    Returns
+    -------
+    ships : int
+        total number of ships the player has
+    """
+    html = session.get()
+    return int(re.search(r'maxFreighters">(\d+)<', html).group(1))

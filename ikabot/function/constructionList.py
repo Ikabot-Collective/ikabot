@@ -331,7 +331,7 @@ def getResourcesNeeded(session, city, building, current_level, final_level):
     return final_costs
 
 
-def sendResourcesNeeded(session, destination_city_id, city_origins, missing_resources):
+def sendResourcesNeeded(session, destination_city_id, city_origins, missing_resources, useFreighters=False):
     """
     Parameters
     ----------
@@ -364,7 +364,7 @@ def sendResourcesNeeded(session, destination_city_id, city_origins, missing_reso
                 toSend[i] = send
                 route = (cityOrigin, cityD, cityD["islandId"], *toSend)
                 routes.append(route)
-        executeRoutes(session, routes)
+        executeRoutes(session, routes, useFreighters)
     except Exception as e:
         msg = _("Error in:\n{}\nCause:\n{}").format(info, traceback.format_exc())
         sendToBot(session, msg)
@@ -447,7 +447,7 @@ def chooseResourceProviders(session, cities_ids, cities, city_id, resource, miss
     return origin_cities
 
 
-def sendResourcesMenu(session, city_id, missing):
+def sendResourcesMenu(session, city_id, missing, useFreighters=False):
     """
     Parameters
     ----------
@@ -493,6 +493,7 @@ def sendResourcesMenu(session, city_id, missing):
             city_id,
             origins,
             missing,
+            useFreighters,
         ),
     )
     thread.start()
@@ -653,8 +654,18 @@ def constructionList(session, event, stdin_fd, predetermined_input):
                     event.set()
                     return
             else:
+                print(_("What type of ships do you want to use? (Default: Trade ships)"))
+                print(_("(1) Trade ships"))
+                print(_("(2) Freighters"))
+                shiptype = read(min=1, max=2, digit=True, empty=True)
+                if shiptype == '':
+                    shiptype = 1
+                if shiptype == 1:
+                    useFreighters = False
+                elif shiptype == 2:
+                    useFreighters = True
                 wait_resources = True
-                sendResourcesMenu(session, cityId, missing)
+                sendResourcesMenu(session, cityId, missing, useFreighters)
         else:
             print(_("\nYou have enough materials"))
             print(_("Proceed? [Y/n]"))
