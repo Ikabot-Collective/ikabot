@@ -35,6 +35,16 @@ def distributeResources(session, event, stdin_fd, predetermined_input):
     try:
         banner()
 
+        print(_("What type of ships do you want to use? (Default: Trade ships)"))
+        print(_("(1) Trade ships"))
+        print(_("(2) Freighters"))
+        shiptype = read(min=1, max=2, digit=True, empty=True)
+        if shiptype == '':
+            shiptype = 1
+        if shiptype == 1:
+            useFreighters = False
+        elif shiptype == 2:
+            useFreighters = True
         print(_("What resource do you want to distribute?"))
         print(_("(0) Exit"))
         for i in range(len(materials_names)):
@@ -116,7 +126,7 @@ def distributeResources(session, event, stdin_fd, predetermined_input):
     setInfoSignal(session, info)
 
     try:
-        executeRoutes(session, routes)  # plan trips for all the routes
+        executeRoutes(session, routes, useFreighters)  # plan trips for all the routes
     except Exception as e:
         msg = _("Error in:\n{}\nCause:\n{}").format(info, traceback.format_exc())
         sendToBot(session, msg)  # sends message to telegram bot
