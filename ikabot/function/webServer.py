@@ -44,7 +44,7 @@ else:
     web_cache_file = "/tmp/ikabot.webcache"
 
 
-def webServer(session, event, stdin_fd, predetermined_input):
+def webServer(session, event, stdin_fd, predetermined_input, port=None):
     """
     Parameters
     ----------
@@ -52,6 +52,7 @@ def webServer(session, event, stdin_fd, predetermined_input):
     event : multiprocessing.Event
     stdin_fd: int
     predetermined_input : multiprocessing.managers.SyncManager.list
+    port : int (optional)
     """
     sys.stdin = os.fdopen(stdin_fd)
     config.predetermined_input = predetermined_input
@@ -104,7 +105,7 @@ def webServer(session, event, stdin_fd, predetermined_input):
             with open(web_cache_file, "wb") as f:
                 pickle.dump(web_cache, f)
 
-    # dump cache in a spearate thread every 5 minutes
+    # dump cache in a separate thread every 5 minutes
     threading.Thread(target=dump_cache, daemon=True).start()
 
     # make logger use session.writeLog()
@@ -272,21 +273,37 @@ def webServer(session, event, stdin_fd, predetermined_input):
                 )
                 raise e
 
-        # chose a port between 43000 and 45000 based on session.main and session.host
-        port = str(
-            (
-                sum(ord(c) ** 2 for c in session.mail)
-                + sum(ord(c) ** 2 for c in session.host)
-            )
-            % 2000
-            + 43000
-        )
-
-        # bang on ports from `port` to 65535 until an available one is found
+        # If the port is not provided, prompt the user for it
         while True:
-            if not is_port_in_use(int(port)):
-                break
-            port = str(int(port) + 1)
+            if port is None:
+                print("Please enter a port number (1 - 65535) to run the web server on (leave empty or 0 for random): ")
+                port = read(min=0, max=65535, digit=True, empty=True)
+                if port == "" or port == 0:
+                    port = None
+                    break
+                else:
+                    port = str(int(port))
+                    if is_port_in_use(int(port)):
+                        print(f"Port {port} is already in use, try another port.")
+                        continue
+                    break
+
+        # If the port is still None, select a random port as in the original script
+        if port is None:
+            port = str(
+                (
+                    sum(ord(c) ** 2 for c in session.mail)
+                    + sum(ord(c) ** 2 for c in session.host)
+                )
+                % 2000
+                + 43000
+            )
+
+            # bang on ports from `port` to 65535 until an available one is found
+            while True:
+                if not is_port_in_use(int(port)):
+                    break
+                port = str(int(port) + 1)
 
         # try to get local network ip if possible
         local_network_ip = None
