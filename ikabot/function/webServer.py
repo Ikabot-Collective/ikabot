@@ -294,6 +294,7 @@ def webServer(session, event, stdin_fd, predetermined_input, port=None):
                 (
                     sum(ord(c) ** 2 for c in session.mail)
                     + sum(ord(c) ** 2 for c in session.host)
+                    + sum(ord(c) ** 2 for c in session.username)
                 )
                 % 2000
                 + 43000
