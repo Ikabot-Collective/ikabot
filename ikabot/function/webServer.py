@@ -273,20 +273,21 @@ def webServer(session, event, stdin_fd, predetermined_input, port=None):
                 )
                 raise e
 
-        # If the port is not provided, prompt the user for it
-        while True:
-            if port is None:
-                print("Please enter a port number (1 - 65535) to run the web server on (leave empty or 0 for random): ")
-                port = read(min=0, max=65535, digit=True, empty=True)
-                if port == "" or port == 0:
-                    port = None
-                    break
-                else:
-                    port = str(int(port))
-                    if is_port_in_use(int(port)):
-                        print(f"Port {port} is already in use, try another port.")
-                        continue
-                    break
+        # If the port is not provided, prompt the user for it if enabled from the config file
+        if config.enable_CustomPort is True:
+            while True:
+                if port is None:
+                    print("Please enter a port number (1 - 65535) to run the web server on (leave empty or 0 for random): ")
+                    port = read(min=0, max=65535, digit=True, empty=True)
+                    if port == "" or port == 0:
+                        port = None
+                        break
+                    else:
+                        port = str(int(port))
+                        if is_port_in_use(int(port)):
+                            print(f"Port {port} is already in use, try another port.")
+                            continue
+                        break
 
         # If the port is still None, select a random port as in the original script
         if port is None:
@@ -294,6 +295,7 @@ def webServer(session, event, stdin_fd, predetermined_input, port=None):
                 (
                     sum(ord(c) ** 2 for c in session.mail)
                     + sum(ord(c) ** 2 for c in session.host)
+                    + sum(ord(c) ** 2 for c in session.username)
                 )
                 % 2000
                 + 43000
