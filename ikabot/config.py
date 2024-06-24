@@ -41,7 +41,7 @@ default_bner = """
 .JMML.  .JMML. YA.  `Moo9^Yo.      .JMMmmmd9     `Ybmd9'      `Mbmo
 """
 
-publicAPIServerDomain = "ikagod.twilightparadox.com"
+publicAPIServerDomain = "susman.twilightparadox.com"
 do_ssl_verify = True
 ids_cache = None
 cities_cache = None
