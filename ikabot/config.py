@@ -9,7 +9,7 @@ import random
 
 # Version changed automatically by the release pipeline
 IKABOT_VERSION = "7.0.3"
-BUILD_DATE = "17.06.2024"
+BUILD_DATE = "24.06.2024"
 
 IKABOT_VERSION_TAG = "v" + IKABOT_VERSION + " - " + BUILD_DATE
 
@@ -41,7 +41,7 @@ default_bner = """
 .JMML.  .JMML. YA.  `Moo9^Yo.      .JMMmmmd9     `Ybmd9'      `Mbmo
 """
 
-publicAPIServerDomain = "ikagod.twilightparadox.com"
+publicAPIServerDomain = "susman.twilightparadox.com"
 do_ssl_verify = True
 ids_cache = None
 cities_cache = None
