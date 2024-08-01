@@ -185,6 +185,16 @@ def getAddressWithNSlookup(session, domain):
             logTraceback=True,
         )
     try:
+        return getDNSTXTRecordWithNSlookup(domain, "")
+    except Exception as e:
+        session.writeLog(
+            "Failed to obtain public API address from nslookup with system default DNS server: "
+            + str(e),
+            level=logLevels.WARN,
+            module=__name__,
+            logTraceback=True,
+        )
+    try:
         return getDNSTXTRecordWithNSlookup(domain, "8.8.8.8")
     except Exception as e:
         session.writeLog(
