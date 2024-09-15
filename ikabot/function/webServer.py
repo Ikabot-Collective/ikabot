@@ -92,18 +92,22 @@ def webServer(session, event, stdin_fd, predetermined_input, port=None):
 
     web_cache = dict()
     # check if webcache already exists and load it if it does
-    if os.path.isfile(web_cache_file):
-        with open(web_cache_file, "rb") as f:
-            web_cache = pickle.load(f)
-    else:
-        with open(web_cache_file, "wb") as f:
-            pickle.dump(web_cache, f)
+    try:
+        if os.path.isfile(web_cache_file):
+            with open(web_cache_file, "rb") as f:
+                web_cache = pickle.load(f)
+        else:
+            with open(web_cache_file, "wb") as f:
+                pickle.dump(web_cache, f)
+    except: pass # TODO add warning about failing to open webcache file
 
     def dump_cache():
         while True:
             time.sleep(300)
-            with open(web_cache_file, "wb") as f:
-                pickle.dump(web_cache, f)
+            try:
+                with open(web_cache_file, "wb") as f:
+                    pickle.dump(web_cache, f)
+            except: pass
 
     # dump cache in a separate thread every 5 minutes
     threading.Thread(target=dump_cache, daemon=True).start()
