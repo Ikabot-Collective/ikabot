@@ -108,7 +108,7 @@ def donationBot(session, event, stdin_fd, predetermined_input):
                     )
                 )
                 percentage = read(
-                    min=0, max=1000000, empty=True
+                    min=0, empty=True
                 )  # no point changing the variable's name everywhere just for this
                 if percentage == "":
                     percentage = 10000
