@@ -77,7 +77,7 @@ def waitForConstruction(session, city_id, final_lvl):
         session.setStatus(
             f"Waiting until {getDateTime(time.time()+seconds_to_wait+10)[8:]}, {construction_building['name']} {construction_building['level']} -> {construction_building['level']+1} in {city['name']}, final lvl: {final_lvl}"
         )
-        wait(seconds_to_wait + 10)
+        wait(seconds_to_wait + 10, 30)
 
     html = session.get(city_url + city_id)
     city = getCity(html)
