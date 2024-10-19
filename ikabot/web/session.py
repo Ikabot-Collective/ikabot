@@ -829,7 +829,8 @@ class Session:
                         for srv in servers
                         if srv["accountGroup"] == account_group
                     ][0]
-                    lastlogin =  lastloginTimetoString(account["lastLogin"])
+                    try: lastlogin =  lastloginTimetoString(account["lastLogin"])
+                    except: lastlogin = 'Unknown'
                     
                     i += 1
                     pad = " " * (max_name - len(account["name"]))
