@@ -14,6 +14,7 @@ import time
 import traceback
 from datetime import datetime, timedelta
 from io import BytesIO
+from urllib.parse import unquote_plus
 
 import requests
 
@@ -178,11 +179,11 @@ def webServer(session, event, stdin_fd, predetermined_input, port=None):
                 if data:
                     for item in data.split("&"):
                         k, v = item.split("=")
-                        new_data[k] = v
+                        new_data[k] = unquote_plus(v)
             except Exception:
                 pass
             for arg in request.args:
-                new_data[arg] = request.args[arg]
+                new_data[arg] = unquote_plus(request.args[arg])
             for arg in new_data:
                 if arg == "actionRequest":
                     new_data[arg] = (
