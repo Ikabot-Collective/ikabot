@@ -24,7 +24,7 @@ from ikabot.helpers.botComm import *
 from ikabot.helpers.getJson import getCity
 from ikabot.helpers.gui import banner
 from ikabot.helpers.pedirInfo import read
-from ikabot.helpers.varios import getDateTime
+from ikabot.helpers.varios import getDateTime, lastloginTimetoString
 from ikabot.helpers.apiComm import getInteractiveCaptchaSolution, getNewBlackBoxToken
 
 t = gettext.translation("session", localedir, languages=languages, fallback=True)
@@ -829,12 +829,13 @@ class Session:
                         for srv in servers
                         if srv["accountGroup"] == account_group
                     ][0]
-
+                    lastlogin =  lastloginTimetoString(account["lastLogin"])
+                    
                     i += 1
                     pad = " " * (max_name - len(account["name"]))
                     print(
-                        "({:d}) {}{} [{} - {}]".format(
-                            i, account["name"], pad, server_lang, world
+                        "({:d}) {}{} [{} - {} - {}]".format(
+                            i, account["name"], pad, lastlogin, server_lang, world
                         )
                     )
                 num = read(min=1, max=i)
