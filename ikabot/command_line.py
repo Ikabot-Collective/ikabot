@@ -13,6 +13,7 @@ from ikabot.function.activateMiracle import activateMiracle
 from ikabot.function.alertAttacks import alertAttacks
 from ikabot.function.alertLowWine import alertLowWine
 from ikabot.function.attackBarbarians import attackBarbarians
+from ikabot.function.autoBarbarians import autoBarbarians
 from ikabot.function.autoPirate import autoPirate
 from ikabot.function.buyResources import buyResources
 from ikabot.function.checkForUpdate import checkForUpdate
@@ -136,7 +137,8 @@ def menu(session, checkUpdate=True):
         16: webServer,
         17: autoPirate,
         18: investigate,
-        19: attackBarbarians,
+        1901: attackBarbarians,
+        1902: autoBarbarians,
         2001: searchForIslandSpaces,
         2002: dumpWorld,
         2101: proxyConf,
@@ -168,7 +170,7 @@ def menu(session, checkUpdate=True):
     print(_("(16) Ikabot Web Server"))
     print(_("(17) Auto-Pirate"))
     print(_("(18) Investigate"))
-    print(_("(19) Attack barbarians"))
+    print(_("(19) Attack / Grind barbarians"))
     print(_("(20) Dump / Monitor world"))
     print(_("(21) Options / Settings"))
     total_options = len(menu_actions) + 1
@@ -216,6 +218,18 @@ def menu(session, checkUpdate=True):
             return
         if selected > 0:
             selected += 900
+
+    if selected == 19:
+        banner()
+        print(_("(0) Back"))
+        print(_("(1) Simple Attack"))
+        print(_("(2) Auto Grind"))
+        selected = read(min=0, max=2, digit=True)
+        if selected == 0:
+            menu(session)
+            return
+        if selected > 0:
+            selected += 1900
 
     if selected == 12:
         banner()
