@@ -363,7 +363,10 @@ def get_unit_data(session, city_id, unit_id):
     ).group(1)
     speed = int(speed)
 
-    return {"speed": speed, "weight": weight}
+    name = re.search(r'<div class="contentBox01h">\s*<h3 class="header">([^<]+)</h3>', html).group(1)
+    name = str(name)
+
+    return {"speed": speed, "weight": weight, "name": name}
 
 
 def city_is_in_island(city, island):
