@@ -358,7 +358,7 @@ def get_unit_data(session, city_id, unit_id):
     weight = int(weight)
 
     speed = re.search(
-        r'<span class="textLabel">Speed:</span>\s*(\d+)\s*<br/>',
+        r'<span class="textLabel">.*?</span>\s*(\d+)\s*<br/>',
         html,
     ).group(1)
     speed = int(speed)
