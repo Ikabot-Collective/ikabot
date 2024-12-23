@@ -288,7 +288,6 @@ def autoBarbarians(session, event, stdin_fd, predetermined_input):
         sendToBot(session, msg)
     finally:
         session.logout()
-        
 
 
 def choose_island(session):
@@ -578,6 +577,7 @@ def has_units_in_city(session, city, units):
         [has_unit(unit_id, unit_amount) for unit_id, unit_amount in units.items()]
     )
 
+
 def do_it(session, island, city, float_city, schematic, units_data):
     attempts = {"ships": 0}
     first_loop = True
@@ -601,7 +601,6 @@ def do_it(session, island, city, float_city, schematic, units_data):
             )
             break
         if island["barbarians"]["destroyed"] == 1:
-            session.setStatus("Looting remaining resources")
             loot(
                 session,
                 island,
@@ -610,7 +609,7 @@ def do_it(session, island, city, float_city, schematic, units_data):
                 float_city=float_city,
                 units_data=units_data,
             )
-            wait_for_arrival(session, city, island)
+
             continue
         ships_available = waitForArrival(session)
         schematic_ships = (
@@ -634,9 +633,7 @@ def do_it(session, island, city, float_city, schematic, units_data):
                 break
             continue
         if (
-            has_units_in_city(
-                session, city, barbarians_plan["needed_units"]["total"]
-            )
+            has_units_in_city(session, city, barbarians_plan["needed_units"]["total"])
             is False
         ):
             sendToBot(
@@ -663,6 +660,14 @@ def do_it(session, island, city, float_city, schematic, units_data):
             units_data=units_data,
         )
         wait_until_attack_is_over(session, city, island)
+        loot(
+            session,
+            island,
+            city,
+            barbarians_plan,
+            float_city=float_city,
+            units_data=units_data,
+        )
         for attempt_key in attempts.keys():
             attempts[attempt_key] = 0
 
@@ -799,6 +804,7 @@ def split_wave_sends_for_group(wave_id, wave_data):
 
 
 def loot(session, island, city, schematic, float_city=None, units_data={}):
+    session.setStatus("Looting remaining resources")
     barbarian_countdown = None
     while True:
         babarians_info = get_barbarians_lv(session, island)
@@ -853,7 +859,7 @@ def loot(session, island, city, schematic, float_city=None, units_data={}):
         time_left = barbarian_countdown - time.time()
         if time_left is not None and travel_time > time_left:
             break
-        time.sleep(60)
+        wait_for_arrival(session, city, island)
 
 
 def get_send_attack_data(session, island, city, attack_round, units_data):
@@ -939,9 +945,7 @@ def extract_scattered_units(html):
     numbers = re.findall(number_pattern, html)
 
     num_dates = len(dates)
-    troop_counts = numbers[
-        -num_dates:
-    ]
+    troop_counts = numbers[-num_dates:]
 
     for arrival, troop in zip(dates, troop_counts):
         try:
@@ -951,6 +955,7 @@ def extract_scattered_units(html):
             continue  # Ignore poorly formatted input
 
     return scattered_units
+
 
 def wait_next_scatter(session, travel_time, city_id=None, old_scatter=None):
     if old_scatter is None:
