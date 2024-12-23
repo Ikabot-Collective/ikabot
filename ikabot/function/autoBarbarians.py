@@ -6,6 +6,7 @@ import math
 import traceback
 import re
 from decimal import *
+from collections import defaultdict
 
 from ikabot.config import *
 from ikabot.helpers.botComm import *
@@ -23,61 +24,63 @@ from ikabot.function.attackBarbarians import get_barbarians_info,get_current_att
 
 
 DEFAULT_SCHEMATICS = {
-    "WITH_HEPHAESTUS" : (
+    "WITH_HEPHAESTUS" : [
         #TODO Develop the preset here for when Hephaestus is available
-    ),
-    "WITHOUT_HEPHAESTUS" : (
+    ],
+    "WITHOUT_HEPHAESTUS" : [
         {
             "level" : (1,9), 
-            "looting": {"from_float": False, "units": [{"id": 302, "amount": 1}]},
-            "needed_units": [{"id": 302, "amount": 90},{"id": 304, "amount": 21}],
+            "looting": {"from_float": False, "units": {"302": 1}},
+            "needed_units": {"main": {"302": 90, "304": 21}},
             "waves" : {
                 "1" : {
                     "send": [
-                        {"from_float": False, "units": [{"id": 302, "amount": 90},{"id": 304, "amount": 21}]}
+                        {"from_float": False, "units": {"302": 90,"304": 21}}
                     ],
                 }
             }
         },
         {
             "level" : (10,19), 
-            "looting": {"from_float": False, "units": ({"id": 305, "amount": 12},{"id": 308, "amount": 50})},
-            "needed_units": [{"id": 302, "amount": 60},{"id": 304, "amount": 35},{"id": 305, "amount": 12},{"id": 308, "amount": 50}],
+            "looting": {"from_float": False, "units": {"305": 12, "308": 50}},
+            "needed_units": {"main": {"302": 60,"304": 35,"305": 12, "308": 50}},
             "waves" : {
                 "1" : {
                     "send": [
-                        {"from_float": False, "units": ({"id": 302, "amount": 60},{"id": 304, "amount": 35},{"id": 305, "amount": 12},{"id": 308, "amount": 50})},
+                        {"from_float": False, "units": {"302": 60,"304": 35,"305": 12, "308": 50}},
                     ],
                 },
             }
         },
         {
             "level" : (20,29), 
-            "looting": {"from_float": False, "units": [{"id": 305, "amount": 12},{"id": 308, "amount": 100}]},
+            "looting": {"from_float": False, "units": {"305": 12, "308": 100}},
+            "needed_units": {"main": {"302": 60,"304": 70,"305": 12, "307": 12, "308": 100, "309": 30, "310": 5}},
             "waves" : {
                 "1" : {
-                    "wave": 1,
                     "send": [
-                        {"from_float": False, "units": [{"id": 302, "amount": 60},{"id": 304, "amount": 70},{"id": 305, "amount": 12},{"id": 307, "amount": 12},{"id": 308, "amount": 100},{"id": 309, "amount": 30},{"id": 310, "amount": 5}]},
+                        {"from_float": False, "units": {"302": 60,"304": 70,"305": 12, "307": 12, "308": 100, "309": 30, "310": 5}},
                     ],
                 },
             }
         },
         {
             "level" : (30,39), 
-            "looting": {"from_float": False, "units": [{"id": 305, "amount": 24},{"id": 308, "amount": 150}]},
-            "needed_units": [{"id": 302, "amount": 300},{"id": 304, "amount": 147},{"id": 305, "amount": 24},{"id": 307, "amount": 18},{"id": 308, "amount": 300},{"id": 310, "amount": 5},{"id": 311, "amount": 10}],
+            "looting": {"from_float": False, "units": {"305": 24,"308": 150}},
+            "needed_units": {"main": {"302": 300, "304": 147, "305": 24, "307": 18, "308": 300, "310": 5, "311": 10}},
             "waves" : {
                 "1" : {
                     "send": [
-                        {"from_float": False, "units": [{"id": 302, "amount": 300},{"id": 304, "amount": 147},{"id": 305, "amount": 24},{"id": 307, "amount": 18},{"id": 308, "amount": 300},{"id": 310, "amount": 5},{"id": 311, "amount": 10}]},
+                        {"from_float": False, "units": {"302": 300, "304": 147, "305": 24, "307": 18, "308": 300, "310": 5, "311": 10}},
                     ],
                 },
             }
         },
-    ),
+    ],
 }
 FIVE_MINUTES = (5 * 60)
+DEVELOPMENT = False
+
 t = gettext.translation(
     "autoBarbarians", localedir, languages=languages, fallback=True
 )
@@ -125,7 +128,7 @@ def autoBarbarians(session, event, stdin_fd, predetermined_input):
             event.set()
             return
         
-        has_rams = has_units_in_city(session,city,{"id": 307, "amount": 2}) 
+        has_rams = has_units_in_city(session,city,{"307": 1}) 
         if has_rams is False:
             print(_("\nYou do not have 2 or more battering rams in this city, the lack of them may prevent you from collecting all the resources present in the barbarian village, are you sure you want to continue anyway? [y/N]"))
             if read(values=["y", "Y", "n", "N"], default="n") in ["n", "N"]:
@@ -133,44 +136,46 @@ def autoBarbarians(session, event, stdin_fd, predetermined_input):
                 return
         
         banner()
-        islands = obtainMiraclesAvailable(session)
-        hephaestus_max = is_hephaestus_max(islands)
-        auto_activate_hephaestus = False
-        if hephaestus_max:
-            print(_("Do you want to keep activating your Hephaestus to maximize the grind? [Y/n]"))
-            activate_miracle_input = read(values=["y", "Y", "n", "N", ""])
-            auto_activate_hephaestus = True if activate_miracle_input in ("y","Y") else False
+        if DEVELOPMENT is True: 
+            islands = obtainMiraclesAvailable(session)
+            hephaestus_max = is_hephaestus_max(islands)
+            auto_activate_hephaestus = False
+            if hephaestus_max:
+                print(_("Do you want to keep activating your Hephaestus to maximize the grind? [Y/n]"))
+                activate_miracle_input = read(values=["y", "Y", "n", "N", ""])
+                auto_activate_hephaestus = True if activate_miracle_input in ("y","Y") else False
 
-        banner()
-        schematic_option = choose_schematic()
-        if schematic_option is None:
-            event.set()
-            return
-    
-        banner()
         schematic = DEFAULT_SCHEMATICS["WITHOUT_HEPHAESTUS"]
-        # schematic = DEFAULT_SCHEMATICS["NEWBIEW_MODE"]
-        if schematic_option == 1:
-            if auto_activate_hephaestus:
-                schematic = DEFAULT_SCHEMATICS["WITH_HEPHAESTUS"]
-            pass
-        elif schematic_option == 2:
-            # TODO do the part where the user can select a custom structure
-            pass
+        if DEVELOPMENT is True: 
+            banner()
+            schematic_option = choose_schematic()
+            if schematic_option is None:
+                event.set()
+                return
+        
+            if schematic_option == 1:
+                if auto_activate_hephaestus:
+                    schematic = DEFAULT_SCHEMATICS["WITH_HEPHAESTUS"]
+                pass
+            elif schematic_option == 2:
+                # TODO do the part where the user can select a custom structure
+                pass
         
         banner()
-        success,units_data,schematic_units,city_units,schematic_ships = get_units_information(session, city, schematic, is_in_island=True if city["islandId"] == island["id"] else False)
+        success,schematic_informations = get_schematic_information(session, city, schematic, is_in_island=True if city["islandId"] == island["id"] else False)
+        units_data = schematic_informations["units_data"]
+        schematic_units = schematic_informations["schematic_units"]
+        main_city_units = schematic_informations["main_city_units"]
+        schematic_ships  = schematic_informations["schematic_ships"]
+
         ships_available = waitForArrival(session)
-        print(_("Para está sequencia de ataques você precisa ter as seguintes tropas:\n"))
-        print_grid_units(schematic_units, city_units, schematic_ships, ships_available)
+        print(_("For this sequence of attacks you need to have the following troops:\n"))
+        print_grid_units(schematic_units["total"], main_city_units, schematic_ships, ships_available)
         if success is False:
-            print(_("\nVocê não possui todas as unidades necessária para iniciar está sequencia de ataque, deseja prosseguir executando ataque somente até aonde for possivel? [Y/n]"))
+            print(_("\nYou do not have all the units needed to start this attack sequence, you want to continue executing the attack only as far as possible? [Y/n]"))
             if read(values=["y", "Y", "n", "N"], default="y") in ["n", "N"]:
                 event.set()
                 return
-        else:
-            print(_("As unidades representadas deverão ficar reservadas para uso do sistema"))
-            enter()
 
         banner()
         need_float_city = check_need_float_city(schematic)
@@ -181,10 +186,6 @@ def autoBarbarians(session, event, stdin_fd, predetermined_input):
                 event.set()
                 return
             
-        banner()
-        print("The auto-attack on the barbarians was programmed!")
-        enter()
-
     except KeyboardInterrupt:
         event.set()
         return
@@ -207,39 +208,36 @@ def autoBarbarians(session, event, stdin_fd, predetermined_input):
                 first_loop = False
             html = session.get(island_url + island["id"])
             island = getIsland(html)
-            if island['barbarians']['destroyed'] == 1:
-                continue
-                #TODO se os barbaros estiverem destruidos o sistema irá lootea-los caso haja loot disponivel, e caso não irá aguardar
 
             babarians_info = get_barbarians_lv(session, island)
             barbarians_plan = get_barbarians_attack_plan(babarians_info,schematic)
             if barbarians_plan is None:
-                sendToBot(session, _("Não foi possivel continuar o ataque aos barbaros pois os mesmos antigiram um nivel que está fora do esquema de ataque.".format(island['x'], island['y'])))
+                sendToBot(session, _("It was not possible to continue the attack on the barbarians because they reached a level that is outside the attack scheme.".format(island['x'], island['y'])))
                 break
 
+            if island['barbarians']['destroyed'] == 1:
+                session.setStatus('Looting remaining resources')
+                loot(session,island,city,barbarians_plan,float_city=float_city,units_data=units_data)
+                wait_for_arrival(session,city,island)
+                continue
+
             ships_available = waitForArrival(session)
-            schematic_ships = get_amount_ships_schematic(convert_schematic_units_in_dict(barbarians_plan['needed_units']),units_data) + babarians_info['ships']
+            schematic_ships = get_amount_ships_schematic(barbarians_plan['needed_units']['total'],units_data) + babarians_info['ships']
             if schematic_ships > ships_available:
                 attempts["ships"] += 1
-                session.setStatus('aguardando disponibilidade de ({}) barcos'.format(schematic_ships))
+                session.setStatus('waiting for availability of ({}) boats'.format(schematic_ships))
                 if attempts["ships"] > 20:
-                    sendToBot(session, _("Não foi possivel continuar o ataque aos barbaros devido a longa indisponibilidade de barcos."))
+                    sendToBot(session, _("It was not possible to continue the attack on the barbarians due to the long unavailability of ships."))
                     break
                 continue
             
-            if has_units_in_city(session,city,barbarians_plan['needed_units']) is False:
-                sendToBot(session, _("Não foi possivel continuar o ataque aos barbaros devido a falta de tropas necessarias na(s) cidade(s)."))
+            if has_units_in_city(session,city,barbarians_plan['needed_units']['total']) is False:
+                sendToBot(session, _("It was not possible to continue the attack on the barbarians due to the lack of necessary troops in the city(ies)."))
                 break
 
-            sendToBot(session, _("Iniciando ataque aos barbaros[{}:{}] level ({}).".format(island['x'], island['y'],babarians_info['level'])))
+            sendToBot(session, _("Starting attack on barbarians[{}:{}] level ({}).".format(island['x'], island['y'],babarians_info['level'])))
             do_it(session,island,city,barbarians_plan,float_city=float_city,units_data=units_data)
             wait_until_attack_is_over(session, city, island)
-            # sendToBot(session, _("Ataque finalizado, iniciando sequencia de pilhagem em barbaros[{}:{}]".format(island['x'], island['y'])))
-            session.setStatus('Pilhando recursos restantes'.format(schematic_ships))
-            loot(session,island,city,barbarians_plan,float_city=float_city,units_data=units_data)
-            # sendToBot(session, _("Pilhagem finalizada em barbaros[{}:{}], preparando para começar outro ataque.".format(island['x'], island['y'])))
-            wait_for_arrival(session,city,island)
-
 
             for attempt_key in attempts.keys():
                 attempts[attempt_key] = 0
@@ -249,7 +247,7 @@ def autoBarbarians(session, event, stdin_fd, predetermined_input):
         sendToBot(session, msg)
     finally:
         session.logout()
-        sendToBot(session, _("Encerrado sequencia de ataque aos babaross[{}:{}].".format(island['x'], island['y'],babarians_info['level'])))
+        sendToBot(session, _("Ended attack sequence on babaross[{}:{}].".format(island['x'], island['y'],babarians_info['level'])))
 
 def choose_island(session):
     idsIslands = getIslandsIds(session)
@@ -370,30 +368,64 @@ def choose_float_city(session,island):
     cities_options_index = read(min=1, max=len(cities_options))
     return inslands_cities.get(cities_options[cities_options_index])
     
-def collect_max_units(schematic):
-    max_units = {}
+def get_max_schematics_units(schematic):
+    max_units = {
+        "main": defaultdict(int),
+        "float": defaultdict(int),
+        "total": defaultdict(int),
+    }
+
+    if isinstance(schematic, dict):
+        schematic = [schematic]
 
     for item in schematic:
-        needed_units = item.get("needed_units", [])
-        for unit in needed_units:
-            unit_id = str(unit["id"])
-            unit_amount = unit["amount"]
-            max_units[unit_id] = max(max_units.get(unit_id, 0), unit_amount)
-    return max_units
+        needed_units = item.get("needed_units", {})
+        
+        # Processar unidades principais e flutuantes
+        for category in ("main", "float"):
+            units = needed_units.get(category, {})
+            for unit_id, unit_amount in units.items():
+                max_units[category][unit_id] = max(max_units[category][unit_id], unit_amount)
+    
+    # Calcular o total (soma de main e float)
+    for unit_id in set(max_units["main"].keys()).union(max_units["float"].keys()):
+        max_units["total"][unit_id] = (
+            max_units["main"].get(unit_id, 0) + max_units["float"].get(unit_id, 0)
+        )
+    
+    # Converter defaultdict para dict antes de retornar
+    return {key: dict(value) for key, value in max_units.items()}
 
-def get_units_information(session, city, schematic, float_city=None,is_in_island=False):
-    schematic_units = collect_max_units(schematic)
-    city_units = get_units(session, city)
+def get_schematic_information(session, city, schematic, float_city=None,is_in_island=False):
+    schematic_units = get_max_schematics_units(schematic)
+    main_city_units = get_units(session, city)
+    float_city_units = {}
+    if float_city is not None:
+        float_city_units = get_units(session, float_city)
+        pass
 
     units_data = {}
-    for unit_id in schematic_units.keys():
+    for unit_id in schematic_units["total"].keys():
         units_data[unit_id] = get_unit_data(session, city["id"], str(unit_id))
 
     schematic_ships = 2
     if is_in_island is False:
-        schematic_ships += get_amount_ships_schematic(schematic_units, units_data)
+        schematic_ships += get_amount_ships_schematic(schematic_units["total"], units_data)
 
-    return all(city_units.get(unit_id, {'amount': 0})['amount'] >= amount for unit_id, amount in schematic_units.items()),units_data,schematic_units,city_units,schematic_ships
+    def get_success():
+        return all([
+            all(main_city_units.get(unit_id, {'amount': 0})['amount'] >= amount for unit_id, amount in schematic_units['main'].items()),
+            all(float_city_units.get(unit_id, {'amount': 0})['amount'] >= amount for unit_id, amount in schematic_units['float'].items()) if float_city is not None else True,
+        ])
+    
+    return get_success(),{
+        "units_data" : units_data,
+        "schematic_units" : schematic_units,
+        "main_city_units" : main_city_units,
+        "float_city_units" : float_city_units,
+        "schematic_ships" : schematic_ships,
+    }
+    # return all(main_city_units.get(unit_id, {'amount': 0})['amount'] >= amount for unit_id, amount in schematic_units.items()),units_data,schematic_units,main_city_units,schematic_ships
 
 def print_grid_units(schematic_units, city_units, schematic_ships, ships_available):
     header = ["Unit", "Required", "Available", "Missing"]
@@ -438,7 +470,7 @@ def get_barbarians_attack_plan(barbarians_info,schematic):
     return {
         'waves' : scheme['waves'],
         'looting' : scheme['looting'],
-        'needed_units' : scheme['needed_units'],
+        'needed_units' : get_max_schematics_units(scheme),
     }
 
 def get_amount_ships_schematic(schematic_units, units_data):
@@ -450,31 +482,19 @@ def get_amount_ships_schematic(schematic_units, units_data):
 
     schematic_ships += math.ceil(Decimal(schematic_weight) / Decimal(500))
     return schematic_ships
-      
-def convert_schematic_units_in_dict(schematic_units):
-    result = {}
-    for units in schematic_units:
-        result[str(units["id"])] = units["amount"]
-
-    return result
 
 def has_units_in_city(session, city, units):
-    if not isinstance(units, (dict, tuple, list)):
+    if not isinstance(units, (dict)):
         raise TypeError(f"The type provided for units is invalid, a type (tuple | dict | list) is expected and its type is {type(units)}")
     city_units = get_units(session, city)
 
-    if isinstance(units, dict):
-        units = [units]
-    elif isinstance(units, tuple):
-        units = list(units)
-
-    def has_unit(unit_required):
-        unit = city_units.get(str(unit_required["id"]))
+    def has_unit(unit_id,unit_amount):
+        unit = city_units.get(str(unit_id))
         if unit is None:
             return False
-        return True if unit["amount"] >= unit_required["amount"] else False
+        return True if unit["amount"] >= unit_amount else False
 
-    return all([has_unit(unit) for unit in units])
+    return all([has_unit(unit_id,unit_amount) for unit_id,unit_amount in units.items()])
 
 def do_it(session, island, city, schematic, float_city=None,units_data={}):
     battle_start = None
@@ -561,20 +581,15 @@ def do_it(session, island, city, schematic, float_city=None,units_data={}):
 def split_wave_sends_for_group(wave_id, wave_data):
     send_groups = wave_data.get("send", [])
     
-    # Inicializando os containers para cada tipo
     float_city = []
     main_city = []
     
-    # Iterando sobre os grupos de envio
     for group_index, group in enumerate(send_groups, start=1):
-            group_id = f"w{wave_id}_g{group_index}"  # Gerando o identificador único
+            group_id = f"w{wave_id}_g{group_index}"
             
-            # Adicionando o identificador ao grupo
             group_with_id = group.copy()
             group_with_id["id"] = group_id
-            group_with_id["units"] = convert_schematic_units_in_dict(group_with_id["units"])
             
-            # Separando com base no valor de `from_float`
             if group["from_float"]:
                 float_city.append(group_with_id)
             else:
