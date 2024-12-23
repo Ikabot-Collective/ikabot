@@ -282,112 +282,13 @@ def autoBarbarians(session, event, stdin_fd, predetermined_input):
     setInfoSignal(session, info)
 
     try:
-        attempts = {"ships": 0}
-        first_loop = True
-        while True:
-            if first_loop is False:
-                time.sleep(FIVE_MINUTES)
-            else:
-                first_loop = False
-            html = session.get(island_url + island["id"])
-            island = getIsland(html)
-
-            babarians_info = get_barbarians_lv(session, island)
-            barbarians_plan = get_barbarians_attack_plan(babarians_info, schematic)
-            if barbarians_plan is None:
-                sendToBot(
-                    session,
-                    _(
-                        "It was not possible to continue the attack on the barbarians because they reached a level that is outside the attack scheme.".format(
-                            island["x"], island["y"]
-                        )
-                    ),
-                )
-                break
-
-            if island["barbarians"]["destroyed"] == 1:
-                session.setStatus("Looting remaining resources")
-                loot(
-                    session,
-                    island,
-                    city,
-                    barbarians_plan,
-                    float_city=float_city,
-                    units_data=units_data,
-                )
-                wait_for_arrival(session, city, island)
-                continue
-
-            ships_available = waitForArrival(session)
-            schematic_ships = (
-                get_amount_ships_schematic(
-                    barbarians_plan["needed_units"]["total"], units_data
-                )
-                + babarians_info["ships"]
-            )
-            if schematic_ships > ships_available:
-                attempts["ships"] += 1
-                session.setStatus(
-                    "waiting for availability of ({}) boats".format(schematic_ships)
-                )
-                if attempts["ships"] > 20:
-                    sendToBot(
-                        session,
-                        _(
-                            "It was not possible to continue the attack on the barbarians due to the long unavailability of ships."
-                        ),
-                    )
-                    break
-                continue
-
-            if (
-                has_units_in_city(
-                    session, city, barbarians_plan["needed_units"]["total"]
-                )
-                is False
-            ):
-                sendToBot(
-                    session,
-                    _(
-                        "It was not possible to continue the attack on the barbarians due to the lack of necessary troops in the city(ies)."
-                    ),
-                )
-                break
-
-            sendToBot(
-                session,
-                _(
-                    "Starting attack on barbarians[{}:{}] level ({}).".format(
-                        island["x"], island["y"], babarians_info["level"]
-                    )
-                ),
-            )
-            do_it(
-                session,
-                island,
-                city,
-                barbarians_plan,
-                float_city=float_city,
-                units_data=units_data,
-            )
-            wait_until_attack_is_over(session, city, island)
-
-            for attempt_key in attempts.keys():
-                attempts[attempt_key] = 0
-
+        do_it(session, island, city, float_city, schematic, units_data)
     except Exception as e:
         msg = _("Error in:\n{}\nCause:\n{}").format(info, traceback.format_exc())
         sendToBot(session, msg)
     finally:
         session.logout()
-        sendToBot(
-            session,
-            _(
-                "Ended attack sequence on babaross[{}:{}].".format(
-                    island["x"], island["y"], babarians_info["level"]
-                )
-            ),
-        )
+        
 
 
 def choose_island(session):
@@ -525,7 +426,6 @@ def get_max_schematics_units(schematic):
     for item in schematic:
         needed_units = item.get("needed_units", {})
 
-        # Processar unidades principais e flutuantes
         for category in ("main", "float"):
             units = needed_units.get(category, {})
             for unit_id, unit_amount in units.items():
@@ -533,13 +433,11 @@ def get_max_schematics_units(schematic):
                     max_units[category][unit_id], unit_amount
                 )
 
-    # Calcular o total (soma de main e float)
     for unit_id in set(max_units["main"].keys()).union(max_units["float"].keys()):
         max_units["total"][unit_id] = max_units["main"].get(unit_id, 0) + max_units[
             "float"
         ].get(unit_id, 0)
 
-    # Converter defaultdict para dict antes de retornar
     return {key: dict(value) for key, value in max_units.items()}
 
 
@@ -680,8 +578,106 @@ def has_units_in_city(session, city, units):
         [has_unit(unit_id, unit_amount) for unit_id, unit_amount in units.items()]
     )
 
+def do_it(session, island, city, float_city, schematic, units_data):
+    attempts = {"ships": 0}
+    first_loop = True
+    while True:
+        if first_loop is False:
+            time.sleep(FIVE_MINUTES)
+        else:
+            first_loop = False
+        html = session.get(island_url + island["id"])
+        island = getIsland(html)
+        babarians_info = get_barbarians_lv(session, island)
+        barbarians_plan = get_barbarians_attack_plan(babarians_info, schematic)
+        if barbarians_plan is None:
+            sendToBot(
+                session,
+                _(
+                    "It was not possible to continue the attack on the barbarians because they reached a level that is outside the attack scheme.".format(
+                        island["x"], island["y"]
+                    )
+                ),
+            )
+            break
+        if island["barbarians"]["destroyed"] == 1:
+            session.setStatus("Looting remaining resources")
+            loot(
+                session,
+                island,
+                city,
+                barbarians_plan,
+                float_city=float_city,
+                units_data=units_data,
+            )
+            wait_for_arrival(session, city, island)
+            continue
+        ships_available = waitForArrival(session)
+        schematic_ships = (
+            get_amount_ships_schematic(
+                barbarians_plan["needed_units"]["total"], units_data
+            )
+            + babarians_info["ships"]
+        )
+        if schematic_ships > ships_available:
+            attempts["ships"] += 1
+            session.setStatus(
+                "waiting for availability of ({}) boats".format(schematic_ships)
+            )
+            if attempts["ships"] > 20:
+                sendToBot(
+                    session,
+                    _(
+                        "It was not possible to continue the attack on the barbarians due to the long unavailability of ships."
+                    ),
+                )
+                break
+            continue
+        if (
+            has_units_in_city(
+                session, city, barbarians_plan["needed_units"]["total"]
+            )
+            is False
+        ):
+            sendToBot(
+                session,
+                _(
+                    "It was not possible to continue the attack on the barbarians due to the lack of necessary troops in the city(ies)."
+                ),
+            )
+            break
+        sendToBot(
+            session,
+            _(
+                "Starting attack on barbarians[{}:{}] level ({}).".format(
+                    island["x"], island["y"], babarians_info["level"]
+                )
+            ),
+        )
+        do_attack(
+            session,
+            island,
+            city,
+            barbarians_plan,
+            float_city=float_city,
+            units_data=units_data,
+        )
+        wait_until_attack_is_over(session, city, island)
+        for attempt_key in attempts.keys():
+            attempts[attempt_key] = 0
 
-def do_it(session, island, city, schematic, float_city=None, units_data={}):
+    babarians_info = get_barbarians_lv(session, island)
+    sendToBot(
+        session,
+        _(
+            "Ended attack sequence on bariarians[{}:{}].".format(
+                island["x"], island["y"], babarians_info["level"]
+            )
+        ),
+    )
+
+
+def do_attack(session, island, city, schematic, float_city=None, units_data={}):
     battle_start = None
     babarians_info = None
 
@@ -736,7 +732,7 @@ def do_it(session, island, city, schematic, float_city=None, units_data={}):
                 minor_travel_time = main_travel_time
 
         try:
-            session.setStatus("Aguardando round (round: {})".format(wave_id))
+            session.setStatus("Waiting for round (round: {})".format(wave_id))
             wait_for_round(
                 session, city, island, major_travel_time, battle_start, wave_id
             )
@@ -841,7 +837,7 @@ def loot(session, island, city, schematic, float_city=None, units_data={}):
             time_left - (travel_time + FIVE_MINUTES)
         ):
             send_scatter = True
-            # TODO continuar apartir daqui, você deve fazer o sistema de ficar enviando arietes para dispersar para aumentar o tempo de loot
+            # TODO continue from here, you must do the system of sending rams to disperse to increase the loot time
 
         session.post(params=attack_data)
 
@@ -945,23 +941,16 @@ def extract_scattered_units(html):
     num_dates = len(dates)
     troop_counts = numbers[
         -num_dates:
-    ]  # Presume que as últimas N entradas são as tropas
+    ]
 
     for arrival, troop in zip(dates, troop_counts):
         try:
             timestamp = int(datetime.strptime(arrival, "%d.%m.%Y %H:%M:%S").timestamp())
             scattered_units.append({"arrival_time": timestamp, "amount": int(troop)})
         except ValueError:
-            continue  # Ignorar entradas mal formatadas
+            continue  # Ignore poorly formatted input
 
     return scattered_units
-
-    # f = open("page.html", "w")
-    # f.write(html)
-    # f.close()
-
-    # return scattered_units
-
 
 def wait_next_scatter(session, travel_time, city_id=None, old_scatter=None):
     if old_scatter is None:
