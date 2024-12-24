@@ -511,11 +511,11 @@ def filter_loading(attacks):
     return [attack for attack in attacks if attack["event"]["missionState"] == 1]
 
 
-def filter_traveling(attacks):
+def filter_traveling(attacks,onlyCanAbort=True):
     return [
         attack
         for attack in attacks
-        if attack["event"]["missionState"] == 2 and attack["event"]["canAbort"]
+        if attack["event"]["missionState"] == 2 and (onlyCanAbort is False or (onlyCanAbort is True and attack["event"]["canAbort"]))
     ]
 
 
