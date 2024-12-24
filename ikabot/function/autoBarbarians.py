@@ -32,6 +32,7 @@ from ikabot.function.attackBarbarians import (
     get_units,
     get_unit_data,
     load_troops,
+    get_movements,
 )
 
 
@@ -609,7 +610,7 @@ def do_it(session, island, city, float_city, schematic, units_data):
                 float_city=float_city,
                 units_data=units_data,
             )
-
+            wait_for_looting(session, city, island)
             continue
         ships_available = waitForArrival(session)
         schematic_ships = (
@@ -660,14 +661,6 @@ def do_it(session, island, city, float_city, schematic, units_data):
             units_data=units_data,
         )
         wait_until_attack_is_over(session, city, island)
-        loot(
-            session,
-            island,
-            city,
-            barbarians_plan,
-            float_city=float_city,
-            units_data=units_data,
-        )
         for attempt_key in attempts.keys():
             attempts[attempt_key] = 0
 
@@ -843,7 +836,6 @@ def loot(session, island, city, schematic, float_city=None, units_data={}):
             time_left - (travel_time + FIVE_MINUTES)
         ):
             send_scatter = True
-            # TODO continue from here, you must do the system of sending rams to disperse to increase the loot time
 
         session.post(params=attack_data)
 
@@ -979,3 +971,37 @@ def wait_next_scatter(session, travel_time, city_id=None, old_scatter=None):
                 return entry["arrival_time"]
 
     pass
+
+
+def get_current_looting(session, city_id, island_id):
+    movements = get_movements(session, city_id)
+    curr_looting = []
+
+    for movement in movements:
+        if movement["event"]["mission"] != 13:
+            continue
+        if movement["target"]["islandId"] != int(island_id):
+            continue
+        if movement["event"]["isReturning"] != 2:
+            continue
+        if movement["origin"]["cityId"] == -1:
+            continue
+
+        curr_looting.append(movement)
+
+    return curr_looting
+
+
+def wait_for_looting(session, city, island):
+    lootings = get_current_looting(session, city["id"], island["id"])
+    lootings = filter_loading(lootings) + filter_traveling(lootings, onlyCanAbort=False)
+    eventTimes = [looting["eventTime"] for looting in lootings]
+
+    if len(eventTimes) == 0:
+        return
+
+    wait_time = max(eventTimes)
+    wait_time -= time.time()
+    wait(wait_time + 5)
+
+    wait_for_looting(session, city, island)
