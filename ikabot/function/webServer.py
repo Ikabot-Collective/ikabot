@@ -14,7 +14,7 @@ import time
 import traceback
 from datetime import datetime, timedelta
 from io import BytesIO
-from urllib.parse import unquote_plus
+from urllib.parse import unquote_plus, unquote
 
 import requests
 
@@ -176,6 +176,7 @@ def webServer(session, event, stdin_fd, predetermined_input, port=None):
             new_data = dict()
             try:
                 data = request.get_data(as_text=True)
+                data = unquote(data, encoding='utf-8', errors='replace')
                 if data:
                     for item in data.split("&"):
                         k, v = item.split("=")
