@@ -15,7 +15,7 @@ _ = t.gettext
 def enter():
     """Wait for the user to press Enter"""
     try:
-        if config.has_params:
+        if len(config.predetermined_input) > 0:
             return
     except Exception:
         pass
@@ -44,7 +44,7 @@ def banner():
       MM      MM;Mm      ,pm9MM          MM    `Y   8M     M8     MM
       MM      MM `Mb.   8M   MM          MM    ,9   YA.   ,A9     MM
     .JMML.  .JMML. YA.  `Moo9^Yo.      .JMMmmmd9     `Ybmd9'      `Mbmo
-                                                            {ikabotVersion}"""
+                                                            {IKABOT_VERSION_TAG}"""
     print("\n{}\n\n{}\n{}".format(bner, config.infoUser, config.update_msg))
 
 
@@ -75,3 +75,5 @@ class bcolors:
     DARK_RED = "\033[31m"
     DARK_BLUE = "\033[34m"
     DARK_GREEN = "\033[32m"
+    CYAN = "\033[36m"
+    YELLOW = "\033[33m"

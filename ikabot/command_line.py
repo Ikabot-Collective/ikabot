@@ -40,6 +40,8 @@ from ikabot.function.trainArmy import trainArmy
 from ikabot.function.update import update
 from ikabot.function.vacationMode import vacationMode
 from ikabot.function.webServer import webServer
+from ikabot.function.loadCustomModule import loadCustomModule
+from ikabot.function.activateShrine import activateShrine
 from ikabot.helpers.botComm import telegramDataIsValid, updateTelegramData
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import read
@@ -116,18 +118,18 @@ def menu(session, checkUpdate=True):
         2: sendResources,
         3: distributeResources,
         4: getStatus,
-        5: searchForIslandSpaces,
+        5: activateShrine,
         6: loginDaily,
-        101: alertAttacks,
-        102: alertLowWine,
-        111: buyResources,
-        112: sellResources,
-        121: donate,
-        122: donationBot,
+        701: alertAttacks,
+        702: alertLowWine,
+        801: buyResources,
+        802: sellResources,
+        901: donate,
+        902: donationBot,
         10: vacationMode,
         11: activateMiracle,
-        131: trainArmy,
-        132: stationArmy,
+        1201: trainArmy,
+        1202: stationArmy,
         13: shipMovements,
         14: constructBuilding,
         15: update,
@@ -135,14 +137,16 @@ def menu(session, checkUpdate=True):
         17: autoPirate,
         18: investigate,
         19: attackBarbarians,
-        20: dumpWorld,
-        141: proxyConf,
-        142: updateTelegramData,
-        143: killTasks,
-        144: decaptchaConf,
-        145: logs,
-        146: testTelegramBot,
-        147: importExportCookie
+        2001: searchForIslandSpaces,
+        2002: dumpWorld,
+        2101: proxyConf,
+        2102: updateTelegramData,
+        2103: killTasks,
+        2104: decaptchaConf,
+        2105: logs,
+        2106: testTelegramBot,
+        2107: importExportCookie,
+        2108: loadCustomModule
     }
 
     print(_("(0)  Exit"))
@@ -150,7 +154,7 @@ def menu(session, checkUpdate=True):
     print(_("(2)  Send resources"))
     print(_("(3)  Distribute resources"))
     print(_("(4)  Account status"))
-    print(_("(5)  Monitor islands"))
+    print(_("(5)  Activate Shrine"))
     print(_("(6)  Login daily"))
     print(_("(7)  Alerts / Notifications"))
     print(_("(8)  Marketplace"))
@@ -165,10 +169,14 @@ def menu(session, checkUpdate=True):
     print(_("(17) Auto-Pirate"))
     print(_("(18) Investigate"))
     print(_("(19) Attack barbarians"))
-    print(_("(20) Dump / View world"))
+    print(_("(20) Dump / Monitor world"))
     print(_("(21) Options / Settings"))
     total_options = len(menu_actions) + 1
-    selected = read(min=0, max=total_options, digit=True)
+    selected = read(min=0, max=total_options, digit=True, empty=True)
+    
+    # refresh main menu on hitting enter
+    if selected == '':
+        return menu(session)
 
     if selected == 7:
         banner()
@@ -181,7 +189,7 @@ def menu(session, checkUpdate=True):
             menu(session)
             return
         if selected > 0:
-            selected += 100
+            selected += 700
 
     if selected == 8:
         banner()
@@ -194,7 +202,7 @@ def menu(session, checkUpdate=True):
             menu(session)
             return
         if selected > 0:
-            selected += 110
+            selected += 800
 
     if selected == 9:
         banner()
@@ -207,7 +215,7 @@ def menu(session, checkUpdate=True):
             menu(session)
             return
         if selected > 0:
-            selected += 120
+            selected += 900
 
     if selected == 12:
         banner()
@@ -219,7 +227,19 @@ def menu(session, checkUpdate=True):
             menu(session)
             return
         if selected > 0:
-            selected += 130
+            selected += 1200
+
+    if selected == 20:
+        print(_("(0) Back"))
+        print(_("(1) Monitor islands"))
+        print(_("(2) Dump & Search world"))
+        
+        selected = read(min=0, max=2, digit=True)
+        if selected == 0:
+            menu(session)
+            return
+        if selected > 0:
+            selected += 2000
 
     if selected == 21:
         banner()
@@ -234,13 +254,14 @@ def menu(session, checkUpdate=True):
         print(_("(5) Logs"))
         print(_("(6) Message Telegram Bot"))
         print(_("(7) Import / Export cookie"))
+        print(_("(8) Load custom ikabot module"))
 
-        selected = read(min=0, max=7, digit=True)
+        selected = read(min=0, max=8, digit=True)
         if selected == 0:
             menu(session)
             return
         if selected > 0:
-            selected += 140
+            selected += 2100
 
     if selected != 0:
         try:
@@ -318,3 +339,10 @@ if __name__ == "__main__":
     if sys.platform.startswith("win"):
         multiprocessing.freeze_support()
     main()
+
+#############################################################
+# This is necessary to ensure that flask is frozen together #
+# with other requirements when creating ikabot.exe          #
+try: import flask                                           #
+except: pass                                                #
+#############################################################

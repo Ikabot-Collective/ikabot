@@ -12,7 +12,6 @@ import threading
 import time
 import traceback
 from pathlib import Path
-
 import ikabot.config as config
 from ikabot.config import *
 from ikabot.helpers.botComm import sendToBot
@@ -395,6 +394,8 @@ def update_status(message, percent, percent_total, add_history=False):
 
 
 def view_dump(session, event):
+
+
     files = [
         file.replace("\\", "/")
         for file in get_files(os.getenv(home) + "/ikabot_world_dumps")
@@ -425,8 +426,10 @@ def view_dump(session, event):
         if not selected_dump["shallow"]:
             print("2) Search islands by player name")
             print("3) Search for nearest inactive players")
+            print("4) Search for alliances")
+            print("5) Search for a specific island by coordinates")
 
-        choice = read(min=0, max=3, digit=True)
+        choice = read(min=0, max=5, digit=True)
         if choice == 0:
             event.set()
             return
@@ -546,6 +549,127 @@ def view_dump(session, event):
             for i, city in enumerate(inactives):
                 print(str(i + 1) + ") " + city["Name"])
             enter()
+        elif choice == 4:
+            if selected_dump["shallow"]:
+                print(
+                    "You can not search by alliance tag because this dump is shallow and doesn't contain data about alliances!"
+                )
+                enter()
+                continue
+            while True:
+                alliance = (read(msg="Enter the alliance TAG you want to search for (ONLY tags): ")).lower()
+                user_islands = dict()
+                alliance_found = False # Flag to check if any alliance is found
+                for island in selected_dump['islands']:
+                    for city in island["cities"]:
+                        if "AllyTag" in city and city["AllyTag"].lower() == alliance:
+                            user_name = city["Name"]
+                            user_id = city["Id"]
+                            if user_name not in user_islands:
+                                user_islands[user_name] = {"id": user_id, "islands": set()}
+                            user_islands[user_name]["islands"].add((island["x"], island["y"]))
+                            alliance_found = True # Set FLag to True if alliance has been found
+                if alliance_found:
+                    for user_name, infe in user_islands.items():
+                        print(f"Player:{bcolors.CYAN} {user_name}{bcolors.ENDC}, Alliance:{bcolors.CYAN} {alliance}{bcolors.ENDC}")
+                        island_coordss = ", ".join([f"{x}:{y}" for x, y in infe['islands']])
+                        print(f"- {bcolors.STONE}Islands{bcolors.ENDC}: {bcolors.YELLOW}{island_coordss}{bcolors.ENDC}")
+                else:
+                    print("No alliance with this tag was found.")
+                # Ask if the user wants to search again
+                search_again = input("Do you want to search for another alliance ? (yes/no): ").lower()
+
+                if search_again != 'yes':
+                    break  # Exit the loop if the user doesn't want to search again
+        elif choice == 5:
+            if selected_dump["shallow"]:
+                print(
+                    "You can not search by coordinates because this dump is shallow and doesn't contain full data about islands!"
+                )
+                enter()
+                continue
+            while True:
+                coords = (read(msg="Enter the coordinates of the island you want to search for (xx:yy): "))
+                try:
+                    x, y = map(int, coords.split(':'))
+                except ValueError:
+                    print("Invalid input format. Please enter coordinates in the form xx:yy")
+                    continue # Prompt again for the correct input
+                island_found = False # Flag to check if the island has been found
+                player_state_dict = {
+                        "": "Active",
+                        "inactive": "Inactive",
+                        "vacation": "Vacation Mode"
+                        }
+                tradegood_dict = {
+                        1: "Wine",
+                        2: 'Marble',
+                        3: "Crystal",
+                        4: "Sulphur"
+                        }
+                wonder_dict = {
+                        "1": "Hephaistos",
+                        "2": "Hades",
+                        "3": "Demeter",
+                        "4": "Athene",
+                        "5": "Hermes",
+                        "6": "Ares",
+                        "7": "Poseidon",
+                        "8": "Colossus"
+                        }
+                for island in selected_dump['islands']:
+                    if island["x"] == x and island["y"] == y:
+                        player_data = {} # Dictionary to track players and their stats
+                        # First count the number of cities for each player on the island
+                        player_city_count = {}
+                        for city in island['cities']:
+                            if city['type'] == 'city':
+                                player_id = city['Id']
+                                if player_id not in player_city_count:
+                                    player_city_count[player_id] = 0
+                                player_city_count[player_id] += 1
+                        # Now process each city and collect the needed data
+                        for city in island['cities']:
+                            if city['type'] == 'city':
+                                player_name = city['Name']
+                                player_id = city['Id']
+                                player_state = player_state_dict.get(city['state'])
+                                player_alliance = city.get('AllyTag', 'No Alliance')
+                                if player_id not in player_data: # Add only if player ID is not already in the dictionary
+                                    player_score_raw = island['avatarScores'].get(player_id, {}).get('building_score_main')
+                                    player_score_int = int(player_score_raw.replace(',', ''))
+                                    player_score = "{:,}".format(player_score_int // 100)
+                                    city_count = player_city_count[player_id]  # Get the number of cities for this player
+                                    player_data[player_id] = f"{bcolors.CYAN}{player_name}{bcolors.ENDC} - Score: {bcolors.YELLOW}{player_score}{bcolors.ENDC}, Cities: {bcolors.YELLOW}{city_count}{bcolors.ENDC}, State: {bcolors.CYAN}{player_state}{bcolors.ENDC}, Alliance: {bcolors.CYAN}{player_alliance}{bcolors.ENDC}"
+                        isl_name = island['name']
+                        cities_of_type_city = [city for city in island['cities'] if city['type'] == 'city']
+                        sum_cities = len(cities_of_type_city) if cities_of_type_city else 0
+                        wood_lvl = island['resourceLevel']
+                        luxury_lvl = island['tradegoodLevel']
+                        isl_type = tradegood_dict.get(island['tradegood']) 
+                        isl_id = island['id']
+                        wonder = wonder_dict[island['wonder']]
+                        wonder_lvl = island['wonderLevel']
+                        island_found = True # Set flag to True if island has been found
+                        break  # Exit the loop once the island is found
+                if island_found:
+                    print(
+                        f"Island Name: {bcolors.CYAN}{isl_name}{bcolors.ENDC}, Number of cities: {bcolors.YELLOW}{sum_cities}{bcolors.ENDC}, Wonder: {bcolors.CYAN}{wonder}{bcolors.ENDC}, Wonder Level: {bcolors.YELLOW}{wonder_lvl}{bcolors.ENDC}")
+                    print(
+                        f"Forrest Level: {bcolors.YELLOW}{wood_lvl}{bcolors.ENDC}, Luxury Mine Level: {bcolors.YELLOW}{luxury_lvl}{bcolors.ENDC}, Island ID: {bcolors.YELLOW}{isl_id}{bcolors.ENDC}, Island Type: {bcolors.CYAN}{isl_type}{bcolors.ENDC}")
+                    if not player_data:
+                        print(f"No players in this island")
+                    else:
+                        player_data_str = '\n'.join(player_data.values())
+                        print(f"Players:\n{player_data_str}")
+                else:
+                    print(f"No such island was found.")
+                # Ask if the user wants to search again
+                search_again = input("Do you want to search for another island ? (yes/no): ").lower()
+                if search_again != 'yes':
+                    break  # Exit the loop if the user doesn't want to search again
+                    
+
 
 
 def print_map(islands):

@@ -163,3 +163,19 @@ def timeStringToSec(time_string):
     else:
         seconds = int(seconds.group(1)) * 1
     return hours + minutes + seconds
+
+def lastloginTimetoString(time_string):
+    """Returns formatet last Login String
+    Parameters
+    ----------
+    time_string : str
+        last Login String that needs to be converted
+
+    Returns
+    -------
+    - str: formatet String of last Login 
+    """
+    date_format = '%Y-%m-%dT%H:%M:%S%z'
+    lastlogin_string = time_string
+    lastlogin_object = datetime.strptime(lastlogin_string, date_format)
+    return lastlogin_object.strftime('%Y-%m-%d')

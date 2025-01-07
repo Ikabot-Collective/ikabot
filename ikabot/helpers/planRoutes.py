@@ -14,7 +14,7 @@ from ikabot.helpers.naval import *
 from ikabot.helpers.varios import wait
 
 
-def sendGoods(session, originCityId, destinationCityId, islandId, ships, send):
+def sendGoods(session, originCityId, destinationCityId, islandId, ships, send, useFreighters=False):
     """This function will execute one route
     Parameters
     ----------
@@ -31,7 +31,6 @@ def sendGoods(session, originCityId, destinationCityId, islandId, ships, send):
     send : list
         array of resources to send
     """
-
     # this can fail if a random request is made in between this two posts
     while True:
         html = session.get()
@@ -67,7 +66,6 @@ def sendGoods(session, originCityId, destinationCityId, islandId, ships, send):
             "activeTab": "",
             "transportDisplayPrice": "0",
             "premiumTransporter": "0",
-            "transporters": ships,
             "capacity": "5",
             "max_capacity": "5",
             "jetPropulsion": "0",
@@ -78,7 +76,14 @@ def sendGoods(session, originCityId, destinationCityId, islandId, ships, send):
             "actionRequest": actionRequest,
             "ajax": "1",
         }
-
+        
+        if useFreighters is False:
+            shiptype = "transporters"
+            data[shiptype] = ships
+        else:
+            shiptype = "usedFreightersShips"
+            data[shiptype] = ships
+            data["transporters"] = "0"
         # add amounts of resources to send
         for i in range(len(send)):
             if city["availableResources"][i] > 0:
@@ -94,7 +99,7 @@ def sendGoods(session, originCityId, destinationCityId, islandId, ships, send):
         time.sleep(5)
 
 
-def executeRoutes(session, routes):
+def executeRoutes(session, routes, useFreighters=False):
     """This function will execute all the routes passed to it, regardless if there are enough ships available to do so
     Parameters
     ----------
@@ -111,8 +116,11 @@ def executeRoutes(session, routes):
             session.setStatus(
                 f'Sending {toSend[0]}W, {toSend[1]}V, {toSend[2]}M, {toSend[3]}C, {toSend[4]}S ---> {destination_city["name"]}'
             )
-            ships_available = waitForArrival(session)
-            storageCapacityInShips = ships_available * 500
+            ships_available = waitForArrival(session, useFreighters)
+            if useFreighters is False:
+                storageCapacityInShips = ships_available * 500
+            else:
+                storageCapacityInShips = ships_available * 50000
 
             html = session.get(city_url + str(origin_city["id"]))
             origin_city = getCity(html)
@@ -148,9 +156,14 @@ def executeRoutes(session, routes):
                 wait(60 * 60)
                 continue
 
-            available_ships = int(
-                math.ceil((Decimal(resources_to_send) / Decimal(500)))
-            )
+            if useFreighters is False:
+                available_ships = int(
+                    math.ceil((Decimal(resources_to_send) / Decimal(500)))
+                )
+            else:
+                available_ships = int(
+                    math.ceil((Decimal(resources_to_send) / Decimal(50000)))
+                )
             sendGoods(
                 session,
                 origin_city["id"],
@@ -158,6 +171,7 @@ def executeRoutes(session, routes):
                 island_id,
                 available_ships,
                 send,
+                useFreighters,
             )
 
 
@@ -198,7 +212,7 @@ def getMinimumWaitingTime(session):
         return 0
 
 
-def waitForArrival(session):
+def waitForArrival(session, useFreighters=False):
     """This function will return the number of available ships, and if there aren't any, it will wait for the closest fleet to arrive and then return the number of available ships
     Parameters
     ----------
@@ -210,9 +224,11 @@ def waitForArrival(session):
     ships : int
         number of available ships
     """
-    available_ships = getAvailableShips(session)
+    if useFreighters is False: available_ships = getAvailableShips(session)
+    elif useFreighters is True: available_ships = getAvailableFreighters(session)
     while available_ships == 0:
         minimum_waiting_time_for_ship = getMinimumWaitingTime(session)
         wait(minimum_waiting_time_for_ship)
-        available_ships = getAvailableShips(session)
+        if useFreighters is False: available_ships = getAvailableShips(session)
+        elif useFreighters is True: available_ships = getAvailableFreighters(session)
     return available_ships

@@ -10,10 +10,13 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.ref }}
+        fetch-depth: 0
 
     - name: Set up Python 3.11
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: "3.11"
 
@@ -22,6 +25,9 @@ jobs:
 
     - name: Install PyInstaller
       run: python -m pip install PyInstaller
+
+    - name: Install flask
+      run: python -m pip install flask
 
     - name: Install ikabot
       run: python -m pip install ikabot
@@ -35,7 +41,7 @@ jobs:
         mv dist/ikabot/command_line.exe dist/ikabot/ikabot.exe
 
     - name: Upload Pre-compiled Ikabot
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: PreCompiledIkabot
         path: "dist"

@@ -390,8 +390,11 @@ def convertCapturePoints(session, piracyCities, convertPerMission):
 
 
 def getCurrentMissionWaitingTime(html):
-    match = re.search(r'ongoingMissionTimeRemaining\\":(\d+),', html)
-    assert (
-        match
-    ), "Couldn't find remaining ongoing mission time, did you run a pirate mission manually?"
-    return int(match.group(1))
+    try:
+        match = re.search(r'ongoingMissionTimeRemaining\\":(\d+),', html)
+        assert (
+            match
+        ), "Couldn't find remaining ongoing mission time, did you run a pirate mission manually?"
+        return int(match.group(1))
+    except: # In case we can not find current mission waiting time, just sleep for 10 mins (Not a perfect solution)
+        return 10 * 60
