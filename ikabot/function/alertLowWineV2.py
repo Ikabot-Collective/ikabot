@@ -19,10 +19,6 @@ from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import daysHoursMinutes
 from ikabot.helpers.planRoutes import *
 
-
-t = gettext.translation("alertLowWine", localedir, languages=languages, fallback=True)
-_ = t.gettext
-
 getcontext().prec = 30
 
 def alertLowWineV2(session, event, stdin_fd, predetermined_input):
