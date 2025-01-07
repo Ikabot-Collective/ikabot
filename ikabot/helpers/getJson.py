@@ -8,7 +8,7 @@ from math import ceil, floor
 from ikabot.helpers.resources import *
 from ikabot.helpers.varios import decodeUnicodeEscape
 from ikabot.config import *
-from typing import Dict, TypedDict, NotRequired, Any
+from typing import Dict, TypedDict, Optional, Any
 
 LinkDict = TypedDict("LinkDict", {"onclick": str, "href": str, "tooltip": str})
 
@@ -33,16 +33,16 @@ PositionDict = TypedDict(
     "PositionDict",
     {
         "name": str,
-        "level": NotRequired[int],
+        "level": Optional[int],
         "isBusy": bool,
-        "canUpgrade": NotRequired[bool],
-        "isMaxLevel": NotRequired[bool],
+        "canUpgrade": Optional[bool],
+        "isMaxLevel": Optional[bool],
         "building": str,
-        "shipIsAtDockyard": NotRequired[int],
+        "shipIsAtDockyard": Optional[int],
 
         # Added for compatibility
         "position": int,
-        "type": NotRequired[str],
+        "type": Optional[str],
     },
 )
 
@@ -128,24 +128,24 @@ CityDict = TypedDict(
         "name": str,
         "id": int,
         "level": int,
-        "ownerId": NotRequired[str],
-        "ownerName": NotRequired[str],
-        "ownerAllyId": NotRequired[int],
-        "ownerAllyTag": NotRequired[str],
-        "hasTreaties": NotRequired[int],
-        "actions": NotRequired[list[Any]],
-        "state": NotRequired[str],
+        "ownerId": Optional[str],
+        "ownerName": Optional[str],
+        "ownerAllyId": Optional[int],
+        "ownerAllyTag": Optional[str],
+        "hasTreaties": Optional[int],
+        "actions": Optional[list[Any]],
+        "state": Optional[str],
         "viewAble": int,
-        "infestedByPlague": NotRequired[bool],
-        "buildplace_type": NotRequired[str],
+        "infestedByPlague": Optional[bool],
+        "buildplace_type": Optional[str],
 
         # Added for compatibility
 
-        "Id": NotRequired[str],
-        "Name": NotRequired[str],
-        "AllyId": NotRequired[int],
-        "AllyTag": NotRequired[str],
-        "_type": NotRequired[str],
+        "Id": Optional[str],
+        "Name": Optional[str],
+        "AllyId": Optional[int],
+        "AllyTag": Optional[str],
+        "_type": Optional[str],
     },
 )
 
