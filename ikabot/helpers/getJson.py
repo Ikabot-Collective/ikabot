@@ -9,7 +9,7 @@ from ikabot.helpers.resources import *
 from ikabot.helpers.varios import decodeUnicodeEscape
 from ikabot.config import *
 from typing import Dict, TypedDict, Optional, Any
-
+# TODO replace Optional with NotRequried when we drop support for python 3.9 and 3.10. NotRequired is more precise here than Optional
 LinkDict = TypedDict("LinkDict", {"onclick": str, "href": str, "tooltip": str})
 
 FlyingTraderDict = TypedDict("FlyingTraderDict", {"link": LinkDict, "banner": str})
