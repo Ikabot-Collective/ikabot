@@ -186,7 +186,6 @@ def webServer(session, event, stdin_fd, predetermined_input, port=None):
                 if arg == "activeTab" and new_data[arg] == "tab_ikabotSandbox":
                     new_data[arg] = "tab_version"
             if request.method in ["POST"]:
-                raise Exception()
                 resp = session.post(
                     dest_url,
                     params=new_data,
