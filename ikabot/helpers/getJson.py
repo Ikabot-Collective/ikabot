@@ -427,7 +427,7 @@ def getCity(html: str) -> FullCityDict:
 
     return city
 
-def getTransportLoadingAndTravelTime(html: str, totalResources = 0, useFreighters = False, capacityPerTransportPercent = 100, tritonBoostPercent = 0) -> int:
+def getTransportLoadingAndTravelTime(html: str, totalResources = 0, useFreighters = False, capacityPerTransportPercent = 100, tritonBoostPercent = 0) -> tuple[int, int, int, int]:
     """Gets total loading and travel time for a shipment.
     Parameters
     ----------
