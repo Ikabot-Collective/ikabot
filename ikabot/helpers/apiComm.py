@@ -22,7 +22,7 @@ def getNewBlackBoxToken(session):
         blackbox token
     """
     address = (
-        getAddress(session, publicAPIServerDomain)
+        getAddress(publicAPIServerDomain)
         + "/v1/token"
         + "?user_agent="
         + session.user_agent
@@ -56,7 +56,7 @@ def getInteractiveCaptchaSolution(session, text_image, icons_image):
     solution : str
         solution of the captcha
     """
-    address = getAddress(session, publicAPIServerDomain) + "/v1/decaptcha/lobby"
+    address = getAddress(publicAPIServerDomain) + "/v1/decaptcha/lobby"
     files = {"text_image": text_image, "icons_image": icons_image}
     response = post(address, files=files, verify=do_ssl_verify, timeout=900)
     assert response.status_code == 200, (
@@ -87,7 +87,7 @@ def getPiratesCaptchaSolution(session, image):
     solution : str
         solution of the captcha
     """
-    address = getAddress(session, publicAPIServerDomain) + "/v1/decaptcha/pirate"
+    address = getAddress(publicAPIServerDomain) + "/v1/decaptcha/pirate"
     files = {"image": image}
     response = post(address, files=files, verify=do_ssl_verify, timeout=900)
     assert response.status_code == 200, (

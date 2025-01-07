@@ -4,9 +4,8 @@
 import gettext
 import locale
 import os
-import random
 
-# Version changed automatically by the release pipeline
+# Version is changed automatically by the release pipeline
 IKABOT_VERSION = "7.0.9"
 
 
@@ -27,6 +26,10 @@ _ = t.gettext
 update_msg = ""
 
 isWindows = os.name == "nt"
+
+
+LOGS_DIRECTORY_FILE = os.getenv("temp") + "/ikabot.log" if isWindows else "/tmp/ikabot.log"
+DEFAULT_LOG_LEVEL = 30 # Warning
 
 publicAPIServerDomain = "ikagod.twilightparadox.com"
 do_ssl_verify = True
@@ -92,17 +95,10 @@ piracyMissionWaitingTime = {
     9: 57600,
 }
 predetermined_input = []
-logLevelsText = ["DEBUG", "INFO", "WARN", "ERROR"]
 
 
-class logLevels:
-    DEBUG = 0
-    INFO = 1
-    WARN = 2
-    ERROR = 3
 
 
-logLevel = logLevels.WARN
 debugON_alertAttacks = False
 debugON_alertLowWine = False
 debugON_donationBot = False

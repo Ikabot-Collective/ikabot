@@ -1,10 +1,11 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import logging
+from ikabot.helpers.logging import getLogger
 import base64
 import gettext
 import json
-import logging
 import pickle
 import re
 import socket
@@ -113,31 +114,21 @@ def webServer(session, event, stdin_fd, predetermined_input, port=None):
     # dump cache in a separate thread every 5 minutes
     threading.Thread(target=dump_cache, daemon=True).start()
 
-    # make logger use session.writeLog()
-    class CustomHandler(logging.Handler):
-        def emit(self, record):
-            session.writeLog(
-                msg="[WEB SERVER] " + record.getMessage(),
-                level=logLevels.ERROR,
-                module=__name__,
-                logTraceback=True,
-            )
-
-    logger = logging.getLogger("werkzeug")
-    logger.handlers.clear()
-    logger.setLevel(logging.ERROR)
-    logger.addHandler(CustomHandler())
+    import flask.cli
+    flask.cli.show_server_banner = lambda *args: None
 
     try:
         app = Flask("Ikabot web server")
-        app.logger = logger
+        logging.getLogger("werkzeug").setLevel(logging.ERROR)
+        app.logger = getLogger(__name__)
+        app.logger.setLevel(logging.ERROR)
 
         @app.route("/", defaults={"path": ""}, methods=["GET", "POST"])
         @app.route("/<path:path>", methods=["GET", "POST"])
         def webServer(path):
 
             dest_url = f"{path}"
-
+            
             if "ikabot=1" in request.url:
                 return handleIkabotAPIRequest(session, request)
 
@@ -195,6 +186,7 @@ def webServer(session, event, stdin_fd, predetermined_input, port=None):
                 if arg == "activeTab" and new_data[arg] == "tab_ikabotSandbox":
                     new_data[arg] = "tab_version"
             if request.method in ["POST"]:
+                raise Exception()
                 resp = session.post(
                     dest_url,
                     params=new_data,

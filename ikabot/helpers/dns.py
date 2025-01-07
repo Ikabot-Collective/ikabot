@@ -1,6 +1,8 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from ikabot.helpers.logging import getLogger
+logger = getLogger(__name__)
 import socket
 import struct
 
@@ -128,7 +130,7 @@ def getDNSTXTRecordWithNSlookup(domain, DNS_server="8.8.8.8"):
     return "http://" + parts[1]
 
 
-def getAddressWithSocket(session, domain):
+def getAddressWithSocket(domain):
     """Makes multiple attempts to obtain the ikabot public API server address with the socket library
     Returns
     -------
@@ -138,36 +140,19 @@ def getAddressWithSocket(session, domain):
     try:
         return getDNSTXTRecordWithSocket(domain, "ns2.afraid.org")
     except Exception as e:
-        session.writeLog(
-            "Failed to obtain public API address from ns2.afraid.org, trying with 8.8.8.8: "
-            + str(e),
-            level=logLevels.WARN,
-            module=__name__,
-            logTraceback=True,
-        )
+        logger.warning("Failed to obtain public API address from ns2.afraid.org, trying with 8.8.8.8: ", exc_info=True)
     try:
         return getDNSTXTRecordWithSocket(domain, "8.8.8.8")
     except Exception as e:
-        session.writeLog(
-            "Failed to obtain public API address from 8.8.8.8, trying with 1.1.1.1: "
-            + str(e),
-            level=logLevels.WARN,
-            module=__name__,
-            logTraceback=True,
-        )
+        logger.warning("Failed to obtain public API address from 8.8.8.8, trying with 1.1.1.1: ", exc_info=True)
     try:
         return getDNSTXTRecordWithSocket(domain, "1.1.1.1")
     except Exception as e:
-        session.writeLog(
-            "Failed to obtain public API address from 1.1.1.1: " + str(e),
-            level=logLevels.WARN,
-            module=__name__,
-            logTraceback=True,
-        )
+        logger.warning("Failed to obtain public API address from 1.1.1.1: ", exc_info=True)
         raise e
 
 
-def getAddressWithNSlookup(session, domain):
+def getAddressWithNSlookup(domain):
     """Makes multiple attempts to obtain the ikabot public API server address with the nslookup tool if it's installed
     Returns
     -------
@@ -177,52 +162,23 @@ def getAddressWithNSlookup(session, domain):
     try:
         return getDNSTXTRecordWithNSlookup(domain, "ns2.afraid.org")
     except Exception as e:
-        session.writeLog(
-            "Failed to obtain public API address from nslookup with ns2.afraid.org: "
-            + str(e),
-            level=logLevels.WARN,
-            module=__name__,
-            logTraceback=True,
-        )
+        logger.warning("Failed to obtain public API address from ns2.afraid.org: ", exc_info=True)
     try:
         return getDNSTXTRecordWithNSlookup(domain, "")
     except Exception as e:
-        session.writeLog(
-            "Failed to obtain public API address from nslookup with system default DNS server: "
-            + str(e),
-            level=logLevels.WARN,
-            module=__name__,
-            logTraceback=True,
-        )
+        logger.warning("Failed to obtain public API address from nslookup with system default DNS server: ", exc_info=True)
     try:
         return getDNSTXTRecordWithNSlookup(domain, "8.8.8.8")
     except Exception as e:
-        session.writeLog(
-            "Failed to obtain public API address from nslookup with 8.8.8.8: " + str(e),
-            level=logLevels.WARN,
-            module=__name__,
-            logTraceback=True,
-        )
+        logger.warning("Failed to obtain public API address from nslookup with 8.8.8.8: ", exc_info=True)
     try:
         return getDNSTXTRecordWithNSlookup(domain, "1.1.1.1")
     except Exception as e:
-        session.writeLog(
-            "Failed to obtain public API address from nslookup with 1.1.1.1: " + str(e),
-            level=logLevels.WARN,
-            module=__name__,
-            logTraceback=True,
-        )
+        logger.warning("Failed to obtain public API address from nslookup with 1.1.1.1: ", exc_info=True)
         raise e
 
 
-def getAddress(
-    session=type(
-        "test",
-        (object,),
-        {"writeLog": lambda *args, **kwargs: print(str(args) + " " + str(kwargs))},
-    )(),
-    domain="ikagod.twilightparadox.com",
-):
+def getAddress(domain="ikagod.twilightparadox.com"):
     """Makes multiple attempts to obtain the ikabot public API server address
     Parameters
     ----------
@@ -237,35 +193,19 @@ def getAddress(
     if custom_address:
         return custom_address
     try:
-        address = getAddressWithSocket(session, domain)
+        address = getAddressWithSocket(domain)
         assert "." in address or ":" in address.replace("http://", ""), (
             "Bad server address: " + address
         )
         return address.replace("/ikagod/ikabot", "")
     except Exception as e:
-        session.writeLog(
-            "Failed to obtain public API address from socket, falling back to nslookup: "
-            + str(e),
-            level=logLevels.WARN,
-            module=__name__,
-            logTraceback=True,
-        )
+        logger.warning("Failed to obtain public API address from socket, falling back to nslookup: ", exc_info=True)
     try:
-        address = getAddressWithNSlookup(session, domain)
+        address = getAddressWithNSlookup(domain)
         assert "." in address or ":" in address.replace("http://", ""), (
             "Bad server address: " + address
         )  # address is either hostname, IPv4 or IPv6
         return address.replace("/ikagod/ikabot", "")
     except Exception as e:
-        session.writeLog(
-            "Failed to obtain public API address from both socket and nslookup: "
-            + str(e),
-            level=logLevels.ERROR,
-            module=__name__,
-            logTraceback=True,
-        )
+        logger.error("Failed to obtain public API address from both socket and nslookup: ", exc_info=True)
         raise e
-
-
-# session = type('test', (object,), {'writeLog': lambda *args, **kwargs: print(str(args) + ' ' + str(kwargs))})() # Useful mock session object for testing
-# print(getAddress(session, 'ikagod.twilightparadox.com'))
