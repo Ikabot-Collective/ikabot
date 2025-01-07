@@ -9,6 +9,7 @@ import random
 # Version changed automatically by the release pipeline
 IKABOT_VERSION = "7.0.9"
 
+
 IKABOT_VERSION_TAG = "v" + IKABOT_VERSION
 
 local = locale.setlocale(locale.LC_ALL, "")
@@ -40,6 +41,17 @@ island_url = "view=island&islandId="
 prompt = " >>  "
 materials_names = [_("Wood"), _("Wine"), _("Marble"), _("Cristal"), _("Sulfur")]
 materials_names_english = ["Wood", "Wine", "Marble", "Cristal", "Sulfur"]
+miracle_names_english = [
+    "",
+    "Hephaestus' Forge",
+    "Hades' Holy Grove",
+    "Demeter's gardens",
+    "Athena's Parthenon",
+    "Temple of Hermes",
+    "Ares' Stronghold",
+    "Temple of Poseidon",
+    "Colossus",
+]
 materials_names_tec = ["wood", "wine", "marble", "glass", "sulfur"]
 material_img_hash = [
     "19c3527b2f694fb882563c04df6d8972",
