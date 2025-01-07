@@ -1,6 +1,8 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from ikabot.helpers.logging import getLogger
+logger = getLogger(__name__)
 import gettext
 import json
 import os
@@ -47,19 +49,10 @@ def sendToBot(session, msg, Token=False, Photo=None):
         a bytes object representing a picture to be sent.
     """
 
-    session.writeLog(
-        msg="MESSAGE TO TG BOT: " + msg,
-        module=__name__,
-        level=logLevels.WARN,
-        logTraceback=True,
-        logRequestHistory=True,
-    )
+    logger.warning(f"MESSAGE TO TG BOT: {msg}", exc_info=True)
+
     if checkTelegramData(session) is False:
-        session.writeLog(
-            msg="Tried to message TG bot without correct tg data!",
-            module=__name__,
-            level=logLevels.ERROR,
-        )
+        logger.error("Tried to message TG bot without correct tg data!", exc_info=True)
         return
     if Token is False:
         msg = "pid:{}\n{}\n{}".format(os.getpid(), config.infoUser, msg)
