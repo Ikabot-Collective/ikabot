@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import gettext
 import sys
 import time
 import traceback
@@ -14,11 +13,6 @@ from ikabot.helpers.pedirInfo import getIslandsIds
 from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import getDateTime, wait
-
-t = gettext.translation(
-    "searchForIslandSpaces", localedir, languages=languages, fallback=True
-)
-_ = t.gettext
 
 
 def searchForIslandSpaces(session, event, stdin_fd, predetermined_input):
@@ -76,7 +70,7 @@ def searchForIslandSpaces(session, event, stdin_fd, predetermined_input):
         )
         fights = read(values=["y", "Y", "n", "N"])
         banner()
-        print(_("I will search for changes in the selected islands"))
+        print("I will search for changes in the selected islands")
         enter()
     except KeyboardInterrupt:
         event.set()
@@ -85,12 +79,12 @@ def searchForIslandSpaces(session, event, stdin_fd, predetermined_input):
     set_child_mode(session)
     event.set()
 
-    info = _("\nI search for new spaces each hour\n")
+    info = "\nI search for new spaces each hour\n"
     setInfoSignal(session, info)
     try:
         do_it(session, islandList, time, fights)
     except Exception as e:
-        msg = _("Error in:\n{}\nCause:\n{}").format(info, traceback.format_exc())
+        msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
         sendToBot(session, msg)
     finally:
         session.logout()
@@ -143,9 +137,7 @@ def do_it(session, islandList, time, fights):
                         city_now["id"] for city_now in cities_now
                     ]:
                         # we didn't find the city_before in the cities_now
-                        msg = _(
-                            "The city {} of the player {} disappeared in {} {}:{} {}"
-                        ).format(
+                        msg = "The city {} of the player {} disappeared in {} {}:{} {}".format(
                             city_before["name"],
                             city_before["Name"],
                             materials_names[int(island["tradegood"])],
@@ -164,9 +156,7 @@ def do_it(session, islandList, time, fights):
                                     and "armyAction" in city_now["infos"]
                                     and city_now["infos"]["armyAction"] == "fight"
                                 ):
-                                    msg = _(
-                                        "A fight started in the city {} of the player {} on island {} {}:{} {}"
-                                    ).format(
+                                    msg = "A fight started in the city {} of the player {} on island {} {}:{} {}".format(
                                         city_before["name"],
                                         city_before["Name"],
                                         materials_names[int(island["tradegood"])],
@@ -181,9 +171,7 @@ def do_it(session, islandList, time, fights):
                                     and "armyAction" in city_before["infos"]
                                     and city_before["infos"]["armyAction"] == "fight"
                                 ):
-                                    msg = _(
-                                        "A fight stopped in the city {} of the player {} on island {} {}:{} {}"
-                                    ).format(
+                                    msg = "A fight stopped in the city {} of the player {} on island {} {}:{} {}".format(
                                         city_before["name"],
                                         city_before["Name"],
                                         materials_names[int(island["tradegood"])],
@@ -199,9 +187,7 @@ def do_it(session, islandList, time, fights):
                         city_before["id"] for city_before in cities_before
                     ]:
                         # we didn't find the city_now in the cities_before
-                        msg = _(
-                            "Player {} created a new city {} in {} {}:{} {}"
-                        ).format(
+                        msg = "Player {} created a new city {} in {} {}:{} {}".format(
                             city_now["Name"],
                             city_now["name"],
                             materials_names[int(island["tradegood"])],

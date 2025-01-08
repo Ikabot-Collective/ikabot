@@ -12,9 +12,6 @@ from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import daysHoursMinutes
 
-t = gettext.translation("alertAttacks", localedir, languages=languages, fallback=True)
-_ = t.gettext
-
 
 def alertAttacks(session, event, stdin_fd, predetermined_input):
     """
@@ -35,14 +32,13 @@ def alertAttacks(session, event, stdin_fd, predetermined_input):
         banner()
         default = 20
         minutes = read(
-            msg=_(
-                "How often should I search for attacks?(min:3, default: {:d}): "
-            ).format(default),
+            msg=
+                "How often should I search for attacks?(min:3, default: {:d}): ".format(default),
             min=3,
             default=default,
         )
         # min_units = read(msg=_('Attacks with less than how many units should be ignored? (default: 0): '), digit=True, default=0)
-        print(_("I will check for attacks every {:d} minutes").format(minutes))
+        print("I will check for attacks every {:d} minutes".format(minutes))
         enter()
     except KeyboardInterrupt:
         event.set()
@@ -51,12 +47,12 @@ def alertAttacks(session, event, stdin_fd, predetermined_input):
     set_child_mode(session)
     event.set()
 
-    info = _("\nI check for attacks every {:d} minutes\n").format(minutes)
+    info = "\nI check for attacks every {:d} minutes\n".format(minutes)
     setInfoSignal(session, info)
     try:
         do_it(session, minutes)
     except Exception as e:
-        msg = _("Error in:\n{}\nCause:\n{}").format(info, traceback.format_exc())
+        msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
         sendToBot(session, msg)
     finally:
         session.logout()
@@ -92,7 +88,7 @@ def respondToAttack(session):
                 # mv
                 activateVacationMode(session)
             else:
-                sendToBot(session, _("Invalid command: {:d}").format(action))
+                sendToBot(session, "Invalid command: {:d}".format(action))
 
 
 def do_it(session, minutes):
@@ -143,22 +139,22 @@ def do_it(session, minutes):
                     timeLeft = int(militaryMovement["eventTime"]) - timeNow
 
                     # send alert
-                    msg = _("-- ALERT --\n")
+                    msg = "-- ALERT --\n"
                     msg += missionText + "\n"
-                    msg += _("from the city {} of {}\n").format(
+                    msg += "from the city {} of {}\n".format(
                         origin["name"], origin["avatarName"]
                     )
-                    msg += _("a {}\n").format(target["name"])
-                    msg += _("{} units\n").format(amountTroops)
-                    msg += _("{} fleet\n").format(amountFleets)
-                    msg += _("arrival in: {}\n").format(daysHoursMinutes(timeLeft))
-                    msg += _("If you want to put the account in vacation mode send:\n")
-                    msg += _("{:d}:1").format(os.getpid())
+                    msg += "a {}\n".format(target["name"])
+                    msg += "{} units\n".format(amountTroops)
+                    msg += "{} fleet\n".format(amountFleets)
+                    msg += "arrival in: {}\n".format(daysHoursMinutes(timeLeft))
+                    msg += "If you want to put the account in vacation mode send:\n"
+                    msg += "{:d}:1".format(os.getpid())
                     sendToBot(session, msg)
 
         except Exception as e:
-            info = _("\nI check for attacks every {:d} minutes\n").format(minutes)
-            msg = _("Error in:\n{}\nCause:\n{}").format(info, traceback.format_exc())
+            info = "\nI check for attacks every {:d} minutes\n".format(minutes)
+            msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
             sendToBot(session, msg)
 
         # remove old attacks from knownAttacks

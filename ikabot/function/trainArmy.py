@@ -3,7 +3,6 @@
 
 import asyncio
 import copy
-import gettext
 import json
 import re
 import traceback
@@ -18,9 +17,6 @@ from ikabot.helpers.resources import getAvailableResources
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import *
 from ikabot.helpers.varios import addThousandSeparator
-
-t = gettext.translation("trainArmy", localedir, languages=languages, fallback=True)
-_ = t.gettext
 
 
 def getBuildingInfo(session, city, trainTroops):
@@ -158,9 +154,8 @@ def planTrainings(session, city, trainings, trainTroops):
             # amount of units that will be trained
             total = sum([unit["train"] for unit in training])
             if total == 0:
-                msg = _(
-                    "It was not possible to finish the training due to lack of resources."
-                )
+                msg = "It was not possible to finish the training due to lack of resources."
+                
                 sendToBot(session, msg)
                 return
 
@@ -202,15 +197,15 @@ def trainArmy(session, event, stdin_fd, predetermined_input):
     try:
         banner()
 
-        print(_("Do you want to train troops (1) or ships (2)?"))
+        print("Do you want to train troops (1) or ships (2)?")
         rta = read(min=1, max=2)
         trainTroops = rta == 1
         banner()
 
         if trainTroops:
-            print(_("In what city do you want to train the troops?"))
+            print("In what city do you want to train the troops?")
         else:
-            print(_("In what city do you want to train the fleet?"))
+            print("In what city do you want to train the fleet?")
         city = chooseCity(session)
         banner()
 
@@ -221,9 +216,9 @@ def trainArmy(session, event, stdin_fd, predetermined_input):
                 break
         else:
             if trainTroops:
-                print(_("Barracks not built."))
+                print("Barracks not built.")
             else:
-                print(_("Shipyard not built."))
+                print("Shipyard not built.")
             enter()
             event.set()
             return
@@ -238,7 +233,7 @@ def trainArmy(session, event, stdin_fd, predetermined_input):
         tranings = []
         while True:
             units = generateArmyData(units_info)
-            print(_("Train:"))
+            print("Train:")
             for unit in units:
                 pad = " " * (maxSize - len(unit["local_name"]))
                 amount = read(
@@ -269,7 +264,7 @@ def trainArmy(session, event, stdin_fd, predetermined_input):
                         unit["costs"]["completiontime"] * unit["cantidad"]
                     )
 
-            print(_("\nTotal cost:"))
+            print("\nTotal cost:")
             for i in range(len(materials_names_english)):
                 if cost[i] > 0:
                     print(
@@ -279,24 +274,24 @@ def trainArmy(session, event, stdin_fd, predetermined_input):
                     )
             if cost[len(materials_names_english) + 0] > 0:
                 print(
-                    _("Citizens: {}").format(
+                    "Citizens: {}".format(
                         addThousandSeparator(cost[len(materials_names_english) + 0])
                     )
                 )
             if cost[len(materials_names_english) + 1] > 0:
                 print(
-                    _("Maintenance: {}").format(
+                    "Maintenance: {}".format(
                         addThousandSeparator(cost[len(materials_names_english) + 1])
                     )
                 )
             if cost[len(materials_names_english) + 2] > 0:
                 print(
-                    _("Duration: {}").format(
+                    "Duration: {}".format(
                         daysHoursMinutes(int(cost[len(materials_names_english) + 2]))
                     )
                 )
 
-            print(_("\nProceed? [Y/n]"))
+            print("\nProceed? [Y/n]")
             rta = read(values=["y", "Y", "n", "N", ""])
             if rta.lower() == "n":
                 event.set()
@@ -305,40 +300,40 @@ def trainArmy(session, event, stdin_fd, predetermined_input):
             tranings.append(units)
 
             if trainTroops:
-                print(_("\nDo you want to train more troops when you finish? [y/N]"))
+                print("\nDo you want to train more troops when you finish? [y/N]")
             else:
-                print(_("\nDo you want to train more fleets when you finish? [y/N]"))
+                print("\nDo you want to train more fleets when you finish? [y/N]")
             rta = read(values=["y", "Y", "n", "N", ""])
             if rta.lower() == "y":
                 banner()
                 if trainTroops:
-                    print(_("Train new troops (1) or repeat (2)?"))
+                    print("Train new troops (1) or repeat (2)?")
                 else:
-                    print(_("Train new fleets (1) or repeat (2)?"))
+                    print("Train new fleets (1) or repeat (2)?")
                 rta = read(min=1, max=2)
                 if rta == 1:
                     continue
                 else:
-                    print(_("\nRepeat how many times?"))
+                    print("\nRepeat how many times?")
                     countRepeat = read(min=1, default=0)
                     break
             else:
                 countRepeat = 0
                 break
 
-        print(_("Do you want to replicate the training to other cities? (y/N)"))
+        print("Do you want to replicate the training to other cities? (y/N)")
         replicate = read(values=["y", "Y", "n", "N", ""])
         if replicate.lower() == "y":
             cityTrainings = []
             ids, cities = getIdsOfCities(session)
 
-            print(_("(0) Back"))
-            print(_("(1) All the wine cities"))
-            print(_("(2) All the marble cities"))
-            print(_("(3) All the cristal cities"))
-            print(_("(4) All the sulfur cities"))
-            print(_("(5) Choose City"))
-            print(_("(6) All City"))
+            print("(0) Back")
+            print("(1) All the wine cities")
+            print("(2) All the marble cities")
+            print("(3) All the cristal cities")
+            print("(4) All the sulfur cities")
+            print("(5) Choose City")
+            print("(6) All City")
 
             selected = read(min=0, max=6, digit=True)
             if selected == 0:
@@ -353,10 +348,10 @@ def trainArmy(session, event, stdin_fd, predetermined_input):
                 while True:
                     city = chooseCity(session)
                     if city["id"] in cityTrainings:
-                        print(_("\nYou have already selected this city!"))
+                        print("\nYou have already selected this city!")
                         continue
                     cityTrainings.append(city["id"])
-                    print(_("\nDo you want to add another city? [y/N]"))
+                    print("\nDo you want to add another city? [y/N]")
                     rta = read(values=["y", "Y", "n", "N", ""])
                     if rta.lower() == "y":
                         continue
@@ -389,7 +384,7 @@ def trainArmy(session, event, stdin_fd, predetermined_input):
         not_enough = [elem for elem in resourcesAvailable if elem < 0] != []
 
         if not_enough:
-            print(_("\nThere are not enough resources:"))
+            print("\nThere are not enough resources:")
             for i in range(len(materials_names_english)):
                 if resourcesAvailable[i] < 0:
                     print(
@@ -401,23 +396,23 @@ def trainArmy(session, event, stdin_fd, predetermined_input):
 
             if resourcesAvailable[len(materials_names_english)] < 0:
                 print(
-                    _("Citizens:{}").format(
+                    "Citizens:{}".format(
                         addThousandSeparator(
                             resourcesAvailable[len(materials_names_english)] * -1
                         )
                     )
                 )
 
-            print(_("\nProceed anyway? [Y/n]"))
+            print("\nProceed anyway? [Y/n]")
             rta = read(values=["y", "Y", "n", "N", ""])
             if rta.lower() == "n":
                 event.set()
                 return
 
         if trainTroops:
-            print(_("\nThe selected troops will be trained."))
+            print("\nThe selected troops will be trained.")
         else:
-            print(_("\nThe selected fleet will be trained."))
+            print("\nThe selected fleet will be trained.")
         enter()
 
         if replicate == "y":
@@ -444,14 +439,14 @@ def trainArmy(session, event, stdin_fd, predetermined_input):
                                 break
                     except Exception as e:
                         if trainTroops:
-                            info = _("\nI train troops in {}\n").format(
+                            info = "\nI train troops in {}\n".format(
                                 city["cityName"]
                             )
                         else:
-                            info = _("\nI train fleets in {}\n").format(
+                            info = "\nI train fleets in {}\n".format(
                                 city["cityName"]
                             )
-                        msg = _("Error in:\n{}\nCause:\n{}").format(
+                        msg = "Error in:\n{}\nCause:\n{}".format(
                             info, traceback.format_exc()
                         )
                         sendToBot(session, msg)
@@ -459,14 +454,14 @@ def trainArmy(session, event, stdin_fd, predetermined_input):
 
         else:
             if trainTroops:
-                info = _("\nI train troops in {}\n").format(city["cityName"])
+                info = "\nI train troops in {}\n".format(city["cityName"])
             else:
-                info = _("\nI train fleets in {}\n").format(city["cityName"])
+                info = "\nI train fleets in {}\n".format(city["cityName"])
             setInfoSignal(session, info)
             try:
                 planTrainings(session, city, tranings, trainTroops)
             except Exception as e:
-                msg = _("Error in:\n{}\nCause:\n{}").format(
+                msg = "Error in:\n{}\nCause:\n{}".format(
                     info, traceback.format_exc()
                 )
                 sendToBot(session, msg)

@@ -3,7 +3,6 @@
 
 from ikabot.helpers.logging import getLogger
 logger = getLogger(__name__)
-import gettext
 import json
 import os
 import random
@@ -15,9 +14,6 @@ import ikabot.config as config
 from ikabot.config import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import read
-
-t = gettext.translation("botComm", localedir, languages=languages, fallback=True)
-_ = t.gettext
 
 
 def sendToBotDebug(session, msg, debugON):
@@ -171,15 +167,12 @@ def checkTelegramData(session):
         if not session.padre:  # stop asking people if process is detached
             return False
         banner()
-        print(_("You must provide valid credentials to communicate by telegram."))
-        print(_("You require the token of the bot you are going to use."))
-        print(
-            _(
-                "For more information about how to obtain them read the readme at https://github.com/physics-sp/ikabot"
-            )
+        print("You must provide valid credentials to communicate by telegram.")
+        print("You require the token of the bot you are going to use.")
+        print("For more information about how to obtain them read the readme at https://github.com/Ikabot-Collective/ikabot"
         )
         rta = read(
-            msg=_("Will you provide the credentials now? [y/N]"),
+            msg="Will you provide the credentials now? [y/N]",
             values=["y", "Y", "n", "N", ""],
         )
         if rta.lower() != "y":
@@ -210,19 +203,11 @@ def updateTelegramData(session, event=None, stdin_fd=None, predetermined_input=[
         sys.stdin = os.fdopen(stdin_fd)  # give process access to terminal
     config.predetermined_input = predetermined_input
     banner()
-    print(
-        _(
-            "To create your own Telegram bot, read this: https://core.telegram.org/bots#3-how-do-i-create-a-bot"
-        )
-    )
-    print(
-        _(
-            "1. Just talk to @botfather in Telegram, send /newbot and then choose the bot's name."
-        )
-    )
-    print(_("2. Obtain your new bot's token"))
-    print(_("3. Remember to keep the token secret!\n"))
-    botToken = read(msg=_("Bot's token: "))
+    print("To create your own Telegram bot, read this: https://core.telegram.org/bots#3-how-do-i-create-a-bot")
+    print("1. Just talk to @botfather in Telegram, send /newbot and then choose the bot's name.")
+    print("2. Obtain your new bot's token")
+    print("3. Remember to keep the token secret!\n")
+    botToken = read(msg="Bot's token: ")
 
     updates = get(
         "https://api.telegram.org/bot{}/getUpdates".format(botToken)
@@ -231,7 +216,7 @@ def updateTelegramData(session, event=None, stdin_fd=None, predetermined_input=[
         "https://api.telegram.org/bot{}/getMe".format(botToken)
     ).json()
     if "ok" not in updates or updates["ok"] is False:
-        print(_("Invalid Telegram bot, try again."))
+        print("Invalid Telegram bot, try again.")
         enter()
         if event is not None and stdin_fd is not None:
             event.set()

@@ -4,7 +4,6 @@
 import logging
 from ikabot.helpers.logging import getLogger
 import base64
-import gettext
 import json
 import pickle
 import re
@@ -35,10 +34,6 @@ class ResponseTypes:
     GREEN = 10
     RED = 11
     YELLOW = 12
-
-
-t = gettext.translation("webServer", localedir, languages=languages, fallback=True)
-_ = t.gettext
 
 if isWindows:
     web_cache_file = os.getenv("temp") + "/ikabot.webcache"

@@ -2,16 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import gettext
 import sys
 
 from ikabot.config import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import enter, read
-
-t = gettext.translation("logs", localedir, languages=languages, fallback=True)
-_ = t.gettext
-
 
 
 def logs(session, event, stdin_fd, predetermined_input):

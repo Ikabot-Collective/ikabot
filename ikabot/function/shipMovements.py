@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import gettext
 import json
 import math
 import re
@@ -14,9 +13,6 @@ from ikabot.helpers.gui import *
 from ikabot.helpers.naval import *
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.varios import *
-
-t = gettext.translation("shipMovements", localedir, languages=languages, fallback=True)
-_ = t.gettext
 
 
 def isHostile(movement):
@@ -52,7 +48,7 @@ def shipMovements(session, event, stdin_fd, predetermined_input):
         banner()
 
         print(
-            _("Ships {:d}/{:d}\n").format(
+            "Ships {:d}/{:d}\n".format(
                 getAvailableShips(session), getTotalShips(session)
             )
         )
@@ -67,7 +63,7 @@ def shipMovements(session, event, stdin_fd, predetermined_input):
         time_now = int(resp[0][1]["time"])
 
         if len(movements) == 0:
-            print(_("There are no movements"))
+            print("There are no movements")
             enter()
             event.set()
             return
@@ -106,7 +102,7 @@ def shipMovements(session, event, stdin_fd, predetermined_input):
                 troops = movement["army"]["amount"]
                 fleets = movement["fleet"]["amount"]
                 print(
-                    _("Troops:{}\nFleets:{}").format(
+                    "Troops:{}\nFleets:{}".format(
                         addThousandSeparator(troops), addThousandSeparator(fleets)
                     )
                 )
@@ -120,7 +116,7 @@ def shipMovements(session, event, stdin_fd, predetermined_input):
                     else:
                         fleets += int(mov["amount"])
                 print(
-                    _("Troops:{}\nFleets:{}\n Ships:{}").format(
+                    "Troops:{}\nFleets:{}\n Ships:{}".format(
                         addThousandSeparator(troops),
                         addThousandSeparator(fleets),
                         addThousandSeparator(ships),
@@ -137,9 +133,9 @@ def shipMovements(session, event, stdin_fd, predetermined_input):
                         index = materials_names_tec.index(tradegood)
                         tradegood = materials_names[index]
                     total_load += int(amount.replace(",", "").replace(".", ""))
-                    print(_("{} of {}").format(amount, tradegood))
+                    print("{} of {}".format(amount, tradegood))
                 ships = int(math.ceil((Decimal(total_load) / Decimal(500))))
-                print(_("{:d} Ships").format(ships))
+                print("{:d} Ships".format(ships))
         enter()
         event.set()
     except KeyboardInterrupt:

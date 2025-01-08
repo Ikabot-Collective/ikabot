@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import gettext
 import json
 import os
 import re
@@ -13,9 +12,6 @@ from ikabot.config import *
 from ikabot.helpers.getJson import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.varios import decodeUnicodeEscape
-
-t = gettext.translation("pedirInfo", localedir, languages=languages, fallback=True)
-_ = t.gettext
 
 getcontext().prec = 30
 
@@ -121,15 +117,15 @@ def chooseCity(session, foreign=False):
             return " " * (longest_city_name_length - len(city_name) + 2)
 
         resources_abbreviations = {
-            "1": _("(W)"),
-            "2": _("(M)"),
-            "3": _("(C)"),
-            "4": _("(S)"),
+            "1": "(W)",
+            "2": "(M)",
+            "3": "(C)",
+            "4": "(S)",
         }
 
         i = 0
         if foreign:
-            print(_(" 0: foreign city"))
+            print(" 0: foreign city")
         else:
             print("")
         for city_id in ids:
@@ -142,7 +138,7 @@ def chooseCity(session, foreign=False):
             )
         menu_cities = menu_cities[:-1]
     if foreign:
-        print(_(" 0: foreign city"))
+        print(" 0: foreign city")
     print(menu_cities)
 
     if foreign:
@@ -181,7 +177,7 @@ def chooseForeignCity(session):
         islands_json = json.loads(islands_json, strict=False)
         island_id = islands_json["data"][str(x)][str(y)][0]
     except Exception:
-        print(_("Incorrect coordinates"))
+        print("Incorrect coordinates")
         enter()
         banner()
         return chooseCity(session, foreign=True)
@@ -208,7 +204,7 @@ def chooseForeignCity(session):
             )
             city_options.append(city)
     if i == 0:
-        print(_("There are no cities where to send resources on this island"))
+        print("There are no cities where to send resources on this island")
         enter()
         return chooseCity(session, foreign=True)
     selected_city_index = read(min=1, max=i)

@@ -1,15 +1,11 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import gettext
 import os
 import signal
 
 from ikabot.config import *
 from ikabot.helpers.botComm import *
-
-t = gettext.translation("signals", localedir, languages=languages, fallback=True)
-_ = t.gettext
 
 
 def do_nothing(signal, frame):
@@ -22,7 +18,7 @@ def deactivate_sigint():
 
 def create_handler(s):
     def _handler(signum, frame):
-        raise Exception(_("Signal number {:d} received").format(signum))
+        raise Exception("Signal number {:d} received".format(signum))
 
     return _handler
 
@@ -43,7 +39,7 @@ def setInfoSignal(session, info):  # send process info to bot
     session : ikabot.web.session.Session
     info : str
     """
-    info = _("information of the process {}:\n{}").format(os.getpid(), info)
+    info = "information of the process {}:\n{}".format(os.getpid(), info)
 
     def _sendInfo(signum, frame):
         sendToBot(session, info)

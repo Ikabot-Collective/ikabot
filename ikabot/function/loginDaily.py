@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import gettext
+
 import sys
 import time
 import traceback
@@ -13,9 +13,6 @@ from ikabot.helpers.pedirInfo import chooseCity, getIdsOfCities
 from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import getDateTime, timeStringToSec, wait
-
-t = gettext.translation("loginDaily", localedir, languages=languages, fallback=True)
-_ = t.gettext
 
 
 earliest_wakeup_time = 24 * 60 * 60
@@ -86,7 +83,7 @@ def loginDaily(session, event, stdin_fd, predetermined_input):
 
             modify_tasks()
 
-        print(_("I will do the thing."))
+        print("I will do the thing.")
         enter()
     except KeyboardInterrupt:
         event.set()
@@ -95,7 +92,7 @@ def loginDaily(session, event, stdin_fd, predetermined_input):
     set_child_mode(session)
     event.set()
 
-    info = _("\nI enter every day\n")
+    info = "\nI enter every day\n"
     setInfoSignal(session, info)
     try:
         do_it(
@@ -106,7 +103,7 @@ def loginDaily(session, event, stdin_fd, predetermined_input):
             favour_tasks=favour_tasks,
         )
     except Exception as e:
-        msg = _("Error in:\n{}\nCause:\n{}").format(info, traceback.format_exc())
+        msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
         sendToBot(session, msg)
     finally:
         session.logout()
