@@ -97,7 +97,7 @@ def proxyConf(session, event, stdin_fd, predetermined_input):
             session_data["proxy"]["set"] = True
         else:
             curr_proxy = session_data["proxy"]["conf"]["https"]
-            print("Current proxy: {}").format(curr_proxy)
+            print("Current proxy: {}".format(curr_proxy))
             print("What do you want to do?")
             print("0) Exit")
             print("1) Set a new proxy")

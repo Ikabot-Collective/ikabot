@@ -51,11 +51,7 @@ def alertLowWine(session, event, stdin_fd, predetermined_input):
             auto_transfer = False
             transfer_amount = 0
 
-        print(
-            (
-                "It will be alerted when the wine runs out in less than {:d} hours in any city"
-            ).format(hours)
-        )
+        print("It will be alerted when the wine runs out in less than {:d} hours in any city".format(hours))
         enter()
     except KeyboardInterrupt:
         event.set()
@@ -64,9 +60,7 @@ def alertLowWine(session, event, stdin_fd, predetermined_input):
     set_child_mode(session)
     event.set()
 
-    info = (
-        "\nI alert if the wine runs out in less than {:d} hours\n"
-    ).format(hours)
+    info = ("\nI alert if the wine runs out in less than {:d} hours\n".format(hours))
     setInfoSignal(session, info)
     try:
         do_it(session, hours, auto_transfer, transfer_amount)

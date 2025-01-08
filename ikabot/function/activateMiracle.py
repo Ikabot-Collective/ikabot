@@ -177,7 +177,7 @@ def activateMiracle(session, event, stdin_fd, predetermined_input):
             return
 
         if island["available"]:
-            print("\nThe miracle {} will be activated").format(island["wonderName"])
+            print("\nThe miracle {} will be activated".format(island["wonderName"]))
             print("Proceed? [Y/n]")
             activate_miracle_input = read(values=["y", "Y", "n", "N", ""])
             if activate_miracle_input.lower() == "n":

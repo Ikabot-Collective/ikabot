@@ -532,7 +532,7 @@ def getBuildingsToExpand(session, cityId):
             level = str(level)
         if building["isBusy"]:
             level = level + "+"
-        print("({:d})\tlv:{}\t{}{}{}").format(i + 1, level, color, building["name"], bcolors.ENDC)
+        print("({:d})\tlv:{}\t{}{}{}".format(i + 1, level, color, building["name"], bcolors.ENDC))
 
     selected_building_ids = read().split(",")
     selected_building_ids = [int(id.strip()) for id in selected_building_ids if id.strip().isdigit()]
@@ -550,8 +550,8 @@ def getBuildingsToExpand(session, cityId):
             current_level += 1
 
         banner()
-        print("building:{}").format(building["name"])
-        print("current level:{}").format(current_level)
+        print("building:{}".format(building["name"]))
+        print("current level:{}".format(current_level))
 
         final_level = read(min=current_level, msg="increase to level:")
         building["upgradeTo"] = final_level
@@ -643,7 +643,7 @@ def constructionList(session, event, stdin_fd, predetermined_input):
                     if missing[i] == 0:
                         continue
                     name = materials_names[i].lower()
-                    print("{} of {}").format(addThousandSeparator(missing[i]), name)
+                    print("{} of {}".format(addThousandSeparator(missing[i]), name))
                 print("")
 
                 # if the user wants, send the resources from the selected cities
