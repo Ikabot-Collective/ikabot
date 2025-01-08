@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import gettext
 import math
 import traceback
 import re
@@ -137,9 +136,6 @@ DEFAULT_SCHEMATICS = {
 FIVE_MINUTES = 5 * 60
 DEVELOPMENT = False
 
-t = gettext.translation("autoBarbarians", localedir, languages=languages, fallback=True)
-_ = t.gettext
-
 
 def autoBarbarians(session, event, stdin_fd, predetermined_input):
     """
@@ -155,11 +151,11 @@ def autoBarbarians(session, event, stdin_fd, predetermined_input):
     try:
         banner()
         print(
-            _(
+            
                 "{}⚠️ BEWARE - THE BARBARIAN GRIND TO BE CARRIED OUT MORE EFFICIENTLY REQUIRES THE FOLLOWING RESOURCES ⚠️{}\n".format(
                     bcolors.WARNING, bcolors.ENDC
                 )
-            )
+            
         )
         print(
             "- You need to leave at least 3 merchant ships available.",
@@ -168,9 +164,9 @@ def autoBarbarians(session, event, stdin_fd, predetermined_input):
             sep="\n",
         )
         print(
-            _(
+            
                 "\nDo you agree that failure to comply with these rules will result in you losing out on resources? [y/N]"
-            )
+            
         )
         if read(values=["y", "Y", "n", "N"], default="n") in ["n", "N"]:
             event.set()
@@ -183,7 +179,7 @@ def autoBarbarians(session, event, stdin_fd, predetermined_input):
             return
 
         banner()
-        print(_("From which city do you want to attack?"))
+        print("From which city do you want to attack?")
         city = chooseCity(session)
         if city is None:
             event.set()
@@ -192,9 +188,9 @@ def autoBarbarians(session, event, stdin_fd, predetermined_input):
         has_rams = has_units_in_city(session, city, {"307": 1})
         if has_rams is False:
             print(
-                _(
+                
                     "\nYou do not have 2 or more battering rams in this city, the lack of them may prevent you from collecting all the resources present in the barbarian village, are you sure you want to continue anyway? [y/N]"
-                )
+                
             )
             if read(values=["y", "Y", "n", "N"], default="n") in ["n", "N"]:
                 event.set()
@@ -207,9 +203,9 @@ def autoBarbarians(session, event, stdin_fd, predetermined_input):
             auto_activate_hephaestus = False
             if hephaestus_max:
                 print(
-                    _(
+                    
                         "Do you want to keep activating your Hephaestus to maximize the grind? [Y/n]"
-                    )
+                    
                 )
                 activate_miracle_input = read(values=["y", "Y", "n", "N", ""])
                 auto_activate_hephaestus = (
@@ -246,16 +242,16 @@ def autoBarbarians(session, event, stdin_fd, predetermined_input):
 
         ships_available = waitForArrival(session)
         print(
-            _("For this sequence of attacks you need to have the following troops:\n")
+            "For this sequence of attacks you need to have the following troops:\n"
         )
         print_grid_units(
             schematic_units["total"], main_city_units, schematic_ships, ships_available
         )
         if success is False:
             print(
-                _(
+                
                     "\nYou do not have all the units needed to start this attack sequence, you want to continue executing the attack only as far as possible? [Y/n]"
-                )
+                
             )
             if read(values=["y", "Y", "n", "N"], default="y") in ["n", "N"]:
                 event.set()
@@ -277,7 +273,7 @@ def autoBarbarians(session, event, stdin_fd, predetermined_input):
     set_child_mode(session)
     event.set()
 
-    info = _("\nI grinding the barbarians in [{}:{}]\n").format(
+    info = "\nI grinding the barbarians in [{}:{}]\n".format(
         island["x"], island["y"]
     )
     setInfoSignal(session, info)
@@ -285,7 +281,7 @@ def autoBarbarians(session, event, stdin_fd, predetermined_input):
     try:
         do_it(session, island, city, float_city, schematic, units_data)
     except Exception as e:
-        msg = _("Error in:\n{}\nCause:\n{}").format(info, traceback.format_exc())
+        msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
         sendToBot(session, msg)
     finally:
         session.logout()
@@ -313,16 +309,16 @@ def choose_island(session):
     def pad(island_name):
         return " " * (longest_island_name_length - len(island_name)) + island_name
 
-    print(_("In which island do you want to attack the barbarians?"))
-    print(_(" 0) Exit"))
+    print("In which island do you want to attack the barbarians?")
+    print(" 0) Exit")
     for i, island in enumerate(islands):
         num = " " + str(i + 1) if i < 9 else str(i + 1)
         if island["barbarians"]["destroyed"] == 1:
-            warn = _("(currently destroyed)")
+            warn = "(currently destroyed)"
         else:
             warn = ""
         print(
-            _("{}) [{}:{}] {} ({}) : barbarians lv: {} ({}) {}").format(
+            "{}) [{}:{}] {} ({}) : barbarians lv: {} ({}) {}".format(
                 num,
                 island["x"],
                 island["y"],
@@ -349,10 +345,10 @@ def is_hephaestus_max(islands):
 
 
 def choose_schematic():
-    print(_("Select what type of attack sequence you will do:"))
-    print(_("(0) Exit"))
-    print(_("(1) Default"))
-    print(_("(2) Custom"))
+    print("Select what type of attack sequence you will do:")
+    print("(0) Exit")
+    print("(1) Default")
+    print("(2) Custom")
     selected = read(min=0, max=2, digit=True)
     if selected == 0:
         return
@@ -386,7 +382,7 @@ def choose_float_city(session, island):
     if len(inslands_cities) == 1:
         return next(iter(inslands_cities.values()))
 
-    print(_("Select the city where the float will be located:\n"))
+    print("Select the city where the float will be located:\n")
     menu_cities = ""
     longest_city_name_length = 0
     for city_id in inslands_cities:
@@ -594,11 +590,11 @@ def do_it(session, island, city, float_city, schematic, units_data):
         if barbarians_plan is None:
             sendToBot(
                 session,
-                _(
+                
                     "It was not possible to continue the attack on the barbarians because they reached a level that is outside the attack scheme.".format(
                         island["x"], island["y"]
                     )
-                ),
+                ,
             )
             break
         if island["barbarians"]["destroyed"] == 1:
@@ -627,9 +623,9 @@ def do_it(session, island, city, float_city, schematic, units_data):
             if attempts["ships"] > 20:
                 sendToBot(
                     session,
-                    _(
+                    
                         "It was not possible to continue the attack on the barbarians due to the long unavailability of ships."
-                    ),
+                    ,
                 )
                 break
             continue
@@ -639,18 +635,18 @@ def do_it(session, island, city, float_city, schematic, units_data):
         ):
             sendToBot(
                 session,
-                _(
+                
                     "It was not possible to continue the attack on the barbarians due to the lack of necessary troops in the city(ies)."
-                ),
+                ,
             )
             break
         sendToBot(
             session,
-            _(
+            
                 "Starting attack on barbarians[{}:{}] level ({}).".format(
                     island["x"], island["y"], babarians_info["level"]
                 )
-            ),
+            ,
         )
         do_attack(
             session,
@@ -667,11 +663,11 @@ def do_it(session, island, city, float_city, schematic, units_data):
     babarians_info = get_barbarians_lv(session, island)
     sendToBot(
         session,
-        _(
+        
             "Ended attack sequence on bariarians[{}:{}].".format(
                 island["x"], island["y"], babarians_info["level"]
             )
-        ),
+        ,
     )
 
 

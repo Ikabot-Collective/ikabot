@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import gettext
 import json
 import traceback
 
@@ -13,11 +12,6 @@ from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import *
-
-t = gettext.translation(
-    "activateMiracle", localedir, languages=languages, fallback=True
-)
-_ = t.gettext
 
 
 def obtainMiraclesAvailable(session):
@@ -140,18 +134,18 @@ def chooseIsland(islands):
     -------
     island : dict
     """
-    print(_("Which miracle do you want to activate?"))
+    print("Which miracle do you want to activate?")
     # Sort islands by name
     sorted_islands = sorted(islands, key=lambda x: x["wonderName"])
     i = 0
-    print(_("(0) Exit"))
+    print("(0) Exit")
     for island in sorted_islands:
         i += 1
         if island["available"]:
             print("({:d}) {}".format(i, island["wonderName"]))
         else:
             print(
-                _("({:d}) {} (available in: {})").format(
+                "({:d}) {} (available in: {})".format(
                     i, island["wonderName"], daysHoursMinutes(island["available_in"])
                 )
             )
@@ -179,7 +173,7 @@ def activateMiracle(session, event, stdin_fd, predetermined_input):
 
         islands = obtainMiraclesAvailable(session)
         if islands == []:
-            print(_("There are no miracles available."))
+            print("There are no miracles available.")
             enter()
             event.set()
             return
@@ -190,8 +184,8 @@ def activateMiracle(session, event, stdin_fd, predetermined_input):
             return
 
         if island["available"]:
-            print(_("\nThe miracle {} will be activated").format(island["wonderName"]))
-            print(_("Proceed? [Y/n]"))
+            print("\nThe miracle {} will be activated".format(island["wonderName"]))
+            print("Proceed? [Y/n]")
             activate_miracle_input = read(values=["y", "Y", "n", "N", ""])
             if activate_miracle_input.lower() == "n":
                 event.set()
@@ -201,7 +195,7 @@ def activateMiracle(session, event, stdin_fd, predetermined_input):
 
             if miracle_activation_result[1][1][0] == "error":
                 print(
-                    _("The miracle {} could not be activated.").format(
+                    "The miracle {} could not be activated.".format(
                         island["wonderName"]
                     )
                 )
@@ -217,19 +211,19 @@ def activateMiracle(session, event, stdin_fd, predetermined_input):
                     break
             wait_time = enddate - currentdate
 
-            print(_("The miracle {} was activated.").format(island["wonderName"]))
+            print("The miracle {} was activated.".format(island["wonderName"]))
             enter()
             banner()
 
             while True:
-                print(_("Do you wish to activate it again when it is finished? [y/N]"))
+                print("Do you wish to activate it again when it is finished? [y/N]")
 
                 reactivate_again_input = read(values=["y", "Y", "n", "N", ""])
                 if reactivate_again_input.lower() != "y":
                     event.set()
                     return
 
-                iterations = read(msg=_("How many times?: "), digit=True, min=0)
+                iterations = read(msg="How many times?: ", digit=True, min=0)
 
                 if iterations == 0:
                     event.set()
@@ -237,9 +231,9 @@ def activateMiracle(session, event, stdin_fd, predetermined_input):
 
                 duration = wait_time * iterations
 
-                print(_("It will finish in:{}").format(daysHoursMinutes(duration)))
+                print("It will finish in:{}".format(daysHoursMinutes(duration)))
 
-                print(_("Proceed? [Y/n]"))
+                print("Proceed? [Y/n]")
                 reactivate_again_input = read(values=["y", "Y", "n", "N", ""])
                 if reactivate_again_input.lower() == "n":
                     banner()
@@ -247,11 +241,11 @@ def activateMiracle(session, event, stdin_fd, predetermined_input):
                 break
         else:
             print(
-                _("\nThe miracle {} will be activated in {}").format(
+                "\nThe miracle {} will be activated in {}".format(
                     island["wonderName"], daysHoursMinutes(island["available_in"])
                 )
             )
-            print(_("Proceed? [Y/n]"))
+            print("Proceed? [Y/n]")
             user_confirm = read(values=["y", "Y", "n", "N", ""])
             if user_confirm.lower() == "n":
                 event.set()
@@ -259,18 +253,18 @@ def activateMiracle(session, event, stdin_fd, predetermined_input):
             wait_time = island["available_in"]
             iterations = 1
 
-            print(_("\nThe mirable will be activated."))
+            print("\nThe mirable will be activated.")
             enter()
             banner()
 
             while True:
-                print(_("Do you wish to activate it again when it is finished? [y/N]"))
+                print("Do you wish to activate it again when it is finished? [y/N]")
 
                 reactivate_again_input = read(values=["y", "Y", "n", "N", ""])
                 again = reactivate_again_input.lower() == "y"
                 if again is True:
                     try:
-                        iterations = read(msg=_("How many times?: "), digit=True, min=0)
+                        iterations = read(msg="How many times?: ", digit=True, min=0)
                     except KeyboardInterrupt:
                         iterations = 1
                         break
@@ -281,12 +275,8 @@ def activateMiracle(session, event, stdin_fd, predetermined_input):
 
                     iterations += 1
                     duration = wait_time * iterations
-                    print(
-                        _(
-                            "It is not possible to calculate the time of finalization. (at least: {})"
-                        ).format(daysHoursMinutes(duration))
-                    )
-                    print(_("Proceed? [Y/n]"))
+                    print("It is not possible to calculate the time of finalization. (at least: {})".format(daysHoursMinutes(duration)))
+                    print("Proceed? [Y/n]")
 
                     try:
                         activate_input = read(values=["y", "Y", "n", "N", ""])
@@ -306,14 +296,14 @@ def activateMiracle(session, event, stdin_fd, predetermined_input):
     set_child_mode(session)
     event.set()
 
-    info = _("\nI activate the miracle {} {:d} times\n").format(
+    info = "\nI activate the miracle {} {:d} times\n".format(
         island["wonderName"], iterations
     )
     setInfoSignal(session, info)
     try:
         do_it(session, island, iterations)
     except Exception as e:
-        msg = _("Error in:\n{}\nCause:\n{}").format(info, traceback.format_exc())
+        msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
         sendToBot(session, msg)
     finally:
         session.logout()
@@ -355,7 +345,7 @@ def wait_for_miracle(session, island):
             else:
                 wait_time = 60
 
-        msg = _("I wait {:d} seconds to activate the miracle {}").format(
+        msg = "I wait {:d} seconds to activate the miracle {}".format(
             wait_time, island["wonderName"]
         )
         sendToBotDebug(session, msg, debugON_activateMiracle)
@@ -378,7 +368,7 @@ def do_it(session, island, iterations):
         response = activateMiracleHttpCall(session, island)
 
         if response[1][1][0] == "error":
-            msg = _("The miracle {} could not be activated.").format(
+            msg = "The miracle {} could not be activated.".format(
                 island["wonderName"]
             )
             sendToBot(session, msg)
@@ -387,5 +377,5 @@ def do_it(session, island, iterations):
         session.setStatus(
             f"Activated {island['wonderName']} @{getDateTime()}, iterations left: {iterations_left}"
         )
-        msg = _("Miracle {} successfully activated").format(island["wonderName"])
+        msg = "Miracle {} successfully activated".format(island["wonderName"])
         sendToBotDebug(session, msg, debugON_activateMiracle)
