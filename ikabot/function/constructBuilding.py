@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import gettext
+
 import json
 import re
 
@@ -9,10 +9,6 @@ from ikabot.config import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import *
 
-t = gettext.translation(
-    "constructBuilding", localedir, languages=languages, fallback=True
-)
-_ = t.gettext
 
 
 def constructBuilding(session, event, stdin_fd, predetermined_input):
@@ -29,7 +25,7 @@ def constructBuilding(session, event, stdin_fd, predetermined_input):
     try:
         banner()
 
-        print(_("City where to build:"))
+        print("City where to build:")
         city = chooseCity(session)
         banner()
 
@@ -83,13 +79,13 @@ def constructBuilding(session, event, stdin_fd, predetermined_input):
                     )
 
         if len(buildings) == 0:
-            print(_("No building can be built."))
+            print("No building can be built.")
             enter()
             event.set()
             return
 
         # show list of buildings to the user
-        print(_("What building do you want to build?\n"))
+        print("What building do you want to build?\n")
         i = 0
         for building in buildings:
             i += 1
@@ -109,7 +105,7 @@ def constructBuilding(session, event, stdin_fd, predetermined_input):
         if len(options) == 1:
             option = options[0]
         else:
-            print(_("In which position do you want to build?\n"))
+            print("In which position do you want to build?\n")
             i = 0
             for option in options:
                 i += 1

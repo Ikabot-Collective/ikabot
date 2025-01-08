@@ -1,16 +1,10 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import gettext
 import re
 
 import ikabot.config as config
 from ikabot.helpers.process import run
-
-t = gettext.translation(
-    "checkForUpdate", config.localedir, languages=config.languages, fallback=True
-)
-_ = t.gettext
 
 
 def checkForUpdate():
@@ -28,4 +22,4 @@ def checkForUpdate():
         return
 
     new = match.group(1)
-    config.update_msg = _("[+] ikabot version {} is available\n").format(new)
+    config.update_msg = "[+] ikabot version {} is available\n".format(new)

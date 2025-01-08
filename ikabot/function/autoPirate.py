@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import gettext
 import re
 import sys
 import time
@@ -18,8 +17,6 @@ from ikabot.helpers.process import run, set_child_mode
 from ikabot.helpers.varios import timeStringToSec, wait
 from ikabot.helpers.apiComm import getPiratesCaptchaSolution
 
-t = gettext.translation("buyResources", localedir, languages=languages, fallback=True)
-_ = t.gettext
 
 
 def autoPirate(session, event, stdin_fd, predetermined_input):
@@ -251,7 +248,7 @@ def autoPirate(session, event, stdin_fd, predetermined_input):
                         break
                 except Exception:
                     info = ""
-                    msg = _("Error in:\n{}\nCause:\n{}").format(
+                    msg = "Error in:\n{}\nCause:\n{}".format(
                         info, traceback.format_exc()
                     )
                     sendToBot(session, msg)
@@ -262,7 +259,7 @@ def autoPirate(session, event, stdin_fd, predetermined_input):
 
     except Exception:
         info = ""
-        msg = _("Error in:\n{}\nCause:\n{}").format(info, traceback.format_exc())
+        msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
         sendToBot(session, msg)
         event.set()
         return

@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import gettext
 import locale
 import os
 
@@ -11,16 +10,7 @@ IKABOT_VERSION = "7.0.9"
 
 IKABOT_VERSION_TAG = "v" + IKABOT_VERSION
 
-local = locale.setlocale(locale.LC_ALL, "")
-if "es_" in local:
-    languages = ["es"]
-else:
-    languages = ["en"]
-languages = ["none"]
 
-localedir = os.path.join(os.path.abspath(os.path.dirname(__file__)), "locale")
-t = gettext.translation("config", localedir, languages=languages, fallback=True)
-_ = t.gettext
 
 
 update_msg = ""
@@ -42,7 +32,7 @@ ikaFile = ".ikabot"
 city_url = "view=city&cityId="
 island_url = "view=island&islandId="
 prompt = " >>  "
-materials_names = [_("Wood"), _("Wine"), _("Marble"), _("Cristal"), _("Sulfur")]
+materials_names = ["Wood", "Wine", "Marble", "Cristal", "Sulfur"]
 materials_names_english = ["Wood", "Wine", "Marble", "Cristal", "Sulfur"]
 miracle_names_english = [
     "",
@@ -64,11 +54,11 @@ material_img_hash = [
     "9b5578a7dfa3e98124439cca4a387a61",
 ]
 tradegoods_names = [
-    _("Saw mill"),
-    _("Vineyard"),
-    _("Quarry"),
-    _("Crystal Mine"),
-    _("Sulfur Pit"),
+    "Saw mill",
+    "Vineyard",
+    "Quarry",
+    "Crystal Mine",
+    "Sulfur Pit",
 ]
 ConnectionError_wait = 5 * 60
 actionRequest = "REQUESTID"

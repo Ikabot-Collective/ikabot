@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import datetime
-import gettext
 import multiprocessing
 import os
 import sys
@@ -47,10 +46,6 @@ from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.process import updateProcessList
 from ikabot.web.session import *
-
-t = gettext.translation("command_line", localedir, languages=languages, fallback=True)
-_ = t.gettext
-
 
 def menu(session, checkUpdate=True):
     """
@@ -149,28 +144,28 @@ def menu(session, checkUpdate=True):
         2108: loadCustomModule
     }
 
-    print(_("(0)  Exit"))
-    print(_("(1)  Construction list"))
-    print(_("(2)  Send resources"))
-    print(_("(3)  Distribute resources"))
-    print(_("(4)  Account status"))
-    print(_("(5)  Activate Shrine"))
-    print(_("(6)  Login daily"))
-    print(_("(7)  Alerts / Notifications"))
-    print(_("(8)  Marketplace"))
-    print(_("(9)  Donate"))
-    print(_("(10) Activate vacation mode"))
-    print(_("(11) Activate miracle"))
-    print(_("(12) Military actions"))
-    print(_("(13) See movements"))
-    print(_("(14) Construct building"))
-    print(_("(15) Update Ikabot"))
-    print(_("(16) Ikabot Web Server"))
-    print(_("(17) Auto-Pirate"))
-    print(_("(18) Investigate"))
-    print(_("(19) Attack barbarians"))
-    print(_("(20) Dump / Monitor world"))
-    print(_("(21) Options / Settings"))
+    print("(0)  Exit")
+    print("(1)  Construction list")
+    print("(2)  Send resources")
+    print("(3)  Distribute resources")
+    print("(4)  Account status")
+    print("(5)  Activate Shrine")
+    print("(6)  Login daily")
+    print("(7)  Alerts / Notifications")
+    print("(8)  Marketplace")
+    print("(9)  Donate")
+    print("(10) Activate vacation mode")
+    print("(11) Activate miracle")
+    print("(12) Military actions")
+    print("(13) See movements")
+    print("(14) Construct building")
+    print("(15) Update Ikabot")
+    print("(16) Ikabot Web Server")
+    print("(17) Auto-Pirate")
+    print("(18) Investigate")
+    print("(19) Attack barbarians")
+    print("(20) Dump / Monitor world")
+    print("(21) Options / Settings")
     total_options = len(menu_actions) + 1
     selected = read(min=0, max=total_options, digit=True, empty=True)
     
@@ -180,9 +175,9 @@ def menu(session, checkUpdate=True):
 
     if selected == 7:
         banner()
-        print(_("(0) Back"))
-        print(_("(1) Alert attacks"))
-        print(_("(2) Alert wine running out"))
+        print("(0) Back")
+        print("(1) Alert attacks")
+        print("(2) Alert wine running out")
 
         selected = read(min=0, max=2, digit=True)
         if selected == 0:
@@ -193,9 +188,9 @@ def menu(session, checkUpdate=True):
 
     if selected == 8:
         banner()
-        print(_("(0) Back"))
-        print(_("(1) Buy resources"))
-        print(_("(2) Sell resources"))
+        print("(0) Back")
+        print("(1) Buy resources")
+        print("(2) Sell resources")
 
         selected = read(min=0, max=2, digit=True)
         if selected == 0:
@@ -206,9 +201,9 @@ def menu(session, checkUpdate=True):
 
     if selected == 9:
         banner()
-        print(_("(0) Back"))
-        print(_("(1) Donate once"))
-        print(_("(2) Donate automatically"))
+        print("(0) Back")
+        print("(1) Donate once")
+        print("(2) Donate automatically")
 
         selected = read(min=0, max=2, digit=True)
         if selected == 0:
@@ -219,9 +214,9 @@ def menu(session, checkUpdate=True):
 
     if selected == 12:
         banner()
-        print(_("(0) Back"))
-        print(_("(1) Train Army"))
-        print(_("(2) Send Troops/Ships"))
+        print("(0) Back")
+        print("(1) Train Army")
+        print("(2) Send Troops/Ships")
         selected = read(min=0, max=2, digit=True)
         if selected == 0:
             menu(session)
@@ -230,9 +225,9 @@ def menu(session, checkUpdate=True):
             selected += 1200
 
     if selected == 20:
-        print(_("(0) Back"))
-        print(_("(1) Monitor islands"))
-        print(_("(2) Dump & Search world"))
+        print("(0) Back")
+        print("(1) Monitor islands")
+        print("(2) Dump & Search world")
         
         selected = read(min=0, max=2, digit=True)
         if selected == 0:
@@ -243,18 +238,18 @@ def menu(session, checkUpdate=True):
 
     if selected == 21:
         banner()
-        print(_("(0) Back"))
-        print(_("(1) Configure Proxy"))
+        print("(0) Back")
+        print("(1) Configure Proxy")
         if telegramDataIsValid(session):
-            print(_("(2) Change the Telegram data"))
+            print("(2) Change the Telegram data")
         else:
-            print(_("(2) Enter the Telegram data"))
-        print(_("(3) Kill tasks"))
-        print(_("(4) Configure captcha resolver"))
-        print(_("(5) Logs"))
-        print(_("(6) Message Telegram Bot"))
-        print(_("(7) Import / Export cookie"))
-        print(_("(8) Load custom ikabot module"))
+            print("(2) Enter the Telegram data")
+        print("(3) Kill tasks")
+        print("(4) Configure captcha resolver")
+        print("(5) Logs")
+        print("(6) Message Telegram Bot")
+        print("(7) Import / Export cookie")
+        print("(8) Load custom ikabot module")
 
         selected = read(min=0, max=8, digit=True)
         if selected == 0:
@@ -290,7 +285,7 @@ def menu(session, checkUpdate=True):
         if isWindows:
             # in unix, you can exit ikabot and close the terminal and the processes will continue to execute
             # in windows, you can exit ikabot but if you close the terminal, the processes will die
-            print(_("Closing this console will kill the processes."))
+            print("Closing this console will kill the processes.")
             enter()
         clear()
         os._exit(

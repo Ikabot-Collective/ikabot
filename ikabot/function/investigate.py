@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import gettext
 import json
 import traceback
 
@@ -14,8 +13,6 @@ from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import *
 
-t = gettext.translation("investigate", localedir, languages=languages, fallback=True)
-_ = t.gettext
 
 
 def get_studies(session):
@@ -137,12 +134,12 @@ def investigate(session, event, stdin_fd, predetermined_input):
                     available.append(num_study)
 
             if len(available) == 0:
-                print(_("There are no available studies."))
+                print("There are no available studies.")
                 enter()
                 event.set()
                 return
 
-            print(_("Which one do you wish to study?"))
+            print("Which one do you wish to study?")
             print("0) None")
             for index, num_study in enumerate(available):
                 print(
@@ -160,7 +157,7 @@ def investigate(session, event, stdin_fd, predetermined_input):
                 return
 
             study(session, studies, available[choice - 1])
-            print(_("Done."))
+            print("Done.")
             enter()
             event.set()
         else:
