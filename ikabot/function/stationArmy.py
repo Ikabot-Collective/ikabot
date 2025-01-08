@@ -1,14 +1,9 @@
-import gettext
 import re
 
 from ikabot.config import *
 from ikabot.helpers.naval import getAvailableShips
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.varios import addThousandSeparator
-
-t = gettext.translation("buyResources", localedir, languages=languages, fallback=True)
-_ = t.gettext
-
 
 def getCityMilitaryData(session, city_id):
     """
@@ -164,12 +159,12 @@ def stationArmy(session, event, stdin_fd, predetermined_input):
             )
 
         print()
-        print(_("(0) Back"))
-        print(_("(1) Move troops"))
-        print(_("(2) Move ships"))
-        print(_("(3) Move all ground units to a city."))
-        print(_("(4) Move all maritime units to a city."))
-        print(_("(5) Move all units to a city."))
+        print("(0) Back")
+        print("(1) Move troops")
+        print("(2) Move ships")
+        print("(3) Move all ground units to a city.")
+        print("(4) Move all maritime units to a city.")
+        print("(5) Move all units to a city.")
 
         selected = read(min=0, max=5, digit=True)
         if selected == 0:

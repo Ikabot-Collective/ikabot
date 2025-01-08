@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import gettext
 import json
 import math
 import time
@@ -19,9 +18,6 @@ from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import addThousandSeparator, wait
 
-t = gettext.translation("sellResources", localedir, languages=languages, fallback=True)
-_ = t.gettext
-
 
 def chooseCommercialCity(commercial_cities):
     """
@@ -33,7 +29,7 @@ def chooseCommercialCity(commercial_cities):
     -------
     commercial_city : dict
     """
-    print(_("In which city do you want to sell resources?\n"))
+    print("In which city do you want to sell resources?\n")
     for i, city in enumerate(commercial_cities):
         print("({:d}) {}".format(i + 1, city["name"]))
     ind = read(min=1, max=len(commercial_cities))
@@ -120,12 +116,12 @@ def sellToOffers(session, city_to_buy_from, resource_type, event):
     offers = getOffers(session, city_to_buy_from, resource_type)
 
     if len(offers) == 0:
-        print(_("No offers available."))
+        print("No offers available.")
         enter()
         event.set()
         return
 
-    print(_("Which offers do you want to sell to?\n"))
+    print("Which offers do you want to sell to?\n")
 
     chosen_offers = []
     total_amount = 0
@@ -136,7 +132,7 @@ def sellToOffers(session, city_to_buy_from, resource_type, event):
         amount = amount.replace(",", "").replace(".", "")
         amount = int(amount)
         price = int(price)
-        msg = _("{} ({}): {} at {:d} each ({} in total) [Y/n]").format(
+        msg = "{} ({}): {} at {:d} each ({} in total) [Y/n]".format(
             cityname,
             username,
             addThousandSeparator(amount),
@@ -159,7 +155,7 @@ def sellToOffers(session, city_to_buy_from, resource_type, event):
 
     banner()
     print(
-        _("\nHow much do you want to sell? [max = {}]").format(
+        "\nHow much do you want to sell? [max = {}]".format(
             addThousandSeparator(amount_to_sell)
         )
     )
@@ -180,7 +176,7 @@ def sellToOffers(session, city_to_buy_from, resource_type, event):
         left_to_sell -= sell
         profit += sell * price
     print(
-        _("\nSell {} of {} for a total of {}? [Y/n]").format(
+        "\nSell {} of {} for a total of {}? [Y/n]".format(
             addThousandSeparator(amount_to_sell),
             materials_names[resource_type],
             addThousandSeparator(profit),
@@ -194,7 +190,7 @@ def sellToOffers(session, city_to_buy_from, resource_type, event):
     set_child_mode(session)
     event.set()
 
-    info = _("\nI sell {} of {} in {}\n").format(
+    info = "\nI sell {} of {} in {}\n".format(
         addThousandSeparator(amount_to_sell),
         materials_names[resource_type],
         city_to_buy_from["name"],
@@ -203,7 +199,7 @@ def sellToOffers(session, city_to_buy_from, resource_type, event):
     try:
         do_it1(session, amount_to_sell, chosen_offers, resource_type, city_to_buy_from)
     except Exception as e:
-        msg = _("Error in:\n{}\nCause:\n{}").format(info, traceback.format_exc())
+        msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
         sendToBot(session, msg)
     finally:
         session.logout()
@@ -227,7 +223,7 @@ def createOffer(session, my_offering_market_city, resource_type, event):
     ]
 
     print(
-        _("How much do you want to sell? [max = {}]").format(
+        "How much do you want to sell? [max = {}]".format(
             addThousandSeparator(total_available_amount_of_resource)
         )
     )
@@ -241,18 +237,18 @@ def createOffer(session, my_offering_market_city, resource_type, event):
     ]
     price_max = int(price_max)
     price_min = int(price_min)
-    print(_("\nAt what price? [min = {:d}, max = {:d}]").format(price_min, price_max))
+    print("\nAt what price? [min = {:d}, max = {:d}]".format(price_min, price_max))
     price = read(min=price_min, max=price_max)
 
     print(
-        _("\nI will sell {} of {} at {}: {}").format(
+        "\nI will sell {} of {} at {}: {}".format(
             addThousandSeparator(amount_to_sell),
             materials_names[resource_type],
             addThousandSeparator(price),
             addThousandSeparator(price * amount_to_sell),
         )
     )
-    print(_("\nProceed? [Y/n]"))
+    print("\nProceed? [Y/n]")
     rta = read(values=["y", "Y", "n", "N", ""])
     if rta.lower() == "n":
         event.set()
@@ -261,7 +257,7 @@ def createOffer(session, my_offering_market_city, resource_type, event):
     set_child_mode(session)
     event.set()
 
-    info = _("\nI sell {} of {} in {}\n").format(
+    info = "\nI sell {} of {} in {}\n".format(
         addThousandSeparator(amount_to_sell),
         materials_names[resource_type],
         my_offering_market_city["name"],
@@ -277,7 +273,7 @@ def createOffer(session, my_offering_market_city, resource_type, event):
             my_offering_market_city,
         )
     except Exception as e:
-        msg = _("Error in:\n{}\nCause:\n{}").format(info, traceback.format_exc())
+        msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
         sendToBot(session, msg)
     finally:
         session.logout()
@@ -299,7 +295,7 @@ def sellResources(session, event, stdin_fd, predetermined_input):
 
         commercial_cities = getCommercialCities(session)
         if len(commercial_cities) == 0:
-            print(_("There is no store built"))
+            print("There is no store built")
             enter()
             event.set()
             return
@@ -310,7 +306,7 @@ def sellResources(session, event, stdin_fd, predetermined_input):
             city = chooseCommercialCity(commercial_cities)
             banner()
 
-        print(_("What resource do you want to sell?"))
+        print("What resource do you want to sell?")
         for index, material_name in enumerate(materials_names):
             print("({:d}) {}".format(index + 1, material_name))
         selected_material = read(min=1, max=len(materials_names))
@@ -318,9 +314,9 @@ def sellResources(session, event, stdin_fd, predetermined_input):
         banner()
 
         print(
-            _(
-                "Do you want to sell to existing offers (1) or do you want to make your own offer (2)?"
-            )
+            
+            "Do you want to sell to existing offers (1) or do you want to make your own offer (2)?"
+            
         )
         selected = read(min=1, max=2)
         [sellToOffers, createOffer][selected - 1](session, city, resource, event)
@@ -467,7 +463,7 @@ def do_it2(session, amount_to_sell, price, resource_type, sell_market_capacity, 
         html = getMarketInfo(session, city)
         currently_on_sell = onSellInMarket(html)[resource_type]
         if currently_on_sell <= previous_on_sell:
-            msg = _("{} of {} was sold at {:d}").format(
+            msg = "{} of {} was sold at {:d}".format(
                 addThousandSeparator(initial_amount_to_sell),
                 materials_names[resource_type],
                 price,
