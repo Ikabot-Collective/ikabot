@@ -68,6 +68,12 @@ def obtainMiraclesAvailable(session):
         }
         data = session.post(params=params)
         data = json.loads(data, strict=False)
+        html = data[1][1][1]
+        match = re.search(r'<div id="wonderLevelDisplay"[^>]*>\\n\s*(\d+)\s*</div>', html)
+        level = 0
+        if match:
+            level = int(match.group(1))
+
         data = data[2][1]
         available = data["js_WonderViewButton"]["buttonState"] == "enabled"
         if available is False:
@@ -82,6 +88,7 @@ def obtainMiraclesAvailable(session):
             if island["id"] == city["islandId"]:
                 island["activable"] = True
                 island["ciudad"] = city
+                island["wonderActivationLevel"] = level
                 island["available"] = available
                 if available is False:
                     island["available_in"] = enddate - currentdate
@@ -268,10 +275,7 @@ def activateMiracle(session, event, stdin_fd, predetermined_input):
 
                     iterations += 1
                     duration = wait_time * iterations
-                    print(
-                        
-                        "It is not possible to calculate the time of finalization. (at least: {})".format(daysHoursMinutes(duration))
-                    )
+                    print("It is not possible to calculate the time of finalization. (at least: {})".format(daysHoursMinutes(duration)))
                     print("Proceed? [Y/n]")
 
                     try:

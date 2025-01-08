@@ -217,9 +217,7 @@ def plan_attack(session, city, babarians_info):
             if len(plan) > 0:
                 round_def = len(plan) + 1
                 attack_round["round"] = read(
-                    msg=
-                        "In which battle round do you want to send them? (min: 2, default: {:d}): "
-                    .format(round_def),
+                    msg= "In which battle round do you want to send them? (min: 2, default: {:d}): ".format(round_def),
                     min=2,
                     default=round_def,
                 )
@@ -233,9 +231,7 @@ def plan_attack(session, city, babarians_info):
             max_ships = total_ships - sum([ar["ships"] for ar in plan])
             if max_ships > 0:
                 attack_round["ships"] = read(
-                    msg=
-                        "How many ships do you want to send in this round? (min: 0, max: {:d}): "
-                    .format(max_ships),
+                    msg= "How many ships do you want to send in this round? (min: 0, max: {:d}): ".format(max_ships),
                     min=0,
                     max=max_ships,
                 )
@@ -252,11 +248,7 @@ def plan_attack(session, city, babarians_info):
         resp = read(values=["y", "Y", "n", "N"], default="n")
         if resp.lower() != "y":
             print("")
-            print(
-                
-                    "Do you want to select the troops that will be used to collect the remaining resources? (they need to destroy the wall) [y/N]"
-                
-            )
+            print("Do you want to select the troops that will be used to collect the remaining resources? (they need to destroy the wall) [y/N]")
             resp = read(values=["y", "Y", "n", "N"], default="n")
             if resp.lower() != "y":
                 break
@@ -352,12 +344,15 @@ def get_unit_data(session, city_id, unit_id):
     weight = int(weight)
 
     speed = re.search(
-        r'<span class="textLabel">Speed:</span>\s*(\d+)\s*<br/>',
+        r'<span class="textLabel">.*?</span>\s*(\d+)\s*<br/>',
         html,
     ).group(1)
     speed = int(speed)
 
-    return {"speed": speed, "weight": weight}
+    name = re.search(r'<div class="contentBox01h">\s*<h3 class="header">([^<]+)</h3>', html).group(1)
+    name = str(name)
+
+    return {"speed": speed, "weight": weight, "name": name}
 
 
 def city_is_in_island(city, island):
@@ -502,11 +497,11 @@ def filter_loading(attacks):
     return [attack for attack in attacks if attack["event"]["missionState"] == 1]
 
 
-def filter_traveling(attacks):
+def filter_traveling(attacks,onlyCanAbort=True):
     return [
         attack
         for attack in attacks
-        if attack["event"]["missionState"] == 2 and attack["event"]["canAbort"]
+        if attack["event"]["missionState"] == 2 and (onlyCanAbort is False or (onlyCanAbort is True and attack["event"]["canAbort"]))
     ]
 
 
