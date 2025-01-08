@@ -85,7 +85,7 @@ def sendResources(session, event, stdin_fd, predetermined_input):
                         )
 
                 if len(msg) > 0:
-                    print("You can store just:\n{}").format(msg)
+                    print("You can store just:\n{}".format(msg))
 
             print("Available:")
             for i in range(len(materials_names)):

@@ -166,7 +166,7 @@ def donate(session, event, stdin_fd, predetermined_input):
         elif amount == 0:
             event.set()
             return
-        print("Will donate {} to the {}?").format(addThousandSeparator(amount), name)
+        print("Will donate {} to the {}?".format(addThousandSeparator(amount), name))
         print("\nProceed? [Y/n]")
         rta = read(values=["y", "Y", "n", "N", ""])
         if rta.lower() == "n":
