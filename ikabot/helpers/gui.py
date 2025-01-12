@@ -56,6 +56,41 @@ def printChoiceList(list):
     ]
 
 
+def formatTable(data: list[dict], header: bool = True, rowNumbers = False) -> str:
+    """
+    Formats a list of dictionaries into a string representing the list of dicts as a table.
+    List of dicts must be normalized (all keys should be strings and they should exist in every dict in the list).
+    """
+    if not data:
+        return ""
+    # Extract keys and determine column widths
+    keys = list(data[0].keys())
+    col_widths = {key: max(len(str(key)), max(len(str(d[key])) for d in data)) for key in keys}
+    if rowNumbers:
+        col_widths['#'] = max(1, len(str(len(data))))
+    def format_value(value, width):
+        if isinstance(value, (int, float)):
+            return f"{value:>{width}}"
+        else:
+            return f"{str(value):^{width}}"
+    def format_row(row, row_num=None):
+        values = [format_value(row[key], col_widths[key]) for key in keys]
+        if row_num is not None:
+            values.insert(0, format_value(row_num, col_widths['#']))
+        return " | ".join(values)
+    table = []
+    # Add header
+    if header:
+        header_row = [format_value(key, col_widths[key]) for key in keys]
+        if rowNumbers:
+            header_row.insert(0, format_value("#", col_widths['#']))
+        table.append(" | ".join(header_row))
+        table.append("-+-".join(['-' * col_widths[col] for col in (['#'] if rowNumbers else []) + keys]))
+    # Add rows
+    for i, row in enumerate(data):
+        table.append(format_row(row, i + 1 if rowNumbers else None))
+    return "\n".join(table)
+
 class bcolors:
     HEADER = "\033[95m"
     STONE = "\033[37m"

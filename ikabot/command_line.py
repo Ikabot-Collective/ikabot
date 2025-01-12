@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from copy import deepcopy
 import datetime
 import multiprocessing
 import os
@@ -37,7 +38,6 @@ from ikabot.function.shipMovements import shipMovements
 from ikabot.function.stationArmy import stationArmy
 from ikabot.function.testTelegramBot import testTelegramBot
 from ikabot.function.trainArmy import trainArmy
-from ikabot.function.update import update
 from ikabot.function.vacationMode import vacationMode
 from ikabot.function.webServer import webServer
 from ikabot.function.loadCustomModule import loadCustomModule
@@ -65,50 +65,12 @@ def menu(session, checkUpdate=True):
 
     process_list = updateProcessList(session)
     if len(process_list) > 0:
-        # Insert table header
-        table = process_list.copy()
-        table.insert(
-            0, {"pid": "pid", "action": "task", "date": "date", "status": "status"}
-        )
-        # Get max length of strings in each category (date is always going to be 15)
-        maxPid, maxAction, maxStatus = [
-            max(i)
-            for i in [
-                [len(str(r["pid"])) for r in table],
-                [len(str(r["action"])) for r in table],
-                [len(str(r["status"])) for r in table],
-            ]
-        ]
-        # Print header
-        print(
-            "|{:^{maxPid}}|{:^{maxAction}}|{:^15}|{:^{maxStatus}}|".format(
-                table[0]["pid"],
-                table[0]["action"],
-                table[0]["date"],
-                table[0]["status"],
-                maxPid=maxPid,
-                maxAction=maxAction,
-                maxStatus=maxStatus,
-            )
-        )
-        # Print process list
-        [
-            print(
-                "|{:^{maxPid}}|{:^{maxAction}}|{:^15}|{:^{maxStatus}}|".format(
-                    r["pid"],
-                    r["action"],
-                    datetime.datetime.fromtimestamp(r["date"]).strftime(
-                        "%b %d %H:%M:%S"
-                    ),
-                    r["status"],
-                    maxPid=maxPid,
-                    maxAction=maxAction,
-                    maxStatus=maxStatus,
-                )
-            )
-            for r in process_list
-        ]
-        print("")
+        table = deepcopy(process_list)
+        # Convert date to datetime
+        for r in table:
+            table[table.index(r)]['date'] = datetime.datetime.fromtimestamp(r["date"]).strftime("%b %d %H:%M:%S")
+        print(formatTable(table, header=True))
+        
 
     menu_actions = {
         1: constructionList,
@@ -129,22 +91,21 @@ def menu(session, checkUpdate=True):
         1202: stationArmy,
         13: shipMovements,
         14: constructBuilding,
-        15: update,
-        16: webServer,
-        17: autoPirate,
-        18: investigate,
-        1901: attackBarbarians,
-        1902: autoBarbarians,
-        2001: searchForIslandSpaces,
-        2002: dumpWorld,
-        2101: proxyConf,
-        2102: updateTelegramData,
-        2103: killTasks,
-        2104: decaptchaConf,
-        2105: logs,
-        2106: testTelegramBot,
-        2107: importExportCookie,
-        2108: loadCustomModule
+        15: webServer,
+        16: autoPirate,
+        17: investigate,
+        1801: attackBarbarians,
+        1802: autoBarbarians,
+        1901: searchForIslandSpaces,
+        1902: dumpWorld,
+        2001: proxyConf,
+        2002: updateTelegramData,
+        2003: killTasks,
+        2004: decaptchaConf,
+        2005: logs,
+        2006: testTelegramBot,
+        2007: importExportCookie,
+        2008: loadCustomModule
     }
 
     print("(0)  Exit")
@@ -162,15 +123,13 @@ def menu(session, checkUpdate=True):
     print("(12) Military actions")
     print("(13) See movements")
     print("(14) Construct building")
-    print("(15) Update Ikabot")
-    print("(16) Ikabot Web Server")
-    print("(17) Auto-Pirate")
-    print("(18) Investigate")
-    print("(19) Attack / Grind barbarians")
-    print("(20) Dump / Monitor world")
-    print("(21) Options / Settings")
-    total_options = len(menu_actions) + 1
-    selected = read(min=0, max=total_options, digit=True, empty=True)
+    print("(15) Ikabot Web Server")
+    print("(16) Auto-Pirate")
+    print("(17) Investigate")
+    print("(18) Attack / Grind barbarians")
+    print("(19) Dump / Monitor world")
+    print("(20) Options / Settings")
+    selected = read(min=0, max=20, digit=True, empty=True)
     
     # refresh main menu on hitting enter
     if selected == '':
@@ -215,7 +174,7 @@ def menu(session, checkUpdate=True):
         if selected > 0:
             selected += 900
 
-    if selected == 19:
+    if selected == 18:
         banner()
         print("(0) Back")
         print("(1) Simple Attack")
@@ -225,7 +184,7 @@ def menu(session, checkUpdate=True):
             menu(session)
             return
         if selected > 0:
-            selected += 1900
+            selected += 1800
 
     if selected == 12:
         banner()
@@ -239,7 +198,7 @@ def menu(session, checkUpdate=True):
         if selected > 0:
             selected += 1200
 
-    if selected == 20:
+    if selected == 19:
         print("(0) Back")
         print("(1) Monitor islands")
         print("(2) Dump & Search world")
@@ -249,9 +208,9 @@ def menu(session, checkUpdate=True):
             menu(session)
             return
         if selected > 0:
-            selected += 2000
+            selected += 1900
 
-    if selected == 21:
+    if selected == 20:
         banner()
         print("(0) Back")
         print("(1) Configure Proxy")
@@ -271,7 +230,7 @@ def menu(session, checkUpdate=True):
             menu(session)
             return
         if selected > 0:
-            selected += 2100
+            selected += 2000
 
     if selected != 0:
         try:
