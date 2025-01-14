@@ -48,6 +48,8 @@ from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.process import updateProcessList
 from ikabot.web.session import *
 
+from ikabot.function.modifyProduction import modifyProduction
+
 
 def menu(session, checkUpdate=True):
     """
@@ -145,6 +147,8 @@ def menu(session, checkUpdate=True):
         2106: testTelegramBot,
         2107: importExportCookie,
         2108: loadCustomModule
+        
+        ,22:  modifyProduction
     }
 
     print("(0)  Exit")
@@ -169,6 +173,10 @@ def menu(session, checkUpdate=True):
     print("(19) Attack / Grind barbarians")
     print("(20) Dump / Monitor world")
     print("(21) Options / Settings")
+    
+    # TEST: Call the modifyProduction module
+    print("(22) Set Production of Saw mill / Luxury good")
+    
     total_options = len(menu_actions) + 1
     selected = read(min=0, max=total_options, digit=True, empty=True)
     
