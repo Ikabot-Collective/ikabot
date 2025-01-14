@@ -137,13 +137,15 @@ def do_it(session, islandList, time, fights):
                         city_now["id"] for city_now in cities_now
                     ]:
                         # we didn't find the city_before in the cities_now
-                        msg = "The city {} of the player {} disappeared in {} {}:{} {}".format(
+                        msg = "The city {} of the player {} disappeared in {}:{}.\n{}-{} / S.M. lvl: {} / L.G. lvl: {}.".format(
                             city_before["name"],
                             city_before["Name"],
-                            materials_names[int(island["tradegood"])],
                             island["x"],
                             island["y"],
-                            island["name"],
+                            materials_names[int(island["tradegood"])],
+                            island["wonderName"],
+                            island["resourceLevel"],
+                            island["tradegoodLevel"],
                         )
                         sendToBot(session, msg)
 

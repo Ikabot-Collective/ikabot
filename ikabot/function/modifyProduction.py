@@ -28,11 +28,18 @@ def modifyProduction(session, event, stdin_fd, predetermined_input):
 
         print("In what city do you want modify your production?")
         city = chooseCity(session)
+        
         banner()
+        
+        # print(str(city))
 
         islandId = city["islandId"]
         html = session.get(island_url + islandId)
         island = getIsland(html)
+        
+        print('==> TEST')
+        print(island)
+        print('==> TEST\n1')
 
         island_type = island["tipo"]
         resource_name = tradegoods_names[0]
