@@ -26,6 +26,10 @@ from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.process import run, set_child_mode, updateProcessList
 from ikabot.helpers.varios import wait
 
+from typing import TYPE_CHECKING, TypedDict, Union
+if TYPE_CHECKING:
+    from ikabot.web.session import Session
+
 
 class ResponseTypes:
     SUCCESS = 10
@@ -40,20 +44,8 @@ if isWindows:
 else:
     web_cache_file = "/tmp/ikabot.webcache"
 
-
-def webServer(session, event, stdin_fd, predetermined_input, port=None):
-    """
-    Parameters
-    ----------
-    session : ikabot.web.session.Session
-    event : multiprocessing.Event
-    stdin_fd: int
-    predetermined_input : multiprocessing.managers.SyncManager.list
-    port : int (optional)
-    """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
-
+WebServerConfig = TypedDict("WebServerConfig", {"port": int})
+def webServer(session: Session) -> WebServerConfig:
     banner()
     try:
         import flask
@@ -72,7 +64,6 @@ def webServer(session, event, stdin_fd, predetermined_input, port=None):
         else:
             print("Please install flask manually and try to run this module again...")
             enter()
-            event.set()
             return
         try:
             import flask
@@ -82,10 +73,99 @@ def webServer(session, event, stdin_fd, predetermined_input, port=None):
                 "Failed to install flask. Please install it manually and try to run this module again..."
             )
             enter()
-            event.set()
             return
 
-    sys.flask = flask
+    port = None
+
+    def is_port_in_use(port: int) -> bool:
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                return s.connect_ex(("127.0.0.1", port)) == 0
+        except Exception as e:
+            logger.log(
+                logging.FATAL,
+                f"Error while checking if port {str(port)} is in use: " + str(e),
+            )
+            raise e
+
+    # If the port is not provided, prompt the user for it if enabled from the config file
+    if config.enable_CustomPort is True:
+        while True:
+            if port is None:
+                print("Please enter a port number (1 - 65535) to run the web server on (leave empty or 0 for random): ")
+                port = read(min=0, max=65535, digit=True, empty=True)
+                if port == "" or port == 0:
+                    port = None
+                    break
+                else:
+                    port = str(int(port))
+                    if is_port_in_use(int(port)):
+                        print(f"Port {port} is already in use, try another port.")
+                        continue
+                    break
+
+    # If the port is still None, select a random port as in the original script
+    if port is None:
+        port = str(
+            (
+                sum(ord(c) ** 2 for c in session.mail)
+                + sum(ord(c) ** 2 for c in session.host)
+                + sum(ord(c) ** 2 for c in session.username)
+            )
+            % 2000
+            + 43000
+        )
+
+        # bang on ports from `port` to 65535 until an available one is found
+        while True:
+            if not is_port_in_use(int(port)):
+                break
+            port = str(int(port) + 1)
+
+    # try to get local network ip if possible
+    local_network_ip = None
+    try:
+        local_network_ip = socket.gethostbyname(socket.gethostname())
+    except:
+        pass
+    print(
+        f"""Ikabot web server is about to be run on {bcolors.BLUE}http://127.0.0.1:{port}{bcolors.ENDC} {'and ' + bcolors.BLUE + 'http://' + str(local_network_ip) + ':' + port + bcolors.ENDC if local_network_ip else ''}"""
+    )
+    print(
+        "You can use this link in your browser to play ikariam without logging ikabot out."
+    )
+    print(
+        "If you wish to access this ikabot web server from another device that is not on this local network"
+    )
+    print(
+        "you can try to run one of the following commands in a separate terminal and use the link that it provides to connect:"
+    )
+    print(
+        f"{bcolors.DARK_GREEN}ssh -o StrictHostKeyChecking=no -R 80:127.0.0.1:{port} serveo.net{bcolors.ENDC}"
+    )
+    print("Or you can try:")
+    print(
+        f"{bcolors.DARK_GREEN}ssh -o StrictHostKeyChecking=no -R 80:127.0.0.1:{port} nokey@localhost.run{bcolors.ENDC}"
+    )
+
+    print(
+        f"\n        {bcolors.WARNING}[WARNING]{bcolors.ENDC} Make sure you don't share this link with anyone you don't trust!"
+    )
+
+    print(
+        "\nPress [ENTER] if you want to run the web server now, or CTRL+C to go back to the main menu"
+    )
+    enter()
+    session.setStatus(
+        f"""running on http://127.0.0.1:{port} {'and '+'http://' + str(local_network_ip) + ':' + port if local_network_ip else ''}"""
+    )
+    
+    return {"port": port}
+
+    
+
+def do_it(session: Session, port: int):
+
 
     web_cache = dict()
     # check if webcache already exists and load it if it does
@@ -109,239 +189,155 @@ def webServer(session, event, stdin_fd, predetermined_input, port=None):
     # dump cache in a separate thread every 5 minutes
     threading.Thread(target=dump_cache, daemon=True).start()
 
+
+    from flask import Flask, Response, request
+    sys.flask = flask
+
     import flask.cli
     flask.cli.show_server_banner = lambda *args: None
 
-    try:
-        app = Flask("Ikabot web server")
-        logging.getLogger("werkzeug").setLevel(logging.ERROR)
-        app.logger = getLogger(__name__)
-        app.logger.setLevel(logging.ERROR)
+    app = Flask("Ikabot web server")
+    logging.getLogger("werkzeug").setLevel(logging.ERROR)
+    app.logger = getLogger(__name__)
+    app.logger.setLevel(logging.ERROR)
 
-        @app.route("/", defaults={"path": ""}, methods=["GET", "POST"])
-        @app.route("/<path:path>", methods=["GET", "POST"])
-        def webServer(path):
+    @app.route("/", defaults={"path": ""}, methods=["GET", "POST"])
+    @app.route("/<path:path>", methods=["GET", "POST"])
+    def webServer(path):
 
-            dest_url = f"{path}"
-            
-            if "ikabot=1" in request.url:
-                return handleIkabotAPIRequest(session, request)
+        dest_url = f"{path}"
+        
+        if "ikabot=1" in request.url:
+            return handleIkabotAPIRequest(session, request)
 
-            # replace mayor
-            if "/cdn/all/both/layout/advisors/mayor" in request.url:
-                image_data = (
-                    base64.b64decode(woke_mayor)
-                    if "active" not in request.url
-                    else base64.b64decode(woke_mayor_active)
+        # replace mayor
+        if "/cdn/all/both/layout/advisors/mayor" in request.url:
+            image_data = (
+                base64.b64decode(woke_mayor)
+                if "active" not in request.url
+                else base64.b64decode(woke_mayor_active)
+            )
+            # Convert the bytes data to a BytesIO object that Flask can send
+            image_io = BytesIO(image_data)
+            image_io.seek(0)
+            expires = datetime.utcnow() + timedelta(days=1)
+            headers = dict()
+            headers["Expires"] = expires.strftime("%a, %d %b %Y %H:%M:%S GMT")
+            headers["Cache-Control"] = "public, max-age=86400"
+            response = Response(image_io, 200, headers)
+            return response
+
+        if (
+            ".png" in request.url
+            or ".jpg" in request.url
+            or ".gif" in request.url
+            or ".cur" in request.url
+        ):
+            # add caching for images
+            expires = datetime.utcnow() + timedelta(days=1)
+            headers = dict()
+            headers["Expires"] = expires.strftime("%a, %d %b %Y %H:%M:%S GMT")
+            headers["Cache-Control"] = "public, max-age=86400"
+            name = request.url.split("/")[-1]
+            if name in web_cache:
+                return Response(BytesIO(web_cache[name]), 200, headers)
+
+        new_data = dict()
+        try:
+            data = request.get_data(as_text=True)
+            data = unquote(data, encoding='utf-8', errors='replace')
+            if data:
+                for item in data.split("&"):
+                    k, v = item.split("=")
+                    new_data[k] = unquote_plus(v)
+        except Exception:
+            pass
+        for arg in request.args:
+            new_data[arg] = unquote_plus(request.args[arg])
+        for arg in new_data:
+            if arg == "actionRequest":
+                new_data[arg] = (
+                    actionRequest  # this is to prevent custom requests from going to ikariam servers
                 )
-                # Convert the bytes data to a BytesIO object that Flask can send
-                image_io = BytesIO(image_data)
-                image_io.seek(0)
-                expires = datetime.utcnow() + timedelta(days=1)
-                headers = dict()
-                headers["Expires"] = expires.strftime("%a, %d %b %Y %H:%M:%S GMT")
-                headers["Cache-Control"] = "public, max-age=86400"
-                response = Response(image_io, 200, headers)
-                return response
-
-            if (
-                ".png" in request.url
-                or ".jpg" in request.url
-                or ".gif" in request.url
-                or ".cur" in request.url
-            ):
-                # add caching for images
-                expires = datetime.utcnow() + timedelta(days=1)
-                headers = dict()
-                headers["Expires"] = expires.strftime("%a, %d %b %Y %H:%M:%S GMT")
-                headers["Cache-Control"] = "public, max-age=86400"
-                name = request.url.split("/")[-1]
-                if name in web_cache:
-                    return Response(BytesIO(web_cache[name]), 200, headers)
-
-            new_data = dict()
-            try:
-                data = request.get_data(as_text=True)
-                data = unquote(data, encoding='utf-8', errors='replace')
-                if data:
-                    for item in data.split("&"):
-                        k, v = item.split("=")
-                        new_data[k] = unquote_plus(v)
-            except Exception:
-                pass
-            for arg in request.args:
-                new_data[arg] = unquote_plus(request.args[arg])
-            for arg in new_data:
-                if arg == "actionRequest":
-                    new_data[arg] = (
-                        actionRequest  # this is to prevent custom requests from going to ikariam servers
-                    )
-                if arg == "view" and new_data[arg] == "ikabotSandbox":
-                    new_data[arg] = "version"
-                if arg == "activeTab" and new_data[arg] == "tab_ikabotSandbox":
-                    new_data[arg] = "tab_version"
-            if request.method in ["POST"]:
-                resp = session.post(
-                    dest_url,
-                    params=new_data,
-                    noIndex=True,
-                    fullResponse=True,
-                    noQuery=True,
-                    allow_redirects=False,
-                )
-            else:
-                resp = session.get(
-                    dest_url,
-                    params=new_data,
-                    noIndex=True,
-                    fullResponse=True,
-                    noQuery=True,
-                    allow_redirects=False,
-                )
-
-            if (
-                ".png" in request.url
-                or ".jpg" in request.url
-                or ".gif" in request.url
-                or ".cur" in request.url
-            ):
-                # cache was missed, add to cache and send response
-                expires = datetime.utcnow() + timedelta(days=1)
-                headers = dict()
-                headers["Expires"] = expires.strftime("%a, %d %b %Y %H:%M:%S GMT")
-                headers["Cache-Control"] = "public, max-age=86400"
-                response = Response(resp.content, 200, headers)
-                web_cache[request.url.split("/")[-1]] = resp.content
-                return response
-
-            # Replace all instances of the target URL with the proxy URL
-            # modified_content = resp.text.replace(session.urlBase.replace( '/index.php?', ''), 'http://localhost:589').replace(session.host, 'localhost:589')
-
-            modified_content = resp.text
-
-            # prevent losing reference to console object. sneaky gameforge...
-            modified_content = modified_content.replace("console = ", "")
-
-            # use regex to replace the script with id="cookiebanner" with custom script
-            scripts = re.findall(r"(<script[\S\s]*?script>)", modified_content)
-            for script in scripts:
-                if "cookiebanner" in script:
-                    modified_content = modified_content.replace(script, custom_script)
-                if "log: function" in script or "dir: function" in script:
-                    modified_content = modified_content.replace(script, "")
-
-            # intercept and modify response to version request, add sandbox html
-            if (
-                "view=version" in request.url
-                or "view=normalServerStatus" in request.url
-                or "view=ikabotSandbox" in request.url
-            ):
-                return addSandbox(session, resp, request)
-
-            # Create a new response with the modified content
-            proxied_response = Response(modified_content, status=resp.status_code)
-
-            # Copy over headers
-            excluded_headers = [
-                "content-encoding",
-                "content-length",
-                "transfer-encoding",
-                "connection",
-            ]
-            for header in resp.headers:
-                if header.lower() not in excluded_headers:
-                    proxied_response.headers[header] = resp.headers[header]
-
-            return proxied_response
-
-        def is_port_in_use(port: int) -> bool:
-            try:
-                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                    return s.connect_ex(("127.0.0.1", port)) == 0
-            except Exception as e:
-                logger.log(
-                    logging.FATAL,
-                    f"Error while checking if port {str(port)} is in use: " + str(e),
-                )
-                raise e
-
-        # If the port is not provided, prompt the user for it if enabled from the config file
-        if config.enable_CustomPort is True:
-            while True:
-                if port is None:
-                    print("Please enter a port number (1 - 65535) to run the web server on (leave empty or 0 for random): ")
-                    port = read(min=0, max=65535, digit=True, empty=True)
-                    if port == "" or port == 0:
-                        port = None
-                        break
-                    else:
-                        port = str(int(port))
-                        if is_port_in_use(int(port)):
-                            print(f"Port {port} is already in use, try another port.")
-                            continue
-                        break
-
-        # If the port is still None, select a random port as in the original script
-        if port is None:
-            port = str(
-                (
-                    sum(ord(c) ** 2 for c in session.mail)
-                    + sum(ord(c) ** 2 for c in session.host)
-                    + sum(ord(c) ** 2 for c in session.username)
-                )
-                % 2000
-                + 43000
+            if arg == "view" and new_data[arg] == "ikabotSandbox":
+                new_data[arg] = "version"
+            if arg == "activeTab" and new_data[arg] == "tab_ikabotSandbox":
+                new_data[arg] = "tab_version"
+        if request.method in ["POST"]:
+            resp = session.post(
+                dest_url,
+                params=new_data,
+                noIndex=True,
+                fullResponse=True,
+                noQuery=True,
+                allow_redirects=False,
+            )
+        else:
+            resp = session.get(
+                dest_url,
+                params=new_data,
+                noIndex=True,
+                fullResponse=True,
+                noQuery=True,
+                allow_redirects=False,
             )
 
-            # bang on ports from `port` to 65535 until an available one is found
-            while True:
-                if not is_port_in_use(int(port)):
-                    break
-                port = str(int(port) + 1)
+        if (
+            ".png" in request.url
+            or ".jpg" in request.url
+            or ".gif" in request.url
+            or ".cur" in request.url
+        ):
+            # cache was missed, add to cache and send response
+            expires = datetime.utcnow() + timedelta(days=1)
+            headers = dict()
+            headers["Expires"] = expires.strftime("%a, %d %b %Y %H:%M:%S GMT")
+            headers["Cache-Control"] = "public, max-age=86400"
+            response = Response(resp.content, 200, headers)
+            web_cache[request.url.split("/")[-1]] = resp.content
+            return response
 
-        # try to get local network ip if possible
-        local_network_ip = None
-        try:
-            local_network_ip = socket.gethostbyname(socket.gethostname())
-        except:
-            pass
-        print(
-            f"""Ikabot web server is about to be run on {bcolors.BLUE}http://127.0.0.1:{port}{bcolors.ENDC} {'and ' + bcolors.BLUE + 'http://' + str(local_network_ip) + ':' + port + bcolors.ENDC if local_network_ip else ''}"""
-        )
-        print(
-            "You can use this link in your browser to play ikariam without logging ikabot out."
-        )
-        print(
-            "If you wish to access this ikabot web server from another device that is not on this local network"
-        )
-        print(
-            "you can try to run one of the following commands in a separate terminal and use the link that it provides to connect:"
-        )
-        print(
-            f"{bcolors.DARK_GREEN}ssh -o StrictHostKeyChecking=no -R 80:127.0.0.1:{port} serveo.net{bcolors.ENDC}"
-        )
-        print("Or you can try:")
-        print(
-            f"{bcolors.DARK_GREEN}ssh -o StrictHostKeyChecking=no -R 80:127.0.0.1:{port} nokey@localhost.run{bcolors.ENDC}"
-        )
+        # Replace all instances of the target URL with the proxy URL
+        # modified_content = resp.text.replace(session.urlBase.replace( '/index.php?', ''), 'http://localhost:589').replace(session.host, 'localhost:589')
 
-        print(
-            f"\n        {bcolors.WARNING}[WARNING]{bcolors.ENDC} Make sure you don't share this link with anyone you don't trust!"
-        )
+        modified_content = resp.text
 
-        print(
-            "\nPress [ENTER] if you want to run the web server now, or CTRL+C to go back to the main menu"
-        )
-        enter()
-        session.setStatus(
-            f"""running on http://127.0.0.1:{port} {'and '+'http://' + str(local_network_ip) + ':' + port if local_network_ip else ''}"""
-        )
-        event.set()
-        app.run(host="0.0.0.0", port=int(port), threaded=True)
+        # prevent losing reference to console object. sneaky gameforge...
+        modified_content = modified_content.replace("console = ", "")
 
-    except Exception:
-        event.set()
-        return
+        # use regex to replace the script with id="cookiebanner" with custom script
+        scripts = re.findall(r"(<script[\S\s]*?script>)", modified_content)
+        for script in scripts:
+            if "cookiebanner" in script:
+                modified_content = modified_content.replace(script, custom_script)
+            if "log: function" in script or "dir: function" in script:
+                modified_content = modified_content.replace(script, "")
+
+        # intercept and modify response to version request, add sandbox html
+        if (
+            "view=version" in request.url
+            or "view=normalServerStatus" in request.url
+            or "view=ikabotSandbox" in request.url
+        ):
+            return addSandbox(session, resp, request)
+
+        # Create a new response with the modified content
+        proxied_response = Response(modified_content, status=resp.status_code)
+
+        # Copy over headers
+        excluded_headers = [
+            "content-encoding",
+            "content-length",
+            "transfer-encoding",
+            "connection",
+        ]
+        for header in resp.headers:
+            if header.lower() not in excluded_headers:
+                proxied_response.headers[header] = resp.headers[header]
+
+        return proxied_response
+
+    app.run(host="0.0.0.0", port=int(port), threaded=True)
 
 
 def handleIkabotAPIRequest(session, request):

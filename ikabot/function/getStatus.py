@@ -1,34 +1,21 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import os
-import re
 from decimal import *
 
 from ikabot.config import *
-from ikabot.helpers.getJson import getCity
 from ikabot.helpers.gui import *
-from ikabot.helpers.market import getGold
 from ikabot.helpers.naval import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.resources import *
 from ikabot.helpers.varios import *
 
-getcontext().prec = 30
+from typing import TYPE_CHECKING, TypedDict, Union
+if TYPE_CHECKING:
+    from ikabot.web.session import Session
 
 
-def getStatus(session, event, stdin_fd, predetermined_input):
-    """
-    Parameters
-    ----------
-    session : ikabot.web.session.Session
-    event : multiprocessing.Event
-    stdin_fd: int
-    predetermined_input : multiprocessing.managers.SyncManager.list
-    """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
-    try:
+def getStatus(session: Session):
         banner()
         color_arr = [
             bcolors.ENDC,
@@ -84,7 +71,7 @@ def getStatus(session, event, stdin_fd, predetermined_input):
         print("\nTotal:")
         print("{:>10}".format(" "), end="|")
         for i in range(len(materials_names)):
-            print("{:>12}".format(materials_names_english[i]), end="|")
+            print("{:>12}".format(materials_names[i]), end="|")
         print()
         print("{:>10}".format("Available"), end="|")
         for i in range(len(materials_names)):
@@ -210,8 +197,6 @@ def getStatus(session, event, stdin_fd, predetermined_input):
             )
 
         enter()
-        print("")
-        event.set()
-    except KeyboardInterrupt:
-        event.set()
-        return
+
+def do_it(session: Session):
+    ...

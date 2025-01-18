@@ -4,7 +4,7 @@ import pytest
 
 import ikabot.config
 import ikabot.function.distributeResources
-from ikabot.config import materials_names_tec
+from ikabot.config import materials_names
 from ikabot.function.distributeResources import distribute_evenly
 
 
@@ -16,7 +16,7 @@ def test_distribute_evenly(monkeypatch, session, cities):
 
     # test
     routes = distribute_evenly(
-        session, materials_names_tec.index("wine"), cities_ids, cities
+        session, materials_names.index("wine"), cities_ids
     )
 
     sorted_routes = sorted(routes, key=lambda route: route[1]["id"])

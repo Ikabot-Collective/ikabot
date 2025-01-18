@@ -301,7 +301,7 @@ def getWorldMapIslands(html: str) -> list[WorldMapIslandDict]:
                 'heliosTower': bool(int(data[x][y][9])),
                 'red': bool(int(data[x][y][10])),
                 'blue': bool(int(data[x][y][11])),
-                'resourceName': materials_names_english[int(data[x][y][2])],
+                'resourceName': materials_names[int(data[x][y][2])],
                 'miracleName': miracle_names_english[int(data[x][y][3])]
             })
 

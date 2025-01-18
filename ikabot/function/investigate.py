@@ -9,38 +9,120 @@ from ikabot.helpers.botComm import *
 from ikabot.helpers.getJson import getCity
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import *
-from ikabot.helpers.process import set_child_mode
-from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import *
 
+from typing import TYPE_CHECKING, TypedDict, Union
+if TYPE_CHECKING:
+    from ikabot.web.session import Session
 
+Experiments = TypedDict("Experiments", {"cityID": int, "cityName": str, "pos": int, "qty": int})
+InvestigateConfig = TypedDict("InvestigateConfig", {"experiments": Experiments, "automatic": bool})
+def investigate(session: Session) -> Union[InvestigateConfig, None]:
+    banner()
 
-def get_studies(session):
-    html = session.get()
-    city = getCity(html)
-    city_id = city["id"]
-    url = "view=researchAdvisor&oldView=updateGlobalData&cityId={0}&backgroundView=city&currentCityId={0}&templateView=researchAdvisor&actionRequest={1}&ajax=1".format(
-        city_id, actionRequest
-    )
-    resp = session.post(url)
-    resp = json.loads(resp, strict=False)
-    return resp[2][1]
+    print("\nSelect an option:")
+    print("1) Study")
+    print("2) Conduct experiment")
+    print("3) Conduct automatically")
+    option = read(min=1, max=3)
 
+    if option == 1:
+        studies = get_studies(session)
+        keys = list(studies.keys())
+        num_studies = len(
+            [
+                key
+                for key in keys
+                if "js_researchAdvisorChangeResearchTypeTxt" in key
+            ]
+        )
 
-def study(session, studies, num_study):
-    html = session.get()
-    city = getCity(html)
-    city_id = city["id"]
-    research_type = studies["js_researchAdvisorChangeResearchType{}".format(num_study)][
-        "ajaxrequest"
-    ].split("=")[-1]
-    url = "action=Advisor&function=doResearch&actionRequest={}&type={}&backgroundView=city&currentCityId={}&templateView=researchAdvisor&ajax=1".format(
-        actionRequest, research_type, city_id
-    )
-    session.post(url)
+        available = []
+        for num_study in range(num_studies):
+            if "js_researchAdvisorProgressTxt{}".format(num_study) in studies:
+                available.append(num_study)
 
+        if len(available) == 0:
+            print("There are no available studies.")
+            enter()
+            return
 
-def experiment(session, experiments, automatic):
+        print("Which one do you wish to study?")
+        print("0) None")
+        for index, num_study in enumerate(available):
+            print(
+                "{:d}) {}".format(
+                    index + 1,
+                    studies[
+                        "js_researchAdvisorNextResearchName{}".format(num_study)
+                    ],
+                )
+            )
+        choice = read(min=0, max=len(available))
+
+        if choice == 0:
+            return
+
+        study(session, studies, available[choice - 1])
+        print("Done.")
+        enter()
+    else:
+        if option == 3:
+            max_experiments = 9999999
+            automatic = True
+        else:
+            automatic = False
+        # Experiment
+        experiments = {}
+        total_glass = 0
+        found_academy = -1
+
+        # while (total_glass < 300000 or found_academy < 0):
+        banner()
+        print("Pick city: ")
+        city = chooseCity(session)
+        total_glass = int(city["availableResources"][3])
+
+        # Check if enough glass
+        if automatic is False:
+            if total_glass < 300000:
+                print(
+                    f"Not enough glass ({addThousandSeparator(total_glass)}), try another city. Min=300k"
+                )
+                time.sleep(2)
+                enter()
+                return
+
+        # Search for Academy
+        for building in city["position"]:
+            if building["building"] == "academy":
+                found_academy = building["position"]
+
+        if found_academy < 0:
+            print(f"No academy in this town, pick another one")
+            time.sleep(2)
+            enter()
+            return
+
+        if automatic is False:
+            max_experiments = total_glass // 300000
+            automatic = False
+            banner()
+            print(f"How many experiments? Min=1, Max={max_experiments}")
+            choice = read(min=1, max=max_experiments)
+
+        if automatic is True:
+            choice = 999999
+
+        # Build experiments dict
+        experiments["cityID"] = city["id"]
+        experiments["cityName"] = city["name"]
+        experiments["pos"] = found_academy
+        experiments["qty"] = choice
+
+        return {"experiments": experiments, "automatic": automatic}
+
+def do_it(session: Session, experiments: Experiments, automatic: bool):
     while experiments["qty"] > 0:
         if automatic is True: experiments["qty"] = 999999
         # Validate if material is still there..oterwhise log it and send it via bot
@@ -97,143 +179,32 @@ def experiment(session, experiments, automatic):
         time.sleep(241 * 60)
 
 
-def investigate(session, event, stdin_fd, predetermined_input):
-    """
-    Parameters
-    ----------
-    session : ikabot.web.session.Session
-    event : multiprocessing.Event
-    stdin_fd: int
-    predetermined_input : multiprocessing.managers.SyncManager.list
-    """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
-    try:
-        banner()
+def get_studies(session):
+    html = session.get()
+    city = getCity(html)
+    city_id = city["id"]
+    url = "view=researchAdvisor&oldView=updateGlobalData&cityId={0}&backgroundView=city&currentCityId={0}&templateView=researchAdvisor&actionRequest={1}&ajax=1".format(
+        city_id, actionRequest
+    )
+    resp = session.post(url)
+    resp = json.loads(resp, strict=False)
+    return resp[2][1]
 
-        print("\nSelect an option:")
-        print("1) Study")
-        print("2) Conduct experiment")
-        print("3) Conduct automatically")
-        option = read(min=1, max=3)
 
-        if option == 1:
-            studies = get_studies(session)
-            keys = list(studies.keys())
-            num_studies = len(
-                [
-                    key
-                    for key in keys
-                    if "js_researchAdvisorChangeResearchTypeTxt" in key
-                ]
-            )
+def study(session, studies, num_study):
+    html = session.get()
+    city = getCity(html)
+    city_id = city["id"]
+    research_type = studies["js_researchAdvisorChangeResearchType{}".format(num_study)][
+        "ajaxrequest"
+    ].split("=")[-1]
+    url = "action=Advisor&function=doResearch&actionRequest={}&type={}&backgroundView=city&currentCityId={}&templateView=researchAdvisor&ajax=1".format(
+        actionRequest, research_type, city_id
+    )
+    session.post(url)
 
-            available = []
-            for num_study in range(num_studies):
-                if "js_researchAdvisorProgressTxt{}".format(num_study) in studies:
-                    available.append(num_study)
 
-            if len(available) == 0:
-                print("There are no available studies.")
-                enter()
-                event.set()
-                return
 
-            print("Which one do you wish to study?")
-            print("0) None")
-            for index, num_study in enumerate(available):
-                print(
-                    "{:d}) {}".format(
-                        index + 1,
-                        studies[
-                            "js_researchAdvisorNextResearchName{}".format(num_study)
-                        ],
-                    )
-                )
-            choice = read(min=0, max=len(available))
 
-            if choice == 0:
-                event.set()
-                return
 
-            study(session, studies, available[choice - 1])
-            print("Done.")
-            enter()
-            event.set()
-        else:
-            if option == 3:
-                max_experiments = 9999999
-                automatic = True
-            else:
-                automatic = False
-            # Experiment
-            experiments = {}
-            total_glass = 0
-            found_academy = -1
 
-            # while (total_glass < 300000 or found_academy < 0):
-            banner()
-            print("Pick city: ")
-            city = chooseCity(session)
-            total_glass = int(city["availableResources"][3])
-
-            # Check if enough glass
-            if automatic is False:
-                if total_glass < 300000:
-                    print(
-                        f"Not enough glass ({addThousandSeparator(total_glass)}), try another city. Min=300k"
-                    )
-                    time.sleep(2)
-                    enter()
-                    event.set()
-                    return
-
-            # Search for Academy
-            for building in city["position"]:
-                if building["building"] == "academy":
-                    found_academy = building["position"]
-
-            if found_academy < 0:
-                print(f"No academy in this town, pick another one")
-                time.sleep(2)
-                enter()
-                event.set()
-                return
-
-            if automatic is False:
-                max_experiments = total_glass // 300000
-                automatic = False
-                banner()
-                print(f"How many experiments? Min=1, Max={max_experiments}")
-                choice = read(min=1, max=max_experiments)
-
-            if automatic is True:
-                choice = 999999
-
-            # Build experiments dict
-            experiments["cityID"] = city["id"]
-            experiments["cityName"] = city["name"]
-            experiments["pos"] = found_academy
-            experiments["qty"] = choice
-
-            # Process
-            set_child_mode(session)
-            event.set()
-
-            if automatic is False:
-                info = f"Process: Experiments\n\nWill excecute {choice} times every 4h"
-            else:
-                info = f"Process: Experiments\n\nWill excecute every 4h"
-
-            try:
-                sendToBot(session, info)
-                experiment(session, experiments, automatic)
-            except Exception as e:
-                error_msg = f"Error in:\n{info}\nCause:\n{traceback.format_exc()}"
-                sendToBot(session, error_msg)
-            finally:
-                session.logout()
-
-    except KeyboardInterrupt:
-        event.set()
-        return

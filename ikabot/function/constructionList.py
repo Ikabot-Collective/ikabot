@@ -21,15 +21,109 @@ from ikabot.helpers.getJson import getCity
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.planRoutes import *
-from ikabot.helpers.process import set_child_mode
-from ikabot.helpers.resources import getAvailableResources
-from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import *
-from ikabot.web.session import normal_get
+
+from typing import TYPE_CHECKING, TypedDict, Union
+if TYPE_CHECKING:
+    from ikabot.web.session import Session
 
 sendResources = True
 expand = True
 thread = None
+
+
+ConstructionListConfig = TypedDict("ConstructionListConfig", {"cityId": int, "buildings": list[dict], "wait_resources": bool})
+def constructionList(session: Session):
+    global expand
+    global sendResources
+    expand = True
+    sendResources = True
+
+    banner()
+    wait_resources = False
+    print("In which city do you want to expand buildings?")
+    city = chooseCity(session)
+    cityId = city["id"]
+    buildings = getBuildingsToExpand(session, cityId)
+    if buildings is None or len(buildings) == 0:
+        return
+
+    # Sequentially upgrade each building
+    for building in buildings:
+        current_level = building["level"]
+        if building["isBusy"]:
+            current_level += 1
+        final_level = building["upgradeTo"]
+
+        # calculate the resources that are needed
+        resourcesNeeded = getResourcesNeeded(
+            session, city, building, current_level, final_level
+        )
+        if -1 in resourcesNeeded:
+            return
+
+        print("\nMaterials needed for {}:".format(building["name"]))
+        for i, name in enumerate(materials_names):
+            amount = resourcesNeeded[i]
+            if amount == 0:
+                continue
+            print("- {}: {}".format(name, addThousandSeparator(amount)))
+        print("")
+
+        # calculate the resources that are missing
+        missing = [0] * len(materials_names)
+        for i in range(len(materials_names)):
+            if city["availableResources"][i] < resourcesNeeded[i]:
+                missing[i] = resourcesNeeded[i] - city["availableResources"][i]
+
+        # show missing resources to the user
+        if sum(missing) > 0:
+            print("\nMissing:")
+            for i in range(len(materials_names)):
+                if missing[i] == 0:
+                    continue
+                name = materials_names[i].lower()
+                print("{} of {}".format(addThousandSeparator(missing[i]), name))
+            print("")
+
+            # if the user wants, send the resources from the selected cities
+            print("Automatically transport resources? [Y/n]")
+            rta = read(values=["y", "Y", "n", "N", ""])
+            if rta.lower() == "n":
+                print("Proceed anyway? [Y/n]")
+                rta = read(values=["y", "Y", "n", "N", ""])
+                if rta.lower() == "n":
+                    return
+            else:
+                print("What type of ships do you want to use? (Default: Trade ships)")
+                print("(1) Trade ships")
+                print("(2) Freighters")
+                shiptype = read(min=1, max=2, digit=True, empty=True)
+                if shiptype == '':
+                    shiptype = 1
+                if shiptype == 1:
+                    useFreighters = False
+                elif shiptype == 2:
+                    useFreighters = True
+                wait_resources = True
+                sendResourcesMenu(session, cityId, missing, useFreighters)
+        else:
+            print("\nYou have enough materials")
+            print("Proceed? [Y/n]")
+            rta = read(values=["y", "Y", "n", "N", ""])
+            if rta.lower() == "n":
+                return
+
+    return {"cityId": cityId, "buildings": buildings, "wait_resources": wait_resources}
+
+
+def do_it(session: Session, cityId: int, buildings: list[dict], wait_resources: bool):
+    global expand
+    if expand:
+        for building in buildings:
+            expandBuilding(session, cityId, building, wait_resources)
+    elif thread:
+        thread.join()
 
 
 def waitForConstruction(session, city_id, final_lvl):
@@ -290,8 +384,8 @@ def getResourcesNeeded(session, city, building, current_level, final_level):
             # get hash from CDN images to identify the resource type
             resource_type = checkhash("https:" + resources_types[i] + ".png")
 
-            for j in range(len(materials_names_tec)):
-                name = materials_names_tec[j]
+            for j in range(len(materials_names)):
+                name = materials_names[j]
                 if resource_type == name:
                     resource_index = j
                     break
@@ -580,123 +674,4 @@ def checkhash(url):
     return material
 
 
-def constructionList(session, event, stdin_fd, predetermined_input):
-    """
-    Parameters
-    ----------
-    session : ikabot.web.session.Session
-    event : multiprocessing.Event
-    stdin_fd: int
-    predetermined_input : multiprocessing.managers.SyncManager.list
-    """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
-    try:
-        global expand
-        global sendResources
-        expand = True
-        sendResources = True
-
-        banner()
-        wait_resources = False
-        print("In which city do you want to expand buildings?")
-        city = chooseCity(session)
-        cityId = city["id"]
-        buildings = getBuildingsToExpand(session, cityId)
-        if buildings is None or len(buildings) == 0:
-            event.set()
-            return
-
-        # Sequentially upgrade each building
-        for building in buildings:
-            current_level = building["level"]
-            if building["isBusy"]:
-                current_level += 1
-            final_level = building["upgradeTo"]
-
-            # calculate the resources that are needed
-            resourcesNeeded = getResourcesNeeded(
-                session, city, building, current_level, final_level
-            )
-            if -1 in resourcesNeeded:
-                event.set()
-                return
-
-            print("\nMaterials needed for {}:".format(building["name"]))
-            for i, name in enumerate(materials_names):
-                amount = resourcesNeeded[i]
-                if amount == 0:
-                    continue
-                print("- {}: {}".format(name, addThousandSeparator(amount)))
-            print("")
-
-            # calculate the resources that are missing
-            missing = [0] * len(materials_names)
-            for i in range(len(materials_names)):
-                if city["availableResources"][i] < resourcesNeeded[i]:
-                    missing[i] = resourcesNeeded[i] - city["availableResources"][i]
-
-            # show missing resources to the user
-            if sum(missing) > 0:
-                print("\nMissing:")
-                for i in range(len(materials_names)):
-                    if missing[i] == 0:
-                        continue
-                    name = materials_names[i].lower()
-                    print("{} of {}".format(addThousandSeparator(missing[i]), name))
-                print("")
-
-                # if the user wants, send the resources from the selected cities
-                print("Automatically transport resources? [Y/n]")
-                rta = read(values=["y", "Y", "n", "N", ""])
-                if rta.lower() == "n":
-                    print("Proceed anyway? [Y/n]")
-                    rta = read(values=["y", "Y", "n", "N", ""])
-                    if rta.lower() == "n":
-                        event.set()
-                        return
-                else:
-                    print("What type of ships do you want to use? (Default: Trade ships)")
-                    print("(1) Trade ships")
-                    print("(2) Freighters")
-                    shiptype = read(min=1, max=2, digit=True, empty=True)
-                    if shiptype == '':
-                        shiptype = 1
-                    if shiptype == 1:
-                        useFreighters = False
-                    elif shiptype == 2:
-                        useFreighters = True
-                    wait_resources = True
-                    sendResourcesMenu(session, cityId, missing, useFreighters)
-            else:
-                print("\nYou have enough materials")
-                print("Proceed? [Y/n]")
-                rta = read(values=["y", "Y", "n", "N", ""])
-                if rta.lower() == "n":
-                    event.set()
-                    return
-    except KeyboardInterrupt:
-        event.set()
-        return
-    
-    set_child_mode(session)
-    event.set()
-
-    info = "\nUpgrade building\n"
-    info = info + "City: {}\nBuilding: {}. From {:d}, to {:d}".format(
-        city["cityName"], building["name"], current_level, final_level
-    )
-
-    setInfoSignal(session, info)
-    try:
-        if expand:
-            for building in buildings:
-                expandBuilding(session, cityId, building, wait_resources)
-        elif thread:
-            thread.join()
-    except Exception as e:
-        msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
-        sendToBot(session, msg)
-    finally:
-        session.logout()
 

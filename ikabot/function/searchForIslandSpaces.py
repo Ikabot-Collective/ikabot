@@ -1,103 +1,74 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import sys
-import time
-import traceback
-
 from ikabot.config import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.getJson import getIsland
 from ikabot.helpers.gui import enter
 from ikabot.helpers.pedirInfo import getIslandsIds
-from ikabot.helpers.process import set_child_mode
-from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import getDateTime, wait
 
 
-def searchForIslandSpaces(session, event, stdin_fd, predetermined_input):
-    """
-    Parameters
-    ----------
-    session : ikabot.web.session.Session
-    event : multiprocessing.Event
-    stdin_fd: int
-    predetermined_input : multiprocessing.managers.SyncManager.list
-    """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
-    try:
-        if checkTelegramData(session) is False:
-            event.set()
-            return
-        banner()
-        print(
-            "Do you want to search for spaces on your islands or a specific set of islands?"
-        )
-        print("(0) Exit")
-        print("(1) Search all islands I have colonised")
-        print("(2) Search a specific set of islands")
-        choice = read(min=0, max=2)
-        islandList = []
-        if choice == 0:
-            event.set()
-            return
-        elif choice == 2:
-            banner()
-            print(
-                "Insert the coordinates of each island you want searched like so: X1:Y1, X2:Y2, X3:Y3..."
-            )
-            coords_string = read()
-            coords_string = coords_string.replace(" ", "")
-            coords = coords_string.split(",")
-            for coord in coords:
-                coord = "&xcoord=" + coord
-                coord = coord.replace(":", "&ycoord=")
-                html = session.get("view=island" + coord)
-                island = getIsland(html)
-                islandList.append(island["id"])
-        else:
-            pass
+from typing import TYPE_CHECKING, TypedDict, Union
+if TYPE_CHECKING:
+    from ikabot.web.session import Session
 
-        banner()
-        print(
-            "How frequently should the islands be searched in minutes (minimum is 3)?"
-        )
-        time = read(min=3, digit=True)
-        banner()
-        print(
-            "Do you wish to be notified when a fight breaks out and stops on a city on these islands? (Y|N)"
-        )
-        fights = read(values=["y", "Y", "n", "N"])
-        banner()
-        print("I will search for changes in the selected islands")
-        enter()
-    except KeyboardInterrupt:
-        event.set()
+SearchForIslandSpacesConfig = TypedDict("SearchForIslandSpacesConfig", {"islands": list[int], "time": int, "fights": str})
+def searchForIslandSpaces(session: Session) -> SearchForIslandSpacesConfig:
+    if checkTelegramData(session) is False:
         return
+    banner()
+    print(
+        "Do you want to search for spaces on your islands or a specific set of islands?"
+    )
+    print("(0) Exit")
+    print("(1) Search all islands I have colonised")
+    print("(2) Search a specific set of islands")
+    choice = read(min=0, max=2)
+    islandList = []
+    if choice == 0:
+        return
+    elif choice == 2:
+        banner()
+        print(
+            "Insert the coordinates of each island you want searched like so: X1:Y1, X2:Y2, X3:Y3..."
+        )
+        coords_string = read()
+        coords_string = coords_string.replace(" ", "")
+        coords = coords_string.split(",")
+        for coord in coords:
+            coord = "&xcoord=" + coord
+            coord = coord.replace(":", "&ycoord=")
+            html = session.get("view=island" + coord)
+            island = getIsland(html)
+            islandList.append(island["id"])
+    else:
+        pass
 
-    set_child_mode(session)
-    event.set()
+    banner()
+    print(
+        "How frequently should the islands be searched in minutes (minimum is 3)?"
+    )
+    time = read(min=3, digit=True)
+    banner()
+    print(
+        "Do you wish to be notified when a fight breaks out and stops on a city on these islands? (Y|N)"
+    )
+    fights = read(values=["y", "Y", "n", "N"])
+    banner()
+    print("I will search for changes in the selected islands")
+    enter()
 
-    info = "\nI search for new spaces each hour\n"
-    setInfoSignal(session, info)
-    try:
-        do_it(session, islandList, time, fights)
-    except Exception as e:
-        msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
-        sendToBot(session, msg)
-    finally:
-        session.logout()
+    return {'islandList': islandList, 'time': time, 'fights': fights}
+    
 
 
-def do_it(session, islandList, time, fights):
+def do_it(session, islandList: list[int], time: int, fights: str):
     """
     Parameters
     ----------
-    session : ikabot.web.session.Session
-        Session object
-    islandList : list[dict]
-        A list containing island objects which should be searched, if an empty list is passed, all the user's colonised islands are searched
+    islandList : list[int]
+        A list containing island ids which should be searched, if an empty list is passed, all the user's colonised islands are searched
     time : int
         The time in minutes between two consecutive seraches
     fights : str

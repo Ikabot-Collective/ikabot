@@ -5,24 +5,148 @@ import json
 import math
 import re
 import time
-import traceback
 from decimal import *
 
 from ikabot.config import *
 from ikabot.helpers.botComm import *
-from ikabot.helpers.getJson import getCity
 from ikabot.helpers.gui import *
 from ikabot.helpers.naval import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.planRoutes import waitForArrival
-from ikabot.helpers.process import set_child_mode
-from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import *
 
-getcontext().prec = 30
+from typing import TYPE_CHECKING, TypedDict, Union
+if TYPE_CHECKING:
+    from ikabot.web.session import Session
 
 
-def choose_island(session):
+UnitData = TypedDict("UnitData", {"speed": int, "weight": int, "name": str})
+UnitDatas = TypedDict("UnitDatas", {str: UnitData})
+Unit = TypedDict("Unit", {"amount": int, "name": str})
+Units = TypedDict("Units", {str: Unit})
+BarbarianAttackRound = TypedDict("BarbarianAttackRound", {"units": Unit, "ships": int, "loot": bool, "round": int})
+BarbarianAttackPlan = list[BarbarianAttackRound]
+BarbariansInfo = TypedDict("BarbariansInfo", {"island_id": int, "level": int, "gold": int, "resources": int, "troops": list[str], "ships": int})
+AttackBarbariansConfig = TypedDict("AttackBarbariansConfig", {"island": IslandDict, "city": FullCityDict, "barbarians_info": BarbariansInfo, "plan": dict})
+def attackBarbarians(session: Session):
+    banner()
+
+    island = choose_island(session)
+    if island is None:
+        return
+
+    babarians_info = get_barbarians_lv(session, island)
+
+    banner()
+    print("The barbarians have:")
+    for name, amount in babarians_info["troops"]:
+        print("{} units of {}".format(amount, name))
+    print("")
+
+    banner()
+    print("From which city do you want to attack?")
+    city = chooseCity(session)
+
+    plan = plan_attack(session, city, babarians_info)
+    if plan is None:
+        return
+
+    banner()
+    print(
+        "The barbarians in [{}:{}] will be attacked.".format(
+            island["x"], island["y"]
+        )
+    )
+    enter()
+
+    return {"island": island, "city": city, "barbarians_info": babarians_info, "plan": plan}
+
+def do_it(session: Session, island: IslandDict, city: FullCityDict, babarians_info: BarbariansInfo, plan: BarbarianAttackPlan):
+
+    units_data = {}
+
+    battle_start = None
+
+    for attack_round in plan:
+
+        # this round is supposed to get the resources
+        if attack_round["loot"]:
+            break
+
+        attack_data = {
+            "action": "transportOperations",
+            "function": "attackBarbarianVillage",
+            "actionRequest": actionRequest,
+            "islandId": island["id"],
+            "destinationCityId": 0,
+            "cargo_army_304_upkeep": 3,
+            "cargo_army_304": 0,
+            "cargo_army_315_upkeep": 1,
+            "cargo_army_315": 0,
+            "cargo_army_302_upkeep": 4,
+            "cargo_army_302": 0,
+            "cargo_army_303_upkeep": 3,
+            "cargo_army_303": 0,
+            "cargo_army_312_upkeep": 15,
+            "cargo_army_312": 0,
+            "cargo_army_309_upkeep": 45,
+            "cargo_army_309": 0,
+            "cargo_army_307_upkeep": 15,
+            "cargo_army_307": 0,
+            "cargo_army_306_upkeep": 25,
+            "cargo_army_306": 0,
+            "cargo_army_305_upkeep": 30,
+            "cargo_army_305": 0,
+            "cargo_army_311_upkeep": 20,
+            "cargo_army_311": 0,
+            "cargo_army_310_upkeep": 10,
+            "cargo_army_310": 0,
+            "transporter": 0,
+            "barbarianVillage": 1,
+            "backgroundView": "island",
+            "currentIslandId": island["id"],
+            "templateView": "plunder",
+            "ajax": 1,
+        }
+
+        attack_data, ships_needed, travel_time = load_troops(
+            session, city, island, attack_round, units_data, attack_data
+        )
+
+        try:
+            wait_for_round(
+                session, city, island, travel_time, battle_start, attack_round["round"]
+            )
+        except AssertionError:
+            # battle ended before expected
+            break
+
+        ships_available = waitForArrival(session)
+        while ships_available < ships_needed:
+            ships_available = waitForArrival(session)
+        ships_available -= ships_needed
+
+        # if the number of available troops changed, the POST request might not work as intended
+
+        attack_data["transporter"] = min(
+            babarians_info["ships"], attack_round["ships"], ships_available
+        )
+
+        # send new round
+        session.post(params=attack_data)
+
+        if attack_round["round"] == 1:
+            battle_start = time.time() + travel_time
+
+    wait_until_attack_is_over(session, city, island)
+
+    last_round = plan[-1]
+    if last_round["loot"]:
+        loot(session, city, island, units_data, last_round)
+
+
+def choose_island(session: Session) -> Union[IslandDict, None]:
+    """Lets the user chose an island to attack the barbarians in."""
     idsIslands = getIslandsIds(session)
     islands = []
     for idIsland in idsIslands:
@@ -72,7 +196,8 @@ def choose_island(session):
         return islands[index - 1]
 
 
-def get_barbarians_lv(session, island):
+def get_barbarians_lv(session: Session, island: IslandDict) -> BarbariansInfo:
+    """Returns info on the barbarians on the given island."""
     params = {
         "view": "barbarianVillage",
         "destinationIslandId": island["id"],
@@ -126,7 +251,8 @@ def get_barbarians_lv(session, island):
     return info
 
 
-def get_units(session, city):
+def get_units(session: Session, city: FullCityDict) -> Units:
+    """Returns info on the units in the given city."""
     params = {
         "view": "cityMilitary",
         "activeTab": "tabUnits",
@@ -160,7 +286,7 @@ def get_units(session, city):
     return units
 
 
-def plan_attack(session, city, babarians_info):
+def plan_attack(session: Session, city: FullCityDict, babarians_info: BarbariansInfo) -> BarbarianAttackPlan:
     total_units = get_units(session, city)
 
     if sum([total_units[unit_id]["amount"] for unit_id in total_units]) == 0:
@@ -258,70 +384,7 @@ def plan_attack(session, city, babarians_info):
     plan.sort(key=lambda ar: ar["round"])
     return plan
 
-
-def attackBarbarians(session, event, stdin_fd, predetermined_input):
-    """
-    Parameters
-    ----------
-    session : ikabot.web.session.Session
-    event : multiprocessing.Event
-    stdin_fd: int
-    predetermined_input : multiprocessing.managers.SyncManager.list
-    """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
-    try:
-        banner()
-
-        island = choose_island(session)
-        if island is None:
-            event.set()
-            return
-
-        babarians_info = get_barbarians_lv(session, island)
-
-        banner()
-        print("The barbarians have:")
-        for name, amount in babarians_info["troops"]:
-            print("{} units of {}".format(amount, name))
-        print("")
-
-        banner()
-        print("From which city do you want to attack?")
-        city = chooseCity(session)
-
-        plan = plan_attack(session, city, babarians_info)
-        if plan is None:
-            event.set()
-            return
-
-        banner()
-        print(
-            "The barbarians in [{}:{}] will be attacked.".format(
-                island["x"], island["y"]
-            )
-        )
-        enter()
-
-    except KeyboardInterrupt:
-        event.set()
-        return
-
-    set_child_mode(session)
-    event.set()
-
-    info = "\nI attack the barbarians in [{}:{}]\n".format(island["x"], island["y"])
-    setInfoSignal(session, info)
-    try:
-        do_it(session, island, city, babarians_info, plan)
-    except Exception as e:
-        msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
-        sendToBot(session, msg)
-    finally:
-        session.logout()
-
-
-def get_unit_data(session, city_id, unit_id):
+def get_unit_data(session: Session, city_id: int, unit_id: str) -> UnitData:
     params_w = {
         "view": "unitdescription",
         "unitId": unit_id,
@@ -355,7 +418,7 @@ def get_unit_data(session, city_id, unit_id):
     return {"speed": speed, "weight": weight, "name": name}
 
 
-def city_is_in_island(city, island):
+def city_is_in_island(city: FullCityDict, island: IslandDict) -> bool:
     return city["x"] == island["x"] and city["y"] == island["y"]
 
 
@@ -373,7 +436,7 @@ def get_barbarians_info(session, island_id):
     return resp
 
 
-def wait_until_can_attack(session, city, island, travel_time=0):
+def wait_until_can_attack(session: Session, city: FullCityDict, island: IslandDict, travel_time:int = 0):
     html = session.get(island_url + island["id"])
     island = getIsland(html)
 
@@ -429,7 +492,7 @@ def get_movements(session, city_id=None):
     return movements
 
 
-def get_current_attacks(session, city_id, island_id):
+def get_current_attacks(session: Session, city_id: str, island_id: str):
 
     movements = get_movements(session, city_id)
     curr_attacks = []
@@ -449,7 +512,7 @@ def get_current_attacks(session, city_id, island_id):
     return curr_attacks
 
 
-def wait_for_arrival(session, city, island):
+def wait_for_arrival(session: Session, city: CityDict, island: IslandDict):
     attacks = get_current_attacks(session, city["id"], island["id"])
     attacks = filter_loading(attacks) + filter_traveling(attacks)
     eventTimes = [attack["eventTime"] for attack in attacks]
@@ -464,7 +527,7 @@ def wait_for_arrival(session, city, island):
     wait_for_arrival(session, city, island)
 
 
-def wait_for_round(session, city, island, travel_time, battle_start, round_number):
+def wait_for_round(session: Session, city: FullCityDict, island: IslandDict, travel_time: int, battle_start: int, round_number: int):
     if round_number == 1:
         wait_until_can_attack(session, city, island, travel_time)
     else:
@@ -481,7 +544,7 @@ def wait_for_round(session, city, island, travel_time, battle_start, round_numbe
             ), "the battle ended before expected"
 
 
-def calc_travel_time(city, island, speed):
+def calc_travel_time(city: FullCityDict, island: IslandDict, speed: int) -> int:
     if city["x"] == island["x"] and city["y"] == island["y"]:
         return math.ceil(36000 / speed)
     else:
@@ -513,7 +576,7 @@ def filter_fighting(attacks):
     ]
 
 
-def wait_until_attack_is_over(session, city, island):
+def wait_until_attack_is_over(session: Session, city: FullCityDict, island: IslandDict):
     html = session.get(island_url + island["id"])
     island = getIsland(html)
 
@@ -534,8 +597,9 @@ def wait_until_attack_is_over(session, city, island):
 
 
 def load_troops(
-    session, city, island, attack_round, units_data, attack_data, extra_cargo=0
-):
+    session: Session, city: FullCityDict, island: IslandDict, attack_round: BarbarianAttackRound, units_data: UnitDatas, attack_data: dict, extra_cargo: int = 0
+) -> tuple[dict, int, int]:
+    """Finds out what ships are needed to transport the troops and how long it will take to get there."""
     ships_needed = Decimal(extra_cargo) / Decimal(500)
     speeds = []
     current_units = get_units(session, city)
@@ -560,7 +624,7 @@ def load_troops(
     return attack_data, ships_needed, travel_time
 
 
-def loot(session, island, city, units_data, loot_round):
+def loot(session: Session, island: IslandDict, city: FullCityDict, units_data: UnitDatas, loot_round: bool):
     while True:
 
         attack_data = {
@@ -634,85 +698,4 @@ def loot(session, island, city, units_data, loot_round):
         session.post(params=attack_data)
 
 
-def do_it(session, island, city, babarians_info, plan):
 
-    units_data = {}
-
-    battle_start = None
-
-    for attack_round in plan:
-
-        # this round is supposed to get the resources
-        if attack_round["loot"]:
-            break
-
-        attack_data = {
-            "action": "transportOperations",
-            "function": "attackBarbarianVillage",
-            "actionRequest": actionRequest,
-            "islandId": island["id"],
-            "destinationCityId": 0,
-            "cargo_army_304_upkeep": 3,
-            "cargo_army_304": 0,
-            "cargo_army_315_upkeep": 1,
-            "cargo_army_315": 0,
-            "cargo_army_302_upkeep": 4,
-            "cargo_army_302": 0,
-            "cargo_army_303_upkeep": 3,
-            "cargo_army_303": 0,
-            "cargo_army_312_upkeep": 15,
-            "cargo_army_312": 0,
-            "cargo_army_309_upkeep": 45,
-            "cargo_army_309": 0,
-            "cargo_army_307_upkeep": 15,
-            "cargo_army_307": 0,
-            "cargo_army_306_upkeep": 25,
-            "cargo_army_306": 0,
-            "cargo_army_305_upkeep": 30,
-            "cargo_army_305": 0,
-            "cargo_army_311_upkeep": 20,
-            "cargo_army_311": 0,
-            "cargo_army_310_upkeep": 10,
-            "cargo_army_310": 0,
-            "transporter": 0,
-            "barbarianVillage": 1,
-            "backgroundView": "island",
-            "currentIslandId": island["id"],
-            "templateView": "plunder",
-            "ajax": 1,
-        }
-
-        attack_data, ships_needed, travel_time = load_troops(
-            session, city, island, attack_round, units_data, attack_data
-        )
-
-        try:
-            wait_for_round(
-                session, city, island, travel_time, battle_start, attack_round["round"]
-            )
-        except AssertionError:
-            # battle ended before expected
-            break
-
-        ships_available = waitForArrival(session)
-        while ships_available < ships_needed:
-            ships_available = waitForArrival(session)
-        ships_available -= ships_needed
-
-        # if the number of available troops changed, the POST request might not work as intended
-
-        attack_data["transporter"] = min(
-            babarians_info["ships"], attack_round["ships"], ships_available
-        )
-
-        # send new round
-        session.post(params=attack_data)
-
-        if attack_round["round"] == 1:
-            battle_start = time.time() + travel_time
-
-    wait_until_attack_is_over(session, city, island)
-
-    last_round = plan[-1]
-    if last_round["loot"]:
-        loot(session, city, island, units_data, last_round)

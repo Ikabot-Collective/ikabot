@@ -90,7 +90,7 @@ def read(
     return read_input
 
 
-def chooseCity(session, foreign=False):
+def chooseCity(session, foreign=False) -> FullCityDict:
     """Prompts the user to chose a city
     Parameters
     ----------

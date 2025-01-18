@@ -5,6 +5,155 @@ from ikabot.helpers.naval import getAvailableShips
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.varios import addThousandSeparator
 
+from typing import TYPE_CHECKING, TypedDict, Union
+if TYPE_CHECKING:
+    from ikabot.web.session import Session
+
+def stationArmy(session: Session):
+    type_army = True
+    banner()
+
+    ids, cities = getIdsOfCities(session)
+    army = {}
+    print("Total:")
+    print("{:>19}|{:>19}|{:>19}|".format("", "Units", "Ships"))
+
+    for city_id in cities:
+        city = cities[city_id]
+        data = getCityMilitaryData(session, city["id"])
+        desc, values = extractTooltipsAndValues(data)
+        army, total_units, total_ships = calculateTotals(desc, values)
+
+        print(
+            "{:>19}|{:>19}|{:>19}|".format(
+                city["name"],
+                addThousandSeparator(total_units),
+                addThousandSeparator(total_ships),
+            )
+        )
+
+    print()
+    print("(0) Back")
+    print("(1) Move troops")
+    print("(2) Move ships")
+    print("(3) Move all ground units to a city.")
+    print("(4) Move all maritime units to a city.")
+    print("(5) Move all units to a city.")
+
+    selected = read(min=0, max=5, digit=True)
+    if selected == 0:
+        return
+    elif selected in (1, 2):
+        print("Origin city:")
+        origin_city = chooseCity(session)
+        print()
+        print("Destination city:")
+        destination_city = chooseCity(session)
+        if origin_city["id"] == destination_city["id"]:
+            banner()
+            print("The city of origin and the destination city cannot be the same!")
+            enter()
+        else:
+            type_army = selected == 1
+            army_available = getArmyAvailable(
+                session, type_army, destination_city["id"], origin_city["id"]
+            )
+            if army_available != None:
+                print("Army will be sent!")
+                enter()
+                sendArmy(
+                    session,
+                    origin_city,
+                    destination_city,
+                    type_army,
+                    army_available,
+                )
+                
+            else:
+                print()
+                print(
+                    "No {} units available in {}.".format(
+                        "ground" if type_army else "maritime", origin_city["name"]
+                    )
+                )
+                enter()
+    elif selected in (3, 4, 5):
+        print("Destination city:")
+        destination_city = chooseCity(session)
+        ids, cities = getIdsOfCities(session)
+
+        if selected in (3, 5):
+            type_army = True
+            for city_id in cities:
+                if city_id != destination_city["id"]:
+                    city = cities[city_id]
+                    army_available = getArmyAvailable(
+                        session,
+                        type_army,
+                        destination_city["id"],
+                        city["id"],
+                    )
+                    if army_available != None:
+                        sendArmy(
+                            session,
+                            city,
+                            destination_city,
+                            type_army,
+                            army_available,
+                        )
+                    else:
+                        print(
+                            "No ground units available in {}.".format(city["name"])
+                        )
+        if selected in (4, 5):
+            type_army = False
+            for city_id in cities:
+                if city_id != destination_city["id"]:
+                    city = cities[city_id]
+                    army_available = getArmyAvailable(
+                        session,
+                        type_army,
+                        destination_city["id"],
+                        city["id"]
+                    )
+                    if army_available != None:
+                        sendArmy(
+                            session,
+                            city,
+                            destination_city,
+                            type_army,
+                            army_available,
+                        )
+                    else:
+                        print(
+                            "No maritime units available in {}.".format(
+                                city["name"]
+                            )
+                        )
+        enter()
+
+def do_it(session: Session):
+    ...
+
+def sendArmy(session, origin_city, destination_city, type_army, army_available):
+    params = {
+        "action": "transportOperations",
+        "function": "deployArmy" if type_army else "deployFleet",
+        "actionRequest": actionRequest,
+        "islandId": destination_city["islandId"],
+        "destinationCityId": destination_city["id"],
+        "deploymentType": "army" if type_army else "fleet",
+        "backgroundView": "city",
+        "currentCityId": origin_city["id"],
+        "templateView": "deployment",
+        "ajax": 1,
+    }
+
+    for army in army_available:
+        params[army] = army_available[army]
+
+    session.post(params=params)
+
 def getCityMilitaryData(session, city_id):
     """
     Parameters
@@ -59,7 +208,7 @@ def calculateTotals(tooltips, values):
     return desc_value_dict, total_units, total_ships
 
 
-def getArmyAvailable(session, type_army, destination_city_id, origin_city_id, event):
+def getArmyAvailable(session, type_army, destination_city_id, origin_city_id):
     params = {
         "view": "deployment",
         "deploymentType": "army" if type_army else "fleet",
@@ -112,157 +261,6 @@ def getArmyAvailable(session, type_army, destination_city_id, origin_city_id, ev
     return None
 
 
-def sendArmy(session, origin_city, destination_city, type_army, army_available):
-    params = {
-        "action": "transportOperations",
-        "function": "deployArmy" if type_army else "deployFleet",
-        "actionRequest": actionRequest,
-        "islandId": destination_city["islandId"],
-        "destinationCityId": destination_city["id"],
-        "deploymentType": "army" if type_army else "fleet",
-        "backgroundView": "city",
-        "currentCityId": origin_city["id"],
-        "templateView": "deployment",
-        "ajax": 1,
-    }
-
-    for army in army_available:
-        params[army] = army_available[army]
-
-    session.post(params=params)
 
 
-def stationArmy(session, event, stdin_fd, predetermined_input):
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
-    type_army = True
-    try:
-        banner()
 
-        ids, cities = getIdsOfCities(session)
-        army = {}
-        print("Total:")
-        print("{:>19}|{:>19}|{:>19}|".format("", "Units", "Ships"))
-
-        for city_id in cities:
-            city = cities[city_id]
-            data = getCityMilitaryData(session, city["id"])
-            desc, values = extractTooltipsAndValues(data)
-            army, total_units, total_ships = calculateTotals(desc, values)
-
-            print(
-                "{:>19}|{:>19}|{:>19}|".format(
-                    city["name"],
-                    addThousandSeparator(total_units),
-                    addThousandSeparator(total_ships),
-                )
-            )
-
-        print()
-        print("(0) Back")
-        print("(1) Move troops")
-        print("(2) Move ships")
-        print("(3) Move all ground units to a city.")
-        print("(4) Move all maritime units to a city.")
-        print("(5) Move all units to a city.")
-
-        selected = read(min=0, max=5, digit=True)
-        if selected == 0:
-            event.set()
-            return
-        elif selected in (1, 2):
-            print("Origin city:")
-            origin_city = chooseCity(session)
-            print()
-            print("Destination city:")
-            destination_city = chooseCity(session)
-            if origin_city["id"] == destination_city["id"]:
-                banner()
-                print("The city of origin and the destination city cannot be the same!")
-                enter()
-                event.set()
-            else:
-                type_army = selected == 1
-                army_available = getArmyAvailable(
-                    session, type_army, destination_city["id"], origin_city["id"], event
-                )
-                if army_available != None:
-                    sendArmy(
-                        session,
-                        origin_city,
-                        destination_city,
-                        type_army,
-                        army_available,
-                    )
-                    print("Army sent!")
-                    enter()
-                    event.set()
-                else:
-                    print()
-                    print(
-                        "No {} units available in {}.".format(
-                            "ground" if type_army else "maritime", origin_city["name"]
-                        )
-                    )
-                    enter()
-                    event.set()
-        elif selected in (3, 4, 5):
-            print("Destination city:")
-            destination_city = chooseCity(session)
-            ids, cities = getIdsOfCities(session)
-
-            if selected in (3, 5):
-                type_army = True
-                for city_id in cities:
-                    if city_id != destination_city["id"]:
-                        city = cities[city_id]
-                        army_available = getArmyAvailable(
-                            session,
-                            type_army,
-                            destination_city["id"],
-                            city["id"],
-                            event,
-                        )
-                        if army_available != None:
-                            sendArmy(
-                                session,
-                                city,
-                                destination_city,
-                                type_army,
-                                army_available,
-                            )
-                        else:
-                            print(
-                                "No ground units available in {}.".format(city["name"])
-                            )
-            if selected in (4, 5):
-                type_army = False
-                for city_id in cities:
-                    if city_id != destination_city["id"]:
-                        city = cities[city_id]
-                        army_available = getArmyAvailable(
-                            session,
-                            type_army,
-                            destination_city["id"],
-                            city["id"],
-                            event,
-                        )
-                        if army_available != None:
-                            sendArmy(
-                                session,
-                                city,
-                                destination_city,
-                                type_army,
-                                army_available,
-                            )
-                        else:
-                            print(
-                                "No maritime units available in {}.".format(
-                                    city["name"]
-                                )
-                            )
-            enter()
-            event.set()
-    except KeyboardInterrupt:
-        event.set()
-        return

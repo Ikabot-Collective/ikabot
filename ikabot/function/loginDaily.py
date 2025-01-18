@@ -10,111 +10,95 @@ from ikabot.config import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.gui import bcolors, enter
 from ikabot.helpers.pedirInfo import chooseCity, getIdsOfCities
-from ikabot.helpers.process import set_child_mode
-from ikabot.helpers.signals import setInfoSignal
+from ikabot.helpers.getJson import FullCityDict
 from ikabot.helpers.varios import getDateTime, timeStringToSec, wait
+
+from typing import TYPE_CHECKING, Callable, TypedDict, Union
+if TYPE_CHECKING:
+    from ikabot.web.session import Session
+FavourTask = dict[str, Callable]
 
 
 earliest_wakeup_time = 24 * 60 * 60
-wine_city = wood_city = luxury_city = favour_tasks = None
+wine_city: FullCityDict = None
+wood_city: FullCityDict = None
+luxury_city: FullCityDict = None
+favour_tasks: list[FavourTask] = None
 
+LoginDailyConfig = TypedDict(
+    "LoginDailyConfig",
+    {
+        "wine_city": FullCityDict,
+        "wood_city": FullCityDict,
+        "luxury_city": FullCityDict,
+        "favour_tasks": list[FavourTask],
+    },
+)
+def loginDaily(session: Session) -> LoginDailyConfig:
+    banner()
+    global wine_city
+    print("Choose the city where the daily login bonus wine will be sent:")
+    wine_city = chooseCity(session)
+    print("Do you want to automatically activate the cinetheatre bonus? (Y|N)")
+    choice = read(values=["y", "Y", "n", "N"])
+    if choice in ["y", "Y"]:
 
-def loginDaily(session, event, stdin_fd, predetermined_input):
-    """
-    Parameters
-    ----------
-    session : ikabot.web.session.Session
-    event : multiprocessing.Event
-    stdin_fd: int
-    predetermined_input : multiprocessing.managers.SyncManager.list
-    """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
-    try:
-        banner()
-        global wine_city
-        print("Choose the city where the daily login bonus wine will be sent:")
-        wine_city = chooseCity(session)
-        print("Do you want to automatically activate the cinetheatre bonus? (Y|N)")
-        choice = read(values=["y", "Y", "n", "N"])
-        if choice in ["y", "Y"]:
+        # choose city for wood
+        print("Choose the city where the wood bonus will be activated:")
+        wood_city = chooseCity(session)
 
-            # choose city for wood
-            print("Choose the city where the wood bonus will be activated:")
-            wood_city = chooseCity(session)
+        # choose city for luxury resource
+        print("Choose the city where the luxury resource bonus will be activated:")
+        luxury_city = chooseCity(session)
+    print("Do you want to collect the favour automatically? (Y|N)")
+    choice = read(values=["y", "Y", "n", "N"])
+    if choice in ["y", "Y"]:
+        favour_tasks = [t for t in tasks]
 
-            # choose city for luxury resource
-            print("Choose the city where the luxury resource bonus will be activated:")
-            luxury_city = chooseCity(session)
-        print("Do you want to collect the favour automatically? (Y|N)")
-        choice = read(values=["y", "Y", "n", "N"])
-        if choice in ["y", "Y"]:
-            favour_tasks = [t for t in tasks]
-
-            def modify_tasks():
-                banner()
-                print(
-                    "Choose which daily tasks will be done/collected by Ikabot automatically."
-                )
-                print(
-                    f"Tasks in {bcolors.BLUE}blue{bcolors.ENDC} WILL be done automatically, tasks in {bcolors.STONE}grey{bcolors.ENDC} WILL NOT be done."
-                )
-                print("Press [ENTER] or type in [Y] to confirm selection")
-                for i, task in enumerate(tasks):
-                    if task in favour_tasks:
-                        print(i + 1, ") ", bcolors.BLUE, task, bcolors.ENDC)
-                    else:
-                        print(i + 1, ") ", bcolors.STONE, task, bcolors.ENDC)
-                choice = read(
-                    min=1,
-                    max=len(tasks),
-                    empty=True,
-                    digit=True,
-                    additionalValues=["y", "Y"],
-                )
-                if not choice or (not choice.isdigit() and choice.lower() == "y"):
-                    return
-                choice -= 1
-                if list(tasks)[choice] in favour_tasks:
-                    favour_tasks.remove(list(tasks)[choice])
+        def modify_tasks():
+            banner()
+            print(
+                "Choose which daily tasks will be done/collected by Ikabot automatically."
+            )
+            print(
+                f"Tasks in {bcolors.BLUE}blue{bcolors.ENDC} WILL be done automatically, tasks in {bcolors.STONE}grey{bcolors.ENDC} WILL NOT be done."
+            )
+            print("Press [ENTER] or type in [Y] to confirm selection")
+            for i, task in enumerate(tasks):
+                if task in favour_tasks:
+                    print(i + 1, ") ", bcolors.BLUE, task, bcolors.ENDC)
                 else:
-                    favour_tasks.append(list(tasks)[choice])
-                return modify_tasks()
+                    print(i + 1, ") ", bcolors.STONE, task, bcolors.ENDC)
+            choice = read(
+                min=1,
+                max=len(tasks),
+                empty=True,
+                digit=True,
+                additionalValues=["y", "Y"],
+            )
+            if not choice or (not choice.isdigit() and choice.lower() == "y"):
+                return
+            choice -= 1
+            if list(tasks)[choice] in favour_tasks:
+                favour_tasks.remove(list(tasks)[choice])
+            else:
+                favour_tasks.append(list(tasks)[choice])
+            return modify_tasks()
 
-            modify_tasks()
+        modify_tasks()
 
-        print("I will do the thing.")
-        enter()
-    except KeyboardInterrupt:
-        event.set()
-        return
-
-    set_child_mode(session)
-    event.set()
-
-    info = "\nI enter every day\n"
-    setInfoSignal(session, info)
-    try:
-        do_it(
-            session,
-            wine_city=wine_city,
-            wood_city=wood_city,
-            luxury_city=luxury_city,
-            favour_tasks=favour_tasks,
-        )
-    except Exception as e:
-        msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
-        sendToBot(session, msg)
-    finally:
-        session.logout()
+    print("I will do the thing.")
+    enter()
 
 
-def do_it(session, wine_city, wood_city, luxury_city, favour_tasks):
-    """
-    Parameters
-    ----------
-    session : ikabot.web.session.Session
-    """
+    return {
+        "wine_city": wine_city,
+        "wood_city": wood_city,
+        "luxury_city": luxury_city,
+        "favour_tasks": favour_tasks,}
+
+
+def do_it(session: Session, wine_city: FullCityDict, wood_city: FullCityDict, luxury_city: FullCityDict, favour_tasks: list[FavourTask]):
     message_sent = False
     while True:
         (ids, cities) = getIdsOfCities(session)

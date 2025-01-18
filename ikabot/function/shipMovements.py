@@ -14,37 +14,11 @@ from ikabot.helpers.naval import *
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.varios import *
 
+from typing import TYPE_CHECKING, TypedDict, Union
+if TYPE_CHECKING:
+    from ikabot.web.session import Session
 
-def isHostile(movement):
-    """
-    Parameters
-    ----------
-    movement : dict
-
-    Returns
-    -------
-    is hostile : bool
-    """
-    if movement["army"]["amount"]:
-        return True
-    for mov in movement["fleet"]["ships"]:
-        if mov["cssClass"] != "ship_transport":
-            return True
-    return False
-
-
-def shipMovements(session, event, stdin_fd, predetermined_input):
-    """
-    Parameters
-    ----------
-    session : ikabot.web.session.Session
-    event : multiprocessing.Event
-    stdin_fd: int
-    predetermined_input : multiprocessing.managers.SyncManager.list
-    """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
-    try:
+def shipMovements(session: Session):
         banner()
 
         print(
@@ -65,7 +39,6 @@ def shipMovements(session, event, stdin_fd, predetermined_input):
         if len(movements) == 0:
             print("There are no movements")
             enter()
-            event.set()
             return
 
         for movement in movements:
@@ -130,14 +103,30 @@ def shipMovements(session, event, stdin_fd, predetermined_input):
                     tradegood = resource["cssClass"].split()[1]
                     # gold won't be translated
                     if tradegood != "gold":
-                        index = materials_names_tec.index(tradegood)
+                        index = materials_names.index(tradegood)
                         tradegood = materials_names[index]
                     total_load += int(amount.replace(",", "").replace(".", ""))
                     print("{} of {}".format(amount, tradegood))
                 ships = int(math.ceil((Decimal(total_load) / Decimal(500))))
                 print("{:d} Ships".format(ships))
         enter()
-        event.set()
-    except KeyboardInterrupt:
-        event.set()
-        return
+
+def do_it(session: Session):
+    ...
+
+def isHostile(movement):
+    """
+    Parameters
+    ----------
+    movement : dict
+
+    Returns
+    -------
+    is hostile : bool
+    """
+    if movement["army"]["amount"]:
+        return True
+    for mov in movement["fleet"]["ships"]:
+        if mov["cssClass"] != "ship_transport":
+            return True
+    return False

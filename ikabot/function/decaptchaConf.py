@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 import base64
-import sys
 import time
 
 import requests
@@ -10,7 +9,202 @@ from ikabot.config import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import enter, read
-from ikabot.helpers.process import run, updateProcessList
+
+from typing import TYPE_CHECKING, TypedDict, Union
+if TYPE_CHECKING:
+    from ikabot.web.session import Session
+
+
+
+def decaptchaConf(session: Session):
+    banner()
+    session_data = session.getSessionData()
+
+    if "decaptcha" not in session_data:
+        session_data["decaptcha"] = {
+            "name": "default",
+            "endpoint": "default",
+            "relevant_data": {},
+        }
+        session.setSessionData(session_data)
+
+    if session_data["decaptcha"]["name"] == "default":
+        print("You are currently using the default decaptcha service")
+    elif session_data["decaptcha"]["name"] == "custom":
+        print("You are currently using your custom decaptcha service")
+        print("Endpoint : {}".format(session_data["decaptcha"]["endpoint"]))
+    elif session_data["decaptcha"]["name"] == "9kw.eu":
+        print("You are currently using 9kw.eu as your decaptcha service")
+        print(
+            "API key : {}".format(
+                session_data["decaptcha"]["relevant_data"]["apiKey"]
+            )
+        )
+    elif session_data["decaptcha"]["name"] == "telegram":
+        print("You are currently using Telegram as your decaptcha service")
+        print(
+            "Telegram ID : {}".format(session_data["shared"]["telegram"]["chatId"])
+        )
+    print()
+    print("(0) Exit")
+    print("(1) Default")
+    print("(2) Custom")
+    print("(3) 9kw.eu")
+    print("(4) Telegram")
+
+    action = read(min=0, max=4, digit=True)
+
+    if action == 0:
+        return
+
+    elif action == 1:
+        banner()
+        session_data["decaptcha"] = {
+            "name": "default",
+            "endpoint": "default",
+            "relevant_data": {},
+        }
+        session.setSessionData(session_data)
+        print("Default decaptcha service set as decaptcha service!")
+        enter()
+        return
+
+    elif action == 2:
+        while True:
+            banner()
+            endpoint = read(msg="Enter your custom endpoint : ")
+            if "http" not in endpoint:
+                print("Invalid endpoint!")
+                enter()
+                return
+            session_data["decaptcha"]["name"] = "custom"
+            session_data["decaptcha"]["endpoint"] = endpoint
+            print(
+                "Endpoint {} set! Remember, the picture will be sent via a POST request under the `upload_file` parameter".format(
+                    endpoint
+                )
+            )
+            print("Do you want to test this newly-set custom endpoint?(y|n)")
+            test_bool = read(values=["y", "Y", "n", "N"])
+            if test_bool.lower() == "n":
+                session.setSessionData(session_data)
+                return
+            for test in decaptcha_test_pictures:
+                if testCustomDecaptcha(
+                    test["ground_truth"],
+                    base64.b64decode(test["picture"]),
+                    endpoint,
+                ):
+                    session.setSessionData(session_data)
+                    print("Custom decaptcha passed at least one test, good enough!")
+                    enter()
+                    return
+            print("All tests failed. Do you wish to set the endpoint again?")
+            input = read(values=["y", "Y", "n", "N"])
+            if input.lower() == "y":
+                continue
+            else:
+                return
+
+    elif action == 3:
+        banner()
+        apiKey_9kw = read(msg="Enter your 9kw.eu API key : ")
+        response = requests.get(
+            "https://www.9kw.eu/index.cgi?action=usercaptchaguthaben&apikey={}".format(
+                apiKey_9kw
+            )
+        ).text
+        if "API key not found" in response:
+            print("{}Failure!{} Wrong API key!".format(bcolors.RED, bcolors.ENDC))
+            enter()
+            return
+        else:
+            session_data["decaptcha"]["name"] = "9kw.eu"
+            session_data["decaptcha"]["endpoint"] = "https://www.9kw.eu/index.cgi"
+            session_data["decaptcha"]["relevant_data"] = {"apiKey": apiKey_9kw}
+            print(
+                "{}Success!{} You currently have {} credits".format(
+                    bcolors.GREEN, bcolors.ENDC, response
+                )
+            )
+            enter()
+            session.setSessionData(session_data)
+            return
+
+    elif action == 4:
+        banner()
+        if checkTelegramData(session) is False:
+            print("Please first set the Telegram data")
+            enter()
+            return
+        session_data["decaptcha"]["name"] = "telegram"
+        print("Do you wish to do a test?(y|n)")
+        test = read(values=["y", "Y", "n", "N"])
+        if test.lower() == "y":
+            print(
+                "A captcha has been sent to you over Telegram. Please open the picture fully and respond on Telegram"
+            )
+            sendToBot(
+                session,
+                "Please resolve the captcha",
+                Photo=base64.b64decode(decaptcha_test_pictures[0]["picture"]),
+            )
+            captcha_time = time.time()
+            while True:
+                response = getUserResponse(session, fullResponse=True)
+                if response == []:
+                    time.sleep(5)
+                    continue
+                response = response[-1]
+                if response["date"] < captcha_time:
+                    time.sleep(5)
+                    continue
+                else:
+                    captcha = response["text"]
+                    break
+            if (
+                captcha.lower()
+                == decaptcha_test_pictures[0]["ground_truth"].lower()
+            ):
+                print(
+                    "{}Success!{} Captcha is correct!".format(
+                        bcolors.GREEN, bcolors.ENDC
+                    )
+                )
+                enter()
+                session.setSessionData(session_data)
+                return
+            else:
+                print(
+                    "{}Failure!{} Captcha is incorrect, try again!".format(
+                        bcolors.GREEN, bcolors.ENDC
+                    )
+                )
+                enter()
+                return
+        else:
+            print("You will now recieve the piracy captcha over Telegram!")
+            session.setSessionData(session_data)
+            enter()
+            return
+    
+def do_it(session: Session):
+    ...
+
+
+def testCustomDecaptcha(ground_truth, picture, address):
+
+    try:
+        files = {"upload_file": picture}
+        captcha = requests.post("{0}".format(address), files=files).text
+        if (
+            captcha.lower() != ground_truth.lower()
+        ):  # Ikariam's captcha is not case-sensitive
+            return False
+        return True
+    except Exception:
+        return False
+
 
 decaptcha_test_pictures = [
     {
@@ -30,217 +224,3 @@ decaptcha_test_pictures = [
         "picture": "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",
     },
 ]
-
-
-def decaptchaConf(session, event, stdin_fd, predetermined_input):
-    """
-    Parameters
-    ----------
-    session : ikabot.web.session.Session
-    event : multiprocessing.Event
-    stdin_fd: int
-    predetermined_input : multiprocessing.managers.SyncManager.list
-    """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
-    banner()
-    try:
-        session_data = session.getSessionData()
-
-        if "decaptcha" not in session_data:
-            session_data["decaptcha"] = {
-                "name": "default",
-                "endpoint": "default",
-                "relevant_data": {},
-            }
-            session.setSessionData(session_data)
-
-        if session_data["decaptcha"]["name"] == "default":
-            print("You are currently using the default decaptcha service")
-        elif session_data["decaptcha"]["name"] == "custom":
-            print("You are currently using your custom decaptcha service")
-            print("Endpoint : {}".format(session_data["decaptcha"]["endpoint"]))
-        elif session_data["decaptcha"]["name"] == "9kw.eu":
-            print("You are currently using 9kw.eu as your decaptcha service")
-            print(
-                "API key : {}".format(
-                    session_data["decaptcha"]["relevant_data"]["apiKey"]
-                )
-            )
-        elif session_data["decaptcha"]["name"] == "telegram":
-            print("You are currently using Telegram as your decaptcha service")
-            print(
-                "Telegram ID : {}".format(session_data["shared"]["telegram"]["chatId"])
-            )
-        print()
-        print("(0) Exit")
-        print("(1) Default")
-        print("(2) Custom")
-        print("(3) 9kw.eu")
-        print("(4) Telegram")
-
-        action = read(min=0, max=4, digit=True)
-
-        if action == 0:
-            event.set()
-            return
-
-        elif action == 1:
-            banner()
-            session_data["decaptcha"] = {
-                "name": "default",
-                "endpoint": "default",
-                "relevant_data": {},
-            }
-            session.setSessionData(session_data)
-            print("Default decaptcha service set as decaptcha service!")
-            enter()
-            event.set()
-            return
-
-        elif action == 2:
-            while True:
-                banner()
-                endpoint = read(msg="Enter your custom endpoint : ")
-                if "http" not in endpoint:
-                    print("Invalid endpoint!")
-                    enter()
-                    event.set()
-                    return
-                session_data["decaptcha"]["name"] = "custom"
-                session_data["decaptcha"]["endpoint"] = endpoint
-                print(
-                    "Endpoint {} set! Remember, the picture will be sent via a POST request under the `upload_file` parameter".format(
-                        endpoint
-                    )
-                )
-                print("Do you want to test this newly-set custom endpoint?(y|n)")
-                test_bool = read(values=["y", "Y", "n", "N"])
-                if test_bool.lower() == "n":
-                    session.setSessionData(session_data)
-                    event.set()
-                    return
-                for test in decaptcha_test_pictures:
-                    if testCustomDecaptcha(
-                        test["ground_truth"],
-                        base64.b64decode(test["picture"]),
-                        endpoint,
-                    ):
-                        session.setSessionData(session_data)
-                        print("Custom decaptcha passed at least one test, good enough!")
-                        enter()
-                        event.set()
-                        return
-                print("All tests failed. Do you wish to set the endpoint again?")
-                input = read(values=["y", "Y", "n", "N"])
-                if input.lower() == "y":
-                    continue
-                else:
-                    event.set()
-                    return
-
-        elif action == 3:
-            banner()
-            apiKey_9kw = read(msg="Enter your 9kw.eu API key : ")
-            response = requests.get(
-                "https://www.9kw.eu/index.cgi?action=usercaptchaguthaben&apikey={}".format(
-                    apiKey_9kw
-                )
-            ).text
-            if "API key not found" in response:
-                print("{}Failure!{} Wrong API key!".format(bcolors.RED, bcolors.ENDC))
-                enter()
-                event.set()
-                return
-            else:
-                session_data["decaptcha"]["name"] = "9kw.eu"
-                session_data["decaptcha"]["endpoint"] = "https://www.9kw.eu/index.cgi"
-                session_data["decaptcha"]["relevant_data"] = {"apiKey": apiKey_9kw}
-                print(
-                    "{}Success!{} You currently have {} credits".format(
-                        bcolors.GREEN, bcolors.ENDC, response
-                    )
-                )
-                enter()
-                session.setSessionData(session_data)
-                event.set()
-                return
-
-        elif action == 4:
-            banner()
-            if checkTelegramData(session) is False:
-                print("Please first set the Telegram data")
-                enter()
-                event.set()
-                return
-            session_data["decaptcha"]["name"] = "telegram"
-            print("Do you wish to do a test?(y|n)")
-            test = read(values=["y", "Y", "n", "N"])
-            if test.lower() == "y":
-                print(
-                    "A captcha has been sent to you over Telegram. Please open the picture fully and respond on Telegram"
-                )
-                sendToBot(
-                    session,
-                    "Please resolve the captcha",
-                    Photo=base64.b64decode(decaptcha_test_pictures[0]["picture"]),
-                )
-                captcha_time = time.time()
-                while True:
-                    response = getUserResponse(session, fullResponse=True)
-                    if response == []:
-                        time.sleep(5)
-                        continue
-                    response = response[-1]
-                    if response["date"] < captcha_time:
-                        time.sleep(5)
-                        continue
-                    else:
-                        captcha = response["text"]
-                        break
-                    time.sleep(5)
-                if (
-                    captcha.lower()
-                    == decaptcha_test_pictures[0]["ground_truth"].lower()
-                ):
-                    print(
-                        "{}Success!{} Captcha is correct!".format(
-                            bcolors.GREEN, bcolors.ENDC
-                        )
-                    )
-                    enter()
-                    session.setSessionData(session_data)
-                    event.set()
-                    return
-                else:
-                    print(
-                        "{}Failure!{} Captcha is incorrect, try again!".format(
-                            bcolors.GREEN, bcolors.ENDC
-                        )
-                    )
-                    enter()
-                    event.set()
-                    return
-            else:
-                print("You will now recieve the piracy captcha over Telegram!")
-                session.setSessionData(session_data)
-                enter()
-                event.set()
-                return
-    except KeyboardInterrupt:
-        event.set()
-        return
-
-
-def testCustomDecaptcha(ground_truth, picture, address):
-
-    try:
-        files = {"upload_file": picture}
-        captcha = requests.post("{0}".format(address), files=files).text
-        if (
-            captcha.lower() != ground_truth.lower()
-        ):  # Ikariam's captcha is not case-sensitive
-            return False
-        return True
-    except Exception:
-        return False

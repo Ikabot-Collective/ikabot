@@ -21,6 +21,10 @@ from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import getDateTime, wait
 
+from typing import TYPE_CHECKING, TypedDict, Union
+if TYPE_CHECKING:
+    from ikabot.web.session import Session
+
 LINE_UP = "\033[1A"
 LINE_CLEAR = "\x1b[2K"
 #              status, history, start_time
@@ -31,107 +35,88 @@ home = "USERPROFILE" if isWindows else "HOME"
 selected_islands = set()
 
 
-def dumpWorld(session, event, stdin_fd, predetermined_input):
-    """
-    Parameters
-    ----------
-    session : ikabot.web.session.Session
-    event : multiprocessing.Event
-    stdin_fd: int
-    predetermined_input : multiprocessing.managers.SyncManager.list
-    """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
-
-    try:
-        banner()
-        if os.path.exists(os.getenv(home) + "/ikabot_world_dumps"):
-            print("1) Create new dump")
-            print("2) Load existing dump")
-            choice = read(min=1, max=2, digit=True)
-            if choice == 2:
-                view_dump(session, event)
-                event.set()
-                return
-        banner()
-        print(
-            "{}⚠️ BEWARE - THE RESULTING DUMP CONTAINS ACCOUNT IDENTIFYING INFORMATION ⚠️{}\n".format(
-                bcolors.WARNING, bcolors.ENDC
-            )
-        )
-        print(
-            "This action will take a couple of hours to complete. Are you sure you want to initiate a data dump now? (Y|N)"
-        )
-        choice = read(values=["y", "Y", "n", "N"])
-        if choice in ["n", "N"]:
-            event.set()
+def dumpWorld(session: Session):
+    banner()
+    if os.path.exists(os.getenv(home) + "/ikabot_world_dumps"):
+        print("1) Create new dump")
+        print("2) Load existing dump")
+        choice = read(min=1, max=2, digit=True)
+        if choice == 2:
+            view_dump(session)
             return
-        print(
-            "Type in the waiting time between each request in miliseconds (default = 1500): "
+    banner()
+    print(
+        "{}⚠️ BEWARE - THE RESULTING DUMP CONTAINS ACCOUNT IDENTIFYING INFORMATION ⚠️{}\n".format(
+            bcolors.WARNING, bcolors.ENDC
         )
-        choice = read(min=0, max=10000, digit=True, default=1500)
-        waiting_time = int(choice) / 1000
-        print(
-            "Do you want only shallow data about the islands? If yes you will not be able to search the dump by player names but the dump will be quick. (Y|N): "
-        )
+    )
+    print(
+        "This action will take a couple of hours to complete. Are you sure you want to initiate a data dump now? (Y|N)"
+    )
+    choice = read(values=["y", "Y", "n", "N"])
+    if choice in ["n", "N"]:
+        return
+    print(
+        "Type in the waiting time between each request in miliseconds (default = 1500): "
+    )
+    choice = read(min=0, max=10000, digit=True, default=1500)
+    waiting_time = int(choice) / 1000
+    print(
+        "Do you want only shallow data about the islands? If yes you will not be able to search the dump by player names but the dump will be quick. (Y|N): "
+    )
+    choice = read(values=["y", "Y", "n", "N"])
+    shallow = choice in ["y", "Y"]
+    coords = None
+    radius = None
+    non_empty_islands = False
+    if not shallow:
+        print("Do you want to only dump a part of the map? (Y|N)")
         choice = read(values=["y", "Y", "n", "N"])
-        shallow = choice in ["y", "Y"]
-        coords = None
-        radius = None
-        non_empty_islands = False
-        if not shallow:
-            print("Do you want to only dump a part of the map? (Y|N)")
+        if choice in ["y", "Y"]:
+            print('Type in a center point (x,y): (type "skip" to skip this step)')
+            input = read()
+            if input.strip().lower() != "skip":
+                coords = input.replace("(", "").replace(")", "").split(",")
+                coords = (int(coords[0]), int(coords[1]))
+                print(
+                    "Type in a max distance from the center point: (default = 15)"
+                )
+                radius = read(min=0, max=200, digit=True, default=15)
+            print("Do you want to only dump islands with at least 1 town? (Y|N)")
             choice = read(values=["y", "Y", "n", "N"])
-            if choice in ["y", "Y"]:
-                print('Type in a center point (x,y): (type "skip" to skip this step)')
-                input = read()
-                if input.strip().lower() != "skip":
-                    coords = input.replace("(", "").replace(")", "").split(",")
-                    coords = (int(coords[0]), int(coords[1]))
-                    print(
-                        "Type in a max distance from the center point: (default = 15)"
-                    )
-                    radius = read(min=0, max=200, digit=True, default=15)
-                print("Do you want to only dump islands with at least 1 town? (Y|N)")
-                choice = read(values=["y", "Y", "n", "N"])
-                non_empty_islands = choice in ["y", "Y"]
+            non_empty_islands = choice in ["y", "Y"]
 
-        thread = threading.Thread(target=update_terminal, args=(shared_data,), daemon=True)
-        thread.start()
-        set_child_mode(session)
-        info = "\nDumped world data\n"
-        setInfoSignal(session, info)
+    thread = threading.Thread(target=update_terminal, args=(shared_data,), daemon=True) # TODO save the spawning thread inside of this one, later iterate through all threads and kill the ones who's parents are dead
+    thread.start()
+    set_child_mode(session)
+    info = "\nDumped world data\n"
+    setInfoSignal(session, info)
 
-        dump_path = do_it(
-            session, waiting_time, coords, radius, shallow, non_empty_islands
+    dump_path = dump_it(
+        session, waiting_time, coords, radius, shallow, non_empty_islands
+    )
+
+    shared_data[3].set()
+    shared_data[4].acquire()
+    time.sleep(5)
+
+    banner()
+    print(
+        "\n{}SUCCESS!{} World data has been dumped to {} in {}s \n".format(
+            bcolors.GREEN,
+            bcolors.ENDC,
+            dump_path,
+            str(round(time.time() - shared_data[2])),
         )
+    )
+    enter()
+    return
 
-        shared_data[3].set()
-        shared_data[4].acquire()
-        time.sleep(5)
-
-        banner()
-        print(
-            "\n{}SUCCESS!{} World data has been dumped to {} in {}s \n".format(
-                bcolors.GREEN,
-                bcolors.ENDC,
-                dump_path,
-                str(round(time.time() - shared_data[2])),
-            )
-        )
-        enter()
-        event.set()
-        return
-    except Exception:
-        shared_data[3].set()
-        shared_data[4].acquire(timeout=10)
-        event.set()
-        msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
-        sendToBot(session, msg)
-        return
+def do_it(session: Session): # TODO fix this module
+    ...
 
 
-def do_it(session, waiting_time, coords, radius, shallow, non_empty_islands):
+def dump_it(session, waiting_time, coords, radius, shallow, non_empty_islands):
     """
     Parameters
     ----------
@@ -389,7 +374,7 @@ def update_status(message, percent, percent_total, add_history=False):
     shared_data[4].release()
 
 
-def view_dump(session, event):
+def view_dump(session):
 
 
     files = [
@@ -427,7 +412,6 @@ def view_dump(session, event):
 
         choice = read(min=0, max=5, digit=True)
         if choice == 0:
-            event.set()
             return
         elif choice == 1:
             print(

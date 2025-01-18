@@ -16,7 +16,6 @@ from ikabot.function.attackBarbarians import attackBarbarians
 from ikabot.function.autoBarbarians import autoBarbarians
 from ikabot.function.autoPirate import autoPirate
 from ikabot.function.buyResources import buyResources
-from ikabot.function.checkForUpdate import checkForUpdate
 from ikabot.function.constructBuilding import constructBuilding
 from ikabot.function.constructionList import constructionList
 from ikabot.function.decaptchaConf import decaptchaConf
@@ -49,15 +48,7 @@ from ikabot.helpers.process import updateProcessList
 from ikabot.web.session import *
 
 
-def menu(session, checkUpdate=True):
-    """
-    Parameters
-    ----------
-    session : ikabot.web.session.Session
-    checkUpdate : bool
-    """
-    if checkUpdate:
-        checkForUpdate()
+def menu(session: Session):
 
     show_proxy(session)
 
@@ -254,7 +245,7 @@ def menu(session, checkUpdate=True):
             event.wait()  # waits for the process to fire the event that's been given to it. When it does  this process gets back control of the command line and asks user for more input
         except KeyboardInterrupt:
             pass
-        menu(session, checkUpdate=False)
+        menu(session)
     else:
         if isWindows:
             # in unix, you can exit ikabot and close the terminal and the processes will continue to execute

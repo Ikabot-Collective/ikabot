@@ -2,46 +2,33 @@
 # -*- coding: utf-8 -*-
 
 import json
-import sys
-
-import requests
 
 from ikabot.config import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import read
 
+from typing import TYPE_CHECKING, TypedDict, Union
+if TYPE_CHECKING:
+    from ikabot.web.session import Session
 
+def importExportCookie(session: Session):
 
-def importExportCookie(session, event, stdin_fd, predetermined_input):
-    """
-    Parameters
-    ----------
-    session : ikabot.web.session.Session
-    event : multiprocessing.Event
-    stdin_fd: int
-    predetermined_input : multiprocessing.managers.SyncManager.list
-    """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
     banner()
-    try:
-        print("Do you want to import or export the cookie?")
-        print("(0) Exit")
-        print("(1) Import")
-        print("(2) Export")
-        action = read(min=0, max=2)
-        if action == 1:
-            importCookie(session)
-        elif action == 2:
-            exportCookie(session)
+    print("Do you want to import or export the cookie?")
+    print("(0) Exit")
+    print("(1) Import")
+    print("(2) Export")
+    action = read(min=0, max=2)
+    if action == 1:
+        importCookie(session)
+    elif action == 2:
+        exportCookie(session)
 
-        event.set()
-    except KeyboardInterrupt:
-        event.set()
-        return
+def do_it(session: Session):
+    ...
 
 
-def importCookie(session):
+def importCookie(session: Session):
     banner()
     print(
         "{}⚠️ INSERTING AN INVALID COOKIE WILL LOG YOU OUT OF YOUR OTHER SESSIONS ⚠️{}\n\n".format(
@@ -82,7 +69,7 @@ def importCookie(session):
     session.get()
 
 
-def exportCookie(session):
+def exportCookie(session: Session):
     banner()
     session.get()  # get valid cookie in case user has logged the bot out before running this feature
     ikariam = session.getSessionData()["cookies"]["ikariam"]

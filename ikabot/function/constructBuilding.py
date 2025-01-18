@@ -9,22 +9,20 @@ from ikabot.config import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import *
 
+from typing import TYPE_CHECKING, TypedDict, Union
+if TYPE_CHECKING:
+    from ikabot.web.session import Session
 
-
-def constructBuilding(session, event, stdin_fd, predetermined_input):
-    """
-    Parameters
-    ----------
-    session : ikabot.web.session.Session
-    event : multiprocessing.Event
-    stdin_fd: int
-    predetermined_input : multiprocessing.managers.SyncManager.list
-    """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
-    try:
+ConstructBuildingConfig = TypedDict(
+    "ConstructBuildingConfig",
+    {
+        "cityId": int,
+        "position": int,
+        "building": int,
+    },
+)
+def constructBuilding(session: Session) -> ConstructBuildingConfig:
         banner()
-
         print("City where to build:")
         city = chooseCity(session)
         banner()
@@ -81,7 +79,6 @@ def constructBuilding(session, event, stdin_fd, predetermined_input):
         if len(buildings) == 0:
             print("No building can be built.")
             enter()
-            event.set()
             return
 
         # show list of buildings to the user
@@ -114,24 +111,26 @@ def constructBuilding(session, event, stdin_fd, predetermined_input):
             option = options[selected_building_index - 1]
             banner()
 
-        # build it
-        params = {
-            "action": "CityScreen",
-            "function": "build",
+        enter()
+        return {
             "cityId": city["id"],
             "position": option["position"],
             "building": building["buildingId"],
+            }
+
+def do_it(session: Session, cityId: int, position: int, building: int):
+    # build it
+        params = {
+            "action": "CityScreen",
+            "function": "build",
+            "cityId": cityId,
+            "position": position,
+            "building": building,
             "backgroundView": "city",
-            "currentCityId": city["id"],
+            "currentCityId": cityId,
             "templateView": "buildingGround",
             "actionRequest": actionRequest,
             "ajax": "1",
         }
         buildings_response = session.post(params=params, noIndex=True)
         msg = json.loads(buildings_response, strict=False)[3][1][0]["text"]
-        print(msg)
-        enter()
-        event.set()
-    except KeyboardInterrupt:
-        event.set()
-        return

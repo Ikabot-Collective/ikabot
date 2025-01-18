@@ -9,7 +9,7 @@ import time
 from decimal import *
 
 from ikabot.config import *
-from ikabot.helpers.getJson import getCity
+from ikabot.helpers.getJson import getCity, FullCityDict
 from ikabot.helpers.naval import *
 from ikabot.helpers.varios import wait
 
@@ -98,16 +98,13 @@ def sendGoods(session, originCityId, destinationCityId, islandId, ships, send, u
             wait(getMinimumWaitingTime(session))
         time.sleep(5)
 
-
-def executeRoutes(session, routes, useFreighters=False):
-    """This function will execute all the routes passed to it, regardless if there are enough ships available to do so
-    Parameters
-    ----------
-    session : ikabot.web.session.Session
-        Session object
-    routes : list
-        a list of tuples, each of which represent a route. A route is defined like so : (originCity,destinationCity,islandId,wood,wine,marble,crystal,sulfur). originCity and destintionCity should be passed as City objects
-    """
+Route = tuple[FullCityDict, FullCityDict, int, int, int, int, int, int]
+"""
+A route is a tuple containing the origin city, destination city and destination island id. Other values are the resource amounts.
+(originCity,destinationCity,islandId,wood,wine,marble,crystal,sulfur)
+"""
+def executeRoutes(session, routes: list[Route], useFreighters=False):
+    """This function will execute all the routes in the list"""
     for route in routes:
         (origin_city, destination_city, island_id, *toSend) = route
         destination_city_id = destination_city["id"]

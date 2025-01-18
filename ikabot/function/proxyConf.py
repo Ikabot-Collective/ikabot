@@ -9,6 +9,51 @@ import ikabot.config as config
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import read
 
+from typing import TYPE_CHECKING, TypedDict, Union
+if TYPE_CHECKING:
+    from ikabot.web.session import Session
+
+def proxyConf(session: Session):
+    banner()
+    print(
+        "Warning: The proxy does not apply to the requests sent to the lobby!\n"
+    )
+
+    session_data = session.getSessionData()
+    if "proxy" not in session_data or session_data["proxy"]["set"] is False:
+        print("Right now, there is no proxy configured.")
+        proxy_dict = read_proxy(session)
+        if proxy_dict is None:
+            return
+        session_data["proxy"] = {}
+        session_data["proxy"]["conf"] = proxy_dict
+        session_data["proxy"]["set"] = True
+    else:
+        curr_proxy = session_data["proxy"]["conf"]["https"]
+        print("Current proxy: {}".format(curr_proxy))
+        print("What do you want to do?")
+        print("0) Exit")
+        print("1) Set a new proxy")
+        print("2) Remove the current proxy")
+        rta = read(min=0, max=2)
+
+        if rta == 0:
+            return
+        if rta == 1:
+            proxy_dict = read_proxy(session)
+            if proxy_dict is None:
+                return
+            session_data["proxy"]["conf"] = proxy_dict
+            session_data["proxy"]["set"] = True
+        if rta == 2:
+            session_data["proxy"]["set"] = False
+            print("The proxy has been removed.")
+            enter()
+
+    session.setSessionData(session_data)
+
+def do_it(session: Session):
+    ...
 
 def show_proxy(session):
     session_data = session.getSessionData()
@@ -68,59 +113,3 @@ def read_proxy(session):
     return proxy_dict
 
 
-def proxyConf(session, event, stdin_fd, predetermined_input):
-    """
-    Parameters
-    ----------
-    session : ikabot.web.session.Session
-    event : multiprocessing.Event
-    stdin_fd: int
-    predetermined_input : multiprocessing.managers.SyncManager.list
-    """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
-    try:
-        banner()
-        print(
-            "Warning: The proxy does not apply to the requests sent to the lobby!\n"
-        )
-
-        session_data = session.getSessionData()
-        if "proxy" not in session_data or session_data["proxy"]["set"] is False:
-            print("Right now, there is no proxy configured.")
-            proxy_dict = read_proxy(session)
-            if proxy_dict is None:
-                event.set()
-                return
-            session_data["proxy"] = {}
-            session_data["proxy"]["conf"] = proxy_dict
-            session_data["proxy"]["set"] = True
-        else:
-            curr_proxy = session_data["proxy"]["conf"]["https"]
-            print("Current proxy: {}".format(curr_proxy))
-            print("What do you want to do?")
-            print("0) Exit")
-            print("1) Set a new proxy")
-            print("2) Remove the current proxy")
-            rta = read(min=0, max=2)
-
-            if rta == 0:
-                event.set()
-                return
-            if rta == 1:
-                proxy_dict = read_proxy(session)
-                if proxy_dict is None:
-                    event.set()
-                    return
-                session_data["proxy"]["conf"] = proxy_dict
-                session_data["proxy"]["set"] = True
-            if rta == 2:
-                session_data["proxy"]["set"] = False
-                print("The proxy has been removed.")
-                enter()
-
-        session.setSessionData(session_data)
-        event.set()
-    except KeyboardInterrupt:
-        event.set()
-        return

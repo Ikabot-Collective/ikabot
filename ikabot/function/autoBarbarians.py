@@ -2,10 +2,12 @@
 # -*- coding: utf-8 -*-
 
 import math
-import traceback
 import re
-from decimal import *
 from collections import defaultdict
+
+from typing import TYPE_CHECKING, TypedDict, Union
+if TYPE_CHECKING:
+    from ikabot.web.session import Session
 
 from ikabot.config import *
 from ikabot.helpers.botComm import *
@@ -14,8 +16,6 @@ from ikabot.helpers.gui import *
 from ikabot.helpers.naval import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.planRoutes import waitForArrival
-from ikabot.helpers.process import set_child_mode
-from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import *
 
 from ikabot.function.activateMiracle import obtainMiraclesAvailable
@@ -137,157 +137,218 @@ FIVE_MINUTES = 5 * 60
 DEVELOPMENT = False
 
 
-def autoBarbarians(session, event, stdin_fd, predetermined_input):
-    """
-    Parameters
-    ----------
-    session : ikabot.web.session.Session
-    event : multiprocessing.Event
-    stdin_fd: int
-    predetermined_input : multiprocessing.managers.SyncManager.list
-    """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
-    try:
-        banner()
+
+AutoBarbariansConfig = TypedDict("AutoBarbariansConfig", {"island": IslandDict, "city": FullCityDict, "float_city": FullCityDict, "schematic": dict, "units_data": dict})
+def autoBarbarians(session: Session):
+    banner()
+    print(
+        
+            "{}⚠️ BEWARE - THE BARBARIAN GRIND TO BE CARRIED OUT MORE EFFICIENTLY REQUIRES THE FOLLOWING RESOURCES ⚠️{}\n".format(
+                bcolors.WARNING, bcolors.ENDC
+            )
+        
+    )
+    print(
+        "- You need to leave at least 3 merchant ships available.",
+        "- You leave 2 extra rams available in the city of origin.",
+        "- It is not recommended that merchant ships be used during the grind, as maximizing their use increases the efficiency and effectiveness of attacks.",
+        sep="\n",
+    )
+    print(
+        
+            "\nDo you agree that failure to comply with these rules will result in you losing out on resources? [y/N]"
+        
+    )
+    if read(values=["y", "Y", "n", "N"], default="n") in ["n", "N"]:
+        return
+
+    banner()
+    island = choose_island(session)
+    if island is None:
+        return
+
+    banner()
+    print("From which city do you want to attack?")
+    city = chooseCity(session)
+    if city is None:
+        return
+
+    has_rams = has_units_in_city(session, city, {"307": 1})
+    if has_rams is False:
         print(
             
-                "{}⚠️ BEWARE - THE BARBARIAN GRIND TO BE CARRIED OUT MORE EFFICIENTLY REQUIRES THE FOLLOWING RESOURCES ⚠️{}\n".format(
-                    bcolors.WARNING, bcolors.ENDC
-                )
-            
-        )
-        print(
-            "- You need to leave at least 3 merchant ships available.",
-            "- You leave 2 extra rams available in the city of origin.",
-            "- It is not recommended that merchant ships be used during the grind, as maximizing their use increases the efficiency and effectiveness of attacks.",
-            sep="\n",
-        )
-        print(
-            
-                "\nDo you agree that failure to comply with these rules will result in you losing out on resources? [y/N]"
+                "\nYou do not have 2 or more battering rams in this city, the lack of them may prevent you from collecting all the resources present in the barbarian village, are you sure you want to continue anyway? [y/N]"
             
         )
         if read(values=["y", "Y", "n", "N"], default="n") in ["n", "N"]:
-            event.set()
             return
 
-        banner()
-        island = choose_island(session)
-        if island is None:
-            event.set()
-            return
-
-        banner()
-        print("From which city do you want to attack?")
-        city = chooseCity(session)
-        if city is None:
-            event.set()
-            return
-
-        has_rams = has_units_in_city(session, city, {"307": 1})
-        if has_rams is False:
+    banner()
+    if DEVELOPMENT is True:
+        islands = obtainMiraclesAvailable(session)
+        hephaestus_max = is_hephaestus_max(islands)
+        auto_activate_hephaestus = False
+        if hephaestus_max:
             print(
                 
-                    "\nYou do not have 2 or more battering rams in this city, the lack of them may prevent you from collecting all the resources present in the barbarian village, are you sure you want to continue anyway? [y/N]"
+                    "Do you want to keep activating your Hephaestus to maximize the grind? [Y/n]"
                 
             )
-            if read(values=["y", "Y", "n", "N"], default="n") in ["n", "N"]:
-                event.set()
-                return
-
-        banner()
-        if DEVELOPMENT is True:
-            islands = obtainMiraclesAvailable(session)
-            hephaestus_max = is_hephaestus_max(islands)
-            auto_activate_hephaestus = False
-            if hephaestus_max:
-                print(
-                    
-                        "Do you want to keep activating your Hephaestus to maximize the grind? [Y/n]"
-                    
-                )
-                activate_miracle_input = read(values=["y", "Y", "n", "N", ""])
-                auto_activate_hephaestus = (
-                    True if activate_miracle_input in ("y", "Y") else False
-                )
-
-        schematic = DEFAULT_SCHEMATICS["WITHOUT_HEPHAESTUS"]
-        if DEVELOPMENT is True:
-            banner()
-            schematic_option = choose_schematic()
-            if schematic_option is None:
-                event.set()
-                return
-
-            if schematic_option == 1:
-                if auto_activate_hephaestus:
-                    schematic = DEFAULT_SCHEMATICS["WITH_HEPHAESTUS"]
-                pass
-            elif schematic_option == 2:
-                # TODO do the part where the user can select a custom structure
-                pass
-
-        banner()
-        success, schematic_informations = get_schematic_information(
-            session,
-            city,
-            schematic,
-            is_in_island=True if city["islandId"] == island["id"] else False,
-        )
-        units_data = schematic_informations["units_data"]
-        schematic_units = schematic_informations["schematic_units"]
-        main_city_units = schematic_informations["main_city_units"]
-        schematic_ships = schematic_informations["schematic_ships"]
-
-        ships_available = waitForArrival(session)
-        print(
-            "For this sequence of attacks you need to have the following troops:\n"
-        )
-        print_grid_units(
-            schematic_units["total"], main_city_units, schematic_ships, ships_available
-        )
-        if success is False:
-            print(
-                
-                    "\nYou do not have all the units needed to start this attack sequence, you want to continue executing the attack only as far as possible? [Y/n]"
-                
+            activate_miracle_input = read(values=["y", "Y", "n", "N", ""])
+            auto_activate_hephaestus = (
+                True if activate_miracle_input in ("y", "Y") else False
             )
-            if read(values=["y", "Y", "n", "N"], default="y") in ["n", "N"]:
-                event.set()
-                return
 
+    schematic = DEFAULT_SCHEMATICS["WITHOUT_HEPHAESTUS"]
+    if DEVELOPMENT is True:
         banner()
-        need_float_city = check_need_float_city(schematic)
-        float_city = None
-        if need_float_city is True:
-            float_city = choose_float_city(session, island)
-            if float_city is None:
-                event.set()
-                return
+        schematic_option = choose_schematic()
+        if schematic_option is None:
+            return
 
-    except KeyboardInterrupt:
-        event.set()
-        return
+        if schematic_option == 1:
+            if auto_activate_hephaestus:
+                schematic = DEFAULT_SCHEMATICS["WITH_HEPHAESTUS"]
+            pass
+        elif schematic_option == 2:
+            # TODO do the part where the user can select a custom structure
+            pass
 
-    set_child_mode(session)
-    event.set()
-
-    info = "\nI grinding the barbarians in [{}:{}]\n".format(
-        island["x"], island["y"]
+    banner()
+    success, schematic_informations = get_schematic_information(
+        session,
+        city,
+        schematic,
+        is_in_island=True if city["islandId"] == island["id"] else False,
     )
-    setInfoSignal(session, info)
+    units_data = schematic_informations["units_data"]
+    schematic_units = schematic_informations["schematic_units"]
+    main_city_units = schematic_informations["main_city_units"]
+    schematic_ships = schematic_informations["schematic_ships"]
 
-    try:
-        do_it(session, island, city, float_city, schematic, units_data)
-    except Exception as e:
-        msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
-        sendToBot(session, msg)
-    finally:
-        session.logout()
+    ships_available = waitForArrival(session)
+    print(
+        "For this sequence of attacks you need to have the following troops:\n"
+    )
+    print_grid_units(
+        schematic_units["total"], main_city_units, schematic_ships, ships_available
+    )
+    if success is False:
+        print(
+            
+                "\nYou do not have all the units needed to start this attack sequence, you want to continue executing the attack only as far as possible? [Y/n]"
+            
+        )
+        if read(values=["y", "Y", "n", "N"], default="y") in ["n", "N"]:
+            return
+
+    banner()
+    need_float_city = check_need_float_city(schematic)
+    float_city = None
+    if need_float_city is True:
+        float_city = choose_float_city(session, island)
+        if float_city is None:
+            return
 
 
-def choose_island(session):
+    return {"island": island, "city": city, "float_city": float_city, "schematic": schematic, "units_data": units_data}
+
+def do_it(session: Session, island: IslandDict, city: FullCityDict, float_city: FullCityDict, schematic: dict, units_data: dict):
+    attempts = {"ships": 0}
+    first_loop = True
+    while True:
+        if first_loop is False:
+            time.sleep(FIVE_MINUTES)
+        else:
+            first_loop = False
+        html = session.get(island_url + island["id"])
+        island = getIsland(html)
+        babarians_info = get_barbarians_lv(session, island)
+        barbarians_plan = get_barbarians_attack_plan(babarians_info, schematic)
+        if barbarians_plan is None:
+            sendToBot(
+                session,
+                
+                    "It was not possible to continue the attack on the barbarians because they reached a level that is outside the attack scheme.".format(
+                        island["x"], island["y"]
+                    )
+                ,
+            )
+            break
+        if island["barbarians"]["destroyed"] == 1:
+            loot(
+                session,
+                island,
+                city,
+                barbarians_plan,
+                float_city=float_city,
+                units_data=units_data,
+            )
+            wait_for_looting(session, city, island)
+            continue
+        ships_available = waitForArrival(session)
+        schematic_ships = (
+            get_amount_ships_schematic(
+                barbarians_plan["needed_units"]["total"], units_data
+            )
+            + babarians_info["ships"]
+        )
+        if schematic_ships > ships_available:
+            attempts["ships"] += 1
+            session.setStatus(
+                "waiting for availability of ({}) boats".format(schematic_ships)
+            )
+            if attempts["ships"] > 20:
+                sendToBot(
+                    session,
+                    
+                        "It was not possible to continue the attack on the barbarians due to the long unavailability of ships."
+                    ,
+                )
+                break
+            continue
+        if (
+            has_units_in_city(session, city, barbarians_plan["needed_units"]["total"])
+            is False
+        ):
+            sendToBot(
+                session,
+                
+                    "It was not possible to continue the attack on the barbarians due to the lack of necessary troops in the city(ies)."
+                ,
+            )
+            break
+        sendToBot(
+            session,
+            
+                "Starting attack on barbarians[{}:{}] level ({}).".format(
+                    island["x"], island["y"], babarians_info["level"]
+                )
+            ,
+        )
+        do_attack(
+            session,
+            island,
+            city,
+            barbarians_plan,
+            float_city=float_city,
+            units_data=units_data,
+        )
+        wait_until_attack_is_over(session, city, island)
+        for attempt_key in attempts.keys():
+            attempts[attempt_key] = 0
+
+    babarians_info = get_barbarians_lv(session, island)
+    sendToBot(
+        session,
+        
+            "Ended attack sequence on bariarians[{}:{}].".format(
+                island["x"], island["y"], babarians_info["level"]
+            )
+        ,
+    )
+
+def choose_island(session: Session) -> Union[IslandDict, None]:
     idsIslands = getIslandsIds(session)
     islands = []
     for idIsland in idsIslands:
@@ -367,7 +428,7 @@ def check_need_float_city(schematic):
     )
 
 
-def choose_float_city(session, island):
+def choose_float_city(session: Session, island: IslandDict) -> FullCityDict:
     ids, cities = getIdsOfCities(session)
     inslands_cities = {}
     for city_id in cities:
@@ -575,100 +636,7 @@ def has_units_in_city(session, city, units):
     )
 
 
-def do_it(session, island, city, float_city, schematic, units_data):
-    attempts = {"ships": 0}
-    first_loop = True
-    while True:
-        if first_loop is False:
-            time.sleep(FIVE_MINUTES)
-        else:
-            first_loop = False
-        html = session.get(island_url + island["id"])
-        island = getIsland(html)
-        babarians_info = get_barbarians_lv(session, island)
-        barbarians_plan = get_barbarians_attack_plan(babarians_info, schematic)
-        if barbarians_plan is None:
-            sendToBot(
-                session,
-                
-                    "It was not possible to continue the attack on the barbarians because they reached a level that is outside the attack scheme.".format(
-                        island["x"], island["y"]
-                    )
-                ,
-            )
-            break
-        if island["barbarians"]["destroyed"] == 1:
-            loot(
-                session,
-                island,
-                city,
-                barbarians_plan,
-                float_city=float_city,
-                units_data=units_data,
-            )
-            wait_for_looting(session, city, island)
-            continue
-        ships_available = waitForArrival(session)
-        schematic_ships = (
-            get_amount_ships_schematic(
-                barbarians_plan["needed_units"]["total"], units_data
-            )
-            + babarians_info["ships"]
-        )
-        if schematic_ships > ships_available:
-            attempts["ships"] += 1
-            session.setStatus(
-                "waiting for availability of ({}) boats".format(schematic_ships)
-            )
-            if attempts["ships"] > 20:
-                sendToBot(
-                    session,
-                    
-                        "It was not possible to continue the attack on the barbarians due to the long unavailability of ships."
-                    ,
-                )
-                break
-            continue
-        if (
-            has_units_in_city(session, city, barbarians_plan["needed_units"]["total"])
-            is False
-        ):
-            sendToBot(
-                session,
-                
-                    "It was not possible to continue the attack on the barbarians due to the lack of necessary troops in the city(ies)."
-                ,
-            )
-            break
-        sendToBot(
-            session,
-            
-                "Starting attack on barbarians[{}:{}] level ({}).".format(
-                    island["x"], island["y"], babarians_info["level"]
-                )
-            ,
-        )
-        do_attack(
-            session,
-            island,
-            city,
-            barbarians_plan,
-            float_city=float_city,
-            units_data=units_data,
-        )
-        wait_until_attack_is_over(session, city, island)
-        for attempt_key in attempts.keys():
-            attempts[attempt_key] = 0
 
-    babarians_info = get_barbarians_lv(session, island)
-    sendToBot(
-        session,
-        
-            "Ended attack sequence on bariarians[{}:{}].".format(
-                island["x"], island["y"], babarians_info["level"]
-            )
-        ,
-    )
 
 
 def do_attack(session, island, city, schematic, float_city=None, units_data={}):

@@ -1,164 +1,133 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import time
-import traceback
 
 from ikabot.config import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.getJson import getCity
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import *
-from ikabot.helpers.process import set_child_mode
-from ikabot.helpers.resources import getAvailableResources, getProductionPerSecond
-from ikabot.helpers.signals import setInfoSignal
+from ikabot.helpers.resources import getProductionPerSecond
 from ikabot.helpers.varios import wait, getDateTime
 
+from typing import TYPE_CHECKING, TypedDict, Union
+if TYPE_CHECKING:
+    from ikabot.web.session import Session
 
-def donationBot(session, event, stdin_fd, predetermined_input):
-    """
-    Parameters
-    ----------
-    session : ikabot.web.session.Session
-    event : multiprocessing.Event
-    stdin_fd: int
-    predetermined_input : multiprocessing.managers.SyncManager.list
-    """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
-    try:
-        banner()
-        (cities_ids, cities) = getIdsOfCities(session)
-        cities_dict = {}
-        initials = [material_name[0] for material_name in materials_names]
-        print(
-            "Enter how often you want to donate in minutes. (min = 1, default = 1 day)"
-        )
-        waiting_time = read(min=1, digit=True, default=1 * 24 * 60)
-        print(
-            "Enter a maximum additional random waiting time between donations in minutes. (min = 0, default = 1 hour)"
-        )
-        max_random_waiting_time = read(min=0, digit=True, default=1 * 60)
-        print(
-            """Which donation method would you like to use to donate automatically? (default = 1)
+
+DonationCityDict = TypedDict("DonationCityDict", {"donation_type": int, "percentage": int, "island": int})
+DonationBotConfig = TypedDict("DonationBotConfig", {"cities_ids": list[int], "cities_dict": dict[int, DonationCityDict], "waiting_time": int, "max_random_waiting_time": int, "donate_method": int})
+def donationBot(session: Session) -> DonationBotConfig:
+    banner()
+    (cities_ids, cities) = getIdsOfCities(session)
+    cities_dict = {}
+    initials = [material_name[0] for material_name in materials_names]
+    print(
+        "Enter how often you want to donate in minutes. (min = 1, default = 1 day)"
+    )
+    waiting_time = read(min=1, digit=True, default=1 * 24 * 60)
+    print(
+        "Enter a maximum additional random waiting time between donations in minutes. (min = 0, default = 1 hour)"
+    )
+    max_random_waiting_time = read(min=0, digit=True, default=1 * 60)
+    print(
+        """Which donation method would you like to use to donate automatically? (default = 1)
 (1) Donate exceeding percentage of your storage capacity
 (2) Donate a percentage of production
 (3) Donate specific amount
-        """
+    """
+    )
+    donate_method = read(min=1, max=3, digit=True, default=1)
+    for cityId in cities_ids:
+        tradegood = cities[cityId]["tradegood"]
+        initial = initials[int(tradegood)]
+        print(
+            
+            "In {} ({}), Do you wish to donate to the forest, to the trading good, to both or none? [f/t/b/n]".format(cities[cityId]["name"], initial)
         )
-        donate_method = read(min=1, max=3, digit=True, default=1)
-        for cityId in cities_ids:
-            tradegood = cities[cityId]["tradegood"]
-            initial = initials[int(tradegood)]
+        f = "f"
+        t = "t"
+        b = "b"
+        n = "n"
+
+        rta = read(values=[f, f.upper(), t, t.upper(), b, b.upper(), n, n.upper()])
+        if rta.lower() == f:
+            donation_type = "resource"
+        elif rta.lower() == t:
+            donation_type = "tradegood"
+        elif rta.lower() == b:
+            donation_type = "both"
+        else:
+            donation_type = None
+            percentage = None
+
+        if donation_type is not None and donate_method == 1:
             print(
                 
-                "In {} ({}), Do you wish to donate to the forest, to the trading good, to both or none? [f/t/b/n]".format(cities[cityId]["name"], initial)
+                "What is the maximum percentage of your storage capacity that you wish to keep occupied? (the resources that exceed it, will be donated) (default: 80%)"
+                
             )
-            f = "f"
-            t = "t"
-            b = "b"
-            n = "n"
-
-            rta = read(values=[f, f.upper(), t, t.upper(), b, b.upper(), n, n.upper()])
-            if rta.lower() == f:
-                donation_type = "resource"
-            elif rta.lower() == t:
-                donation_type = "tradegood"
-            elif rta.lower() == b:
-                donation_type = "both"
-            else:
+            percentage = read(min=0, max=100, empty=True)
+            if percentage == "":
+                percentage = 80
+            elif (
+                percentage == 100
+            ):  # if the user is ok with the storage beeing totally full, don't donate at all
                 donation_type = None
-                percentage = None
+        elif donation_type is not None and donate_method == 2:
+            print(
+                
+                "What is the percentage of your production that you wish to donate? (enter 0 to disable donation for the town) (default: 50%)"
+                
+            )
+            percentage = read(
+                min=0, max=100, empty=True
+            )  # max_random_waiting_time increases inaccuracy
+            if percentage == "":
+                percentage = 50
+            elif percentage == 0:
+                donation_type = None
+        elif donation_type is not None and donate_method == 3:
+            print(
+                
+                "What is the amount would you like to donate? (enter 0 to disable donation for the town) (default: 10000)"
+                
+            )
+            percentage = read(
+                min=0, empty=True
+            )  # no point changing the variable's name everywhere just for this
+            if percentage == "":
+                percentage = 10000
+            elif percentage == 0:
+                donation_type = None
 
-            if donation_type is not None and donate_method == 1:
-                print(
-                    
-                    "What is the maximum percentage of your storage capacity that you wish to keep occupied? (the resources that exceed it, will be donated) (default: 80%)"
-                    
-                )
-                percentage = read(min=0, max=100, empty=True)
-                if percentage == "":
-                    percentage = 80
-                elif (
-                    percentage == 100
-                ):  # if the user is ok with the storage beeing totally full, don't donate at all
-                    donation_type = None
-            elif donation_type is not None and donate_method == 2:
-                print(
-                    
-                    "What is the percentage of your production that you wish to donate? (enter 0 to disable donation for the town) (default: 50%)"
-                    
-                )
-                percentage = read(
-                    min=0, max=100, empty=True
-                )  # max_random_waiting_time increases inaccuracy
-                if percentage == "":
-                    percentage = 50
-                elif percentage == 0:
-                    donation_type = None
-            elif donation_type is not None and donate_method == 3:
-                print(
-                    
-                    "What is the amount would you like to donate? (enter 0 to disable donation for the town) (default: 10000)"
-                    
-                )
-                percentage = read(
-                    min=0, empty=True
-                )  # no point changing the variable's name everywhere just for this
-                if percentage == "":
-                    percentage = 10000
-                elif percentage == 0:
-                    donation_type = None
+        cities_dict[cityId] = {
+            "donation_type": donation_type,
+            "percentage": percentage,
+        }
 
-            cities_dict[cityId] = {
-                "donation_type": donation_type,
-                "percentage": percentage,
-            }
+    print("I will donate every {} minutes.".format(waiting_time))
+    enter()
 
-        print("I will donate every {} minutes.".format(waiting_time))
-        enter()
-    except KeyboardInterrupt:
-        event.set()
-        return
 
-    set_child_mode(session)
-    event.set()
+    return {
+        "cities_ids": cities_ids,
+        "cities_dict": cities_dict,
+        "waiting_time": waiting_time,
+        "max_random_waiting_time": max_random_waiting_time,
+        "donate_method": donate_method,}
 
-    info = "\nI donate every {} minutes\n".format(waiting_time)
-    setInfoSignal(session, info)
-    try:
-        do_it(
-            session,
-            cities_ids,
-            cities_dict,
-            waiting_time,
-            max_random_waiting_time,
-            donate_method,
-        )
-    except Exception as e:
-        msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
-        sendToBot(session, msg)
-    finally:
-        session.logout()
+
 
 
 def do_it(
     session,
-    cities_ids,
-    cities_dict,
-    waiting_time,
-    max_random_waiting_time,
-    donate_method,
+    cities_ids: list[int],
+    cities_dict: dict[int, DonationCityDict],
+    waiting_time: int,
+    max_random_waiting_time: int,
+    donate_method: int,
 ):
-    """
-    Parameters
-    ----------
-    session : ikabot.web.session.Session
-    cities_ids : list[int]
-    cities_dict : dict[int, dict]
-    waiting_time: int
-    max_random_waiting_time: int
-    """
     for cityId in cities_ids:
         html = session.get(city_url + cityId)
         city = getCity(html)

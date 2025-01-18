@@ -3,6 +3,7 @@
 
 import locale
 import os
+import decimal
 
 # Version is changed automatically by the release pipeline
 IKABOT_VERSION = "7.0.9"
@@ -11,7 +12,7 @@ IKABOT_VERSION = "7.0.9"
 IKABOT_VERSION_TAG = "v" + IKABOT_VERSION
 
 
-
+decimal.getcontext().prec = 30
 
 update_msg = ""
 
@@ -33,7 +34,6 @@ city_url = "view=city&cityId="
 island_url = "view=island&islandId="
 prompt = " >>  "
 materials_names = ["Wood", "Wine", "Marble", "Cristal", "Sulfur"]
-materials_names_english = ["Wood", "Wine", "Marble", "Cristal", "Sulfur"]
 miracle_names_english = [
     "",
     "Hephaestus' Forge",
@@ -45,20 +45,27 @@ miracle_names_english = [
     "Temple of Poseidon",
     "Colossus",
 ]
-materials_names_tec = ["wood", "wine", "marble", "glass", "sulfur"]
-material_img_hash = [
-    "19c3527b2f694fb882563c04df6d8972",
-    "c694ddfda045a8f5ced3397d791fd064",
-    "bffc258b990c1a2a36c5aeb9872fc08a",
-    "1e417b4059940b2ae2680c070a197d8c",
-    "9b5578a7dfa3e98124439cca4a387a61",
-]
 tradegoods_names = [
     "Saw mill",
     "Vineyard",
     "Quarry",
     "Crystal Mine",
     "Sulfur Pit",
+]
+god_names = {
+    1: "Pan (Wood)",
+    2: "Dionysus (Wine)",
+    3: "Tyche (Marble)",
+    4: "Plutus (Gold)",
+    5: "Theia (Crystal)",
+    6: "Hephaestus (Sulphur)",
+}
+material_img_hash = [
+    "19c3527b2f694fb882563c04df6d8972",
+    "c694ddfda045a8f5ced3397d791fd064",
+    "bffc258b990c1a2a36c5aeb9872fc08a",
+    "1e417b4059940b2ae2680c070a197d8c",
+    "9b5578a7dfa3e98124439cca4a387a61",
 ]
 ConnectionError_wait = 5 * 60
 actionRequest = "REQUESTID"
