@@ -192,8 +192,8 @@ IslandDict = TypedDict(
 
         # Added for compatibility
 
-        "x": str,
-        "y": str,
+        "x": int,
+        "y": int,
         "tipo": str,
     },
 )
@@ -339,9 +339,9 @@ def getIsland(html: str) -> IslandDict:
 
     # Must add aliases for different properties to maintain backwards compatibility with old code
 
-    island["x"] = island["xCoord"]
-    island["y"] = island["yCoord"]
-    island["tipo"] = island["tradegood"]
+    island["x"] = int(island["xCoord"])
+    island["y"] = int(island["yCoord"])
+    island["tipo"] = str(island["tradegood"])
 
     for city in island["cities"]:
         for key in ["Id", "Name", "AllyId", "AllyTag"]:
