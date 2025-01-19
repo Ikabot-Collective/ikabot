@@ -386,8 +386,10 @@ def getCity(html: str) -> FullCityDict:
         this function returns a json parsed City object. For more information about this object refer to the github wiki page of Ikabot.
     """
 
-    city = re.search(r'ajax.Responder, (\[\[[\S\s]*?\]\])\)\;', html).group(1)
-    city = json.loads(city)[0][1]
+    city = re.search(
+        r'"updateBackgroundData",\s?([\s\S]*?)\],\["updateTemplateData"', html
+    ).group(1)
+    city = json.loads(city, strict=False)
 
     city["ownerId"] = city.pop("ownerId")
     city["ownerName"] = decodeUnicodeEscape(city["ownerName"])
