@@ -236,7 +236,8 @@ def getFreeCitizens(html: str) -> int:
         an integer representing the amount of free citizens in the given city.
     """
     freeCitizens = re.search(r'js_GlobalMenu_citizens">(.*?)</span>', html).group(1)
-    return int(freeCitizens.replace(",", "").replace(".", ""))
+    freeCitizens = re.sub(r'\D', '', freeCitizens)
+    return int(freeCitizens)
 
 
 def getResourcesListedForSale(html: str) -> list[int]:
