@@ -284,7 +284,7 @@ def getResourcesNeeded(session, city, building, current_level, final_level):
 
         levels_to_upgrade += 1
         # get the costs for the current level
-        costs = re.findall(r'<td class="costs">([\d,\.]*)</td>', match)
+        costs = re.findall(r'<td class="costs"><div>([\d,\.]*)<div', match)
 
         for i in range(len(costs)):
             # get hash from CDN images to identify the resource type
