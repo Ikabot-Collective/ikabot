@@ -529,7 +529,7 @@ def get_barbarians_attack_plan(barbarians_info, schematic):
     selected_scheme = None
     for scheme in schematic:
         if isinstance(scheme["level"], (tuple, list)):
-            if barbarians_level in range(scheme["level"][0], scheme["level"][1]):
+            if barbarians_level in range(scheme["level"][0], (scheme["level"][1] + 1)):
                 selected_scheme = scheme
                 break
         elif isinstance(scheme["level"], int) and barbarians_level == scheme["level"]:
@@ -744,7 +744,7 @@ def do_attack(session, island, city, schematic, float_city=None, units_data={}):
         if float_city is not None:
             ships_needed += sum([data["ships_needed"] for data in float_city_data])
 
-        assert getTotalShips(session) < ships_needed, "barcos insuficientes!"
+        assert getTotalShips(session) >= ships_needed, "barcos insuficientes!"
         ships_available = waitForArrival(session)
         ships_available -= ships_needed
 
