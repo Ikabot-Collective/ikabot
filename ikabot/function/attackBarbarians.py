@@ -87,7 +87,7 @@ def get_barbarians_lv(session, island):
     resp = session.post(params=params)
     resp = json.loads(resp, strict=False)
 
-    level = int(resp[2][1]["js_islandBarbarianLevel"]["text"])
+    level = int(math.ceil(resp[2][1]["js_islandBarbarianLevel"]["text"]))
     gold = int(resp[2][1]["js_islandBarbarianResourcegold"]["text"].replace(",", ""))
 
     resources = [0] * len(materials_names)
