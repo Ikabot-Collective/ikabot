@@ -80,7 +80,7 @@ def getOffers(session, city):
     for hit in hits:
         cleaned_hit = tuple(item.strip() for item in hit)  # Strip whitespace from each item
         cleaned_hits.append(cleaned_hit)
-        hits = cleaned_hits
+    hits = cleaned_hits
         
     offers = []
     for hit in hits:
