@@ -239,7 +239,7 @@ def webServer(session, event, stdin_fd, predetermined_input, port=None):
                 return addSandbox(session, resp, request)
 
             # Create a new response with the modified content
-            proxied_response = Response(modified_content, status=resp.status_code)
+            proxied_response = Response(modified_content, status=resp.status_code) if modified_content[1:4] != "PNG" else Response(resp.content, status=resp.status_code, content_type="image/png")
 
             # Copy over headers
             excluded_headers = [

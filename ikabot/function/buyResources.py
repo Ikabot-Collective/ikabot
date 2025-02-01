@@ -70,9 +70,18 @@ def getOffers(session, city):
     """
     html = getMarketHtml(session, city)
     hits = re.findall(
-        r'short_text80">(.*?) *<br/>\((.*?)\)\s *</td>\s *<td>(\d+)</td>\s *<td>(.*?)/td>\s *<td><img src="(.*?)\.png[\s\S]*?white-space:nowrap;">(\d+)\s[\s\S]*?href="\?view=takeOffer&destinationCityId=(\d+)&oldView=branchOffice&activeTab=bargain&cityId=(\d+)&position=(\d+)&type=(\d+)&resource=(\w+)"',
+        r'short_text80">(.*?) <br/>\((.*?)\)\s*</td>\s*<td>(\d+)</td>\s*<td>([\d,\s]+)(?:<div class="tooltip">.*?)?</td>\s*<td><img src="([^"]+\.png)"[\s\S]*?white-space:nowrap;">(\d+)\s*[\s\S]*?href="\?view=takeOffer&destinationCityId=(\d+)&oldView=branchOffice&activeTab=bargain&cityId=(\d+)&position=(\d+)&type=(\d+)&resource=(\w+)"',
         html,
+        re.DOTALL
     )
+
+    # Clean up the hits by stripping whitespace from each captured string
+    cleaned_hits = []
+    for hit in hits:
+        cleaned_hit = tuple(item.strip() for item in hit)  # Strip whitespace from each item
+        cleaned_hits.append(cleaned_hit)
+    hits = cleaned_hits
+        
     offers = []
     for hit in hits:
         offer = {
@@ -92,22 +101,22 @@ def getOffers(session, city):
         }
 
         # Parse CDN Images to material type
-        if offer["tipo"] == "//gf2.geo.gfsrv.net/cdn19/c3527b2f694fb882563c04df6d8972":
+        if offer["tipo"] == "//gf2.geo.gfsrv.net/cdn19/c3527b2f694fb882563c04df6d8972.png":
             offer["tipo"] = "wood"
         elif (
-            offer["tipo"] == "//gf1.geo.gfsrv.net/cdnc6/94ddfda045a8f5ced3397d791fd064"
+            offer["tipo"] == "//gf1.geo.gfsrv.net/cdnc6/94ddfda045a8f5ced3397d791fd064.png"
         ):
             offer["tipo"] = "wine"
         elif (
-            offer["tipo"] == "//gf3.geo.gfsrv.net/cdnbf/fc258b990c1a2a36c5aeb9872fc08a"
+            offer["tipo"] == "//gf3.geo.gfsrv.net/cdnbf/fc258b990c1a2a36c5aeb9872fc08a.png"
         ):
             offer["tipo"] = "marble"
         elif (
-            offer["tipo"] == "//gf2.geo.gfsrv.net/cdn1e/417b4059940b2ae2680c070a197d8c"
+            offer["tipo"] == "//gf2.geo.gfsrv.net/cdn1e/417b4059940b2ae2680c070a197d8c.png"
         ):
             offer["tipo"] = "glass"
         elif (
-            offer["tipo"] == "//gf1.geo.gfsrv.net/cdn9b/5578a7dfa3e98124439cca4a387a61"
+            offer["tipo"] == "//gf1.geo.gfsrv.net/cdn9b/5578a7dfa3e98124439cca4a387a61.png"
         ):
             offer["tipo"] = "sulfur"
         else:
