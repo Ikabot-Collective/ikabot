@@ -140,7 +140,7 @@ def do_it(session, hours, auto_transfer, transfer_amount):
         current_time = datetime.datetime.now()
         time_elapsed = (current_time - last_reset_time).total_seconds()
         if time_elapsed >= 12 * 60 * 60:  # 12 h to reset the alerted list
-            was_alerted = {cityId: False for cityId in was_alerted}  # Reset all alerts
+            was_alerted.clear()  # Reset all alerts
             last_reset_time = current_time  # Update the last time reseted the list
             
         ids, cities = getIdsOfCities(session)
@@ -183,7 +183,7 @@ def do_it(session, hours, auto_transfer, transfer_amount):
             if seconds_left < hours * 60 * 60:
                 if was_alerted[cityId] is False:
                     time_left = daysHoursMinutes(seconds_left)
-                    message_log.append(f"In {city['name']}, the wine will run out in {time_left}")
+                    message_log.append(f"In {city['name']} you have: {city['availableResources'][1]:,.0f} wine. Consumption: {consumption_per_hour:.2f} per hour.\nThe wine will run out in {time_left}")
 
                     if auto_transfer:
                         transport_status = isWineTransportInProgress(session, cityId)
