@@ -96,10 +96,12 @@ def getOffers(session, my_market_city, resource_type):
     }
     resp = session.post(params=data)
     html = json.loads(resp, strict=False)[1][1][1]
-    return re.findall(
-        r'<td class=".*?">(.*?)<br/>\((.*?)\)\s*</td>\s*<td>(.*?)</td>\s*<td><img src=".*?"\s*alt=".*?"\s*title=".*?"/></td>\s*<td style="white-space:nowrap;">(\d+)\s*<img src=".*?"\s*class=".*?"/>.*?</td>\s*<td>(\d+)</td>\s*<td><a onclick="ajaxHandlerCall\(this\.href\);return false;"\s*href="\?view=takeOffer&destinationCityId=(\d+)&',
-        html,
-    )
+
+    html = re.sub(r'\s+', ' ', html).strip()
+    html = re.findall(r'<td class="short_text80">(.*?)<br/>\((.*?)\).*?tooltip">([\d\s]+)</div>.*?<td style="white-space:nowrap;">(\d+).*?<td>(\d+)</td>.*?href="\?view=takeOffer&destinationCityId=(\d+)', html)
+    html = [(cityname, username, re.sub(r"\s+", "", amount), price, dist, destination_city_id) for cityname, username, amount, price, dist, destination_city_id in html]    
+    
+    return html
 
 
 def sellToOffers(session, city_to_buy_from, resource_type, event):
