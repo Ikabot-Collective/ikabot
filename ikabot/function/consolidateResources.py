@@ -155,7 +155,7 @@ def do_it(session, limits, sourceCityId, destinationCityId, intervalInHours):
             time.sleep(300)  # Wait 5 minutes before retrying
             continue
 
-        toSend = {}
+        toSend = [0] * len(materials_names)
         totalToSend = 0
 
         session.setStatus(
@@ -163,18 +163,17 @@ def do_it(session, limits, sourceCityId, destinationCityId, intervalInHours):
         )
 
         for i, resource in enumerate(materials_names):
-            resourceKey = resource.lower()
             limit = limits[i]
             
             sourceAmount = sourceCity['availableResources'][i]
             destinationSpace = destinationCity['freeSpaceForResources'][i]
 
             if limit == -1 or limit < 0:  # Handle any negative number as "keep all"
-                toSend[resourceKey] = 0
+                toSend[i] = 0
             else:
                 excess = max(0, sourceAmount - limit)
                 sendable = min(excess, destinationSpace)
-                toSend[resourceKey] = sendable
+                toSend[i] = sendable
                 totalToSend += sendable
 
         if totalToSend == 0:
@@ -187,17 +186,10 @@ def do_it(session, limits, sourceCityId, destinationCityId, intervalInHours):
                 sourceCity,
                 destinationCity,
                 destinationCity["islandId"],
-                toSend.get("wood", 0),
-                toSend.get("wine", 0),
-                toSend.get("marble", 0),
-                toSend.get("crystal", 0),
-                toSend.get("sulfur", 0),
+                *toSend,
             )
 
             executeRoutes(session, [route], useFreighters=False)
-
-            resourceMessage = ", ".join([f"{amt} {res}" for res, amt in toSend.items() if amt > 0])
-            sendToBot(session, f"Sent {resourceMessage} from {sourceCity['name']} to {destinationCity['name']}")
 
         nextRunTime = datetime.datetime.now() + datetime.timedelta(hours=intervalInHours)
         session.setStatus(
