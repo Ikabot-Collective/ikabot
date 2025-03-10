@@ -199,9 +199,9 @@ def do_it(session, limits, sourceCityId, destinationCityId, intervalInHours):
             resourceMessage = ", ".join([f"{amt} {res}" for res, amt in toSend.items() if amt > 0])
             sendToBot(session, f"Sent {resourceMessage} from {sourceCity['name']} to {destinationCity['name']}")
 
-        nextExecutionTime = datetime.datetime.now() + datetime.timedelta(hours=intervalInHours)
+        nextRunTime = datetime.datetime.now() + datetime.timedelta(hours=intervalInHours)
         session.setStatus(
-            f" {sourceCity['name']} -> {destinationCity['name']} | Next at {getDateTime(nextExecutionTime.timestamp())}"
+            f" {sourceCity['name']} -> {destinationCity['name']} | Next at {getDateTime(nextRunTime.timestamp())}"
         )
 
         firstRun = False
