@@ -26,6 +26,7 @@ from ikabot.function.dumpWorld import dumpWorld
 from ikabot.function.getStatus import getStatus
 from ikabot.function.importExportCookie import importExportCookie
 from ikabot.function.investigate import investigate
+from ikabot.function.consolidateResources import consolidateResources
 from ikabot.function.killTasks import killTasks
 from ikabot.function.loginDaily import loginDaily
 from ikabot.function.logs import logs
@@ -144,7 +145,8 @@ def menu(session, checkUpdate=True):
         2105: logs,
         2106: testTelegramBot,
         2107: importExportCookie,
-        2108: loadCustomModule
+        2108: loadCustomModule,
+        22: consolidateResources,
     }
 
     print("(0)  Exit")
@@ -169,6 +171,7 @@ def menu(session, checkUpdate=True):
     print("(19) Attack / Grind barbarians")
     print("(20) Dump / Monitor world")
     print("(21) Options / Settings")
+    print("(22) Consolidate resources")
     total_options = len(menu_actions) + 1
     selected = read(min=0, max=total_options, digit=True, empty=True)
     
