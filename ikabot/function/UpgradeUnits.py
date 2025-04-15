@@ -134,7 +134,7 @@ def run_workshop_upgrade_interface(session, city_id, position, action_request, e
     filter_type = "tabUnits" if choice == 1 else "tabShips"
     task_label = "units" if choice == 1 else "ships"
 
-    print(f"\n🔍 Loading upgrades for {task_label}...")
+    print(f"\n Loading upgrades for {task_label}...")
     response = getWorkshopTab(session, city_id, position, action_request, filter_type)
 
     try:
