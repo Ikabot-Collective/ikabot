@@ -48,6 +48,7 @@ from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.process import updateProcessList
 from ikabot.web.session import *
+from ikabot.function.UpgradeUnits import UpgradeUnits
 
 
 def menu(session, checkUpdate=True):
@@ -128,6 +129,7 @@ def menu(session, checkUpdate=True):
         11: activateMiracle,
         1201: trainArmy,
         1202: stationArmy,
+        1203: upgradeArmy,
         13: shipMovements,
         14: constructBuilding,
         15: update,
@@ -235,7 +237,8 @@ def menu(session, checkUpdate=True):
         print("(0) Back")
         print("(1) Train Army")
         print("(2) Send Troops/Ships")
-        selected = read(min=0, max=2, digit=True)
+        print("(3) Upgrade Army")
+        selected = read(min=0, max=3, digit=True)
         if selected == 0:
             menu(session)
             return
