@@ -6,7 +6,7 @@ import time
 import sys
 import os
 import json
-import multiprocessing
+import threading
 from ikabot.config import *
 from ikabot.helpers.getJson import getCity
 from ikabot.helpers.gui import *
@@ -15,6 +15,7 @@ from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.process import set_child_mode
+from ikabot.web.session import Session
 
 def getActionRequestFromHTML(html):
     match = re.search(r'name="actionRequest"\s+value="(\w+)"', html)
@@ -54,7 +55,7 @@ def send_upgrade_request(session, city_id, position, unit_id, upgrade_type, acti
         session.post(params=payload)
         return True
     except Exception as e:
-        print(f" Error sending upgrade request for unitId={unit_id}, type={upgrade_type}: {e}")
+        session.setStatus(f"Failed to upgrade {unit_id} ({upgrade_type})")
         return False
 
 def wait_for_upgrade_completion(session, city_id, position, tab):
@@ -66,37 +67,44 @@ def wait_for_upgrade_completion(session, city_id, position, tab):
         try:
             data = json.loads(response, strict=False)
             template_data = next((b[1] for b in data if isinstance(b, list) and b[0] == "updateTemplateData"), None)
-            if template_data and "inProgress" in template_data:
-                end_time = int(template_data["inProgress"].get("endTime", 0))
-                current_time = int(template_data.get("currentdate", int(time.time())))
-                seconds_left = max(0, end_time - current_time)
-                mins = seconds_left // 60
-                print(f" Waiting for ongoing upgrade to finish (~{mins}m)...")
-                time.sleep(min(300, seconds_left))
-                continue
-        except Exception as e:
-            print(f" Error while checking upgrade progress: {e}")
+            if template_data:
+                # Check for building upgrade in progress
+                if template_data.get("buildingInProgress"):
+                    end_time = int(template_data["buildingInProgress"].get("endTime", 0))
+                    current_time = int(template_data.get("currentdate", int(time.time())))
+                    seconds_left = max(0, end_time - current_time)
+                    mins = seconds_left // 60
+                    session.setStatus(f"Workshop upgrade in progress (~{mins}m)...")
+                    time.sleep(min(300, seconds_left))
+                    continue
+                # Check for unit/ship upgrade in progress
+                if template_data.get("inProgress"):
+                    end_time = int(template_data["inProgress"].get("endTime", 0))
+                    current_time = int(template_data.get("currentdate", int(time.time())))
+                    seconds_left = max(0, end_time - current_time)
+                    mins = seconds_left // 60
+                    session.setStatus(f"Upgrade in progress (~{mins}m)...")
+                    time.sleep(min(300, seconds_left))
+                    continue
+        except Exception:
+            session.setStatus("Error checking upgrade/building progress")
 
         break
 
-def background_upgrade_worker(session, city_id, position, filter_type, selected_tasks):
-    set_child_mode(session)
-    info = f"Workshop upgrade: {len(selected_tasks)} upgrades queued"
-    setInfoSignal(session, info)
-
-    while selected_tasks:
-        wait_for_upgrade_completion(session, city_id, position, filter_type)
+def execute_sequential_upgrades(session, city_id, position, tab, tasks):
+    while tasks:
+        wait_for_upgrade_completion(session, city_id, position, tab)
         html = session.get(city_url + str(city_id))
         action_request = getActionRequestFromHTML(html)
 
-        task = selected_tasks.pop(0)
-        success = send_upgrade_request(session, city_id, position, task['unitId'], task['upgradeType'], action_request, filter_type)
-        if success:
-            print(f" {task['unit']} ({task['type']}) upgrade sent!")
-        else:
-            print(f" {task['unit']} ({task['type']}) failed. Will retry later.")
-            selected_tasks.insert(0, task)
+        task = tasks.pop(0)
+        session.setStatus(f"Upgrading {task['unit']} ({task['type']}) to level {task['to']}")
+        success = send_upgrade_request(session, city_id, position, task['unitId'], task['upgradeType'], action_request, tab)
+        if not success:
+            tasks.insert(0, task)
             time.sleep(60)
+
+    session.setStatus("All workshop upgrades completed")
 
 def UpgradeUnits(session, event, stdin_fd, predetermined_input):
     sys.stdin = os.fdopen(stdin_fd)
@@ -115,7 +123,6 @@ def UpgradeUnits(session, event, stdin_fd, predetermined_input):
                 run_workshop_upgrade_interface(session, city_id, position, action_request, event)
                 return
 
-    print("No workshop building found.")
     enter()
     event.set()
 
@@ -125,30 +132,26 @@ def run_workshop_upgrade_interface(session, city_id, position, action_request, e
     print("[2] Ships")
 
     while True:
-        choice_input = read(msg="Select an option (1 or 2): ").strip()
+        choice_input = read(msg="Choose option (1 or 2): ").strip()
         if choice_input in ["1", "2"]:
             break
         print("Invalid option. Please choose 1 or 2.")
 
     choice = int(choice_input)
     filter_type = "tabUnits" if choice == 1 else "tabShips"
-    task_label = "units" if choice == 1 else "ships"
+    label = "units" if choice == 1 else "ships"
 
-    print(f"\n Loading upgrades for {task_label}...")
     response = getWorkshopTab(session, city_id, position, action_request, filter_type)
 
     try:
         data = json.loads(response, strict=False)
     except Exception as e:
-        print("Error parsing JSON response.")
-        print(e)
         enter()
         event.set()
         return
 
     template_data = next((b[1] for b in data if isinstance(b, list) and b[0] == "updateTemplateData"), None)
     if not template_data:
-        print("No valid data found.")
         enter()
         event.set()
         return
@@ -181,21 +184,18 @@ def run_workshop_upgrade_interface(session, city_id, position, action_request, e
             })
 
     if not tasks:
-        print("No upgrades available.")
         enter()
         event.set()
         return
 
-    print("\n📋 Select upgrades (enter numbers):")
     for idx, task in enumerate(tasks, start=1):
         print(f"[{idx}] {task['unit']} ({task['type']}): Level {task['from']} -> {task['to']} | +{task['effect_from']} -> +{task['effect_to']} | {task['gold']} gold, {task['crystal']} crystal | {task['duration']}")
 
-    print("\nEnter numbers separated by space for upgrades (e.g., 1 3 5):")
+    print("\nEnter numbers separated by space (e.g., 1 3 5):")
     selected_indexes = read().split()
     selected_tasks = [tasks[int(i)-1] for i in selected_indexes if i.isdigit() and 0 < int(i) <= len(tasks)]
 
     if not selected_tasks:
-        print("No valid upgrades selected.")
         enter()
         event.set()
         return
@@ -209,15 +209,20 @@ def run_workshop_upgrade_interface(session, city_id, position, action_request, e
         except Exception:
             pass
 
-    print("\nEstimated total costs:")
+    print("\nTotal estimated cost:")
     print(f" - Gold: {total_gold:,} gold")
     print(f" - Crystal: {total_crystal:,} crystal")
 
-    print("\nThe task has been started in the background. You can return to the main menu.")
-    enter()
+    confirm = read(msg="\nProceed with these upgrades? (y/n): ").strip().lower()
+    if confirm != 'y':
+        print("Operation cancelled by user.")
+        enter()
+        event.set()
+        return
+    session.setStatus(f"Queued {len(selected_tasks)} upgrades | Gold: {total_gold:,} | Crystal: {total_crystal:,}")
+    info = f"Workshop upgrade: {len(selected_tasks)} upgrades queued"
+    set_child_mode(session)
+    setInfoSignal(session, info)
+    thread = threading.Thread(target=execute_sequential_upgrades, args=(session, city_id, position, filter_type, selected_tasks))
+    thread.start()
     event.set()
-
-    # Start background execution using multiprocessing
-    process = multiprocessing.Process(target=background_upgrade_worker, args=(session, city_id, position, filter_type, selected_tasks))
-    process.start()
-    return

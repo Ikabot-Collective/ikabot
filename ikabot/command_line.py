@@ -129,7 +129,7 @@ def menu(session, checkUpdate=True):
         11: activateMiracle,
         1201: trainArmy,
         1202: stationArmy,
-        1203: upgradeArmy,
+        1203: UpgradeUnits,
         13: shipMovements,
         14: constructBuilding,
         15: update,
