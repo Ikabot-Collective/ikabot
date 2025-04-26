@@ -48,6 +48,9 @@ def read(
     result : int | str
         int representing the user's choice
     """
+    if min is not None and max is not None and min > max:
+        return None
+
     try:
         if len(config.predetermined_input) != 0:
             return config.predetermined_input.pop(0)
