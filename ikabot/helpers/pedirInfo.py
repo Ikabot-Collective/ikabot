@@ -43,7 +43,6 @@ def read(
         a boolean indicating whether or not an empty string is acceptable as input
     additionalValues : list
         list of strings which are additional valid inputs. Can be used with digit = True to validate a string as an input among all digits
-
     Returns
     -------
     result : int | str
@@ -54,40 +53,42 @@ def read(
             return config.predetermined_input.pop(0)
     except Exception:
         pass
-
-    def _invalid():
+   
+    def _invalid(min, max, digit, msg, values, empty, additionalValues, default):
         print("\033[1A\033[K", end="")  # remove line
-        return read(min, max, digit, msg, values, additionalValues=additionalValues)
+        return read(min=min, max=max, digit=digit, msg=msg, values=values, empty=empty, additionalValues=additionalValues, default=default)
 
-    try:
-        read_input = input(msg)
-    except EOFError:
-        return _invalid()
-
-    if additionalValues is not None and read_input in additionalValues:
+    while True:
+        try:
+            read_input = input(msg)
+        except EOFError:
+            return _invalid(min, max, digit, msg, values, empty, additionalValues, default)
+        if additionalValues is not None and read_input in additionalValues:
+            return read_input
+        if read_input == "" and default is not None:
+            return default
+        if read_input == "" and empty is True:
+            return read_input
+        if digit is True or min is not None or max is not None:
+            if not read_input.isdigit():
+                print("\033[1A\033[K", end="")  # remove line
+                continue
+            else:
+                try:
+                    read_input = int(read_input)
+                except ValueError:
+                    print("\033[1A\033[K", end="")  # remove line
+                    continue
+        if min is not None and read_input < min:
+            print("\033[1A\033[K", end="")  # remove line
+            continue
+        if max is not None and read_input > max:
+            print("\033[1A\033[K", end="")  # remove line
+            continue
+        if values is not None and read_input not in values:
+            print("\033[1A\033[K", end="")  # remove line
+            continue
         return read_input
-
-    if read_input == "" and default is not None:
-        return default
-
-    if read_input == "" and empty is True:
-        return read_input
-
-    if digit is True or min is not None or max is not None:
-        if read_input.isdigit() is False:
-            return _invalid()
-        else:
-            try:
-                read_input = eval(read_input)
-            except SyntaxError:
-                return _invalid()
-    if min is not None and read_input < min:
-        return _invalid()
-    if max is not None and read_input > max:
-        return _invalid()
-    if values is not None and read_input not in values:
-        return _invalid()
-    return read_input
 
 
 def chooseCity(session, foreign=False):
