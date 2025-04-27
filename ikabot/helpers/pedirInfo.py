@@ -15,12 +15,11 @@ from ikabot.helpers.varios import decodeUnicodeEscape
 
 getcontext().prec = 30
 
-
 def read(
     min=None,
     max=None,
     digit=False,
-    msg=prompt,
+    msg="",
     values=None,
     empty=False,
     additionalValues=None,
@@ -50,48 +49,45 @@ def read(
     """
     if min is not None and max is not None and min > max:
         return None
-
     try:
         if len(config.predetermined_input) != 0:
             return config.predetermined_input.pop(0)
     except Exception:
         pass
-   
-    def _invalid(min, max, digit, msg, values, empty, additionalValues, default):
+    
+    def _invalid():
         print("\033[1A\033[K", end="")  # remove line
         return read(min=min, max=max, digit=digit, msg=msg, values=values, empty=empty, additionalValues=additionalValues, default=default)
-
-    while True:
-        try:
-            read_input = input(msg)
-        except EOFError:
-            return _invalid(min, max, digit, msg, values, empty, additionalValues, default)
-        if additionalValues is not None and read_input in additionalValues:
-            return read_input
-        if read_input == "" and default is not None:
-            return default
-        if read_input == "" and empty is True:
-            return read_input
-        if digit is True or min is not None or max is not None:
-            if not read_input.isdigit():
-                print("\033[1A\033[K", end="")  # remove line
-                continue
-            else:
-                try:
-                    read_input = int(read_input)
-                except ValueError:
-                    print("\033[1A\033[K", end="")  # remove line
-                    continue
-        if min is not None and read_input < min:
-            print("\033[1A\033[K", end="")  # remove line
-            continue
-        if max is not None and read_input > max:
-            print("\033[1A\033[K", end="")  # remove line
-            continue
-        if values is not None and read_input not in values:
-            print("\033[1A\033[K", end="")  # remove line
-            continue
+    
+    try:
+        read_input = input(msg)
+    except EOFError:
+        return _invalid()
+    
+    if additionalValues is not None and read_input in additionalValues:
         return read_input
+    if read_input == "" and default is not None:
+        return default
+    if read_input == "" and empty is True:
+        return read_input
+    
+    if digit is True or min is not None or max is not None:
+        if not read_input.isdigit():
+            return _invalid()
+        else:
+            try:
+                read_input = int(read_input)  # Using int() instead of eval() for safety
+            except ValueError:
+                return _invalid()
+    
+    if min is not None and read_input < min:
+        return _invalid()
+    if max is not None and read_input > max:
+        return _invalid()
+    if values is not None and read_input not in values:
+        return _invalid()
+
+    return read_input
 
 
 def chooseCity(session, foreign=False):
