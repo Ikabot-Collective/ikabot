@@ -37,19 +37,21 @@ def killTasks(session, event, stdin_fd, predetermined_input):
             for process in process_list:
                 if "date" in process:
                     print(
-                        "({}) {:<35}{:>20}".format(
+                        "({}) {:<35}{:>20} {:>10}".format(
                             process_list.index(process) + 1,
                             process["action"],
                             datetime.datetime.fromtimestamp(process["date"]).strftime(
                                 "%b %d %H:%M:%S"
                             ),
+                            process["pid"]
                         )
                     )
                 else:
                     print(
-                        "({}) {:<35}".format(
+                        "({}) {:<35} {:>10}".format(
                             process_list.index(process) + 1,
                             process["action"],
+                            process["pid"]
                         )
                     )
             choise = read(min=0, max=len(process_list), digit=True)
