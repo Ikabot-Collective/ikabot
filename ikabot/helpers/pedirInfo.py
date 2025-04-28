@@ -51,9 +51,11 @@ def read(
         int representing the user's choice
     """
     if _retries >= _max_retries:
+        print('Error: Max recursion depth reached for read function. Returning None!')
         return None
         
     if min is not None and max is not None and min > max:
+        print('Error: minimum input value is greater than maximum input value!')
         return None
         
     try:
