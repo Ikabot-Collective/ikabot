@@ -687,7 +687,7 @@ def do_attack(session, island, city, schematic, float_city=None, units_data={}):
         if float_city is not None:
             float_city_data = []
             for float_attack_round in sends_data["float_city"]:
-                float_attack_data, float_travel_time, float_ships_needed = (
+                float_attack_data, float_ships_needed, float_travel_time = (
                     get_send_attack_data(
                         session, island, float_city, float_attack_round, units_data
                     )
@@ -707,7 +707,7 @@ def do_attack(session, island, city, schematic, float_city=None, units_data={}):
 
         main_city_data = []
         for main_attack_round in sends_data["main_city"]:
-            main_attack_data, main_travel_time, main_ships_needed = (
+            main_attack_data, main_ships_needed, main_travel_time = (
                 get_send_attack_data(
                     session, island, city, main_attack_round, units_data
                 )
@@ -744,7 +744,7 @@ def do_attack(session, island, city, schematic, float_city=None, units_data={}):
         if float_city is not None:
             ships_needed += sum([data["ships_needed"] for data in float_city_data])
 
-        assert getTotalShips(session) >= ships_needed, "barcos insuficientes!"
+        assert getTotalShips(session) >= ships_needed, "Insufficient cargo ships!"
         ships_available = waitForArrival(session)
         ships_available -= ships_needed
 
@@ -813,7 +813,7 @@ def loot(session, island, city, schematic, float_city=None, units_data={}):
         destin_city = (
             city if schematic["looting"]["from_float"] is False else float_city
         )
-        attack_data, travel_time, ships_needed = get_send_attack_data(
+        attack_data, ships_needed, travel_time = get_send_attack_data(
             session, island, destin_city, schematic, units_data
         )
         attack_data["transporter"] = min(ships_available, ships_needed)
