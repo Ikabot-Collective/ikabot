@@ -320,3 +320,22 @@ def getIslandsIds(session):
         island_id = city["islandId"]
         islands_ids.add(island_id)
     return list(islands_ids)
+
+
+def getShipCapacity(session):
+    """Gets the ship capacity
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+        Session object
+
+    Returns
+    -------
+    capacity : int
+        an integer representing the ship capacity of the user's current city
+    """
+    html = session.post('view=merchantNavy')
+    ship_capacity = html.split('singleTransporterCapacity":')[1].split(',"singleFreighterCapacity')[0]
+    freighter_capacity = html.split('singleFreighterCapacity":')[1].split(',"draftEffect')[0]
+
+    return int(ship_capacity), int(freighter_capacity)
