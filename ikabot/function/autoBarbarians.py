@@ -17,6 +17,7 @@ from ikabot.helpers.planRoutes import waitForArrival
 from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import *
+from ikabot.helpers.pedirInfo import getShipCapacity
 
 from ikabot.function.activateMiracle import obtainMiraclesAvailable
 from ikabot.function.attackBarbarians import (
@@ -148,6 +149,7 @@ def autoBarbarians(session, event, stdin_fd, predetermined_input):
     """
     sys.stdin = os.fdopen(stdin_fd)
     config.predetermined_input = predetermined_input
+    ship_capacity, freighter_capacity = getShipCapacity(session)
     try:
         banner()
         print(
@@ -233,6 +235,7 @@ def autoBarbarians(session, event, stdin_fd, predetermined_input):
             session,
             city,
             schematic,
+            ship_capacity,
             is_in_island=True if city["islandId"] == island["id"] else False,
         )
         units_data = schematic_informations["units_data"]
@@ -279,7 +282,7 @@ def autoBarbarians(session, event, stdin_fd, predetermined_input):
     setInfoSignal(session, info)
 
     try:
-        do_it(session, island, city, float_city, schematic, units_data)
+        do_it(session, island, city, float_city, schematic, units_data, ship_capacity)
     except Exception as e:
         msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
         sendToBot(session, msg)
@@ -438,7 +441,7 @@ def get_max_schematics_units(schematic):
 
 
 def get_schematic_information(
-    session, city, schematic, float_city=None, is_in_island=False
+    session, city, schematic, ship_capacity, float_city=None, is_in_island=False
 ):
     schematic_units = get_max_schematics_units(schematic)
     main_city_units = get_units(session, city)
@@ -454,7 +457,7 @@ def get_schematic_information(
     schematic_ships = 2
     if is_in_island is False:
         schematic_ships += get_amount_ships_schematic(
-            schematic_units["total"], units_data
+            schematic_units["total"], units_data, ship_capacity
         )
 
     def get_success():
@@ -546,14 +549,14 @@ def get_barbarians_attack_plan(barbarians_info, schematic):
     }
 
 
-def get_amount_ships_schematic(schematic_units, units_data):
+def get_amount_ships_schematic(schematic_units, units_data, ship_capacity):
     schematic_weight = 0.0
     schematic_ships = 2
 
     for unit_id, amount in schematic_units.items():
         schematic_weight += amount * units_data[str(unit_id)]["weight"]
 
-    schematic_ships += math.ceil(Decimal(schematic_weight) / Decimal(500))
+    schematic_ships += math.ceil(Decimal(schematic_weight) / Decimal(ship_capacity))
     return schematic_ships
 
 
@@ -575,7 +578,7 @@ def has_units_in_city(session, city, units):
     )
 
 
-def do_it(session, island, city, float_city, schematic, units_data):
+def do_it(session, island, city, float_city, schematic, units_data, ship_capacity):
     attempts = {"ships": 0}
     first_loop = True
     while True:
@@ -585,7 +588,7 @@ def do_it(session, island, city, float_city, schematic, units_data):
             first_loop = False
         html = session.get(island_url + island["id"])
         island = getIsland(html)
-        babarians_info = get_barbarians_lv(session, island)
+        babarians_info = get_barbarians_lv(session, island, ship_capacity)
         barbarians_plan = get_barbarians_attack_plan(babarians_info, schematic)
         if barbarians_plan is None:
             sendToBot(
@@ -603,6 +606,7 @@ def do_it(session, island, city, float_city, schematic, units_data):
                 island,
                 city,
                 barbarians_plan,
+                ship_capacity,
                 float_city=float_city,
                 units_data=units_data,
             )
@@ -611,7 +615,7 @@ def do_it(session, island, city, float_city, schematic, units_data):
         ships_available = waitForArrival(session)
         schematic_ships = (
             get_amount_ships_schematic(
-                barbarians_plan["needed_units"]["total"], units_data
+                barbarians_plan["needed_units"]["total"], units_data, ship_capacity
             )
             + babarians_info["ships"]
         )
@@ -653,6 +657,7 @@ def do_it(session, island, city, float_city, schematic, units_data):
             island,
             city,
             barbarians_plan,
+            ship_capacity,
             float_city=float_city,
             units_data=units_data,
         )
@@ -660,7 +665,7 @@ def do_it(session, island, city, float_city, schematic, units_data):
         for attempt_key in attempts.keys():
             attempts[attempt_key] = 0
 
-    babarians_info = get_barbarians_lv(session, island)
+    babarians_info = get_barbarians_lv(session, island, ship_capacity)
     sendToBot(
         session,
         
@@ -671,7 +676,7 @@ def do_it(session, island, city, float_city, schematic, units_data):
     )
 
 
-def do_attack(session, island, city, schematic, float_city=None, units_data={}):
+def do_attack(session, island, city, schematic, ship_capacity, float_city=None, units_data={}):
     battle_start = None
     babarians_info = None
 
@@ -736,7 +741,7 @@ def do_attack(session, island, city, schematic, float_city=None, units_data={}):
             return None
 
         if babarians_info is None:
-            babarians_info = get_barbarians_lv(session, island)
+            babarians_info = get_barbarians_lv(session, island, ship_capacity)
         if battle_start is None:
             battle_start = time.time() + major_travel_time
 
@@ -792,11 +797,11 @@ def split_wave_sends_for_group(wave_id, wave_data):
     return {"float_city": float_city, "main_city": main_city}
 
 
-def loot(session, island, city, schematic, float_city=None, units_data={}):
+def loot(session, island, city, schematic, ship_capacity, float_city=None, units_data={}):
     session.setStatus("Looting remaining resources")
     barbarian_countdown = None
     while True:
-        babarians_info = get_barbarians_lv(session, island)
+        babarians_info = get_barbarians_lv(session, island, ship_capacity)
         html = session.get(island_url + island["id"])
         island = getIsland(html)
         destroyed = island["barbarians"]["destroyed"] == 1

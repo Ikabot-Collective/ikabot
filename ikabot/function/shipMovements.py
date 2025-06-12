@@ -13,6 +13,7 @@ from ikabot.helpers.gui import *
 from ikabot.helpers.naval import *
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.varios import *
+from ikabot.helpers.pedirInfo import getShipCapacity
 
 
 def isHostile(movement):
@@ -134,7 +135,8 @@ def shipMovements(session, event, stdin_fd, predetermined_input):
                         tradegood = materials_names[index]
                     total_load += int(amount.replace(",", "").replace(".", ""))
                     print("{} of {}".format(amount, tradegood))
-                ships = int(math.ceil((Decimal(total_load) / Decimal(500))))
+                ship_capacity, freighter_capacity = getShipCapacity(session)
+                ships = int(math.ceil((Decimal(total_load) / Decimal(ship_capacity))))
                 print("{:d} Ships".format(ships))
         enter()
         event.set()
