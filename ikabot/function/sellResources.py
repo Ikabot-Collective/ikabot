@@ -17,6 +17,7 @@ from ikabot.helpers.planRoutes import waitForArrival
 from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import addThousandSeparator, wait
+from ikabot.helpers.pedirInfo import getShipCapacity
 
 
 def chooseCommercialCity(commercial_cities):
@@ -337,6 +338,7 @@ def do_it1(session, left_to_sell, offers, resource_type, city_to_buy_from):
     resource_type : int
     city_to_buy_from : dict
     """
+    ship_capacity, freighter_capacity = getShipCapacity(session)
     for offer in offers:
         cityname, username, amount, precio, dist, destination_city_id = offer
         cityname = cityname.strip()
@@ -345,10 +347,10 @@ def do_it1(session, left_to_sell, offers, resource_type, city_to_buy_from):
         while True:
             amount_to_sell = min(amount_to_buy, left_to_sell)
             ships_available = waitForArrival(session)
-            ships_needed = math.ceil((Decimal(amount_to_sell) / Decimal(500)))
+            ships_needed = math.ceil((Decimal(amount_to_sell) / Decimal(ship_capacity)))
             ships_used = min(ships_available, ships_needed)
             if ships_needed > ships_used:
-                amount_to_sell = ships_used * 500
+                amount_to_sell = ships_used * ship_capacity
             left_to_sell -= amount_to_sell
             amount_to_buy -= amount_to_sell
 
