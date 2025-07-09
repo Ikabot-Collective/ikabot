@@ -332,7 +332,7 @@ def webServer(session, event, stdin_fd, predetermined_input, port=None):
         print(
             "\nPress [ENTER] if you want to run the web server now, or CTRL+C to go back to the main menu"
         )
-        #enter()
+        enter()
         session.setStatus(
             f"""running on http://127.0.0.1:{port} {'and '+'http://' + str(local_network_ip) + ':' + port if local_network_ip else ''}"""
         )

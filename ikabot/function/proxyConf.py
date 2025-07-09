@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 
 import sys
+
 import requests
-from ikabot.helpers.pedirInfo import read
-from ikabot.helpers.gui import *
-from ikabot.function.proxyList import network_check, enable_proxy
+
 import ikabot.config as config
-import sys
+from ikabot.helpers.gui import *
+from ikabot.helpers.pedirInfo import read
 
 
 def show_proxy(session):

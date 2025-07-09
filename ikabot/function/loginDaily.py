@@ -84,7 +84,7 @@ def loginDaily(session, event, stdin_fd, predetermined_input):
             modify_tasks()
 
         print("I will do the thing.")
-        #enter()
+        enter()
     except KeyboardInterrupt:
         event.set()
         return

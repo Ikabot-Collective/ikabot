@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import sys
-import time
+
+from ikabot.config import *
+from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.process import run
-from ikabot.helpers.gui import *
-from ikabot.config import *
 
 
 def update(session, event, stdin_fd, predetermined_input):
@@ -21,8 +21,9 @@ def update(session, event, stdin_fd, predetermined_input):
     sys.stdin = os.fdopen(stdin_fd)
     config.predetermined_input = predetermined_input
     try:
-        print(f'Task list has been updated.\n{config.version}')
-        time.sleep(1)
+        print("To update ikabot run:")
+        print("python3 -m pip install --user --upgrade ikabot")
+        enter()
         event.set()
     except KeyboardInterrupt:
         event.set()

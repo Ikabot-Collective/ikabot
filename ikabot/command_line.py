@@ -23,9 +23,6 @@ from ikabot.function.distributeResources import distributeResources
 from ikabot.function.donate import donate
 from ikabot.function.donationBot import donationBot
 from ikabot.function.dumpWorld import dumpWorld
-from ikabot.function.cookieConf import cookieConf
-from ikabot.helpers.checker import checker
-from ikabot.function.proxyList import proxyList
 from ikabot.function.getStatus import getStatus
 from ikabot.function.importExportCookie import importExportCookie
 from ikabot.function.investigate import investigate
@@ -53,7 +50,7 @@ from ikabot.helpers.process import updateProcessList
 from ikabot.web.session import *
 
 
-def menu(session, checkUpdate=False):
+def menu(session, checkUpdate=True):
     """
     Parameters
     ----------
@@ -61,7 +58,6 @@ def menu(session, checkUpdate=False):
     checkUpdate : bool
     """
     if checkUpdate:
-        checker(session)
         checkForUpdate()
 
     show_proxy(session)
@@ -135,7 +131,7 @@ def menu(session, checkUpdate=False):
         13: shipMovements,
         14: constructBuilding,
         15: update,
-        16: importExportCookie,
+        16: webServer,
         17: autoPirate,
         18: investigate,
         1901: attackBarbarians,
@@ -146,11 +142,10 @@ def menu(session, checkUpdate=False):
         2102: updateTelegramData,
         2103: killTasks,
         2104: decaptchaConf,
-        2105: cookieConf,
-        2107: logs,
-        2108: testTelegramBot,
-        2109: loadCustomModule,
-        2110: webServer,
+        2105: logs,
+        2106: testTelegramBot,
+        2107: importExportCookie,
+        2108: loadCustomModule,
         22: consolidateResources,
     }
 
@@ -170,14 +165,13 @@ def menu(session, checkUpdate=False):
     print("(13) See movements")
     print("(14) Construct building")
     print("(15) Update Ikabot")
-    print("(16) Import / Export cookie")
+    print("(16) Ikabot Web Server")
     print("(17) Auto-Pirate")
     print("(18) Investigate")
     print("(19) Attack / Grind barbarians")
     print("(20) Dump / Monitor world")
     print("(21) Options / Settings")
     print("(22) Consolidate resources")
-
     total_options = len(menu_actions) + 1
     selected = read(min=0, max=total_options, digit=True, empty=True)
     
@@ -267,30 +261,16 @@ def menu(session, checkUpdate=False):
         if telegramDataIsValid(session):
             print("(2) Change the Telegram data")
         else:
+            print("(2) Enter the Telegram data")
+        print("(3) Kill tasks")
+        print("(4) Configure captcha resolver")
+        print("(5) Logs")
+        print("(6) Message Telegram Bot")
+        print("(7) Import / Export cookie")
+        print("(8) Load custom ikabot module")
 
-            print(_('(2) Enter the Telegram data'))
-        print(_('(3) Kill tasks'))
-        print(_('(4) Configure captcha resolver'))
-        print(_('(5) Cookie data file'))
-        print(_('(6) Proxy list'))
-        print(_('(7) Logs'))
-        print(_('(8) Message Telegram Bot'))
-        print(_("(9) Load custom ikabot module"))
-        print(_("(10) Ikabot Web Server"))
-
-        selected = read(min=0, max=10, digit=True)
-        
+        selected = read(min=0, max=8, digit=True)
         if selected == 0:
-            menu(session)
-            return
-        if selected == 5:
-            print(" This function has been disabled due to a bug.")
-            time.sleep(1)
-            menu(session)
-            return
-        if selected == 6:
-            print(" This function has been disabled due to a bug.")
-            time.sleep(1)
             menu(session)
             return
         if selected > 0:
@@ -326,19 +306,14 @@ def menu(session, checkUpdate=False):
             print("Closing this console will kill the processes.")
             enter()
         clear()
-        #session_data = session.getSessionData()
-        #session_data['status']['data'] = config.default_bner
-        #session_data['status']['set'] = False
-        #session.setSessionData(session_data)
-        os._exit(0)  # kills the process which executes this statement, but it does not kill it's child processes
+        os._exit(
+            0
+        )  # kills the process which executes this statement, but it does not kill it's child processes
 
 
 def init():
-    if getattr(sys, 'frozen', False):
-        home = os.path.dirname(sys.executable)#'USERPROFILE' if isWindows else 'HOME'
-    elif __file__:
-        home = os.path.dirname(__file__)
-    os.chdir(str(home))
+    home = "USERPROFILE" if isWindows else "HOME"
+    os.chdir(os.getenv(home))
     if not os.path.isfile(ikaFile):
         open(ikaFile, "w")
         os.chmod(ikaFile, 0o600)
@@ -356,7 +331,7 @@ def start():
 
     session = Session()
     try:
-        menu(session, checkUpdate=True)
+        menu(session)
     finally:
         clear()
         session.logout()

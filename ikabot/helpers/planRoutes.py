@@ -91,18 +91,6 @@ def sendGoods(session, originCityId, destinationCityId, islandId, ships, send, u
                 key = "cargo_resource" if i == 0 else "cargo_tradegood{:d}".format(i)
                 data[key] = send[i]
 
-        # Change from the city the bot is sitting right now to the city we want to load resources from
-        senddata = {
-            'action': 'header',
-            'function': 'changeCurrentCity',
-            'actionRequest': actionRequest,
-            'oldView': 'city',
-            'cityId': originCityId,
-            'backgroundView': 'city',
-            'currentCityId': currId,
-            'ajax': '1'
-        }
-        session.post(params=senddata)#####MOVED THE TOWN CHECK FROM THE FRONT INTO THE END JUST BEFORE SEND
         resp = session.post(params=data)
         resp = json.loads(resp, strict=False)
         if resp[3][1][0]["type"] == 10:
