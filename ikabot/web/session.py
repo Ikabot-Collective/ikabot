@@ -932,6 +932,7 @@ class Session:
             if self.padre:
                 msg = "Login error."
                 print(msg)
+                sendToBot(self, msg)
                 os._exit(0)
             raise Exception("Couldn't log in")
 

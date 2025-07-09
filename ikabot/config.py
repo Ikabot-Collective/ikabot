@@ -4,11 +4,12 @@
 import locale
 import os
 
-# Version is changed automatically by the release pipeline
+
+# Version changed automatically by the release pipeline
 IKABOT_VERSION = "7.1.11"
+BUILD_DATE = "9.7.2025"
 
-
-IKABOT_VERSION_TAG = "v" + IKABOT_VERSION
+IKABOT_VERSION_TAG = "v" + IKABOT_VERSION + " - " + BUILD_DATE
 
 
 
@@ -17,11 +18,23 @@ update_msg = ""
 
 isWindows = os.name == "nt"
 
+version = "Ikabot version: 6.7.0 - 2.2.4\nBuild date: 13.4.2024"
+
+default_bner = """
+`7MMF'  `7MM                       `7MM\"""Yp,                 mm
+  MM      MM                         MM    Yb                 MM
+  MM      MM  ,MP'   ,6"Yb.          MM    dP    ,pW"Wq.    mmMMmm
+  MM      MM ;Y     8)   MM          MM\"""bg.   6W'   `Wb     MM
+  MM      MM;Mm      ,pm9MM          MM    `Y   8M     M8     MM
+  MM      MM `Mb.   8M   MM          MM    ,9   YA.   ,A9     MM
+.JMML.  .JMML. YA.  `Moo9^Yo.      .JMMmmmd9     `Ybmd9'      `Mbmo
+"""
+
+publicAPIServerDomain = "susman.twilightparadox.com"
 
 LOGS_DIRECTORY_FILE = os.getenv("temp") + "/ikabot.log" if isWindows else "/tmp/ikabot.log"
 DEFAULT_LOG_LEVEL = 30 # Warning
 
-publicAPIServerDomain = "ikagod.twilightparadox.com"
 do_ssl_verify = True
 ids_cache = None
 cities_cache = None
@@ -99,7 +112,8 @@ debugON_sendResources = False
 debugON_constructionList = False
 debugON_buyResources = False
 debugON_activateMiracle = False
-
+debugON_setStatus = False
+debugON_updateStatus = False
 MAXIMUM_CITY_NAME_LENGTH = 20
 SECONDS_IN_HOUR = 60 * 60
 
