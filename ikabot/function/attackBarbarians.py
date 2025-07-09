@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import gettext
 import json
 import math
 import re
@@ -19,11 +18,7 @@ from ikabot.helpers.planRoutes import waitForArrival
 from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import *
-
-t = gettext.translation(
-    "attackBarbarians", localedir, languages=languages, fallback=True
-)
-_ = t.gettext
+from ikabot.helpers.pedirInfo import getShipCapacity
 
 getcontext().prec = 30
 
@@ -50,16 +45,16 @@ def choose_island(session):
     def pad(island_name):
         return " " * (longest_island_name_length - len(island_name)) + island_name
 
-    print(_("In which island do you want to attack the barbarians?"))
-    print(_(" 0) Exit"))
+    print("In which island do you want to attack the barbarians?")
+    print(" 0) Exit")
     for i, island in enumerate(islands):
         num = " " + str(i + 1) if i < 9 else str(i + 1)
         if island["barbarians"]["destroyed"] == 1:
-            warn = _("(currently destroyed)")
+            warn = "(currently destroyed)"
         else:
             warn = ""
         print(
-            _("{}) [{}:{}] {} ({}) : barbarians lv: {} ({}) {}").format(
+            "{}) [{}:{}] {} ({}) : barbarians lv: {} ({}) {}".format(
                 num,
                 island["x"],
                 island["y"],
@@ -78,7 +73,7 @@ def choose_island(session):
         return islands[index - 1]
 
 
-def get_barbarians_lv(session, island):
+def get_barbarians_lv(session, island, ship_capacity):
     params = {
         "view": "barbarianVillage",
         "destinationIslandId": island["id"],
@@ -93,7 +88,7 @@ def get_barbarians_lv(session, island):
     resp = session.post(params=params)
     resp = json.loads(resp, strict=False)
 
-    level = int(resp[2][1]["js_islandBarbarianLevel"]["text"])
+    level = int(math.ceil(resp[2][1]["js_islandBarbarianLevel"]["text"]))
     gold = int(resp[2][1]["js_islandBarbarianResourcegold"]["text"].replace(",", ""))
 
     resources = [0] * len(materials_names)
@@ -118,7 +113,7 @@ def get_barbarians_lv(session, island):
     )
 
     total_cargo = sum(resources)
-    ships = math.ceil(Decimal(total_cargo) / Decimal(500))
+    ships = math.ceil(Decimal(total_cargo) / Decimal(ship_capacity))
 
     info = {
         "island_id": island["id"],
@@ -195,13 +190,13 @@ def plan_attack(session, city, babarians_info):
                 units_available[unit_id]["name"] = total_units[unit_id]["name"]
 
         if len(units_available) == 0:
-            print(_("No more troops available to send"))
+            print("No more troops available to send")
             enter()
             break
 
         attack_round = {}
         attack_round["units"] = {}
-        print(_("Which troops do you want to send?"))
+        print("Which troops do you want to send?")
         for unit_id in units_available:
             unit_amount = units_available[unit_id]["amount"]
             unit_name = units_available[unit_id]["name"]
@@ -223,9 +218,7 @@ def plan_attack(session, city, babarians_info):
             if len(plan) > 0:
                 round_def = len(plan) + 1
                 attack_round["round"] = read(
-                    msg=_(
-                        "In which battle round do you want to send them? (min: 2, default: {:d}): "
-                    ).format(round_def),
+                    msg= "In which battle round do you want to send them? (min: 2, default: {:d}): ".format(round_def),
                     min=2,
                     default=round_def,
                 )
@@ -239,9 +232,7 @@ def plan_attack(session, city, babarians_info):
             max_ships = total_ships - sum([ar["ships"] for ar in plan])
             if max_ships > 0:
                 attack_round["ships"] = read(
-                    msg=_(
-                        "How many ships do you want to send in this round? (min: 0, max: {:d}): "
-                    ).format(max_ships),
+                    msg= "How many ships do you want to send in this round? (min: 0, max: {:d}): ".format(max_ships),
                     min=0,
                     max=max_ships,
                 )
@@ -254,15 +245,11 @@ def plan_attack(session, city, babarians_info):
         if last:
             break
 
-        print(_("Do you want to send another round of troops? [y/N]"))
+        print("Do you want to send another round of troops? [y/N]")
         resp = read(values=["y", "Y", "n", "N"], default="n")
         if resp.lower() != "y":
             print("")
-            print(
-                _(
-                    "Do you want to select the troops that will be used to collect the remaining resources? (they need to destroy the wall) [y/N]"
-                )
-            )
+            print("Do you want to select the troops that will be used to collect the remaining resources? (they need to destroy the wall) [y/N]")
             resp = read(values=["y", "Y", "n", "N"], default="n")
             if resp.lower() != "y":
                 break
@@ -291,17 +278,17 @@ def attackBarbarians(session, event, stdin_fd, predetermined_input):
         if island is None:
             event.set()
             return
-
-        babarians_info = get_barbarians_lv(session, island)
+        ship_capacity, freighter_capacity = getShipCapacity(session)
+        babarians_info = get_barbarians_lv(session, island, ship_capacity)
 
         banner()
-        print(_("The barbarians have:"))
+        print("The barbarians have:")
         for name, amount in babarians_info["troops"]:
-            print(_("{} units of {}").format(amount, name))
+            print("{} units of {}".format(amount, name))
         print("")
 
         banner()
-        print(_("From which city do you want to attack?"))
+        print("From which city do you want to attack?")
         city = chooseCity(session)
 
         plan = plan_attack(session, city, babarians_info)
@@ -311,7 +298,7 @@ def attackBarbarians(session, event, stdin_fd, predetermined_input):
 
         banner()
         print(
-            _("The barbarians in [{}:{}] will be attacked.").format(
+            "The barbarians in [{}:{}] will be attacked.".format(
                 island["x"], island["y"]
             )
         )
@@ -324,12 +311,12 @@ def attackBarbarians(session, event, stdin_fd, predetermined_input):
     set_child_mode(session)
     event.set()
 
-    info = _("\nI attack the barbarians in [{}:{}]\n").format(island["x"], island["y"])
+    info = "\nI attack the barbarians in [{}:{}]\n".format(island["x"], island["y"])
     setInfoSignal(session, info)
     try:
-        do_it(session, island, city, babarians_info, plan)
+        do_it(session, island, city, babarians_info, plan, ship_capacity)
     except Exception as e:
-        msg = _("Error in:\n{}\nCause:\n{}").format(info, traceback.format_exc())
+        msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
         sendToBot(session, msg)
     finally:
         session.logout()
@@ -358,12 +345,15 @@ def get_unit_data(session, city_id, unit_id):
     weight = int(weight)
 
     speed = re.search(
-        r'(\d+)\s*<br\/>\s*<span class="textLabel">.*?\s*:<\/span>\d+<br\/>\s*<\/div>\s*<div class="clearfloat"><\/div>\s*<div class="weapon">',
+        r'<span class="textLabel">.*?</span>\s*(\d+)\s*<br/>',
         html,
     ).group(1)
     speed = int(speed)
 
-    return {"speed": speed, "weight": weight}
+    name = re.search(r'<div class="contentBox01h">\s*<h3 class="header">([^<]+)</h3>', html).group(1)
+    name = str(name)
+
+    return {"speed": speed, "weight": weight, "name": name}
 
 
 def city_is_in_island(city, island):
@@ -508,11 +498,11 @@ def filter_loading(attacks):
     return [attack for attack in attacks if attack["event"]["missionState"] == 1]
 
 
-def filter_traveling(attacks):
+def filter_traveling(attacks,onlyCanAbort=True):
     return [
         attack
         for attack in attacks
-        if attack["event"]["missionState"] == 2 and attack["event"]["canAbort"]
+        if attack["event"]["missionState"] == 2 and (onlyCanAbort is False or (onlyCanAbort is True and attack["event"]["canAbort"]))
     ]
 
 
@@ -545,9 +535,9 @@ def wait_until_attack_is_over(session, city, island):
 
 
 def load_troops(
-    session, city, island, attack_round, units_data, attack_data, extra_cargo=0
+    session, city, island, attack_round, units_data, attack_data, ship_capacity, extra_cargo=0
 ):
-    ships_needed = Decimal(extra_cargo) / Decimal(500)
+    ships_needed = Decimal(extra_cargo) / Decimal(ship_capacity)
     speeds = []
     current_units = get_units(session, city)
     for unit_id in attack_round["units"]:
@@ -563,7 +553,7 @@ def load_troops(
 
         if city_is_in_island(city, island) is False:
             weight = units_data[unit_id]["weight"]
-            ships_needed += Decimal(amount_to_send * weight) / Decimal(500)
+            ships_needed += Decimal(amount_to_send * weight) / Decimal(ship_capacity)
 
     ships_needed = math.ceil(ships_needed)
     speed = min(speeds)
@@ -571,7 +561,7 @@ def load_troops(
     return attack_data, ships_needed, travel_time
 
 
-def loot(session, island, city, units_data, loot_round):
+def loot(session, island, city, units_data, loot_round, ship_capacity):
     while True:
 
         attack_data = {
@@ -617,7 +607,7 @@ def loot(session, island, city, units_data, loot_round):
         html = session.get(island_url + island["id"])
         island = getIsland(html)
         destroyed = island["barbarians"]["destroyed"] == 1
-        resources = get_barbarians_lv(session, island)["resources"]
+        resources = get_barbarians_lv(session, island, ship_capacity)["resources"]
         if destroyed is False or sum(resources) == 0:
             return
 
@@ -628,7 +618,7 @@ def loot(session, island, city, units_data, loot_round):
             return
 
         attack_data, ships_needed, travel_time = load_troops(
-            session, city, island, loot_round, units_data, attack_data, sum(resources)
+            session, city, island, loot_round, units_data, attack_data, ship_capacity, sum(resources)
         )
         attack_data["transporter"] = min(ships_available, ships_needed)
 
@@ -645,7 +635,7 @@ def loot(session, island, city, units_data, loot_round):
         session.post(params=attack_data)
 
 
-def do_it(session, island, city, babarians_info, plan):
+def do_it(session, island, city, babarians_info, plan, ship_capacity):
 
     units_data = {}
 
@@ -694,7 +684,7 @@ def do_it(session, island, city, babarians_info, plan):
         }
 
         attack_data, ships_needed, travel_time = load_troops(
-            session, city, island, attack_round, units_data, attack_data
+            session, city, island, attack_round, units_data, attack_data, ship_capacity
         )
 
         try:
@@ -726,4 +716,4 @@ def do_it(session, island, city, babarians_info, plan):
 
     last_round = plan[-1]
     if last_round["loot"]:
-        loot(session, city, island, units_data, last_round)
+        loot(session, city, island, units_data, last_round, ship_capacity)

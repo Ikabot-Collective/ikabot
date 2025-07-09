@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import gettext
 import json
 import os
 import re
@@ -13,9 +12,6 @@ from ikabot.config import *
 from ikabot.helpers.getJson import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.varios import decodeUnicodeEscape
-
-t = gettext.translation("pedirInfo", localedir, languages=languages, fallback=True)
-_ = t.gettext
 
 getcontext().prec = 30
 
@@ -29,7 +25,9 @@ def read(
     empty=False,
     additionalValues=None,
     default=None,
-):  # user input
+    _retries=0,
+    _max_retries=20
+):
     """Reads input from user
     Parameters
     ----------
@@ -47,44 +45,50 @@ def read(
         a boolean indicating whether or not an empty string is acceptable as input
     additionalValues : list
         list of strings which are additional valid inputs. Can be used with digit = True to validate a string as an input among all digits
-
     Returns
     -------
     result : int | str
         int representing the user's choice
     """
+    if _retries >= _max_retries:
+        print('Error: Max recursion depth reached for read function. Returning None!')
+        return None
+        
+    if min is not None and max is not None and min > max:
+        print('Error: minimum input value is greater than maximum input value!')
+        return None
+        
     try:
         if len(config.predetermined_input) != 0:
             return config.predetermined_input.pop(0)
     except Exception:
         pass
-
+    
     def _invalid():
         print("\033[1A\033[K", end="")  # remove line
-        return read(min, max, digit, msg, values, additionalValues=additionalValues)
-
+        return read(min=min, max=max, digit=digit, msg=msg, values=values, empty=empty, additionalValues=additionalValues, default=default, _retries=_retries+1, _max_retries=_max_retries)
+    
     try:
         read_input = input(msg)
     except EOFError:
         return _invalid()
-
+    
     if additionalValues is not None and read_input in additionalValues:
         return read_input
-
     if read_input == "" and default is not None:
         return default
-
     if read_input == "" and empty is True:
         return read_input
-
+    
     if digit is True or min is not None or max is not None:
-        if read_input.isdigit() is False:
+        if not read_input.isdigit():
             return _invalid()
         else:
             try:
-                read_input = eval(read_input)
-            except SyntaxError:
+                read_input = int(read_input)
+            except ValueError:
                 return _invalid()
+    
     if min is not None and read_input < min:
         return _invalid()
     if max is not None and read_input > max:
@@ -121,15 +125,15 @@ def chooseCity(session, foreign=False):
             return " " * (longest_city_name_length - len(city_name) + 2)
 
         resources_abbreviations = {
-            "1": _("(W)"),
-            "2": _("(M)"),
-            "3": _("(C)"),
-            "4": _("(S)"),
+            "1": "(W)",
+            "2": "(M)",
+            "3": "(C)",
+            "4": "(S)",
         }
 
         i = 0
         if foreign:
-            print(_(" 0: foreign city"))
+            print(" 0: foreign city")
         else:
             print("")
         for city_id in ids:
@@ -142,7 +146,7 @@ def chooseCity(session, foreign=False):
             )
         menu_cities = menu_cities[:-1]
     if foreign:
-        print(_(" 0: foreign city"))
+        print(" 0: foreign city")
     print(menu_cities)
 
     if foreign:
@@ -181,7 +185,7 @@ def chooseForeignCity(session):
         islands_json = json.loads(islands_json, strict=False)
         island_id = islands_json["data"][str(x)][str(y)][0]
     except Exception:
-        print(_("Incorrect coordinates"))
+        print("Incorrect coordinates")
         enter()
         banner()
         return chooseCity(session, foreign=True)
@@ -208,7 +212,7 @@ def chooseForeignCity(session):
             )
             city_options.append(city)
     if i == 0:
-        print(_("There are no cities where to send resources on this island"))
+        print("There are no cities where to send resources on this island")
         enter()
         return chooseCity(session, foreign=True)
     selected_city_index = read(min=1, max=i)
@@ -316,3 +320,22 @@ def getIslandsIds(session):
         island_id = city["islandId"]
         islands_ids.add(island_id)
     return list(islands_ids)
+
+
+def getShipCapacity(session):
+    """Gets the ship capacity
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+        Session object
+
+    Returns
+    -------
+    capacity : int
+        an integer representing the ship capacity of the user's current city
+    """
+    html = session.post('view=merchantNavy')
+    ship_capacity = html.split('singleTransporterCapacity":')[1].split(',"singleFreighterCapacity')[0]
+    freighter_capacity = html.split('singleFreighterCapacity":')[1].split(',"draftEffect')[0]
+
+    return int(ship_capacity), int(freighter_capacity)

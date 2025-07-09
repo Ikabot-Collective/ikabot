@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import gettext
 import os
 import re
 from decimal import *
@@ -14,9 +13,6 @@ from ikabot.helpers.naval import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.resources import *
 from ikabot.helpers.varios import *
-
-t = gettext.translation("getStatus", localedir, languages=languages, fallback=True)
-_ = t.gettext
 
 getcontext().prec = 30
 
@@ -46,6 +42,7 @@ def getStatus(session, event, stdin_fd, predetermined_input):
         total_resources = [0] * len(materials_names)
         total_production = [0] * len(materials_names)
         total_wine_consumption = 0
+        city_population = {}
         housing_space = 0
         citizens = 0
         total_housing_space = 0
@@ -66,6 +63,9 @@ def getStatus(session, event, stdin_fd, predetermined_input):
             total_production[typeGood] += good * 3600
             total_wine_consumption += json_data["wineSpendings"]
             housing_space = int(json_data["currentResources"]["population"])
+            city_population[id] = {
+                "housing_space": housing_space
+            }
             citizens = int(json_data["currentResources"]["citizens"])
             total_housing_space += housing_space
             total_citizens += citizens
@@ -84,8 +84,8 @@ def getStatus(session, event, stdin_fd, predetermined_input):
                     + json_data["upkeep"]
                 )
             )
-        print(_("Ships {:d}/{:d}").format(int(available_ships), int(total_ships)))
-        print(_("\nTotal:"))
+        print("Ships {:d}/{:d}".format(int(available_ships), int(total_ships)))
+        print("\nTotal:")
         print("{:>10}".format(" "), end="|")
         for i in range(len(materials_names)):
             print("{:>12}".format(materials_names_english[i]), end="|")
@@ -101,7 +101,7 @@ def getStatus(session, event, stdin_fd, predetermined_input):
         print(
             "Housing Space: {}, Citizens: {}".format(
                 addThousandSeparator(total_housing_space),
-                addThousandSeparator(citizens),
+                addThousandSeparator(total_citizens),
             )
         )
         print(
@@ -115,8 +115,9 @@ def getStatus(session, event, stdin_fd, predetermined_input):
             end="",
         )
 
-        print(_("\nOf which city do you want to see the state?"))
+        print("\nOf which city do you want to see the state?")
         city = chooseCity(session)
+        city_id = city['id']
         banner()
 
         (wood, good, typeGood) = getProductionPerSecond(session, city["id"])
@@ -128,13 +129,15 @@ def getStatus(session, event, stdin_fd, predetermined_input):
 
         resources = city["availableResources"]
         storageCapacity = city["storageCapacity"]
+        citizens = city["freeCitizens"]
+        housing_space = city_population[city_id]["housing_space"]
         color_resources = []
         for i in range(len(materials_names)):
             if resources[i] == storageCapacity:
                 color_resources.append(bcolors.RED)
             else:
                 color_resources.append(bcolors.ENDC)
-        print(_("Population:"))
+        print("Population:")
         print(
             "{}: {} {}: {}".format(
                 "Housing space",
@@ -143,8 +146,8 @@ def getStatus(session, event, stdin_fd, predetermined_input):
                 addThousandSeparator(citizens),
             )
         )
-        print(_("Storage: {}".format(addThousandSeparator(storageCapacity))))
-        print(_("Resources:"))
+        print("Storage: {}".format(addThousandSeparator(storageCapacity)))
+        print("Resources:")
         for i in range(len(materials_names)):
             print(
                 "{} {}{}{} ".format(
@@ -157,13 +160,13 @@ def getStatus(session, event, stdin_fd, predetermined_input):
             )
         print("")
 
-        print(_("Production:"))
+        print("Production:")
         print(
             "{}: {} {}: {}".format(
                 materials_names[0],
-                addThousandSeparator(wood * 3600),
+                addThousandSeparator(wood),
                 materials_names[typeGood],
-                addThousandSeparator(good * 3600),
+                addThousandSeparator(good),
             )
         )
 
@@ -172,7 +175,7 @@ def getStatus(session, event, stdin_fd, predetermined_input):
             consumption_per_hour = city["wineConsumptionPerHour"]
             if consumption_per_hour == 0:
                 print(
-                    _("{}{}Does not consume wine!{}").format(
+                    "{}{}Does not consume wine!{}".format(
                         bcolors.RED, bcolors.BOLD, bcolors.ENDC
                     )
                 )
@@ -189,7 +192,7 @@ def getStatus(session, event, stdin_fd, predetermined_input):
                     elapsed_time_run_out = daysHoursMinutes(
                         remaining_resources_to_consume
                     )
-                print(_("There is wine for: {}").format(elapsed_time_run_out))
+                print("There is wine for: {}".format(elapsed_time_run_out))
 
         for building in [
             building for building in city["position"] if building["name"] != "empty"
@@ -210,7 +213,7 @@ def getStatus(session, event, stdin_fd, predetermined_input):
                 level = level + "+"
 
             print(
-                _("lv:{}\t{}{}{}").format(level, color, building["name"], bcolors.ENDC)
+                "lv:{}\t{}{}{}".format(level, color, building["name"], bcolors.ENDC)
             )
 
         enter()

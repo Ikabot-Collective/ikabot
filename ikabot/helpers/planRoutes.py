@@ -12,6 +12,7 @@ from ikabot.config import *
 from ikabot.helpers.getJson import getCity
 from ikabot.helpers.naval import *
 from ikabot.helpers.varios import wait
+from ikabot.helpers.pedirInfo import getShipCapacity
 
 
 def sendGoods(session, originCityId, destinationCityId, islandId, ships, send, useFreighters=False):
@@ -168,13 +169,14 @@ def executeRoutes(session, routes, useFreighters=False):
                 wait(60 * 60)
                 continue
 
+            ship_capacity, freighter_capacity = getShipCapacity(session)
             if useFreighters is False:
                 available_ships = int(
-                    math.ceil((Decimal(resources_to_send) / Decimal(500)))
+                    math.ceil((Decimal(resources_to_send) / Decimal(ship_capacity)))
                 )
             else:
                 available_ships = int(
-                    math.ceil((Decimal(resources_to_send) / Decimal(50000)))
+                    math.ceil((Decimal(resources_to_send) / Decimal(freighter_capacity)))
                 )
             sendGoods(
                 session,

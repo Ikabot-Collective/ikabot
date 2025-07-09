@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import gettext
 import json
 import traceback
 
@@ -13,11 +12,6 @@ from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import *
-
-t = gettext.translation(
-    "activateMiracle", localedir, languages=languages, fallback=True
-)
-_ = t.gettext
 
 
 def obtainMiraclesAvailable(session):
@@ -74,6 +68,12 @@ def obtainMiraclesAvailable(session):
         }
         data = session.post(params=params)
         data = json.loads(data, strict=False)
+        html = data[1][1][1]
+        match = re.search(r'<div id="wonderLevelDisplay"[^>]*>\\n\s*(\d+)\s*</div>', html)
+        level = 0
+        if match:
+            level = int(match.group(1))
+
         data = data[2][1]
         available = data["js_WonderViewButton"]["buttonState"] == "enabled"
         if available is False:
@@ -88,6 +88,7 @@ def obtainMiraclesAvailable(session):
             if island["id"] == city["islandId"]:
                 island["activable"] = True
                 island["ciudad"] = city
+                island["wonderActivationLevel"] = level
                 island["available"] = available
                 if available is False:
                     island["available_in"] = enddate - currentdate
@@ -133,18 +134,18 @@ def chooseIsland(islands):
     -------
     island : dict
     """
-    print(_("Which miracle do you want to activate?"))
+    print("Which miracle do you want to activate?")
     # Sort islands by name
     sorted_islands = sorted(islands, key=lambda x: x["wonderName"])
     i = 0
-    print(_("(0) Exit"))
+    print("(0) Exit")
     for island in sorted_islands:
         i += 1
         if island["available"]:
             print("({:d}) {}".format(i, island["wonderName"]))
         else:
             print(
-                _("({:d}) {} (available in: {})").format(
+                "({:d}) {} (available in: {})".format(
                     i, island["wonderName"], daysHoursMinutes(island["available_in"])
                 )
             )
@@ -172,7 +173,7 @@ def activateMiracle(session, event, stdin_fd, predetermined_input):
 
         islands = obtainMiraclesAvailable(session)
         if islands == []:
-            print(_("There are no miracles available."))
+            print("There are no miracles available.")
             enter()
             event.set()
             return
@@ -194,7 +195,7 @@ def activateMiracle(session, event, stdin_fd, predetermined_input):
 
             if miracle_activation_result[1][1][0] == "error":
                 print(
-                    _("The miracle {} could not be activated.").format(
+                    "The miracle {} could not be activated.".format(
                         island["wonderName"]
                     )
                 )
@@ -234,14 +235,14 @@ def activateMiracle(session, event, stdin_fd, predetermined_input):
     set_child_mode(session)
     event.set()
 
-    info = _("\nI activate the miracle {} {:d} times\n").format(
+    info = "\nI activate the miracle {} {:d} times\n".format(
         island["wonderName"], iterations
     )
     setInfoSignal(session, info)
     try:
         do_it(session, island, iterations)
     except Exception as e:
-        msg = _("Error in:\n{}\nCause:\n{}").format(info, traceback.format_exc())
+        msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
         sendToBot(session, msg)
     finally:
         session.logout()
@@ -283,7 +284,7 @@ def wait_for_miracle(session, island):
             else:
                 wait_time = 60
 
-        msg = _("I wait {:d} seconds to activate the miracle {}").format(
+        msg = "I wait {:d} seconds to activate the miracle {}".format(
             wait_time, island["wonderName"]
         )
         sendToBotDebug(session, msg, debugON_activateMiracle)
@@ -306,7 +307,7 @@ def do_it(session, island, iterations):
         response = activateMiracleHttpCall(session, island)
 
         if response[1][1][0] == "error":
-            msg = _("The miracle {} could not be activated.").format(
+            msg = "The miracle {} could not be activated.".format(
                 island["wonderName"]
             )
             sendToBot(session, msg)
@@ -315,5 +316,5 @@ def do_it(session, island, iterations):
         session.setStatus(
             f"Activated {island['wonderName']} @{getDateTime()}, iterations left: {iterations_left}"
         )
-        msg = _("Miracle {} successfully activated").format(island["wonderName"])
+        msg = "Miracle {} successfully activated".format(island["wonderName"])
         sendToBotDebug(session, msg, debugON_activateMiracle)

@@ -1,28 +1,17 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import gettext
 import locale
 import os
-import random
 
 
 # Version changed automatically by the release pipeline
-IKABOT_VERSION = "7.0.5"
-BUILD_DATE = "30.06.2024"
+IKABOT_VERSION = "7.1.10"
+BUILD_DATE = "9.7.2025"
 
 IKABOT_VERSION_TAG = "v" + IKABOT_VERSION + " - " + BUILD_DATE
 
-local = locale.setlocale(locale.LC_ALL, "")
-if "es_" in local:
-    languages = ["es"]
-else:
-    languages = ["en"]
-languages = ["none"]
 
-localedir = os.path.join(os.path.abspath(os.path.dirname(__file__)), "locale")
-t = gettext.translation("config", localedir, languages=languages, fallback=True)
-_ = t.gettext
 
 
 update_msg = ""
@@ -42,6 +31,10 @@ default_bner = """
 """
 
 publicAPIServerDomain = "susman.twilightparadox.com"
+
+LOGS_DIRECTORY_FILE = os.getenv("temp") + "/ikabot.log" if isWindows else "/tmp/ikabot.log"
+DEFAULT_LOG_LEVEL = 30 # Warning
+
 do_ssl_verify = True
 ids_cache = None
 cities_cache = None
@@ -52,8 +45,19 @@ ikaFile = ".ikabot"
 city_url = "view=city&cityId="
 island_url = "view=island&islandId="
 prompt = " >>  "
-materials_names = [_("Wood"), _("Wine"), _("Marble"), _("Cristal"), _("Sulfur")]
-materials_names_english = ["Wood", "Wine", "Marble", "Cristal", "Sulfur"]
+materials_names = ["Wood", "Wine", "Marble", "Crystal", "Sulfur"]
+materials_names_english = ["Wood", "Wine", "Marble", "Crystal", "Sulfur"]
+miracle_names_english = [
+    "",
+    "Hephaestus' Forge",
+    "Hades' Holy Grove",
+    "Demeter's gardens",
+    "Athena's Parthenon",
+    "Temple of Hermes",
+    "Ares' Stronghold",
+    "Temple of Poseidon",
+    "Colossus",
+]
 materials_names_tec = ["wood", "wine", "marble", "glass", "sulfur"]
 material_img_hash = [
     "19c3527b2f694fb882563c04df6d8972",
@@ -63,11 +67,11 @@ material_img_hash = [
     "9b5578a7dfa3e98124439cca4a387a61",
 ]
 tradegoods_names = [
-    _("Saw mill"),
-    _("Vineyard"),
-    _("Quarry"),
-    _("Crystal Mine"),
-    _("Sulfur Pit"),
+    "Saw mill",
+    "Vineyard",
+    "Quarry",
+    "Crystal Mine",
+    "Sulfur Pit",
 ]
 ConnectionError_wait = 5 * 60
 actionRequest = "REQUESTID"
@@ -94,17 +98,10 @@ piracyMissionWaitingTime = {
     9: 57600,
 }
 predetermined_input = []
-logLevelsText = ["DEBUG", "INFO", "WARN", "ERROR"]
 
 
-class logLevels:
-    DEBUG = 0
-    INFO = 1
-    WARN = 2
-    ERROR = 3
 
 
-logLevel = logLevels.WARN
 debugON_alertAttacks = False
 debugON_alertLowWine = False
 debugON_donationBot = False

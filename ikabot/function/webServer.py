@@ -1,10 +1,10 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import base64
-import gettext
-import json
 import logging
+from ikabot.helpers.logging import getLogger
+import base64
+import json
 import pickle
 import re
 import socket
@@ -14,6 +14,7 @@ import time
 import traceback
 from datetime import datetime, timedelta
 from io import BytesIO
+from urllib.parse import unquote_plus, unquote
 
 import requests
 
@@ -33,10 +34,6 @@ class ResponseTypes:
     GREEN = 10
     RED = 11
     YELLOW = 12
-
-
-t = gettext.translation("webServer", localedir, languages=languages, fallback=True)
-_ = t.gettext
 
 if isWindows:
     web_cache_file = os.getenv("temp") + "/ikabot.webcache"
@@ -92,47 +89,41 @@ def webServer(session, event, stdin_fd, predetermined_input, port=None):
 
     web_cache = dict()
     # check if webcache already exists and load it if it does
-    if os.path.isfile(web_cache_file):
-        with open(web_cache_file, "rb") as f:
-            web_cache = pickle.load(f)
-    else:
-        with open(web_cache_file, "wb") as f:
-            pickle.dump(web_cache, f)
+    try:
+        if os.path.isfile(web_cache_file):
+            with open(web_cache_file, "rb") as f:
+                web_cache = pickle.load(f)
+        else:
+            with open(web_cache_file, "wb") as f:
+                pickle.dump(web_cache, f)
+    except: pass # TODO add warning about failing to open webcache file
 
     def dump_cache():
         while True:
             time.sleep(300)
-            with open(web_cache_file, "wb") as f:
-                pickle.dump(web_cache, f)
+            try:
+                with open(web_cache_file, "wb") as f:
+                    pickle.dump(web_cache, f)
+            except: pass
 
     # dump cache in a separate thread every 5 minutes
     threading.Thread(target=dump_cache, daemon=True).start()
 
-    # make logger use session.writeLog()
-    class CustomHandler(logging.Handler):
-        def emit(self, record):
-            session.writeLog(
-                msg="[WEB SERVER] " + record.getMessage(),
-                level=logLevels.ERROR,
-                module=__name__,
-                logTraceback=True,
-            )
-
-    logger = logging.getLogger("werkzeug")
-    logger.handlers.clear()
-    logger.setLevel(logging.ERROR)
-    logger.addHandler(CustomHandler())
+    import flask.cli
+    flask.cli.show_server_banner = lambda *args: None
 
     try:
         app = Flask("Ikabot web server")
-        app.logger = logger
+        logging.getLogger("werkzeug").setLevel(logging.ERROR)
+        app.logger = getLogger(__name__)
+        app.logger.setLevel(logging.ERROR)
 
         @app.route("/", defaults={"path": ""}, methods=["GET", "POST"])
         @app.route("/<path:path>", methods=["GET", "POST"])
         def webServer(path):
 
             dest_url = f"{path}"
-
+            
             if "ikabot=1" in request.url:
                 return handleIkabotAPIRequest(session, request)
 
@@ -171,14 +162,15 @@ def webServer(session, event, stdin_fd, predetermined_input, port=None):
             new_data = dict()
             try:
                 data = request.get_data(as_text=True)
+                data = unquote(data, encoding='utf-8', errors='replace')
                 if data:
                     for item in data.split("&"):
                         k, v = item.split("=")
-                        new_data[k] = v
+                        new_data[k] = unquote_plus(v)
             except Exception:
                 pass
             for arg in request.args:
-                new_data[arg] = request.args[arg]
+                new_data[arg] = unquote_plus(request.args[arg])
             for arg in new_data:
                 if arg == "actionRequest":
                     new_data[arg] = (
@@ -247,7 +239,7 @@ def webServer(session, event, stdin_fd, predetermined_input, port=None):
                 return addSandbox(session, resp, request)
 
             # Create a new response with the modified content
-            proxied_response = Response(modified_content, status=resp.status_code)
+            proxied_response = Response(modified_content, status=resp.status_code) if modified_content[1:4] != "PNG" else Response(resp.content, status=resp.status_code, content_type="image/png")
 
             # Copy over headers
             excluded_headers = [

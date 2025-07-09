@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import ast
-import gettext
 import gzip
 import json
 import os
@@ -21,9 +20,6 @@ from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import getDateTime, wait
-
-t = gettext.translation("dumpWorld", localedir, languages=languages, fallback=True)
-_ = t.gettext
 
 LINE_UP = "\033[1A"
 LINE_CLEAR = "\x1b[2K"
@@ -103,7 +99,7 @@ def dumpWorld(session, event, stdin_fd, predetermined_input):
         thread = threading.Thread(target=update_terminal, args=(shared_data,), daemon=True)
         thread.start()
         set_child_mode(session)
-        info = _("\nDumped world data\n")
+        info = "\nDumped world data\n"
         setInfoSignal(session, info)
 
         dump_path = do_it(
@@ -130,7 +126,7 @@ def dumpWorld(session, event, stdin_fd, predetermined_input):
         shared_data[3].set()
         shared_data[4].acquire(timeout=10)
         event.set()
-        msg = _("Error in:\n{}\nCause:\n{}").format(info, traceback.format_exc())
+        msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
         sendToBot(session, msg)
         return
 

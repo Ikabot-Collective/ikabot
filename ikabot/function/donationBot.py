@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import gettext
 import time
 import traceback
 
@@ -14,9 +13,6 @@ from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.resources import getAvailableResources, getProductionPerSecond
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import wait, getDateTime
-
-t = gettext.translation("donationBot", localedir, languages=languages, fallback=True)
-_ = t.gettext
 
 
 def donationBot(session, event, stdin_fd, predetermined_input):
@@ -55,14 +51,13 @@ def donationBot(session, event, stdin_fd, predetermined_input):
             tradegood = cities[cityId]["tradegood"]
             initial = initials[int(tradegood)]
             print(
-                _(
-                    "In {} ({}), Do you wish to donate to the forest, to the trading good, to both or none? [f/t/b/n]"
-                ).format(cities[cityId]["name"], initial)
+                
+                "In {} ({}), Do you wish to donate to the forest, to the trading good, to both or none? [f/t/b/n]".format(cities[cityId]["name"], initial)
             )
-            f = _("f")
-            t = _("t")
-            b = _("b")
-            n = _("n")
+            f = "f"
+            t = "t"
+            b = "b"
+            n = "n"
 
             rta = read(values=[f, f.upper(), t, t.upper(), b, b.upper(), n, n.upper()])
             if rta.lower() == f:
@@ -77,9 +72,9 @@ def donationBot(session, event, stdin_fd, predetermined_input):
 
             if donation_type is not None and donate_method == 1:
                 print(
-                    _(
-                        "What is the maximum percentage of your storage capacity that you wish to keep occupied? (the resources that exceed it, will be donated) (default: 80%)"
-                    )
+                    
+                    "What is the maximum percentage of your storage capacity that you wish to keep occupied? (the resources that exceed it, will be donated) (default: 80%)"
+                    
                 )
                 percentage = read(min=0, max=100, empty=True)
                 if percentage == "":
@@ -90,9 +85,9 @@ def donationBot(session, event, stdin_fd, predetermined_input):
                     donation_type = None
             elif donation_type is not None and donate_method == 2:
                 print(
-                    _(
-                        "What is the percentage of your production that you wish to donate? (enter 0 to disable donation for the town) (default: 50%)"
-                    )
+                    
+                    "What is the percentage of your production that you wish to donate? (enter 0 to disable donation for the town) (default: 50%)"
+                    
                 )
                 percentage = read(
                     min=0, max=100, empty=True
@@ -103,12 +98,12 @@ def donationBot(session, event, stdin_fd, predetermined_input):
                     donation_type = None
             elif donation_type is not None and donate_method == 3:
                 print(
-                    _(
-                        "What is the amount would you like to donate? (enter 0 to disable donation for the town) (default: 10000)"
-                    )
+                    
+                    "What is the amount would you like to donate? (enter 0 to disable donation for the town) (default: 10000)"
+                    
                 )
                 percentage = read(
-                    min=0, max=1000000, empty=True
+                    min=0, empty=True
                 )  # no point changing the variable's name everywhere just for this
                 if percentage == "":
                     percentage = 10000
@@ -120,7 +115,7 @@ def donationBot(session, event, stdin_fd, predetermined_input):
                 "percentage": percentage,
             }
 
-        print(_("I will donate every {} minutes.".format(waiting_time)))
+        print("I will donate every {} minutes.".format(waiting_time))
         #enter()
     except KeyboardInterrupt:
         event.set()
@@ -129,7 +124,7 @@ def donationBot(session, event, stdin_fd, predetermined_input):
     set_child_mode(session)
     event.set()
 
-    info = _("\nI donate every {} minutes\n".format(waiting_time))
+    info = "\nI donate every {} minutes\n".format(waiting_time)
     setInfoSignal(session, info)
     try:
         do_it(
@@ -141,7 +136,7 @@ def donationBot(session, event, stdin_fd, predetermined_input):
             donate_method,
         )
     except Exception as e:
-        msg = _("Error in:\n{}\nCause:\n{}").format(info, traceback.format_exc())
+        msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
         sendToBot(session, msg)
     finally:
         session.logout()
@@ -270,7 +265,7 @@ def do_it(
         session.setStatus(
             f"Donated {total_donated} wood @{getDateTime()}"
         )
-        msg = _("I donated automatically.")
+        msg = "I donated automatically."
         sendToBotDebug(session, msg, debugON_donationBot)
 
         # sleep a day

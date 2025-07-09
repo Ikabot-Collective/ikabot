@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import gettext
 import re
 import sys
 import time
@@ -18,8 +17,6 @@ from ikabot.helpers.process import run, set_child_mode
 from ikabot.helpers.varios import timeStringToSec, wait
 from ikabot.helpers.apiComm import getPiratesCaptchaSolution
 
-t = gettext.translation("buyResources", localedir, languages=languages, fallback=True)
-_ = t.gettext
 
 
 def autoPirate(session, event, stdin_fd, predetermined_input):
@@ -251,7 +248,7 @@ def autoPirate(session, event, stdin_fd, predetermined_input):
                         break
                 except Exception:
                     info = ""
-                    msg = _("Error in:\n{}\nCause:\n{}").format(
+                    msg = "Error in:\n{}\nCause:\n{}".format(
                         info, traceback.format_exc()
                     )
                     sendToBot(session, msg)
@@ -262,7 +259,7 @@ def autoPirate(session, event, stdin_fd, predetermined_input):
 
     except Exception:
         info = ""
-        msg = _("Error in:\n{}\nCause:\n{}").format(info, traceback.format_exc())
+        msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
         sendToBot(session, msg)
         event.set()
         return
@@ -390,8 +387,11 @@ def convertCapturePoints(session, piracyCities, convertPerMission):
 
 
 def getCurrentMissionWaitingTime(html):
-    match = re.search(r'ongoingMissionTimeRemaining\\":(\d+),', html)
-    assert (
-        match
-    ), "Couldn't find remaining ongoing mission time, did you run a pirate mission manually?"
-    return int(match.group(1))
+    try:
+        match = re.search(r'ongoingMissionTimeRemaining\\":(\d+),', html)
+        assert (
+            match
+        ), "Couldn't find remaining ongoing mission time, did you run a pirate mission manually?"
+        return int(match.group(1))
+    except: # In case we can not find current mission waiting time, just sleep for 10 mins (Not a perfect solution)
+        return 10 * 60

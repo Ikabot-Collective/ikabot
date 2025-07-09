@@ -2,27 +2,22 @@
 # -*- coding: utf-8 -*-
 
 import getpass
-import gettext
 import os
 
 from ikabot import config
 from ikabot.config import *
 
-t = gettext.translation("gui", localedir, languages=languages, fallback=True)
-_ = t.gettext
-
-
 def enter():
     """Wait for the user to press Enter"""
     try:
-        if config.has_params:
+        if len(config.predetermined_input) > 0:
             return
     except Exception:
         pass
     if isWindows:
-        input(_("\n[Enter]"))  # TODO improve this
+        input("\n[Enter]")  # TODO improve this
     else:
-        getpass.getpass(_("\n[Enter]"))
+        getpass.getpass("\n[Enter]")
 
 
 def clear():

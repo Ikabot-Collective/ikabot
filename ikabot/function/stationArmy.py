@@ -1,14 +1,10 @@
-import gettext
 import re
 
 from ikabot.config import *
 from ikabot.helpers.naval import getAvailableShips
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.varios import addThousandSeparator
-
-t = gettext.translation("buyResources", localedir, languages=languages, fallback=True)
-_ = t.gettext
-
+from ikabot.helpers.pedirInfo import getShipCapacity
 
 def getCityMilitaryData(session, city_id):
     """
@@ -74,6 +70,7 @@ def getArmyAvailable(session, type_army, destination_city_id, origin_city_id, ev
         "actionRequest": actionRequest,
         "ajax": 1,
     }
+    ship_capacity, freighter_capacity = getShipCapacity(session)
 
     data = session.post(params=params)
     amount_results = re.findall(r'<div class=\\"amount\\">(.*?)<\\/div>', data)
@@ -82,7 +79,7 @@ def getArmyAvailable(session, type_army, destination_city_id, origin_city_id, ev
         army_results = re.findall(
             r'name=\\"cargo_army_([^\\]+)_upkeep\\"\\n\s+value=\\"([^\\"]+)\\"', data
         )
-        weight_total_ships = int(getAvailableShips(session)) * 500 if type_army else 0
+        weight_total_ships = int(getAvailableShips(session)) * ship_capacity if type_army else 0
         weight_results = re.findall(r'<div class=\\"weight\\">(.*?)<\\/div>', data)
     else:
         army_results = re.findall(
@@ -164,12 +161,12 @@ def stationArmy(session, event, stdin_fd, predetermined_input):
             )
 
         print()
-        print(_("(0) Back"))
-        print(_("(1) Move troops"))
-        print(_("(2) Move ships"))
-        print(_("(3) Move all ground units to a city."))
-        print(_("(4) Move all maritime units to a city."))
-        print(_("(5) Move all units to a city."))
+        print("(0) Back")
+        print("(1) Move troops")
+        print("(2) Move ships")
+        print("(3) Move all ground units to a city.")
+        print("(4) Move all maritime units to a city.")
+        print("(5) Move all units to a city.")
 
         selected = read(min=0, max=5, digit=True)
         if selected == 0:

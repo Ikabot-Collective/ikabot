@@ -83,19 +83,28 @@ def getProductionPerSecond(session, city_id):
     -------
     production: tuple[Decimal, Decimal, int]
     """
-    prod = session.post(
-        params={
-            "action": "header",
-            "function": "changeCurrentCity",
-            "actionRequest": actionRequest,
-            "cityId": city_id,
-            "ajax": "1",
-        }
-    )
-    prod = json.loads(prod, strict=False)
-    prod = prod[0][1]["headerData"]
-    wood_production = Decimal(prod["resourceProduction"])
-    luxury_production = Decimal(prod["tradegoodProduction"])
-    luxury_resource_type = int(prod["producedTradegood"])
+    resource_search_pool = {
+        1: "js_GlobalMenu_production_wine",
+        2: "js_GlobalMenu_production_marble",
+        3: "js_GlobalMenu_production_crystal",
+        4: "js_GlobalMenu_production_sulfur",
+    }
+
+    prod = session.get('?view=city&cityId=' + city_id)
+    luxury_type = re.search(r'tradegood&type=(\d+)', prod)
+    luxury_type = int(luxury_type.group(1))
+    
+    #get wood production
+    match = re.search(r'<td id="js_GlobalMenu_resourceProduction"[^>]*>\s*(\d+)\s*</td>', prod)
+    wood_prod = int(match.group(1))
+
+    #get luxury production
+    match = re.search(fr'<td id="{resource_search_pool[int(luxury_type)]}"[^>]*>\s*(\d+)\s*</td>', prod)
+    luxury_prod = int(match.group(1))
+
+    #get luxury production
+    wood_production = Decimal(wood_prod)
+    luxury_production = Decimal(luxury_prod)
+    luxury_resource_type = int(luxury_type)
 
     return wood_production, luxury_production, luxury_resource_type

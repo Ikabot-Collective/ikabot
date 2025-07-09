@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 import base64
-import gettext
 import sys
 import time
 
@@ -12,9 +11,6 @@ from ikabot.helpers.botComm import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import enter, read
 from ikabot.helpers.process import run, updateProcessList
-
-t = gettext.translation("killTasks", localedir, languages=languages, fallback=True)
-_ = t.gettext
 
 decaptcha_test_pictures = [
     {
