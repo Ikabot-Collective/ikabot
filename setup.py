@@ -13,7 +13,7 @@ setuptools.setup(
     url="https://github.com/Ikabot-Collective/ikabot",
     include_package_data=True,
     packages=setuptools.find_packages(),
-    install_requires=["requests", "requests[socks]", "cryptography", "psutil"],
+    install_requires=["requests", "requests[socks]", "cryptography", "psutil", "pyperclip"],
     extras_require={"webServer": ["flask"]},
     entry_points={
         "console_scripts": ["ikabot=ikabot.command_line:main"],

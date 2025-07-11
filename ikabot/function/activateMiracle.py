@@ -183,11 +183,11 @@ def activateMiracle(session, event, stdin_fd, predetermined_input):
             event.set()
             return
 
-        if island["available"]:
-            print("\nThe miracle {} will be activated".format(island["wonderName"]))
-            print("Proceed? [Y/n]")
-            activate_miracle_input = read(values=["y", "Y", "n", "N", ""])
-            if activate_miracle_input.lower() == "n":
+        if island['available']:
+            print(_('\nThe miracle {} will be activated.\nAfter cooldown, it will be reactivated.').format(island['wonderName']))
+            print(_('Proceed? [Y/n]'))
+            activate_miracle_input = read(values=['y', 'Y', 'n', 'N', ''])
+            if activate_miracle_input.lower() == 'n':
                 event.set()
                 return
 
@@ -211,84 +211,23 @@ def activateMiracle(session, event, stdin_fd, predetermined_input):
                     break
             wait_time = enddate - currentdate
 
-            print("The miracle {} was activated.".format(island["wonderName"]))
-            enter()
+            print(_('The miracle {} was activated.').format(island['wonderName']))
+            #enter()
             banner()
-
-            while True:
-                print("Do you wish to activate it again when it is finished? [y/N]")
-
-                reactivate_again_input = read(values=["y", "Y", "n", "N", ""])
-                if reactivate_again_input.lower() != "y":
-                    event.set()
-                    return
-
-                iterations = read(msg="How many times?: ", digit=True, min=0)
-
-                if iterations == 0:
-                    event.set()
-                    return
-
-                duration = wait_time * iterations
-
-                print("It will finish in:{}".format(daysHoursMinutes(duration)))
-
-                print("Proceed? [Y/n]")
-                reactivate_again_input = read(values=["y", "Y", "n", "N", ""])
-                if reactivate_again_input.lower() == "n":
-                    banner()
-                    continue
-                break
+            iterations = 1000
         else:
-            print(
-                "\nThe miracle {} will be activated in {}".format(
-                    island["wonderName"], daysHoursMinutes(island["available_in"])
-                )
-            )
-            print("Proceed? [Y/n]")
-            user_confirm = read(values=["y", "Y", "n", "N", ""])
-            if user_confirm.lower() == "n":
+            print(_('\nThe miracle {} will be activated in {}.\nAfter cooldown, it will be reactivated.').format(island['wonderName'], daysHoursMinutes(island['available_in'])))
+            print(_('Proceed? [Y/n]'))
+            user_confirm = read(values=['y', 'Y', 'n', 'N', ''])
+            if user_confirm.lower() == 'n':
                 event.set()
                 return
-            wait_time = island["available_in"]
-            iterations = 1
+            wait_time = island['available_in']
+            iterations = 1000
 
-            print("\nThe mirable will be activated.")
-            enter()
+            print(_('\nThe miracle will be activated.'))
+            #enter()
             banner()
-
-            while True:
-                print("Do you wish to activate it again when it is finished? [y/N]")
-
-                reactivate_again_input = read(values=["y", "Y", "n", "N", ""])
-                again = reactivate_again_input.lower() == "y"
-                if again is True:
-                    try:
-                        iterations = read(msg="How many times?: ", digit=True, min=0)
-                    except KeyboardInterrupt:
-                        iterations = 1
-                        break
-
-                    if iterations == 0:
-                        iterations = 1
-                        break
-
-                    iterations += 1
-                    duration = wait_time * iterations
-                    print("It is not possible to calculate the time of finalization. (at least: {})".format(daysHoursMinutes(duration)))
-                    print("Proceed? [Y/n]")
-
-                    try:
-                        activate_input = read(values=["y", "Y", "n", "N", ""])
-                    except KeyboardInterrupt:
-                        iterations = 1
-                        break
-
-                    if activate_input.lower() == "n":
-                        iterations = 1
-                        banner()
-                        continue
-                break
     except KeyboardInterrupt:
         event.set()
         return

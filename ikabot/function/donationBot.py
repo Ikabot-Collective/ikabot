@@ -116,7 +116,7 @@ def donationBot(session, event, stdin_fd, predetermined_input):
             }
 
         print("I will donate every {} minutes.".format(waiting_time))
-        enter()
+        #enter()
     except KeyboardInterrupt:
         event.set()
         return
