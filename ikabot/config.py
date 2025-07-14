@@ -19,6 +19,7 @@ isWindows = os.name == "nt"
 
 
 LOGS_DIRECTORY_FILE = os.getenv("temp") + "/ikabot.log" if isWindows else "/tmp/ikabot.log"
+RESERVATION_FILE = os.getenv("temp") + "/ikabot_reserved_resources.json" if isWindows else "/tmp/ikabot_reserved_resources.json"
 DEFAULT_LOG_LEVEL = 30 # Warning
 
 publicAPIServerDomain = "ikagod.twilightparadox.com"
@@ -105,6 +106,8 @@ SECONDS_IN_HOUR = 60 * 60
 
 # Default values for dynamic settings
 enable_CustomPort = False
+
+enable_Reservation = True
 
 user_agents = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.3",

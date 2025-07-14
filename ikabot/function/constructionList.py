@@ -3,29 +3,20 @@
 
 
 import hashlib
-import json
-import math
-import random
-import re
+import os
 import threading
-import time
 import traceback
-from decimal import *
-
-import requests
 from functools import cache
 
-from ikabot.config import *
+import requests
+
 from ikabot.helpers.botComm import *
-from ikabot.helpers.getJson import getCity
-from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.planRoutes import *
 from ikabot.helpers.process import set_child_mode
-from ikabot.helpers.resources import getAvailableResources
+from ikabot.helpers.resources_reservation import get_available, reserve, release_all_for_pid
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import *
-from ikabot.web.session import normal_get
 
 sendResources = True
 expand = True
@@ -401,11 +392,12 @@ def chooseResourceProviders(session, cities_ids, cities, city_id, resource, miss
         html = session.get(city_url + cityId)
         city = getCity(html)
 
-        available = city["availableResources"][resource]
-        if available == 0:
+        # Use available stock (real - reserved)
+        available = get_available(city, cityId, resource)
+        if available <= 0:
             continue
 
-        # ask the user it this city should provide resources
+        # ask the user if this city should provide resources
         tradegood_initial = tradegood_initials[int(cities[cityId]["tradegood"])]
         pad = " " * (maxName - len(cities[cityId]["name"]))
         is_producer = (int(cities[cityId]["tradegood"]) == int(resource))
@@ -420,8 +412,10 @@ def chooseResourceProviders(session, cities_ids, cities, city_id, resource, miss
         if choice.lower() == "n":
             continue
 
-        # if so, save the city and calculate the total amount resources to send
-        total_available += available
+        # Reserve the resource immediately with the PID du processus courant
+        to_reserve = min(available, missing - total_available)
+        reserve(cityId, resource, to_reserve, os.getpid())
+        total_available += to_reserve
         origin_cities.append(city)
         # if we have enough resources, return
         if total_available >= missing:
@@ -632,11 +626,15 @@ def constructionList(session, event, stdin_fd, predetermined_input):
                 print("- {}: {}".format(name, addThousandSeparator(amount)))
             print("")
 
+            for i in range(len(materials_names)):
+                used = min(resourcesNeeded[i], max(0, get_available(city, cityId, i)))
+                reserve(cityId, i, used, os.getpid())
+
             # calculate the resources that are missing
             missing = [0] * len(materials_names)
             for i in range(len(materials_names)):
-                if city["availableResources"][i] < resourcesNeeded[i]:
-                    missing[i] = resourcesNeeded[i] - city["availableResources"][i]
+                if get_available(city, cityId, i) < resourcesNeeded[i]:
+                    missing[i] = resourcesNeeded[i] - get_available(city, cityId, i)
 
             # show missing resources to the user
             if sum(missing) > 0:
@@ -675,9 +673,11 @@ def constructionList(session, event, stdin_fd, predetermined_input):
                 print("Proceed? [Y/n]")
                 rta = read(values=["y", "Y", "n", "N", ""])
                 if rta.lower() == "n":
+                    release_all_for_pid(os.getpid())
                     event.set()
                     return
     except KeyboardInterrupt:
+        release_all_for_pid(os.getpid())
         event.set()
         return
     
@@ -700,5 +700,6 @@ def constructionList(session, event, stdin_fd, predetermined_input):
         msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
         sendToBot(session, msg)
     finally:
+        release_all_for_pid(os.getpid())
         session.logout()
 

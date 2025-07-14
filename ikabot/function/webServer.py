@@ -1,30 +1,19 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import logging
-from ikabot.helpers.logging import getLogger
 import base64
-import json
+import logging
 import pickle
-import re
 import socket
-import sys
 import threading
-import time
-import traceback
 from datetime import datetime, timedelta
 from io import BytesIO
 from urllib.parse import unquote_plus, unquote
 
-import requests
-
-from ikabot.config import *
 from ikabot.helpers.botComm import *
-from ikabot.helpers.getJson import *
-from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import *
-from ikabot.helpers.process import run, set_child_mode, updateProcessList
-from ikabot.helpers.varios import wait
+from ikabot.helpers.process import run, updateProcessList
+from ikabot.helpers.resources_reservation import release_all_for_pid
 
 
 class ResponseTypes:
@@ -351,6 +340,7 @@ def handleIkabotAPIRequest(session, request):
                 run(f"taskkill /F /PID {request.args['pid']}")
             else:
                 run(f"kill -9 {request.args['pid']}")
+            release_all_for_pid(request.args["pid"])
             return mayorMessageResponse(
                 ResponseTypes.SUCCESS, "Task successfully killed!"
             )

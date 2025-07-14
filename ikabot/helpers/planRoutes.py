@@ -4,15 +4,15 @@
 import json
 import math
 import random
-import re
 import time
 from decimal import *
 
 from ikabot.config import *
 from ikabot.helpers.getJson import getCity
 from ikabot.helpers.naval import *
-from ikabot.helpers.varios import wait
 from ikabot.helpers.pedirInfo import getShipCapacity
+from ikabot.helpers.resources_reservation import release
+from ikabot.helpers.varios import wait
 
 
 def sendGoods(session, originCityId, destinationCityId, islandId, ships, send, useFreighters=False):
@@ -157,6 +157,11 @@ def executeRoutes(session, routes, useFreighters=False):
                 # wait an hour and try again
                 wait(60 * 60)
                 continue
+
+            # Release reservation for each resource actually sent
+            for i in range(len(send)):
+                if send[i] > 0:
+                    release(origin_city["id"], i, send[i], os.getpid())
 
             if useFreighters is False:
                 available_ships = int(
