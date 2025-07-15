@@ -13,7 +13,7 @@ from urllib.parse import unquote_plus, unquote
 from ikabot.helpers.botComm import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.process import run, updateProcessList
-from ikabot.helpers.resources_reservation import release_all_for_pid
+from ikabot.helpers.resourcesReservation import release_all_for_pid
 
 
 class ResponseTypes:

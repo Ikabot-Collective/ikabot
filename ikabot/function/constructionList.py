@@ -14,7 +14,7 @@ from ikabot.helpers.botComm import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.planRoutes import *
 from ikabot.helpers.process import set_child_mode
-from ikabot.helpers.resources_reservation import get_available, reserve, release_all_for_pid
+from ikabot.helpers.resourcesReservation import get_available, reserve, release_all_for_pid
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import *
 
@@ -626,15 +626,15 @@ def constructionList(session, event, stdin_fd, predetermined_input):
                 print("- {}: {}".format(name, addThousandSeparator(amount)))
             print("")
 
-            for i in range(len(materials_names)):
-                used = min(resourcesNeeded[i], max(0, get_available(city, cityId, i)))
-                reserve(cityId, i, used, os.getpid())
-
             # calculate the resources that are missing
             missing = [0] * len(materials_names)
             for i in range(len(materials_names)):
                 if get_available(city, cityId, i) < resourcesNeeded[i]:
                     missing[i] = resourcesNeeded[i] - get_available(city, cityId, i)
+
+            for i in range(len(materials_names)):
+                used = min(resourcesNeeded[i], max(0, get_available(city, cityId, i)))
+                reserve(cityId, i, used, os.getpid())
 
             # show missing resources to the user
             if sum(missing) > 0:

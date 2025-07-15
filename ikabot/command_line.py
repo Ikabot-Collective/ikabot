@@ -40,7 +40,7 @@ from ikabot.function.vacationMode import vacationMode
 from ikabot.function.webServer import webServer
 from ikabot.helpers.process import updateProcessList
 from ikabot.web.session import *
-from ikabot.helpers.resources_reservation import clearReservations
+from ikabot.helpers.resourcesReservation import clearReservations
 
 def menu(session, checkUpdate=True):
     """

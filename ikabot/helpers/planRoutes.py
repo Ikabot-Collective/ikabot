@@ -11,7 +11,7 @@ from ikabot.config import *
 from ikabot.helpers.getJson import getCity
 from ikabot.helpers.naval import *
 from ikabot.helpers.pedirInfo import getShipCapacity
-from ikabot.helpers.resources_reservation import release
+from ikabot.helpers.resourcesReservation import release
 from ikabot.helpers.varios import wait
 
 

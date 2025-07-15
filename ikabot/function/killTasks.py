@@ -6,7 +6,7 @@ import sys
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import enter, read
 from ikabot.helpers.process import run, updateProcessList
-from ikabot.helpers.resources_reservation import release_all_for_pid
+from ikabot.helpers.resourcesReservation import release_all_for_pid
 
 
 def killTasks(session, event, stdin_fd, predetermined_input):
