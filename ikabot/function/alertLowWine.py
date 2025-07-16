@@ -14,7 +14,7 @@ from ikabot.helpers.getJson import getCity
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import getIdsOfCities
 from ikabot.helpers.process import set_child_mode
-from ikabot.helpers.resources import getWineConsumptionPerHour, getAvailableResources, getProductionPerSecond
+from ikabot.helpers.resources import getWineConsumptionPerHour, getAvailableResources, getProductionPerHour
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import daysHoursMinutes
 from ikabot.helpers.planRoutes import *
@@ -199,7 +199,7 @@ def do_it(session, hours, auto_transfer, transfer_amount):
                         # Find the donor city among wine-producing cities with the most wine available
                         max_wine_available = 0
                         for donor_id, donor in cities.items():
-                            wood_prod, luxury_prod, tradegood = getProductionPerSecond(session, donor_id)
+                            wood_prod, luxury_prod, tradegood = getProductionPerHour(session, donor_id)
                                 
                             if tradegood != 1:  # Skip if not wine-producing
                                 continue
