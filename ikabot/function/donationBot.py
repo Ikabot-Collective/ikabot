@@ -10,7 +10,7 @@ from ikabot.helpers.getJson import getCity
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.process import set_child_mode
-from ikabot.helpers.resources import getAvailableResources, getProductionPerSecond
+from ikabot.helpers.resources import getAvailableResources, getProductionPerHour
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import wait, getDateTime
 
@@ -193,13 +193,13 @@ def do_it(
 
             elif donate_method == 2:
                 # get current production rate if changed since starting the bot
-                (wood_prod, good_prod, typeGood) = getProductionPerSecond(
+                (wood_prod, good_prod, typeGood) = getProductionPerHour(
                     session, cityId
                 )
                 percentage = cities_dict[cityId]["percentage"]
 
                 # calculate the amount of wood to be donated from production, based on the given donation frequency
-                to_donate = int((wood_prod * percentage / 100) * (waiting_time * 60))
+                to_donate = int((float(wood_prod) * percentage / 100) * (waiting_time / 60))
                 # Note: Connection delay can/will cause "inaccurate" donations especially with low waiting_time
                 if to_donate <= 0:
                     continue
