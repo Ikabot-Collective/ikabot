@@ -217,7 +217,7 @@ def do_it(
             islandId = cities_dict[cityId]["island"]
             
             # donate
-            if donation_type is "both":
+            if donation_type == "both":
                 forrest = int(to_donate / 2)
                 trade = int(to_donate / 2)
                 session.post(
