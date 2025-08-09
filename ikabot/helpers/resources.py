@@ -72,7 +72,7 @@ def getWineConsumptionPerHour(html):
     return 0
 
 
-def getProductionPerSecond(session, city_id):
+def getProductionPerHour(session, city_id):
     """
     Parameters
     ----------
@@ -91,18 +91,30 @@ def getProductionPerSecond(session, city_id):
     }
 
     prod = session.get('?view=city&cityId=' + city_id)
-    luxury_type = re.search(r'tradegood&type=(\d+)', prod)
-    luxury_type = int(luxury_type.group(1))
+    luxury_type_match = re.search(r'tradegood&type=(\d+)', prod)
+    if not luxury_type_match:
+        raise ValueError(f"Could not determine luxury resource type for city {city_id}")
+    luxury_type = int(luxury_type_match.group(1))
+
+    # The group ([\d,\s]+) now matches digits, commas, AND spaces.
+    production_pattern = r'<td id="{}"[^>]*>\s*([\d,\s]+)\s*</td>'
+
+    # Get wood production
+    wood_match = re.search(production_pattern.format("js_GlobalMenu_resourceProduction"), prod)
+    # Get luxury production
+    luxury_match = re.search(production_pattern.format(resource_search_pool[luxury_type]), prod)
+
+    if not wood_match or not luxury_match:
+        raise AttributeError("Could not find production values. The game's HTML may have changed.")
     
-    #get wood production
-    match = re.search(r'<td id="js_GlobalMenu_resourceProduction"[^>]*>\s*(\d+)\s*</td>', prod)
-    wood_prod = int(match.group(1))
+    # helper function to strip all non-digit characters.
+    def clean_number(num_str):
+        return re.sub(r'[^\d]', '', num_str)
 
-    #get luxury production
-    match = re.search(fr'<td id="{resource_search_pool[int(luxury_type)]}"[^>]*>\s*(\d+)\s*</td>', prod)
-    luxury_prod = int(match.group(1))
+    # Use the helper to clean the strings before converting to int.
+    wood_prod = int(clean_number(wood_match.group(1)))
+    luxury_prod = int(clean_number(luxury_match.group(1)))
 
-    #get luxury production
     wood_production = Decimal(wood_prod)
     luxury_production = Decimal(luxury_prod)
     luxury_resource_type = int(luxury_type)

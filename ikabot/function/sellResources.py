@@ -98,11 +98,17 @@ def getOffers(session, my_market_city, resource_type):
     resp = session.post(params=data)
     html = json.loads(resp, strict=False)[1][1][1]
 
-    html = re.sub(r'\s+', ' ', html).strip()
-    html = re.findall(r'<td class="short_text80">(.*?)<br/>\((.*?)\).*?tooltip">([\d\s]+)</div>.*?<td style="white-space:nowrap;">(\d+).*?<td>(\d+)</td>.*?href="\?view=takeOffer&destinationCityId=(\d+)', html)
-    html = [(cityname, username, re.sub(r"\s+", "", amount), price, dist, destination_city_id) for cityname, username, amount, price, dist, destination_city_id in html]    
+    offers_found = re.findall(
+        r'<td class="short_text80">(.*?)<br/>\((.*?)\)[\s\S]*?<div class="tooltip">([\d,]+)</div>[\s\S]*?<td style="white-space:nowrap;">(\d+)[\s\S]*?<td>(\d+)</td>[\s\S]*?href="\?view=takeOffer&destinationCityId=(\d+)',
+        html
+    )
+    # Process the found offers, removing commas and converting to integers
+    processed_offers = []
+    for city_name, user_name, amount, price, dist, dest_id in offers_found:
+        clean_amount = int(amount.replace(',', ''))
+        processed_offers.append((city_name.strip(), user_name.strip(), clean_amount, int(price), int(dist), int(dest_id)))
     
-    return html
+    return processed_offers
 
 
 def sellToOffers(session, city_to_buy_from, resource_type, event):
@@ -132,7 +138,6 @@ def sellToOffers(session, city_to_buy_from, resource_type, event):
     for offer in offers:
         cityname, username, amount, price, dist, destination_city_id = offer
         cityname = cityname.strip()
-        amount = amount.replace(",", "").replace(".", "")
         amount = int(amount)
         price = int(price)
         msg = "{} ({}): {} at {:d} each ({} in total) [Y/n]".format(
