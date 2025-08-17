@@ -58,29 +58,7 @@ def distributeResources(session, event, stdin_fd, predetermined_input):
             type_distribution = read(min=1, max=2)
             evenly = type_distribution == 2
 
-        (cities_ids, cities) = getIdsOfCities(session)
-        choice = None
-        ignored_cities = []
-        while True:
-            banner()
-            displayed_string = (
-                f'(currently ignoring: {", ".join(ignored_cities)})'
-                if ignored_cities
-                else ""
-            )
-            print(f"Select cities to ignore. {displayed_string}")
-            print("0) Continue")
-            choice_to_cityid_map = []
-            for i, city in enumerate(cities.values()):
-                choice_to_cityid_map.append(city["id"])
-                print(f'{i + 1}) {city["name"]} - {materials_names[city["tradegood"]]}')
-            choice = read(min=0, max=len(cities_ids))
-            if choice == 0:
-                break
-            city_id = choice_to_cityid_map[choice - 1]
-            cities_ids = list(filter(lambda x: x != str(city_id), cities_ids))
-            ignored_cities.append(cities[str(city_id)]["name"])
-            del cities[str(city_id)]
+        cities_ids, cities = ignoreCities(session)
 
         if evenly:
             routes = distribute_evenly(session, resource, cities_ids, cities)
