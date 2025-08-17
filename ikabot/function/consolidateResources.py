@@ -42,10 +42,10 @@ def consolidateResources(session, event, stdin_fd, predetermined_input):
             return
 
         banner()
-        print('Select source cities to send resources from:')
-        sourceCity = chooseCity(session)
+        source_msg = 'Select source cities to send resources from:'
+        sourceCities, sourceCitiesDict = ignoreCities(session, msg=source_msg)
         
-        if sourceCity is None:
+        if sourceCities is None:
             event.set()
             return
 
@@ -57,15 +57,13 @@ def consolidateResources(session, event, stdin_fd, predetermined_input):
             event.set()
             return
         
-        if sourceCity["id"] == destinationCity["id"]:
-            banner()
-            print("The city of origin and the destination city cannot be the same")
-            enter()
-            event.set()
-            return
+        destination_id_str = str(destinationCity['id'])
+        if destination_id_str in sourceCities:
+            sourceCities.remove(destination_id_str)
+            del sourceCitiesDict[destination_id_str]
 
         banner()
-        print(('Define resource limits to keep in {}:').format(sourceCity['name']))
+        print('Define resource limits to keep:')
     
         limits = []
         
@@ -86,9 +84,9 @@ def consolidateResources(session, event, stdin_fd, predetermined_input):
             else:
                 print(('- Keep up to {} {} and send excess').format(addThousandSeparator(limits[i]), resource))
         
-
+        source_city_names_str = ', '.join([city['name'] for city in sourceCitiesDict.values()])
         print(('\nFrom {} to {} every {} hours').format(
-            sourceCity['name'], 
+            source_city_names_str, 
             destinationCity['name'], 
             intervalInHours,
         ))
@@ -108,17 +106,17 @@ def consolidateResources(session, event, stdin_fd, predetermined_input):
     set_child_mode(session)
     event.set()  # this is where we give back control to main process
 
-    info = 'Consolidate resources from {} to {} every {:d} hours'.format(sourceCity['name'], destinationCity['name'], intervalInHours)
+    info = 'Consolidate resources from {} to {} every {:d} hours'.format(source_city_names_str, destinationCity['name'], intervalInHours)
     setInfoSignal(session, info)
 
     nextExecutionTime = datetime.datetime.now() + datetime.timedelta(hours=intervalInHours)
 
     session.setStatus(
-        f" {sourceCity['name']} -> {destinationCity['name']} | Next at {getDateTime(nextExecutionTime.timestamp())}"
+        f" {source_city_names_str} -> {destinationCity['name']} | Next at {getDateTime(nextExecutionTime.timestamp())}"
     )
 
     try:
-        do_it(session, limits, sourceCity['id'], destinationCity['id'], intervalInHours)
+        do_it(session, limits, sourceCities, destinationCity['id'], intervalInHours)
     except Exception as e:
         msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
         sendToBot(session, msg)
@@ -126,74 +124,84 @@ def consolidateResources(session, event, stdin_fd, predetermined_input):
         session.logout()
 
 
-def do_it(session, limits, sourceCityId, destinationCityId, intervalInHours):
+def do_it(session, limits, sourceCityIds, destinationCityId, intervalInHours):
     """
     Parameters
     ----------
     session : ikabot.web.session.Session
     limits : array
-    sourceCityId : int
+    sourceCityIds : list[str]
     destinationCityId : int
     intervalInHours : int
     """
 
     firstRun = True
     nextRunTime = datetime.datetime.now()
+    total_amount_sent = 0
 
     while True:
         currentTime = datetime.datetime.now()
-        
+        loop_amount_sent = 0
         if currentTime < nextRunTime and not firstRun:
             time.sleep(60)
             continue
-        
-        try:
-            sourceCity = getCity(session.get(city_url + str(sourceCityId)))
-            destinationCity = getCity(session.get(city_url + str(destinationCityId)))
-        except Exception as e:
-            logger.error(f"Failed to get city data: {e}")
-            time.sleep(300)  # Wait 5 minutes before retrying
-            continue
-
-        toSend = [0] * len(materials_names)
-        totalToSend = 0
-
-        session.setStatus(
-            f"{sourceCity['name']} -> {destinationCity['name']}| Processing..."
-        )
-
-        for i, resource in enumerate(materials_names):
-            limit = limits[i]
             
-            sourceAmount = sourceCity['availableResources'][i]
-            destinationSpace = destinationCity['freeSpaceForResources'][i]
+        # Loop through each source city ID in the provided list
+        for sourceCityId in sourceCityIds:
+            try:
+                sourceCity = getCity(session.get(city_url + str(sourceCityId)))
+                destinationCity = getCity(session.get(city_url + str(destinationCityId)))
+            except Exception as e:
+                print(f"Failed to get data for source city ID {sourceCityId}: {e}")
+                continue # Skip to the next city if one fails
 
-            if limit == -1 or limit < 0:  # Handle any negative number as "keep all"
-                toSend[i] = 0
-            else:
-                excess = max(0, sourceAmount - limit)
-                sendable = min(excess, destinationSpace)
-                toSend[i] = sendable
-                totalToSend += sendable
+            toSend = [0] * len(materials_names)
+            totalToSend = 0
 
-        if totalToSend == 0:
-            sendToBot(session, "No excess resources to send from {}. Will check again in {} hours.".format(
-                sourceCity['name'], 
-                intervalInHours
-            ))
-        else: 
-            route = (
-                sourceCity,
-                destinationCity,
-                destinationCity["islandId"],
-                *toSend,
+            session.setStatus(
+                f"{sourceCity['name']} -> {destinationCity['name']}| Processing..."
             )
 
-            executeRoutes(session, [route], useFreighters=False)
+            for i, resource in enumerate(materials_names):
+                limit = limits[i]
+                
+                sourceAmount = sourceCity['availableResources'][i]
+                destinationSpace = destinationCity['freeSpaceForResources'][i]
+
+                if limit == -1 or limit < 0:  # Handle any negative number as "keep all"
+                    toSend[i] = 0
+                else:
+                    excess = max(0, sourceAmount - limit)
+                    sendable = min(excess, destinationSpace)
+                    toSend[i] = sendable
+                    totalToSend += sendable
+
+            if totalToSend == 0:
+                sendToBot(session, "No excess resources to send from {}.".format(
+                    sourceCity['name']
+                ))
+            else: 
+                route = (
+                    sourceCity,
+                    destinationCity,
+                    destinationCity["islandId"],
+                    *toSend,
+                )
+
+                executeRoutes(session, [route], useFreighters=False)
+                loop_amount_sent += totalToSend
+                total_amount_sent += totalToSend
 
         nextRunTime = datetime.datetime.now() + datetime.timedelta(hours=intervalInHours)
+        
+        # Get the name of each source city by its ID for the final status message
+        source_city_names = [getCity(session.get(city_url + str(city_id)))['name'] for city_id in sourceCityIds]
+        source_city_names_str = ', '.join(source_city_names)
+        # Get the destination city's name for the status message
+        destinationCityName = getCity(session.get(city_url + str(destinationCityId)))['name']
+
         session.setStatus(
-            f" {sourceCity['name']} -> {destinationCity['name']} | Next at {getDateTime(nextRunTime.timestamp())}"
+            f"Sent {addThousandSeparator(loop_amount_sent)} resources from {source_city_names_str} -> {destinationCity['name']} | Total sent: {addThousandSeparator(total_amount_sent)} | Next shipment at {getDateTime(nextRunTime.timestamp())}"
         )
 
         firstRun = False

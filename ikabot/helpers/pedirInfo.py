@@ -341,7 +341,7 @@ def getShipCapacity(session):
     return int(ship_capacity), int(freighter_capacity)
 
 
-def ignoreCities(session):
+def ignoreCities(session, msg=None):
     """Prompts the user to select cities which should be ignored
     Parameters
     ----------
@@ -358,6 +358,7 @@ def ignoreCities(session):
     ignored_cities = []
     while True:
         banner()
+        if msg is not None: print(f"{msg}")
         displayed_string = (
             f'(currently ignoring: {", ".join(ignored_cities)})'
             if ignored_cities

@@ -57,8 +57,8 @@ def distributeResources(session, event, stdin_fd, predetermined_input):
             print("2) Distribute them evenly among all cities")
             type_distribution = read(min=1, max=2)
             evenly = type_distribution == 2
-
-        cities_ids, cities = ignoreCities(session)
+        distribution_msg = 'Select the cities to participate in the distribution:'
+        cities_ids, cities = ignoreCities(session, msg=distribution_msg)
 
         if evenly:
             routes = distribute_evenly(session, resource, cities_ids, cities)
