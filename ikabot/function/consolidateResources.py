@@ -176,11 +176,7 @@ def do_it(session, limits, sourceCityIds, destinationCityId, intervalInHours):
                     toSend[i] = sendable
                     totalToSend += sendable
 
-            if totalToSend == 0:
-                sendToBot(session, "No excess resources to send from {}.".format(
-                    sourceCity['name']
-                ))
-            else: 
+            if totalToSend != 0:
                 route = (
                     sourceCity,
                     destinationCity,
