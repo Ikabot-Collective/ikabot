@@ -116,7 +116,7 @@ def executeRoutes(session, routes, useFreighters=False):
 
         while sum(toSend) > 0:
             session.setStatus(
-                f'Sending {toSend[0]}W, {toSend[1]}V, {toSend[2]}M, {toSend[3]}C, {toSend[4]}S ---> {destination_city["name"]}'
+                f' Sending {toSend[0]}W, {toSend[1]}V, {toSend[2]}M, {toSend[3]}C, {toSend[4]}S | {origin_city["name"]} ---> {destination_city["name"]} '
             )
             ships_available = waitForArrival(session, useFreighters)
             if useFreighters is False:
