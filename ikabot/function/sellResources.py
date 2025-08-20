@@ -17,6 +17,7 @@ from ikabot.helpers.planRoutes import waitForArrival
 from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import addThousandSeparator, wait
+from ikabot.helpers.pedirInfo import getShipCapacity
 
 
 def chooseCommercialCity(commercial_cities):
@@ -96,10 +97,18 @@ def getOffers(session, my_market_city, resource_type):
     }
     resp = session.post(params=data)
     html = json.loads(resp, strict=False)[1][1][1]
-    return re.findall(
-        r'<td class=".*?">(.*?)<br/>\((.*?)\)\s*</td>\s*<td>(.*?)</td>\s*<td><img src=".*?"\s*alt=".*?"\s*title=".*?"/></td>\s*<td style="white-space:nowrap;">(\d+)\s*<img src=".*?"\s*class=".*?"/>.*?</td>\s*<td>(\d+)</td>\s*<td><a onclick="ajaxHandlerCall\(this\.href\);return false;"\s*href="\?view=takeOffer&destinationCityId=(\d+)&',
-        html,
+
+    offers_found = re.findall(
+        r'<td class="short_text80">(.*?)<br/>\((.*?)\)[\s\S]*?<div class="tooltip">([\d,]+)</div>[\s\S]*?<td style="white-space:nowrap;">(\d+)[\s\S]*?<td>(\d+)</td>[\s\S]*?href="\?view=takeOffer&destinationCityId=(\d+)',
+        html
     )
+    # Process the found offers, removing commas and converting to integers
+    processed_offers = []
+    for city_name, user_name, amount, price, dist, dest_id in offers_found:
+        clean_amount = int(amount.replace(',', ''))
+        processed_offers.append((city_name.strip(), user_name.strip(), clean_amount, int(price), int(dist), int(dest_id)))
+    
+    return processed_offers
 
 
 def sellToOffers(session, city_to_buy_from, resource_type, event):
@@ -129,7 +138,6 @@ def sellToOffers(session, city_to_buy_from, resource_type, event):
     for offer in offers:
         cityname, username, amount, price, dist, destination_city_id = offer
         cityname = cityname.strip()
-        amount = amount.replace(",", "").replace(".", "")
         amount = int(amount)
         price = int(price)
         msg = "{} ({}): {} at {:d} each ({} in total) [Y/n]".format(
@@ -335,6 +343,7 @@ def do_it1(session, left_to_sell, offers, resource_type, city_to_buy_from):
     resource_type : int
     city_to_buy_from : dict
     """
+    ship_capacity, freighter_capacity = getShipCapacity(session)
     for offer in offers:
         cityname, username, amount, precio, dist, destination_city_id = offer
         cityname = cityname.strip()
@@ -343,10 +352,10 @@ def do_it1(session, left_to_sell, offers, resource_type, city_to_buy_from):
         while True:
             amount_to_sell = min(amount_to_buy, left_to_sell)
             ships_available = waitForArrival(session)
-            ships_needed = math.ceil((Decimal(amount_to_sell) / Decimal(500)))
+            ships_needed = math.ceil((Decimal(amount_to_sell) / Decimal(ship_capacity)))
             ships_used = min(ships_available, ships_needed)
             if ships_needed > ships_used:
-                amount_to_sell = ships_used * 500
+                amount_to_sell = ships_used * ship_capacity
             left_to_sell -= amount_to_sell
             amount_to_buy -= amount_to_sell
 

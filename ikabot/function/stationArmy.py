@@ -4,6 +4,7 @@ from ikabot.config import *
 from ikabot.helpers.naval import getAvailableShips
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.varios import addThousandSeparator
+from ikabot.helpers.pedirInfo import getShipCapacity
 
 def getCityMilitaryData(session, city_id):
     """
@@ -69,6 +70,7 @@ def getArmyAvailable(session, type_army, destination_city_id, origin_city_id, ev
         "actionRequest": actionRequest,
         "ajax": 1,
     }
+    ship_capacity, freighter_capacity = getShipCapacity(session)
 
     data = session.post(params=params)
     amount_results = re.findall(r'<div class=\\"amount\\">(.*?)<\\/div>', data)
@@ -77,7 +79,7 @@ def getArmyAvailable(session, type_army, destination_city_id, origin_city_id, ev
         army_results = re.findall(
             r'name=\\"cargo_army_([^\\]+)_upkeep\\"\\n\s+value=\\"([^\\"]+)\\"', data
         )
-        weight_total_ships = int(getAvailableShips(session)) * 500 if type_army else 0
+        weight_total_ships = int(getAvailableShips(session)) * ship_capacity if type_army else 0
         weight_results = re.findall(r'<div class=\\"weight\\">(.*?)<\\/div>', data)
     else:
         army_results = re.findall(

@@ -5,7 +5,7 @@ import locale
 import os
 
 # Version is changed automatically by the release pipeline
-IKABOT_VERSION = "7.0.9"
+IKABOT_VERSION = "7.1.12"
 
 
 IKABOT_VERSION_TAG = "v" + IKABOT_VERSION
@@ -32,8 +32,8 @@ ikaFile = ".ikabot"
 city_url = "view=city&cityId="
 island_url = "view=island&islandId="
 prompt = " >>  "
-materials_names = ["Wood", "Wine", "Marble", "Cristal", "Sulfur"]
-materials_names_english = ["Wood", "Wine", "Marble", "Cristal", "Sulfur"]
+materials_names = ["Wood", "Wine", "Marble", "Crystal", "Sulfur"]
+materials_names_english = ["Wood", "Wine", "Marble", "Crystal", "Sulfur"]
 miracle_names_english = [
     "",
     "Hephaestus' Forge",

@@ -12,6 +12,7 @@ from ikabot.config import *
 from ikabot.helpers.getJson import getCity
 from ikabot.helpers.naval import *
 from ikabot.helpers.varios import wait
+from ikabot.helpers.pedirInfo import getShipCapacity
 
 
 def sendGoods(session, originCityId, destinationCityId, islandId, ships, send, useFreighters=False):
@@ -108,6 +109,7 @@ def executeRoutes(session, routes, useFreighters=False):
     routes : list
         a list of tuples, each of which represent a route. A route is defined like so : (originCity,destinationCity,islandId,wood,wine,marble,crystal,sulfur). originCity and destintionCity should be passed as City objects
     """
+    ship_capacity, freighter_capacity = getShipCapacity(session)
     for route in routes:
         (origin_city, destination_city, island_id, *toSend) = route
         destination_city_id = destination_city["id"]
@@ -118,9 +120,9 @@ def executeRoutes(session, routes, useFreighters=False):
             )
             ships_available = waitForArrival(session, useFreighters)
             if useFreighters is False:
-                storageCapacityInShips = ships_available * 500
+                storageCapacityInShips = ships_available * ship_capacity
             else:
-                storageCapacityInShips = ships_available * 50000
+                storageCapacityInShips = ships_available * freighter_capacity
 
             html = session.get(city_url + str(origin_city["id"]))
             origin_city = getCity(html)
@@ -158,11 +160,11 @@ def executeRoutes(session, routes, useFreighters=False):
 
             if useFreighters is False:
                 available_ships = int(
-                    math.ceil((Decimal(resources_to_send) / Decimal(500)))
+                    math.ceil((Decimal(resources_to_send) / Decimal(ship_capacity)))
                 )
             else:
                 available_ships = int(
-                    math.ceil((Decimal(resources_to_send) / Decimal(50000)))
+                    math.ceil((Decimal(resources_to_send) / Decimal(freighter_capacity)))
                 )
             sendGoods(
                 session,

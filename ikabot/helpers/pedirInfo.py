@@ -25,7 +25,9 @@ def read(
     empty=False,
     additionalValues=None,
     default=None,
-):  # user input
+    _retries=0,
+    _max_retries=20
+):
     """Reads input from user
     Parameters
     ----------
@@ -43,44 +45,50 @@ def read(
         a boolean indicating whether or not an empty string is acceptable as input
     additionalValues : list
         list of strings which are additional valid inputs. Can be used with digit = True to validate a string as an input among all digits
-
     Returns
     -------
     result : int | str
         int representing the user's choice
     """
+    if _retries >= _max_retries:
+        print('Error: Max recursion depth reached for read function. Returning None!')
+        return None
+        
+    if min is not None and max is not None and min > max:
+        print('Error: minimum input value is greater than maximum input value!')
+        return None
+        
     try:
         if len(config.predetermined_input) != 0:
             return config.predetermined_input.pop(0)
     except Exception:
         pass
-
+    
     def _invalid():
         print("\033[1A\033[K", end="")  # remove line
-        return read(min, max, digit, msg, values, additionalValues=additionalValues)
-
+        return read(min=min, max=max, digit=digit, msg=msg, values=values, empty=empty, additionalValues=additionalValues, default=default, _retries=_retries+1, _max_retries=_max_retries)
+    
     try:
         read_input = input(msg)
     except EOFError:
         return _invalid()
-
+    
     if additionalValues is not None and read_input in additionalValues:
         return read_input
-
     if read_input == "" and default is not None:
         return default
-
     if read_input == "" and empty is True:
         return read_input
-
+    
     if digit is True or min is not None or max is not None:
-        if read_input.isdigit() is False:
+        if not read_input.isdigit():
             return _invalid()
         else:
             try:
-                read_input = eval(read_input)
-            except SyntaxError:
+                read_input = int(read_input)
+            except ValueError:
                 return _invalid()
+    
     if min is not None and read_input < min:
         return _invalid()
     if max is not None and read_input > max:
@@ -312,3 +320,62 @@ def getIslandsIds(session):
         island_id = city["islandId"]
         islands_ids.add(island_id)
     return list(islands_ids)
+
+
+def getShipCapacity(session):
+    """Gets the ship capacity
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+        Session object
+
+    Returns
+    -------
+    capacity : int
+        an integer representing the ship capacity of the user's current city
+    """
+    html = session.post('view=merchantNavy')
+    ship_capacity = html.split('singleTransporterCapacity":')[1].split(',"singleFreighterCapacity')[0]
+    freighter_capacity = html.split('singleFreighterCapacity":')[1].split(',"draftEffect')[0]
+
+    return int(ship_capacity), int(freighter_capacity)
+
+
+def ignoreCities(session, msg=None):
+    """Prompts the user to select cities which should be ignored
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+        Session object
+
+    Returns
+    -------
+    (cities_ids) : list
+        a list containing IDs of cities that were not ignored
+    """
+    (cities_ids, cities) = getIdsOfCities(session)
+    choice = None
+    ignored_cities = []
+    while True:
+        banner()
+        if msg is not None: print(f"{msg}")
+        displayed_string = (
+            f'(currently ignoring: {", ".join(ignored_cities)})'
+            if ignored_cities
+            else ""
+        )
+        print(f"Select cities to ignore. {displayed_string}")
+        print("0) Continue")
+        choice_to_cityid_map = []
+        for i, city in enumerate(cities.values()):
+            choice_to_cityid_map.append(city["id"])
+            print(f'{i + 1}) {city["name"]} - {materials_names[city["tradegood"]]}')
+        choice = read(min=0, max=len(cities_ids))
+        if choice == 0:
+            break
+        city_id = choice_to_cityid_map[choice - 1]
+        cities_ids = list(filter(lambda x: x != str(city_id), cities_ids))
+        ignored_cities.append(cities[str(city_id)]["name"])
+        del cities[str(city_id)]
+        
+    return cities_ids, cities

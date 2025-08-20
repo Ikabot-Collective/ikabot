@@ -19,6 +19,7 @@ from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.resources import *
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import addThousandSeparator
+from ikabot.helpers.pedirInfo import getShipCapacity
 
 
 
@@ -70,9 +71,18 @@ def getOffers(session, city):
     """
     html = getMarketHtml(session, city)
     hits = re.findall(
-        r'short_text80">(.*?) *<br/>\((.*?)\)\s *</td>\s *<td>(\d+)</td>\s *<td>(.*?)/td>\s *<td><img src="(.*?)\.png[\s\S]*?white-space:nowrap;">(\d+)\s[\s\S]*?href="\?view=takeOffer&destinationCityId=(\d+)&oldView=branchOffice&activeTab=bargain&cityId=(\d+)&position=(\d+)&type=(\d+)&resource=(\w+)"',
+        r'short_text80">(.*?) <br/>\((.*?)\)\s*</td>\s*<td>(\d+)</td>\s*<td>([\d,\s]+)(?:<div class="tooltip">.*?)?</td>\s*<td><img src="([^"]+\.png)"[\s\S]*?white-space:nowrap;">(\d+)\s*[\s\S]*?href="\?view=takeOffer&destinationCityId=(\d+)&oldView=branchOffice&activeTab=bargain&cityId=(\d+)&position=(\d+)&type=(\d+)&resource=(\w+)"',
         html,
+        re.DOTALL
     )
+
+    # Clean up the hits by stripping whitespace from each captured string
+    cleaned_hits = []
+    for hit in hits:
+        cleaned_hit = tuple(item.strip() for item in hit)  # Strip whitespace from each item
+        cleaned_hits.append(cleaned_hit)
+    hits = cleaned_hits
+        
     offers = []
     for hit in hits:
         offer = {
@@ -80,7 +90,7 @@ def getOffers(session, city):
             "jugadorAComprar": hit[1],
             "bienesXminuto": int(hit[2]),
             "amountAvailable": int(
-                hit[3].replace(",", "").replace(".", "").replace("<", "")
+                hit[3].replace(",", "").replace(".", "").replace("<", "").replace(" ", "")
             ),
             "tipo": hit[4],
             "precio": int(hit[5]),
@@ -92,22 +102,22 @@ def getOffers(session, city):
         }
 
         # Parse CDN Images to material type
-        if offer["tipo"] == "//gf2.geo.gfsrv.net/cdn19/c3527b2f694fb882563c04df6d8972":
+        if offer["tipo"] == "//gf2.geo.gfsrv.net/cdn19/c3527b2f694fb882563c04df6d8972.png":
             offer["tipo"] = "wood"
         elif (
-            offer["tipo"] == "//gf1.geo.gfsrv.net/cdnc6/94ddfda045a8f5ced3397d791fd064"
+            offer["tipo"] == "//gf1.geo.gfsrv.net/cdnc6/94ddfda045a8f5ced3397d791fd064.png"
         ):
             offer["tipo"] = "wine"
         elif (
-            offer["tipo"] == "//gf3.geo.gfsrv.net/cdnbf/fc258b990c1a2a36c5aeb9872fc08a"
+            offer["tipo"] == "//gf3.geo.gfsrv.net/cdnbf/fc258b990c1a2a36c5aeb9872fc08a.png"
         ):
             offer["tipo"] = "marble"
         elif (
-            offer["tipo"] == "//gf2.geo.gfsrv.net/cdn1e/417b4059940b2ae2680c070a197d8c"
+            offer["tipo"] == "//gf2.geo.gfsrv.net/cdn1e/417b4059940b2ae2680c070a197d8c.png"
         ):
             offer["tipo"] = "glass"
         elif (
-            offer["tipo"] == "//gf1.geo.gfsrv.net/cdn9b/5578a7dfa3e98124439cca4a387a61"
+            offer["tipo"] == "//gf1.geo.gfsrv.net/cdn9b/5578a7dfa3e98124439cca4a387a61.png"
         ):
             offer["tipo"] = "sulfur"
         else:
@@ -270,7 +280,7 @@ def buyResources(session, event, stdin_fd, predetermined_input):
         session.logout()
 
 
-def buy(session, city, offer, amount_to_buy, ships_available):
+def buy(session, city, offer, amount_to_buy, ships_available, ship_capacity):
     """
     Parameters
     ----------
@@ -279,7 +289,7 @@ def buy(session, city, offer, amount_to_buy, ships_available):
     offer : dict
     amount_to_buy : int
     """
-    ships = int(math.ceil((Decimal(amount_to_buy) / Decimal(500))))
+    ships = int(math.ceil((Decimal(amount_to_buy) / Decimal(ship_capacity))))
     data_dict = {
         "action": "transportOperations",
         "function": "buyGoodsAtAnotherBranchOffice",
@@ -347,6 +357,7 @@ def do_it(session, city, offers, amount_to_buy):
     offers : list[dict]
     amount_to_buy : int
     """
+    ship_capacity, freighter_capacity = getShipCapacity(session)
     while True:
         for offer in offers:
             if amount_to_buy == 0:
@@ -355,11 +366,11 @@ def do_it(session, city, offers, amount_to_buy):
                 continue
 
             ships_available = waitForArrival(session)
-            storageCapacity = ships_available * 500
+            storageCapacity = ships_available * ship_capacity
             buy_amount = min(amount_to_buy, storageCapacity, offer["amountAvailable"])
 
             amount_to_buy -= buy_amount
             offer["amountAvailable"] -= buy_amount
-            buy(session, city, offer, buy_amount, ships_available)
+            buy(session, city, offer, buy_amount, ships_available, ship_capacity)
             # start from the beginning again, so that we always buy from the cheapest offers fisrt
             break

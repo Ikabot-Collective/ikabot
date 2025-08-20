@@ -42,6 +42,7 @@ def getStatus(session, event, stdin_fd, predetermined_input):
         total_resources = [0] * len(materials_names)
         total_production = [0] * len(materials_names)
         total_wine_consumption = 0
+        city_population = {}
         housing_space = 0
         citizens = 0
         total_housing_space = 0
@@ -62,6 +63,9 @@ def getStatus(session, event, stdin_fd, predetermined_input):
             total_production[typeGood] += good * 3600
             total_wine_consumption += json_data["wineSpendings"]
             housing_space = int(json_data["currentResources"]["population"])
+            city_population[id] = {
+                "housing_space": housing_space
+            }
             citizens = int(json_data["currentResources"]["citizens"])
             total_housing_space += housing_space
             total_citizens += citizens
@@ -97,7 +101,7 @@ def getStatus(session, event, stdin_fd, predetermined_input):
         print(
             "Housing Space: {}, Citizens: {}".format(
                 addThousandSeparator(total_housing_space),
-                addThousandSeparator(citizens),
+                addThousandSeparator(total_citizens),
             )
         )
         print(
@@ -113,9 +117,10 @@ def getStatus(session, event, stdin_fd, predetermined_input):
 
         print("\nOf which city do you want to see the state?")
         city = chooseCity(session)
+        city_id = city['id']
         banner()
 
-        (wood, good, typeGood) = getProductionPerSecond(session, city["id"])
+        (wood, good, typeGood) = getProductionPerHour(session, city["id"])
         print(
             "\033[1m{}{}{}".format(
                 color_arr[int(typeGood)], city["cityName"], color_arr[0]
@@ -124,6 +129,8 @@ def getStatus(session, event, stdin_fd, predetermined_input):
 
         resources = city["availableResources"]
         storageCapacity = city["storageCapacity"]
+        citizens = city["freeCitizens"]
+        housing_space = city_population[city_id]["housing_space"]
         color_resources = []
         for i in range(len(materials_names)):
             if resources[i] == storageCapacity:
@@ -157,9 +164,9 @@ def getStatus(session, event, stdin_fd, predetermined_input):
         print(
             "{}: {} {}: {}".format(
                 materials_names[0],
-                addThousandSeparator(wood * 3600),
+                addThousandSeparator(wood),
                 materials_names[typeGood],
-                addThousandSeparator(good * 3600),
+                addThousandSeparator(good),
             )
         )
 

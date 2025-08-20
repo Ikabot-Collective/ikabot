@@ -72,7 +72,7 @@ def getWineConsumptionPerHour(html):
     return 0
 
 
-def getProductionPerSecond(session, city_id):
+def getProductionPerHour(session, city_id):
     """
     Parameters
     ----------
@@ -83,19 +83,40 @@ def getProductionPerSecond(session, city_id):
     -------
     production: tuple[Decimal, Decimal, int]
     """
-    prod = session.post(
-        params={
-            "action": "header",
-            "function": "changeCurrentCity",
-            "actionRequest": actionRequest,
-            "cityId": city_id,
-            "ajax": "1",
-        }
-    )
-    prod = json.loads(prod, strict=False)
-    prod = prod[0][1]["headerData"]
-    wood_production = Decimal(prod["resourceProduction"])
-    luxury_production = Decimal(prod["tradegoodProduction"])
-    luxury_resource_type = int(prod["producedTradegood"])
+    resource_search_pool = {
+        1: "js_GlobalMenu_production_wine",
+        2: "js_GlobalMenu_production_marble",
+        3: "js_GlobalMenu_production_crystal",
+        4: "js_GlobalMenu_production_sulfur",
+    }
+
+    prod = session.get('?view=city&cityId=' + city_id)
+    luxury_type_match = re.search(r'tradegood&type=(\d+)', prod)
+    if not luxury_type_match:
+        raise ValueError(f"Could not determine luxury resource type for city {city_id}")
+    luxury_type = int(luxury_type_match.group(1))
+
+    # The group ([\d,\s]+) now matches digits, commas, AND spaces.
+    production_pattern = r'<td id="{}"[^>]*>\s*([\d,\s]+)\s*</td>'
+
+    # Get wood production
+    wood_match = re.search(production_pattern.format("js_GlobalMenu_resourceProduction"), prod)
+    # Get luxury production
+    luxury_match = re.search(production_pattern.format(resource_search_pool[luxury_type]), prod)
+
+    if not wood_match or not luxury_match:
+        raise AttributeError("Could not find production values. The game's HTML may have changed.")
+    
+    # helper function to strip all non-digit characters.
+    def clean_number(num_str):
+        return re.sub(r'[^\d]', '', num_str)
+
+    # Use the helper to clean the strings before converting to int.
+    wood_prod = int(clean_number(wood_match.group(1)))
+    luxury_prod = int(clean_number(luxury_match.group(1)))
+
+    wood_production = Decimal(wood_prod)
+    luxury_production = Decimal(luxury_prod)
+    luxury_resource_type = int(luxury_type)
 
     return wood_production, luxury_production, luxury_resource_type

@@ -192,8 +192,8 @@ IslandDict = TypedDict(
 
         # Added for compatibility
 
-        "x": str,
-        "y": str,
+        "x": int,
+        "y": int,
         "tipo": str,
     },
 )
@@ -236,7 +236,8 @@ def getFreeCitizens(html: str) -> int:
         an integer representing the amount of free citizens in the given city.
     """
     freeCitizens = re.search(r'js_GlobalMenu_citizens">(.*?)</span>', html).group(1)
-    return int(freeCitizens.replace(",", "").replace(".", ""))
+    freeCitizens = re.sub(r'\D', '', freeCitizens)
+    return int(freeCitizens)
 
 
 def getResourcesListedForSale(html: str) -> list[int]:
@@ -339,9 +340,9 @@ def getIsland(html: str) -> IslandDict:
 
     # Must add aliases for different properties to maintain backwards compatibility with old code
 
-    island["x"] = island["xCoord"]
-    island["y"] = island["yCoord"]
-    island["tipo"] = island["tradegood"]
+    island["x"] = int(island["xCoord"])
+    island["y"] = int(island["yCoord"])
+    island["tipo"] = str(island["tradegood"])
 
     for city in island["cities"]:
         for key in ["Id", "Name", "AllyId", "AllyTag"]:
@@ -385,8 +386,10 @@ def getCity(html: str) -> FullCityDict:
         this function returns a json parsed City object. For more information about this object refer to the github wiki page of Ikabot.
     """
 
-    city = re.search(r'ajax.Responder, (\[\[[\S\s]*?\]\])\)\;', html).group(1)
-    city = json.loads(city)[0][1]
+    city = re.search(
+        r'"updateBackgroundData",\s?([\s\S]*?)\],\["updateTemplateData"', html
+    ).group(1)
+    city = json.loads(city, strict=False)
 
     city["ownerId"] = city.pop("ownerId")
     city["ownerName"] = decodeUnicodeEscape(city["ownerName"])
