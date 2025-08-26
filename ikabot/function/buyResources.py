@@ -18,7 +18,7 @@ from ikabot.helpers.planRoutes import waitForArrival
 from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.resources import *
 from ikabot.helpers.signals import setInfoSignal
-from ikabot.helpers.varios import addThousandSeparator
+from ikabot.helpers.varios import addThousandSeparator, getDateTime
 from ikabot.helpers.pedirInfo import getShipCapacity
 
 
@@ -346,6 +346,10 @@ def buy(session, city, offer, amount_to_buy, ships_available, ship_capacity):
         offer["jugadorAComprar"],
     )
     sendToBotDebug(session, msg, debugON_buyResources)
+    resource_name = offer['tipo']
+    session.setStatus(
+        f"Bought {addThousandSeparator(amount_to_buy)} {resource_name} for {offer['precio']} gold from {offer['ciudadDestino']} ({offer['jugadorAComprar']}) ---> {city['name']} | {getDateTime()}"
+    )
 
 
 def do_it(session, city, offers, amount_to_buy):
@@ -364,7 +368,6 @@ def do_it(session, city, offers, amount_to_buy):
                 return
             if offer["amountAvailable"] == 0:
                 continue
-
             ships_available = waitForArrival(session)
             storageCapacity = ships_available * ship_capacity
             buy_amount = min(amount_to_buy, storageCapacity, offer["amountAvailable"])
