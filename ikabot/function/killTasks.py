@@ -3,10 +3,10 @@
 import datetime
 import sys
 
-from ikabot.config import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import enter, read
 from ikabot.helpers.process import run, updateProcessList
+from ikabot.helpers.resourcesReservation import release_all_for_pid
 
 
 def killTasks(session, event, stdin_fd, predetermined_input):
@@ -63,6 +63,7 @@ def killTasks(session, event, stdin_fd, predetermined_input):
                     run("taskkill /F /PID {}".format(process_list[choise - 1]["pid"]))
                 else:
                     run("kill -9 {}".format(process_list[choise - 1]["pid"]))
+                release_all_for_pid(process_list[choise - 1]["pid"])
     except KeyboardInterrupt:
         event.set()
         return
