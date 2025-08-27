@@ -335,6 +335,10 @@ def wait_for_miracle(session, island):
                 enddate = temple_response[elem]["countdown"]["enddate"]
                 currentdate = temple_response[elem]["countdown"]["currentdate"]
                 wait_time = enddate - currentdate
+                next_activation_time = time.time() + wait_time
+                session.setStatus(
+                    f"Miracle {island['wonderName']} is activated. Available at: {getDateTime(next_activation_time)}"
+                )
                 break
         else:
             available = (
@@ -361,6 +365,7 @@ def do_it(session, island, iterations):
     iterations : int
     """
     iterations_left = iterations
+    session.setStatus(f"Waiting to activate {island['wonderName']}...")
     for i in range(iterations):
 
         wait_for_miracle(session, island)
