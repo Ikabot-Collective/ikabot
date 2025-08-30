@@ -76,6 +76,7 @@ def do_it(session, godids, mode, times):
                         f"Not enough favor @{getDateTime()}, re-trying in 3h."
                     )
                     time.sleep(wait_time / 4)  # 12h / 4 = 3 hours
+                    favor = getFavor(session, cityid, pos)
                 for godid in godids:
                     donateShrine(session, godid, cityid, pos)
                     time.sleep(2)
@@ -93,6 +94,7 @@ def do_it(session, godids, mode, times):
                         f"Not enough favor @{getDateTime()}, re-trying in 3h."
                     )
                     time.sleep(wait_time / 4)  # 12h / 4 = 3 hours
+                    favor = getFavor(session, cityid, pos)
                 for godid in godids:
                     donateShrine(session, godid, cityid, pos)
                     time.sleep(2)
