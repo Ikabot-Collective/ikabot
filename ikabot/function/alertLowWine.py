@@ -52,6 +52,7 @@ def alertLowWine(session, event, stdin_fd, predetermined_input):
             auto_transfer = False
             transfer_amount = 0
         print("It will be alerted when the wine runs out in less than {:d} hours in any city, and {:,d} wine will be transferred if necessary.".format(hours, transfer_amount))
+
         enter()
     except KeyboardInterrupt:
         event.set()
@@ -229,7 +230,8 @@ def do_it(session, hours, auto_transfer, transfer_amount):
                                 0,  # Sulfur
                             ))
                             
-                            message_log.append(f"Will transfer {transfer_amount:,.0f:,.0f} from {donor_city['name']}.")
+                            message_log.append(f"Will transfer {transfer_amount:,d} from {donor_city['name']}.")
+
                         else:
                             message_log.append(f"No city has sufficient wine to transfer to {city['name']}.")
 
