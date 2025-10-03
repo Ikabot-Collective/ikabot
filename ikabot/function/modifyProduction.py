@@ -107,11 +107,12 @@ def modifyProduction(session, event, stdin_fd, predetermined_input):
                         finalWorkers = int(max_normal / 100 * percentageWorkers)
                     
                     # Set the workers
+                    worker_key = "rw" if resource_type == "resource" else "tw"    
                     session.post(params={
                         "islandId": islandId, "cityId": city["id"],
                         "type": resource_type, "screen": resource_type,
                         "action": "IslandScreen", "function": "workerPlan",
-                        "rw": finalWorkers, "templateView": resource_type,
+                         worker_key: finalWorkers, "templateView": resource_type,
                         "actionRequest": actionRequest, "ajax": "1"
                     })
                     
