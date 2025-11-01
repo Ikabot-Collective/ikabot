@@ -51,7 +51,9 @@ def sendToBot(session, msg, Token=False, Photo=None):
         logger.error("Tried to message TG bot without correct tg data!", exc_info=True)
         return
     if Token is False:
-        msg = "pid:{}\n{}\n{}".format(os.getpid(), config.infoUser, msg)
+        # A bit hacky, but fixes issue that config.infoUser isn't updated in new processes for sending TG messages.
+        infoUser = "Server:{}, World:{}, Player:{}".format(self.servidor, self.word, self.username)
+        msg = "pid:{}\n{}\n{}".format(os.getpid(), infoUser, msg)
 
     sessionData = session.getSessionData()
     telegram_data = sessionData["shared"]["telegram"]
