@@ -144,20 +144,34 @@ def webServer(session, event, stdin_fd, predetermined_input, port=None):
                 response = Response(image_io, 200, headers)
                 return response
 
-            if (
+            is_image = (
                 ".png" in request.url
                 or ".jpg" in request.url
                 or ".gif" in request.url
                 or ".cur" in request.url
-            ):
+            )
+            
+            if is_image:
                 # add caching for images
                 expires = datetime.utcnow() + timedelta(days=1)
                 headers = dict()
                 headers["Expires"] = expires.strftime("%a, %d %b %Y %H:%M:%S GMT")
                 headers["Cache-Control"] = "public, max-age=86400"
                 name = request.url.split("/")[-1]
+                
                 if name in web_cache:
-                    return Response(BytesIO(web_cache[name]), 200, headers)
+                    # Determine and enforce Content-Type when using the web_cache cache:
+                    content_type = 'image/png'
+                    if '.jpg' in name:
+                        content_type = 'image/jpeg'
+                    elif '.gif' in name:
+                        content_type = 'image/gif'
+                    elif '.cur' in name:
+                        content_type = 'image/x-icon' 
+                    
+                    response = Response(BytesIO(web_cache[name]), 200, headers)
+                    response.headers['Content-Type'] = content_type
+                    return response
 
             new_data = dict()
             try:
@@ -199,18 +213,20 @@ def webServer(session, event, stdin_fd, predetermined_input, port=None):
                     allow_redirects=False,
                 )
 
-            if (
-                ".png" in request.url
-                or ".jpg" in request.url
-                or ".gif" in request.url
-                or ".cur" in request.url
-            ):
+            if is_image:
                 # cache was missed, add to cache and send response
                 expires = datetime.utcnow() + timedelta(days=1)
                 headers = dict()
                 headers["Expires"] = expires.strftime("%a, %d %b %Y %H:%M:%S GMT")
                 headers["Cache-Control"] = "public, max-age=86400"
+                
+                # Get Content-Type from the original server for the Content-Type
+                original_content_type = resp.headers.get("Content-Type", 'image/png')
+                
                 response = Response(resp.content, 200, headers)
+                response.headers['Content-Type'] = original_content_type # Aseguramos el Content-Type
+                
+                # Cached (must use resp.content binary)
                 web_cache[request.url.split("/")[-1]] = resp.content
                 return response
 
