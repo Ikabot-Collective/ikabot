@@ -124,6 +124,10 @@ def webServer(session, event, stdin_fd, predetermined_input, port=None):
 
             dest_url = f"{path}"
             
+            # FIX: Use the full path as the cache key
+            # This prevents collisions between images with the same key.
+            cache_key = request.url.replace(f'http://{request.host}/', '')
+            
             if "ikabot=1" in request.url:
                 return handleIkabotAPIRequest(session, request)
 
@@ -157,10 +161,10 @@ def webServer(session, event, stdin_fd, predetermined_input, port=None):
                 headers = dict()
                 headers["Expires"] = expires.strftime("%a, %d %b %Y %H:%M:%S GMT")
                 headers["Cache-Control"] = "public, max-age=86400"
-                name = request.url.split("/")[-1]
+                name = cache_key 
                 
                 if name in web_cache:
-                    # Determine and enforce Content-Type when using the web_cache cache:
+                    # Determine and enforce Content-Type when using the cache
                     content_type = 'image/png'
                     if '.jpg' in name:
                         content_type = 'image/jpeg'
@@ -214,20 +218,25 @@ def webServer(session, event, stdin_fd, predetermined_input, port=None):
                 )
 
             if is_image:
+									 
+										
+										
+										
+			  
                 # cache was missed, add to cache and send response
                 expires = datetime.utcnow() + timedelta(days=1)
                 headers = dict()
                 headers["Expires"] = expires.strftime("%a, %d %b %Y %H:%M:%S GMT")
                 headers["Cache-Control"] = "public, max-age=86400"
                 
-                # Get Content-Type from the original server for the Content-Type
+                # Get Content-Type from the original server
                 original_content_type = resp.headers.get("Content-Type", 'image/png')
                 
                 response = Response(resp.content, 200, headers)
-                response.headers['Content-Type'] = original_content_type # Aseguramos el Content-Type
+                response.headers['Content-Type'] = original_content_type
                 
-                # Cached (must use resp.content binary)
-                web_cache[request.url.split("/")[-1]] = resp.content
+                # Cached (using unique key)
+                web_cache[cache_key] = resp.content
                 return response
 
             # Replace all instances of the target URL with the proxy URL
