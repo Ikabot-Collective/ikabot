@@ -259,7 +259,6 @@ class Session:
 
             # get __cfduid cookie
             self.headers = {
-                "Host": "gameforge.com",
                 "User-Agent": self.user_agent,
                 "Accept": "*/*",
                 "Accept-Language": "en-US,en;q=0.5",
@@ -278,7 +277,6 @@ class Session:
 
             # update __cfduid cookie
             self.headers = {
-                "Host": "gameforge.com",
                 "User-Agent": self.user_agent,
                 "Accept": "*/*",
                 "Accept-Language": "en-US,en;q=0.5",
@@ -364,8 +362,6 @@ class Session:
 
             # options req (not really needed)
             self.headers = {
-                "Host": "gameforge.com",
-                "Connection": "keep-alive",
                 "Accept": "*/*",
                 "Accept-Language": "en-US,en;q=0.5",
                 "Accept-Encoding": "gzip, deflate, br",
@@ -385,8 +381,6 @@ class Session:
 
             # send creds
             self.headers = {
-                "Host": "gameforge.com",
-                "Connection": "keep-alive",
                 "Accept": "*/*",
                 "Accept-Language": "en-US,en;q=0.5",
                 "Accept-Encoding": "gzip, deflate, br",
@@ -406,21 +400,19 @@ class Session:
             data = {
                 "identity": self.mail,
                 "password": self.password,
-                "locale": "en_GB",
+                "locale": "en-GB",
                 "gfLang": "en",
                 "gameId": platformGameId,
                 "gameEnvironmentId": gameEnvironmentId,
                 "blackbox": self.blackbox,
             }
             r = self.s.post(
-                "https://spark-web.gameforge.com/api/v2/authProviders/mauth/session", json=data
+                "https://spark-web.gameforge.com/api/v2/authProviders/mauth/sessions", json=data
             )
             if "gf-challenge-id" in r.headers:
 
                 while True:
                     self.headers = {
-                        "Host": "gameforge.com",
-                        "Connection": "keep-alive",
                         "Accept": "*/*",
                         "Accept-Language": "en-US,en;q=0.5",
                         "Accept-Encoding": "gzip, deflate, br",
@@ -440,7 +432,7 @@ class Session:
                     data = {
                             "identity": self.mail,
                             "password": self.password,
-                            "locale": "en_GB",
+                            "locale": "en-GB",
                             "gfLang": "en",
                             "gameId": platformGameId,
                             "gameEnvironmentId": gameEnvironmentId,
@@ -560,8 +552,6 @@ class Session:
                     ).json()
                     if captcha_sent["status"] == "solved":
                         self.headers = {
-                            "Host": "gameforge.com",
-                            "Connection": "keep-alive",
                             "Accept": "*/*",
                             "Accept-Language": "en-US,en;q=0.5",
                             "Accept-Encoding": "gzip, deflate, br",
@@ -582,7 +572,7 @@ class Session:
                         data = {
                             "identity": self.mail,
                             "password": self.password,
-                            "locale": "en_GB",
+                            "locale": "en-GB",
                             "gfLang": "en",
                             "gameId": platformGameId,
                             "gameEnvironmentId": gameEnvironmentId,
