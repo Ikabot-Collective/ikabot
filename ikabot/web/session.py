@@ -259,7 +259,6 @@ class Session:
 
             # get __cfduid cookie
             self.headers = {
-                "Host": "gameforge.com",
                 "User-Agent": self.user_agent,
                 "Accept": "*/*",
                 "Accept-Language": "en-US,en;q=0.5",
@@ -278,7 +277,6 @@ class Session:
 
             # update __cfduid cookie
             self.headers = {
-                "Host": "gameforge.com",
                 "User-Agent": self.user_agent,
                 "Accept": "*/*",
                 "Accept-Language": "en-US,en;q=0.5",
@@ -364,8 +362,6 @@ class Session:
 
             # options req (not really needed)
             self.headers = {
-                "Host": "gameforge.com",
-                "Connection": "keep-alive",
                 "Accept": "*/*",
                 "Accept-Language": "en-US,en;q=0.5",
                 "Accept-Encoding": "gzip, deflate, br",
@@ -385,8 +381,6 @@ class Session:
 
             # send creds
             self.headers = {
-                "Host": "gameforge.com",
-                "Connection": "keep-alive",
                 "Accept": "*/*",
                 "Accept-Language": "en-US,en;q=0.5",
                 "Accept-Encoding": "gzip, deflate, br",
@@ -406,22 +400,19 @@ class Session:
             data = {
                 "identity": self.mail,
                 "password": self.password,
-                "locale": "en_GB",
+                "locale": "en-GB",
                 "gfLang": "en",
-                "platformGameId": platformGameId,
+                "gameId": platformGameId,
                 "gameEnvironmentId": gameEnvironmentId,
-                "autoGameAccountCreation": False,
                 "blackbox": self.blackbox,
             }
             r = self.s.post(
-                "https://gameforge.com/api/v1/auth/thin/sessions", json=data
+                "https://spark-web.gameforge.com/api/v2/authProviders/mauth/sessions", json=data
             )
             if "gf-challenge-id" in r.headers:
 
                 while True:
                     self.headers = {
-                        "Host": "gameforge.com",
-                        "Connection": "keep-alive",
                         "Accept": "*/*",
                         "Accept-Language": "en-US,en;q=0.5",
                         "Accept-Encoding": "gzip, deflate, br",
@@ -439,17 +430,16 @@ class Session:
                     self.s.headers.clear()
                     self.s.headers.update(self.headers)
                     data = {
-                        "identity": self.mail,
-                        "password": self.password,
-                        "locale": "en_GB",
-                        "gfLang": "en",
-                        "platformGameId": platformGameId,
-                        "gameEnvironmentId": gameEnvironmentId,
-                        "autoGameAccountCreation": False,
-                        "blackbox": self.blackbox,
-                    }
+                            "identity": self.mail,
+                            "password": self.password,
+                            "locale": "en-GB",
+                            "gfLang": "en",
+                            "gameId": platformGameId,
+                            "gameEnvironmentId": gameEnvironmentId,
+                            "blackbox": self.blackbox,
+                        }
                     r = self.s.post(
-                        "https://gameforge.com/api/v1/auth/thin/sessions", json=data
+                        "https://spark-web.gameforge.com/api/v2/authProviders/mauth/sessions", json=data
                     )
 
                     challenge_id = r.headers["gf-challenge-id"].split(";")[0]
@@ -562,8 +552,6 @@ class Session:
                     ).json()
                     if captcha_sent["status"] == "solved":
                         self.headers = {
-                            "Host": "gameforge.com",
-                            "Connection": "keep-alive",
                             "Accept": "*/*",
                             "Accept-Language": "en-US,en;q=0.5",
                             "Accept-Encoding": "gzip, deflate, br",
@@ -576,6 +564,7 @@ class Session:
                             "Sec-Fetch-Site": "same-site",
                             "TE": "trailers",
                             "TNT-Installation-Id": "",
+                            "Gf-Challenge-Id": challenge_id,
                             "User-Agent": self.user_agent,
                         }
                         self.s.headers.clear()
@@ -583,15 +572,14 @@ class Session:
                         data = {
                             "identity": self.mail,
                             "password": self.password,
-                            "locale": "en_GB",
+                            "locale": "en-GB",
                             "gfLang": "en",
-                            "platformGameId": platformGameId,
+                            "gameId": platformGameId,
                             "gameEnvironmentId": gameEnvironmentId,
-                            "autoGameAccountCreation": False,
                             "blackbox": self.blackbox,
                         }
                         r = self.s.post(
-                            "https://gameforge.com/api/v1/auth/thin/sessions", json=data
+                            "https://spark-web.gameforge.com/api/v2/authProviders/mauth/sessions", json=data
                         )
                         if "gf-challenge-id" in r.headers:
                             self.logger.error("Failed to solve interactive captcha!")

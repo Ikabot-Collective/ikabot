@@ -52,7 +52,7 @@ def sendToBot(session, msg, Token=False, Photo=None):
         return
     if Token is False:
         # A bit hacky, but fixes issue that config.infoUser isn't updated in new processes for sending TG messages.
-        infoUser = "Server:{}, World:{}, Player:{}".format(self.servidor, self.word, self.username)
+        infoUser = "Server:{}, World:{}, Player:{}".format(session.servidor, session.word, session.username)
         msg = "pid:{}\n{}\n{}".format(os.getpid(), infoUser, msg)
 
     sessionData = session.getSessionData()
