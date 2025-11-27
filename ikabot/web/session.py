@@ -588,7 +588,7 @@ class Session:
                         else:
                             break
 
-            if r.status_code == 403:
+            if 'token' not in r.text:
                 print("Failed to log in...")
                 print(
                     "Log into the lobby via browser and then press CTRL + SHIFT + J to open up the javascript console"
