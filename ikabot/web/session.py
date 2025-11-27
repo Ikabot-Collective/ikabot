@@ -409,8 +409,25 @@ class Session:
             r = self.s.post(
                 "https://spark-web.gameforge.com/api/v2/authProviders/mauth/sessions", json=data
             )
-            if "gf-challenge-id" in r.headers:
 
+            # MFA / 2FA Check. If the server responds with 409, it means 2FA is required.
+            if r.status_code == 409 and 'OTP_REQUIRED' in r.text:
+                if self.padre:
+                    print("Two-factor authentication (2FA) is required.")
+                    mfa_code = read(msg="Enter your 2FA code: ")
+                else:
+                    self.logger.error("2FA is required, but it cannot be requested in a child process.")
+                    sys.exit("Login failure: 2FA is required in a non-interactive process.")
+
+                # Add the OTP code to the original data and send the request again
+                # to the same endpoint.
+                data['otpCode'] = mfa_code
+
+                r = self.s.post(
+                    "https://spark-web.gameforge.com/api/v2/authProviders/mauth/sessions", json=data
+                )
+
+            if "gf-challenge-id" in r.headers and 'token' not in r.text:
                 while True:
                     self.headers = {
                         "Accept": "*/*",
@@ -588,7 +605,7 @@ class Session:
                         else:
                             break
 
-            if r.status_code == 403:
+            if 'token' not in r.text:
                 print("Failed to log in...")
                 print(
                     "Log into the lobby via browser and then press CTRL + SHIFT + J to open up the javascript console"
