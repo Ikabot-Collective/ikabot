@@ -590,6 +590,7 @@ class Session:
 
             if 'token' not in r.text:
                 print("Failed to log in...")
+                print(f"Expected to get token in response to login request but instead got code {r.status_code} and body {r.text}")
                 print(
                     "Log into the lobby via browser and then press CTRL + SHIFT + J to open up the javascript console"
                 )
