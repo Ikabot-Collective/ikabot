@@ -694,7 +694,7 @@ def do_attack(session, island, city, schematic, ship_capacity, float_city=None, 
             for float_attack_round in sends_data["float_city"]:
                 float_attack_data, float_ships_needed, float_travel_time = (
                     get_send_attack_data(
-                        session, island, float_city, float_attack_round, units_data
+                        session, island, float_city, float_attack_round, units_data, ship_capacity
                     )
                 )
                 float_city_data.append(
@@ -714,7 +714,7 @@ def do_attack(session, island, city, schematic, ship_capacity, float_city=None, 
         for main_attack_round in sends_data["main_city"]:
             main_attack_data, main_ships_needed, main_travel_time = (
                 get_send_attack_data(
-                    session, island, city, main_attack_round, units_data
+                    session, island, city, main_attack_round, units_data, ship_capacity
                 )
             )
             main_city_data.append(
@@ -819,7 +819,7 @@ def loot(session, island, city, schematic, ship_capacity, float_city=None, units
             city if schematic["looting"]["from_float"] is False else float_city
         )
         attack_data, ships_needed, travel_time = get_send_attack_data(
-            session, island, destin_city, schematic, units_data
+            session, island, destin_city, schematic, units_data, ship_capacity
         )
         attack_data["transporter"] = min(ships_available, ships_needed)
 
@@ -842,7 +842,7 @@ def loot(session, island, city, schematic, ship_capacity, float_city=None, units
 
         if send_scatter:
             ram_attack_data, ram_travel_time, _ = get_send_attack_data(
-                session, island, destin_city, {"307": 1}, units_data
+                session, island, destin_city, {"307": 1}, units_data, ship_capacity
             )
             session.post(params=ram_attack_data)
             new_countdown = wait_next_scatter(session, ram_travel_time)
@@ -855,7 +855,7 @@ def loot(session, island, city, schematic, ship_capacity, float_city=None, units
         wait_for_arrival(session, city, island)
 
 
-def get_send_attack_data(session, island, city, attack_round, units_data):
+def get_send_attack_data(session, island, city, attack_round, units_data, ship_capacity):
     attack_data = {
         "action": "transportOperations",
         "function": "attackBarbarianVillage",
@@ -891,7 +891,7 @@ def get_send_attack_data(session, island, city, attack_round, units_data):
         "templateView": "plunder",
         "ajax": 1,
     }
-    return load_troops(session, city, island, attack_round, units_data, attack_data)
+    return load_troops(session, city, island, attack_round, units_data, attack_data, ship_capacity)
 
 
 def get_units_scattered(session, city_id=None):
