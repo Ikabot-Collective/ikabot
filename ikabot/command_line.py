@@ -1,14 +1,10 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import datetime
 import multiprocessing
-import os
-import sys
-import time
 
-from ikabot.config import *
 from ikabot.function.activateMiracle import activateMiracle
+from ikabot.function.activateShrine import activateShrine
 from ikabot.function.alertAttacks import alertAttacks
 from ikabot.function.alertLowWine import alertLowWine
 from ikabot.function.attackBarbarians import attackBarbarians
@@ -16,6 +12,7 @@ from ikabot.function.autoBarbarians import autoBarbarians
 from ikabot.function.autoPirate import autoPirate
 from ikabot.function.buyResources import buyResources
 from ikabot.function.checkForUpdate import checkForUpdate
+from ikabot.function.consolidateResources import consolidateResources
 from ikabot.function.constructBuilding import constructBuilding
 from ikabot.function.constructionList import constructionList
 from ikabot.function.decaptchaConf import decaptchaConf
@@ -26,8 +23,8 @@ from ikabot.function.dumpWorld import dumpWorld
 from ikabot.function.getStatus import getStatus
 from ikabot.function.importExportCookie import importExportCookie
 from ikabot.function.investigate import investigate
-from ikabot.function.consolidateResources import consolidateResources
 from ikabot.function.killTasks import killTasks
+from ikabot.function.loadCustomModule import loadCustomModule
 from ikabot.function.loginDaily import loginDaily
 from ikabot.function.logs import logs
 from ikabot.function.proxyConf import proxyConf, show_proxy
@@ -41,14 +38,9 @@ from ikabot.function.trainArmy import trainArmy
 from ikabot.function.update import update
 from ikabot.function.vacationMode import vacationMode
 from ikabot.function.webServer import webServer
-from ikabot.function.loadCustomModule import loadCustomModule
-from ikabot.function.activateShrine import activateShrine
-from ikabot.helpers.botComm import telegramDataIsValid, updateTelegramData
-from ikabot.helpers.gui import *
-from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.process import updateProcessList
+from ikabot.helpers.resourcesReservation import clearReservations
 from ikabot.web.session import *
-from ikabot.function.modifyProduction import modifyProduction
 
 
 def menu(session, checkUpdate=True):
@@ -148,7 +140,6 @@ def menu(session, checkUpdate=True):
         2107: importExportCookie,
         2108: loadCustomModule,
         22: consolidateResources,
-        23: modifyProduction
     }
 
     print("(0)  Exit")
@@ -345,6 +336,7 @@ def main():
     manager = multiprocessing.Manager()
     predetermined_input = manager.list()
     config.predetermined_input = predetermined_input
+    clearReservations()
     try:
         start()
     except KeyboardInterrupt:
