@@ -49,6 +49,7 @@ from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.process import updateProcessList
 from ikabot.web.session import *
 from ikabot.function.modifyProduction import modifyProduction
+from ikabot.function.exportCityInfo import exportCityInfo
 
 
 def menu(session, checkUpdate=True):
@@ -148,7 +149,8 @@ def menu(session, checkUpdate=True):
         2107: importExportCookie,
         2108: loadCustomModule,
         22: consolidateResources,
-        23: modifyProduction
+        23: modifyProduction,
+        24: exportCityInfo,
     }
 
     print("(0)  Exit")
@@ -175,12 +177,13 @@ def menu(session, checkUpdate=True):
     print("(21) Options / Settings")
     print("(22) Consolidate resources")
     print("(23) Set Production of Saw mill / Luxury good")
+    print("(24) Export full city details")
 
     total_options = len(menu_actions) + 1
     selected = read(min=0, max=total_options, digit=True, empty=True)
-    
+
     # refresh main menu on hitting enter
-    if selected == '':
+    if selected == "":
         return menu(session)
 
     if selected == 7:
@@ -250,7 +253,7 @@ def menu(session, checkUpdate=True):
         print("(0) Back")
         print("(1) Monitor islands")
         print("(2) Dump & Search world")
-        
+
         selected = read(min=0, max=2, digit=True)
         if selected == 0:
             menu(session)
@@ -360,6 +363,8 @@ if __name__ == "__main__":
 #############################################################
 # This is necessary to ensure that flask is frozen together #
 # with other requirements when creating ikabot.exe          #
-try: import flask                                           #
-except: pass                                                #
+try:
+    import flask  #
+except:
+    pass  #
 #############################################################
