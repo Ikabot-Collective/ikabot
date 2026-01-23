@@ -3,13 +3,62 @@
 
 import json
 import sys
+import time
+from datetime import datetime
 
 import requests
 
 from ikabot.config import *
+from ikabot.helpers.botComm import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import read
 
+
+def wait_for_key_or_timeout(key, timeout_seconds):
+    """Wait for a specific key or timeout, whichever comes first.
+    
+    Parameters
+    ----------
+    key : str
+        The key to wait for
+    timeout_seconds : int
+        Maximum seconds to wait before returning
+    
+    Returns
+    -------
+    bool
+        True if the key was pressed, False if timeout occurred
+    """
+    if isWindows:
+        # Windows implementation using msvcrt
+        import msvcrt
+        start_time = time.time()
+        while (time.time() - start_time) < timeout_seconds:
+            if msvcrt.kbhit():
+                pressed = msvcrt.getch().decode('utf-8', errors='ignore')
+                if pressed == key:
+                    return True
+            time.sleep(0.1)
+        return False
+    else:
+        # Unix/Linux implementation using select
+        import select
+        import termios
+        import tty
+        
+        old_settings = termios.tcgetattr(sys.stdin)
+        try:
+            tty.setcbreak(sys.stdin.fileno())
+            start_time = time.time()
+            while (time.time() - start_time) < timeout_seconds:
+                rlist, _, _ = select.select([sys.stdin], [], [], 0.1)
+                if rlist:
+                    pressed = sys.stdin.read(1)
+                    if pressed == key:
+                        return True
+            return False
+        finally:
+            termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
 
 
 def importExportCookie(session, event, stdin_fd, predetermined_input):
@@ -106,4 +155,65 @@ def exportCookie(session):
     """
     )
     print(cookies_js)
-    enter()
+    print("\n")
+    print("(t) Send to Telegram")
+    print("(') Return to main menu")
+    
+    choice = read(values=["t", "T", "'"])
+    
+    if choice.lower() == "t":
+        sendCookieToTelegram(session, cookies_js)
+
+
+def sendCookieToTelegram(session, cookies_js):
+    """Send the cookie JavaScript code to Telegram.
+    
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+        Session object
+    cookies_js : str
+        The JavaScript code to send
+    """
+    banner()
+    
+    # Check if Telegram is configured
+    if not telegramDataIsValid(session):
+        print("Telegram is not configured.")
+        print("You need to set up Telegram to use this feature.\n")
+        
+        # Prompt user to configure Telegram
+        result = updateTelegramData(session)
+        
+        if not result:
+            print("\nTelegram setup was not completed. Cannot export cookie.")
+            enter()
+            return
+        
+        banner()
+        print("Telegram configured successfully!\n")
+    
+    # Build the message with date/time
+    now = datetime.now()
+    date_time_str = now.strftime("%H:%M %d %b %Y")  # e.g., "03:14 23 Jan 2025"
+    
+    msg = "Server:{}, World:{}, Player:{}, {}\n\n{}".format(
+        session.servidor,
+        session.word,
+        session.username,
+        date_time_str,
+        cookies_js
+    )
+    
+    # Send to Telegram
+    sendToBot(session, msg, Token=True)
+    
+    # Display success message
+    banner()
+    print("Press ' to return to main menu or wait 10 seconds\n")
+    print("{}Sent successfully!{}".format(bcolors.GREEN, bcolors.ENDC))
+    print("\nThe cookie has been sent to your Telegram bot.")
+    print("Paste it into the browser console while on the Ikariam website.\n")
+    
+    # Wait for ' key or 10 seconds
+    wait_for_key_or_timeout("'", 10)
