@@ -334,11 +334,15 @@ def getShipCapacity(session):
     capacity : int
         an integer representing the ship capacity of the user's current city
     """
-    html = session.post('view=merchantNavy')
-    ship_capacity = html.split('singleTransporterCapacity":')[1].split(',"singleFreighterCapacity')[0]
-    freighter_capacity = html.split('singleFreighterCapacity":')[1].split(',"draftEffect')[0]
+    html = session.get('view=merchantNavy')
+    data = re.search(r'ajax.Responder, (\[\[[\S\s]*?\]\])\)\;', html).group(1)
+    data = json.loads(data, strict=False)
+
+    ship_capacity = data[3][1]['singleTransporterCapacity']
+    freighter_capacity = data[3][1]['singleFreighterCapacity']
 
     return int(ship_capacity), int(freighter_capacity)
+
 
 
 def ignoreCities(session, msg=None):
