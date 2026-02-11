@@ -43,6 +43,7 @@ from ikabot.function.vacationMode import vacationMode
 from ikabot.function.webServer import webServer
 from ikabot.function.loadCustomModule import loadCustomModule
 from ikabot.function.activateShrine import activateShrine
+from ikabot.function.tavernManager import tavernManager
 from ikabot.helpers.botComm import telegramDataIsValid, updateTelegramData
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import read
@@ -148,7 +149,8 @@ def menu(session, checkUpdate=True):
         2107: importExportCookie,
         2108: loadCustomModule,
         22: consolidateResources,
-        23: modifyProduction
+        23: modifyProduction,
+        50: tavernManager,
     }
 
     print("(0)  Exit")
@@ -175,8 +177,11 @@ def menu(session, checkUpdate=True):
     print("(21) Options / Settings")
     print("(22) Consolidate resources")
     print("(23) Set Production of Saw mill / Luxury good")
+    print("")
+    print("--- Custom Modules ---")
+    print("(50) Tavern Manager")
 
-    total_options = len(menu_actions) + 1
+    total_options = max(k for k in menu_actions if k < 100)
     selected = read(min=0, max=total_options, digit=True, empty=True)
     
     # refresh main menu on hitting enter
