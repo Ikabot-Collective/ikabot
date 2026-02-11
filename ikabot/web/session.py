@@ -1081,6 +1081,19 @@ class Session:
                     "text": response.text,
                 }
                 html = response.text
+
+               # modifica redirect 302
+                if response.status_code == 302:
+                    location = response.headers.get('Location', '')
+                    if 'lobby.ikariam.gameforge.com' in location:
+                        raise AssertionError("Redirect to lobby detected")
+                
+                # modifica processi 404
+                if response.status_code == 404:
+                    self.logger.error(f"404 Not Found received for URL: {url}")
+                    self.logger.error(f"HTML received: {response.text[:200]}")
+                    raise AssertionError("404 Not Found - Session likely expired")
+
                 if self.__test_server_maintenace(html):
                     self.logger.warning("Ikariam world backup is in progress, waiting 10 mins.")
                     time.sleep(10 * 60)
@@ -1171,6 +1184,19 @@ class Session:
                     "text": response.text,
                 }
                 resp = response.text
+
+                #  modifica redirect 302
+                if response.status_code == 302:
+                    location = response.headers.get('Location', '')
+                    if 'lobby.ikariam.gameforge.com' in location:
+                        raise AssertionError("Redirect to lobby detected")
+                
+                #  modifica processi 404
+                if response.status_code == 404:
+                    self.logger.error(f"404 Not Found received for POST URL: {url}")
+                    self.logger.error(f"HTML received: {response.text[:200]}")
+                    raise AssertionError("404 Not Found - Session likely expired")
+
                 if self.__test_server_maintenace(resp):
                     self.logger.warning("Ikariam world backup is in progress, waiting 10 mins.")
                     time.sleep(10 * 60)
