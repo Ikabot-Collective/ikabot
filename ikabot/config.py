@@ -5,7 +5,7 @@ import locale
 import os
 
 # Version is changed automatically by the release pipeline
-IKABOT_VERSION = "7.2.6"
+IKABOT_VERSION = "7.2.7"
 
 
 IKABOT_VERSION_TAG = "v" + IKABOT_VERSION
