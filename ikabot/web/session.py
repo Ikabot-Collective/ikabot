@@ -409,8 +409,25 @@ class Session:
             r = self.s.post(
                 "https://spark-web.gameforge.com/api/v2/authProviders/mauth/sessions", json=data
             )
-            if "gf-challenge-id" in r.headers:
 
+            # MFA / 2FA Check. If the server responds with 409, it means 2FA is required.
+            if r.status_code == 409 and 'OTP_REQUIRED' in r.text:
+                if self.padre:
+                    print("Two-factor authentication (2FA) is required.")
+                    mfa_code = read(msg="Enter your 2FA code: ")
+                else:
+                    self.logger.error("2FA is required, but it cannot be requested in a child process.")
+                    sys.exit("Login failure: 2FA is required in a non-interactive process.")
+
+                # Add the OTP code to the original data and send the request again
+                # to the same endpoint.
+                data['otpCode'] = mfa_code
+
+                r = self.s.post(
+                    "https://spark-web.gameforge.com/api/v2/authProviders/mauth/sessions", json=data
+                )
+
+            if "gf-challenge-id" in r.headers and 'token' not in r.text:
                 while True:
                     self.headers = {
                         "Accept": "*/*",
@@ -588,8 +605,9 @@ class Session:
                         else:
                             break
 
-            if r.status_code == 403:
+            if 'token' not in r.text:
                 print("Failed to log in...")
+                print(f"Expected to get token in response to login request but instead got code {r.status_code} and body {r.text}")
                 print(
                     "Log into the lobby via browser and then press CTRL + SHIFT + J to open up the javascript console"
                 )
@@ -1063,6 +1081,19 @@ class Session:
                     "text": response.text,
                 }
                 html = response.text
+
+               # modifica redirect 302
+                if response.status_code == 302:
+                    location = response.headers.get('Location', '')
+                    if 'lobby.ikariam.gameforge.com' in location:
+                        raise AssertionError("Redirect to lobby detected")
+                
+                # modifica processi 404
+                if response.status_code == 404:
+                    self.logger.error(f"404 Not Found received for URL: {url}")
+                    self.logger.error(f"HTML received: {response.text[:200]}")
+                    raise AssertionError("404 Not Found - Session likely expired")
+
                 if self.__test_server_maintenace(html):
                     self.logger.warning("Ikariam world backup is in progress, waiting 10 mins.")
                     time.sleep(10 * 60)
@@ -1153,6 +1184,19 @@ class Session:
                     "text": response.text,
                 }
                 resp = response.text
+
+                #  modifica redirect 302
+                if response.status_code == 302:
+                    location = response.headers.get('Location', '')
+                    if 'lobby.ikariam.gameforge.com' in location:
+                        raise AssertionError("Redirect to lobby detected")
+                
+                #  modifica processi 404
+                if response.status_code == 404:
+                    self.logger.error(f"404 Not Found received for POST URL: {url}")
+                    self.logger.error(f"HTML received: {response.text[:200]}")
+                    raise AssertionError("404 Not Found - Session likely expired")
+
                 if self.__test_server_maintenace(resp):
                     self.logger.warning("Ikariam world backup is in progress, waiting 10 mins.")
                     time.sleep(10 * 60)
