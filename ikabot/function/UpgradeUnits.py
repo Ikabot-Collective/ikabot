@@ -272,7 +272,7 @@ def run_workshop_upgrade_interface(session, city_id, position, action_request, e
         except Exception:
             pass
 
-    print("\nTotal estimated cost:")
+    print("\nTotal estimated cost for first level upgrades:")
     print(f" - Gold: {total_gold:,} gold")
     print(f" - Crystal: {total_crystal:,} crystal")
 
