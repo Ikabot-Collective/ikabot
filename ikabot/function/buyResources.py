@@ -90,7 +90,7 @@ def getOffers(session, city):
             "jugadorAComprar": hit[1],
             "bienesXminuto": int(hit[2]),
             "amountAvailable": int(
-                hit[3].replace(",", "").replace(".", "").replace("<", "").replace(" ", "")
+                hit[3].replace(",", "").replace(".", "").replace("<", "").replace(" ", "").replace("\xa0", "")
             ),
             "tipo": hit[4],
             "precio": int(hit[5]),
