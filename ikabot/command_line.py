@@ -7,6 +7,9 @@ import os
 import sys
 import time
 
+from dotenv import load_dotenv
+load_dotenv()
+
 from ikabot.config import *
 from ikabot.function.activateMiracle import activateMiracle
 from ikabot.function.alertAttacks import alertAttacks
