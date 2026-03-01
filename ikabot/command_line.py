@@ -7,6 +7,9 @@ import os
 import sys
 import time
 
+from dotenv import load_dotenv
+load_dotenv()
+
 from ikabot.config import *
 from ikabot.function.activateMiracle import activateMiracle
 from ikabot.function.alertAttacks import alertAttacks
@@ -48,6 +51,8 @@ from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.process import updateProcessList
 from ikabot.web.session import *
+from ikabot.function.UpgradeUnits import UpgradeUnits
+from ikabot.function.modifyProduction import modifyProduction
 
 
 def menu(session, checkUpdate=True):
@@ -128,6 +133,7 @@ def menu(session, checkUpdate=True):
         11: activateMiracle,
         1201: trainArmy,
         1202: stationArmy,
+        1203: UpgradeUnits,
         13: shipMovements,
         14: constructBuilding,
         15: update,
@@ -147,6 +153,7 @@ def menu(session, checkUpdate=True):
         2107: importExportCookie,
         2108: loadCustomModule,
         22: consolidateResources,
+        23: modifyProduction
     }
 
     print("(0)  Exit")
@@ -172,6 +179,8 @@ def menu(session, checkUpdate=True):
     print("(20) Dump / Monitor world")
     print("(21) Options / Settings")
     print("(22) Consolidate resources")
+    print("(23) Set Production of Saw mill / Luxury good")
+
     total_options = len(menu_actions) + 1
     selected = read(min=0, max=total_options, digit=True, empty=True)
     
@@ -235,7 +244,8 @@ def menu(session, checkUpdate=True):
         print("(0) Back")
         print("(1) Train Army")
         print("(2) Send Troops/Ships")
-        selected = read(min=0, max=2, digit=True)
+        print("(3) Upgrade Army")
+        selected = read(min=0, max=3, digit=True)
         if selected == 0:
             menu(session)
             return

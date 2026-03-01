@@ -70,13 +70,14 @@ def do_it(session, godids, mode, times):
 
         if mode == 1 or mode == 3:
             for _ in range(times):
-                for godid in godids:
+                favor = getFavor(session, cityid, pos)
+                while favor < favor_needed:
+                    session.setStatus(
+                        f"Not enough favor @{getDateTime()}, re-trying in 3h."
+                    )
+                    time.sleep(wait_time / 4)  # 12h / 4 = 3 hours
                     favor = getFavor(session, cityid, pos)
-                    while favor < favor_needed:
-                        session.setStatus(
-                            f"Not enough favor @{getDateTime()}, re-trying in 3h."
-                        )
-                        time.sleep(wait_time / 4)  # 12h / 4 = 3 hours
+                for godid in godids:
                     donateShrine(session, godid, cityid, pos)
                     time.sleep(2)
 
@@ -87,13 +88,14 @@ def do_it(session, godids, mode, times):
 
         if mode == 2:
             while True:
-                for godid in godids:
+                favor = getFavor(session, cityid, pos)
+                while favor < favor_needed:
+                    session.setStatus(
+                        f"Not enough favor @{getDateTime()}, re-trying in 3h."
+                    )
+                    time.sleep(wait_time / 4)  # 12h / 4 = 3 hours
                     favor = getFavor(session, cityid, pos)
-                    while favor < favor_needed:
-                        session.setStatus(
-                            f"Not enough favor @{getDateTime()}, re-trying in 3h."
-                        )
-                        time.sleep(wait_time / 4)  # 12h / 4 = 3 hours
+                for godid in godids:
                     donateShrine(session, godid, cityid, pos)
                     time.sleep(2)
                 for i in range(6):  # 12h * 6 = 72 hours

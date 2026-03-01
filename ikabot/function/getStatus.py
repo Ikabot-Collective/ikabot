@@ -120,7 +120,7 @@ def getStatus(session, event, stdin_fd, predetermined_input):
         city_id = city['id']
         banner()
 
-        (wood, good, typeGood) = getProductionPerSecond(session, city["id"])
+        (wood, good, typeGood) = getProductionPerHour(session, city["id"])
         print(
             "\033[1m{}{}{}".format(
                 color_arr[int(typeGood)], city["cityName"], color_arr[0]

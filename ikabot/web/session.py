@@ -259,7 +259,6 @@ class Session:
 
             # get __cfduid cookie
             self.headers = {
-                "Host": "gameforge.com",
                 "User-Agent": self.user_agent,
                 "Accept": "*/*",
                 "Accept-Language": "en-US,en;q=0.5",
@@ -278,7 +277,6 @@ class Session:
 
             # update __cfduid cookie
             self.headers = {
-                "Host": "gameforge.com",
                 "User-Agent": self.user_agent,
                 "Accept": "*/*",
                 "Accept-Language": "en-US,en;q=0.5",
@@ -364,8 +362,6 @@ class Session:
 
             # options req (not really needed)
             self.headers = {
-                "Host": "gameforge.com",
-                "Connection": "keep-alive",
                 "Accept": "*/*",
                 "Accept-Language": "en-US,en;q=0.5",
                 "Accept-Encoding": "gzip, deflate, br",
@@ -385,8 +381,6 @@ class Session:
 
             # send creds
             self.headers = {
-                "Host": "gameforge.com",
-                "Connection": "keep-alive",
                 "Accept": "*/*",
                 "Accept-Language": "en-US,en;q=0.5",
                 "Accept-Encoding": "gzip, deflate, br",
@@ -406,22 +400,36 @@ class Session:
             data = {
                 "identity": self.mail,
                 "password": self.password,
-                "locale": "en_GB",
+                "locale": "en-GB",
                 "gfLang": "en",
-                "platformGameId": platformGameId,
+                "gameId": platformGameId,
                 "gameEnvironmentId": gameEnvironmentId,
-                "autoGameAccountCreation": False,
                 "blackbox": self.blackbox,
             }
             r = self.s.post(
-                "https://gameforge.com/api/v1/auth/thin/sessions", json=data
+                "https://spark-web.gameforge.com/api/v2/authProviders/mauth/sessions", json=data
             )
-            if "gf-challenge-id" in r.headers:
 
+            # MFA / 2FA Check. If the server responds with 409, it means 2FA is required.
+            if r.status_code == 409 and 'OTP_REQUIRED' in r.text:
+                if self.padre:
+                    print("Two-factor authentication (2FA) is required.")
+                    mfa_code = read(msg="Enter your 2FA code: ")
+                else:
+                    self.logger.error("2FA is required, but it cannot be requested in a child process.")
+                    sys.exit("Login failure: 2FA is required in a non-interactive process.")
+
+                # Add the OTP code to the original data and send the request again
+                # to the same endpoint.
+                data['otpCode'] = mfa_code
+
+                r = self.s.post(
+                    "https://spark-web.gameforge.com/api/v2/authProviders/mauth/sessions", json=data
+                )
+
+            if "gf-challenge-id" in r.headers and 'token' not in r.text:
                 while True:
                     self.headers = {
-                        "Host": "gameforge.com",
-                        "Connection": "keep-alive",
                         "Accept": "*/*",
                         "Accept-Language": "en-US,en;q=0.5",
                         "Accept-Encoding": "gzip, deflate, br",
@@ -439,17 +447,16 @@ class Session:
                     self.s.headers.clear()
                     self.s.headers.update(self.headers)
                     data = {
-                        "identity": self.mail,
-                        "password": self.password,
-                        "locale": "en_GB",
-                        "gfLang": "en",
-                        "platformGameId": platformGameId,
-                        "gameEnvironmentId": gameEnvironmentId,
-                        "autoGameAccountCreation": False,
-                        "blackbox": self.blackbox,
-                    }
+                            "identity": self.mail,
+                            "password": self.password,
+                            "locale": "en-GB",
+                            "gfLang": "en",
+                            "gameId": platformGameId,
+                            "gameEnvironmentId": gameEnvironmentId,
+                            "blackbox": self.blackbox,
+                        }
                     r = self.s.post(
-                        "https://gameforge.com/api/v1/auth/thin/sessions", json=data
+                        "https://spark-web.gameforge.com/api/v2/authProviders/mauth/sessions", json=data
                     )
 
                     challenge_id = r.headers["gf-challenge-id"].split(";")[0]
@@ -562,8 +569,6 @@ class Session:
                     ).json()
                     if captcha_sent["status"] == "solved":
                         self.headers = {
-                            "Host": "gameforge.com",
-                            "Connection": "keep-alive",
                             "Accept": "*/*",
                             "Accept-Language": "en-US,en;q=0.5",
                             "Accept-Encoding": "gzip, deflate, br",
@@ -576,6 +581,7 @@ class Session:
                             "Sec-Fetch-Site": "same-site",
                             "TE": "trailers",
                             "TNT-Installation-Id": "",
+                            "Gf-Challenge-Id": challenge_id,
                             "User-Agent": self.user_agent,
                         }
                         self.s.headers.clear()
@@ -583,15 +589,14 @@ class Session:
                         data = {
                             "identity": self.mail,
                             "password": self.password,
-                            "locale": "en_GB",
+                            "locale": "en-GB",
                             "gfLang": "en",
-                            "platformGameId": platformGameId,
+                            "gameId": platformGameId,
                             "gameEnvironmentId": gameEnvironmentId,
-                            "autoGameAccountCreation": False,
                             "blackbox": self.blackbox,
                         }
                         r = self.s.post(
-                            "https://gameforge.com/api/v1/auth/thin/sessions", json=data
+                            "https://spark-web.gameforge.com/api/v2/authProviders/mauth/sessions", json=data
                         )
                         if "gf-challenge-id" in r.headers:
                             self.logger.error("Failed to solve interactive captcha!")
@@ -600,8 +605,9 @@ class Session:
                         else:
                             break
 
-            if r.status_code == 403:
+            if 'token' not in r.text:
                 print("Failed to log in...")
+                print(f"Expected to get token in response to login request but instead got code {r.status_code} and body {r.text}")
                 print(
                     "Log into the lobby via browser and then press CTRL + SHIFT + J to open up the javascript console"
                 )
@@ -1075,6 +1081,19 @@ class Session:
                     "text": response.text,
                 }
                 html = response.text
+
+               # modifica redirect 302
+                if response.status_code == 302:
+                    location = response.headers.get('Location', '')
+                    if 'lobby.ikariam.gameforge.com' in location:
+                        raise AssertionError("Redirect to lobby detected")
+                
+                # modifica processi 404
+                if response.status_code == 404:
+                    self.logger.error(f"404 Not Found received for URL: {url}")
+                    self.logger.error(f"HTML received: {response.text[:200]}")
+                    raise AssertionError("404 Not Found - Session likely expired")
+
                 if self.__test_server_maintenace(html):
                     self.logger.warning("Ikariam world backup is in progress, waiting 10 mins.")
                     time.sleep(10 * 60)
@@ -1165,6 +1184,19 @@ class Session:
                     "text": response.text,
                 }
                 resp = response.text
+
+                #  modifica redirect 302
+                if response.status_code == 302:
+                    location = response.headers.get('Location', '')
+                    if 'lobby.ikariam.gameforge.com' in location:
+                        raise AssertionError("Redirect to lobby detected")
+                
+                #  modifica processi 404
+                if response.status_code == 404:
+                    self.logger.error(f"404 Not Found received for POST URL: {url}")
+                    self.logger.error(f"HTML received: {response.text[:200]}")
+                    raise AssertionError("404 Not Found - Session likely expired")
+
                 if self.__test_server_maintenace(resp):
                     self.logger.warning("Ikariam world backup is in progress, waiting 10 mins.")
                     time.sleep(10 * 60)

@@ -91,7 +91,7 @@ def obtainMiraclesAvailable(session):
                 island["wonderActivationLevel"] = level
                 island["available"] = available
                 if available is False:
-                    island["available_in"] = enddate - currentdate
+                    island["available_in"] = int(float(enddate)) - int(float(currentdate))
                 break
 
     # only return island which wonder we can activate
@@ -209,7 +209,7 @@ def activateMiracle(session, event, stdin_fd, predetermined_input):
                     enddate = data[elem]["countdown"]["enddate"]
                     currentdate = data[elem]["countdown"]["currentdate"]
                     break
-            wait_time = enddate - currentdate
+            wait_time = int(float(enddate)) - int(float(currentdate))
 
             print("The miracle {} was activated.".format(island["wonderName"]))
             enter()
@@ -335,6 +335,10 @@ def wait_for_miracle(session, island):
                 enddate = temple_response[elem]["countdown"]["enddate"]
                 currentdate = temple_response[elem]["countdown"]["currentdate"]
                 wait_time = enddate - currentdate
+                next_activation_time = time.time() + wait_time
+                session.setStatus(
+                    f"Miracle {island['wonderName']} is activated. Available at: {getDateTime(next_activation_time)}"
+                )
                 break
         else:
             available = (
@@ -361,6 +365,7 @@ def do_it(session, island, iterations):
     iterations : int
     """
     iterations_left = iterations
+    session.setStatus(f"Waiting to activate {island['wonderName']}...")
     for i in range(iterations):
 
         wait_for_miracle(session, island)

@@ -334,8 +334,52 @@ def getShipCapacity(session):
     capacity : int
         an integer representing the ship capacity of the user's current city
     """
-    html = session.post('view=merchantNavy')
-    ship_capacity = html.split('singleTransporterCapacity":')[1].split(',"singleFreighterCapacity')[0]
-    freighter_capacity = html.split('singleFreighterCapacity":')[1].split(',"draftEffect')[0]
+    html = session.get('view=merchantNavy')
+    data = re.search(r'ajax.Responder, (\[\[[\S\s]*?\]\])\)\;', html).group(1)
+    data = json.loads(data, strict=False)
+
+    ship_capacity = data[3][1]['singleTransporterCapacity']
+    freighter_capacity = data[3][1]['singleFreighterCapacity']
 
     return int(ship_capacity), int(freighter_capacity)
+
+
+
+def ignoreCities(session, msg=None):
+    """Prompts the user to select cities which should be ignored
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+        Session object
+
+    Returns
+    -------
+    (cities_ids) : list
+        a list containing IDs of cities that were not ignored
+    """
+    (cities_ids, cities) = getIdsOfCities(session)
+    choice = None
+    ignored_cities = []
+    while True:
+        banner()
+        if msg is not None: print(f"{msg}")
+        displayed_string = (
+            f'(currently ignoring: {", ".join(ignored_cities)})'
+            if ignored_cities
+            else ""
+        )
+        print(f"Select cities to ignore. {displayed_string}")
+        print("0) Continue")
+        choice_to_cityid_map = []
+        for i, city in enumerate(cities.values()):
+            choice_to_cityid_map.append(city["id"])
+            print(f'{i + 1}) {city["name"]} - {materials_names[city["tradegood"]]}')
+        choice = read(min=0, max=len(cities_ids))
+        if choice == 0:
+            break
+        city_id = choice_to_cityid_map[choice - 1]
+        cities_ids = list(filter(lambda x: x != str(city_id), cities_ids))
+        ignored_cities.append(cities[str(city_id)]["name"])
+        del cities[str(city_id)]
+        
+    return cities_ids, cities

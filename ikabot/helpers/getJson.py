@@ -336,7 +336,7 @@ def getIsland(html: str) -> IslandDict:
     """
     isla = re.search(r'ajax.Responder, (\[\[[\S\s]*?\]\])\)\;', html).group(1)
 
-    island: IslandDict = json.loads(isla)[0][1]
+    island: IslandDict = json.loads(isla)[1][1]
 
     # Must add aliases for different properties to maintain backwards compatibility with old code
 
