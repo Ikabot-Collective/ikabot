@@ -946,6 +946,14 @@ class Session:
 
         self.logged = True
 
+        # --- Developer runtime info ---
+        self.dev_api_host = self.host
+        self.dev_url_base = self.urlBase
+
+        cookies = self.s.cookies.get_dict()
+        self.dev_ikariam_cookie = cookies.get("ikariam")
+        self.dev_gf_token = cookies.get("gf-token-production")
+
     def __backoff(self):
         self.logger.info("__backoff()")
         if self.padre is False:
@@ -1100,6 +1108,16 @@ class Session:
                     raise requests.exceptions.ConnectionError  # repeat after 10 minutes
                 if ignoreExpire is False:
                     assert self.__isExpired(html) is False
+                # --- update developer runtime info ---
+                try:
+                    self.dev_api_host = self.host
+                    self.dev_url_base = self.urlBase
+                    cookies = self.s.cookies.get_dict()
+                    self.dev_ikariam_cookie = cookies.get("ikariam")
+                    self.dev_gf_token = cookies.get("gf-token-production")
+                except Exception:
+                    pass
+
                 if fullResponse:
                     return response
                 else:
@@ -1212,6 +1230,16 @@ class Session:
                         ignoreExpire=ignoreExpire,
                         noIndex=noIndex,
                     )
+                # --- update developer runtime info ---
+                try:
+                    self.dev_api_host = self.host
+                    self.dev_url_base = self.urlBase
+                    cookies = self.s.cookies.get_dict()
+                    self.dev_ikariam_cookie = cookies.get("ikariam")
+                    self.dev_gf_token = cookies.get("gf-token-production")
+                except Exception:
+                    pass
+                    
                 return resp if not fullResponse else response
             except AssertionError:
                 self.__sessionExpired()
