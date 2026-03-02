@@ -53,6 +53,7 @@ from ikabot.helpers.process import updateProcessList
 from ikabot.web.session import *
 from ikabot.function.UpgradeUnits import UpgradeUnits
 from ikabot.function.modifyProduction import modifyProduction
+from ikabot.function.developer import developer
 
 
 def menu(session, checkUpdate=True):
@@ -152,6 +153,7 @@ def menu(session, checkUpdate=True):
         2106: testTelegramBot,
         2107: importExportCookie,
         2108: loadCustomModule,
+        2109: developer,
         22: consolidateResources,
         23: modifyProduction
     }
@@ -278,8 +280,9 @@ def menu(session, checkUpdate=True):
         print("(6) Message Telegram Bot")
         print("(7) Import / Export cookie")
         print("(8) Load custom ikabot module")
+        print("(9) Developer Data")
 
-        selected = read(min=0, max=8, digit=True)
+        selected = read(min=0, max=9, digit=True)
         if selected == 0:
             menu(session)
             return
