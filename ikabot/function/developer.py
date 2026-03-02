@@ -1,4 +1,5 @@
 from ikabot.helpers.dns import getAddress
+import ikabot
 import os
 import sys
 
@@ -6,12 +7,19 @@ def developer(session, event, stdin_fd, *args):
     sys.stdin = os.fdopen(stdin_fd)
     print("\n=== Developer Information ===\n")
 
-    # Ikabot public API address (blackbox / decaptcha etc)
+    # 1. Get the ikabot package directory
+    try:
+        ikabot_dir = os.path.dirname(ikabot.__file__)
+    except Exception as e:
+        ikabot_dir = f"Error locating package: {e}"
+
+    # 2. Ikabot public API address (blackbox / decaptcha etc)
     try:
         api_address = getAddress()
-    except Exception:
-        api_address = "Could not resolve"
+    except Exception as e:
+        api_address = f"Could not resolve: {e}"
 
+    print(f"Ikabot Install Directory: {ikabot_dir}")
     print("Ikabot API address:", api_address)
     print("CUSTOM_API_ADDRESS:", os.getenv("CUSTOM_API_ADDRESS"))
 
@@ -23,4 +31,5 @@ def developer(session, event, stdin_fd, *args):
     print("ikariam:", cookies.get("ikariam", "Not set"))
     print("gf-token-production:", cookies.get("gf-token-production", "Not set"))
     input("\nPress enter to return...")
+
     event.set()
