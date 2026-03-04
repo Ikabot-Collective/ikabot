@@ -66,6 +66,57 @@ def onSellInMarket(html):
     return [int(mad), int(vin), int(mar), int(cri), int(azu)]
 
 
+def getOwnOfferPrices(html):
+    """Parse current prices from own offers form inputs.
+    Parameters
+    ----------
+    html : str
+        HTML from getMarketInfo() (branchOfficeOwnOffers view)
+    Returns
+    -------
+    prices : list[int]
+        [wood_price, wine_price, marble_price, crystal_price, sulfur_price]
+    """
+    prices = re.findall(
+        r'<input type="text" class="textfield"\s*size="\d+"\s*name=".*?Price"\s*id=".*?"\s*maxlength="\d+"\s*value="(\d+)"',
+        html,
+    )
+    return [int(p) for p in prices]
+
+
+def getOwnOfferTradeTypes(html):
+    """Parse current trade types (Buy/Sell) from own offers dropdowns.
+    Parameters
+    ----------
+    html : str
+        HTML from getMarketInfo() (branchOfficeOwnOffers view)
+    Returns
+    -------
+    types : list[str]
+        List of 5 strings, each "333" (Buy) or "444" (Sell)
+    """
+    types = re.findall(
+        r'<option value="(\d+)" selected="">',
+        html,
+    )
+    return types
+
+
+def getPriceLimits(html):
+    """Parse min/max price boundaries per resource from marketplace JS.
+    Parameters
+    ----------
+    html : str
+        HTML from getMarketInfo() (branchOfficeOwnOffers view)
+    Returns
+    -------
+    limits : list[tuple[int, int]]
+        List of 5 (min_price, max_price) tuples
+    """
+    raw = re.findall(r"'upper':\s*(\d+),\s*'lower':\s*(\d+)", html)
+    return [(int(lo), int(hi)) for hi, lo in raw]
+
+
 def getGold(session, city):
     """
     Parameters

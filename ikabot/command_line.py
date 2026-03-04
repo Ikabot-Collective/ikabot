@@ -33,6 +33,7 @@ from ikabot.function.logs import logs
 from ikabot.function.proxyConf import proxyConf, show_proxy
 from ikabot.function.searchForIslandSpaces import searchForIslandSpaces
 from ikabot.function.sellResources import sellResources
+from ikabot.function.autoMarketTrader import autoMarketTrader
 from ikabot.function.sendResources import sendResources
 from ikabot.function.shipMovements import shipMovements
 from ikabot.function.stationArmy import stationArmy
@@ -124,6 +125,7 @@ def menu(session, checkUpdate=True):
         702: alertLowWine,
         801: buyResources,
         802: sellResources,
+        803: autoMarketTrader,
         901: donate,
         902: donationBot,
         10: vacationMode,
@@ -204,8 +206,9 @@ def menu(session, checkUpdate=True):
         print("(0) Back")
         print("(1) Buy resources")
         print("(2) Sell resources")
+        print("(3) Auto market trader")
 
-        selected = read(min=0, max=2, digit=True)
+        selected = read(min=0, max=3, digit=True)
         if selected == 0:
             menu(session)
             return

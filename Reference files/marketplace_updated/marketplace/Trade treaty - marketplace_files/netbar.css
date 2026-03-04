@@ -1,0 +1,24 @@
+/* 
+Anpassungen am CSS zur Darstellung der Ingame Netbar
+(Elemente um 32px nach unten verschieben)
+
+*/
+
+#mmoNewsticker {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: auto;
+    z-index: 70;
+    width: 300px;
+    font:bold 11px Arial, Helvetica, sans-serif;
+    line-height: 20px;
+}
+
+#mmoNewsticker ul {
+    padding-left: 0;
+}
+
+#mmoNewsticker li a {
+    margin: 0;
+}
