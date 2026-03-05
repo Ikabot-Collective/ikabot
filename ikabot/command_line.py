@@ -28,7 +28,7 @@ from ikabot.function.donationBot import donationBot
 from ikabot.function.dumpWorld import dumpWorld
 from ikabot.function.getStatus import getStatus
 from ikabot.function.importExportCookie import importExportCookie
-from ikabot.function.investigate import investigate
+from ikabot.function.Research import research
 from ikabot.function.consolidateResources import consolidateResources
 from ikabot.function.killTasks import killTasks
 from ikabot.function.loginDaily import loginDaily
@@ -140,7 +140,7 @@ def menu(session, checkUpdate=True):
         15: update,
         16: webServer,
         17: autoPirate,
-        18: investigate,
+        18: research,
         1901: attackBarbarians,
         1902: autoBarbarians,
         2001: searchForIslandSpaces,
@@ -176,7 +176,7 @@ def menu(session, checkUpdate=True):
     print("(15) Update Ikabot")
     print("(16) Ikabot Web Server")
     print("(17) Auto-Pirate")
-    print("(18) Investigate")
+    print("(18) Research")
     print("(19) Attack / Grind barbarians")
     print("(20) Dump / Monitor world")
     print("(21) Options / Settings")
