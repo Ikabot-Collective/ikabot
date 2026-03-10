@@ -183,7 +183,7 @@ def webServer(session, event, stdin_fd, predetermined_input, port=None):
                 if data:
                     parsed = parse_qs(data, keep_blank_values=True)
                     for k, v_list in parsed.items():
-                        new_data[k] = v_list[0] if v_list else ''
+                        new_data[k] = v_list[-1] if v_list else ''
             except Exception:
                 pass
             for arg in request.args:
