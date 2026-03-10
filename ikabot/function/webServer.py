@@ -14,7 +14,7 @@ import time
 import traceback
 from datetime import datetime, timedelta
 from io import BytesIO
-from urllib.parse import unquote_plus, unquote
+from urllib.parse import unquote_plus, parse_qs
 
 import requests
 
@@ -180,11 +180,10 @@ def webServer(session, event, stdin_fd, predetermined_input, port=None):
             new_data = dict()
             try:
                 data = request.get_data(as_text=True)
-                data = unquote(data, encoding='utf-8', errors='replace')
                 if data:
-                    for item in data.split("&"):
-                        k, v = item.split("=")
-                        new_data[k] = unquote_plus(v)
+                    parsed = parse_qs(data, keep_blank_values=True)
+                    for k, v_list in parsed.items():
+                        new_data[k] = v_list[-1] if v_list else ''
             except Exception:
                 pass
             for arg in request.args:
