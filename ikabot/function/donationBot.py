@@ -15,6 +15,80 @@ from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import wait, getDateTime
 
 
+def _get_donation_config(cities, donate_method, cityId):
+    """
+    Get donation configuration for a city.
+
+    Parameters
+    ----------
+    cities : dict
+    donate_method : int
+    cityId : int
+
+    Returns
+    -------
+    tuple[str|None, int|None]
+        (donation_type, percentage)
+    """
+    initials = [material_name[0] for material_name in materials_names]
+    tradegood = cities[cityId]["tradegood"]
+    initial = initials[int(tradegood)]
+
+    print(
+        "In {} ({}), Do you wish to donate to the forest, to the trading good, to both or none? [f/t/b/n]".format(
+            cities[cityId]["name"], initial
+        )
+    )
+
+    f = "f"
+    t = "t"
+    b = "b"
+    n = "n"
+
+    rta = read(values=[f, f.upper(), t, t.upper(), b, b.upper(), n, n.upper()])
+    if rta.lower() == f:
+        donation_type = "resource"
+    elif rta.lower() == t:
+        donation_type = "tradegood"
+    elif rta.lower() == b:
+        donation_type = "both"
+    else:
+        donation_type = None
+        percentage = None
+        return donation_type, percentage
+
+    if donate_method == 1:
+        print(
+            "What is the maximum percentage of your storage capacity that you wish to keep occupied? (the resources that exceed it, will be donated) (default: 80%)"
+        )
+        percentage = read(min=0, max=100, empty=True)
+        if percentage == "":
+            percentage = 80
+        elif percentage == 100:
+            # if the user is ok with the storage being totally full, don't donate at all
+            donation_type = None
+    elif donate_method == 2:
+        print(
+            "What is the percentage of your production that you wish to donate? (enter 0 to disable donation for the town) (default: 50%)"
+        )
+        percentage = read(min=0, max=100, empty=True)
+        if percentage == "":
+            percentage = 50
+        elif percentage == 0:
+            donation_type = None
+    elif donate_method == 3:
+        print(
+            "What is the amount would you like to donate? (enter 0 to disable donation for the town) (default: 10000)"
+        )
+        percentage = read(min=0, empty=True)
+        if percentage == "":
+            percentage = 10000
+        elif percentage == 0:
+            donation_type = None
+
+    return donation_type, percentage
+
+
 def donationBot(session, event, stdin_fd, predetermined_input):
     """
     Parameters
@@ -36,10 +110,6 @@ def donationBot(session, event, stdin_fd, predetermined_input):
         )
         waiting_time = read(min=1, digit=True, default=1 * 24 * 60)
         print(
-            "Enter a maximum additional random waiting time between donations in minutes. (min = 0, default = 1 hour)"
-        )
-        max_random_waiting_time = read(min=0, digit=True, default=1 * 60)
-        print(
             """Which donation method would you like to use to donate automatically? (default = 1)
 (1) Donate exceeding percentage of your storage capacity
 (2) Donate a percentage of production
@@ -47,73 +117,94 @@ def donationBot(session, event, stdin_fd, predetermined_input):
         """
         )
         donate_method = read(min=1, max=3, digit=True, default=1)
-        for cityId in cities_ids:
-            tradegood = cities[cityId]["tradegood"]
-            initial = initials[int(tradegood)]
-            print(
-                
-                "In {} ({}), Do you wish to donate to the forest, to the trading good, to both or none? [f/t/b/n]".format(cities[cityId]["name"], initial)
-            )
-            f = "f"
-            t = "t"
-            b = "b"
-            n = "n"
 
-            rta = read(values=[f, f.upper(), t, t.upper(), b, b.upper(), n, n.upper()])
-            if rta.lower() == f:
-                donation_type = "resource"
-            elif rta.lower() == t:
-                donation_type = "tradegood"
-            elif rta.lower() == b:
-                donation_type = "both"
-            else:
-                donation_type = None
-                percentage = None
+        print(
+            """Do you wish to apply the same donation configuration to all cities? (default = 1)
+(1) Apply same configuration to all cities
+(2) Define configuration separately for each city
+        """
+        )
+        apply_to_all = read(min=1, max=2, digit=True, default=1) == 1
 
-            if donation_type is not None and donate_method == 1:
+        # Get donation configuration
+        if apply_to_all:
+            # Ask for configuration once
+            donation_type, percentage = _get_donation_config(cities, donate_method, cities_ids[0])
+            # Apply to all cities
+            for cityId in cities_ids:
+                cities_dict[cityId] = {
+                    "donation_type": donation_type,
+                    "percentage": percentage,
+                }
+        else:
+            # Ask for each city separately
+            for cityId in cities_ids:
+                tradegood = cities[cityId]["tradegood"]
+                initial = initials[int(tradegood)]
                 print(
-                    
-                    "What is the maximum percentage of your storage capacity that you wish to keep occupied? (the resources that exceed it, will be donated) (default: 80%)"
-                    
-                )
-                percentage = read(min=0, max=100, empty=True)
-                if percentage == "":
-                    percentage = 80
-                elif (
-                    percentage == 100
-                ):  # if the user is ok with the storage beeing totally full, don't donate at all
-                    donation_type = None
-            elif donation_type is not None and donate_method == 2:
-                print(
-                    
-                    "What is the percentage of your production that you wish to donate? (enter 0 to disable donation for the town) (default: 50%)"
-                    
-                )
-                percentage = read(
-                    min=0, max=100, empty=True
-                )  # max_random_waiting_time increases inaccuracy
-                if percentage == "":
-                    percentage = 50
-                elif percentage == 0:
-                    donation_type = None
-            elif donation_type is not None and donate_method == 3:
-                print(
-                    
-                    "What is the amount would you like to donate? (enter 0 to disable donation for the town) (default: 10000)"
-                    
-                )
-                percentage = read(
-                    min=0, empty=True
-                )  # no point changing the variable's name everywhere just for this
-                if percentage == "":
-                    percentage = 10000
-                elif percentage == 0:
-                    donation_type = None
 
-            cities_dict[cityId] = {
-                "donation_type": donation_type,
-                "percentage": percentage,
-            }
+                    "In {} ({}), Do you wish to donate to the forest, to the trading good, to both or none? [f/t/b/n]".format(cities[cityId]["name"], initial)
+                )
+                f = "f"
+                t = "t"
+                b = "b"
+                n = "n"
+
+                rta = read(values=[f, f.upper(), t, t.upper(), b, b.upper(), n, n.upper()])
+                if rta.lower() == f:
+                    donation_type = "resource"
+                elif rta.lower() == t:
+                    donation_type = "tradegood"
+                elif rta.lower() == b:
+                    donation_type = "both"
+                else:
+                    donation_type = None
+                    percentage = None
+
+                if donation_type is not None and donate_method == 1:
+                    print(
+
+                        "What is the maximum percentage of your storage capacity that you wish to keep occupied? (the resources that exceed it, will be donated) (default: 80%)"
+
+                    )
+                    percentage = read(min=0, max=100, empty=True)
+                    if percentage == "":
+                        percentage = 80
+                    elif (
+                        percentage == 100
+                    ):  # if the user is ok with the storage beeing totally full, don't donate at all
+                        donation_type = None
+                elif donation_type is not None and donate_method == 2:
+                    print(
+
+                        "What is the percentage of your production that you wish to donate? (enter 0 to disable donation for the town) (default: 50%)"
+
+                    )
+                    percentage = read(
+                        min=0, max=100, empty=True
+                    )
+                    if percentage == "":
+                        percentage = 50
+                    elif percentage == 0:
+                        donation_type = None
+                elif donation_type is not None and donate_method == 3:
+                    print(
+
+                        "What is the amount would you like to donate? (enter 0 to disable donation for the town) (default: 10000)"
+
+                    )
+                    percentage = read(
+                        min=0, empty=True
+                    )  # no point changing the variable's name everywhere just for this
+                    if percentage == "":
+                        percentage = 10000
+                    elif percentage == 0:
+                        donation_type = None
+
+                cities_dict[cityId] = {
+                    "donation_type": donation_type,
+                    "percentage": percentage,
+                }
 
         print("I will donate every {} minutes.".format(waiting_time))
         enter()
@@ -132,7 +223,6 @@ def donationBot(session, event, stdin_fd, predetermined_input):
             cities_ids,
             cities_dict,
             waiting_time,
-            max_random_waiting_time,
             donate_method,
         )
     except Exception as e:
@@ -147,7 +237,6 @@ def do_it(
     cities_ids,
     cities_dict,
     waiting_time,
-    max_random_waiting_time,
     donate_method,
 ):
     """
@@ -157,7 +246,6 @@ def do_it(
     cities_ids : list[int]
     cities_dict : dict[int, dict]
     waiting_time: int
-    max_random_waiting_time: int
     """
     for cityId in cities_ids:
         html = session.get(city_url + cityId)
@@ -268,5 +356,5 @@ def do_it(
         msg = "I donated automatically."
         sendToBotDebug(session, msg, debugON_donationBot)
 
-        # sleep a day
-        wait(waiting_time * 60, maxrandom=max_random_waiting_time * 60)
+        # sleep until next donation
+        wait(waiting_time * 60)
