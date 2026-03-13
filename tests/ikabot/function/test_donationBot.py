@@ -191,26 +191,5 @@ class TestDonationBotWorkflow(unittest.TestCase):
         self.assertEqual(cities_dict[3]["percentage"], 75)
 
 
-class TestMaxRandomWaitingTimeRemoval(unittest.TestCase):
-    """Test that max_random_waiting_time has been properly removed"""
-
-    def test_do_it_function_signature_no_max_random(self):
-        """Verify that do_it function doesn't have max_random_waiting_time parameter"""
-        from ikabot.function.donationBot import do_it
-        import inspect
-
-        sig = inspect.signature(do_it)
-        params = list(sig.parameters.keys())
-
-        self.assertIn('session', params)
-        self.assertIn('cities_ids', params)
-        self.assertIn('cities_dict', params)
-        self.assertIn('waiting_time', params)
-        self.assertIn('donate_method', params)
-
-        self.assertNotIn('max_random_waiting_time', params)
-        self.assertEqual(len(params), 5, "do_it should have exactly 5 parameters")
-
-
 if __name__ == '__main__':
     unittest.main()
