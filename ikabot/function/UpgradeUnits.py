@@ -217,9 +217,8 @@ def run_workshop_upgrade_interface(session, city_id, position, action_request, e
         print(f"[{idx}] {task['unit']} ({task['type']}): Level {task['from']} -> {task['to']} | +{task['effect_from']} -> +{task['effect_to']} | {task['gold']} gold, {task['crystal']} crystal | {task['duration']}")
 
     print("\nEnter numbers separated by space (e.g., 1 3 5):")
-    selected_indexes = read().split()
-    selected_tasks = [tasks[int(i)-1] for i in selected_indexes if i.isdigit() and 0 < int(i) <= len(tasks)]
-
+    selected_indexes = sorted(set(i for i in read().split() if i.isdigit()), key=int)
+    selected_tasks = [tasks[int(i)-1] for i in selected_indexes if 0 < int(i) <= len(tasks)]
     if not selected_tasks:
         enter()
         event.set()
