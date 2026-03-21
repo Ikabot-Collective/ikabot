@@ -1,11 +1,11 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 import sys
+import os
 import traceback
 from ikabot.helpers.pedirInfo import read, enter
 from ikabot.helpers.gui import *
 from ikabot.config import *
-
 from importlib.machinery import SourceFileLoader
 
 def loadCustomModule(session, event, stdin_fd, predetermined_input):
@@ -17,12 +17,23 @@ def loadCustomModule(session, event, stdin_fd, predetermined_input):
     stdin_fd: int
     predetermined_input : multiprocessing.managers.SyncManager.list
     """
-    sys.stdin = os.fdopen(stdin_fd)
+    # FIX GLOBAL FOR LINUX:
+    # In Linux, sys.stdin is often closed in threads.
+    # We reopen the terminal directly so that read() always works.
+    if sys.platform != "win32":
+        try:
+            sys.stdin = open('/dev/tty', 'r')
+        except Exception:
+            # If there is no tty (e.g., Docker), we try to use the passed fd
+            sys.stdin = os.fdopen(stdin_fd)
+    else:
+        sys.stdin = os.fdopen(stdin_fd)
+
     config.predetermined_input = predetermined_input
     try:
         banner()
         sessionData = session.getSessionData()
-        modules = [path for path in sessionData.get('shared', {}).get('customModules', []) if os.path.isfile(path)]
+        modules = [path for path in sessionData.get('shared', {}).get('customModules', []) if os.path.exists(path)]
         print("0) Back")
         print("1) Add new module")
         for module in modules:
@@ -34,7 +45,7 @@ def loadCustomModule(session, event, stdin_fd, predetermined_input):
             return
         elif choice == 1:
             banner()
-            print(f'        {bcolors.WARNING}[WARNING]{bcolors.ENDC} Running third party code could be dangerous!\n\n')
+            print(f'        {bcolors.WARNING}[WARNING]{bcolors.ENDC} Running third party code can be dangerous.')
             print('Enter the full path to the module you wish to load. The module must have a function with the same name as the file.')
             print('Enter full path: ')
             path = read().strip().replace('\\', '/')
@@ -43,43 +54,26 @@ def loadCustomModule(session, event, stdin_fd, predetermined_input):
                 enter()
                 event.set()
                 return
-
+            
             modules.append(path)
             sessionData = session.getSessionData()
             sessionData['shared'] = sessionData.get('shared', {})
             sessionData['shared']['customModules'] = modules
-            session.setSessionData(sessionData['shared'], shared = True)
-
-        else:    
+            session.setSessionData(sessionData, shared = True)
+        else:
             path = modules[choice - 2]
 
-        name = path.split('/')[-1].split('.')[0]
-
-        banner()
+        name = os.path.basename(path).replace('.py', '')
 
         # Load module
-        try:
-            temp = SourceFileLoader(name,path).load_module()
-        except Exception as e:
-            print(f'Error while loading {path}: ' + str(e) + '\n' + traceback.format_exc())
-            enter()
-            event.set()
-            return
-        
-        # Call the function with the same name as the file
-        try:
-            exec('temp.' + name + '(session, event, stdin_fd, predetermined_input)')
-        except Exception as e:
-            print(f'Error while running {name} in {path}: ' + str(e) + '\n' + traceback.format_exc())
-            enter()
-            event.set()
-            return
-        
-        event.set()
-        return
+        module = SourceFileLoader(name, path).load_module()
 
-      
-    except KeyboardInterrupt:
+        # Run module
+        print('Running module...\n')
+        getattr(module, name)(session, event, stdin_fd, predetermined_input)
+
+    except Exception:
+        print('\n>> Error while running custom module:')
+        traceback.print_exc()
+        enter()
         event.set()
-        return
-    

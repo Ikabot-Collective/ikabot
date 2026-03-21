@@ -97,7 +97,7 @@ def experiment(session, experiments, automatic):
         time.sleep(241 * 60)
 
 
-def investigate(session, event, stdin_fd, predetermined_input):
+def research(session, event, stdin_fd, predetermined_input):
     """
     Parameters
     ----------
