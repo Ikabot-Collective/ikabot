@@ -53,23 +53,50 @@ def send_upgrade_request(session, city_id, position, unit_id, upgrade_type, acti
     }
     try:
         resp = session.post(params=payload)
-        
+        # Normalize response text for simple checks. session.post may return raw text or a requests.Response
         try:
             resp_text = resp if isinstance(resp, str) else resp.text
         except Exception:
             resp_text = str(resp)
 
         low = resp_text.lower()
-        
-        if "not enough" in low or "insufficient" in low or "not enough resources" in low:
+        # Detect common failure messages related to insufficient resources.
+        if "not enough" in low or "insufficient resources" in low or "insufficient" in low:
             return False, "insufficient_resources"
 
-        
-        if "error" in low or "failed" in low or "exception" in low:
+        # Parse any JSON feedback objects (language-agnostic) to handle all locales.
+        try:
+            resp_json = json.loads(resp_text)
+            if isinstance(resp_json, list):
+                for entry in resp_json:
+                    if isinstance(entry, list) and len(entry) >= 2 and entry[0] == "provideFeedback":
+                        feedback_items = entry[1]
+                        if isinstance(feedback_items, list) and feedback_items:
+                            messages = []
+                            for item in feedback_items:
+                                if isinstance(item, dict) and "text" in item:
+                                    messages.append(item.get("text", ""))
+                            combined = " ".join(messages).lower()
+                            # numeric or building level outcome fallback.
+                            if combined:
+                                if "nivelul" in combined or "level" in combined or "workshop" in combined:
+                                    return False, "insufficient_workshop_level"
+                                return False, "insufficient_resources"
+                            return False, "feedback"
+        except Exception:
+            pass
+
+        # Check for specific server errors, but avoid false positives from HTML content
+        if ("upgrade failed" in low or "cannot upgrade" in low or "invalid request" in low or 
+            "server error" in low or "exception" in low):
             return False, "server_error"
 
-        
-        return True, None
+        # If we get a valid response structure, assume success
+        if resp_text.startswith('[["updateGlobalData"'):
+            return True, None
+
+        # Otherwise, treat as unknown error
+        return False, "unknown_response"
     except Exception as e:
         session.setStatus(f"Failed to upgrade {unit_id} ({upgrade_type})")
         return False, "exception"
@@ -144,18 +171,22 @@ def execute_sequential_upgrades(session, city_id, city_name, position, tab, task
         action_request = getActionRequestFromHTML(html)
 
         task = tasks.pop(0)
+        # display both current and target level when available
         from_lvl = task.get('from', '?')
         to_lvl = task.get('to', '?')
         session.setStatus(f"Upgrading {task['unit']} ({task['type']}) {from_lvl}→{to_lvl}")
         success, error = send_upgrade_request(session, city_id, position, task['unitId'], task['upgradeType'], action_request, tab)
         if not success:
-            if error == "insufficient_resources":
-                session.setStatus("Upgrade aborted: insufficient resources")
+            # If the failure is because of insufficient resources, stop and notify via Telegram bot.
+            if error in ("insufficient_resources", "insufficient_workshop_level", "feedback"):
+                session.setStatus(f"Upgrade aborted: {error}")
+                city_name_str = city_name if isinstance(city_name, str) else str(city_name)
                 try:
                     sendToBot(session, f"Upgrade aborted in city {city_name_str}: {error} for {task['unit']} ({task['type']}).")
                 except Exception:
                     session.setStatus("Failed to send Telegram notification")
                 return
+            # For transient server errors, requeue and retry after a short delay
             tasks.insert(0, task)
             time.sleep(60)
         else:
@@ -165,7 +196,12 @@ def execute_sequential_upgrades(session, city_id, city_name, position, tab, task
     session.setStatus("All workshop upgrades completed")
 
 def UpgradeUnits(session, event, stdin_fd, predetermined_input):
-
+    # The original implementation only handled the first city containing a
+    # workshop.  It now collects *all* cities with workshops and allows the
+    # user to select one, several, or 'all' of them.  Each chosen city will
+    # spawn its own background thread for the actual upgrade sequence, so
+    # upgrades can proceed in parallel across multiple cities while the user
+    # continues interacting with the bot.
     sys.stdin = os.fdopen(stdin_fd)
     config.predetermined_input = predetermined_input
 
@@ -219,7 +255,7 @@ def UpgradeUnits(session, event, stdin_fd, predetermined_input):
 
     # run interface for each chosen city; only set the event after the last one
     for idx, w in enumerate(selected_workshops):
-
+        # make it clear to the user which city we're working on
         print(f"\n=== City {w['name']} (id {w['city_id']}) ===")
         finalize = idx == len(selected_workshops) - 1
         run_workshop_upgrade_interface(
@@ -248,6 +284,7 @@ def run_workshop_upgrade_interface(session, city_id, city_name, position, action
     filter_type = "tabUnits" if choice == 1 else "tabShips"
     label = "units" if choice == 1 else "ships"
 
+    # report workshop level to user; will be used when limiting upgrades
     print(f"Workshop level: {workshop_level}")
 
     response = getWorkshopTab(session, city_id, position, action_request, filter_type)
@@ -284,7 +321,8 @@ def run_workshop_upgrade_interface(session, city_id, city_name, position, action
             cur = upgrade.get("currentLevel", {})
             nxt = upgrade.get("nextLevel", {})
             current_level = int(cur.get("upgradeLevel", 0))
-
+            # the templated data may include upgrades regardless of workshop
+            # level; skip anything we can't start due to a low workshop.
             if workshop_level <= current_level:
                 continue
 
@@ -322,15 +360,17 @@ def run_workshop_upgrade_interface(session, city_id, city_name, position, action
             event.set()
         return
 
+    # Ask for target level for each selected task.
     upgrade_levels = {}
     print("\nFor each selected unit, enter the desired target level.")
     for idx, task in enumerate(selected_tasks):
         current_level = int(task['from'])
-
-        max_levels = min(25 - current_level, workshop_level - current_level)
+        # Ensure absolute unit level cap is 25, regardless of workshop level value.
+        max_target_level = min(25, workshop_level)
+        max_levels = max_target_level - current_level
         if max_levels <= 0:
-
-            print(f"Cannot upgrade {task['unit']} ({task['type']}) - workshop too low.")
+            # should not happen because of earlier filtering, but just in case
+            print(f"Cannot upgrade {task['unit']} ({task['type']}) - workshop too low or already max level ({current_level}).")
             continue
 
         while True:
@@ -350,12 +390,24 @@ def run_workshop_upgrade_interface(session, city_id, city_name, position, action
             except ValueError:
                 print("Invalid input. Please enter a number.")
 
+    # build a flat queue of individual upgrade tasks; this avoids the confusing
+    # "expanded_tasks" calculation previously used and guarantees that each
+    # choice is upgraded the correct number of times without accidentally
+    # combining levels for the first selection only.
     queued_tasks = []
+    # accumulate cost using the base cost from each level and multiply by
+    # requested levels so the totals reflect all of the work being queued.
     total_gold = 0
     total_crystal = 0
 
     for idx, base_task in enumerate(selected_tasks):
-        levels = upgrade_levels.get(idx, 1)
+        levels = upgrade_levels.get(idx, 0)
+        if levels <= 0:
+            # a skipped or invalid response, do not queue this task
+            continue
+        
+
+        # base cost strings might contain commas or dots; parse safely
         try:
             cost_gold = int(base_task['gold'].replace(',', '').replace('.', ''))
         except Exception:
@@ -367,6 +419,10 @@ def run_workshop_upgrade_interface(session, city_id, city_name, position, action
 
         total_gold += cost_gold * levels
         total_crystal += cost_crystal * levels
+
+        # each individual level upgrade is represented by a copy of the base
+        # task with its level fields adjusted so the status messages remain
+        # meaningful.
         current_level = int(base_task['from'])
         effect_step = int(base_task.get('effect_to', 0)) - int(base_task.get('effect_from', 0))
         for n in range(levels):
@@ -377,8 +433,18 @@ def run_workshop_upgrade_interface(session, city_id, city_name, position, action
             new_task['effect_to'] = str(int(base_task.get('effect_from', 0)) + effect_step * (n + 1))
             queued_tasks.append(new_task)
 
+    # replace the selected_tasks list with the fully expanded queue
     selected_tasks = queued_tasks
 
+    if not selected_tasks:
+        print("\nNo upgrades selected after target evaluation. Nothing to do.")
+        enter()
+        if finalize:
+            event.set()
+        return
+
+    # show the user exactly what will be queued so they can catch any
+    # mis-ordering or duplicate entries before we launch the background thread
     print("\nThe following individual upgrades will be queued:")
     for i, t in enumerate(selected_tasks, start=1):
         print(f" [{i}] {t['unit']} ({t['type']}): Level {t.get('from','?')} -> {t.get('to','?')}")
