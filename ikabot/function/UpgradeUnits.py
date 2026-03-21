@@ -75,6 +75,8 @@ def send_upgrade_request(session, city_id, position, unit_id, upgrade_type, acti
         return False, "exception"
 
 def wait_for_upgrade_completion(session, city_id, position, tab):
+    first_check = True
+    logged_duration = False
     while True:
         html = session.get(city_url + str(city_id))
         action_request = getActionRequestFromHTML(html)
@@ -90,6 +92,9 @@ def wait_for_upgrade_completion(session, city_id, position, tab):
                     current_time = int(template_data.get("currentdate", int(time.time())))
                     seconds_left = max(0, end_time - current_time)
                     mins = seconds_left // 60
+                    hours = mins // 60
+                    if not logged_duration:
+                        logged_duration = True
                     session.setStatus(f"Workshop upgrade in progress (~{mins}m)...")
                     time.sleep(min(300, seconds_left))
                     continue
@@ -99,6 +104,9 @@ def wait_for_upgrade_completion(session, city_id, position, tab):
                     current_time = int(template_data.get("currentdate", int(time.time())))
                     seconds_left = max(0, end_time - current_time)
                     mins = seconds_left // 60
+                    hours = mins // 60
+                    if not logged_duration:
+                        logged_duration = True
                     session.setStatus(f"Upgrade in progress (~{mins}m)...")
                     time.sleep(min(300, seconds_left))
                     continue
@@ -107,7 +115,29 @@ def wait_for_upgrade_completion(session, city_id, position, tab):
 
         break
 
-def execute_sequential_upgrades(session, city_id, position, tab, tasks):
+def wait_for_upgrade_start(session, city_id, position, tab):
+    session.setStatus("Waiting for upgrade to start...")
+    max_attempts = 30  # ~30 seconds with 1-second sleeps
+    attempts = 0
+    while attempts < max_attempts:
+        html = session.get(city_url + str(city_id))
+        action_request = getActionRequestFromHTML(html)
+        response = getWorkshopTab(session, city_id, position, action_request, tab)
+
+        try:
+            data = json.loads(response, strict=False)
+            template_data = next((b[1] for b in data if isinstance(b, list) and b[0] == "updateTemplateData"), None)
+            if template_data and template_data.get("inProgress"):
+                return
+        except Exception:
+            pass
+
+        time.sleep(1)
+        attempts += 1
+    
+    # If we reach here, timeout occurred - no upgrade has started yet.
+
+def execute_sequential_upgrades(session, city_id, city_name, position, tab, tasks):
     while tasks:
         wait_for_upgrade_completion(session, city_id, position, tab)
         html = session.get(city_url + str(city_id))
@@ -122,12 +152,15 @@ def execute_sequential_upgrades(session, city_id, position, tab, tasks):
             if error == "insufficient_resources":
                 session.setStatus("Upgrade aborted: insufficient resources")
                 try:
-                    sendToBot(session, f"Upgrade aborted in city {city_id}: insufficient resources for {task['unit']} ({task['type']}).")
+                    sendToBot(session, f"Upgrade aborted in city {city_name_str}: {error} for {task['unit']} ({task['type']}).")
                 except Exception:
                     session.setStatus("Failed to send Telegram notification")
                 return
             tasks.insert(0, task)
             time.sleep(60)
+        else:
+            # Wait for the upgrade to actually start before proceeding
+            wait_for_upgrade_start(session, city_id, position, tab)
 
     session.setStatus("All workshop upgrades completed")
 
@@ -192,6 +225,7 @@ def UpgradeUnits(session, event, stdin_fd, predetermined_input):
         run_workshop_upgrade_interface(
             session,
             w["city_id"],
+            w["name"],
             w["position"],
             w["action_request"],
             event,
@@ -199,7 +233,7 @@ def UpgradeUnits(session, event, stdin_fd, predetermined_input):
             w.get("level", 0),
         )
 
-def run_workshop_upgrade_interface(session, city_id, position, action_request, event, finalize=True, workshop_level=0):
+def run_workshop_upgrade_interface(session, city_id, city_name, position, action_request, event, finalize=True, workshop_level=0):
     print("\nWhat would you like to upgrade?")
     print("[1] Units")
     print("[2] Ships")
@@ -239,9 +273,12 @@ def run_workshop_upgrade_interface(session, city_id, position, action_request, e
 
     for unit_id, upgrades in complete_data.items():
         unit_name = unit_details.get(str(unit_id), {}).get("unitName", f"Unit {unit_id}")
-        for upgrade_type in ["offensive", "defensive"]:
-            upgrade = upgrades.get(upgrade_type)
-            if not upgrade:
+
+        # Some units/ships may only offer one type of upgrade (e.g. cargo capacity
+        # improvements). The API can return arbitrary upgrade types, so iterate
+        # all available ones rather than assuming only "offensive"/"defensive".
+        for upgrade_type, upgrade in upgrades.items():
+            if not isinstance(upgrade, dict):
                 continue
 
             cur = upgrade.get("currentLevel", {})
@@ -273,10 +310,10 @@ def run_workshop_upgrade_interface(session, city_id, position, action_request, e
         return
 
     for idx, task in enumerate(tasks, start=1):
-        print(f"[{idx}] {task['unit']} ({task['type']}): Level {task['from']} -> {task['to']} | +{task['effect_from']} -> +{task['effect_to']} | {task['gold']} gold, {task['crystal']} crystal | {task['duration']}")
+        print(f"[{idx}] {task['unit']} ({task['type']}): Level {task['from']}")
 
     print("\nEnter numbers separated by space (e.g., 1 3 5):")
-    selected_indexes = read().split()
+    selected_indexes = list(set(read().split()))  # deduplicate to avoid multiple selections of the same upgrade
     selected_tasks = [tasks[int(i)-1] for i in selected_indexes if i.isdigit() and 0 < int(i) <= len(tasks)]
 
     if not selected_tasks:
@@ -286,7 +323,7 @@ def run_workshop_upgrade_interface(session, city_id, position, action_request, e
         return
 
     upgrade_levels = {}
-    print("\nHow many levels do you want to upgrade each selected unit?")
+    print("\nFor each selected unit, enter the desired target level.")
     for idx, task in enumerate(selected_tasks):
         current_level = int(task['from'])
 
@@ -297,14 +334,19 @@ def run_workshop_upgrade_interface(session, city_id, position, action_request, e
             continue
 
         while True:
-            levels_input = read(msg=f"{idx + 1}. {task['unit']} ({task['type']}) - Level {current_level}, Max upgradeable: {max_levels} levels: ").strip()
+            target_input = read(msg=f"{idx + 1}. {task['unit']} ({task['type']}) - current level {current_level}, target level (max {max_target_level}), 0 to skip: ").strip()
             try:
-                levels = int(levels_input)
-                if 1 <= levels <= max_levels:
+                target_level = int(target_input)
+                if target_level == 0:
+                    # skip this task
+                    break
+
+                if current_level < target_level <= max_target_level:
+                    levels = target_level - current_level
                     upgrade_levels[idx] = levels
                     break
-                else:
-                    print(f"Please enter a number between 1 and {max_levels}.")
+
+                print(f"Please enter a level between {current_level + 1} and {max_target_level}, or 0 to skip.")
             except ValueError:
                 print("Invalid input. Please enter a number.")
 
@@ -339,7 +381,7 @@ def run_workshop_upgrade_interface(session, city_id, position, action_request, e
 
     print("\nThe following individual upgrades will be queued:")
     for i, t in enumerate(selected_tasks, start=1):
-        print(f" [{i}] {t['unit']} ({t['type']}) {t.get('from','?')} -> {t.get('to','?')}")
+        print(f" [{i}] {t['unit']} ({t['type']}): Level {t.get('from','?')} -> {t.get('to','?')}")
 
     print("\nTotal estimated cost for all requested upgrades:")
     print(f" - Gold: {total_gold:,} gold")
@@ -356,7 +398,7 @@ def run_workshop_upgrade_interface(session, city_id, position, action_request, e
     info = f"Workshop upgrade: {len(selected_tasks)} upgrades queued"
     set_child_mode(session)
     setInfoSignal(session, info)
-    thread = threading.Thread(target=execute_sequential_upgrades, args=(session, city_id, position, filter_type, selected_tasks))
+    thread = threading.Thread(target=execute_sequential_upgrades, args=(session, city_id, city_name, position, filter_type, selected_tasks))
     thread.start()
     if finalize:
         event.set()
