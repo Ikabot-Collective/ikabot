@@ -117,6 +117,50 @@ def getPriceLimits(html):
     return [(int(lo), int(hi)) for hi, lo in raw]
 
 
+def scanMarketPrices(session, city, resource_index, scan_type="444"):
+    """Browse marketplace offers to find the current lowest sell or highest buy price.
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    city : dict
+    resource_index : int
+        0=Wood, 1=Wine, 2=Marble, 3=Crystal, 4=Sulfur
+    scan_type : str
+        "444" to browse sell offers (find lowest sell price for undercutting),
+        "333" to browse buy offers (find highest buy price for outbidding)
+    Returns
+    -------
+    best_price : int or None
+        The best price found (lowest for sell, highest for buy), or None if no offers
+    """
+    search_resource = "resource" if resource_index == 0 else str(resource_index)
+    data = {
+        "cityId": city["id"],
+        "position": city["pos"],
+        "view": "branchOffice",
+        "activeTab": "bargain",
+        "type": scan_type,
+        "searchResource": search_resource,
+        "range": city["rango"],
+        "backgroundView": "city",
+        "currentCityId": city["id"],
+        "templateView": "branchOffice",
+        "currentTab": "bargain",
+        "actionRequest": actionRequest,
+        "ajax": "1",
+    }
+    resp = session.post(params=data)
+    html = json.loads(resp, strict=False)[1][1][1]
+    prices = re.findall(r'white-space:nowrap;">(\d+)\s', html)
+    if not prices:
+        return None
+    prices = [int(p) for p in prices]
+    if scan_type == "444":
+        return min(prices)  # lowest sell price to undercut
+    else:
+        return max(prices)  # highest buy price to outbid
+
+
 def getGold(session, city):
     """
     Parameters
