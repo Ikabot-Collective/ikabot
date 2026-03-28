@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import json
+import re
 import traceback
 
 from ikabot.config import *
@@ -69,7 +70,7 @@ def obtainMiraclesAvailable(session):
         data = session.post(params=params)
         data = json.loads(data, strict=False)
         html = data[1][1][1]
-        match = re.search(r'<div id="wonderLevelDisplay"[^>]*>\\n\s*(\d+)\s*</div>', html)
+        match = re.search(r'<div id="wonderLevelDisplay"[^>]*>\s*(\d+)\s*</div>', html)
         level = 0
         if match:
             level = int(match.group(1))
@@ -135,18 +136,18 @@ def chooseIsland(islands):
     island : dict
     """
     print("Which miracle do you want to activate?")
-    # Sort islands by name
-    sorted_islands = sorted(islands, key=lambda x: x["wonderName"])
+    # Sort islands by level descending, then by name
+    sorted_islands = sorted(islands, key=lambda x: (-x["wonderActivationLevel"], x["wonderName"]))
     i = 0
     print("(0) Exit")
     for island in sorted_islands:
         i += 1
         if island["available"]:
-            print("({:d}) {}".format(i, island["wonderName"]))
+            print("({:d}) {} (level {})".format(i, island["wonderName"], island["wonderActivationLevel"]))
         else:
             print(
-                "({:d}) {} (available in: {})".format(
-                    i, island["wonderName"], daysHoursMinutes(island["available_in"])
+                "({:d}) {} (level {}) (available in: {})".format(
+                    i, island["wonderName"], island["wonderActivationLevel"], daysHoursMinutes(island["available_in"])
                 )
             )
 
@@ -184,7 +185,7 @@ def activateMiracle(session, event, stdin_fd, predetermined_input):
             return
 
         if island["available"]:
-            print("\nThe miracle {} will be activated".format(island["wonderName"]))
+            print("\nThe miracle {} (level {}) will be activated".format(island["wonderName"], island["wonderActivationLevel"]))
             print("Proceed? [Y/n]")
             activate_miracle_input = read(values=["y", "Y", "n", "N", ""])
             if activate_miracle_input.lower() == "n":
