@@ -1,0 +1,4171 @@
+
+
+.js_abyssalAmbushBanner {
+    height: 80px;
+    width: 200px;
+    background-repeat: no-repeat;
+    margin: 0 10px 10px;
+}
+.js_abyssalAmbushBanner.firstAbyssalAmbushIcon {
+    background-image: url(//gf2.geo.gfsrv.net/cdn7e/6b0256de2cdf5f3281ad15e2b91822.png);
+    top: -50px;
+    inset-inline-start: -38px;
+}
+
+.js_abyssalAmbushBanner.winterBronzeIcon {
+    background-image: url(//gf3.geo.gfsrv.net/cdnb5/d6033d3bbef5f9abe1ac93367876e2.png);
+}
+.js_abyssalAmbushBanner.winterSilverIcon {
+    background-image: url(//gf1.geo.gfsrv.net/cdnf1/dfea14ec17a615a033cf1eb4ce5eb4.png);
+}
+.js_abyssalAmbushBanner.winterGoldIcon {
+    background-image: url(//gf2.geo.gfsrv.net/cdna7/ad3378bfc8541b2d0a8a4caa07ca3e.png);
+}
+.js_abyssalAmbushBanner.newYear2026BronzeIcon {
+    background-image: url(//gf2.geo.gfsrv.net/cdn1d/98b3dba829f413011671c2a67ab17d.png);
+}
+.js_abyssalAmbushBanner.newYear2026SilverIcon {
+    background-image: url(//gf2.geo.gfsrv.net/cdn75/c473fba966069a029d2e4a90b827df.png);
+}
+.js_abyssalAmbushBanner.newYear2026GoldIcon {
+    background-image: url(//gf1.geo.gfsrv.net/cdn9e/9caa02f2a213e778b8e4f85cb4d09a.png);
+}
+
+.abyssalAmbushIcon.firstAbyssalAmbushIcon {
+    background-image: url(//gf2.geo.gfsrv.net/cdnd3/cd14d58d86c07a4dfeaf7025d4b96e.png);
+}
+.abyssalAmbushIcon.winterBronzeIcon {
+    background-image: url(//gf2.geo.gfsrv.net/cdnae/683932258d40fce41d751f3620c75a.png);
+}
+.abyssalAmbushIcon.winterSilverIcon {
+    background-image: url(//gf3.geo.gfsrv.net/cdn28/f0fcabd7cc403ef0934580915ab0ed.png);
+}
+.abyssalAmbushIcon.winterGoldIcon {
+    background-image: url(//gf1.geo.gfsrv.net/cdn0e/85b392b5c4361319799d1b76d08598.png);
+}
+.abyssalAmbushIcon.newYear2026BronzeIcon {
+    background-image: url(//gf1.geo.gfsrv.net/cdn6b/b21435896f278df4dd2219daae1f23.png);
+}
+.abyssalAmbushIcon.newYear2026SilverIcon {
+    background-image: url(//gf3.geo.gfsrv.net/cdnee/924c10baa157abe6f2008ff8d78321.png);
+}
+.abyssalAmbushIcon.newYear2026GoldIcon {
+    background-image: url(//gf3.geo.gfsrv.net/cdne1/2b77cb8326cea01e43e67ccb7f8223.png);
+}
+
+
+#worldmap_iso #worldmap .islandMarked {
+    position:absolute;
+    cursor:url(//gf1.geo.gfsrv.net/cdn00/0aa3bb98504af3b7f3d779bf46b82b.ico), pointer;
+    height:120px;
+    width:238px;
+}
+
+#worldmap_iso .linkIslandMarked {
+    cursor:url(//gf1.geo.gfsrv.net/cdn00/0aa3bb98504af3b7f3d779bf46b82b.ico), pointer !important;
+    z-index:3000;
+}
+
+
+#container .mainContentBox .mainHeader, .accordionTitle  {
+    cursor: url(//gf2.geo.gfsrv.net/cdn7f/7f18d668d17637308c52f5088bb8b6.gif),url(//gf2.geo.gfsrv.net/cdna3/53924075fe33d719129db7df72bb38.cur), pointer;
+    text-align: center;
+    z-index:3000;
+}
+#container .mainContentBox .mainHeader.mousedown, .accordionTitle.mousedown  {
+    cursor: url(//gf1.geo.gfsrv.net/cdn6b/ad39c431ed991ec7c6d29b91c9ecca.gif),url(//gf1.geo.gfsrv.net/cdnf0/7457b39ac9c5071576ca1eebc13b45.cur), pointer;
+}
+
+#container ul.itemlist a {
+    text-align: center;
+    width: 40px;
+    margin-top: 3px;
+    vertical-align: bottom;
+    display: inline-block !important;
+    margin-left: 30px;
+}
+
+.treasureMapTableContainer {
+    background-image: url(//gf2.geo.gfsrv.net/cdn40/0b4b4f3f64fdcde042b8f0cee4a7d2.jpg);
+    height: 464px;
+    padding-top: 60px;
+    margin: 0 3px;
+}
+
+.treasureMapArchiveContainer {
+    background-image: url(//gf2.geo.gfsrv.net/cdn14/151ed6468d9896fbc4f871937a2b45.jpg);
+    margin: 0 3px;
+}
+
+.treasureMapTableFullContainer {
+    width:426px;
+    height:266px;
+    margin: auto auto;
+}
+
+.treasureMapTableFullContainer.completeMap_WJuAXzdq {
+    background-image: url(//gf2.geo.gfsrv.net/cdn49/55319c84d1db2770ae79ac8df15d9b.png);
+}
+
+.treasureMapTableFullContainer.completeMap_wteYKbsf {
+    background-image: url(//gf3.geo.gfsrv.net/cdn51/2856df524c7f4e2fcf9f5becc01472.png);
+}
+
+.treasureMapTableFullContainer.completeMap_VoDenRDU {
+    background-image: url(//gf1.geo.gfsrv.net/cdnf0/bdbfe3c6448e9453cc709277379fb4.png);
+}
+
+.treasureMapTableFullContainer.completeMap_KNfMNyPx {
+    background-image: url(//gf2.geo.gfsrv.net/cdnde/2cf24a5d3de3db25215c1bb122b74f.png);
+}
+
+.treasureMapTableFullContainer.completeMap_TFcqJVqE {
+    background-image: url(//gf3.geo.gfsrv.net/cdnb2/57cf50e00da54ee87733ea3a7e5528.png);
+}
+
+.treasureMapTableFullContainer.completeMap_iViYNJdZ {
+    background-image: url(//gf3.geo.gfsrv.net/cdn54/32e4442e10971ef68501a3328e83a6.png);
+}
+
+.treasureMapTableFullContainer.completeMap_BogOKaaq {
+    background-image: url(//gf1.geo.gfsrv.net/cdnf6/76567f2120a10813e8875164ef5b18.png);
+}
+
+.treasureMapTableFullContainer.completeMap_rUrPrBQy {
+    background-image: url(//gf1.geo.gfsrv.net/cdn3e/7289637a72f690570ca9848ce8d6b4.png);
+}
+
+.treasureMapTableFullContainer.completeMap_NpADgrvu {
+    background-image: url(//gf2.geo.gfsrv.net/cdn7d/aa14499ec1f0f2491d9fe9a24c1ee9.png);
+}
+
+.treasureMapTableFullContainer.completeMap_UQzDfKRd {
+    background-image: url(//gf3.geo.gfsrv.net/cdn2f/11f1e12c9baf3e5f7d6ac5d31f575e.png);
+}
+
+.treasureMapTableFullContainer.completeMap_unknown {
+    background-image: url(//gf1.geo.gfsrv.net/cdnf9/7ea455572794c75667479ff9902329.png);
+}
+
+.treasureMapTable {
+    width:489px;
+    height:240px;
+    margin: auto auto;
+
+}
+
+.treasureMapTable td {
+    width:163px;
+    height:149px;
+    border: 1px solid #987347;
+}
+
+#container .itemlist a.itemMapPiece:before {
+    background: url(//gf1.geo.gfsrv.net/cdn0e/cd05a25c112a47c120540c2ab7b26c.jpg) no-repeat 0 0 transparent;
+    display: block;
+    content: "";
+    height: 40px;
+    width: 40px;
+    margin: 0 5px 5px 0;
+    float: left;
+}
+
+#container .itemlist a.itemMapPiece:hover:before {
+    background-position: 0 -40px;
+}
+
+.mapPiece_EwUSMeNJ {
+    background: url(//gf1.geo.gfsrv.net/cdn0b/c8ce53309b37c2ba55846bf8a41fb4.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_VwvObONF {
+    background: url(//gf1.geo.gfsrv.net/cdnca/43bbdf0874af5b63882c7ce5828d34.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_KyLeHEZC {
+    background: url(//gf1.geo.gfsrv.net/cdnfb/48f92e839a0ae8c0a6bf6cf66daf9e.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_kkQrKdRM {
+    background: url(//gf2.geo.gfsrv.net/cdn71/a05758f8284fd3fc9e2a9ee27e7a9f.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_MXsGvqyV {
+    background: url(//gf2.geo.gfsrv.net/cdn1d/fcf44b812fd46ecb08db50c57f1bbd.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_BolgpBmd {
+    background: url(//gf1.geo.gfsrv.net/cdnc7/abcdceef23ad8f3483d3edbb311f7b.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_FSigtfWL {
+    background: url(//gf3.geo.gfsrv.net/cdneb/72a2a25a54c99dc3685476b8f91cd6.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_qeCzIuyV {
+    background: url(//gf3.geo.gfsrv.net/cdn5d/e04acd2397af98633dcbb50ac59292.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_BwBjrJqE {
+    background: url(//gf3.geo.gfsrv.net/cdn5c/364eab083cde70ef36cd2b407a66b8.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_cxkPVdIX {
+    background: url(//gf1.geo.gfsrv.net/cdnc8/f6bb6440b2bac2108bf7742a3f32bc.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_KdADYLls {
+    background: url(//gf2.geo.gfsrv.net/cdna8/4e17fe093d722b7ba32e23d16c0139.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_avPoeBwL {
+    background: url(//gf1.geo.gfsrv.net/cdn6b/7073fa66a56df098a343819c7bb2ba.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_TAEsgZhu {
+    background: url(//gf1.geo.gfsrv.net/cdncd/48cfb4f0371960e94e68da7650e617.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_mcCzLRtx {
+    background: url(//gf3.geo.gfsrv.net/cdnbd/fe7998a84e218091291a1384566826.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_BpVeRxdZ {
+    background: url(//gf3.geo.gfsrv.net/cdn27/e596bab4a5741fca53fc4d610a4c02.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_ZswvVvMM {
+    background: url(//gf2.geo.gfsrv.net/cdndf/ee5541599dcfaea240ac77577b149f.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_EnntXwiO {
+    background: url(//gf1.geo.gfsrv.net/cdnf4/04b832fa7dff2e551e76c92b2554c8.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_GsbpZVvS {
+    background: url(//gf2.geo.gfsrv.net/cdn79/d048b1c6f219a517c3f9ab32996737.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_QIzBOeHR {
+    background: url(//gf2.geo.gfsrv.net/cdnd3/ab2856885803da01916d249751c195.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_NXCHuVgU {
+    background: url(//gf1.geo.gfsrv.net/cdnfa/4ec45f9e9c3288454b679a5ac79c6d.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_uiMVcniw {
+    background: url(//gf1.geo.gfsrv.net/cdn39/76f6649807a49780b22abde97b3495.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_FGssuffs {
+    background: url(//gf1.geo.gfsrv.net/cdn3f/0036825ffd7f0a8b3ad073166b6107.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_AqoYJRNw {
+    background: url(//gf2.geo.gfsrv.net/cdn71/78a114fbae1aa1ffce6b7712403fc1.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_ozhkDzFk {
+    background: url(//gf3.geo.gfsrv.net/cdn5a/4c5584b9d0f2b392a798ed8e09bd5e.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_yYNlzQco {
+    background: url(//gf1.geo.gfsrv.net/cdn35/71ee8d8d756ffbfb0cb876d7e3bd6f.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_XyhMzoBE {
+    background: url(//gf2.geo.gfsrv.net/cdn4c/9ca9f241d81a62db6ae17af6b351e2.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_xoaLFCrc {
+    background: url(//gf3.geo.gfsrv.net/cdne0/e69e8c783b09a0c48a384994cc007a.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_aTPabpmp {
+    background: url(//gf1.geo.gfsrv.net/cdnce/3a86eb12c363457630319bc920d4e0.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_tGgXpLeM {
+    background: url(//gf2.geo.gfsrv.net/cdn78/70c72b0af60aeb4f4d7b33bf09ff37.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_vMTKelmp {
+    background: url(//gf2.geo.gfsrv.net/cdna3/941d05e8fd12b704ec03ce3c18d30d.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_tddXHVgM {
+    background: url(//gf2.geo.gfsrv.net/cdn4e/4de7b25b9caa1a24150549b7895805.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_cAgQNuzf {
+    background: url(//gf3.geo.gfsrv.net/cdn8b/8333bda762b213da5a5e5c4b830b84.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_RNtQgnCO {
+    background: url(//gf3.geo.gfsrv.net/cdne0/1f3e217814084af1b9d4b2eda9a4b0.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_ZpmYLKdm {
+    background: url(//gf3.geo.gfsrv.net/cdn88/9aad04811e65af00ab1ce37bef9a8a.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_NbzHzisQ {
+    background: url(//gf1.geo.gfsrv.net/cdn9f/fcfabdcde7358b0186cdfed71fe606.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_lEpUtRYl {
+    background: url(//gf2.geo.gfsrv.net/cdndc/9f09db984250449b8a566d4418b935.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_JGWhvIlz {
+    background: url(//gf2.geo.gfsrv.net/cdna8/b266936f89a09320b8ceb60883590c.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_HkyXysEs {
+    background: url(//gf1.geo.gfsrv.net/cdnc1/b06d7f50505c92133d22df5c78948a.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_AxbyDAgU {
+    background: url(//gf2.geo.gfsrv.net/cdnac/c7001a56dbc6fa79c05605db00e434.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_xhEhvDKR {
+    background: url(//gf3.geo.gfsrv.net/cdnb0/4e3ef9ae73fb057a4e9d8805efebad.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_dIpyXbkv {
+    background: url(//gf1.geo.gfsrv.net/cdn65/5c03e395cd308e10817f6c07ad30b1.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_IjTweZxJ {
+    background: url(//gf1.geo.gfsrv.net/cdnc5/91eb8bc932284dcbd946d75d548904.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_BCTLlpdX {
+    background: url(//gf3.geo.gfsrv.net/cdn8c/04991d39530cb648dd935882ebab62.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_liQHaEGa {
+    background: url(//gf1.geo.gfsrv.net/cdncc/a3e24a097fe4f3751d41bc1195b54c.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_VbwDKKRl {
+    background: url(//gf3.geo.gfsrv.net/cdnb6/4553a9d5e053f0f7702374d69c058a.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_WsaPtJqp {
+    background: url(//gf1.geo.gfsrv.net/cdnc9/cf3edf2214851b0e6d457f3460880d.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_JQYhMyEi {
+    background: url(//gf3.geo.gfsrv.net/cdne4/f2b044fcd4a900ec3844a0b0458419.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_jJKGloDM {
+    background: url(//gf3.geo.gfsrv.net/cdn22/a6811ec9d027d837e7499b7e771dbd.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_RkXdjiXY {
+    background: url(//gf1.geo.gfsrv.net/cdn09/3db40f20ad23d1d4aabedbe60e9bdf.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_EFohJEok {
+    background: url(//gf3.geo.gfsrv.net/cdnbd/2623eb916820de4a176387b1cafea8.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_yjOUAryo {
+    background: url(//gf1.geo.gfsrv.net/cdn9d/60c97fb8c8eb8677dbc5260736ce9a.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_xiuRWjUL {
+    background: url(//gf3.geo.gfsrv.net/cdnb8/421509c1690f014e4a10753ba7c1db.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_arnsTdjr {
+    background: url(//gf2.geo.gfsrv.net/cdn4b/d356827905c08a56a139940048424d.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_sBodVDjE {
+    background: url(//gf2.geo.gfsrv.net/cdn72/b8c7c6422ac7bcad00d063398a1d15.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_FFKKlsCq {
+    background: url(//gf3.geo.gfsrv.net/cdn8a/74e27320dded357e7cc68a9d2a6a3c.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_yCdjBBlD {
+    background: url(//gf2.geo.gfsrv.net/cdn4b/3d187c56fb15dd520051b2c4f2097e.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_FwhNUyYa {
+    background: url(//gf2.geo.gfsrv.net/cdn78/8ee65f6664b1189e0dfa572547605a.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_AiVZCAFX {
+    background: url(//gf1.geo.gfsrv.net/cdn33/66b9e033cbd7454dab14e2982057e8.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_juKBbiXz {
+    background: url(//gf1.geo.gfsrv.net/cdnf5/0e19a9c77718e6d84bca97fec5e739.png) no-repeat 0 0 transparent;
+}
+
+.mapPiece_UIoffGwP {
+    background: url(//gf2.geo.gfsrv.net/cdn1c/873d52622d1e7b9eb45b5cf8db14f8.png) no-repeat 0 0 transparent;
+}
+
+#treasureMapDescription.highlightbox {
+    margin: 20px auto;
+    width: 400px;
+}
+
+
+
+#tab_inventory {
+    width: 845px;
+}
+
+#inventory .modifiersContentBox {
+    width: 572px;
+    height: 90px;
+    margin-bottom: 10px;
+}
+
+#inventory .modifiersContentBox .content {
+    height: 58px;
+    margin: 0 2px;
+    border: #ddbf81 solid 2px;
+}
+
+#inventory .inventoryContentBox {
+    width: 572px;
+    height: 518px;
+}
+
+#inventory #modifierList {
+    float: left;
+    padding: 1px;
+}
+
+#inventory #modifierList .modifier {
+    float: left;
+    width: 42px;
+    height: 56px;
+    background: url(//gf2.geo.gfsrv.net/cdn19/4f185c16166ebbb5f69e623d48e502.png) no-repeat;
+    cursor: pointer;
+}
+
+#inventory #modifierList .modifier.global {
+    background-position: -42px 0;
+}
+#inventory #modifierList .modifier.global:hover {
+    background-position: -42px -112px;
+}
+#inventory #modifierList .modifier.global.active {
+    background-position: -42px -56px;
+}
+
+#inventory #modifierList .modifier.local:not(.negative) {
+    background-position: -84px 0;
+}
+
+#inventory #modifierList .modifier.local:not(.negative):hover {
+    background-position: -84px -112px;
+}
+#inventory #modifierList .modifier.local.active:not(.negative) {
+    background-position: -84px -56px;
+}
+
+#inventory #modifierList .modifier.negative {
+    background-position: -126px 0;
+}
+
+#inventory #modifierList .modifier.negative:hover {
+    background-position: -126px -112px;
+}
+
+#inventory #modifierList .modifier.negative.active {
+    background-position: -126px -56px;
+}
+
+
+
+#inventory #modifierList .modifier .itemIcon {
+    margin-left: 4px;
+    margin-top: 4px;
+}
+
+#inventory #modifierList .countdown {
+    line-height: 16px;
+    width: 35px;
+    margin-left: 4px;
+    text-align: center;
+    font-size: 12px;
+    color: #ffffff;
+}
+
+#inventory #modifierListPagination {
+    float: left;
+    width: 57px;
+}
+
+#inventory .modifierListPageArrow {
+    float: left;
+    width: 22px;
+    height: 25px;
+    margin-top: 5px;
+    margin-left: 2px;
+    background: url(//gf3.geo.gfsrv.net/cdn5b/c2d74e5e5b262071882a09202b70ea.png) no-repeat;
+    cursor: pointer;
+}
+
+#inventory .modifierListPageArrow:hover {
+    background-position: 0 -25px;
+}
+
+#inventory .modifierListPageArrow.forward {
+    background-position: -22px 0;
+    margin-left: 5px;
+}
+
+#inventory .modifierListPageArrow.forward:hover {
+    background-position: -22px -25px;
+    margin-left: 5px;
+}
+
+#inventory #modifierListPage {
+    float: left;
+    width: 57px;
+    height: 18px;
+    margin-top: 3px;
+    font-size: 13pt;
+}
+
+#inventory  .countdown {
+    color: green;
+}
+
+#inventory #modifierList .countdown.infinity {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+
+#inventory .inventoryContentBox .content {
+    height: 488px;
+    margin: 0 2px;
+}
+
+#inventory .categories {
+    float: left;
+    width: 73px;
+    height: 452px;
+}
+
+#inventory .categories .itemCategory {
+    display: block;
+    width: 73px;
+    height: 90px;
+    cursor: pointer;
+}
+
+#inventory .categories .itemCategory:not(.selected) {
+    border-right: #ddbf81 solid 2px;
+}
+
+#inventory .categories .itemCategory.selected {
+    border: #ddbf81 solid 2px;
+    border-right: 0;
+}
+
+#inventory .categories .itemCategory.selected + .itemCategory {
+    margin-top: -2px;
+}
+
+#inventory .categories .itemCategory > div {
+    display: block;
+    position: absolute;
+    width: 67px;
+    height: 31px;
+    vertical-align: middle;
+    padding-top: 51px;
+    margin-top: 5px;
+    margin-left: 2px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 10px;
+    background-color: #faeac6;
+    color: #946c39;
+}
+
+#inventory .categories .itemCategory:not(.selected) > div {
+    border-bottom-color: #946c39;
+    border-right-color: #946c39;
+}
+
+#inventory .categories .itemCategory:not(.selected):hover > div {
+    color: #5c2a0f;
+}
+
+#inventory .categories .itemCategory.selected > div {
+    width: 70px;
+    height: 31px;
+    padding: 56px 5px 0 2px;
+    margin: 0;
+    background: none;
+    color: #5c2a0f;
+}
+
+#inventory .categories .itemCategory > div:before {
+    display: block;
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    background: url(//gf1.geo.gfsrv.net/cdnc8/dcb27ee47a2473ff3d35e83a5aa9ae.png) no-repeat top left;
+    content: '';
+    margin-top: -40px;
+    margin-left: 19px;
+}
+
+#inventory .categories .itemCategory.selected > div:before { background-position-y: -32px; }
+#inventory .categories .itemCategory:not(.selected):hover > div:before {
+    background-position-y: -32px;
+}
+
+#inventory .categories .itemCategory.all > div:before { background-position: 0 0; }
+#inventory .categories .itemCategory.all.selected > div:before,
+#inventory .categories .itemCategory.all:hover > div:before {
+    background-position: 0 -32px;
+}
+
+#inventory .categories .itemCategory.economy > div:before { background-position: -32px 0; }
+#inventory .categories .itemCategory.economy.selected > div:before,
+#inventory .categories .itemCategory.economy:hover > div:before {
+    background-position: -32px -32px;
+}
+
+#inventory .categories .itemCategory.military > div:before { background-position: -64px 0; }
+#inventory .categories .itemCategory.military.selected > div:before,
+#inventory .categories .itemCategory.military:hover > div:before {
+    background-position: -64px -32px;
+}
+
+#inventory .categories .itemCategory.decoration > div:before { background-position: -96px 0; }
+#inventory .categories .itemCategory.decoration.selected > div:before,
+#inventory .categories .itemCategory.decoration:hover > div:before {
+    background-position: -96px -32px;
+}
+
+#inventory .categories .itemCategory.misc > div:before { background-position: -128px 0; }
+#inventory .categories .itemCategory.misc.selected > div:before,
+#inventory .categories .itemCategory.misc:hover > div:before {
+    background-position: -128px -32px;
+}
+
+
+#inventory .items {
+    float: left;
+    width: 490px;
+    height: 452px;
+    padding-left: 3px;
+    border: #ddbf81 solid 2px;
+    border-left-width: 0;
+    border-bottom-width: 0;
+}
+
+#inventory .items .itemSlot {
+    float: left;
+    height: 90px;
+    width: 70px;
+    background: url(//gf3.geo.gfsrv.net/cdne6/059b7fdf048d8b8d40faee711dc6f9.png) no-repeat;
+}
+
+#inventory .items .itemSlot.item {
+    background-position: -70px 0;
+    cursor: pointer;
+}
+
+#inventory .items .itemSlot.item:hover {
+    background-position: -210px 0;
+}
+
+#inventory .items .itemSlot.item.active{
+    background-position: -140px 0;
+}
+
+#inventory .items .itemIcon {
+    margin: 5px 0 3px 5px;
+}
+
+#inventory .items .item .count {
+    line-height: 16px;
+    text-align: center;
+    font-size: 13pt;
+}
+
+#inventory .inventoryPaginator {
+    margin: -2px 0 0 73px;
+    width: 101px;
+    height: 34px;
+    padding: 0 195px;
+    border: #ddbf81 solid 2px;
+    border-top-width: 0;
+}
+
+#inventory .inventoryPaginator img {
+    position: absolute;
+}
+
+#inventory .inventoryPaginator .inventoryBack    {
+    margin-top: 5px;
+    left: 283px;
+}
+#inventory .inventoryPaginator .inventoryForward {
+    margin-left: -24px;
+    left: 377px;
+}
+
+#inventory .inventoryPaginator .inventoryPage {
+    display: inline-block;
+    height: 30px;
+    width: 46px;
+    padding: 0 24px;
+    font-weight: 700;
+    text-align: center;
+    line-height: 30px;
+}
+
+#inventory .inventoryDetailsBox {
+    width: 274px;
+    position: relative;
+    top: -618px;
+    left: 579px;
+}
+
+#inventory .inventoryDetailsBox .content {
+    padding: 0 6px;
+    border: #ddbf81 solid 2px;
+    margin: 0 2px;
+}
+
+#inventory .inventoryDetailsBox .content > .displayBox {
+    padding: 5px;
+    margin: 4px 0;
+    background-color: #FDF7DD;
+    border: #f1d9a8 solid 1px;
+}
+
+#inventory .inventoryDetailsBox .icon {
+    border: #946c39 solid 2px;
+}
+
+#inventory .inventoryDetailsBox .name {
+    margin-top: 5px;
+    font-size: 13pt;
+    font-weight: bold;
+}
+
+#inventory .inventoryDetailsBox .title {
+    padding: 2px;
+    background-color: #f1d9a8;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+}
+
+#inventory .inventoryDetailsBox .text {
+    margin: 5px 2px;
+}
+
+#inventory .inventoryDetailsBox .durationDisplay {
+    font-weight: bold;
+    text-align: left;
+}
+
+#inventory .inventoryDetailsBox .countdown {
+    float: right;
+}
+
+#inventory .inventoryDetailsBox .extendModifierBox {
+    height: 65px;
+    padding: 5px;
+    margin-top: 5px;
+    background-color: #f5e9c7;
+    background: linear-gradient(to bottom, #f5e9c7, #fdf7dd);
+    border-radius: 2px;
+}
+#inventory .inventoryDetailsBox .extendModifierBox div.checkbox {
+    margin-top: 4px;
+}
+#inventory .inventoryDetailsBox .extendModifierBox span.checkbox_label {
+    margin: 3px 0;
+    width: 206px;
+    height: 24px;
+    vertical-align: middle;
+}
+#inventory .inventoryDetailsBox .extendModifierBox .itemIcon {
+    float: left;
+    margin-top: 5px;
+    margin-left: 40px;
+    border: #946c39 solid 1px;
+
+}
+#inventory .inventoryDetailsBox .cancelModifierBtn {
+    display: block;
+    margin: 5px auto 0 auto;
+}
+#inventory .inventoryDetailsBox .extendTextOr {
+    float: left;
+    width: 40px;
+    line-height: 44px;
+    margin: 0 5px;
+   text-align: center;
+}
+#inventory .inventoryDetailsBox .extendAmbrosia {
+    float: left;
+    width: 28px;
+    height: 39px;
+    background: url(//gf1.geo.gfsrv.net/cdncd/bbf7df16ece85db8a49aef7cdd9058.png) no-repeat top left;
+}
+#inventory .inventoryDetailsBox .extendPrice {
+    float: left;
+    width: 20px;
+    padding-top: 30px;
+    padding-left: 3px;
+    font-weight: bold;
+}
+#inventory .inventoryDetailsBox .extendPriceUnavailable {
+    float: left;
+    width: 20px;
+    padding-top: 30px;
+    padding-left: 3px;
+    font-weight: bold;
+    color: red;
+}
+
+
+
+#inventory .inventoryDetailsBox .citySelection {
+    width: 177px;
+    margin: 5px auto;
+}
+
+#inventory .inventoryDetailsBox .godSelection {
+    width: 177px;
+    margin: 5px auto;
+}
+
+#inventory .inventoryDetailsBox .useItemBtn {
+    display: block;
+    margin: 5px;
+}
+
+
+.itemIcon.small, .itemIcon.small:before, .itemIcon.small:after {
+    width: 34px;
+    height: 34px;
+}
+
+.itemIcon.medium, .itemIcon.medium:before, .itemIcon.medium:after {
+    width: 60px;
+    height: 60px;
+}
+
+.itemIcon.large, .itemIcon.large:before, .itemIcon.large:after {
+    width: 98px;
+    height: 98px;
+}
+
+.itemIcon.xl, .itemIcon.xl:before, .itemIcon.xl:after {
+    width: 150px;
+    height: 150px;
+}
+
+.itemIcon.medium, .itemIcon.medium:before, .itemIcon.medium:after {
+    width: 60px;
+    height: 60px;
+}
+
+.premiumOffer .itemIcon, #inventory .inventoryDetailsBox .itemIcon {
+    margin: 0 auto;
+}
+
+.itemIcon.small:after {
+    top: -34px;
+}
+
+.itemIcon.medium:after {
+    top: -60px;
+}
+
+.itemIcon.large:after {
+    top: -98px;
+}
+
+.itemIcon.xl:after {
+    top: -150px;
+}
+
+.itemIcon:before, .itemIcon:after {
+    content: "";
+    display: block;
+    position: relative;
+}
+
+.itemIcon.small {
+    background: url(//gf3.geo.gfsrv.net/cdn2c/d31a524d4592a87a77cc793c9fcd2f.jpg) no-repeat;
+}
+
+.itemIcon.small:before {
+    background: url(//gf1.geo.gfsrv.net/cdn3b/6e0ea5adf1e9556015d0b88ccad171.png) no-repeat;
+    background-position: -748px 0;
+}
+
+.itemIcon.merge.small:after {
+    background: url(//gf2.geo.gfsrv.net/cdn40/004f7c48b7fff9df96570d4d827c2e.png) no-repeat;
+}
+
+.itemIcon.medium {
+    background: url(//gf2.geo.gfsrv.net/cdn70/c2fd611779d0cc6f8f7ad34ff990da.jpg) no-repeat;
+}
+
+.itemIcon.medium:before {
+    background: url(//gf1.geo.gfsrv.net/cdnc5/9ded8bb207674a544eed47a067bb5c.png) no-repeat;
+    background-position: -1440px 0;
+}
+
+.itemIcon.days.medium:after, .itemIcon.troopsPackage.medium:after, .itemIcon.citizensPackage.medium:after,
+.itemIcon.goodsPackage.medium:after, .itemIcon.barbarianTruce.medium:after, .itemIcon.medium.recruitmentSpeedUp:after,
+.itemIcon.medium.increaseResearchPoints:after, .itemIcon.medium.actionPointsLimitIncrease:after {
+    background: url(//gf2.geo.gfsrv.net/cdn14/d164f0c467dfc65a6e02fe290ebf86.png) no-repeat;
+}
+
+.itemIcon.merge.medium:after {
+    background: url(//gf1.geo.gfsrv.net/cdn62/022e21949d3f74ed9adb3c9a6714ad.png) no-repeat 0 -360px;
+}
+
+.itemIcon.large {
+    background: url(//gf1.geo.gfsrv.net/cdnce/0f3a12dbd45ceead1c5c084a0727ec.jpg) no-repeat;
+}
+
+.itemIcon.large:before {
+    background: url(//gf2.geo.gfsrv.net/cdn73/b4621f2a3ccd6951d2e9c49c24bff1.png) no-repeat;
+    background-position: -2352px 0;
+}
+.itemIcon.days.large:after, .itemIcon.troopsPackage.large:after, .itemIcon.citizensPackage.large:after,
+.itemIcon.goodsPackage.large:after, .itemIcon.barbarianTruce.large:after, .itemIcon.large.recruitmentSpeedUp:after,
+.itemIcon.large.increaseResearchPoints:after, .itemIcon.large.actionPointsLimitIncrease:after {
+    background: url(//gf1.geo.gfsrv.net/cdnca/36ab06ae922834dd8d6c98282a38fe.png) no-repeat top left;
+}
+.itemIcon.merge.large:after {
+    background: url(//gf2.geo.gfsrv.net/cdn4f/80b16f348818c4f3c30f10fefe8969.png) no-repeat 0 -360px;
+}
+
+.itemIcon.xl {
+    background: url(//gf1.geo.gfsrv.net/cdn30/357c4c3c1106a6c0fdc864dfd4336d.jpg) no-repeat;
+}
+.itemIcon.xl:before {
+    background: url(//gf1.geo.gfsrv.net/cdn63/7f4a9bc46bb909f7db21e123ed0924.png) no-repeat;
+    background-position: -3600px 0;
+}
+.itemIcon.days.xl:after, .itemIcon.troopsPackage.xl:after, .itemIcon.citizensPackage.xl:after,
+.itemIcon.goodsPackage.xl:after, .itemIcon.barbarianTruce.xl:after,
+.itemIcon.xl.recruitmentSpeedUp:after, .itemIcon.xl.actionPointsLimitIncrease:after {
+    background: url(//gf3.geo.gfsrv.net/cdnb2/9669a125e14ae35b9295c098e2e3f3.png) no-repeat;
+}
+.itemIcon.merge.xl:after {
+    background: url(//gf3.geo.gfsrv.net/cdn5b/d3dadbbfbf4b7f7a6b3d17033dcd78.png) no-repeat 0 -950px;
+}
+
+
+.itemIcon.small.abyssalAmbush:before, .itemIcon.small.actionPointsLimitIncrease:before {
+    background: url(//gf1.geo.gfsrv.net/cdn0d/8fe34773877f387307f747dd727673.png) no-repeat;
+}
+
+.itemIcon.medium.abyssalAmbush:before, .itemIcon.medium.actionPointsLimitIncrease:before {
+    background: url(//gf3.geo.gfsrv.net/cdnea/0569bc5e0e156904a168f651ee59aa.png) no-repeat;
+}
+
+.itemIcon.large.abyssalAmbush:before, .itemIcon.large.actionPointsLimitIncrease:before {
+    background: url(//gf1.geo.gfsrv.net/cdn97/e5af7b573d6aa280710c4327616f71.png) no-repeat;
+}
+
+.itemIcon.xl.abyssalAmbush:before, .itemIcon.xl.actionPointsLimitIncrease:before {
+    background: url(//gf3.geo.gfsrv.net/cdne4/2d33a608b6093d111efb525646bb36.png) no-repeat;
+}
+
+.itemIcon.small.premiumAccount:before { background-position: 0 0; }
+.itemIcon.small.accountTransferCoin:before { background-position: -34px 0;}
+.itemIcon.small.resourceBonus:before { background-position: -68px 0; }
+.itemIcon.small.wineBonus:before { background-position: -102px 0; }
+.itemIcon.small.marbleBonus:before { background-position: -136px 0; }
+.itemIcon.small.sulfurBonus:before { background-position: -170px 0; }
+.itemIcon.small.crystalBonus:before { background-position: -204px 0; }
+.itemIcon.small.safeCapacityBonus:before { background-position: -238px 0; }
+.itemIcon.small.storageCapacityBonus:before { background-position: -272px 0; }
+.itemIcon.small.researchPointsBonus:before { background-position: -306px 0; }
+.itemIcon.small.tradeRouteCoin:before { background-position: -340px 0; }
+.itemIcon.small.premiumDummyPackageSmall:before { background-position: -374px 0; }
+.itemIcon.small.premiumDummyPackageMedium:before { background-position: -408px 0; }
+.itemIcon.small.premiumDummyPackageBig:before { background-position: -442px 0; }
+.itemIcon.small.winePackage:before { background-position: -476px 0; }
+.itemIcon.small.marblePackage:before { background-position: -510px 0; }
+.itemIcon.small.crystalPackage:before { background-position: -544px 0; }
+.itemIcon.small.sulfurPackage:before { background-position: -578px 0; }
+.itemIcon.small.resourcePackage:before { background-position: -612px 0; }
+.itemIcon.small.putPlague:before { background-position: -646px 0; }
+.itemIcon.small.plagueProtection:before { background-position: -680px 0; }
+.itemIcon.small.premiumTraderCoin:before { background-position: -714px 0; }
+.itemIcon.small.heliosTowerOil:before { background-position: -782px 0; }
+.itemIcon.small.badTaxAccountant:before { background-position: -816px 0; }
+.itemIcon.small.culturalTreatyCoin:before { background-position: -850px 0; }
+.itemIcon.small.heliosTowerCoin:before { background-position: -884px 0; }
+.itemIcon.small.tritonEnginesCoin:before { background-position: -918px 0; }
+.itemIcon.small.archiveMessageCoin:before { background-position: -952px 0; }
+.itemIcon.small.archiveEspionageReportCoin:before { background-position: -986px 0; }
+.itemIcon.small.moveCityCoin:before { background-position: -1020px 0; }
+.itemIcon.small.moveIslandSpotCoin:before { background-position: -1054px 0; }
+.itemIcon.small.colonizeIslandSpotCoin:before { background-position: -1088px 0; }
+.itemIcon.small.barbarianMapPiece:before { background-position: -1122px 0; }
+.itemIcon.small.goldPackage:before { background-position: -1156px 0; }
+.itemIcon.small.tradegoodBonus:before { background-position: -1190px 0; }
+.itemIcon.small.troopInfoCoin:before { background-position: -1224px 0; }
+.itemIcon.small.convertCapturePointsCoin:before { background-position: -1258px 0; }
+.itemIcon.small.troopsPackage.s309:before { background-position: -1292px 0; }
+.itemIcon.small.troopsPackage.s313:before { background-position: -1326px 0; }
+.itemIcon.small.troopsPackage.s308:before { background-position: -1360px 0; }
+.itemIcon.small.troopsPackage.s311:before { background-position: -1394px 0; }
+.itemIcon.small.troopsPackage.s312:before { background-position: -1428px 0; }
+.itemIcon.small.troopsPackage.s303:before { background-position: -1462px 0; }
+.itemIcon.small.troopsPackage.s306:before { background-position: -1496px 0; }
+.itemIcon.small.troopsPackage.s310:before { background-position: -1530px 0; }
+.itemIcon.small.troopsPackage.s305:before { background-position: -1564px 0; }
+.itemIcon.small.troopsPackage.s307:before { background-position: -1598px 0; }
+.itemIcon.small.troopsPackage.s304:before { background-position: -1632px 0; }
+.itemIcon.small.troopsPackage.s302:before { background-position: -1666px 0; }
+.itemIcon.small.troopsPackage.s315:before { background-position: -1700px 0; }
+.itemIcon.small.troopsPackage.s301:before { background-position: -1734px 0; }
+.itemIcon.small.troopsPackage.s213:before { background-position: -1768px 0; }
+.itemIcon.small.troopsPackage.s219:before { background-position: -1802px 0; }
+.itemIcon.small.troopsPackage.s216:before { background-position: -1836px 0; }
+.itemIcon.small.troopsPackage.s211:before { background-position: -1870px 0; }
+.itemIcon.small.troopsPackage.s214:before { background-position: -1904px 0; }
+.itemIcon.small.troopsPackage.s215:before { background-position: -1938px 0; }
+.itemIcon.small.troopsPackage.s217:before { background-position: -1972px 0; }
+.itemIcon.small.troopsPackage.s210:before { background-position: -2006px 0; }
+.itemIcon.small.troopsPackage.s218:before { background-position: -2040px 0; }
+.itemIcon.small.troopsPackage.s212:before { background-position: -2074px 0; }
+.itemIcon.small.troopsPackage.s220:before { background-position: -2108px 0; }
+.itemIcon.small.citizensPackage:before { background-position: -2142px 0; }
+.itemIcon.small.femaleAdvisor:before { background-position: -2176px 0; }
+.itemIcon.small.halloweenAdvisor:before { background-position: -2210px 0; }
+.itemIcon.small.halloweenCity:before { background-position: -2244px 0; }
+.itemIcon.small.barbarianTruce:before { background-position: -2278px 0; }
+.itemIcon.small.barbarianAdvisor:before { background-position: -2312px 0; }
+.itemIcon.small.winterAdvisor:before { background-position: -2346px 0; }
+.itemIcon.small.winterCity:before { background-position: -2380px 0; }
+.itemIcon.small.christmasAdvisor:before { background-position: -2414px 0; }
+.itemIcon.small.christmasCity:before { background-position: -2448px 0; }
+.itemIcon.small.easterAdvisor:before { background-position: -2482px 0; }
+.itemIcon.small.easterCity:before { background-position: -2516px 0; }
+.itemIcon.small.troopsPackage.s319:before { background-position: -2584px 0; }
+.itemIcon.small.softMerge:before { background-position: -2618px 0; }
+.itemIcon.small.accountTransfer.city0:before { background-position: -2652px 0; }
+.itemIcon.small.accountTransfer.city1:before { background-position: -2686px 0; }
+.itemIcon.small.accountTransfer.city2:before { background-position: -2720px 0; }
+.itemIcon.small.accountTransfer.city3:before { background-position: -2754px 0; }
+.itemIcon.small.accountTransfer.city4:before { background-position: -2788px 0; }
+.itemIcon.small.accountTransfer.city5:before { background-position: -2822px 0; }
+.itemIcon.small.accountTransfer.city6:before { background-position: -2856px 0; }
+.itemIcon.small.accountTransfer.city7:before { background-position: -2890px 0; }
+.itemIcon.small.accountTransfer.city8:before { background-position: -2924px 0; }
+.itemIcon.small.accountTransfer.city9:before { background-position: -2958px 0; }
+.itemIcon.small.accountTransfer.city10:before { background-position: -2992px 0; }
+.itemIcon.small.accountTransfer.city11:before { background-position: -3026px 0; }
+.itemIcon.small.accountTransfer.city12:before { background-position: -3060px 0; }
+.itemIcon.small.accountTransfer.city13:before { background-position: -3094px 0; }
+.itemIcon.small.accountTransfer.city14:before { background-position: -3128px 0; }
+.itemIcon.small.accountTransfer.city15:before { background-position: -3162px 0; }
+.itemIcon.small.accountTransfer.city16:before { background-position: -3196px 0; }
+.itemIcon.small.accountTransfer.city17:before { background-position: -3230px 0; }
+.itemIcon.small.accountTransfer.city18:before { background-position: -3264px 0; }
+.itemIcon.small.accountTransfer.city19:before { background-position: -3298px 0; }
+.itemIcon.small.accountTransfer.city20:before { background-position: -3332px 0; }
+.itemIcon.small.accountTransfer.city21:before { background-position: -3366px 0; }
+.itemIcon.small.dailyRewardBoostPlutus:before     { background-position: -3500px 0; }
+.itemIcon.small.dailyRewardBoostTyche:before      { background-position: -3534px 0; }
+.itemIcon.small.dailyRewardBoostDionysus:before   { background-position: -3568px 0; }
+.itemIcon.small.dailyRewardBoostPan:before        { background-position: -3602px 0; }
+.itemIcon.small.dailyRewardBoostTheia:before      { background-position: -3636px 0; }
+.itemIcon.small.dailyRewardBoostHephaestos:before { background-position: -3670px 0; }
+.itemIcon.small.bronzeFleece:before { background-position: -3400px 0; }
+.itemIcon.small.silverFleece:before { background-position: -3434px 0; }
+.itemIcon.small.goldenFleece:before { background-position: -3468px 0; }
+.itemIcon.small.abyssalAmbush.recruitmentSpeedUp:before { background-position: 0 0; }
+.itemIcon.small.abyssalAmbush.increaseGodFavour:before { background-position: -34px 0; }
+.itemIcon.small.abyssalAmbush.increaseResearchPoints:before { background-position: -68px 0; }
+.itemIcon.small.abyssalAmbush.reduceExperimentCost:before { background-position: -102px 0; }
+.itemIcon.small.actionPointsLimitIncrease.actionPoints2:before { background-position: -136px 0; }
+.itemIcon.small.actionPointsLimitIncrease.actionPoints4:before { background-position: -170px 0; }
+
+
+.itemIcon.medium.premiumAccount:before { background-position: 0 0; }
+.itemIcon.medium.accountTransferCoin:before { background-position: -60px 0; }
+.itemIcon.medium.resourceBonus:before { background-position: -120px 0; }
+.itemIcon.medium.wineBonus:before { background-position: -180px 0; }
+.itemIcon.medium.marbleBonus:before { background-position: -240px 0;}
+.itemIcon.medium.sulfurBonus:before { background-position: -300px 0; }
+.itemIcon.medium.crystalBonus:before { background-position: -360px 0; }
+.itemIcon.medium.safeCapacityBonus:before { background-position: -420px 0; }
+.itemIcon.medium.storageCapacityBonus:before { background-position: -480px 0; }
+.itemIcon.medium.researchPointsBonus:before { background-position: -540px 0; }
+.itemIcon.medium.tradeRouteCoin:before { background-position: -600px 0; }
+.itemIcon.medium.premiumDummyPackageSmall:before { background-position: -660px 0; }
+.itemIcon.medium.premiumDummyPackageMedium:before { background-position: -720px 0; }
+.itemIcon.medium.premiumDummyPackageBig:before { background-position: -780px 0; }
+.itemIcon.medium.winePackage:before { background-position: -840px 0; }
+.itemIcon.medium.marblePackage:before { background-position: -900px 0; }
+.itemIcon.medium.crystalPackage:before { background-position: -960px 0; }
+.itemIcon.medium.sulfurPackage:before { background-position: -1020px 0; }
+.itemIcon.medium.resourcePackage:before { background-position: -1080px 0; }
+.itemIcon.medium.putPlague:before { background-position: -1140px 0; }
+.itemIcon.medium.plagueProtection:before { background-position: -1200px 0; }
+.itemIcon.medium.wineBonus.days:before { background-position: -1260px 0; }
+.itemIcon.medium.safeCapacityBonus.days:before { background-position: -1320px 0; }
+.itemIcon.medium.premiumTraderCoin:before { background-position: -1380px 0; }
+.itemIcon.medium.heliosTowerOil:before { background-position: -1500px 0; }
+.itemIcon.medium.badTaxAccountant:before { background-position: -1560px 0; }
+.itemIcon.medium.culturalTreatyCoin:before { background-position: -1620px 0; }
+.itemIcon.medium.heliosTowerCoin:before { background-position: -1680px 0; }
+.itemIcon.medium.tritonEnginesCoin:before { background-position: -1740px 0; }
+.itemIcon.medium.archiveMessageCoin:before { background-position: -1800px 0; }
+.itemIcon.medium.archiveEspionageReportCoin:before { background-position: -1860px 0; }
+.itemIcon.medium.moveCityCoin:before { background-position: -1920px 0; }
+.itemIcon.medium.moveIslandSpotCoin:before { background-position: -1980px 0; }
+.itemIcon.medium.colonizeIslandSpotCoin:before { background-position: -2040px 0; }
+.itemIcon.medium.barbarianMapPiece:before { background-position: -2100px 0; }
+.itemIcon.medium.goldPackage:before { background-position: -2160px 0; }
+.itemIcon.medium.tradegoodBonus:before { background-position: -2220px 0; }
+.itemIcon.medium.troopInfoCoin:before { background-position: -2280px 0; }
+.itemIcon.medium.convertCapturePointsCoin:before { background-position: -2340px 0; }
+.itemIcon.medium.troopsPackage.s309:before { background-position: -2400px 0; }
+.itemIcon.medium.troopsPackage.s313:before { background-position: -2460px 0; }
+.itemIcon.medium.troopsPackage.s308:before { background-position: -2520px 0; }
+.itemIcon.medium.troopsPackage.s311:before { background-position: -2580px 0; }
+.itemIcon.medium.troopsPackage.s312:before { background-position: -2640px 0; }
+.itemIcon.medium.troopsPackage.s303:before { background-position: -2700px 0; }
+.itemIcon.medium.troopsPackage.s306:before { background-position: -2760px 0; }
+.itemIcon.medium.troopsPackage.s310:before { background-position: -2820px 0; }
+.itemIcon.medium.troopsPackage.s305:before { background-position: -2880px 0; }
+.itemIcon.medium.troopsPackage.s307:before { background-position: -2940px 0; }
+.itemIcon.medium.troopsPackage.s304:before { background-position: -3000px 0; }
+.itemIcon.medium.troopsPackage.s302:before { background-position: -3060px 0; }
+.itemIcon.medium.troopsPackage.s315:before { background-position: -3120px 0; }
+.itemIcon.medium.troopsPackage.s301:before { background-position: -3180px 0; }
+.itemIcon.medium.troopsPackage.s213:before { background-position: -3240px 0; }
+.itemIcon.medium.troopsPackage.s219:before { background-position: -3300px 0; }
+.itemIcon.medium.troopsPackage.s216:before { background-position: -3360px 0; }
+.itemIcon.medium.troopsPackage.s211:before { background-position: -3420px 0; }
+.itemIcon.medium.troopsPackage.s214:before { background-position: -3480px 0; }
+.itemIcon.medium.troopsPackage.s215:before { background-position: -3540px 0; }
+.itemIcon.medium.troopsPackage.s217:before { background-position: -3600px 0; }
+.itemIcon.medium.troopsPackage.s210:before { background-position: -3660px 0; }
+.itemIcon.medium.troopsPackage.s218:before { background-position: -3720px 0; }
+.itemIcon.medium.troopsPackage.s212:before { background-position: -3780px 0; }
+.itemIcon.medium.troopsPackage.s220:before { background-position: -3840px 0; }
+.itemIcon.medium.citizensPackage:before { background-position: -3900px 0; }
+.itemIcon.medium.femaleAdvisor:before { background-position: -3960px 0; }
+.itemIcon.medium.halloweenAdvisor:before { background-position: -4020px 0; }
+.itemIcon.medium.halloweenCity:before { background-position: -4080px 0; }
+.itemIcon.medium.barbarianTruce:before { background-position: -4140px 0; }
+.itemIcon.medium.barbarianAdvisor:before { background-position: -4200px 0; }
+.itemIcon.medium.winterAdvisor:before { background-position: -4260px 0; }
+.itemIcon.medium.winterCity:before { background-position: -4320px 0; }
+.itemIcon.medium.christmasAdvisor:before { background-position: -4380px 0; }
+.itemIcon.medium.christmasCity:before { background-position: -4440px 0; }
+.itemIcon.medium.easterAdvisor:before { background-position: -4500px 0; }
+.itemIcon.medium.easterCity:before { background-position: -4560px 0; }
+.itemIcon.medium.troopsPackage.s319:before { background-position: -4680px 0; }
+.itemIcon.medium.softMerge:before { background-position: -4740px 0; }
+.itemIcon.medium.accountTransfer.city0:before { background-position: -4800px 0; }
+.itemIcon.medium.accountTransfer.city1:before { background-position: -4860px 0; }
+.itemIcon.medium.accountTransfer.city2:before { background-position: -4920px 0; }
+.itemIcon.medium.accountTransfer.city3:before { background-position: -4980px 0; }
+.itemIcon.medium.accountTransfer.city4:before { background-position: -5040px 0; }
+.itemIcon.medium.accountTransfer.city5:before { background-position: -5100px 0; }
+.itemIcon.medium.accountTransfer.city6:before { background-position: -5160px 0; }
+.itemIcon.medium.accountTransfer.city7:before { background-position: -5220px 0; }
+.itemIcon.medium.accountTransfer.city8:before { background-position: -5280px 0; }
+.itemIcon.medium.accountTransfer.city9:before { background-position: -5340px 0; }
+.itemIcon.medium.accountTransfer.city10:before { background-position: -5400px 0; }
+.itemIcon.medium.accountTransfer.city11:before { background-position: -5460px 0; }
+.itemIcon.medium.accountTransfer.city12:before { background-position: -5520px 0; }
+.itemIcon.medium.accountTransfer.city13:before { background-position: -5580px 0; }
+.itemIcon.medium.accountTransfer.city14:before { background-position: -5640px 0; }
+.itemIcon.medium.accountTransfer.city15:before { background-position: -5700px 0; }
+.itemIcon.medium.accountTransfer.city16:before { background-position: -5760px 0; }
+.itemIcon.medium.accountTransfer.city17:before { background-position: -5820px 0; }
+.itemIcon.medium.accountTransfer.city18:before { background-position: -5880px 0; }
+.itemIcon.medium.accountTransfer.city19:before { background-position: -5940px 0; }
+.itemIcon.medium.accountTransfer.city20:before { background-position: -6000px 0; }
+.itemIcon.medium.accountTransfer.city21:before { background-position: -6060px 0; }
+.itemIcon.medium.dailyRewardBoostPlutus:before     { background-position: -6300px 0; }
+.itemIcon.medium.dailyRewardBoostTyche:before      { background-position: -6360px 0; }
+.itemIcon.medium.dailyRewardBoostDionysus:before   { background-position: -6420px 0; }
+.itemIcon.medium.dailyRewardBoostPan:before        { background-position: -6480px 0; }
+.itemIcon.medium.dailyRewardBoostTheia:before      { background-position: -6540px 0; }
+.itemIcon.medium.dailyRewardBoostHephaestos:before { background-position: -6600px 0; }
+.itemIcon.medium.bronzeFleece:before { background-position: -6120px 0; }
+.itemIcon.medium.silverFleece:before { background-position: -6180px 0; }
+.itemIcon.medium.goldenFleece:before { background-position: -6240px 0; }
+.itemIcon.medium.abyssalAmbush.recruitmentSpeedUp:before { background-position: 0 0; }
+.itemIcon.medium.abyssalAmbush.increaseGodFavour:before { background-position: -60px 0; }
+.itemIcon.medium.abyssalAmbush.increaseResearchPoints:before { background-position: -120px 0; }
+.itemIcon.medium.abyssalAmbush.reduceExperimentCost:before { background-position: -180px 0; }
+.itemIcon.medium.actionPointsLimitIncrease.actionPoints2:before { background-position: -240px 0; }
+.itemIcon.medium.actionPointsLimitIncrease.actionPoints4:before { background-position: -300px 0; }
+
+
+.itemIcon.large.premiumAccount:before { background-position: 0 0; }
+.itemIcon.large.accountTransferCoin:before { background-position: -98px 0; }
+.itemIcon.large.resourceBonus:before { background-position: -196px 0; }
+.itemIcon.large.wineBonus:before { background-position: -294px 0; }
+.itemIcon.large.marbleBonus:before { background-position: -392px 0; }
+.itemIcon.large.sulfurBonus:before { background-position: -490px 0; }
+.itemIcon.large.crystalBonus:before { background-position: -588px 0; }
+.itemIcon.large.safeCapacityBonus:before { background-position: -686px 0; }
+.itemIcon.large.storageCapacityBonus:before { background-position: -784px 0; }
+.itemIcon.large.researchPointsBonus:before { background-position: -882px 0; }
+.itemIcon.large.tradeRouteCoin:before { background-position: -980px 0; }
+.itemIcon.large.premiumDummyPackageSmall:before { background-position: -1078px 0; }
+.itemIcon.large.premiumDummyPackageMedium:before { background-position: -1176px 0; }
+.itemIcon.large.premiumDummyPackageBig:before { background-position: -1274px 0; }
+.itemIcon.large.winePackage:before { background-position: -1372px 0; }
+.itemIcon.large.marblePackage:before { background-position: -1470px 0; }
+.itemIcon.large.crystalPackage:before { background-position: -1568px 0; }
+.itemIcon.large.sulfurPackage:before { background-position: -1666px 0; }
+.itemIcon.large.resourcePackage:before { background-position: -1764px 0; }
+.itemIcon.large.putPlague:before { background-position: -1862px 0; }
+.itemIcon.large.plagueProtection:before { background-position: -1960px 0; }
+.itemIcon.large.wineBonus.days:before { background-position: -2058px 0; }
+.itemIcon.large.safeCapacityBonus.days:before { background-position: -2156px 0; }
+.itemIcon.large.premiumTraderCoin:before { background-position: -2254px 0; }
+.itemIcon.large.heliosTowerOil:before { background-position: -2450px 0; }
+.itemIcon.large.badTaxAccountant:before { background-position: -2548px 0; }
+.itemIcon.large.culturalTreatyCoin:before { background-position: -2646px 0; }
+.itemIcon.large.heliosTowerCoin:before { background-position: -2744px 0; }
+.itemIcon.large.tritonEnginesCoin:before { background-position: -2842px 0; }
+.itemIcon.large.archiveMessageCoin:before { background-position: -2940px 0; }
+.itemIcon.large.archiveEspionageReportCoin:before { background-position: -3038px 0; }
+.itemIcon.large.moveCityCoin:before { background-position: -3136px 0; }
+.itemIcon.large.moveIslandSpotCoin:before { background-position: -3234px 0; }
+.itemIcon.large.colonizeIslandSpotCoin:before { background-position: -3332px 0; }
+.itemIcon.large.barbarianMapPiece:before { background-position: -3430px 0; }
+.itemIcon.large.goldPackage:before { background-position: -3528px 0; }
+.itemIcon.large.tradegoodBonus:before { background-position: -3626px 0; }
+.itemIcon.large.troopInfoCoin:before { background-position: -3724px 0; }
+.itemIcon.large.convertCapturePointsCoin:before { background-position: -3822px 0; }
+.itemIcon.large.troopsPackage.s309:before { background-position: -3920px 0; }
+.itemIcon.large.troopsPackage.s313:before { background-position: -4018px 0; }
+.itemIcon.large.troopsPackage.s308:before { background-position: -4116px 0; }
+.itemIcon.large.troopsPackage.s311:before { background-position: -4214px 0; }
+.itemIcon.large.troopsPackage.s312:before { background-position: -4312px 0; }
+.itemIcon.large.troopsPackage.s303:before { background-position: -4410px 0; }
+.itemIcon.large.troopsPackage.s306:before { background-position: -4508px 0; }
+.itemIcon.large.troopsPackage.s310:before { background-position: -4606px 0; }
+.itemIcon.large.troopsPackage.s305:before { background-position: -4704px 0; }
+.itemIcon.large.troopsPackage.s307:before { background-position: -4802px 0; }
+.itemIcon.large.troopsPackage.s304:before { background-position: -4900px 0; }
+.itemIcon.large.troopsPackage.s302:before { background-position: -4998px 0; }
+.itemIcon.large.troopsPackage.s315:before { background-position: -5096px 0; }
+.itemIcon.large.troopsPackage.s301:before { background-position: -5194px 0; }
+.itemIcon.large.troopsPackage.s213:before { background-position: -5292px 0; }
+.itemIcon.large.troopsPackage.s219:before { background-position: -5390px 0; }
+.itemIcon.large.troopsPackage.s216:before { background-position: -5488px 0; }
+.itemIcon.large.troopsPackage.s211:before { background-position: -5586px 0; }
+.itemIcon.large.troopsPackage.s214:before { background-position: -5684px 0; }
+.itemIcon.large.troopsPackage.s215:before { background-position: -5782px 0; }
+.itemIcon.large.troopsPackage.s217:before { background-position: -5880px 0; }
+.itemIcon.large.troopsPackage.s210:before { background-position: -5978px 0; }
+.itemIcon.large.troopsPackage.s218:before { background-position: -6076px 0; }
+.itemIcon.large.troopsPackage.s212:before { background-position: -6174px 0; }
+.itemIcon.large.troopsPackage.s220:before { background-position: -6272px 0; }
+.itemIcon.large.citizensPackage:before { background-position: -6370px 0; }
+.itemIcon.large.femaleAdvisor:before { background-position: -6468px 0; }
+.itemIcon.large.halloweenAdvisor:before { background-position: -6566px 0; }
+.itemIcon.large.halloweenCity:before { background-position: -6664px 0; }
+.itemIcon.large.barbarianTruce:before { background-position: -6762px 0; }
+.itemIcon.large.barbarianAdvisor:before { background-position: -6860px 0; }
+.itemIcon.large.winterAdvisor:before { background-position: -6958px 0; }
+.itemIcon.large.winterCity:before { background-position: -7056px 0; }
+.itemIcon.large.christmasAdvisor:before { background-position: -7154px 0; }
+.itemIcon.large.christmasCity:before { background-position: -7252px 0; }
+.itemIcon.large.easterAdvisor:before { background-position: -7350px 0; }
+.itemIcon.large.easterCity:before { background-position: -7448px 0; }
+.itemIcon.large.troopsPackage.s319:before { background-position: -7644px 0; }
+.itemIcon.large.softMerge:before { background-position: -7742px 0; }
+.itemIcon.large.accountTransfer.city0:before { background-position: -7840px 0; }
+.itemIcon.large.accountTransfer.city1:before { background-position: -7938px 0; }
+.itemIcon.large.accountTransfer.city2:before { background-position: -8036px 0; }
+.itemIcon.large.accountTransfer.city3:before { background-position: -8134px 0; }
+.itemIcon.large.accountTransfer.city4:before { background-position: -8232px 0; }
+.itemIcon.large.accountTransfer.city5:before { background-position: -8330px 0; }
+.itemIcon.large.accountTransfer.city6:before { background-position: -8428px 0; }
+.itemIcon.large.accountTransfer.city7:before { background-position: -8526px 0; }
+.itemIcon.large.accountTransfer.city8:before { background-position: -8624px 0; }
+.itemIcon.large.accountTransfer.city9:before { background-position: -8722px 0; }
+.itemIcon.large.accountTransfer.city10:before { background-position: -8820px 0; }
+.itemIcon.large.accountTransfer.city11:before { background-position: -8918px 0; }
+.itemIcon.large.accountTransfer.city12:before { background-position: -9016px 0; }
+.itemIcon.large.accountTransfer.city13:before { background-position: -9114px 0; }
+.itemIcon.large.accountTransfer.city14:before { background-position: -9212px 0; }
+.itemIcon.large.accountTransfer.city15:before { background-position: -9310px 0; }
+.itemIcon.large.accountTransfer.city16:before { background-position: -9408px 0; }
+.itemIcon.large.accountTransfer.city17:before { background-position: -9506px 0; }
+.itemIcon.large.accountTransfer.city18:before { background-position: -9604px 0; }
+.itemIcon.large.accountTransfer.city19:before { background-position: -9702px 0; }
+.itemIcon.large.accountTransfer.city20:before { background-position: -9800px 0; }
+.itemIcon.large.accountTransfer.city21:before { background-position: -9898px 0; }
+.itemIcon.large.dailyRewardBoostPlutus:before     { background-position: -10290px 0; }
+.itemIcon.large.dailyRewardBoostTyche:before      { background-position: -10388px 0; }
+.itemIcon.large.dailyRewardBoostDionysus:before   { background-position: -10486px 0; }
+.itemIcon.large.dailyRewardBoostPan:before        { background-position: -10584px 0; }
+.itemIcon.large.dailyRewardBoostTheia:before      { background-position: -10682px 0; }
+.itemIcon.large.dailyRewardBoostHephaestos:before { background-position: -10780px 0; }
+.itemIcon.large.bronzeFleece:before { background-position:  -9996px 0; }
+.itemIcon.large.silverFleece:before { background-position: -10094px 0; }
+.itemIcon.large.goldenFleece:before { background-position: -10192px 0; }
+.itemIcon.large.abyssalAmbush.recruitmentSpeedUp:before { background-position: 0 0; }
+.itemIcon.large.abyssalAmbush.increaseGodFavour:before { background-position: -98px 0; }
+.itemIcon.large.abyssalAmbush.increaseResearchPoints:before { background-position: -196px 0; }
+.itemIcon.large.abyssalAmbush.reduceExperimentCost:before { background-position: -294px 0; }
+.itemIcon.large.actionPointsLimitIncrease.actionPoints2:before { background-position: -392px 0; }
+.itemIcon.large.actionPointsLimitIncrease.actionPoints4:before { background-position: -490px 0; }
+
+.itemIcon.xl.premiumAccount:before { background-position: 0 0; }
+.itemIcon.xl.accountTransferCoin:before { background-position: -150px 0; }
+.itemIcon.xl.resourceBonus:before { background-position: -300px 0; }
+.itemIcon.xl.wineBonus:before { background-position: -450px 0; }
+.itemIcon.xl.marbleBonus:before { background-position: -600px 0; }
+.itemIcon.xl.sulfurBonus:before { background-position: -750px 0; }
+.itemIcon.xl.crystalBonus:before { background-position: -900px 0; }
+.itemIcon.xl.safeCapacityBonus:before { background-position: -1050px 0; }
+.itemIcon.xl.storageCapacityBonus:before { background-position: -1200px 0; }
+.itemIcon.xl.researchPointsBonus:before { background-position: -1350px 0; }
+.itemIcon.xl.tradeRouteCoin:before { background-position: -1500px 0; }
+.itemIcon.xl.premiumDummyPackageSmall:before { background-position: -1650px 0; }
+.itemIcon.xl.premiumDummyPackageMedium:before { background-position: -1800px 0; }
+.itemIcon.xl.premiumDummyPackageBig:before { background-position: -1950px 0; }
+.itemIcon.xl.winePackage:before { background-position: -2100px 0; }
+.itemIcon.xl.marblePackage:before { background-position: -2250px 0; }
+.itemIcon.xl.crystalPackage:before { background-position: -2400px 0; }
+.itemIcon.xl.sulfurPackage:before { background-position: -2550px 0; }
+.itemIcon.xl.resourcePackage:before { background-position: -2700px 0; }
+.itemIcon.xl.putPlague:before { background-position: -2850px 0; }
+.itemIcon.xl.plagueProtection:before { background-position: -3000px 0; }
+.itemIcon.xl.wineBonus.days:before { background-position: -3150px 0; }
+.itemIcon.xl.safeCapacityBonus.days:before { background-position: -3300px 0; }
+.itemIcon.xl.premiumTraderCoin:before { background-position: -3450px 0; }
+.itemIcon.xl.heliosTowerOil:before { background-position: -3750px 0; }
+.itemIcon.xl.badTaxAccountant:before { background-position: -3900px 0; }
+.itemIcon.xl.culturalTreatyCoin:before { background-position: -4050px 0; }
+.itemIcon.xl.heliosTowerCoin:before { background-position: -4200px 0; }
+.itemIcon.xl.tritonEnginesCoin:before { background-position: -4350px 0; }
+.itemIcon.xl.archiveMessageCoin:before { background-position: -4500px 0; }
+.itemIcon.xl.archiveEspionageReportCoin:before { background-position: -4650px 0; }
+.itemIcon.xl.moveCityCoin:before { background-position: -4800px 0; }
+.itemIcon.xl.moveIslandSpotCoin:before { background-position: -4950px 0; }
+.itemIcon.xl.colonizeIslandSpotCoin:before { background-position: -5100px 0; }
+.itemIcon.xl.barbarianMapPiece:before { background-position: -5250px 0; }
+.itemIcon.xl.goldPackage:before { background-position: -5400px 0; }
+.itemIcon.xl.tradegoodBonus:before { background-position: -5550px 0; }
+.itemIcon.xl.troopInfoCoin:before { background-position: -5700px 0; }
+.itemIcon.xl.convertCapturePointsCoin:before { background-position: -5850px 0; }
+.itemIcon.xl.troopsPackage.s309:before { background-position: -6000px 0; }
+.itemIcon.xl.troopsPackage.s313:before { background-position: -6150px 0; }
+.itemIcon.xl.troopsPackage.s308:before { background-position: -6300px 0; }
+.itemIcon.xl.troopsPackage.s311:before { background-position: -6450px 0; }
+.itemIcon.xl.troopsPackage.s312:before { background-position: -6600px 0; }
+.itemIcon.xl.troopsPackage.s303:before { background-position: -6750px 0; }
+.itemIcon.xl.troopsPackage.s306:before { background-position: -6900px 0; }
+.itemIcon.xl.troopsPackage.s310:before { background-position: -7050px 0; }
+.itemIcon.xl.troopsPackage.s305:before { background-position: -7200px 0; }
+.itemIcon.xl.troopsPackage.s307:before { background-position: -7350px 0; }
+.itemIcon.xl.troopsPackage.s304:before { background-position: -7500px 0; }
+.itemIcon.xl.troopsPackage.s302:before { background-position: -7650px 0; }
+.itemIcon.xl.troopsPackage.s315:before { background-position: -7800px 0; }
+.itemIcon.xl.troopsPackage.s301:before { background-position: -7950px 0; }
+.itemIcon.xl.troopsPackage.s213:before { background-position: -8100px 0; }
+.itemIcon.xl.troopsPackage.s219:before { background-position: -8250px 0; }
+.itemIcon.xl.troopsPackage.s216:before { background-position: -8400px 0; }
+.itemIcon.xl.troopsPackage.s211:before { background-position: -8550px 0; }
+.itemIcon.xl.troopsPackage.s214:before { background-position: -8700px 0; }
+.itemIcon.xl.troopsPackage.s215:before { background-position: -8850px 0; }
+.itemIcon.xl.troopsPackage.s217:before { background-position: -9000px 0; }
+.itemIcon.xl.troopsPackage.s210:before { background-position: -9150px 0; }
+.itemIcon.xl.troopsPackage.s218:before { background-position: -9300px 0; }
+.itemIcon.xl.troopsPackage.s212:before { background-position: -9450px 0; }
+.itemIcon.xl.troopsPackage.s220:before { background-position: -9600px 0; }
+.itemIcon.xl.citizensPackage:before { background-position: -9750px 0; }
+.itemIcon.xl.femaleAdvisor:before { background-position: -9900px 0; }
+.itemIcon.xl.halloweenAdvisor:before { background-position: -10050px 0; }
+.itemIcon.xl.halloweenCity:before { background-position: -10200px 0; }
+.itemIcon.xl.barbarianTruce:before { background-position: -10350px 0; }
+.itemIcon.xl.barbarianAdvisor:before { background-position: -10500px 0; }
+.itemIcon.xl.winterAdvisor:before { background-position: -10650px 0; }
+.itemIcon.xl.winterCity:before { background-position: -10800px 0; }
+.itemIcon.xl.christmasAdvisor:before { background-position: -10950px 0; }
+.itemIcon.xl.christmasCity:before { background-position: -11100px 0; }
+.itemIcon.xl.easterAdvisor:before { background-position: -11250px 0; }
+.itemIcon.xl.easterCity:before { background-position: -11400px 0; }
+.itemIcon.xl.troopsPackage.s319:before { background-position: -11700px 0; }
+.itemIcon.xl.softMerge:before { background-position: -11850px 0; }
+.itemIcon.xl.accountTransfer.city0:before { background-position: -12000px 0; }
+.itemIcon.xl.accountTransfer.city1:before { background-position: -12150px 0; }
+.itemIcon.xl.accountTransfer.city2:before { background-position: -12300px 0; }
+.itemIcon.xl.accountTransfer.city3:before { background-position: -12450px 0; }
+.itemIcon.xl.accountTransfer.city4:before { background-position: -12600px 0; }
+.itemIcon.xl.accountTransfer.city5:before { background-position: -12750px 0; }
+.itemIcon.xl.accountTransfer.city6:before { background-position: -12900px 0; }
+.itemIcon.xl.accountTransfer.city7:before { background-position: -13050px 0; }
+.itemIcon.xl.accountTransfer.city8:before { background-position: -13200px 0; }
+.itemIcon.xl.accountTransfer.city9:before { background-position: -13350px 0; }
+.itemIcon.xl.accountTransfer.city10:before { background-position: -13500px 0; }
+.itemIcon.xl.accountTransfer.city11:before { background-position: -13650px 0; }
+.itemIcon.xl.accountTransfer.city12:before { background-position: -13800px 0; }
+.itemIcon.xl.accountTransfer.city13:before { background-position: -13950px 0; }
+.itemIcon.xl.accountTransfer.city14:before { background-position: -14100px 0; }
+.itemIcon.xl.accountTransfer.city15:before { background-position: -14250px 0; }
+.itemIcon.xl.accountTransfer.city16:before { background-position: -14400px 0; }
+.itemIcon.xl.accountTransfer.city17:before { background-position: -14550px 0; }
+.itemIcon.xl.accountTransfer.city18:before { background-position: -14700px 0; }
+.itemIcon.xl.accountTransfer.city19:before { background-position: -14850px 0; }
+.itemIcon.xl.accountTransfer.city20:before { background-position: -15000px 0; }
+.itemIcon.xl.accountTransfer.city21:before { background-position: -15150px 0; }
+.itemIcon.xl.dailyRewardBoostPlutus:before     { background-position: -15750px 0; }
+.itemIcon.xl.dailyRewardBoostTyche:before      { background-position: -15900px 0; }
+.itemIcon.xl.dailyRewardBoostDionysus:before   { background-position: -16050px 0; }
+.itemIcon.xl.dailyRewardBoostPan:before        { background-position: -16200px 0; }
+.itemIcon.xl.dailyRewardBoostTheia:before      { background-position: -16350px 0; }
+.itemIcon.xl.dailyRewardBoostHephaestos:before { background-position: -16500px 0; }
+.itemIcon.xl.bronzeFleece:before { background-position: -15300px 0; }
+.itemIcon.xl.silverFleece:before { background-position: -15450px 0; }
+.itemIcon.xl.goldenFleece:before { background-position: -15600px 0; }
+.itemIcon.xl.abyssalAmbush.recruitmentSpeedUp:before { background-position: 0 0; }
+.itemIcon.xl.abyssalAmbush.increaseGodFavour:before { background-position: -150px 0; }
+.itemIcon.xl.abyssalAmbush.increaseResearchPoints:before { background-position: -300px 0; }
+.itemIcon.xl.abyssalAmbush.reduceExperimentCost:before { background-position: -450px 0; }
+.itemIcon.xl.actionPointsLimitIncrease.actionPoints2:before { background-position: -600px 0; }
+.itemIcon.xl.actionPointsLimitIncrease.actionPoints4:before { background-position: -750px 0; }
+
+
+.itemIcon.small.consumable { background-position: 0 0; }
+.itemIcon.small.twoDays, .itemIcon.small.threeDays, .itemIcon.small.abyssalAmbush.amount1,.itemIcon.small.abyssalAmbush.amount3, .itemIcon.small.abyssalAmbush.amount2 { background-position: -34px 0; }
+.itemIcon.small.sevenDays, .itemIcon.small.tenDays, .itemIcon.small.fourteenDays, .itemIcon.small.abyssalAmbush.amount6 { background-position: -68px 0; }
+.itemIcon.small.thirtyDays, .itemIcon.small.abyssalAmbush.amount12 { background-position: -102px 0; }
+.itemIcon.small.coin { background-position: -136px 0; }
+.itemIcon.small.sixtyDays, .itemIcon.small.abyssalAmbush.amount24 { background-position: -170px 0; }
+
+.itemIcon.medium.consumable { background-position: 0 0; }
+.itemIcon.medium.twoDays, .itemIcon.medium.threeDays, .itemIcon.medium.abyssalAmbush.amount1,.itemIcon.medium.abyssalAmbush.amount3, .itemIcon.medium.abyssalAmbush.amount2  { background-position: -60px 0; }
+.itemIcon.medium.sevenDays, .itemIcon.medium.tenDays, .itemIcon.medium.fourteenDays, .itemIcon.medium.abyssalAmbush.amount6 { background-position: -120px 0; }
+.itemIcon.medium.thirtyDays, .itemIcon.medium.abyssalAmbush.amount12 { background-position: -180px 0; }
+.itemIcon.medium.coin { background-position: -240px 0; }
+.itemIcon.medium.sixtyDays, .itemIcon.medium.abyssalAmbush.amount24 { background-position: -300px 0; }
+
+.itemIcon.medium.twoDays:after { background-position: 0 0; }
+.itemIcon.medium.sevenDays:after { background-position: -60px 0; }
+.itemIcon.medium.thirtyDays:after { background-position: -120px 0; }
+.itemIcon.medium.tenDays:after { background-position: -180px 0; }
+.itemIcon.medium.sixtyDays:after { background-position: -240px 0; }
+.itemIcon.medium.threeDays:after { background-position: -300px 0; }
+.itemIcon.medium.fourteenDays:after { background-position: -360px 0; }
+.itemIcon.medium.twelveHours:after { background-position: 0 -420px }
+.itemIcon.medium.twentyFourHours:after { background-position: -60px -420px }
+.itemIcon.medium.abyssalAmbush.amount1:after { background-position: 0 -360px; }
+.itemIcon.medium.abyssalAmbush.amount2:after { background-position: -60px -360px; }
+.itemIcon.medium.abyssalAmbush.amount3:after { background-position: -120px -360px; }
+.itemIcon.medium.abyssalAmbush.amount6:after { background-position: -180px -360px; }
+.itemIcon.medium.abyssalAmbush.amount12:after { background-position: -240px -360px; }
+.itemIcon.medium.abyssalAmbush.amount24:after { background-position: -300px -360px; }
+
+.itemIcon.medium.goodsPackage.amount1000:after { background-position: 0 -60px; }
+.itemIcon.medium.goodsPackage.amount10000:after { background-position: -60px -60px; }
+.itemIcon.medium.goodsPackage.amount25000:after { background-position: -120px -60px; }
+.itemIcon.medium.goodsPackage.amount100000:after { background-position: -180px -60px; }
+.itemIcon.medium.goodsPackage.amount250000:after { background-position: -240px -60px; }
+.itemIcon.medium.goodsPackage.amount500000:after { background-position: -300px -60px; }
+.itemIcon.medium.goodsPackage.amount1000000:after { background-position: -360px -60px; }
+.itemIcon.medium.goodsPackage.amount5000000:after { background-position: -420px -60px; }
+.itemIcon.medium.goodsPackage.amount10000000:after { background-position: -480px -60px; }
+.itemIcon.medium.troopsPackage.units.amount10:after { background-position: 0 -120px; }
+.itemIcon.medium.troopsPackage.units.amount50:after { background-position: -60px -120px; }
+.itemIcon.medium.troopsPackage.units.amount100:after { background-position: -120px -120px; }
+.itemIcon.medium.troopsPackage.units.amount250:after { background-position: -180px -120px; }
+.itemIcon.medium.troopsPackage.units.amount500:after { background-position: -240px -120px; }
+.itemIcon.medium.troopsPackage.units.amount1000:after { background-position: -300px -120px; }
+.itemIcon.medium.troopsPackage.units.amount1500:after { background-position: -360px -120px; }
+.itemIcon.medium.troopsPackage.units.amount300:after { background-position: -420px -120px; }
+.itemIcon.medium.troopsPackage.ships.amount5:after { background-position: 0 -180px; }
+.itemIcon.medium.troopsPackage.ships.amount25:after { background-position: -60px -180px; }
+.itemIcon.medium.troopsPackage.ships.amount50:after { background-position: -120px -180px; }
+.itemIcon.medium.troopsPackage.ships.amount125:after { background-position: -180px -180px; }
+.itemIcon.medium.troopsPackage.ships.amount250:after { background-position: -240px -180px; }
+.itemIcon.medium.troopsPackage.ships.amount500:after { background-position: -300px -180px; }
+.itemIcon.medium.troopsPackage.ships.amount1000:after { background-position: -360px -180px; }
+.itemIcon.medium.citizensPackage.amount5:after { background-position: 0 -240px; }
+.itemIcon.medium.citizensPackage.amount10:after { background-position: -60px -240px; }
+.itemIcon.medium.citizensPackage.amount20:after { background-position: -120px -240px; }
+.itemIcon.medium.barbarianTruce.n1:after { background-position: 0 -300px; }
+.itemIcon.medium.barbarianTruce.n2:after { background-position: -60px -300px; }
+.itemIcon.medium.barbarianTruce.n3:after { background-position: -120px -300px; }
+.itemIcon.medium.barbarianTruce.n4:after { background-position: -180px -300px; }
+.itemIcon.medium.barbarianTruce.n5:after { background-position: -240px -300px; }
+
+
+.itemIcon.large.consumable { background-position: 0 0; }
+.itemIcon.large.twoDays, .itemIcon.large.threeDays, .itemIcon.large.abyssalAmbush.amount1,.itemIcon.large.abyssalAmbush.amount3, .itemIcon.large.abyssalAmbush.amount2 { background-position: -98px 0; }
+.itemIcon.large.sevenDays, .itemIcon.large.tenDays, .itemIcon.large.fourteenDays, .itemIcon.large.abyssalAmbush.amount6  { background-position: -196px 0; }
+.itemIcon.large.thirtyDays, .itemIcon.large.abyssalAmbush.amount12 { background-position: -294px 0; }
+.itemIcon.large.sixtyDays, .itemIcon.large.abyssalAmbush.amount24 { background-position: -490px 0; }
+.itemIcon.large.coin { background-position: -392px 0; }
+
+.itemIcon.large.twoDays:after { background-position: 0 0; }
+.itemIcon.large.sevenDays:after { background-position: -98px 0; }
+.itemIcon.large.thirtyDays:after { background-position: -196px 0; }
+.itemIcon.large.tenDays:after { background-position: -294px 0; }
+.itemIcon.large.sixtyDays:after { background-position: -392px 0; }
+.itemIcon.large.threeDays:after { background-position: -490px 0; }
+.itemIcon.large.fourteenDays:after { background-position: -588px 0; }
+.itemIcon.large.fourteenDays:after { background-position: -360px 0; }
+.itemIcon.large.twelveHours:after { background-position: 0 -686px }
+.itemIcon.large.twentyFourHours:after { background-position: -98px -686px }
+.itemIcon.large.abyssalAmbush.amount1:after { background-position: 0 -588px; }
+.itemIcon.large.abyssalAmbush.amount2:after { background-position: -88px -588px; }
+.itemIcon.large.abyssalAmbush.amount3:after { background-position: -196px -588px; }
+.itemIcon.large.abyssalAmbush.amount6:after { background-position: -294px -588px; }
+.itemIcon.large.abyssalAmbush.amount12:after { background-position: -392px -588px; }
+.itemIcon.large.abyssalAmbush.amount24:after { background-position: -490px -588px; }
+
+.itemIcon.large.goodsPackage.amount1000:after { background-position: 0 -98px; }
+.itemIcon.large.goodsPackage.amount10000:after { background-position: -98px -98px; }
+.itemIcon.large.goodsPackage.amount25000:after { background-position: -196px -98px; }
+.itemIcon.large.goodsPackage.amount100000:after { background-position: -294px -98px; }
+.itemIcon.large.goodsPackage.amount250000:after { background-position: -392px -98px; }
+.itemIcon.large.troopsPackage.units.amount10:after { background-position: 0 -196px; }
+.itemIcon.large.troopsPackage.units.amount50:after { background-position: -98px -196px; }
+.itemIcon.large.troopsPackage.units.amount100:after { background-position: -196px -196px; }
+.itemIcon.large.troopsPackage.units.amount250:after { background-position: -294px -196px; }
+.itemIcon.large.troopsPackage.units.amount500:after { background-position: -392px -196px; }
+.itemIcon.large.troopsPackage.units.amount1000:after { background-position: -490px -196px; }
+.itemIcon.large.troopsPackage.units.amount1500:after { background-position: -588px -196px; }
+.itemIcon.large.troopsPackage.units.amount300:after { background-position: -686px -196px; }
+.itemIcon.large.troopsPackage.ships.amount5:after { background-position: 0 -294px; }
+.itemIcon.large.troopsPackage.ships.amount25:after { background-position: -98px -294px; }
+.itemIcon.large.troopsPackage.ships.amount50:after { background-position: -196px -294px; }
+.itemIcon.large.troopsPackage.ships.amount125:after { background-position: -294px -294px; }
+.itemIcon.large.troopsPackage.ships.amount250:after { background-position: -392px -294px; }
+.itemIcon.large.troopsPackage.ships.amount500:after { background-position: -490px -294px; }
+.itemIcon.large.troopsPackage.ships.amount1000:after { background-position: -588px -294px; }
+.itemIcon.large.citizensPackage.amount5:after { background-position: 0 -392px; }
+.itemIcon.large.citizensPackage.amount10:after { background-position: -98px -392px; }
+.itemIcon.large.citizensPackage.amount20:after { background-position: -196px -392px; }
+.itemIcon.large.barbarianTruce.n1:after { background-position: 0 -490px; }
+.itemIcon.large.barbarianTruce.n2:after { background-position: -98px -490px; }
+.itemIcon.large.barbarianTruce.n3:after { background-position: -196px -490px; }
+.itemIcon.large.barbarianTruce.n4:after { background-position: -294px -490px; }
+.itemIcon.large.barbarianTruce.n5:after { background-position: -392px -490px; }
+
+
+.itemIcon.xl.consumable { background-position: 0 0; }
+.itemIcon.xl.twoDays, .itemIcon.xl.threeDays, .itemIcon.xl.abyssalAmbush.amount1,.itemIcon.xl.abyssalAmbush.amount3, .itemIcon.xl.abyssalAmbush.amount2 { background-position: -150px 0; }
+.itemIcon.xl.sevenDays, .itemIcon.xl.tenDays, .itemIcon.xl.fourteenDays, .itemIcon.xl.abyssalAmbush.amount6 { background-position: -300px 0; }
+.itemIcon.xl.thirtyDays, .itemIcon.xl.abyssalAmbush.amount12 { background-position: -450px 0; }
+.itemIcon.xl.coin { background-position: -600px 0; }
+.itemIcon.xl.sixtyDays, .itemIcon.xl.abyssalAmbush.amount24 { background-position: -750px 0; }
+
+.itemIcon.xl.twoDays:after { background-position: 0 0; }
+.itemIcon.xl.sevenDays:after { background-position: -150px 0; }
+.itemIcon.xl.thirtyDays:after { background-position: -300px 0; }
+.itemIcon.xl.tenDays:after { background-position: -450px 0; }
+.itemIcon.xl.sixtyDays:after { background-position: -600px 0; }
+.itemIcon.xl.threeDays:after { background-position: -750px 0; }
+.itemIcon.xl.fourteenDays:after { background-position: -900px 0; }
+.itemIcon.xl.twelveHours:after { background-position: 0 -1050px }
+.itemIcon.xl.twentyFourHours:after { background-position: -150px -1050px }
+.itemIcon.xl.abyssalAmbush.amount1:after { background-position: 0 -900px; }
+.itemIcon.xl.abyssalAmbush.amount2:after { background-position: -150px -900px; }
+.itemIcon.xl.abyssalAmbush.amount3:after { background-position: -300px -900px; }
+.itemIcon.xl.abyssalAmbush.amount6:after { background-position: -450px -900px; }
+.itemIcon.xl.abyssalAmbush.amount12:after { background-position: -600px -900px; }
+.itemIcon.xl.abyssalAmbush.amount24:after { background-position: -750px -900px; }
+
+.itemIcon.xl.goodsPackage.amount1000:after { background-position: 0 -150px; }
+.itemIcon.xl.goodsPackage.amount10000:after { background-position: -150px -150px; }
+.itemIcon.xl.goodsPackage.amount25000:after { background-position: -300px -150px; }
+.itemIcon.xl.goodsPackage.amount100000:after { background-position: -450px -150px; }
+.itemIcon.xl.goodsPackage.amount250000:after { background-position: -600px -150px; }
+.itemIcon.xl.goodsPackage.amount500000:after { background-position: -750px -150px; }
+.itemIcon.xl.goodsPackage.amount1000000:after { background-position: -900px -150px; }
+.itemIcon.xl.goodsPackage.amount5000000:after { background-position: -1050px -150px; }
+.itemIcon.xl.goodsPackage.amount10000000:after { background-position: -1200px -150px; }
+.itemIcon.xl.troopsPackage.units.amount10:after { background-position: 0 -300px; }
+.itemIcon.xl.troopsPackage.units.amount50:after { background-position: -150px -300px; }
+.itemIcon.xl.troopsPackage.units.amount100:after { background-position: -300px -300px; }
+.itemIcon.xl.troopsPackage.units.amount250:after { background-position: -450px -300px; }
+.itemIcon.xl.troopsPackage.units.amount500:after { background-position: -600px -300px; }
+.itemIcon.xl.troopsPackage.units.amount1000:after { background-position: -750px -300px; }
+.itemIcon.xl.troopsPackage.units.amount1500:after { background-position: -900px -300px; }
+.itemIcon.xl.troopsPackage.units.amount300:after { background-position: -1050px -300px; }
+.itemIcon.xl.troopsPackage.ships.amount5:after { background-position: 0 -450px; }
+.itemIcon.xl.troopsPackage.ships.amount25:after { background-position: -150px -450px; }
+.itemIcon.xl.troopsPackage.ships.amount50:after { background-position: -300px -450px; }
+.itemIcon.xl.troopsPackage.ships.amount125:after { background-position: -450px -450px; }
+.itemIcon.xl.troopsPackage.ships.amount250:after { background-position: -600px -450px; }
+.itemIcon.xl.troopsPackage.ships.amount500:after { background-position: -750px -450px; }
+.itemIcon.xl.troopsPackage.ships.amount1000:after { background-position: -900px -450px; }
+.itemIcon.xl.citizensPackage.amount5:after { background-position: 0 -600px; }
+.itemIcon.xl.citizensPackage.amount10:after { background-position: -150px -600px; }
+.itemIcon.xl.citizensPackage.amount20:after { background-position: -300px -600px; }
+.itemIcon.xl.barbarianTruce.n1:after { background-position: 0 -750px; }
+.itemIcon.xl.barbarianTruce.n2:after { background-position: -150px -750px; }
+.itemIcon.xl.barbarianTruce.n3:after { background-position: -300px -750px; }
+.itemIcon.xl.barbarianTruce.n4:after { background-position: -450px -750px; }
+.itemIcon.xl.barbarianTruce.n5:after { background-position: -600px -750px; }
+
+#dailyTasksRewards .itemIcon {
+    margin: 0 auto;
+    background: none;
+}
+
+.itemIcon.noAmountIndicator:after {
+    background: none !important;
+}
+
+.itemIcon.small.troopInfo:before {
+    background-position: -1224px 0;
+}
+
+@-webkit-keyframes ani8steps {
+    from { background-position: 0px; }
+    to { background-position: -400px; }
+}
+
+@-moz-keyframes ani8steps {
+    from { background-position: 0px; }
+    to { background-position: -400px; }
+}
+
+@-ms-keyframes ani8steps {
+    from { background-position: 0px; }
+    to { background-position: -400px; }
+}
+
+
+@-webkit-keyframes ani48steps {
+    from { background-position: 0px; }
+    to { background-position: -4080px; }
+}
+
+@-moz-keyframes ani48steps {
+    from { background-position: 0px; }
+    to { background-position: -4080px; }
+}
+
+@-ms-keyframes ani48steps {
+    from { background-position: 0px; }
+    to { background-position: -4080px; }
+}
+
+
+@-webkit-keyframes ani52steps {
+    0% { background-position: 0px; }
+    70% { background-position: -2860px; }
+    100% { background-position: -2860px; }
+}
+
+@-moz-keyframes ani52steps {
+    0% { background-position: 0px; }
+    70% { background-position: -2860px; }
+    100% { background-position: -2860px; }
+}
+
+@-ms-keyframes ani52steps {
+    0% { background-position: 0px; }
+    70% { background-position: -2860px; }
+    100% { background-position: -2860px; }
+}
+
+
+@-webkit-keyframes animation_walker_12steps {
+    from { background-position: 0px 0px; }
+    to { background-position: -636px 0px; }
+}
+
+@-moz-keyframes animation_walker_12steps {
+    from { background-position:0px }
+    to { background-position: -636px }
+}
+
+@-ms-keyframes animation_walker_12steps {
+    from { background-position: 0px 0px; }
+    to { background-position: -636px 0px; }
+}
+
+@-webkit-keyframes ani5steps {
+    from { background-position: 0px; }
+    to { background-position: -620px; }
+}
+
+@-moz-keyframes ani5steps {
+    from { background-position: 0px; }
+    to { background-position: -620px; }
+}
+
+@-ms-keyframes ani5steps {
+    from { background-position: 0px; }
+    to { background-position: -620px; }
+}
+
+@-webkit-keyframes ani12steps {
+    0% { background-position: 0px; }
+    80% { background-position: -1920px; }
+    100% { background-position: -1920px; }
+}
+
+@-moz-keyframes ani12steps {
+    0% { background-position: 0px; }
+    80% { background-position: -1920px; }
+    100% { background-position: -1920px; }
+}
+
+@-ms-keyframes ani12steps {
+    0% { background-position: 0px; }
+    80% { background-position: -1920px; }
+    100% { background-position: -1920px; }
+}
+
+
+@-webkit-keyframes ani16steps {
+    from { background-position: 0px; }
+    to { background-position: -416px; }
+}
+
+@-moz-keyframes ani16steps {
+    from { background-position: 0px; }
+    to { background-position: -416px; }
+}
+
+@-ms-keyframes ani16steps {
+    from { background-position: 0px; }
+    to { background-position: -416px; }
+}
+
+
+@-webkit-keyframes aniAmbrsiaFountain {
+    from { background-position: 0px; }
+    to { background-position: -2880px; }
+}
+
+@-moz-keyframes aniAmbrsiaFountain {
+    from { background-position: 0px; }
+    to { background-position: -2880px; }
+}
+
+@-ms-keyframes aniAmbrsiaFountain {
+    from { background-position: 0px; }
+    to { background-position: -2880px; }
+}
+
+#city #cityAmbrosiaFountain.animated .animation {
+    -webkit-animation: aniAmbrsiaFountain 1s steps(24, end) infinite;
+    -moz-animation: aniAmbrsiaFountain 1s steps(24, end) infinite;
+    -ms-animation: aniAmbrsiaFountain 1s steps(24, end) infinite;
+    width:120px;
+    height:114px;
+    top:0px;
+    left:0px;
+    position: absolute;
+}
+
+#city #cityAmbrosiaFountain.fountain_active_empty.animated .animation {
+    background-image:url(//gf1.geo.gfsrv.net/cdn33/6722492a8442908e8f059b6f7778c5.png);
+}
+
+#city #cityAmbrosiaFountain.fountain_active_full.animated .animation {
+    background-image:url(//gf1.geo.gfsrv.net/cdnc8/5d894c2c5ffbb99f1c8e96f8a381dd.png);
+}
+
+.animation_walker_12steps {
+    left:555px;
+    position:absolute;
+    top:500px;
+    z-index:40;
+    width: 53px !important;
+    height: 46px !important;
+    background-image: url(//gf1.geo.gfsrv.net/cdn66/627a647da7bf84ff78f27add3e05ef.png);
+    -webkit-animation: animation_walker_12steps 1s steps(12, end) infinite;
+    -moz-animation: animation_walker_12steps 1s steps(12, end) infinite;
+    -ms-animation: animation_walker_12steps 1s steps(12, end) infinite;
+}
+
+.animation_dailyTasks_52steps {
+    left:49px;
+    top:32px;
+    z-index:100;
+    width: 55px !important;
+    height: 54px !important;
+    background-image: url(//gf1.geo.gfsrv.net/cdn3c/ce5df7825e3dda09d396c79ed8ed4c.png);
+    -webkit-animation: ani52steps 7s steps(52, end) infinite;
+    -moz-animation: ani52steps 7s steps(52, end) infinite;
+    -ms-animation: ani52steps 7s steps(52, end) infinite;
+}
+
+#cities .cityLocation.city.plague a:after {
+    background-image: url(//gf1.geo.gfsrv.net/cdncf/bb80e6e9a513b3d637bbc36d03caba.png);
+    display: block;
+    content: "";
+    width: 85px !important;
+    height: 85px !important;
+    position: absolute;
+    top: -15px;
+    left: 11px;
+    z-index: 100;
+
+}
+
+#cities .cityLocation.city.plague.animated a:after {
+    -webkit-animation: ani48steps 2s steps(48, end) infinite;
+    -moz-animation: ani48steps 2s steps(48, end) infinite;
+    -ms-animation: ani48steps 2s steps(48, end) infinite;
+}
+
+.walkerO { background-image: url(//gf3.geo.gfsrv.net/cdnef/d688d11755338bd8a6efbb8d31cbce.png);}
+
+.walkerSO { background-image: url(//gf1.geo.gfsrv.net/cdn00/465a6a29f2153cb73ecc747c049cfc.png);}
+.walkerS { background-image: url(//gf2.geo.gfsrv.net/cdn15/c309942b8ecdb0c429466834e0ec99.png);}
+
+.walkerSW { background-image: url(//gf1.geo.gfsrv.net/cdn3d/019db923c8f5930a2e1772a62fecb6.png);}
+.walkerW { background-image: url(//gf2.geo.gfsrv.net/cdna3/00074463a70913beea41c46c66baa9.png);}
+.walkerNW { background-image: url(//gf3.geo.gfsrv.net/cdn83/d2bd9a9ff8bc91119f096b5388b47d.png);}
+.walkerN { background-image: url(//gf3.geo.gfsrv.net/cdn2b/4bcf5902884674c7ebf4f902b46920.png);}
+.walkerNO { background-image: url(//gf3.geo.gfsrv.net/cdnec/c5bc0ebc41eb84be57bcaee92f8cc5.png);}
+
+.walker2O { background-image: url(//gf2.geo.gfsrv.net/cdn77/484f5b0a70c5d060c1fed0cfcca622.png);}
+.walker2SO { background-image: url(//gf1.geo.gfsrv.net/cdnf0/1a31a0685c4061d088e6d7c8123e04.png);}
+.walker2S { background-image: url(//gf2.geo.gfsrv.net/cdn71/2f660ca6d6cfa3ab552a92c569adf3.png);}
+.walker2SW { background-image: url(//gf1.geo.gfsrv.net/cdn99/5b444a0f89bec7c408eb479b0da04d.png);}
+.walker2W { background-image: url(//gf1.geo.gfsrv.net/cdnfb/9425b736e77d49f9a34239fb43ebe0.png);}
+.walker2NW { background-image: url(//gf3.geo.gfsrv.net/cdne4/41ef2947d7c323f7068be0fcbc7c10.png);}
+.walker2N { background-image: url(//gf1.geo.gfsrv.net/cdnc4/af801b571e5116ebd9b3241c6653c6.png);}
+.walker2NO { background-image: url(//gf2.geo.gfsrv.net/cdna7/c52661e82d5ecde69329edd463b6cd.png);}
+
+
+.animation_citizensMale_12steps {
+    left:555px;
+    position:absolute;
+    top:500px;
+    z-index:40;
+    width: 53px !important;
+    height: 46px !important;
+    background-image: url(//gf2.geo.gfsrv.net/cdn12/720456d03c92a9e4b36e5a14217f98.png);
+    -webkit-animation: animation_walker_12steps 1s steps(12, end) infinite;
+    -moz-animation: animation_walker_12steps 1s steps(12, end) infinite;
+    -ms-animation: animation_walker_12steps 1s steps(12, end) infinite;
+}
+.citizensMaleO { background-image: url(//gf2.geo.gfsrv.net/cdn12/720456d03c92a9e4b36e5a14217f98.png);}
+.citizensMaleSO { background-image: url(//gf3.geo.gfsrv.net/cdnb8/0937d4ab6fc7dbe17b824b6b7f4a8c.png);}
+.citizensMaleS { background-image: url(//gf1.geo.gfsrv.net/cdn96/27e62d4093ffaa0e915da55a06100c.png);}
+.citizensMaleSW { background-image: url(//gf3.geo.gfsrv.net/cdn8e/8c902e39f59251d52bca940b722bab.png);}
+.citizensMaleW { background-image: url(//gf2.geo.gfsrv.net/cdna3/4f028be7a5eb19579ebc86cd7c7891.png);}
+.citizensMaleNW { background-image: url(//gf1.geo.gfsrv.net/cdn0e/a9d5797c9093de0a279614dd198f38.png);}
+.citizensMaleN { background-image: url(//gf1.geo.gfsrv.net/cdnf3/e68a50596d8088f28726589cf31823.png);}
+.citizensMaleNO { background-image: url(//gf1.geo.gfsrv.net/cdnfb/9eab81f8d59d2de0ba0c721c0dc7e6.png);}
+
+
+.animation_populationNew_12steps {
+    left:555px;
+    position:absolute;
+    top:500px;
+    z-index:40;
+    width: 53px !important;
+    height: 46px !important;
+    background-image: url(//gf3.geo.gfsrv.net/cdn8f/a472b8a6b9178c044a0011da81fe99.png);
+    -webkit-animation: animation_walker_12steps 1s steps(12, end) infinite;
+    -moz-animation: animation_walker_12steps 1s steps(12, end) infinite;
+    -ms-animation: animation_walker_12steps 1s steps(12, end) infinite;
+}
+.populationNewO { background-image: url(//gf3.geo.gfsrv.net/cdn8f/a472b8a6b9178c044a0011da81fe99.png);}
+.populationNewSO { background-image: url(//gf1.geo.gfsrv.net/cdnc3/139292aa1a9a7776454b704e8c503a.png);}
+.populationNewS { background-image: url(//gf1.geo.gfsrv.net/cdn9e/43ced6ca9d9ad0962abef3104960eb.png);}
+.populationNewSW { background-image: url(//gf2.geo.gfsrv.net/cdnae/f73d7bd7a184b4dde581b105d663a1.png);}
+.populationNewW { background-image: url(//gf3.geo.gfsrv.net/cdnef/f4aeb0ca7ae82fdbe251a29087fe50.png);}
+.populationNewNW { background-image: url(//gf3.geo.gfsrv.net/cdnef/01cdd52a9a2c1049866be3a149138f.png);}
+.populationNewN { background-image: url(//gf1.geo.gfsrv.net/cdnc2/1088936a3f87a65406e20a8de74b61.png);}
+.populationNewNO { background-image: url(//gf1.geo.gfsrv.net/cdn61/f43e5029c9dc129a479dbd73c035e3.png);}
+
+
+.animation_upgradeFull_12steps {
+    left:555px;
+    position:absolute;
+    top:500px;
+    z-index:40;
+    width: 53px !important;
+    height: 46px !important;
+    background-image: url(//gf3.geo.gfsrv.net/cdnb4/a983fe9699ce2fef840fb4c8af433e.png);
+    -webkit-animation: animation_walker_12steps 1s steps(12, end) infinite;
+    -moz-animation: animation_walker_12steps 1s steps(12, end) infinite;
+    -ms-animation: animation_walker_12steps 1s steps(12, end) infinite;
+}
+.upgradeFullO { background-image: url(//gf3.geo.gfsrv.net/cdnb4/a983fe9699ce2fef840fb4c8af433e.png);}
+.upgradeFullSO { background-image: url(//gf2.geo.gfsrv.net/cdnd1/62d6777505a9af762a3c97b3a63902.png);}
+.upgradeFullS { background-image: url(//gf1.geo.gfsrv.net/cdncb/408856161e9756ef3f711e2f7336b5.png);}
+.upgradeFullSW { background-image: url(//gf1.geo.gfsrv.net/cdn0b/a2ba93fd491a77fb229da98aebeabb.png);}
+.upgradeFullW { background-image: url(//gf1.geo.gfsrv.net/cdnc4/d18d5bf08652fba54ce5c7f185fb3d.png);}
+.upgradeFullNW { background-image: url(//gf1.geo.gfsrv.net/cdn69/c0497193209840daa510df5f35be57.png);}
+.upgradeFullN { background-image: url(//gf2.geo.gfsrv.net/cdndf/f71c6727102213d44430a605b53a18.png);}
+.upgradeFullNO { background-image: url(//gf1.geo.gfsrv.net/cdn31/cc8a50bad5ad2f63fe0a1502e1d625.png);}
+
+
+.animation_upgradeEmpty_12steps {
+    left:555px;
+    position:absolute;
+    top:500px;
+    z-index:40;
+    width: 53px !important;
+    height: 46px !important;
+    background-image: url(//gf2.geo.gfsrv.net/cdnd8/f3e7158f863f21d0e83ab24b735fe3.png);
+    -webkit-animation: animation_walker_12steps 1s steps(12, end) infinite;
+    -moz-animation: animation_walker_12steps 1s steps(12, end) infinite;
+    -ms-animation: animation_walker_12steps 1s steps(12, end) infinite;
+}
+.upgradeEmptyO { background-image: url(//gf2.geo.gfsrv.net/cdnd8/f3e7158f863f21d0e83ab24b735fe3.png);}
+.upgradeEmptySO { background-image: url(//gf3.geo.gfsrv.net/cdn52/d135424d9c0c40c7ba55ade05583f9.png);}
+.upgradeEmptyS { background-image: url(//gf1.geo.gfsrv.net/cdn03/c8e25490d8560843b90a2e39627e3f.png);}
+.upgradeEmptySW { background-image: url(//gf3.geo.gfsrv.net/cdnee/09bf547add8539472b7def517b310e.png);}
+.upgradeEmptyW { background-image: url(//gf1.geo.gfsrv.net/cdncb/5963261093dc039a57d29a395c8f93.png);}
+.upgradeEmptyNW { background-image: url(//gf1.geo.gfsrv.net/cdnfb/3ebec416f53b752334ff3ca0e743da.png);}
+.upgradeEmptyN { background-image: url(//gf3.geo.gfsrv.net/cdn28/198bd980210fcf1132c6e4d5db1346.png);}
+.upgradeEmptyNO { background-image: url(//gf1.geo.gfsrv.net/cdn39/9a6a363782b9feb70499aae385e3e6.png);}
+
+
+.animation_ship_cityTransport_12steps {
+    left:555px;
+    position:absolute;
+    top:500px;
+    z-index:40;
+    width: 111px !important;
+    height: 91px !important;
+    background-image: url(//gf2.geo.gfsrv.net/cdn12/915260a8f37341926295071dfb6ea6.png);
+    background-position: 555px 0;
+}
+.ship_cityTransportO { background-position: 333px 0;}
+.ship_cityTransportSO { background-position: 222px 0;}
+.ship_cityTransportS { background-position: 111px 0;}
+.ship_cityTransportSW { background-position: 0 0;}
+.ship_cityTransportW { background-position: 777px 0;}
+.ship_cityTransportNW { background-position: 666px 0;}
+.ship_cityTransportN { background-position: 555px 0;}
+.ship_cityTransportNO { background-position: 444px 0;}
+
+
+.animation_ship_cityFreighterTransport_12steps {
+    left:555px;
+    position:absolute;
+    top:500px;
+    z-index:40;
+    width: 150px !important;
+    height: 150px !important;
+    background-image: url(//gf2.geo.gfsrv.net/cdnaa/57818f5fca8d5699240a547e0f51e7.png);
+    background-position: 1110px 0;
+}
+.ship_cityFreighterTransportO { background-position: 450px 0;}
+.ship_cityFreighterTransportSO { background-position: 300px 0;}
+.ship_cityFreighterTransportS { background-position: 150px 0;}
+.ship_cityFreighterTransportSW { background-position: 0 0;}
+.ship_cityFreighterTransportW { background-position: 1050px 0;}
+.ship_cityFreighterTransportNW { background-position: 900px 0;}
+.ship_cityFreighterTransportN { background-position: 750px 0;}
+.ship_cityFreighterTransportNO { background-position: 600px 0;}
+
+
+
+.animation_ship_islandTransport_12steps {
+    left:555px;
+    position:absolute;
+    top:500px;
+    z-index:40;
+    width: 73px !important;
+    height: 67px !important;
+    background-image: url(//gf2.geo.gfsrv.net/cdn47/87a0b2cf7804368872f7b385e7d0c9.png);
+    background-position: 365px 0;
+}
+.ship_islandTransportO { background-position: 219px 0;}
+.ship_islandTransportSO { background-position: 146px 0;}
+.ship_islandTransportS { background-position: 73px 0;}
+.ship_islandTransportSW { background-position: 0 0;}
+.ship_islandTransportW { background-position: 511px 0;}
+.ship_islandTransportNW { background-position: 438px 0;}
+.ship_islandTransportN { background-position: 365px 0;}
+.ship_islandTransportNO { background-position: 292px 0;}
+
+
+.animation_ship_cityBlockade_12steps {
+    left:555px;
+    position:absolute;
+    top:500px;
+    z-index:40;
+    width: 132px !important;
+    height: 94px !important;
+    background-image: url(//gf1.geo.gfsrv.net/cdn9f/c4b4855ab1626c793b308e49ab90d2.png);
+    background-position: 555px 0;
+}
+.ship_cityBlockadeO { background-position: 924px 0;}
+.ship_cityBlockadeSO { background-position: 792px 0;}
+.ship_cityBlockadeS { background-position: 660px 0;}
+.ship_cityBlockadeSW { background-position: 528px 0;}
+.ship_cityBlockadeW { background-position: 396px 0;}
+.ship_cityBlockadeNW { background-position: 264px 0;}
+.ship_cityBlockadeN { background-position: 132px 0;}
+.ship_cityBlockadeNO { background-position: 0px 0;}
+
+.animation_soldierOwn_12steps,
+.animation_soldierAlly_12steps,
+.animation_soldierTreaty_12steps,
+.animation_soldierForeign_12steps,
+.animation_citizen1_12steps,
+.animation_citizen2_12steps,
+.animation_citizen3_12steps,
+.animation_citizen4_12steps,
+.animation_citizen5_12steps,
+.animation_locust_12steps,
+.animation_rat_12steps,
+.animation_toad_12steps,
+.animation_resourceWalker_12steps,
+.animation_resourceWalkerEmpty_12steps,
+.animation_tradegoodWalker1_12steps,
+.animation_tradegoodWalker2_12steps,
+.animation_tradegoodWalker3_12steps,
+.animation_tradegoodWalker4_12steps,
+.animation_tradegoodLoader_12steps,
+.animation_tradegoodWalkerEmpty_12steps
+
+{
+    left:555px;
+    position:absolute;
+    top:500px;
+    z-index:40;
+    width: 73px !important;
+    height: 67px !important;
+    background-image: url(//gf2.geo.gfsrv.net/cdnd8/f3e7158f863f21d0e83ab24b735fe3.png);
+    -webkit-animation: animation_resourceWalker_12steps 1s steps(12, end) infinite;
+    -moz-animation: animation_resourceWalker_12steps 1s steps(12, end) infinite;
+    -ms-animation: animation_resourceWalker_12steps 1s steps(12, end) infinite;
+}
+
+.animation_soldierFight1_12steps
+{
+    left:368px;
+    position:absolute;
+    top:224px;
+    z-index:40;
+    width: 73px !important;
+    height: 67px !important;
+    background-image: url(//gf1.geo.gfsrv.net/cdnca/86f7332a641a24e03eaae797e597e0.png);
+    -webkit-animation: animation_resourceWalker_12steps 1.5s steps(12, end) infinite;
+    -moz-animation: animation_resourceWalker_12steps 1.5s steps(12, end) infinite;
+    -ms-animation: animation_resourceWalker_12steps 1.5s steps(12, end) infinite;
+}
+
+.animation_soldierFight2_12steps
+{
+    left:400px;
+    position:absolute;
+    top:253px;
+    z-index:40;
+    width: 73px !important;
+    height: 67px !important;
+    background-image: url(//gf3.geo.gfsrv.net/cdn8a/3e2f6ecac3101dc89718b548a28a54.png);
+    -webkit-animation: animation_resourceWalker_12steps 1.5s steps(12, end) infinite;
+    -moz-animation: animation_resourceWalker_12steps 1.5s steps(12, end) infinite;
+    -ms-animation: animation_resourceWalker_12steps 1.5s steps(12, end) infinite;
+}
+
+.animation_soldierFight3_12steps
+{
+    left:487px;
+    position:absolute;
+    top:209px;
+    z-index:40;
+    width: 73px !important;
+    height: 67px !important;
+    background-image: url(//gf1.geo.gfsrv.net/cdnca/86f7332a641a24e03eaae797e597e0.png);
+    -webkit-animation: animation_resourceWalker_12steps 1.5s steps(12, end) infinite;
+    -moz-animation: animation_resourceWalker_12steps 1.5s steps(12, end) infinite;
+    -ms-animation: animation_resourceWalker_12steps 1.5s steps(12, end) infinite;
+}
+
+.resourceWalkerO { background-image: url(//gf1.geo.gfsrv.net/cdncf/1c3fcc6e56a838665020879c2a7d22.png);}
+.resourceWalkerSO { background-image: url(//gf2.geo.gfsrv.net/cdn7e/b7b59efbc51a9178929643a6a05c46.png);}
+.resourceWalkerS { background-image: url(//gf1.geo.gfsrv.net/cdnc9/7b91f4107dcaca486497676bbd673c.png);}
+.resourceWalkerSW { background-image: url(//gf1.geo.gfsrv.net/cdnf2/118e0dfed82b498d08afe98206453a.png);}
+.resourceWalkerW { background-image: url(//gf1.geo.gfsrv.net/cdn6d/cb6f1ddc2e52e7e00c8ca7b2117103.png);}
+.resourceWalkerNW { background-image: url(//gf1.geo.gfsrv.net/cdnf2/c9df5e74a3efbc6f7b285d28500697.png);}
+.resourceWalkerN { background-image: url(//gf3.geo.gfsrv.net/cdnec/53e03c69521767f1fb06d0a69ff56f.png);}
+.resourceWalkerNO { background-image: url(//gf3.geo.gfsrv.net/cdn2f/81f23c305808459bb74dd8ac342521.png);}
+
+
+@-webkit-keyframes animation_resourceWalker_12steps {
+    from { background-position: 0px 0px; }
+    to { background-position: -876px 0px; }
+}
+
+@-moz-keyframes animation_resourceWalker_12steps {
+    from { background-position:0px }
+    to { background-position: -876px }
+}
+
+@-ms-keyframes animation_resourceWalker_12steps {
+    from { background-position: 0px 0px; }
+    to { background-position: -876px 0px; }
+}
+
+
+.resourceWalkerEmptyO { background-image: url(//gf1.geo.gfsrv.net/cdn91/db8a48adaf65f1a9353579f88fc00a.png);}
+.resourceWalkerEmptySO { background-image: url(//gf2.geo.gfsrv.net/cdnd3/efbf894afbae85505b70620e338604.png);}
+.resourceWalkerEmptyS { background-image: url(//gf2.geo.gfsrv.net/cdnd8/ce707b0291a12edafd782879f41c59.png);}
+.resourceWalkerEmptySW { background-image: url(//gf3.geo.gfsrv.net/cdn86/da325f910057e220440717caa00388.png);}
+.resourceWalkerEmptyW { background-image: url(//gf2.geo.gfsrv.net/cdnac/2705d3e5aadfe926930b83727405a9.png);}
+.resourceWalkerEmptyNW { background-image: url(//gf2.geo.gfsrv.net/cdn1f/8b3d6e98e9e6a3bae22d48be12430f.png);}
+.resourceWalkerEmptyN { background-image: url(//gf2.geo.gfsrv.net/cdnd5/20d1261f1323bdadd9c9d556e896f0.png);}
+.resourceWalkerEmptyNO { background-image: url(//gf2.geo.gfsrv.net/cdn17/88d2d8817c7ee6febd3a938cdca228.png);}
+
+.tradegoodWalker1O { background-image: url(//gf3.geo.gfsrv.net/cdn51/01b26425d72dd6704f6b8b1c83d35e.png);}
+.tradegoodWalker1SO { background-image: url(//gf3.geo.gfsrv.net/cdne4/ce219bfd6813fa8eb45fae44296d96.png);}
+.tradegoodWalker1S { background-image: url(//gf3.geo.gfsrv.net/cdn27/66f5e972c978fe13b3779fc1d2c000.png);}
+.tradegoodWalker1SW { background-image: url(//gf2.geo.gfsrv.net/cdn78/1e518f1a588e60a2d437d5edc022fd.png);}
+.tradegoodWalker1W { background-image: url(//gf1.geo.gfsrv.net/cdncf/d90f6fd9f5dbf62c80da041e557e0b.png);}
+.tradegoodWalker1NW { background-image: url(//gf1.geo.gfsrv.net/cdn69/ce3e29380f6c752a4d20324aff43f2.png);}
+.tradegoodWalker1N { background-image: url(//gf1.geo.gfsrv.net/cdn3f/ace91c7359cf0f6fe1343b76c88fa4.png);}
+.tradegoodWalker1NO { background-image: url(//gf2.geo.gfsrv.net/cdnd6/394dcb240b7972b87a356ef2bf3ae7.png);}
+
+.tradegoodWalker2O { background-image: url(//gf1.geo.gfsrv.net/cdn35/50846ec7340523a646e444e8f6ddf8.png);}
+.tradegoodWalker2SO { background-image: url(//gf1.geo.gfsrv.net/cdnfa/097d7af95d8c4dd2a51b0bf6257103.png);}
+.tradegoodWalker2S { background-image: url(//gf2.geo.gfsrv.net/cdn44/c1afe711b4ea39a1aa8fd9d650fc62.png);}
+.tradegoodWalker2SW { background-image: url(//gf3.geo.gfsrv.net/cdn88/f73384b6082a8ef1ca612ca11f3a08.png);}
+.tradegoodWalker2W { background-image: url(//gf2.geo.gfsrv.net/cdnd5/3c1c91847bf61c50079bc8d92e50be.png);}
+.tradegoodWalker2NW { background-image: url(//gf2.geo.gfsrv.net/cdn4b/77d8170cff18ad93c3755892eb4e2a.png);}
+.tradegoodWalker2N { background-image: url(//gf1.geo.gfsrv.net/cdn6d/c49387f456bb3d98b1f3237a1eb007.png);}
+.tradegoodWalker2NO { background-image: url(//gf2.geo.gfsrv.net/cdn1b/e90286de2045f48f6dc87fa0d51afd.png);}
+
+.tradegoodWalker3O { background-image: url(//gf3.geo.gfsrv.net/cdnb2/b8047857364156d5a4cb1dfba89228.png);}
+.tradegoodWalker3SO { background-image: url(//gf1.geo.gfsrv.net/cdn6d/900731888eaf5b6fdaa5b9d6572d05.png);}
+.tradegoodWalker3S { background-image: url(//gf1.geo.gfsrv.net/cdn32/d26aa7194cb10e7363f5cbf6da66cc.png);}
+.tradegoodWalker3SW { background-image: url(//gf3.geo.gfsrv.net/cdn2d/c9f689917bb1b830c8e7f75922dec2.png);}
+.tradegoodWalker3W { background-image: url(//gf3.geo.gfsrv.net/cdn2f/3269c0ddcf5537fc7f9fe21f85bf82.png);}
+.tradegoodWalker3NW { background-image: url(//gf2.geo.gfsrv.net/cdn18/5b0b78d352bdff1365eac069560782.png);}
+.tradegoodWalker3N { background-image: url(//gf2.geo.gfsrv.net/cdn1b/897f78c833f01490ebbd4bd657ebd2.png);}
+.tradegoodWalker3NO { background-image: url(//gf2.geo.gfsrv.net/cdn7c/7fcfe1908d388d0e476dd732d3cdaa.png);}
+
+.tradegoodWalker4O { background-image: url(//gf1.geo.gfsrv.net/cdn0e/31b999f1115f4f146ed2e79714fe91.png);}
+.tradegoodWalker4SO { background-image: url(//gf2.geo.gfsrv.net/cdnd3/0a46a1706bf8239a806befe35cf493.png);}
+.tradegoodWalker4S { background-image: url(//gf3.geo.gfsrv.net/cdnba/83e40afdd7bdccc36bfe2810f5bf66.png);}
+.tradegoodWalker4SW { background-image: url(//gf2.geo.gfsrv.net/cdn47/521e9da5e5a0f40d797bf732c1b803.png);}
+.tradegoodWalker4W { background-image: url(//gf1.geo.gfsrv.net/cdn60/acee79d6e3d656a624f0443f949fb5.png);}
+.tradegoodWalker4NW { background-image: url(//gf1.geo.gfsrv.net/cdn9c/86ddf970de26667bd07903d7c489b1.png);}
+.tradegoodWalker4N { background-image: url(//gf3.geo.gfsrv.net/cdn21/54f6468804615a1cc363da5fa85520.png);}
+.tradegoodWalker4NO { background-image: url(//gf2.geo.gfsrv.net/cdn44/7339a6183edd5a6e632bedf9f223d4.png);}
+
+.tradegoodLoaderO { background-image: url(//gf2.geo.gfsrv.net/cdn40/45c327036b643dced29335259e76cb.png);}
+.tradegoodLoaderSO { background-image: url(//gf3.geo.gfsrv.net/cdn2a/4f6bd8e6042883e9f28cc4cfca42ea.png);}
+.tradegoodLoaderS { background-image: url(//gf2.geo.gfsrv.net/cdn4e/378e22419bee7b4e21157463174585.png);}
+.tradegoodLoaderSW { background-image: url(//gf3.geo.gfsrv.net/cdnba/56e154a8f7b23f8cc1cc7c8b5efd0b.png);}
+.tradegoodLoaderW { background-image: url(//gf3.geo.gfsrv.net/cdn8d/e4dab82fb949894814d668217dde8e.png);}
+.tradegoodLoaderNW { background-image: url(//gf3.geo.gfsrv.net/cdn2b/006e5aed567fd436eb6084c3701052.png);}
+.tradegoodLoaderN { background-image: url(//gf3.geo.gfsrv.net/cdn28/c24c232f7e367abdb87d76492ca551.png);}
+.tradegoodLoaderNO { background-image: url(//gf3.geo.gfsrv.net/cdn89/57fea5a313afaa16704d2acaf4baf1.png);}
+
+.tradegoodWalkerEmptyO { background-image: url(//gf1.geo.gfsrv.net/cdn66/c9ba6ad3ecf995a7e5991f92e7abce.png);}
+.tradegoodWalkerEmptySO { background-image: url(//gf1.geo.gfsrv.net/cdn97/f761251bb39fce3c5f1160917625a8.png);}
+.tradegoodWalkerEmptyS { background-image: url(//gf3.geo.gfsrv.net/cdne2/321df011aaae932c8c6cce8b58d8d8.png);}
+.tradegoodWalkerEmptySW { background-image: url(//gf3.geo.gfsrv.net/cdn8e/d969fcdc1a064f9bfd579ed777dcf0.png);}
+.tradegoodWalkerEmptyW { background-image: url(//gf2.geo.gfsrv.net/cdnaa/9a8780fc5c65731b0e0bc913479c9c.png);}
+.tradegoodWalkerEmptyNW { background-image: url(//gf1.geo.gfsrv.net/cdn0b/96b611ac0904cb0bcca81aab7acde0.png);}
+.tradegoodWalkerEmptyN { background-image: url(//gf1.geo.gfsrv.net/cdnf5/e6f96aa1801014af545d6ed7e7bcbd.png);}
+.tradegoodWalkerEmptyNO { background-image: url(//gf1.geo.gfsrv.net/cdnff/a158fe6c149917b230efd150ddc713.png);}
+
+.citizen1O { background-image: url(//gf3.geo.gfsrv.net/cdnef/d688d11755338bd8a6efbb8d31cbce.png);}
+.citizen1SO { background-image: url(//gf1.geo.gfsrv.net/cdn00/465a6a29f2153cb73ecc747c049cfc.png);}
+.citizen1S { background-image: url(//gf2.geo.gfsrv.net/cdn15/c309942b8ecdb0c429466834e0ec99.png);}
+.citizen1SW { background-image: url(//gf1.geo.gfsrv.net/cdn3d/019db923c8f5930a2e1772a62fecb6.png);}
+.citizen1W { background-image: url(//gf2.geo.gfsrv.net/cdna3/00074463a70913beea41c46c66baa9.png);}
+.citizen1NW { background-image: url(//gf3.geo.gfsrv.net/cdn83/d2bd9a9ff8bc91119f096b5388b47d.png);}
+.citizen1N { background-image: url(//gf3.geo.gfsrv.net/cdn2b/4bcf5902884674c7ebf4f902b46920.png);}
+.citizen1NO { background-image: url(//gf3.geo.gfsrv.net/cdnec/c5bc0ebc41eb84be57bcaee92f8cc5.png);}
+
+.citizen2O { background-image: url(//gf2.geo.gfsrv.net/cdn16/47a61511320668923e64abdaa1154a.png);}
+.citizen2SO { background-image: url(//gf3.geo.gfsrv.net/cdn80/6e476a2af6dee9f2bedbcf038af10e.png);}
+.citizen2S { background-image: url(//gf2.geo.gfsrv.net/cdnda/49994c63ad9b9b36056f8796ebeeef.png);}
+.citizen2SW { background-image: url(//gf1.geo.gfsrv.net/cdnc7/dae35b4398dddec38f8ec023de6fcb.png);}
+.citizen2W { background-image: url(//gf3.geo.gfsrv.net/cdned/d1d12f0bc7ccbaa5ceb5573d53dcae.png);}
+.citizen2NW { background-image: url(//gf2.geo.gfsrv.net/cdn48/b5fc91f89d15aec9f5df44c930cbbe.png);}
+.citizen2N { background-image: url(//gf1.geo.gfsrv.net/cdnc7/51cf21656854a6d6b9433116295dac.png);}
+.citizen2NO { background-image: url(//gf1.geo.gfsrv.net/cdn0e/07934d8b2523b6084888cc7df3d554.png);}
+
+.citizen3O { background-image: url(//gf2.geo.gfsrv.net/cdna9/abed104cce27281280f31dcab131b0.png);}
+.citizen3SO { background-image: url(//gf1.geo.gfsrv.net/cdn37/214a0168ee6cb31e68ee5a5daab77d.png);}
+.citizen3S { background-image: url(//gf3.geo.gfsrv.net/cdne7/3ab40716ecfcc7882f875f4076c4aa.png);}
+.citizen3SW { background-image: url(//gf2.geo.gfsrv.net/cdn18/e4d50db7dbe44924c7085a3c335842.png);}
+.citizen3W { background-image: url(//gf3.geo.gfsrv.net/cdn25/48517a3f06ac98845ecec3e50624de.png);}
+.citizen3NW { background-image: url(//gf1.geo.gfsrv.net/cdn61/47d69b2ab7643460c2d14027d3fb90.png);}
+.citizen3N { background-image: url(//gf1.geo.gfsrv.net/cdncf/b78719abe33df1144593d56e850cde.png);}
+.citizen3NO { background-image: url(//gf3.geo.gfsrv.net/cdn8b/9dbe08b1f02ecaadb4769f12a29787.png);}
+
+.citizen4O { background-image: url(//gf1.geo.gfsrv.net/cdn98/8eef275d77e01ed0c41124b8df2366.png);}
+.citizen4SO { background-image: url(//gf1.geo.gfsrv.net/cdn3d/cc536e193a196fc8199ae0c4f465d7.png);}
+.citizen4S { background-image: url(//gf3.geo.gfsrv.net/cdnb0/b0ad3b08992c75590615836951b7ce.png);}
+.citizen4SW { background-image: url(//gf2.geo.gfsrv.net/cdn16/bb304971e467acd4f2477dc2018d42.png);}
+.citizen4W { background-image: url(//gf2.geo.gfsrv.net/cdn1c/147b8e6ac0c49f60c0f584ee38e81d.png);}
+.citizen4NW { background-image: url(//gf1.geo.gfsrv.net/cdn65/212e7d5d773f0bff15538792bf946d.png);}
+.citizen4N { background-image: url(//gf1.geo.gfsrv.net/cdn69/7e4c1ee13d22741f90cec51e60a728.png);}
+.citizen4NO { background-image: url(//gf2.geo.gfsrv.net/cdna4/ebf279828fa9c1d5c0154ac6cd751c.png);}
+
+.citizen5O { background-image: url(//gf1.geo.gfsrv.net/cdnc4/a44ea5787d195458268054a99f2087.png);}
+.citizen5SO { background-image: url(//gf2.geo.gfsrv.net/cdn4f/0b71f3d9b8b783a1f9f7df4ccb548b.png);}
+.citizen5S { background-image: url(//gf3.geo.gfsrv.net/cdn84/9d0bdfb05e6b5097caad8a20783990.png);}
+.citizen5SW { background-image: url(//gf1.geo.gfsrv.net/cdn92/45a77361b8f2a05201a662bca89dab.png);}
+.citizen5W { background-image: url(//gf3.geo.gfsrv.net/cdn2b/12618758e66f755cc00ac72cacc7c2.png);}
+.citizen5NW { background-image: url(//gf2.geo.gfsrv.net/cdn78/72a580a7bd0637aa771e0a86abc888.png);}
+.citizen5N { background-image: url(//gf2.geo.gfsrv.net/cdn12/c47ff7a106ca76b841eaa34983923d.png);}
+.citizen5NO { background-image: url(//gf1.geo.gfsrv.net/cdnf1/9d201bb795226f67dd1df57f8ec781.png);}
+
+
+
+.locustO { background-image: url(//gf3.geo.gfsrv.net/cdn2d/4723644e7195fd683f3fb8cb96ea35.png);}
+.locustSO { background-image: url(//gf2.geo.gfsrv.net/cdna1/0018901e1d589fff38b8d23ad04075.png);}
+.locustS { background-image: url(//gf1.geo.gfsrv.net/cdn35/904cef1990af411cc53f2e328cc0f2.png);}
+.locustSW { background-image: url(//gf3.geo.gfsrv.net/cdnec/549de7dcb6ff1499c4690ed24bdac6.png);}
+.locustW { background-image: url(//gf2.geo.gfsrv.net/cdn72/f0e361e5c621e2361acb6b65343f27.png);}
+.locustNW { background-image: url(//gf3.geo.gfsrv.net/cdn53/2d2bd161ad291a869d1e5eaf73c7a0.png);}
+.locustN { background-image: url(//gf1.geo.gfsrv.net/cdnc2/30e940c10e82abd1eb5f34072ffdc2.png);}
+.locustNO { background-image: url(//gf2.geo.gfsrv.net/cdna3/c655288bf9e903f2fca8e9cf360d3d.png);}
+
+.ratO { background-image: url(//gf1.geo.gfsrv.net/cdn03/9505bd5c5124ddcec8afdeb726e7f3.png);}
+.ratSO { background-image: url(//gf2.geo.gfsrv.net/cdn19/c959b6706437cc867d9bcc6dc2db6d.png);}
+.ratS { background-image: url(//gf1.geo.gfsrv.net/cdn37/71150c3c4d24bba11301c12d3e4460.png);}
+.ratSW { background-image: url(//gf3.geo.gfsrv.net/cdn56/9ca28ddcc53ef1019ef73a37fdeaea.png);}
+.ratW { background-image: url(//gf1.geo.gfsrv.net/cdn9e/c6522d4f6f0464f04a48701d88f766.png);}
+.ratNW { background-image: url(//gf1.geo.gfsrv.net/cdnc1/c7e831b1b6852f1bee1bc612c6acb8.png);}
+.ratN { background-image: url(//gf1.geo.gfsrv.net/cdn32/745c46fe34a4178b2636a7ef2880e8.png);}
+.ratNO { background-image: url(//gf3.geo.gfsrv.net/cdn50/b8516ace5ab61cb01776b140da0f68.png);}
+
+.toadO { background-image: url(//gf2.geo.gfsrv.net/cdna6/853f3273e5a7a0a81ea753cb78df9c.png);}
+.toadSO { background-image: url(//gf3.geo.gfsrv.net/cdn53/93551b6e6c9d1e2c1a087826dab43e.png);}
+.toadS { background-image: url(//gf3.geo.gfsrv.net/cdnb9/7a525dafeaa6d4f757d0eb38935256.png);}
+.toadSW { background-image: url(//gf1.geo.gfsrv.net/cdn64/22a9cbc0e9aedea0b2dbbf334ceb08.png);}
+.toadW { background-image: url(//gf2.geo.gfsrv.net/cdn76/b15dc6f999670e104cd7e1d920eda8.png);}
+.toadNW { background-image: url(//gf1.geo.gfsrv.net/cdn6b/0f4b83df2fd099e31ae3ab3a5f1d4c.png);}
+.toadN { background-image: url(//gf2.geo.gfsrv.net/cdnad/3d5e4c0dfcc669be97e1e35c5eeebf.png);}
+.toadNO { background-image: url(//gf2.geo.gfsrv.net/cdnd1/a36e4b83a611a9b62795261e75f459.png);}
+
+
+
+
+
+.animation_bird_12steps
+{
+    left:555px;
+    position:absolute;
+    top:500px;
+    z-index:40;
+    width: 50px !important;
+    height: 50px !important;
+    background-image: url(//gf2.geo.gfsrv.net/cdnd8/f3e7158f863f21d0e83ab24b735fe3.png);
+    -webkit-animation: animation_birds_8steps 1s steps(8, end) infinite;
+    -moz-animation: animation_birds_8steps 1s steps(8, end) infinite;
+    -ms-animation: animation_birds_8steps 1s steps(8, end) infinite;
+}
+
+.birdO { background-image: url(//gf3.geo.gfsrv.net/cdn2c/69dc736573ea7fc82c533526927bd8.png);}
+.birdSO { background-image: url(//gf2.geo.gfsrv.net/cdn19/dcc4405e670a227d392c0d01ef66d5.png);}
+.birdS { background-image: url(//gf3.geo.gfsrv.net/cdn8c/166189fab4bdc54d202a12a1e38c33.png);}
+.birdSW { background-image: url(//gf1.geo.gfsrv.net/cdn04/e7d657fe233af42cc3d57d1c615f3b.png);}
+.birdW { background-image: url(//gf2.geo.gfsrv.net/cdn45/a1e6ab7a95f4b907a4e7ec5958ed78.png);}
+.birdNW { background-image: url(//gf2.geo.gfsrv.net/cdnd9/3535b96635adfa8d6270a290cdcf09.png);}
+.birdN { background-image: url(//gf3.geo.gfsrv.net/cdn88/87ed83f3c97d5636b048e2abdbf049.png);}
+.birdNO { background-image: url(//gf1.geo.gfsrv.net/cdn35/0bd35291452238265f88401fd95c0f.png);}
+
+
+
+@-webkit-keyframes animation_birds_8steps {
+    from { background-position: 0px 0px; }
+    to { background-position: -400px 0px; }
+}
+
+@-moz-keyframes animation_birds_8steps {
+    from { background-position:0px }
+    to { background-position: -400px }
+}
+
+@-ms-keyframes animation_birds_8steps {
+    from { background-position: 0px 0px; }
+    to { background-position: -400px 0px; }
+}
+
+
+
+.soldierOwnO { background-image: url(//gf1.geo.gfsrv.net/cdnfd/682f19b7fa7cb71959704404d1c7e9.png);}
+.soldierOwnSO { background-image: url(//gf3.geo.gfsrv.net/cdn51/9db2341a7024ae51706f5c271416dc.png);}
+.soldierOwnS { background-image: url(//gf3.geo.gfsrv.net/cdnb3/28c2d7aa064b955fb5dd0e36cb6aef.png);}
+.soldierOwnSW { background-image: url(//gf3.geo.gfsrv.net/cdn89/a871148bcbda29ec5250b2cf6c61f1.png);}
+.soldierOwnW { background-image: url(//gf1.geo.gfsrv.net/cdn91/0a336acbf446d9d4be450638d0db8e.png);}
+.soldierOwnNW { background-image: url(//gf1.geo.gfsrv.net/cdnc8/a1fface0c25f18459b9c5097141b11.png);}
+.soldierOwnN { background-image: url(//gf1.geo.gfsrv.net/cdn36/ad08bcab4b899bdf3bc397d37091d8.png);}
+.soldierOwnNO { background-image: url(//gf1.geo.gfsrv.net/cdn0b/e5dfef11440b7802728818c2671c94.png);}
+
+.soldierAllyO { background-image: url(//gf3.geo.gfsrv.net/cdnb3/6ab1f43ed5031f1a0d4ac383e4361c.png);}
+.soldierAllySO { background-image: url(//gf2.geo.gfsrv.net/cdn40/08388830b483f414a570994c71bbcb.png);}
+.soldierAllyS { background-image: url(//gf1.geo.gfsrv.net/cdn96/ccf816c3f7253273099993302a4f55.png);}
+.soldierAllySW { background-image: url(//gf3.geo.gfsrv.net/cdn5f/43a05fd1ebdbc1a5a92abba847983e.png);}
+.soldierAllyW { background-image: url(//gf1.geo.gfsrv.net/cdnf0/8ec8442a7d8380b8975e0a385b915f.png);}
+.soldierAllyNW { background-image: url(//gf1.geo.gfsrv.net/cdn98/3a62634721cbfc0b3a9102a75e036f.png);}
+.soldierAllyN { background-image: url(//gf3.geo.gfsrv.net/cdn20/04d1cea4e28b5643839fa38a8f4a9e.png);}
+.soldierAllyNO { background-image: url(//gf2.geo.gfsrv.net/cdn1a/a1fdfd8c7aabb2d912f54aeb8b70be.png);}
+
+.soldierForeignO { background-image: url(//gf1.geo.gfsrv.net/cdn31/b29784ef451459c1c9f3ac32fd1f7a.png);}
+.soldierForeignSO { background-image: url(//gf2.geo.gfsrv.net/cdn1b/628af1c69ea10475498af1996f1ae8.png);}
+.soldierForeignS { background-image: url(//gf2.geo.gfsrv.net/cdnd9/03fab2bea26e6b9a81483f3b6fe6d7.png);}
+.soldierForeignSW { background-image: url(//gf3.geo.gfsrv.net/cdn85/92314717b79df49cd5279e27960848.png);}
+.soldierForeignW { background-image: url(//gf1.geo.gfsrv.net/cdn3c/8f704aafa386ddc099e6328b8bad83.png);}
+.soldierForeignNW { background-image: url(//gf1.geo.gfsrv.net/cdn98/754cf87593ef9439ec928d7d083ce7.png);}
+.soldierForeignN { background-image: url(//gf2.geo.gfsrv.net/cdn77/9ce0898320557150e3c21f65de25cf.png);}
+.soldierForeignNO { background-image: url(//gf2.geo.gfsrv.net/cdn19/6760ecea69b41a680ce364b704a571.png);}
+
+.soldierTreatyO { background-image: url(//gf2.geo.gfsrv.net/cdndb/49807ec05a01c97f86cb32590ea703.png);}
+.soldierTreatySO { background-image: url(//gf1.geo.gfsrv.net/cdn65/2edf423f77d998a210c766dc1e1721.png);}
+.soldierTreatyS { background-image: url(//gf1.geo.gfsrv.net/cdn07/91202d19ed4338c55adad673f6ab85.png);}
+.soldierTreatySW { background-image: url(//gf1.geo.gfsrv.net/cdn66/ba14ddf3747d2d5c1cdcc3d0ea2d0e.png);}
+.soldierTreatyW { background-image: url(//gf1.geo.gfsrv.net/cdn35/0b8eca6a10ec3948009d8e6f9e5b74.png);}
+.soldierTreatyNW { background-image: url(//gf1.geo.gfsrv.net/cdn37/f3e662211a5971e9700bdfb3f170ff.png);}
+.soldierTreatyN { background-image: url(//gf2.geo.gfsrv.net/cdna5/5208b7ff9bb92d0b1c7df9f3d2d8d8.png);}
+.soldierTreatyNO { background-image: url(//gf3.geo.gfsrv.net/cdnbe/9a0a47d6f0c3dd07a156b30b4a4147.png);}
+
+
+.soldierFight1O,
+.soldierFight1SO,
+.soldierFight1S,
+.soldierFight1SW,
+.soldierFight1W,
+.soldierFight1NW,
+.soldierFight1N,
+.soldierFight1NO { background-image: url(//gf1.geo.gfsrv.net/cdnca/86f7332a641a24e03eaae797e597e0.png);}
+
+
+.soldierFight2O,
+.soldierFight2SO,
+.soldierFight2S,
+.soldierFight2SW,
+.soldierFight2W,
+.soldierFight2NW,
+.soldierFight2N,
+.soldierFight2NO { background-image: url(//gf3.geo.gfsrv.net/cdn8a/3e2f6ecac3101dc89718b548a28a54.png);}
+
+
+.animation_soldierWaiting_12steps
+{
+    left:555px;
+    position:absolute;
+    top:500px;
+    z-index:40;
+    width: 73px !important;
+    height: 67px !important;
+    background-image: url(//gf1.geo.gfsrv.net/cdn31/b29784ef451459c1c9f3ac32fd1f7a.png);
+}
+.soldierWaitingO { background-image: url(//gf1.geo.gfsrv.net/cdn31/b29784ef451459c1c9f3ac32fd1f7a.png);}
+.soldierWaitingSO { background-image: url(//gf2.geo.gfsrv.net/cdn1b/628af1c69ea10475498af1996f1ae8.png);}
+.soldierWaitingS { background-image: url(//gf2.geo.gfsrv.net/cdnd9/03fab2bea26e6b9a81483f3b6fe6d7.png);}
+.soldierWaitingSW { background-image: url(//gf3.geo.gfsrv.net/cdn85/92314717b79df49cd5279e27960848.png);}
+.soldierWaitingW { background-image: url(//gf1.geo.gfsrv.net/cdn3c/8f704aafa386ddc099e6328b8bad83.png);}
+.soldierWaitingNW { background-image: url(//gf1.geo.gfsrv.net/cdn98/754cf87593ef9439ec928d7d083ce7.png);}
+.soldierWaitingN { background-image: url(//gf2.geo.gfsrv.net/cdn77/9ce0898320557150e3c21f65de25cf.png);}
+.soldierWaitingNO { background-image: url(//gf2.geo.gfsrv.net/cdn19/6760ecea69b41a680ce364b704a571.png);}
+
+
+.animation_8steps {
+    left:0;
+    position:absolute;
+    top:0;
+    z-index:40;
+    width: 50px !important;
+    height: 50px !important;
+    -webkit-animation: ani8steps .8s steps(8, end) infinite;
+    -moz-animation: ani8steps .8s steps(8, end) infinite;
+    -ms-animation: ani8steps .8s steps(8, end) infinite;
+}
+
+
+.animation_5steps {
+    position:absolute;
+    z-index:40;
+    width: 120px !important;
+    height: 50px !important;
+    -webkit-animation: ani5steps .8s steps(5, end) infinite;
+    -moz-animation: ani5steps .8s steps(5, end) infinite;
+    -ms-animation: ani5steps .8s steps(5, end) infinite;
+}
+
+.animation_12steps {
+    position:absolute;
+    z-index:40;
+    width: 160px !important;
+    height: 70px !important;
+    -webkit-animation: ani12steps 1.2s steps(12, end) infinite;
+    -moz-animation: ani12steps 1.2s steps(12, end) infinite;
+    -ms-animation: ani12steps 1.2s steps(12, end) infinite;
+}
+
+.bird_swarm {
+    position: absolute;
+    height: 200px;
+	/* @noflip */
+    left: 200px;
+    top: 200px;
+    overflow:hidden;
+    width: 400px;
+    z-index: 50;
+    pointer-events:none;
+}
+
+.walker_dummy {
+    position: absolute;
+    height: 200px;
+    /* @noflip */
+    left: 200px;
+    top: 200px;
+    overflow:hidden;
+    width: 400px;
+    z-index: 50;
+    pointer-events:none;
+}
+
+.bird_n { background-image: url(//gf3.geo.gfsrv.net/cdn88/87ed83f3c97d5636b048e2abdbf049.png); }
+.bird_o { background-image: url(//gf3.geo.gfsrv.net/cdn2c/69dc736573ea7fc82c533526927bd8.png); }
+.bird_s { background-image: url(//gf3.geo.gfsrv.net/cdn8c/166189fab4bdc54d202a12a1e38c33.png); }
+.bird_w { background-image: url(//gf2.geo.gfsrv.net/cdn45/a1e6ab7a95f4b907a4e7ec5958ed78.png); }
+.bird_nw { background-image: url(//gf2.geo.gfsrv.net/cdnd9/3535b96635adfa8d6270a290cdcf09.png); }
+.bird_no { background-image: url(//gf1.geo.gfsrv.net/cdn35/0bd35291452238265f88401fd95c0f.png); }
+.bird_so { background-image: url(//gf2.geo.gfsrv.net/cdn19/dcc4405e670a227d392c0d01ef66d5.png); }
+.bird_sw { background-image: url(//gf1.geo.gfsrv.net/cdn04/e7d657fe233af42cc3d57d1c615f3b.png); }
+
+.one_dolphin { background: url(//gf2.geo.gfsrv.net/cdnd5/d1d95329a0c1601f3b9f3d4ebdc4fe.png) 0 0 no-repeat; }
+.two_dolphins { background: url(//gf3.geo.gfsrv.net/cdn2c/500f481ac13eafe084d23895015c48.png) 0 0 no-repeat; }
+
+#worldmap_iso #worldmap.animated .fish1 { background-image: url(//gf3.geo.gfsrv.net/cdn50/ce10df8f991adb4e244b5d22c970f7.gif); }
+#worldmap_iso #worldmap.animated .fish2 { background-image: url(//gf3.geo.gfsrv.net/cdn22/ef95e4d942a7987d033bf291e7a4ed.gif); }
+#worldmap_iso #worldmap.animated .fish3 { background-image: url(//gf2.geo.gfsrv.net/cdn78/500863232f911e931ddd94859442d8.gif); }
+#worldmap_iso #worldmap.animated .fish4 { background-image: url(//gf2.geo.gfsrv.net/cdn74/3b71bd7056e4669fed2e2649f04dee.gif); }
+#worldmap_iso #worldmap.animated .fish1_start1 { background-image: url(//gf3.geo.gfsrv.net/cdn2e/d96703a77f2c81a1def36ca529a7a8.gif); }
+#worldmap_iso #worldmap.animated .fish1_start2 { background-image: url(//gf1.geo.gfsrv.net/cdnff/5a80f021c0f33622a1e2fcdcb4fe91.gif); }
+#worldmap_iso #worldmap.animated .fish1_start3 { background-image: url(//gf2.geo.gfsrv.net/cdn7a/2cfecb6ad79bba48c2ba477d627398.gif); }
+#worldmap_iso #worldmap.animated .fish2_start1 { background-image: url(//gf1.geo.gfsrv.net/cdnfe/10e2cebed2dc54290c0e0eab6c6366.gif); }
+#worldmap_iso #worldmap.animated .fish2_start2 { background-image: url(//gf2.geo.gfsrv.net/cdn1a/7aaadebad9b645a73fd277bc3f8f2b.gif); }
+#worldmap_iso #worldmap.animated .fish2_start3 { background-image: url(//gf2.geo.gfsrv.net/cdn1a/7aaadebad9b645a73fd277bc3f8f2b.gif); }
+#worldmap_iso #worldmap.animated .fish3_start1 { background-image: url(//gf1.geo.gfsrv.net/cdnf5/c66a4876bc2c2bbc231acb94966e45.gif); }
+#worldmap_iso #worldmap.animated .fish3_start2 { background-image: url(//gf3.geo.gfsrv.net/cdned/472ce88fb767bf9d452d7fdaeb68f9.gif); }
+#worldmap_iso #worldmap.animated .fish3_start3 { background-image: url(//gf1.geo.gfsrv.net/cdn34/ff22939fe89c325c33862b8fb8ece7.gif); }
+#worldmap_iso #worldmap.animated .fish4_start1 { background-image: url(//gf3.geo.gfsrv.net/cdn22/de14a235fa2b5de11b53a3e51349cd.gif); }
+#worldmap_iso #worldmap.animated .fish4_start2 { background-image: url(//gf1.geo.gfsrv.net/cdn3c/ace2b6c1b69288ed590a41e006a899.gif); }
+#worldmap_iso #worldmap.animated .fish4_start3 { background-image: url(//gf3.geo.gfsrv.net/cdnbe/3a30cfac76f4be008a2dbc2d250a23.gif); }
+
+
+#city #locations .plagueAnimal {
+    display: none;
+    width: 73px;
+    height: 67px;
+    position: absolute;
+}
+
+#city #locations #plaguePos1 { top: 624px; left: 636px; }
+#city #locations #plaguePos2 { top: 638px; left: 945px; }
+#city #locations #plaguePos3 { top: 541px; left: 783px; }
+#city #locations #plaguePos4 { top: 290px; left: 1439px; }
+#city #locations #plaguePos5 { top: 354px; left: 1107px; }
+#city #locations #plaguePos6 { top: 440px; left: 427px; }
+#city #locations #plaguePos7 { top: 489px; left: 620px; }
+#city #locations #plaguePos8 { top: 313px; left: 828px; }
+#city #locations #plaguePos9 { top: 643px; left: 1362px; }
+#city #locations #plaguePos10 { top: 555px; left: 1238px; }
+#city #locations #plaguePos11 { top: 247px; left: 1297px; }
+#city #locations #plaguePos12 { top: 310px; left: 538px; }
+#city #locations #plaguePos13 { top: 478px; left: 727px; }
+#city #locations #plaguePos14 { top: 543px; left: 1107px; }
+#city #locations #plaguePos15 { top: 380px; left: 970px; }
+
+
+
+
+#city #locations .dolphin {
+    display:none;
+    position: absolute;
+    width: 120px;
+    height: 120px;
+}
+#city #locations #dolphinPos1 { left: 295px; top: 1141px; }
+#city #locations #dolphinPos2 { left: 901px; top: 833px; z-index: 300;}
+#city #locations #dolphinPos3 { left: 843px; top: 1067px; }
+#city #locations #dolphinPos4 { left: 1237px; top: 1152px; }
+
+
+
+#city #locations .portOccupier {
+    position: absolute;
+    background-image: url(//gf3.geo.gfsrv.net/cdne9/7c2a7a7717616fa3e722a5a8f11531.png);
+    background-repeat: no-repeat;
+    width: 120px;
+    height: 78px;
+    cursor: pointer;
+    z-index: 100;
+}
+#city .animated #locations .portOccupier {
+    background-image: url(//gf2.geo.gfsrv.net/cdnd8/1c920325c189f37807b46b96f829f7.png);
+    -webkit-animation: port_occupier_ani24steps 2.4s steps(24, end) infinite;
+    -moz-animation: port_occupier_ani24steps 2.4s steps(24, end) infinite;
+    -ms-animation: port_occupier_ani24steps 2.4s steps(24, end) infinite;
+}
+#city .animated #locations #portOccupierShip2 {
+    -webkit-animation-delay: 0.7s;
+    -moz-animation-delay: 0.7s;
+    -ms-animation-delay: 0.7s;
+}
+#city #locations #portOccupierShip1 {
+    left: 862px;
+    top: 902px;
+}
+#city #locations #portOccupierShip2 {
+    left: 711px;
+    top: 936px;
+}
+#city #locations #portOccupierShip3 {
+    left: 711px;
+    top: 1136px;
+}
+@-webkit-keyframes port_occupier_ani24steps {
+    from { background-position: 0px; }
+    to { background-position: -2880px; }
+}
+
+@-moz-keyframes port_occupier_ani24steps {
+    from { background-position: 0px; }
+    to { background-position: -2880px; }
+}
+
+@-ms-keyframes port_occupier_ani24steps {
+    from { background-position: 0px; }
+    to { background-position: -2880px; }
+}
+
+
+.animated .animation_16steps, .animated.animation_16steps {
+    position:absolute;
+    z-index:1000;
+    width: 26px !important;
+    height: 15px !important;
+    -webkit-animation: ani16steps 1.6s steps(16, end) infinite;
+    -moz-animation: ani16steps 1.6s steps(16, end) infinite;
+    -ms-animation: ani16steps 1.6s steps(16, end) infinite;
+}
+
+.animated .flagRedBig, .animated.flagRedBig,
+#island #cities .animated .flag {
+    background-image: url(//gf3.geo.gfsrv.net/cdn81/ac00d2d7b1e3964e38054f8c3cc27c.png);
+    width:17px;
+    height:10px;
+    z-index: 50;
+}
+
+.animated .flagBlueBig, .animated.flagBlueBig, #island #cities .animated.city.own .flag {
+    background-image: url(//gf3.geo.gfsrv.net/cdn82/820d83cc57770f495b7de73bf88e07.png);
+    width:17px;
+    height:10px;
+}
+
+.animated .flagYellowBig, .animated.flagYellowBig, #island #cities .animated.city.treaty .flag {
+    background-image: url(//gf1.geo.gfsrv.net/cdn95/8aec7d667557d507636567d24aa447.png);
+    width:17px;
+    height:10px;
+}
+
+.animated .flagGreenBig, .animated.flagGreenBig, #island #cities .animated.city.ally .flag {
+    background-image: url(//gf1.geo.gfsrv.net/cdncb/18adeabcb4d51dd5c5a45aa2b5a9db.png);
+    width:17px;
+    height:10px;
+}
+.animated .flagBlackBig, .animated.flagBlackBig {
+    background-image: url(//gf3.geo.gfsrv.net/cdn89/b249e2da64a035fd3041fd1f519c35.png);
+    width:17px;
+    height:10px;
+}
+
+
+.animated .animation_flag_barracks_16steps, .animated.animation_flag_barracks_16steps {
+    position:absolute;
+    z-index:1000;
+    width: 30px !important;
+    height: 26px !important;
+    -webkit-animation: flag_barracks_ani16steps 1.6s steps(16, end) infinite;
+    -moz-animation: flag_barracks_ani16steps 1.6s steps(16, end) infinite;
+    -ms-animation: flag_barracks_ani16steps 1.6s steps(16, end) infinite;
+}
+
+@-webkit-keyframes flag_barracks_ani16steps {
+    from { background-position: 0px; }
+    to { background-position: -480px; }
+}
+
+@-moz-keyframes flag_barracks_ani16steps {
+    from { background-position: 0px; }
+    to { background-position: -480px; }
+}
+
+@-ms-keyframes flag_barracks_ani16steps {
+    from { background-position: 0px; }
+    to { background-position: -480px; }
+}
+
+.fire_large {
+    background-image: url(//gf3.geo.gfsrv.net/cdn5b/ad037268718bc4fa024c34d2c2c7c9.png);
+    position:absolute;
+    width: 55px;
+    height: 75px;
+    width:55px;
+    height:75px;
+}
+
+.fire_large.animated {
+    background-image: url(//gf2.geo.gfsrv.net/cdn7e/7d5bf1e86eff20dec85b96fb52f4aa.png);
+    z-index:2000;
+    -webkit-animation: fire_large_ani16steps 1.6s steps(16, end) infinite;
+    -moz-animation: fire_large_ani16steps 1.6s steps(16, end) infinite;
+    -ms-animation: fire_large_ani16steps 1.6s steps(16, end) infinite;
+}
+
+@-webkit-keyframes fire_large_ani16steps {
+    from { background-position: 0px; }
+    to { background-position: -880px; }
+}
+
+@-moz-keyframes fire_large_ani16steps {
+    from { background-position: 0px; }
+    to { background-position: -880px; }
+}
+
+@-ms-keyframes fire_large_ani16steps {
+    from { background-position: 0px; }
+    to { background-position: -880px; }
+}
+
+.fire_small {
+    position:absolute;
+    width: 40px;
+    height: 55px;
+}
+.animated .fire_small {
+    background-image: url(//gf3.geo.gfsrv.net/cdnee/5fc5427ab164604cd6cdd8f2b47388.png);
+    z-index:2000;
+    -webkit-animation: fire_small_ani16steps 1.6s steps(16, end) infinite;
+    -moz-animation: fire_small_ani16steps 1.6s steps(16, end) infinite;
+    -ms-animation: fire_small_ani16steps 1.6s steps(16, end) infinite;
+}
+
+@-webkit-keyframes fire_small_ani16steps {
+    from { background-position: 0px; }
+    to { background-position: -640px; }
+}
+
+@-moz-keyframes fire_small_ani16steps {
+    from { background-position: 0px; }
+    to { background-position: -640px; }
+}
+
+@-ms-keyframes fire_small_ani16steps {
+    from { background-position: 0px; }
+    to { background-position: -640px; }
+}
+
+.animatedSea1.animated {
+  background-image:url(//gf2.geo.gfsrv.net/cdn7b/589c683a3524adc527768b29522b95.png);
+  width: 47px;
+  height:39px;
+  -webkit-animation: animatedSea1_ani16steps 1.6s steps(16, end) infinite;
+  -moz-animation: animatedSea1_ani16steps 1.6s steps(16, end) infinite;
+  -ms-animation: animatedSea1_ani16steps 1.6s steps(16, end) infinite;
+}
+
+@-webkit-keyframes animatedSea1_ani16steps {
+    from { background-position: 0px; }
+    to { background-position: -752px; }
+}
+
+@-moz-keyframes animatedSea1_ani16steps {
+    from { background-position: 0px; }
+    to { background-position: -752px; }
+}
+
+@-ms-keyframes animatedSea1_ani16steps {
+    from { background-position: 0px; }
+    to { background-position: -752px; }
+}
+
+.animatedSea2.animated {
+  background-image:url(//gf1.geo.gfsrv.net/cdn65/b180b5446e4d243fee361cb5fb365c.png);
+  width: 64px;
+  height:66px;
+  -webkit-animation: animatedSea2_ani16steps 1.6s steps(16, end) infinite;
+  -moz-animation: animatedSea2_ani16steps 1.6s steps(16, end) infinite;
+  -ms-animation: animatedSea2_ani16steps 1.6s steps(16, end) infinite;
+}
+
+@-webkit-keyframes animatedSea2_ani16steps {
+    from { background-position: 0px; }
+    to { background-position: -1024px; }
+}
+
+@-moz-keyframes animatedSea2_ani16steps {
+    from { background-position: 0px; }
+    to { background-position: -1024px; }
+}
+
+@-ms-keyframes animatedSea2_ani16steps {
+    from { background-position: 0px; }
+    to { background-position: -1024px; }
+}
+
+.animated .animated_worker_construction_1 {
+  background-image:url(//gf1.geo.gfsrv.net/cdn6c/92c865432acea82fcd200e504a4780.png);
+  width: 27px;
+  height:32px;
+  -webkit-animation: animated_worker_construction_1_ani12steps 1.2s steps(12, end) infinite;
+  -moz-animation: animated_worker_construction_1_ani12steps 1.2s steps(12, end) infinite;
+  -ms-animation: animated_worker_construction_1_ani12steps 1.2s steps(12, end) infinite;
+}
+
+@-webkit-keyframes animated_worker_construction_1_ani12steps {
+    from { background-position: 0px; }
+    to { background-position: -324px; }
+}
+
+@-moz-keyframes animated_worker_construction_1_ani12steps {
+    from { background-position: 0px; }
+    to { background-position: -324px; }
+}
+
+@-ms-keyframes animated_worker_construction_1_ani12steps {
+    from { background-position: 0px; }
+    to { background-position: -324px; }
+}
+
+.animated .animated_worker_construction_2 {
+  background-image:url(//gf3.geo.gfsrv.net/cdn8a/d140b8c603f40f5746e02e618a7fb8.png);
+  width: 88px;
+  height:63px;
+  -webkit-animation: animated_worker_construction_2_ani13steps 1.3s steps(13, end) infinite;
+  -moz-animation: animated_worker_construction_2_ani13steps 1.3s steps(13, end) infinite;
+  -ms-animation: animated_worker_construction_2_ani13steps 1.3s steps(13, end) infinite;
+}
+
+@-webkit-keyframes animated_worker_construction_2_ani13steps {
+    from { background-position: 0px; }
+    to { background-position: -1144px; }
+}
+
+@-moz-keyframes animated_worker_construction_2_ani13steps {
+    from { background-position: 0px; }
+    to { background-position: -1144px; }
+}
+
+@-ms-keyframes animated_worker_construction_2_ani13steps {
+    from { background-position: 0px; }
+    to { background-position: -1144px; }
+}
+
+.animated .animated_worker_resource {
+  background-image:url(//gf1.geo.gfsrv.net/cdn31/fc83a5aa3f315505c8a735a129d3fa.png);
+  width: 53px;
+  height:48px;
+  -webkit-animation: animated_worker_resource_ani16steps 1.6s steps(16, end) infinite;
+  -moz-animation: animated_worker_resource_ani16steps 1.6s steps(16, end) infinite;
+  -ms-animation: animated_worker_resource_ani16steps 1.6s steps(16, end) infinite;
+}
+
+@-webkit-keyframes animated_worker_resource_ani16steps {
+    from { background-position: 0px; }
+    to { background-position: -848px; }
+}
+
+@-moz-keyframes animated_worker_resource_ani16steps {
+    from { background-position: 0px; }
+    to { background-position: -848px; }
+}
+
+@-ms-keyframes animated_worker_resource_ani16steps {
+    from { background-position: 0px; }
+    to { background-position: -848px; }
+}
+
+.animated .animated_worker_marble {
+  background-image:url(//gf1.geo.gfsrv.net/cdnfd/547f6000d7d5d9e703bab623f9ad2c.png);
+  width: 25px;
+  height:28px;
+  -webkit-animation: animated_worker_marble_ani9steps 0.9s steps(9, end) infinite;
+  -moz-animation: animated_worker_marble_ani9steps 0.9s steps(9, end) infinite;
+  -ms-animation: animated_worker_marble_ani9steps 0.9s steps(9, end) infinite;
+}
+
+@-webkit-keyframes animated_worker_marble_ani9steps {
+    from { background-position: 0px; }
+    to { background-position: -225px; }
+}
+
+@-moz-keyframes animated_worker_marble_ani9steps {
+    from { background-position: 0px; }
+    to { background-position: -225px; }
+}
+
+@-ms-keyframes animated_worker_marble_ani9steps {
+    from { background-position: 0px; }
+    to { background-position: -225px; }
+}
+
+.animated .animated_worker_wine_1 {
+  background-image:url(//gf3.geo.gfsrv.net/cdn58/3dc19bb36243c5f667c9d2ffe020ed.png);
+  width: 25px;
+  height:31px;
+  -webkit-animation: animated_worker_marble_ani9steps 1.5s steps(9, end) infinite;
+  -moz-animation: animated_worker_marble_ani9steps 1.5s steps(9, end) infinite;
+  -ms-animation: animated_worker_marble_ani9steps 1.5s steps(9, end) infinite;
+}
+
+.animated .animated_worker_wine_2 {
+  background-image:url(//gf1.geo.gfsrv.net/cdn90/eb203e9d46847902a0a66a53f11611.png);
+  width: 24px;
+  height:30px;
+  -webkit-animation: animated_worker_wine_2_ani9steps 1s steps(9, end) infinite;
+  -moz-animation: animated_worker_wine_2_ani9steps 1s steps(9, end) infinite;
+  -ms-animation: animated_worker_wine_2_ani9steps 1s steps(9, end) infinite;
+}
+
+@-webkit-keyframes animated_worker_wine_2_ani9steps {
+    from { background-position: 0px; }
+    to { background-position: -216px; }
+}
+
+@-moz-keyframes animated_worker_wine_2_ani9steps {
+    from { background-position: 0px; }
+    to { background-position: -216px; }
+}
+
+@-ms-keyframes animated_worker_wine_2_ani9steps {
+    from { background-position: 0px; }
+    to { background-position: -216px; }
+}
+
+.animated .animated_happy_citizen_1 {
+  background-image:url(//gf1.geo.gfsrv.net/cdnf7/ef9e9ee8c10322f495224b3f7a2c69.png);
+  width: 32px;
+  height:33px;
+  -webkit-animation: animated_happy_citizen_1_ani17steps 1.7s steps(17, end) infinite;
+  -moz-animation: animated_happy_citizen_1_ani17steps 1.7s steps(17, end) infinite;
+  -ms-animation: animated_happy_citizen_1_ani17steps 1.7s steps(17, end) infinite;
+}
+
+@-webkit-keyframes animated_happy_citizen_1_ani17steps {
+    from { background-position: 0px; }
+    to { background-position: -544px; }
+}
+
+@-moz-keyframes animated_happy_citizen_1_ani17steps {
+    from { background-position: 0px; }
+    to { background-position: -544px; }
+}
+
+@-ms-keyframes animated_happy_citizen_1_ani17steps {
+    from { background-position: 0px; }
+    to { background-position: -544px; }
+}
+
+.animated .animated_happy_citizen_2 {
+  background-image:url(//gf3.geo.gfsrv.net/cdnb4/a2adf884450a755e315d55fb80e5c7.png);
+  width: 32px;
+  height:23px;
+  -webkit-animation: animated_happy_citizen_2_ani17steps 1.9s steps(17, end) infinite;
+  -moz-animation: animated_happy_citizen_2_ani17steps 1.9s steps(17, end) infinite;
+  -ms-animation: animated_happy_citizen_2_ani17steps 1.9s steps(17, end) infinite;
+}
+
+@-webkit-keyframes animated_happy_citizen_2_ani17steps {
+    from { background-position: 0px; }
+    to { background-position: -561px; }
+}
+
+@-moz-keyframes animated_happy_citizen_2_ani17steps {
+    from { background-position: 0px; }
+    to { background-position: -561px; }
+}
+
+@-ms-keyframes animated_happy_citizen_2_ani17steps {
+    from { background-position: 0px; }
+    to { background-position: -561px; }
+}
+
+
+.animated .animated_happy_citizen_3 {
+  background-image:url(//gf1.geo.gfsrv.net/cdnc3/f251d0380b5df9a40106d8069f8602.png);
+  width: 37px;
+  height:29px;
+  -webkit-animation: animated_happy_citizen_3_ani17steps 2s steps(17, end) infinite;
+  -moz-animation: animated_happy_citizen_3_ani17steps 2s steps(17, end) infinite;
+  -ms-animation: animated_happy_citizen_3_ani17steps 2s steps(17, end) infinite;
+}
+
+@-webkit-keyframes animated_happy_citizen_3_ani17steps {
+    from { background-position: 0px; }
+    to { background-position: -629px; }
+}
+
+@-moz-keyframes animated_happy_citizen_3_ani17steps {
+    from { background-position: 0px; }
+    to { background-position: -629px; }
+}
+
+@-ms-keyframes animated_happy_citizen_3_ani17steps {
+    from { background-position: 0px; }
+    to { background-position: -629px; }
+}
+
+
+#city #locations .barracks .hover  { background-image:url(//gf1.geo.gfsrv.net/cdn0c/b9947244e96f3015ca72e23a5cc322.png);	}
+#city #locations .pirateFortress .hover  { background:url(//gf3.geo.gfsrv.net/cdn50/eccfe03988fe253cfbec1820f3991d.png) 0 -21px no-repeat;	}
+#city #locations .position1.port .hover { background-image:url(//gf1.geo.gfsrv.net/cdn00/1e6f6c206e6bf006790b2062fba85d.png);  }
+#city #locations .position2.port .hover { background-image:url(//gf2.geo.gfsrv.net/cdn48/5f95f6e13b94a5fedae8aca896d3d1.png);	 }
+#city #locations .position1.shipyard .hover { background-image:url(//gf1.geo.gfsrv.net/cdn3f/9f9aabfcb932d03424c287a9743315.png);	}
+#city #locations .position2.shipyard .hover { background-image:url(//gf2.geo.gfsrv.net/cdn44/c2e872f477f8bb8e49eaab4e154012.png);	}
+#city #locations .museum .hover {   background-image:url(//gf3.geo.gfsrv.net/cdn2f/c134774d601d3d90196048114ac4b4.png);	}
+#city #locations .warehouse .hover {   background-image:url(//gf3.geo.gfsrv.net/cdne2/026a39a3cf19f4b46d1b6ad7872955.png);	}
+#city #locations .wall .hover {   background-image:url(//gf2.geo.gfsrv.net/cdnaa/dc77a3c5352d947cf18192475af620.png);	}
+#city #locations .tavern .hover {   background-image:url(//gf3.geo.gfsrv.net/cdnb5/516e4e2173d2b655a07ba10513d214.png);	}
+#city #locations .palace .hover {   background-image:url(//gf2.geo.gfsrv.net/cdnd2/a63ebdc71a49488bf05e10e7982c43.png);	}
+#city #locations .palaceColony .hover {   background-image:url(//gf1.geo.gfsrv.net/cdn05/c5757754e1a21ba94e7c988a96137d.png);	}
+#city #locations .academy .hover {   background-image:url(//gf1.geo.gfsrv.net/cdn9f/1765a39c747478ee1bc3e6c8ee4613.png);	}
+#city #locations .workshop .hover {   background-image:url(//gf2.geo.gfsrv.net/cdn7b/0d51641f1d78c6227719c922bce845.png);	}
+#city #locations .safehouse .hover {   background-image:url(//gf2.geo.gfsrv.net/cdn14/e590faf313a0081feb7b903977126e.png);	}
+#city #locations .temple .hover {   background-image:url(//gf1.geo.gfsrv.net/cdnc9/2326f5ee4c7c221d45b945cf8351fe.png);	}
+#city #locations .branchOffice .hover {   background-image:url(//gf3.geo.gfsrv.net/cdn56/37ac13b6a80eb811dad5f72225a924.png);	}
+#city #locations .embassy .hover {   background-image:url(//gf1.geo.gfsrv.net/cdnc1/ada2d6cf0f3b72a25d2ff89e620599.png);	}
+#city #locations .townHall .hover {   background-image:url(//gf1.geo.gfsrv.net/cdnfe/5af51f904f1bba6483d2f7ab293d0b.png);	}
+#city #locations .forester .hover {   background-image:url(//gf1.geo.gfsrv.net/cdn91/22bc004c584091e3bf75235c645dc5.png);	}
+#city #locations .stonemason .hover { background-image:url(//gf2.geo.gfsrv.net/cdnd4/d60cf9ddff6a0c2ab4edc9ef656ec9.png);	}
+#city #locations .winegrower .hover {   background-image:url(//gf3.geo.gfsrv.net/cdn5f/825d0285e8dd6cc17b4a68959114f3.png);	}
+#city #locations .glassblowing .hover {   background-image:url(//gf3.geo.gfsrv.net/cdn20/9cc1b7f99328224bc51f9e88789a18.png);	}
+#city #locations .alchemist .hover {   background-image:url(//gf2.geo.gfsrv.net/cdna0/19c0e911d7c6d309aa4c3ab462bc4e.png);	}
+#city #locations .carpentering .hover {   background-image:url(//gf3.geo.gfsrv.net/cdnb8/2654ceeaf5657f0f00ec7ff1aa957b.png);	}
+#city #locations .architect .hover {   background-image:url(//gf2.geo.gfsrv.net/cdn1f/71357b71686af6d19820c1d496f3a2.png);	}
+#city #locations .optician .hover {   background-image:url(//gf2.geo.gfsrv.net/cdn7d/ac1cd9a5d5d168d5ce9c87354e7480.png);	}
+#city #locations .vineyard .hover {   background-image:url(//gf1.geo.gfsrv.net/cdn9e/3b02db01fb41cddf7bc5f6c0da63fa.png);	}
+#city #locations .fireworker .hover {   background-image:url(//gf3.geo.gfsrv.net/cdn5f/a1dfaf913506749536da468873cddf.png);	}
+#city #locations .blackMarket .hover {   background-image:url(//gf3.geo.gfsrv.net/cdn81/f3458a2c76e2745b112b68f94e2236.png);	}
+#city #locations .marineChartArchive .hover {   background-image:url(//gf1.geo.gfsrv.net/cdnf1/5929ef13870daab91d3df7b55aed45.png);	}
+#city #locations .dump .hover {   background-image:url(//gf3.geo.gfsrv.net/cdnea/5099cc0a8a0495f2eaa54b785d0977.png);	}
+#city #locations .dockyard .hover {   background-image:url(//gf3.geo.gfsrv.net/cdn58/6871c4e5d7b6dde7c9a838465f8b50.png);	}
+#city #locations .shrineOfOlympus .hover {   background-image:url(//gf2.geo.gfsrv.net/cdn10/c0b105aee7e198a5d9629cc23cf9d3.png);	}
+#city #locations .chronosForge .hover {   background-image:url(//gf1.geo.gfsrv.net/cdn67/ed8064db58369cf7b2f687ec044b6c.png);	}
+
+#city #locations .buildingGround.land .hover {	background-image:url(//gf3.geo.gfsrv.net/cdn53/712e36466808e5d3dceed4d346eb71.png);	}
+#city #locations .buildingGround.shore .hover {	background-image:url(//gf3.geo.gfsrv.net/cdn85/8795fdaa43600741f545636eebc512.png);	}
+#city #locations .buildingGround.dockyard .hover {	background-image:url(//gf3.geo.gfsrv.net/cdn85/8795fdaa43600741f545636eebc512.png);	}
+#city #locations .buildingGround.wall .hover {    background-image:url(//gf2.geo.gfsrv.net/cdn18/5afd702e22d0a88b3710d1b931b16a.png); }
+#city #locations .buildingGround.sea .hover {	background-image:url(//gf3.geo.gfsrv.net/cdn53/712e36466808e5d3dceed4d346eb71.png);	}
+#city #locations .building.level0 .hover {  background-image: url(//gf3.geo.gfsrv.net/cdn5e/9acf433ce5ae91e1e3c59128cca02d.png) !important;}
+#city #locations .barracks.busy .hover,
+#city .animated #locations .barracks.busy .hover {	background-image:url(//gf3.geo.gfsrv.net/cdn8a/33db62258ba622c0c339c347bd94d1.png);	}
+#city .animated #locations .barracks .hover  {	background-image:url(//gf2.geo.gfsrv.net/cdnd1/f70d31e4a1664077176bd8c7eee63c.png);	}
+#city .animated #locations .buildingGround.land .hover {	background-image:url(//gf1.geo.gfsrv.net/cdn39/233dd7ff627a0b376a2b2a72562c00.png);	}
+#city .animated #locations .buildingGround.shore .hover {	background-image:url(//gf1.geo.gfsrv.net/cdnc9/f09a8b2cbf69469563bbd8574d4527.png);	}
+#city .animated #locations .buildingGround.wall .hover {	background-image:url(//gf2.geo.gfsrv.net/cdn18/5afd702e22d0a88b3710d1b931b16a.png); }
+#city .animated #locations .buildingGround.dockyard .hover {	background-image:url(//gf1.geo.gfsrv.net/cdnc9/f09a8b2cbf69469563bbd8574d4527.png);	}
+#city .animated #locations .townHall .hover { background-image:url(//gf3.geo.gfsrv.net/cdn25/0d8bf613d1c4323f871c4de838c40c.png);	}
+#city .animated #locations .embassy .hover {   background-image:url(//gf1.geo.gfsrv.net/cdnc0/e35ac57166334b272311400e3715e2.png);	}
+#city .animated #locations .building.level0 .hover {  background-image: url(//gf3.geo.gfsrv.net/cdn2c/9a69e1b40dd0e2bffed19b5aaed464.png)  !important; }
+#city #locations .building.constructionSite .hover {    background-image: url(//gf3.geo.gfsrv.net/cdn5e/9acf433ce5ae91e1e3c59128cca02d.png); left: -49px;  top: -60px; }
+#city #locations .building.constructionSite.animated .hover {    background-image: url(//gf3.geo.gfsrv.net/cdn2c/9a69e1b40dd0e2bffed19b5aaed464.png);}
+
+
+@-webkit-keyframes protester_ani32steps {    from { background-position: 0px; } to { background-position: -1120px; }}
+@-moz-keyframes protester_ani32steps {    from { background-position: 0px; } to { background-position: -1120px; }}
+@-ms-keyframes protester_ani32steps {    from { background-position: 0px; } to { background-position: -1120px; }}
+@-webkit-keyframes garnison_ani32steps {   from { background-position: 0px; } to { background-position: -1424px; }}
+@-moz-keyframes garnison_ani32steps {    from { background-position: 0px; }    to { background-position: -1424px; }}
+@-ms-keyframes garnison_ani32steps {    from { background-position: 0px; }    to { background-position: -1424px; }}
+@-webkit-keyframes garnisonGate1_ani32steps { from { background-position: 0px; }    to { background-position: -2100px; }}
+@-moz-keyframes garnisonGate1_ani32steps {    from { background-position: 0px; }    to { background-position: -2100px; }}
+@-ms-keyframes garnisonGate1_ani32steps {    from { background-position: 0px; }    to { background-position: -2100px; }}
+
+
+#city #locations .protester {
+    left:824px; top:484px;
+    width:89px;  height:80px;
+    z-index:360;
+    background-image:url(//gf1.geo.gfsrv.net/cdn6c/034373511261b05f2b9f71bb018051.png);
+}
+
+#city .animated #locations .protester {
+    background-image:url(//gf2.geo.gfsrv.net/cdnda/a148e2641e3bf773c1cbc98735e8af.png);
+    width:70px;  height:70px;
+    -webkit-animation: protester_ani32steps 2s steps(16, end) infinite;
+    -moz-animation: protester_ani32steps 2s steps(16, end) infinite;
+    -ms-animation: protester_ani32steps 2s steps(16, end) infinite;
+}
+
+#city #locations .garnison {
+    background-image:url(//gf2.geo.gfsrv.net/cdna8/46872c98c1c6b2aa4f852edc56cb18.png);
+    left:758px;  top:440px;
+    width:80px;  height:89px;
+    z-index:360;
+    cursor: pointer;
+}
+
+#city #locations .attacker {
+    background-image:url(/cdn/all/ltr/animations/enemy.png);
+    left:200px;  top:145px;
+    width:19px;  height:38px;
+    z-index:360;
+    cursor: pointer;
+}
+
+#city #locations .fighters {
+    background-image:url(/cdn/all/ltr/animations/enemy.png);
+    left:200px;  top:145px;
+    width:19px;  height:38px;
+    z-index:360;
+    cursor: pointer;
+}
+
+#city .animated #locations .garnison {
+    
+    background-image:url(//gf2.geo.gfsrv.net/cdn16/cde62b2d71af073f0aefbb74dad034.png);
+    width:100px; height:82px;
+    -webkit-animation: garnisonGate1_ani32steps 2.1s steps(21, end) infinite;
+    -moz-animation: garnisonGate1_ani32steps 2.1s steps(21, end) infinite;
+    -ms-animation: garnisonGate1_ani32steps 2.1s steps(21, end) infinite;
+}
+
+#city #locations .garnisonGate {
+    background-image:url(//gf3.geo.gfsrv.net/cdnbe/ab1248ed6d79fccc1e864b37dad33e.png);
+    left:369px; top:210px;
+    width:100px; height:82px;
+}
+
+#city .animated #locations .garnisonGate  {
+    background-image:url(//gf2.geo.gfsrv.net/cdn16/cde62b2d71af073f0aefbb74dad034.png);
+    width:100px; height:82px;
+    -webkit-animation: garnisonGate1_ani32steps 2.1s steps(21, end) infinite;
+    -moz-animation: garnisonGate1_ani32steps 2.1s steps(21, end) infinite;
+    -ms-animation: garnisonGate1_ani32steps 2.1s steps(21, end) infinite;
+}
+
+#city #locations .beachboys {
+  background-image:url(//gf1.geo.gfsrv.net/cdnf6/265a38b0289b564d21171521484add.png);
+  height: 78px;  left: 610px;
+  top: 858px;  width: 151px;
+}
+
+
+#city .animated #locations .beachboys {
+   background-image:url(//gf1.geo.gfsrv.net/cdn0b/80c086bde82fa7864d3893c6ae0f29.png);
+   width: 87px;   height: 68px;
+}
+#city .animated #locations .beachboys .animated_happy_citizen_1 {    top: 13px;    left: 58px; }
+#city .animated #locations .beachboys .animated_happy_citizen_2 {    top: 45px;    left: 111px;}
+#city .animated #locations .beachboys .animated_happy_citizen_3 {     top: 13px;    left: 119px;}
+
+
+@-webkit-keyframes well_animated_phase3_ani16steps {    from { background-position: 0px; }    to { background-position: -384px; }}
+@-moz-keyframes well_animated_phase3_ani16steps {    from { background-position: 0px; }    to { background-position: -384px; }}
+@-ms-keyframes well_animated_phase3_ani16steps {    from { background-position: 0px; }    to { background-position: -384px; }}
+@-webkit-keyframes well_animated_phase4_ani16steps {    from { background-position: 0px; }    to { background-position: -272px; }}
+@-moz-keyframes well_animated_phase4_ani16steps {    from { background-position: 0px; }    to { background-position: -272px; }}
+@-ms-keyframes well_animated_phase4_ani16steps {    from { background-position: 0px; }    to { background-position: -272px; }}
+@-webkit-keyframes well_animated_phase2_ani16steps {  from { background-position: 0px; }  to { background-position: -352px; }}
+@-moz-keyframes well_animated_phase2_ani16steps {    from { background-position: 0px; }    to { background-position: -352px; }}
+@-ms-keyframes well_animated_phase2_ani16steps {    from { background-position: 0px; }    to { background-position: -352px; }}
+@-webkit-keyframes well_animated_phase1_ani16steps {    from { background-position: 0px; }    to { background-position: -256px; }}
+@-moz-keyframes well_animated_phase1_ani16steps {    from { background-position: 0px; } to { background-position: -256px; }}
+@-ms-keyframes well_animated_phase1_ani16steps {    from { background-position: 0px; } to { background-position: -256px; }}
+@-webkit-keyframes animatedRiverPart1_ani16steps {    from { background-position: 0px; }    to { background-position: -1136px; }}
+@-moz-keyframes animatedRiverPart1_ani16steps {    from { background-position: 0px; }    to { background-position: -1136px; }}
+@-ms-keyframes animatedRiverPart1_ani16steps {    from { background-position: 0px; }    to { background-position: -1136px; }}
+@-webkit-keyframes animatedRiverPart2_ani16steps {    from { background-position: 0px; }    to { background-position: -912px; }}
+@-moz-keyframes animatedRiverPart2_ani16steps {    from { background-position: 0px; }    to { background-position: -912px; }}
+@-ms-keyframes animatedRiverPart2_ani16steps {    from { background-position: 0px; }    to { background-position: -912px; }}
+@-webkit-keyframes animatedRiverPart3_ani16steps {    from { background-position: 0px; }    to { background-position: -2528px; }}
+@-moz-keyframes animatedRiverPart3_ani16steps {    from { background-position: 0px; }    to { background-position: -2528px; }}
+@-ms-keyframes animatedRiverPart3_ani16steps {    from { background-position: 0px; }    to { background-position: -2528px; }}
+
+#city .phase1 #locations .animatedWell {
+  background-image:url(//gf3.geo.gfsrv.net/cdn82/18b3d6b8448f81ff8a6bf7d3a73dfb.png);
+  width: 16px;  height:14px;
+  top: 438px;  left: 825px;
+  -webkit-animation: well_animated_phase1_ani16steps 1.6s steps(16, end) infinite;
+  -moz-animation: well_animated_phase1_ani16steps 1.6s steps(16, end) infinite;
+  -ms-animation: well_animated_phase1_ani16steps 1.6s steps(16, end) infinite;
+}
+
+#city .phase2 #locations .animatedWell {
+  background-image:url(//gf1.geo.gfsrv.net/cdnc4/d12c372e8b99c5ef84ee0f6f6165ad.png);
+  width: 22px;  height:20px;
+  top: 431px;  left: 825px;
+  -webkit-animation: well_animated_phase2_ani16steps 1.6s steps(16, end) infinite;
+  -moz-animation: well_animated_phase2_ani16steps 1.6s steps(16, end) infinite;
+  -ms-animation: well_animated_phase2_ani16steps 1.6s steps(16, end) infinite;
+}
+
+#city .phase3 #locations .animatedWell {
+  background-image:url(//gf1.geo.gfsrv.net/cdnf5/0bd7deee8b767629c79e5b5d161fdf.png);
+  width: 24px;  height:20px;
+  top: 433px;  left: 824px;
+  -webkit-animation: well_animated_phase3_ani16steps 1.6s steps(16, end) infinite;
+  -moz-animation: well_animated_phase3_ani16steps 1.6s steps(16, end) infinite;
+  -ms-animation: well_animated_phase3_ani16steps 1.6s steps(16, end) infinite;
+}
+
+#city .phase4 #locations .animatedWell {
+  background-image:url(//gf1.geo.gfsrv.net/cdn39/79ba52cc92b89580266404f825bf6b.png);
+  width: 17px;  height:11px;
+  top: 437px;  left: 827px;
+  -webkit-animation: well_animated_phase4_ani16steps 1.6s steps(16, end) infinite;
+  -moz-animation: well_animated_phase4_ani16steps 1.6s steps(16, end) infinite;
+  -ms-animation: well_animated_phase4_ani16steps 1.6s steps(16, end) infinite;
+}
+
+#city .phase5 #locations .animatedWell  {
+  background-image:url(//gf1.geo.gfsrv.net/cdn0d/88c3bb35e3e1b5c62024e497ab8600.png);
+  width: 17px;  height:12px;
+  top: 437px;  left: 826px;
+  -webkit-animation: well_animated_phase4_ani16steps 1.6s steps(16, end) infinite;
+  -moz-animation: well_animated_phase4_ani16steps 1.6s steps(16, end) infinite;
+  -ms-animation: well_animated_phase4_ani16steps 1.6s steps(16, end) infinite;
+}
+
+#city .animated #locations .animatedRiverPart1  {
+  background-image:url(//gf1.geo.gfsrv.net/cdn9f/87aa594139e918bcb32084c738dd0b.png);
+  width: 71px;  height:110px;
+  top: 648px;  left: 894px;
+  -webkit-animation: animatedRiverPart1_ani16steps 1.6s steps(16, end) infinite;
+  -moz-animation: animatedRiverPart1_ani16steps 1.6s steps(16, end) infinite;
+  -ms-animation: animatedRiverPart1_ani16steps 1.6s steps(16, end) infinite;
+}
+
+#city .animated  #locations .animatedRiverPart2 {
+  background-image:url(//gf2.geo.gfsrv.net/cdn10/f9f917613bc44d75b68b548ea323e1.png);
+  width: 57px;  height:122px;
+  top: 529px;  left: 953px;
+  -webkit-animation: animatedRiverPart2_ani16steps 1.6s steps(16, end) infinite;
+  -moz-animation: animatedRiverPart2_ani16steps 1.6s steps(16, end) infinite;
+  -ms-animation: animatedRiverPart2_ani16steps 1.6s steps(16, end) infinite;
+}
+
+#city .animated #locations .animatedRiverPart3  {
+  background-image:url(//gf3.geo.gfsrv.net/cdn24/5d704a63a592ebed142aa89bd4dfe1.png);
+  width: 158px;  height:58px;
+  top: 455px;  left: 1069px;
+  -webkit-animation: animatedRiverPart3_ani16steps 1.6s steps(16, end) infinite;
+  -moz-animation: animatedRiverPart3_ani16steps 1.6s steps(16, end) infinite;
+  -ms-animation: animatedRiverPart3_ani16steps 1.6s steps(16, end) infinite;
+}
+
+#city .animated #locations .animatedSea1 {  top: 794px;  left: 1226px;}
+#city .animated #locations .animatedSea2 {   top: 693px;  left: 132px;}
+
+
+@-webkit-keyframes barracks_animated_ani32steps {    0% { background-position: 0px; }    50% { background-position: 0px; }    100% { background-position: -848px; }}
+@-moz-keyframes barracks_animated_ani32steps {     0% { background-position: 0px; }    50% { background-position: 0px; }    100% { background-position: -848px; }}
+@-ms-keyframes barracks_animated_ani32steps {     0% { background-position: 0px; }    50% { background-position: 0px; }    100% { background-position: -848px; }}
+
+@-webkit-keyframes port1_animated_ani32steps {    0% { background-position: 0px; }    50% { background-position: 0px; }    100% { background-position: -792px; }}
+@-moz-keyframes port1_animated_ani32steps {    0% { background-position: 0px; }    50% { background-position: 0px; }    100% { background-position: -792px; }}
+@-ms-keyframes port1_animated_ani32steps {    0% { background-position: 0px; }    50% { background-position: 0px; }    100% { background-position: -792px; }}
+
+@-webkit-keyframes port2_animated_ani32steps {    0% { background-position: 0px; }    50% { background-position: 0px; }    100% { background-position: -792px; }}
+@-moz-keyframes port2_animated_ani32steps {    0% { background-position: 0px; }    50% { background-position: 0px; }    100% { background-position: -792px; }}
+@-ms-keyframes port2_animated_ani32steps {    0% { background-position: 0px; }    50% { background-position: 0px; }    100% { background-position: -792px; }}
+
+@-webkit-keyframes flag_barracks_ani16steps {    from { background-position: 0px; }    to { background-position: -480px; }}
+@-moz-keyframes flag_barracks_ani16steps {    from { background-position: 0px; }    to { background-position: -480px; }}
+@-ms-keyframes flag_barracks_ani16steps {    from { background-position: 0px; }    to { background-position: -480px; }}
+
+@-webkit-keyframes flag_pirateFortress_ani8steps {    from { background-position: 0px; }    to { background-position: -280px; }}
+@-moz-keyframes flag_pirateFortress_ani8steps {    from { background-position: 0px; }    to { background-position: -280px; }}
+@-ms-keyframes flag_pirateFortress_ani8steps {    from { background-position: 0px; }    to { background-position: -280px; }}
+
+
+#city .animated #locations .level0 .animation { background-image: none !important; }
+#city .animated #locations .building.level0 .animated_worker_construction_1 { position:absolute; top:57px; left:34px; }
+#city .animated #locations .building.level0 .animated_worker_construction_2 { position:absolute; top:64px; left:46px; }
+#city .animated #locations .barracks .animation.soldiers {
+  background-image:url(//gf3.geo.gfsrv.net/cdn82/81b0e04af7a94a740334528c792615.png);
+  width: 53px;  height:50px;
+  top: 71px;  left: 69px;
+  -webkit-animation: barracks_animated_ani32steps 4s steps(16, end) infinite;
+  -moz-animation: barracks_animated_ani32steps 4s steps(16, end) infinite;
+  -ms-animation: barracks_animated_ani32steps 4s steps(16, end) infinite;
+}
+#city .animated #locations #position1.port .animation.ship {
+    left:55px;  top:57px;
+    width:72px;  height:62px;
+    background-image:url(//gf2.geo.gfsrv.net/cdn4d/0c7f3935e2d68a9ee6e6328b536577.png);
+    -webkit-animation: port1_animated_ani32steps 4s steps(11, end) infinite;
+    -moz-animation: port1_animated_ani32steps 4s steps(11, end) infinite;
+    -ms-animation: port1_animated_ani32steps 4s steps(11, end) infinite;
+
+}
+
+#city .animated #locations #position2.port .animation.ship {
+    left:58px; top:51px;
+    width:72px;  height:62px;
+    background-image:url(//gf1.geo.gfsrv.net/cdn34/b12fb2dd28303cca6647543778f40b.png);
+    -webkit-animation: port2_animated_ani32steps 4s steps(11, end) infinite;
+    -moz-animation: port2_animated_ani32steps 4s steps(11, end) infinite;
+    -ms-animation: port2_animated_ani32steps 4s steps(11, end) infinite;
+}
+
+.animated .animation_flag_barracks_16steps {
+    background-image: url(//gf2.geo.gfsrv.net/cdndf/097969bdc9887e788ab35e019cbd83.png);
+    top:18px;  left:74px;
+    z-index:1000;
+    width: 30px !important;
+    height: 26px !important;
+    -webkit-animation: flag_barracks_ani16steps 1.6s steps(16, end) infinite;
+    -moz-animation: flag_barracks_ani16steps 1.6s steps(16, end) infinite;
+    -ms-animation: flag_barracks_ani16steps 1.6s steps(16, end) infinite;
+}
+
+.animated .animation_marineChartArchive_1 {
+    background-image: url(//gf1.geo.gfsrv.net/cdn96/3786b1406741d42882b111c6d01980.png);
+    top:13px;  left:39px;
+    width: 73px !important;
+    height: 67px !important;
+    -webkit-animation: animation_resourceWalker_12steps 1.6s steps(12, end) infinite;
+    -moz-animation: animation_resourceWalker_12steps 1.6s steps(12, end) infinite;
+    -ms-animation: animation_resourceWalker_12steps 1.6s steps(12, end) infinite;
+}
+
+.animated .animation_marineChartArchive_2 {
+    background-image: url(//gf1.geo.gfsrv.net/cdn90/ecffbdd6b296282f21fc1bc788bc8c.png);
+    top:15px;  left:71px;
+    width: 73px !important;
+    height: 67px !important;
+    -webkit-animation: animation_resourceWalker_12steps 2s steps(12, end) infinite;
+    -moz-animation: animation_resourceWalker_12steps 2s steps(12, end) infinite;
+    -ms-animation: animation_resourceWalker_12steps 2s steps(12, end) infinite;
+}
+
+.animated .animation_flag_pirateFortress_8steps {
+    background-image: url(//gf3.geo.gfsrv.net/cdne4/58af81ad189dc0232bb568bed0321c.png);
+    top:6px;  left:81px;
+    z-index:1000;
+    width: 35px !important;
+    height: 45px !important;
+    -webkit-animation: flag_pirateFortress_ani8steps 1.2s steps(8, end) infinite;
+    -moz-animation: flag_pirateFortress_ani8steps 1.2s steps(8, end) infinite;
+    -ms-animation: flag_pirateFortress_ani8steps 1.2s steps(8, end) infinite;
+}
+
+
+
+#island  #cities .islandfeature.wood.animated .animated_worker_resource {
+    position:absolute;
+    top:18px;
+    left:9px;
+}
+
+#island  #cities .islandfeature.wine.animated .animated_worker_wine_1 {
+    position:absolute;
+    top:38px;
+    left:2px;
+}
+#island  #cities .islandfeature.wine.animated .animated_worker_wine_2 {
+    position:absolute;
+    top:31px;
+    left:62px;
+}
+
+#island  #cities .islandfeature.marble.animated .animated_worker_marble {
+    position:absolute;
+    top:21px;
+    left:55px;
+}
+#island  #cities .islandfeature.marble.animated .animated_worker_construction_1 {
+    position:absolute;
+    top:21px;
+    left:30px;
+}
+
+#island  #cities .islandfeature.crystal.animated .animated_worker_crystal {
+    background-image:url(//gf1.geo.gfsrv.net/cdn96/14c4089a7001cd89f30a91cccee2b6.png);
+    top:42px; left:54px;
+    width:34px; height:41px;
+    position:absolute;
+    -webkit-animation: crystal_animated_worker_ani26steps 3.5s steps(13, end) infinite;
+    -moz-animation: crystal_animated_worker_ani26steps 3.5s steps(13, end) infinite;
+    -ms-animation: crystal_animated_worker_ani26steps 3.5s steps(13, end) infinite;
+}
+
+@-webkit-keyframes crystal_animated_worker_ani26steps {
+    0% { background-position: 0px; }
+    50% { background-position: 0px; }
+    100% { background-position: -442px; }
+}
+
+@-moz-keyframes crystal_animated_worker_ani26steps {
+    0% { background-position: 0px; }
+    50% { background-position: 0px; }
+    100% { background-position: -442px; }
+}
+
+@-ms-keyframes crystal_animated_worker_ani26steps {
+    0% { background-position: 0px; }
+    50% { background-position: 0px; }
+    100% { background-position: -442px; }
+}
+
+
+#island  #cities .islandfeature.sulfur.animated .animated_worker_sulfur {
+    background-image:url(//gf2.geo.gfsrv.net/cdnac/6f6287ed643832692ae7dcb1b8e0e6.png);
+    top:46px; left:21px;
+    width:38px; height:46px;
+    position:absolute;
+    -webkit-animation: sulfur_animated_worker_ani26steps 3.5s steps(13, end) infinite;
+    -moz-animation: sulfur_animated_worker_ani26steps 3.5s steps(13, end) infinite;
+    -ms-animation: sulfur_animated_worker_ani26steps 3.5s steps(13, end) infinite;
+}
+
+@-webkit-keyframes sulfur_animated_worker_ani26steps {
+    0% { background-position: 0px; }
+    50% { background-position: 0px; }
+    100% { background-position: -494px; }
+}
+
+@-moz-keyframes sulfur_animated_worker_ani26steps {
+    0% { background-position: 0px; }
+    50% { background-position: 0px; }
+    100% { background-position: -494px; }
+}
+
+@-ms-keyframes sulfur_animated_worker_ani26steps {
+    0% { background-position: 0px; }
+    50% { background-position: 0px; }
+    100% { background-position: -494px; }
+}
+
+#island #barbarianVillage.animated .animated_barbar {
+    background-image:url(//gf2.geo.gfsrv.net/cdn18/5a248f00efa0777fa874e18df3e897.png);
+    top:71px; left:104px;
+    width:40px; height:41px;
+    position:absolute;
+    -webkit-animation: animated_barbar_ani16steps 3.2s steps(16, end) infinite;
+    -moz-animation: animated_barbar_ani16steps 3.2s steps(16, end) infinite;
+    -ms-animation: animated_barbar_ani16steps 3.2s steps(16, end) infinite;
+}
+
+@-webkit-keyframes animated_barbar_ani16steps {
+    0% { background-position: 0px; }
+    50% { background-position: 0px; }
+    100% { background-position: -640px; }
+}
+
+@-moz-keyframes animated_barbar_ani16steps {
+    0% { background-position: 0px; }
+    50% { background-position: 0px; }
+    100% { background-position: -640px; }
+}
+
+@-ms-keyframes animated_barbar_ani16steps {
+    0% { background-position: 0px; }
+    50% { background-position: 0px; }
+    100% { background-position: -640px; }
+}
+
+#island #islandtradegood.animated .islandHighwayMen1 {
+    background-image:url(//gf3.geo.gfsrv.net/cdn87/44720accf98c9b16109ba24dd5002a.png);
+    width:30px;
+    height:27px;
+    position:absolute;
+    -webkit-animation: animated_highwayman_1 1.2s steps(13, end) infinite;
+    -moz-animation: animated_highwayman_1 1.2s steps(13, end) infinite;
+    -ms-animation: animated_highwayman_1 1.2s steps(13, end) infinite;
+}
+
+#island #islandtradegood .islandHighwayMen1 {
+    background-image:url(//gf3.geo.gfsrv.net/cdn89/985fd6e8489acda776e2fd9b8bcbd8.png);
+    width:30px;
+    height:27px;
+    position:absolute;
+}
+
+#island #islandtradegood.animated .islandHighwayMen2 {
+    background-image:url(//gf1.geo.gfsrv.net/cdnf0/fe51291359bb1f998bebc87493b7c2.png);
+    width:30px;
+    height:27px;
+    position:absolute;
+    -webkit-animation: animated_highwayman_2 1.2s steps(12, end) infinite;
+    -moz-animation: animated_highwayman_2 1.2s steps(12, end) infinite;
+    -ms-animation: animated_highwayman_2 1.2s steps(12, end) infinite;
+}
+
+#island #islandtradegood .islandHighwayMen2 {
+    background-image:url(//gf2.geo.gfsrv.net/cdn45/e22a91f47878ddc7b368468b2d04f6.png);
+    width:30px;
+    height:27px;
+    position:absolute;
+}
+
+@-webkit-keyframes animated_highwayman_1 {
+    0% { background-position: 0px; }
+    50% { background-position: 0px; }
+    100% { background-position: -390px; }
+}
+
+@-moz-keyframes animated_highwayman_1 {
+    0% { background-position: 0px; }
+    50% { background-position: 0px; }
+    100% { background-position: -390px; }
+}
+
+@-ms-keyframes animated_highwayman_1 {
+    0% { background-position: 0px; }
+    50% { background-position: 0px; }
+    100% { background-position: -390px; }
+}
+
+@-webkit-keyframes animated_highwayman_2 {
+    0% { background-position: 0px; }
+    50% { background-position: 0px; }
+    100% { background-position: -480px; }
+}
+
+@-moz-keyframes animated_highwayman_2 {
+    0% { background-position: 0px; }
+    50% { background-position: 0px; }
+    100% { background-position: -480px; }
+}
+
+@-ms-keyframes animated_highwayman_2 {
+    0% { background-position: 0px; }
+    50% { background-position: 0px; }
+    100% { background-position: -480px; }
+}
+
+
+
+#city #cityFlyingShop {
+    background-image:url(//gf2.geo.gfsrv.net/cdnd8/a5e20a72737deb69cf5be68c012c1b.png);
+    height: 149px;
+    width: 124px;
+    z-index: 317;
+    position: absolute;
+}
+
+#city .percent #cityFlyingShop {
+    background-image:url(//gf1.geo.gfsrv.net/cdn08/4cc6fc36f5fec9861650e8a4a836f3.png);
+}
+
+#city .ambrosia #cityFlyingShop {
+    background-image:url(//gf1.geo.gfsrv.net/cdn98/e57b7dc536c1be0101679342003649.png);
+}
+
+#city .military #cityFlyingShop {
+    background-image:url(//gf2.geo.gfsrv.net/cdn42/c569425438c4a98b89f94f87664d8d.png);
+}
+
+#city .animated #cityFlyingShop {
+    background-image:url(//gf3.geo.gfsrv.net/cdn22/baf4eb1ad9fefd9c5647eb01d95fcb.png);
+}
+
+#city .animated .percent #cityFlyingShop {
+    background-image:url(//gf1.geo.gfsrv.net/cdn99/2f8c9fd88c838eb10a346609646b74.png);
+}
+
+#city .animated .ambrosia #cityFlyingShop {
+    background-image:url(//gf3.geo.gfsrv.net/cdn57/a5d49a16082afbf0372a95ca072698.png);
+}
+
+#city .animated .military #cityFlyingShop {
+    background-image:url(//gf3.geo.gfsrv.net/cdnb4/4c9b6846197a3241101a0f62c56c6f.png);
+}
+
+
+#city #cityFlyingShopContainer .hover {
+    background-image:url(//gf3.geo.gfsrv.net/cdnbd/abcb8c06613e0f96987849dfa71e85.png);
+    height: 149px;
+    width: 124px;
+    z-index: 317;
+    position: absolute;
+}
+
+#city #cityFlyingShopContainer
+{
+    position: absolute;
+    top: 225px;
+    left: 599px;
+    height: 149px;
+    width: 124px;
+    cursor: pointer;
+    z-index: 317;
+}
+
+
+#city .animated #cityFlyingShopContainer {
+
+    -moz-animation-name: animation_flyingShop;
+    -moz-animation-duration: 5s;
+    -moz-animation-timing-function: ease;
+    -moz-animation-iteration-count: infinite;
+    -moz-animation-direction: alternate;
+
+    -webkit-animation-name: animation_flyingShop;
+    -webkit-animation-duration: 5s;
+    -webkit-animation-timing-function: ease;
+    -webkit-animation-iteration-count: infinite;
+    -webkit-animation-direction: alternate;
+
+    -ms-animation-name: animation_flyingShop;
+    -ms-animation-duration: 3s;
+    -ms-animation-timing-function: ease;
+    -ms-animation-iteration-count: infinite;
+    -ms-animation-direction: alternate;
+}
+
+
+@-webkit-keyframes animation_flyingShop {
+    from {
+        -webkit-transform: translateY(0) rotate(0deg);
+    }
+    to {
+        -webkit-transform: translateY(-7%) rotate(0.02deg);
+    }
+}
+
+@-moz-keyframes animation_flyingShop {
+    from {
+        -moz-transform: translateY(0) rotate(0deg);
+    }
+    to {
+        -moz-transform: translateY(-7%) rotate(0.02deg);
+    }
+}
+
+@-ms-keyframes animation_flyingShop {
+    from {
+        -ms-transform: translateY(0px) rotate(0deg);
+    }
+    to {
+        -ms-transform: translateY(10px) rotate(0.02deg);
+    }
+}
+
+
+#city .animated #cityFlyingShopContainer .extras {
+    height: 121px;
+    width: 121px;
+    z-index: 317;
+    position: absolute;
+
+
+    -webkit-animation: animated_flyingShop_extras 2s steps(24, end) infinite;
+    -moz-animation: animated_flyingShop_extras 2s steps(24, end) infinite;
+    -ms-animation: animated_flyingShop_extras 2s steps(24, end) infinite;
+}
+
+
+
+#city .animated #cityFlyingShopContainer .extras.flags {
+    background-image:url(//gf3.geo.gfsrv.net/cdn23/13ee333cfe615792f7d18360f72ebc.png);
+}
+
+#city .animated #cityFlyingShopContainer .extras.sparkle1 {
+    background-image:url(//gf3.geo.gfsrv.net/cdn81/27f6fcf2fbb351901f8fec99f8eb02.png);
+}
+
+
+
+@-webkit-keyframes animated_flyingShop_extras {    from { background-position: 0px; }    to { background-position: -2904px; }}
+@-moz-keyframes animated_flyingShop_extras {    from { background-position: 0px; }    to { background-position: -2904px; }}
+@-ms-keyframes animated_flyingShop_extras {    from { background-position: 0px; }    to { background-position: -2904px; }}
+
+
+#city .animated #cityCinema.active .animationFire {
+    background-image:url(//gf1.geo.gfsrv.net/cdn61/0617510d43df29be5736653c6b237d.png);
+    height: 106px;
+    width: 120px;
+    z-index: 317;
+    position: absolute;
+
+
+    -webkit-animation: animated_cinema_light 1s steps(10, end) infinite;
+    -moz-animation: animated_cinema_light 1s steps(10, end) infinite;
+    -ms-animation: animated_cinema_light 1s steps(10, end) infinite;
+}
+
+
+
+
+#city .animated #cityCinema.active .animationLight {
+    background-image:url(//gf2.geo.gfsrv.net/cdn17/d4885ff192080ce534f7e29784cd65.png);
+    height: 106px;
+    width: 120px;
+    z-index: 317;
+    position: absolute;
+
+
+    -webkit-animation: animated_cinema_light 1s steps(10, end) infinite;
+    -moz-animation: animated_cinema_light 1s steps(10, end) infinite;
+    -ms-animation: animated_cinema_light 1s steps(10, end) infinite;
+}
+
+@-webkit-keyframes animated_cinema_light {
+    from { background-position: 0px; }
+    to { background-position: -1200px; }
+}
+
+@-moz-keyframes animated_cinema_light {
+    from { background-position: 0px; }
+    to { background-position: -1200px; }
+}
+
+@-ms-keyframes animated_cinema_light {
+    from { background-position: 0px; }
+    to { background-position: -1200px; }
+}
+
+
+
+@-webkit-keyframes aniEmailValidationButton {
+    from { background-position: 0px 0; }
+    to { background-position: -1219px 0; }
+}
+
+@-moz-keyframes aniEmailValidationButton {
+    from { background-position: 0px 0; }
+    to { background-position: -1219px 0; }
+}
+
+@-ms-keyframes aniEmailValidationButton {
+    from { background-position: 0px 0; }
+    to { background-position: -1219px 0; }
+}
+
+@keyframes aniEmailValidationButton {
+    from { background-position: 0px 0; }
+    to { background-position: -1219px 0; }
+}
+
+#container #emailValidationReminderButton {
+    -webkit-animation: aniEmailValidationButton 1s steps(23, end) infinite;
+    -moz-animation: aniEmailValidationButton 1s steps(23, end) infinite;
+    -ms-animation: aniEmailValidationButton 1s steps(23, end) infinite;
+    animation: aniEmailValidationButton 1s steps(23, end) infinite;
+}
+
+#container #emailValidationReminderButton {
+    width: 53px;
+    height: 40px;
+    position: absolute;
+    top: 175px;
+    left: -5px;
+    z-index: 65;
+    cursor: pointer;
+    background: url(//gf2.geo.gfsrv.net/cdn1d/d80cb6819bf84e612711207087989b.png) no-repeat 0 0;
+}
+#container #emailValidationReminderButton:hover {
+    background: url(//gf3.geo.gfsrv.net/cdnb9/fd5e58111a33e4691534c4b408784d.png) no-repeat 0 0;
+}
+
+
+@-webkit-keyframes aniInventoryButton {
+    from { background-position: 0 0; }
+    to { background-position: -1927px 0; }
+}
+@-moz-keyframes aniInventoryButton {
+    from { background-position: 0 0; }
+    to { background-position: -1927px 0; }
+}
+@-ms-keyframes aniInventoryButton {
+    from { background-position: 0 0; }
+    to { background-position: -1927px 0; }
+}
+@keyframes aniInventoryButton {
+    from { background-position: 0 0; }
+    to { background-position: -1927px 0; }
+}
+
+#header .inventory a.itemAdded {
+    background: url(//gf3.geo.gfsrv.net/cdnbb/1ab6a2a63e65f411e83a4ff8699f17.png) no-repeat 0 0;
+    -webkit-animation: aniInventoryButton 6s steps(47, end) infinite;
+    -moz-animation: aniInventoryButton 6s steps(47, end) infinite;
+    -ms-animation: aniInventoryButton 6s steps(47, end) infinite;
+    animation: aniInventoryButton 6s steps(47, end) infinite;
+}
+
+
+@-webkit-keyframes aniSeaMonster {
+    from { background-position: 0 0; }
+    to { background-position: -19873px 0; }
+}
+@-moz-keyframes aniSeaMonster {
+    from { background-position: 0 0; }
+    to { background-position: -19873px 0; }
+}
+@-ms-keyframes aniSeaMonster {
+    from { background-position: 0 0; }
+    to { background-position: -19873px 0; }
+}
+@keyframes aniSeaMonster {
+    from { background-position: 0 0; }
+    to { background-position: -19873px 0; }
+}
+
+#seaMonster {
+    display: none;
+    background: url("//gf3.geo.gfsrv.net/cdn26/4cba0205e5da8d5c6ff010f72aef9f.png") no-repeat 0 0;
+    width: 167px;
+    height: 113px;
+    position: absolute;
+    left: 1175px;
+    top: 760px;
+    z-index: 300;
+    -webkit-animation: aniSeaMonster 5s steps(119, end) infinite;
+    -moz-animation: aniSeaMonster 5s steps(119, end) infinite;
+    -ms-animation: aniSeaMonster 5s steps(119, end) infinite;
+    animation: aniSeaMonster 5s steps(119, end) infinite;
+}
+#chronosForge .inner {
+    background: url(//gf2.geo.gfsrv.net/cdn14/c464020fea60b1755b101267aeeb16.png);
+    width: 650px;
+    height: 350px;
+    position: relative;
+}
+#chronosForge .inner .effect {
+    position: absolute;
+    top: 130px;
+    left: 70px;
+}
+
+
+.resourceShop.resImage {
+    width: 200px;
+    height: 200px;
+}
+
+.resourceShop.amountDiv {
+    position: relative;
+    bottom: -129px;
+}
+
+.resourceShop.packageTitle {
+    font-size: 12px;
+    font-weight: bold;
+    position: relative;
+    height: 34px;
+    padding: 6px;
+}
+
+.resourceShop.packageAmount {
+    font-size: 14px;
+}
+
+.resourceShop.packageAmountBackground {
+    padding: 11px 5px 2px 5px;
+    background-color: #9fee9f;
+    border-radius: 5px;
+}
+
+.resourceShop.resImage.wood {
+    background-image: url(//gf3.geo.gfsrv.net/cdn87/1e8aec9c57372495be889e9b902044.jpg);
+}
+
+.resourceShop.resImage.wine {
+    background-image: url(//gf2.geo.gfsrv.net/cdn48/d2c0654e5171d80fa0d49e0d179452.jpg);
+}
+
+.resourceShop.resImage.marble {
+    background-image: url(//gf3.geo.gfsrv.net/cdn2a/347907a274a35dc51edb1ca1e38722.jpg);
+}
+
+.resourceShop.resImage.sulfur {
+    background-image: url(//gf3.geo.gfsrv.net/cdn55/a530f5ec99d086d42e4275f77cb2a9.jpg);
+}
+
+.resourceShop.resImage.crystal {
+    background-image: url(//gf1.geo.gfsrv.net/cdn66/f27d86db1fbef88816eefe5cff5aa4.jpg);
+}
+
+.resourceShop.resImage.gold {
+    background-image: url(//gf1.geo.gfsrv.net/cdn3a/234dc27bed0d815dd94fdf33af1183.jpg);
+    background-position: 0 0;
+}
+.phase1 #city_background_nw { background-image:url(//gf1.geo.gfsrv.net/cdnf3/b34b2a90ebf1541b1f28833dd5642e.jpg); }
+.phase1 #city_background_ne { background-image:url(//gf3.geo.gfsrv.net/cdnba/a83c042f318d637106eb71bb53ec5e.jpg); }
+.phase1 #city_background_sw { background-image:url(//gf2.geo.gfsrv.net/cdnad/b242d18913ffa01f483445a5f56727.jpg); }
+.phase1 #city_background_se { background-image:url(//gf1.geo.gfsrv.net/cdn97/e4c67ff779eedb049dbc5e646df97d.jpg); }
+
+.phase2 #city_background_nw { background-image:url(//gf3.geo.gfsrv.net/cdn5f/834d4157dbe90d8ff04f3cbab0fd7b.jpg); }
+.phase2 #city_background_ne { background-image:url(//gf3.geo.gfsrv.net/cdn29/180fea11f00e15aa0297c7db073cbd.jpg); }
+.phase2 #city_background_sw { background-image:url(//gf1.geo.gfsrv.net/cdnc0/76268085023fbfe8b754a91dcae395.jpg); }
+.phase2 #city_background_se { background-image:url(//gf3.geo.gfsrv.net/cdn53/a30360772bf16ff94fd68ee8907093.jpg); }
+
+.phase3 #city_background_nw { background-image:url(//gf2.geo.gfsrv.net/cdn11/ff5fd8e7769e255a9099a94373aebf.jpg); }
+.phase3 #city_background_ne { background-image:url(//gf1.geo.gfsrv.net/cdn68/734a0dbe4f7750097e5c207cb6954d.jpg); }
+.phase3 #city_background_sw { background-image:url(//gf2.geo.gfsrv.net/cdn44/c38b15cedcccc418fdf1b59fc296b5.jpg); }
+.phase3 #city_background_se { background-image:url(//gf3.geo.gfsrv.net/cdn2b/bde979e604a8e98bbb1d15fcaac217.jpg); }
+
+.phase4 #city_background_nw { background-image:url(//gf3.geo.gfsrv.net/cdn5a/dff8bdbf4de132dea3f72516ca43fd.jpg); }
+.phase4 #city_background_ne { background-image:url(//gf2.geo.gfsrv.net/cdn4d/c2ca1931e9085e7e18568385b6568c.jpg); }
+.phase4 #city_background_sw { background-image:url(//gf1.geo.gfsrv.net/cdn92/936a18229734246cc73fe05f6ec3f4.jpg); }
+.phase4 #city_background_se { background-image:url(//gf1.geo.gfsrv.net/cdnf9/8c47b1b1d972107154199a883703cb.jpg); }
+
+.phase5 #city_background_nw { background-image:url(//gf2.geo.gfsrv.net/cdn7a/a96585a13ef2c139cc79dc07274fd9.jpg); }
+.phase5 #city_background_ne { background-image:url(//gf3.geo.gfsrv.net/cdnbf/3abe09ab951cd626f866fe5c9bf95f.jpg); }
+.phase5 #city_background_sw { background-image:url(//gf1.geo.gfsrv.net/cdn64/fa47268a4ecc341cdadcce8fb44e1f.jpg); }
+.phase5 #city_background_se { background-image:url(//gf2.geo.gfsrv.net/cdn46/c24f6236aec37c03f3da7b803089e7.jpg); }
+
+.phase1.isCapital #city_background_nw { background-image:url(//gf1.geo.gfsrv.net/cdnf3/b34b2a90ebf1541b1f28833dd5642e.jpg); }
+.phase1.isCapital #city_background_ne { background-image:url(//gf3.geo.gfsrv.net/cdnba/a83c042f318d637106eb71bb53ec5e.jpg); }
+.phase1.isCapital #city_background_sw { background-image:url(//gf2.geo.gfsrv.net/cdnad/b242d18913ffa01f483445a5f56727.jpg); }
+.phase1.isCapital #city_background_se { background-image:url(//gf2.geo.gfsrv.net/cdn7c/4a6f1abfa33f48e96dd2e84da38e21.jpg); }
+
+.phase2.isCapital #city_background_nw { background-image:url(//gf2.geo.gfsrv.net/cdn17/010da4a16f241ec4488cca90f7e527.jpg); }
+.phase2.isCapital #city_background_ne { background-image:url(//gf3.geo.gfsrv.net/cdn24/0654968fa6924e3c9cfd109bbd9e4a.jpg); }
+.phase2.isCapital #city_background_sw { background-image:url(//gf1.geo.gfsrv.net/cdnc0/76268085023fbfe8b754a91dcae395.jpg); }
+.phase2.isCapital #city_background_se { background-image:url(//gf1.geo.gfsrv.net/cdn97/34fd90244296e86888317f66b81c01.jpg); }
+
+.phase3.isCapital #city_background_nw { background-image:url(//gf2.geo.gfsrv.net/cdn11/ff5fd8e7769e255a9099a94373aebf.jpg); }
+.phase3.isCapital #city_background_ne { background-image:url(//gf1.geo.gfsrv.net/cdn68/734a0dbe4f7750097e5c207cb6954d.jpg); }
+.phase3.isCapital #city_background_sw { background-image:url(//gf2.geo.gfsrv.net/cdn44/c38b15cedcccc418fdf1b59fc296b5.jpg); }
+.phase3.isCapital #city_background_se { background-image:url(//gf3.geo.gfsrv.net/cdnee/4a7c1329b11ee9535b6e52338a49cb.jpg); }
+
+.phase4.isCapital #city_background_nw { background-image:url(//gf1.geo.gfsrv.net/cdnf2/c2f6feaa9f8b7fa37a151688eae980.jpg); }
+.phase4.isCapital #city_background_ne { background-image:url(//gf2.geo.gfsrv.net/cdn7d/67b3ac3b02599ab31d7f2bcd3f95aa.jpg); }
+.phase4.isCapital #city_background_sw { background-image:url(//gf1.geo.gfsrv.net/cdn92/936a18229734246cc73fe05f6ec3f4.jpg); }
+.phase4.isCapital #city_background_se { background-image:url(//gf2.geo.gfsrv.net/cdndb/04abfb66f809675c2ff213fe72efac.jpg); }
+
+.phase5.isCapital #city_background_nw { background-image:url(//gf3.geo.gfsrv.net/cdn8d/c5c3a5963b9cc5d368213ef9dadeab.jpg); }
+.phase5.isCapital #city_background_ne { background-image:url(//gf3.geo.gfsrv.net/cdn21/d89ca970f78d8853c522389b0a0d68.jpg); }
+.phase5.isCapital #city_background_sw { background-image:url(//gf1.geo.gfsrv.net/cdn64/fa47268a4ecc341cdadcce8fb44e1f.jpg); }
+.phase5.isCapital #city_background_se { background-image:url(//gf3.geo.gfsrv.net/cdnb8/8fabeae298eec4cd751010300ee973.jpg); }
+
+.recentlyResearched { position:relative; display:inline-block; }
+.recentlyResearched div {
+    background-image:url(//gf2.geo.gfsrv.net/cdna6/dde024aec1ef3840cbfdd92a855e1d.png);
+    height:32px;
+    width:32px;
+    position:absolute;
+    top:-22px;
+    left: 10px;
+}
+
+#city.draggable-city #locations .position24 .draggableElement {
+    margin-top: 60px;
+    margin-left: 130px;
+}
+#city.draggable-city #worldmap { 
+    transform: scale(1) !important;
+    zoom: 1 !important;
+    cursor: inherit;
+}
+#city.draggable-city #container #worldmap .draggableElement {
+    z-index: 1;
+    cursor: grab;
+}
+#city.draggable-city #container .mainContentBox .draggable,
+#city.draggable-city #container #worldmap .buildingItem a.hoverable {
+    cursor: default;
+}
+
+#city.draggable-city #cityCinema,
+#city.draggable-city #cityCinema .animationLight,
+#city.draggable-city #cityCinema #cityCinemaLink,
+#city.draggable-city #cityAmbrosiaFountainLink,
+#city.draggable-city #cityDailyTasks,
+#city.draggable-city #cityFlyingShop,
+#city.draggable-city #cityFlyingShop .extras,
+#city.draggable-city #cityRegistrationGifts {
+    cursor: default;
+}
+#city.draggable-city #cityRegistrationGifts:hover {
+    background-image: url(//gf3.geo.gfsrv.net/cdnb3/3f4a6d0d06892f635208085d7ea2ba.png);
+}
+#city.draggable-city #locations .buildingimg {
+    pointer-events: none;
+}
+.god {
+    width: 155px;
+    height: 155px;
+}
+.god_big {
+    width: 200px;
+    height: 200px;
+}
+.god_small {
+    width: 40px;
+    height: 40px;
+}
+
+.god_pan.god {
+    background: url(//gf1.geo.gfsrv.net/cdn97/ac5de58f52e6563469c5dd15409d4c.png) no-repeat 0 0 transparent;
+}
+.god_pan.god_big {
+    background: url(//gf2.geo.gfsrv.net/cdnd9/f9a81cb4d2a66e2dcebe699d13ed4e.png) no-repeat 0 0 transparent;
+}
+.god_pan.god_small {
+    background: url(//gf3.geo.gfsrv.net/cdneb/2900f454db43b0c7fe7e049970f3bf.png) no-repeat 0 0 transparent;
+}
+
+.god_dionysus.god {
+    background: url(//gf2.geo.gfsrv.net/cdn1a/38c647d435c0a55a7dc94cbe8a088c.png) no-repeat 0 0 transparent;
+}
+.god_dionysus.god_big {
+    background: url(//gf2.geo.gfsrv.net/cdna9/cc2c484657a94fd873cb22b310c2b0.png) no-repeat 0 0 transparent;
+}
+.god_dionysus.god_small {
+    background: url(//gf1.geo.gfsrv.net/cdn3d/69d9d9ec3a7b17ed6ac41a0725da52.png) no-repeat 0 0 transparent;
+}
+
+.god_tyche.god {
+    background: url(//gf3.geo.gfsrv.net/cdnea/45d44990ea19fa5ac165a29da2935a.png) no-repeat 0 0 transparent;
+}
+.god_tyche.god_big {
+    background: url(//gf2.geo.gfsrv.net/cdnd3/7dcdd08d220d29e9e9b0dd8e55c285.png) no-repeat 0 0 transparent;
+}
+.god_tyche.god_small {
+    background: url(//gf3.geo.gfsrv.net/cdnbb/972beca31043ca96b9b7a46498e166.png) no-repeat 0 0 transparent;
+}
+
+.god_plutus.god {
+    background: url(//gf2.geo.gfsrv.net/cdn4e/1a50ed5e2ab7db22a5301ad1f095ab.png) no-repeat 0 0 transparent;
+}
+.god_plutus.god_big {
+    background: url(//gf3.geo.gfsrv.net/cdnec/868415cba0c808fb895754fc17b6af.png) no-repeat 0 0 transparent;
+}
+.god_plutus.god_small {
+    background: url(//gf1.geo.gfsrv.net/cdn95/bc0b8608184dc8df71f8e51ff3784d.png) no-repeat 0 0 transparent;
+}
+
+.god_theia.god {
+    background: url(//gf2.geo.gfsrv.net/cdn4a/6b5a260f8eff68c5d277d094d83a92.png) no-repeat 0 0 transparent;
+}
+.god_theia.god_big {
+    background: url(//gf1.geo.gfsrv.net/cdn6e/84dc0a705942ddfeea395d60c46826.png) no-repeat 0 0 transparent;
+}
+.god_theia.god_small {
+    background: url(//gf1.geo.gfsrv.net/cdn9a/de9feb8952c4a28b487d16f08d2096.png) no-repeat 0 0 transparent;
+}
+
+.god_hephaestos.god {
+    background: url(//gf2.geo.gfsrv.net/cdndf/85a7f6350ddcc7871baad9ea654ee9.png) no-repeat 0 0 transparent;
+}
+.god_hephaestos.god_big {
+    background: url(//gf1.geo.gfsrv.net/cdn66/0cc021c2d2c2d57b2dce1af4dc00c3.png) no-repeat 0 0 transparent;
+}
+.god_hephaestos.god_small {
+    background: url(//gf3.geo.gfsrv.net/cdn2b/b25f7556cf0eec5874ac4b0902020b.png) no-repeat 0 0 transparent;
+}
+
+ul.gods > li {
+    border: 1px solid #d1a876;
+    border-radius: 5px;
+    padding: 10px;
+    background: linear-gradient(0deg, #f2d39d 0%,#f9ebcc 100%);
+    margin: 10px 16px 10px 0;
+    position: relative;
+}
+ul.gods.worshiping > li {
+    min-height: 45px;
+}
+.gods.overview > li.locked {
+    filter: grayscale(60%);
+}
+
+.gods.overview .god_small {
+    border: 1px solid #b6a50f;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+}
+
+.gods.overview .godDescription {
+    padding-left: 50px;
+    min-height: 40px;
+}
+
+.gods.overview .gracePeriodDiv {
+    margin-top: 5px;
+}
+.gods.overview .gracePeriodExtension {
+    display: none;
+}
+.gods.overview .buyExtensionAllowed .gracePeriodExtension {
+    display: block;
+    width: 110px;
+    height: 27px;
+    position: relative;
+}
+.gods.overview .itemIcon.small {
+    background: none;
+    position: absolute;
+    cursor: pointer;
+}
+.gods.overview .gracePeriodExtension .bronzeFleece {
+    top: 0;
+    left: 0;
+}
+.gods.overview .gracePeriodExtension .silverFleece {
+    top: 0;
+    left: 35px;
+}
+.gods.overview .gracePeriodExtension .goldenFleece {
+    top: 0;
+    left: 70px;
+}
+
+#shrineOfOlympus .questionMarkOuter {
+    position: relative;
+}
+#shrineOfOlympus .questionMark {
+    background: url(//gf1.geo.gfsrv.net/cdncf/e1caded88afd00a9a987d6f5d95067.png) no-repeat;
+    cursor:help;
+    width: 9px;
+    height:15px;
+    margin-left: 4px;
+    display: inline-block;
+    position: absolute;
+    top: -1px;
+}
+
+#shrineOfOlympus .gods.overview .progressbar {
+    position: absolute;
+    top: 20px;
+    left: 300px;
+    width: 210px;
+    height: 20px;
+    border-radius: 5px;
+}
+#shrineOfOlympus .gods.overview  .buyExtensionAllowed .progressbar {
+    top: 30px;
+}
+#shrineOfOlympus .gods.overview .progressbar .bar {
+    border-radius: 5px;
+}
+#shrineOfOlympus .gods.overview .progressbar .innerDisplay {
+    position: absolute;
+    top: 2px;
+    text-align: center;
+    width: 100%;
+}
+
+.gods.overview .requirements {
+    position: absolute;
+    top: 10px;
+    left: 300px;
+}
+
+.gods.overview .button {
+    position: absolute;
+    top: 18px;
+    right: 20px;
+}
+.gods.overview .buyExtensionAllowed .button {
+    top: 30px;
+}
+
+#ikipedia .ikipediaGods.battleLayouts {
+    min-height: 270px;
+    height: auto;
+}
+.ikipediaGods .god_big {
+    margin: 10px 10px 10px 60px;
+    position: absolute;
+}
+.ikipediaGods .rightSide {
+    margin-left: 290px;
+    width: 310px;
+    padding-top: 10px;
+}
+.ikipediaGods .researches>div {
+    border: 1px solid #D4AA78;
+    background-color: papayawhip;
+    border-radius: 5px;
+    padding: 6px;
+}
+.ikipediaGods .researches {
+    margin-bottom: 10px;
+}
+.ikipediaGods.battleLayouts {
+    position: relative;
+}
+
+.ikipediaGods .ikipedia_prev_btn {
+    position: absolute;
+    top: 145px;
+    left: 10px;
+    cursor: pointer;
+}
+
+.ikipediaGods .ikipedia_next_btn {
+    position: absolute;
+    top: 145px;
+    right: 10px;
+    cursor: pointer;
+}
+
+
+.gods.worshiping .select_container {
+    margin: 10px 0 10px 10px;
+    float: left;
+}
+.gods.worshiping .god {
+    margin: 10px;
+    float: left;
+    border-radius: 5px;
+}
+
+.right_arrow_dashed {
+    display: inline-block;
+    font-size: 30px;
+    float: left;
+    margin: 4px;
+    color: #af8759;
+}
+.direction_rtl .right_arrow_dashed {
+    transform: rotate(180deg);
+}
+
+.gods .js_toggleBig {
+    position: absolute;
+    top: 25px;
+    right: 20px;
+    cursor: pointer;
+    width: 18px;
+    height: 16px;
+    background: transparent url(//gf3.geo.gfsrv.net/cdnb9/d74b4ce1a2906f05f6bb51fa471608.png) no-repeat scroll -90px 0;
+    border-spacing: 0; 
+}
+
+.gods .js_toggleBigContent {
+    min-height: 175px;
+}
+.gods.worshiping .details {
+    margin-left: 210px;
+    padding-top: 50px;
+}
+.gods.worshiping .details > div {
+    margin-bottom: 15px;
+}

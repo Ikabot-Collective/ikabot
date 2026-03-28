@@ -1,0 +1,1113 @@
+#reductionBuilding .buildingPictureImg,  #bonusBuilding
+.buildingPictureImg{position:absolute;top:8px;left:2px;width:70px;height:48px}#warehouseList .capacitiesTableResult td, #warehouseList .capacitiesTableBonus
+td{border-top:1px solid #C49873}#warehouse #warehouseList
+td{height:45px;padding:0
+10px}#tavern
+#serve{margin:10px
+0px 10px 130px}#tavern  #serve
+select{border:1px
+solid #c9a584;border-top-color:#5d4c2f;border-left-color:#5d4c2f}#tavern
+.bonus{margin-left:20px;line-height:22px;padding-right:8px !important}#tavern
+#citySatisfaction{margin-top:20px;height:80px}#tavern
+.ecstatic{background:url(/cdn/all/both/smilies/ecstatic.png) no-repeat center center}#tavern
+.happy{background:url(/cdn/all/both/smilies/happy.png) no-repeat center center}#tavern
+.neutral{background:url(/cdn/all/both/smilies/neutral.png) no-repeat center center}#tavern
+.sad{background:url(/cdn/all/both/smilies/sad.png) no-repeat center center}#tavern
+.outraged{background:url(/cdn/all/both/smilies/outraged.png) no-repeat center center}.captchaImage{border:1px
+solid #F3DDB2;display:block;height:60px;left:98px;position:relative;margin-top:10px}.captcha_input{left:450px;position:relative;top: -61px;width:200px;height:60px}#branchOffice  .content table.search
+td{padding-left:3px;vertical-align:middle}#branchOffice  .content table.search td
+input{margin-top:5px}#branchOffice
+.checkbox_column{padding:4px
+0 4px 10px !important}#branchOffice .checkbox_column
+div{margin-right:3px}#branchOfficeOwnOffers
+input.textfield{min-width:60px}#temple  a:hover{color:#B03937;text-decoration:none}#temple  #setPriests
+.content{height:145px}#temple  #setPriests .priests, #temple  #setPriests
+.citizens{position:absolute;top:16px;width:100px;height:120px}#temple  #setPriests
+.citizens{left:12px;background:url(/cdn/all/both/characters/y100_citizen_faceright.png) no-repeat 30px 16px}#temple  #setPriests
+.priests{left:538px;background:url(/cdn/all/both/characters/templer.png) no-repeat 16px 16px}#temple  #setPriests
+.scroll_view{position:absolute;top:123px;left:14px}#temple  #setPriests
+.gain{position:absolute;top:38px;left:110px;width:250px}#temple  #setPriests
+.costs{position:absolute;top:38px;left:404px;width:120px}#temple  #setPriests
+#overchargeMsg.status{position:absolute;left:200px;top:60px;width:250px;height:20px;font-weight:bold;text-align:center}#temple  #setPriests
+#overchargeMsg.nooc{display:none}#temple  #setPriests
+#overchargeMsg.ocready{color:#d30c0c}#temple  #setPriests
+#overchargeMsg.oced{font-style:italic;color:#d30c0c}#temple
+.wonder{margin:10px
+3px;min-height:200px;padding-left:140px}#temple
+.wonder1{background:url(/cdn/all/both/wonder/wonder1_active.png) no-repeat left}#temple
+.wonder2{background:url(/cdn/all/both/wonder/wonder2_active.png) no-repeat left}#temple
+.wonder3{background:url(/cdn/all/both/wonder/wonder3_active.png) no-repeat left}#temple
+.wonder4{background:url(/cdn/all/both/wonder/wonder4_active.png) no-repeat left}#temple
+.wonder5{background:url(/cdn/all/both/wonder/wonder5_active.png) no-repeat left}#temple
+.wonder6{background:url(/cdn/all/both/wonder/wonder6_active.png) no-repeat left}#temple
+.wonder7{background:url(/cdn/all/both/wonder/wonder7_active.png) no-repeat left}#temple
+.wonder8{background:url(/cdn/all/both/wonder/wonder8_active.png) no-repeat left;padding-bottom:10px}#formOfRuleContent .government_table
+h3{margin:10px
+0}#formOfRuleContent .content
+.anarchy_text{margin-top:10px}#formOfRuleContent .government_table .government_desc
+.description_text{min-height:79px}#formOfRuleContent .government_table .government_desc
+h4{margin-left:10px}#formOfRuleContent .government_table
+.government_effects{width:100%}#formOfRuleContent .government_table .government_effects
+td{padding:7px;width:50%}#formOfRuleContent .government_table .government_effects
+li{margin-left:15px}#formOfRuleContent .government_table
+.revolution_button{margin:15px}#formOfRuleContent
+.government_pic{width:283px}#formOfRuleContent
+.confirm_buttons{margin-bottom:30px}#formOfRuleContent .revolution_button
+.button{padding:7px}#palaceColony #moveCapitalConfirmation
+li{margin-left:24px}#wall
+.bgWall{background:url(/cdn/all/both/layout/wall675.jpg) no-repeat;width:674px;height:231px}#wall .highlightbox
+.damageFocusContainer{width:40px;border:1px
+solid #4d0e0c;margin:5px
+0 5px 110px}#wall .highlightbox
+.weapon{background:url(/cdn/all/both/workshop/angriff_gold.png) no-repeat;padding-left:70px}#workshop
+.upgradeInProgress.highlightbox{margin:10px
+170px;position:relative;width:auto}#workshop .upgradeInProgress
+.unitPic{position:absolute;top:25px;left:25px;width:60px;height:60px}#workshop .upgradeInProgress
+.upgradePic{position:absolute;top:12px;left:110px;width:60px;height:60px}#workshop .upgradeInProgress
+.upgradeDescriptionTitle{position:absolute;top:15px;left:165px}#workshop .upgradeInProgress
+.upgradeDescription{position:absolute;top:86px;left:110px}#workshop .upgradeInProgress
+.upgradeEffect{font-size:30px;font-weight:bold;position:absolute;top:45px;left:102px}#workshop
+.highlightbox{height:80px;margin:5px;width:273px;position:relative}#workshop .units
+.unitDisplay{padding:30px
+0 0 5px;width:60px}#workshop .highlightbox
+.resources{position:absolute;top:92px;left:0;width:100%;min-height:20px;text-align:center}#workshop .highlightbox .resources
+li{width:55px;display:inline-block;overflow:visible}#workshop .highlightbox
+.upgrade_desc{position:absolute;top:50px;left:10px;width:275px}#workshop .highlightbox .upgrade_desc
+p{padding:0}#workshop .highlightbox
+.newImage{position:absolute;top:10px;left:10px}#workshop .highlightbox
+.actionButton{position:absolute;top:5px;left:80px;width:115px}#workshop ul.units
+.offenseBronze{background-image:url(/cdn/all/both/workshop/angriff_bronze.png)}#workshop ul.units
+.upgradeSilber{background-image:url(/cdn/all/both/workshop/angriff_silber.png)}#workshop ul.units
+.upgradeGold{background-image:url(/cdn/all/both/workshop/angriff_gold.png)}#workshop
+.actionButton{padding:10px
+10px 10px 0;text-align:left}.unitDropDownSlot{height:36px !important;width:36px !important;display:inline-block}.unitDropDownSlot.tradegood{background-position:center center !important}.unitDropDownElement{height:36px !important}#container .table01
+td.text{padding:4px
+0}#culturalPossessions_search table.center
+.checkbox{margin:0
+auto}#culturalPossessions_search
+.centerButton{clear:both;display:block;margin:10px
+auto;overflow:hidden;width:122px}#VideoRewards{margin:0
+auto;overflow:auto;display:block;width:620px}#VideoRewards>li{background:rgba(253, 247, 221, 0.9);border:1px
+solid #E4B873;display:block;float:left;margin-right:21px;min-height:107px;padding:5px;text-align:center;width:180px}#VideoRewards>li:last-of-type{margin-right:0}#VideoRewards>li.highlight{border:1px
+solid #0eaa03}#VideoRewards > li input[type="submit"]{padding:5px;margin-top:5px}#VideoRewards
+h4{font-weight:bold;margin:0;padding:0;text-align:center}.theater_rewards_bg{background:url(/cdn/all/both/advideo/2016-03-14_IK_Werbe_Video_Feature_Hintergrundbild_fuer_Kino-Fenster.jpg) top center no-repeat;display:block;overflow:hidden;min-height:700px}.theater_rewards_bg
+.textbox{background:rgba(253, 247, 221, 0.9);border:1px
+solid #E4B873;font-size:14px;font-weight:bold;padding:10px
+5px!important;margin:40px
+auto 90px auto;text-align:center;width:400px}.theater_rewards_bg
+.infobox{background:rgba(253, 247, 221, 0.9);border:1px
+solid #E4B873;padding:5px
+5px!important;margin:200px
+auto 0 auto;width:598px}.theater_rewards_bg
+#externAdDisclaimer{margin:40px
+auto 0 auto}.theater_rewards_bg
+.playbox{display:none;background:rgba(253, 247, 221, 0.9);border:3px
+solid #E4B873;padding:5px
+5px!important;margin:20px
+auto 0 auto;text-align:center;position:absolute;top:150px;left:140px;width:400px}.theater_rewards_bg
+.warningbox{padding:10px
+5px!important;;background:rgba(252, 221, 210, 0.9);border:1px
+solid #E4B873;margin:20px
+auto;width:598px}.theater_rewards_bg
+#player{display:block;margin:20px
+auto}#cinema_c
+ul.list{margin-left:30px}#cinema_c ul.list
+li{list-style-type:disc!important}#player{border:1px
+solid #E4B873}#externPlayerBox{display:none;margin:25px
+auto}#playerBox{display:none}#playerBox
+p{font-size:16px}#playerBox p:last-of-type{margin-bottom:5px}#playerBox
+.button{margin:10px
+auto;padding:10px
+5px;font-size:18px;width:200px}#playerControls{background:rgba(253, 247, 221, 1);border:1px
+solid #E4B873;font-weight:bold;height:40px;line-height:40px;margin: -20px auto 0 auto;width:640px}#videoTime{margin-left:10px}#videoVolume{background:url(/cdn/all/both/spy/slider_build_bg.png) no-repeat;float:right;margin-right:10px;height:25px;-webkit-appearance:none;margin-top:5px;padding:0
+8px;width:114px}#videoVolume::-webkit-slider-runnable-track{background:transparent;height:25px;left:24px;width:130px}#videoVolume::-webkit-slider-thumb{-webkit-appearance:none;background:url(/cdn/all/both/spy/slider_build_thumb.png) no-repeat;cursor:pointer;height:25px;width:15px}#videoVolume:focus{outline:none}#videoVolume::-moz-range-track{border:none;background:transparent;height:25px;left:24px;margin:15px
+0 0 0;width:352px}#videoVolume::-moz-range-thumb{border:none;background:url(/cdn/all/both/spy/slider_build_thumb.png) no-repeat;cursor:pointer;height:25px;width:15px}#videoVolume:-moz-focusring{outline:1px
+solid white;outline-offset: -1px}#videoVolume::-ms-track{color:transparent;border:none;background:transparent;height:25px;left:24px;margin:15px
+0 0 0;width:130px}#videoVolume::-ms-thumb{-webkit-appearance:none;background:url(/cdn/all/both/spy/slider_build_thumb.png) no-repeat;cursor:pointer;height:25px;margin-top: -13px;width:15px}#videoVolume::-ms-fill-lower{background:transparent}#videoVolume::-ms-fill-upper{background:transparent}#cinemaBoxClose{background:url(/cdn/all/both/interface/window_control_sprite.png) no-repeat scroll transparent;cursor:pointer;display:block;height:18px;width:18px;position:absolute;right:0;top:0;overflow:hidden}.volumeLoud,.volumeMute{background:url(/cdn/all/both/advideo/volume_icon.png) no-repeat;cursor:pointer;display:block;float:right;margin:10px
+10px 0 0;height:20px;width:27px}.volumeLoud{background-position:0 0}.volumeLoud:hover{background-position:0 -20px}.volumeMute{background-position:0 -40px}.volumeMute:hover{background-position:0 -60px}.reduction_graph
+.nextUpgrade{width:100px;background-image:url(/cdn/all/both/bars/bg_24px_lightviolet.png)}.reduction_graph
+.current{width:100px;background-image:url(/cdn/all/both/bars/bg_24px_lightgreen.png)}.reduction_graph
+.without{width:100px;background-image:url(/cdn/all/both/bars/bg_24px_lightcyan.png)}#marineChartArchive
+.reduction_graph{position:relative;border-top:1px solid #f3ddb5;margin:0
+3px}#marineChartArchive .reduction_graph .nextUpgrade,
+#marineChartArchive .reduction_graph .current,
+#marineChartArchive .reduction_graph
+.without{height:24px;border:1px
+solid #c99868}.firstcolumn{width:75px}.desctitle{padding:5px
+0 15px 0}.example_graphs{padding:0
+0 0 10px}.timecompromise{padding:5px
+0 15px 0}#marinechartarchiveAmbiente{width:250px;height:170px;background:url(/cdn/all/both/marineChartArchive/ambiente.png);margin:10px
+5px;border:1px
+solid #f1d198;position:absolute;top:35px;right:5px}#shipselector{padding:15px
+0 10px 0}.currentTimeField{display:inline-block;width:80px}.nextTimeField{display:inline-block;width:70px}.withoutTimeField{display:inline-block;padding-left:15px}#pirateFortress
+.pirateHeader{position:relative;width:694px;height:124px;margin:0
+-7px;background:url(/cdn/all/both/pirateFortress/scroll.jpg)}#pirateFortress .pirateHeader
+.resources{position:absolute;height:26px;width:540px;left:108px;top:20px;color:#fef5d5}#pirateFortress .pirateHeader .resources
+.capturePoints{position:absolute;left:0px;top:0px}#pirateFortress .pirateHeader .resources
+.time{position:absolute;left:190px;top:0px}#pirateFortress .pirateHeader .resources
+.pirateCrew{position:absolute;left:350px;top:0px}#pirateFortress .pirateHeader .resources
+.pirateCrewBonus{position:absolute;top:5px;right:0px;width:74px;height:15px;line-height:15px;font-size:10px;text-align:center;background:url(/cdn/all/both/pirateFortress/crewbonus_small.png)}#pirateFortress .pirateHeader .resources
+.pirateCrewBonus.active{background-color:#8ef06e;color:#11540f}#pirateFortress .pirateHeader .resources
+.pirateCrewBonus.inactive{background-color:#d9d9d9;color:#a2a2a2;background-position:0 15px}#pirateFortress .pirateHeader a
+.textLabel{top:-9999px;position:absolute;width:1px;height:1px}#pirateFortress .pirateHeader
+a.next{position:absolute;top:55px;left:35px;width:70px;height:50px;background-image:url(/cdn/all/both/pirateFortress/button_arrow_70x50_sprite.png);background-repeat:no-repeat;background-position:0 0}#pirateFortress .pirateHeader a.next:hover{background-position:0 -50px}#pirateFortress .pirateHeader a.next:active{background-position:0 -100px}#pirateFortress .pirateHeader
+a.previous{position:absolute;top:55px;right:35px;width:70px;height:50px;background-image:url(/cdn/all/both/pirateFortress/button_arrow_70x50_sprite.png);background-repeat:no-repeat;background-position:-70px 0}#pirateFortress .pirateHeader a.previous:hover{background-position:-70px -50px}#pirateFortress .pirateHeader a.previous:active{background-position:-70px -100px}#pirateFortress .pirateHeader
+.pirateHighscoreContainer{position:absolute;left:107px;top:52px;width:480px;height:56px;overflow:hidden}#pirateFortress .pirateHeader
+.pirateHighscore{position:absolute;top:0px;left:0px;height:56px;width:1200px}#pirateFortress .pirateHeader .pirateHighscore
+li{color:#af7649;float:left;width:118px;height:54px;border:1px
+solid #deb755;background-color:#fdf7dd;font-weight:100}#pirateFortress .pirateHeader .pirateHighscore li
+a{color:#af7649!important}#pirateFortress .pirateHeader .pirateHighscore
+li.alt{background-color:#FFFAE8!important;color:#542c0f!important;font-weight:700}#pirateFortress .pirateHeader .pirateHighscore
+li.player{border:1px
+solid #509739;background-color:#ecf8cc}#pirateFortress .pirateHeader .pirateHighscore
+li.gold{background:url(/cdn/all/both/pirateFortress/highscoreicons/reward_gold.png) no-repeat bottom right}#pirateFortress .pirateHeader .pirateHighscore
+li.silver{background:url(/cdn/all/both/pirateFortress/highscoreicons/reward_silver.png) no-repeat bottom right}#pirateFortress .pirateHeader .pirateHighscore
+li.bronze{background:url(/cdn/all/both/pirateFortress/highscoreicons/reward_bronze.png) no-repeat bottom right}#pirateFortress .pirateHeader .pirateHighscore li
+span{display:block;margin:0
+4px}#pirateFortress .pirateHeader .pirateHighscore li
+.place{font-size:18px}#pirateFortress .pirateHeader .pirateHighscore li.player
+.place{color:#257f32}#pirateFortress .pirateHeader .pirateHighscore li
+.userName{font-size:12px}#pirateFortress .pirateHeader .pirateHighscore li.player
+.userName{color:#257f32}#pirateFortress .pirateHeader .pirateHighscore li
+.pirateBooty{font-size:12px}#pirateFortress ul.resources
+.textLabel{top:-9999px;position:absolute;width:1px;height:1px}#pirateFortress
+#conversionProgressTxt{top:-17px;text-align:center;position:relative}#pirateFortress
+.CPToCrewBox{position:relative;background:url(/cdn/all/both/interface/bg_build.png) repeat-y top right;margin-right:3px;min-height:215px}#pirateFortress
+.CrewbonusExplanation{display:inline-block;vertical-align:top;width:135px}#pirateFortress .CrewbonusExplanation
+h3{color:#e5b06c;font-size:14px;font-style:italic;font-weight:bold;margin-top:14px;text-align:center}#pirateFortress .content .CrewbonusExplanation
+p{padding:10px
+8px}#pirateFortress .CrewbonusExplanation p
+strong{font-weight:bold}#pirateFortress .CrewbonusExplanation
+.pirateCrewBonus{margin:0px
+auto 10px auto;width:88px;height:31px;padding-top:14px;font-weight:bold;text-align:center;background:url(/cdn/all/both/pirateFortress/crewbonus_big.png)}#pirateFortress .CrewbonusExplanation
+.pirateCrewBonus.active{background-color:#8ef06e;color:#11540f}#pirateFortress .CrewbonusExplanation
+.pirateCrewBonus.inactive{background-color:#d9d9d9;color:#a2a2a2;background-position:0 -45px}#pirateFortress
+.CPToCrew{position:relative;display:inline-block;width:533px;margin-left:3px;vertical-align:top}#pirateFortress .CPToCrew
+.valueinput{position:absolute;top:45px;left:460px}#pirateFortress .CPToCrew .valueinput
+.textfield{width:60px;text-align:center}#pirateFortress .CPToCrew
+.sliderinput{width:300px;margin-left:124px}#container .slider_x286
+.sliderbg{width:266px;background-image:url(/cdn/all/both/interface/slider_x286_bg.png)}#container .slider_x286
+.setMax{left:310px}#pirateFortress .CPToCrew .unitinfo
+h4{padding-top:10px;margin-left:130px;width:400px}#pirateFortress .CPToCrew .unitinfo
+img{position:absolute;top:0px;left:38px}#pirateFortress .CPToCrew .unitinfo
+.scroll_view{position:absolute;top:95px;left:30px}#pirateFortress  .costsPerUnit
+.resources{height:22px;margin:0
+160px;text-align:right}#pirateFortress .costsPerUnit .resources
+li{display:inline;width:auto;padding-top:3px;padding-bottom:3px;margin:0px
+8px;line-height:22px}#pirateFortress .costsPerUnit .resources
+li.capturePoints{position:absolute;left:125px}#pirateFortress .costsPerUnit .resources
+li.time{position:absolute;left:265px}#pirateFortress
+.CostsPerTransaction{position:relative;border-top:1px solid #BC575D;margin:10px
+10px 16px 130px;height:35px}#pirateFortress .CostsPerTransaction
+.resources{height:22px;margin:4px
+0px;text-align:right}#pirateFortress
+.hidden{visibility:hidden}#pirateFortress .CostsPerTransaction .resources
+li{display:inline;width:auto;padding-top:3px;padding-bottom:3px;margin:0px
+3px;line-height:22px}#pirateFortress .CostsPerTransaction .resources
+li.capturePoints{position:absolute;left:0px}#pirateFortress .CostsPerTransaction .resources
+li.time{position:absolute;left:140px}#pirateFortress .CostsPerTransaction
+.button{position:absolute;top:4px;right:0px}#pirateFortress .CPToCrew
+.ongoingConversion{position:relative;margin:10px
+0px 0px 130px}#pirateFortress .CPToCrew .ongoingConversion
+.progressbar{width:350px;height:20px}#pirateFortress .CPToCrew .ongoingConversion
+.time{width:350px;text-align:center}#pirateFortress .CPToCrew .ongoingConversion
+.buildingSpeedupButton{right:31px;min-width:0px}#pirateFortress .CPToCrew
+.red_box{text-align:center;margin:0
+10px 0 30px}#pirateFortress .pirateCaptureBox
+td{text-align:center;height:43px}#pirateFortress .pirateCaptureBox .requirement
+ul.resources{display:inline-block;width:80px}#pirateFortress .pirateCaptureBox .requirement ul.resources
+li{display:inline-block;width:80px}#pirateFortress .pirateCaptureBox
+.reward{white-space:nowrap}#pirateFortress .pirateCaptureBox .reward
+ul.resources{display:inline-block}#pirateFortress .pirateCaptureBox .reward ul.resources
+li{display:inline-block;width:50px}#pirateFortress .pirateCaptureBox .action
+.button{display:inline-block;width:94px;height:30px;line-height:30px}#pirateFortress .pirateCaptureBox
+.greyout{color:#8e7f56}#pirateFortress .pirateCaptureBox.action
+.button{display:inline-block;width:120px;height:40px;line-height:40px}#pirateFortress .pirateCaptureBox
+.ongoingMission{margin:3px;position:relative}#pirateFortress .pirateCaptureBox .ongoingMission
+.duration{display:inline-block;margin:5px;margin-left:10px;vertical-align:middle;width:90px;text-align:right}#pirateFortress .pirateCaptureBox .ongoingMission
+.progressbar{display:inline-block;margin:5px;width:400px;vertical-align:middle}#pirateFortress .pirateCaptureBox .ongoingMission
+.time{display:inline-block;margin:5px;vertical-align:middle}#pirateFortress .pirateCaptureBox .ongoingMission
+.abort{display:inline-block;margin:5px;width:23px;height:19px;vertical-align:middle;background:url(/cdn/all/both/interface/btn_abort.png) no-repeat}#pirateFortress
+.pirateHighscoreNextCalc{text-align:center;font-size:10px;margin-bottom:10px}#pirateFortress
+.convertHint{margin:26px
+0 0 7px;min-height:23px;padding:8px
+0 0 0 !important;text-align:center}#academy #goToResearch
+img.iconResearch{margin: -4px 5px;float:left}#academy #goToResearch
+.researchPoints{padding-left:43px;padding-top:15px}#academy #researchFocus.dynamic, #academy
+#researchLibrary.dynamic{text-align:center}#academy #setScientists .content
+.assign_workers{height:87px}#academy #setScientists
+.citizens{position:absolute;top:16px;left:12px;width:100px;height:120px;background:url(/cdn/all/both/characters/y100_citizen_faceright.png) no-repeat 30px 16px}#academy #setScientists .citizens
+.value{position:absolute;top:123px;left:14px}#academy
+.bulbs{width:140px;height:21px;z-index:5}#academy
+.bulbsOn{background:url(/cdn/all/both/layout/bulb-on.png) repeat-x;height:21px;z-index:6}#academy #setScientists
+.scientists{position:absolute;top:16px;left:538px;width:100px;height:120px;background:url(/cdn/all/both/characters/y100_scientist_faceleft.png) no-repeat 11px 16px}#academy #setScientists .scientists
+.value{position:absolute;top:123px;left:14px}#academy #setScientists
+.gain{position:absolute;top:35px;left:113px;width:250px}#academy #setScientists
+.researchAdvisorTabletHelpButton{position:absolute;top:45px;left:364px;width:39px}#academy #setScientists
+.questionMark{background:url(/cdn/all/both/layout/help_smaller.png) no-repeat;cursor:help;width:9px;height:15px;margin-left:2px}#academy  #setScientists
+.costs{position:absolute;top:35px;left:404px;width:120px}#academy  #setScientists
+.order{left:18px;position:absolute;top:175px}#academy #setScientists
+.sliderinput{top: -20px}#academy  #setScientists
+#overchargeMsg.status{position:absolute;left:200px;top:60px;width:250px;height:20px;font-weight:bold;text-align:center}#academy  #setScientists
+#overchargeMsg.nooc{display:none}#academy  #setScientists
+#overchargeMsg.ocready{color:#d30c0c}#academy  #setScientists
+#overchargeMsg.oced{font-style:italic;color:#d30c0c}#academy  #setScientists
+.textfield{width:90px;text-align:center}#academy  #currentResearch
+.content{position:relative;margin-left:30px;width:360px;padding-left:160px;height:120px;background:url(/cdn/all/both/research/bg_currentresearch.png) no-repeat left top;text-align:center}#academy  #currentResearch
+.percentage{font-weight:bold;font-size:18px;color:#580404;position:absolute;top:35px;left:500px}#academy #currentResearch
+.time{font-weight:bold;color:#580404}#academy  #accelerateResearch
+p{margin:6px
+20px}#academy #accelerateResearch
+p.notice{padding:5px}#academy  #accelerateResearch ul, #academy #accelerateResearch
+li{margin:6px
+20px;list-style-type:disc;list-style:disc outside}#academy  li.gain
+#gainPoints{width:140px;height:20px;line-height:20px;overflow:hidden}#academy #accelerateResearch .research-achievement{text-align:center;margin-top:20px;padding:10px}#academy #accelerateResearch .research-achievement .achievement-content{display:inline-flex;align-items:center;gap:5px;font-size:14px}#academy #accelerateResearch .research-achievement .achievement-content span:first-child{font-weight:bold}#academy #accelerateResearch .research-achievement .achievement-content .icon-research{width:16px;height:16px;background-color:#ffeb3b;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;font-size:10px}#academy #accelerateResearch .research-achievement .achievement-content .icon-research
+img{max-width:100%;max-height:100%}#academy #accelerateResearch .cost-block{display:flex;align-items:center;justify-content:center;gap:5px}#academy #accelerateResearch .cost-block .cost-info{display:flex;align-items:center;justify-content:center;gap:5px;margin-bottom:15px;font-size:14px;color:#333}#academy #accelerateResearch .cost-block .cost-info span:first-child{font-weight:bold}#academy #accelerateResearch .experiment-options{display:flex;justify-content:space-around;align-items:flex-start;margin:20px
+0 40px;gap:0}#academy #accelerateResearch .experiment-options
+.experiment{text-align:center;flex:1}#academy #accelerateResearch .experiment-options .experiment .cost-info{display:flex;align-items:center;justify-content:center;gap:5px;margin-bottom:15px;font-size:14px}#academy #accelerateResearch .experiment-options .experiment .cost-info span:first-child{font-weight:bold}#academy #accelerateResearch .experiment-options .experiment .cost-info .striked-cost{text-decoration:line-through;color:#999}#academy #accelerateResearch .experiment-options .experiment .cost-info .discounted-cost{font-weight:bold}#townHall #abandon
+.button{display:block;width:120px;margin:0
+auto}#townHall #finances
+.button{display:block;width:170px;margin:0
+auto}#townHall   h3
+a{display:block;position:absolute;top:8px;right:20px;width:148px;height:20px;line-height:18px;background-image:url(/cdn/all/both/buttons/btn_heading.png);font-size:11px;color:#9d8e74}#townHall
+.population_graph{background-color:#ffeeca;border-top:1px solid #f3ddb5;margin:0
+3px;padding:10px;overflow:hidden}#townHall .population_graph
+h4{color:#906646;font-weight:bold;font-size:12px;margin-left:0}#populationManagement{box-sizing:border-box;display:block;overflow:hidden;width:100%}#populationManagement>div{position:relative}#populationManagement
+li{background:#FDF7DD;box-sizing:border-box;border:1px
+solid #c99868;border-right:none;display:inline-block;float:left;min-height:65px;padding:5px}#populationManagement ul:last-of-type
+li{padding-top:20px;min-height:53px}#populationManagement
+.plusminus{display:block;float:left;margin-left:5px}#populationManagement
+.textfield{float:left;width:40px}#populationManagement .disabled .plus,
+#populationManagement .disabled .plus:hover{background-image:url(/cdn/all/both/buttons/arrows_no_bg_disabled.png);background-position:0px 0px}#populationManagement .disabled .minus,
+#populationManagement .disabled .minus:hover{background-image:url(/cdn/all/both/buttons/arrows_no_bg_disabled.png);background-position:0px -13px}#populationManagement
+.plus{cursor:pointer;position:relative;background:transparent url(/cdn/all/both/buttons/arrows_no_bg.png) no-repeat;height:13px;width:15px}#populationManagement .plus:hover{background-position: -16px 0px}#populationManagement
+.minus{cursor:pointer;position:relative;background:transparent url(/cdn/all/both/buttons/arrows_no_bg.png);background-repeat:no-repeat;background-position:0px -14px;height:13px;width:15px}#populationManagement .minus:hover{background-position: -16px -15px}#populationManagement li:last-of-type{border-right:1px solid #c99868}.population_graph
+.button{display:block;margin:0
+auto;padding:2px
+5px}.population_graph .button:focus{padding:2px
+5px}#populationManagement input[type='number']{-moz-appearance:textfield}#populationManagement input::-webkit-outer-spin-button,
+#populationManagement input::-webkit-inner-spin-button{-webkit-appearance:none}#populationManagement
+.return{clear:both;display:block}#townHall  .population_graph .citizens,
+#townHall  .population_graph .woodworkers,
+#townHall  .population_graph .specialworkers,
+#townHall  .population_graph .priests,
+#townHall  .population_graph
+.scientists{box-sizing:border-box;height:24px;border:1px
+solid #c99868;border-right:none;border-top:none}#townHall  .population_graph
+.citizens{border-right:1px solid #c99868}#townHall  .population_graph
+.citizens{width:160px;background-image:url(/cdn/all/both/bars/bg_24px_lightviolet.png)}#townHall
+.woodworkers{width:100px;background-image:url(/cdn/all/both/bars/bg_24px_lightgreen.png)}#townHall  .population_graph
+.specialworkers{width:80px;background-image:url(/cdn/all/both/bars/bg_24px_lightbrown.png)}#townHall  .population_graph
+.scientists{width:60px;background-image:url(/cdn/all/both/bars/bg_24px_lightyellow.png)}#townHall  .population_graph
+.priests{width:60px;background-image:url(/cdn/all/both/bars/bg_24px_lightcyan.png)}#townHall  .population_graph .type
+img{margin-left:4px}#townHall  .population_graph .type
+.count{float:right;margin-right:6px;line-height:22px}#townHall  .population_graph
+.production{width:100%;margin-top: -44px;height:44px;padding-left:5px;line-height:21px}#townHall  .population_graph .production
+img{vertical-align:middle}#townHall .population_graph
+.icon_wood{background-image:url(/cdn/all/both/resources/icon_wood.png);background-repeat:no-repeat}#townHall .population_graph
+.resourceIcon{height:20px;width:30px}#townHall .population_graph
+.icon_crystal{background-image:url(/cdn/all/both/resources/icon_crystal.png);background-repeat:no-repeat}#townHall .population_graph
+.icon_gold{background-image:url(/cdn/all/both/resources/icon_gold.png);background-repeat:no-repeat}#townHall .population_graph
+.icon_marble{background-image:url(/cdn/all/both/resources/icon_marble.png);background-repeat:no-repeat}#townHall .population_graph
+.icon_sulfur{background-image:url(/cdn/all/both/resources/icon_sulfur.png);background-repeat:no-repeat}#townHall .population_graph
+.icon_wine{background-image:url(/cdn/all/both/resources/icon_wine.png);background-repeat:no-repeat}#townHall .population_graph
+.icon_research{background-image:url(/cdn/all/both/resources/icon_research.png);background-repeat:no-repeat}#townHall .notices div
+p{margin:0px}#townHall .notices div
+h5{font-weight:bold}#townHall
+.stats{margin-left:24px;margin-top:10px}#townHall .stats
+li{width:180px;min-height:24px;padding-left:37px;line-height:18px;background-position:top left;background-repeat:no-repeat}#townHall
+.citizen_image{margin-right:21px}#townHall .stats
+.space{background-image:url(/cdn/all/both/icons/livingspace_24x24.png)}.stats
+.garrisonLimit{background-image:url(/cdn/all/both/advisors/military/bang_soldier.png);height:38px}.stats
+.garrisonLimitSea{background-image:url(/cdn/all/both/advisors/military/bang_ship.png);height:31px}#townHall .stats
+.corruption{background-image:url(/cdn/all/both/icons/corruption_24x24.png)}#townHall .stats
+.actions{background-image:url(/cdn/all/both/resources/icon_actionpoints.png)}#townHall .stats
+.growth_positive{background-image:url(/cdn/all/both/icons/growth_positive.png)}#townHall .stats
+.growth_negative{background-image:url(/cdn/all/both/icons/growth_negative.png)}#townHall .stats
+.incomegold_positive{background-image:url(/cdn/all/both/icons/income_positive.png)}#townHall .stats
+.incomegold_negative{background-image:url(/cdn/all/both/icons/income_negative.png)}#townHall .stats
+.happiness{width:140px;height:78px;text-align:center}#townHall .stats .happiness
+.happiness_text{margin-top:80px}#townHall
+.happiness_ecstatic{background:url(/cdn/all/both/smilies/ecstatic.png) no-repeat center center}#townHall
+.happiness_happy{background:url(/cdn/all/both/smilies/happy.png) no-repeat center center}#townHall
+.happiness_neutral{background:url(/cdn/all/both/smilies/neutral.png) no-repeat center center}#townHall
+.happiness_sad{background:url(/cdn/all/both/smilies/sad.png) no-repeat center center}#townHall
+.happiness_outraged{background:url(/cdn/all/both/smilies/outraged.png) no-repeat center center}#townHall
+.satisfaction_overview{position:relative}#townHall  .satisfaction_overview *
+h5{width:90px;text-align:left;padding:0px
+10px;font-weight:bold;color:#906646}#townHall  .satisfaction_overview .positives,
+#townHall  .satisfaction_overview
+.negatives{border-right:1px solid #c99868;padding-top:10px;overflow:hidden;width:520px}#townHall  .satisfaction_overview
+div.cat{height:32px;margin:12px
+0px}#townHall  .satisfaction_overview .negatives
+div.cat{margin:4px
+0px }#townHall  .satisfaction_overview .cat
+.value{float:right;margin-right:4px;line-height:22px}#townHall  .satisfaction_overview div.cat
+div{border:1px
+solid #c99868;min-width:60px}#townHall  .satisfaction_overview
+img{margin-left:2px}#townHall  .satisfaction_overview div.cat
+p{height:24px;width:400px;margin:0}#townHall  .satisfaction_overview .basic
+.base{width:80px;height:24px;background-image:url(/cdn/all/both/bars/bg_24px_lightviolet.png);overflow:visible}#townHall  .satisfaction_overview .basic
+.research1{width:60px;height:24px;background-image:url(/cdn/all/both/bars/bg_24px_lightcyan.png)}#townHall  .satisfaction_overview .basic
+.capital{width:80px;height:24px;background-image:url(/cdn/all/both/bars/bg_24px_yellow.png)}#townHall  .satisfaction_overview .basic
+.government{width:80px;height:24px;background-image:url(/cdn/all/both/bars/bg_24px_yellow.png)}#townHall  .satisfaction_overview .wine
+.tavern{width:120px;height:24px;background-image:url(/cdn/all/both/bars/bg_24px_violet.png)}#townHall  .satisfaction_overview .wine
+.serving{width:260px;height:24px;background-image:url(/cdn/all/both/bars/bg_24px_redblue.png)}#townHall  .satisfaction_overview .culture
+.museum{width:140px;height:24px;background-image:url(/cdn/all/both/bars/bg_24px_lightbrown.png)}#townHall  .satisfaction_overview .culture
+.treaties{width:260px;height:24px;background-image:url(/cdn/all/both/bars/bg_24px_whiteyellow.png)}#townHall  .satisfaction_overview .negatives .governmentEffectNoTemple
+.bar{width:236px;height:24px;background-image:url(/cdn/all/both/bars/bg_24px_red.png);text-align:right;padding-right:4px;line-height:22px}#townHall  .satisfaction_overview .negatives .overpopulation
+.bar{width:236px;height:24px;background-image:url(/cdn/all/both/bars/bg_24px_red.png);text-align:right;padding-right:4px;line-height:22px}#townHall  .satisfaction_overview .negatives .corruption
+.bar{width:116px;height:24px;background-image:url(/cdn/all/both/bars/bg_24px_red.png);text-align:right;padding-right:4px;line-height:22px}#townHall  .satisfaction_overview .negatives .punishment
+.bar{width:400px;height:24px;background-image:url(/cdn/all/both/bars/bg_24px_red.png);text-align:right;padding-right:4px;line-height:22px}#townHall  .satisfaction_overview
+.happiness{width:140px;background-position:center 20px;padding:0px;text-align:center;margin-left:10px}#townHall  .satisfaction_overview .happiness
+h4{width:auto;text-align:center;font-weight:bold;font-size:12px;color:#906646;margin:0px
+0px 90px 0px}#townHall  .satisfaction_overview .happiness
+.value{text-align:center;font-weight:bold;color:#4FA253;margin:2px}#townHall #renameCity
+.oldCityName{line-height:30px;font-weight:bold}#townHall #renameCity .oldCityName .textLabel, #townHall #renameCity .newCityName
+label{float:left;width:241px;text-align:right;margin-right:10px;font-weight:normal;line-height:30px}#js_TownHallSatisfactionOverviewBaseBoniTransferBonus
+img{float:left}.TownHallSatisfactionCountdownContainer{float:left;margin:0
+0 0 10px;display:block;line-height:22px}#townHall
+.premiumOffer{clear:left;height:auto;width:367px;margin:0px
+auto}#townHall
+.city_icons{padding:10px;display:flex;justify-content:flex-start;flex-wrap:wrap}#townHall .city_icons
+.city_icon_box{margin:5px
+5px 5px 3px}#townHall .city_icons
+.city_icon_bg{background-image:url(/cdn/all/both/premium/bg_premium_features_large.png);background-size:cover;background-repeat:no-repeat;background-position:left center;color:#542c0f;display:block;width:123px;height:123px}#townHall .city_icons .city_icon_bg:hover, #townHall .city_icons
+.city_icon_bg.active{background-image:url(/cdn/all/both/premium/bg_premium_features_large_hover.png);text-decoration:none;position:relative}#townHall .city_icons .city_icon_bg.active::before{content:'';display:block;position:absolute;bottom:10px;left:10px;width:0;height:0;border:4px
+solid #c6992c;border-radius:4px}#townHall .city_icons
+.city_icon_bg.inactive{filter:grayscale(100%);cursor:not-allowed}#townHall .city_icons
+.boxContent{position:relative;top:0;left:0;height:120px;width:120px}#townHall .city_icons .city_icon_box
+.symbol{position:absolute;top:56%;inset-inline-end:calc(49% + 2px);transform:translate(50%, -50%);background-size:cover;width:60px;height:70px}body.direction_rtl #townHall .city_icons .city_icon_box
+.symbol{position:absolute;top:56%;inset-inline-end:calc(49% + 2px);transform:translate(-50%, -50%);background-size:cover;width:60px;height:70px}#townHall .city_icons .city_icon_box
+.defaultCityIcon{background:url(/cdn/all/both/img/island/city_blue.png) no-repeat center top}#townHall .city_icons .city_icon_box
+.level1{background-position:-3px 0}#townHall .city_icons .city_icon_box .level2,
+#townHall .city_icons .city_icon_box
+.level3{background-position:-74px 0}#townHall .city_icons .city_icon_box .level4,
+#townHall .city_icons .city_icon_box  .level5,
+#townHall .city_icons .city_icon_box
+.level6{background-position:-149px 0}#townHall .city_icons .city_icon_box .level7,
+#townHall .city_icons .city_icon_box .level8,
+#townHall .city_icons .city_icon_box
+.level9{background-position:-228px 0}#townHall .city_icons .city_icon_box .level10,
+#townHall .city_icons .city_icon_box .level11,
+#townHall .city_icons .city_icon_box
+.level12{background-position:-300px 0}#townHall .city_icons .city_icon_box .level13,
+#townHall .city_icons .city_icon_box .level14,
+#townHall .city_icons .city_icon_box
+.level15{background-position:-378px 0}#townHall .city_icons .city_icon_box .level16,
+#townHall .city_icons .city_icon_box
+.level17{background-position:-454px 0}#townHall .city_icons .city_icon_box .level18,
+#townHall .city_icons .city_icon_box .level19,
+#townHall .city_icons .city_icon_box .level20,
+#townHall .city_icons .city_icon_box .level21,
+#townHall .city_icons .city_icon_box .level22,
+#townHall .city_icons .city_icon_box .level23,
+#townHall .city_icons .city_icon_box
+.level24{background-position:-529px 0}body.direction_rtl #townHall .city_icons .city_icon_box
+.level1{background-position: -535px 0}body.direction_rtl #townHall .city_icons .city_icon_box .level2,
+body.direction_rtl #townHall .city_icons .city_icon_box
+.level3{background-position: -460px 0}body.direction_rtl #townHall .city_icons .city_icon_box .level4,
+body.direction_rtl #townHall .city_icons .city_icon_box  .level5,
+body.direction_rtl #townHall .city_icons .city_icon_box
+.level6{background-position: -388px 0}body.direction_rtl #townHall .city_icons .city_icon_box .level7,
+body.direction_rtl #townHall .city_icons .city_icon_box .level8,
+body.direction_rtl #townHall .city_icons .city_icon_box
+.level9{background-position: -315px 0}body.direction_rtl #townHall .city_icons .city_icon_box .level10,
+body.direction_rtl #townHall .city_icons .city_icon_box .level11,
+body.direction_rtl #townHall .city_icons .city_icon_box
+.level12{background-position: -238px 0}body.direction_rtl #townHall .city_icons .city_icon_box .level13,
+body.direction_rtl #townHall .city_icons .city_icon_box .level14,
+body.direction_rtl #townHall .city_icons .city_icon_box
+.level15{background-position: -160px 0}body.direction_rtl #townHall .city_icons .city_icon_box .level16,
+body.direction_rtl #townHall .city_icons .city_icon_box
+.level17{background-position: -85px 0}body.direction_rtl #townHall .city_icons .city_icon_box .level18,
+body.direction_rtl #townHall .city_icons .city_icon_box .level19,
+body.direction_rtl #townHall .city_icons .city_icon_box .level20,
+body.direction_rtl #townHall .city_icons .city_icon_box .level21,
+body.direction_rtl #townHall .city_icons .city_icon_box .level22,
+body.direction_rtl #townHall .city_icons .city_icon_box .level23,
+body.direction_rtl #townHall .city_icons .city_icon_box
+.level24{background-position: -9px 0}#blackmarketAmbiente{width:300px;height:150px;background:url(/cdn/all/both/blackMarket/ambiente.png);margin:0
+3px;border:1px
+solid #f1d198;position:absolute;top:50px;left:20px}#blackmarketInfoBox{height:130px;width:277px;padding:10px;border:1px
+solid #f1d198;position:absolute;left:357px;top:50px}#blackmarketInfoBox.marketClosed{background-color:#fcddd2}#blackmarketInfoBox.marketOpen{background-color:#F4DCA7}#blackmarketNoOffers{margin:0
+7px;text-align:center;line-height:25px}#blackmarketInfoBox
+ul{padding:10px
+10px 10px 20px}#blackmarketInfoBox
+li{list-style:circle outside none}#blackMarket
+input.textfield{min-width:60px}#blackmarketOfferForm
+.alertBox{background:url(/cdn/all/both/layout/exclamation.jpg) no-repeat scroll 15px center #F3D3A0;margin:0;min-height:50px;padding:10px
+30px 10px 80px !important;text-align:left;vertical-align:middle;display:flex;align-items:center}#blackmarketOfferForm .alertBox
+span{margin-left:10px;color:rgba(0,0,0, 0.8);background-color:#f2ddac;padding:3px
+8px}#blackmarketOfferForm
+tr.disabled{opacity:0.5}#blackmarketOfferForm tr.disabled
+td{position:relative}#blackmarketOfferForm tr.disabled td::after{content:"";position:absolute;top:0;left:0;width:100%;height:100%;background:transparent;cursor:not-allowed;z-index:10;pointer-events:all}#city #container
+#mapControls{left:443px}#city .animated #locations
+.animation{position:absolute}#city #locations
+.city_feature{position:absolute;z-index:299}#city #locations .building, #city #locations
+.lockedPosition{position:absolute;width:86px;height:43px;z-index:299}#city #locations
+#position19{z-index:301}#city #locations #position12, #city #locations #position14, #city #locations
+#position16{z-index:302}#city #locations #position11, #city #locations
+#position13{z-index:303}#city #locations #position10, #city #locations
+#position8{z-index:304}#city #locations #position9,  #city #locations
+#position0{z-index:305}#city #locations #position3,  #city #locations #position4, #city #locations
+#position7{z-index:306}#city #locations #position5,  #city #locations #position6, #city #locations
+#position18{z-index:307}#city #locations #position1,  #city #locations #position2, #city #locations
+#position15{z-index:308}#city #locations
+#position17{z-index:309}#city #locations
+#position20{z-index:310}#city #locations
+#position21{z-index:311}#city #locations
+#position22{z-index:312}#city #locations
+#position23{z-index:305}#city #locations
+#position24{z-index:305}#city #breadcrumbs .red_box
+span{line-height:20px}#city #breadcrumbs .red_box
+.icon{background:url(/cdn/all/both/interface/icon_message_write.png) no-repeat top left;height:20px;width:24px}#city #breadcrumbs .red_box .spy_warning
+.icon{background-image:url(/cdn/all/both/layout/icon-status-small.png)}.city_background{position:absolute;width:960px;height:600px}#city_background_nw{top:0;left:0}#city_background_ne{top:0;left:960px}#city_background_sw{top:600px;left:0}#city_background_se{top:600px;;left:960px}#city #locations .building
+a{display:block;position:absolute;bottom:-10px;left:-10px;width:90px;height:60px;transform-origin:50% 50%;-webkit-transform-origin:50% 50%;-moz-transform-origin:50% 50%;-ms-transform-origin:50% 50%;-o-transform-origin:50% 50%;transform:rotate(28deg);-webkit-transform:rotate(28deg);-moz-transform:rotate(28deg);-ms-transform:rotate(28deg);-o-transform:rotate(28deg)}#city #locations .barracks a, #city #locations .buildingGround.land a, #city #locations .buildingGround.shore a, #city #locations
+.stonemason{transform:rotate(0);-webkit-transform:rotate(0);-moz-transform:rotate(0);-ms-transform:rotate(0);-o-transform:rotate(0)}#city #locations .wall
+a{transform:rotate(-25deg);-webkit-transform:rotate(-25deg);-moz-transform:rotate(-25deg);-ms-transform:rotate(-25deg);-o-transform:rotate(-25deg)}#city #locations .lockedPosition
+a{height:50px;width:100px;left: -20px;bottom: -5px}#city #locations .buildingGround
+a{height:50px;width:100px;left: -20px;bottom: -5px}#city #locations .building.buildingGround.wall
+a{height:40px;width:150px;left: -30px;bottom:0px}#city #locations .building.wall
+a{height:40px;width:210px;left: -43px;bottom:20px}#city #locations .building.level0
+a{height:50px  !important;width:70px  !important;left: -10px  !important;bottom:0px  !important}#city #locations #position1.port
+a{height:100px;width:120px;left: -10px;bottom: -40px}#city #locations #position2.port
+a{height:120px;width:100px;left: -10px;bottom: -40px}#city #locations #position1.shipyard
+a{height:100px;width:110px;left: -40px;bottom: -5px}#city #locations #position2.shipyard
+a{height:100px;width:110px;left: -30px;bottom: -5px}#city #locations #position24.building.level0
+a{left:136px !important;bottom: -66px !important}#city #locations .barracks
+a{height:75px;width:95px;left: -25px;bottom: -5px}#city #locations .museum
+a{height:82px;width:80px;left: -12px;bottom: -2px}#city #locations .warehouse
+a{height:80px;width:90px;left: -15px;bottom: -5px}#city #locations .tavern
+a{height:75px;width:90px;left: -10px;bottom: -5px}#city #locations .palace
+a{height:95px;width:95px;left: -15px;bottom: -5px}#city #locations .palaceColony
+a{height:80px;width:85px;left: -10px;bottom:0px}#city #locations .academy
+a{height:90px;width:90px;left: -10px;bottom:0px}#city #locations .workshop
+a{height:70px;width:90px;left: -10px;bottom:0px}#city #locations .safehouse
+a{height:55px;width:55px;left:5px;bottom:0px}#city #locations .temple
+a{height:85px;width:65px;left:0px;bottom: -5px}#city #locations .branchOffice
+a{height:70px;left: -20px;left: -10px;bottom: -5px}#city #locations .embassy
+a{height:90px;width:80px;left: -10px;bottom:0px}#city #locations .townHall
+a{height:85px;width:90px;left: -10px;bottom: -4px}#city #locations .forester
+a{height:60px;width:70px;left: -5px;bottom:5px}#city #locations .stonemason
+a{height:60px;width:80px;left: -10px;bottom: -5px}#city #locations .glassblowing
+a{height:60px;width:75px;left: -5px;bottom:0px}#city #locations .winegrower
+a{height:60px;width:90px;left: -10px;bottom:0px}#city #locations .alchemist
+a{height:90px;width:80px;left: -15px;bottom:0px}#city #locations .carpentering
+a{height:50px;width:70px;left: -5px;bottom:3px}#city #locations .architect
+a{height:70px;width:80px;left: -10px;bottom:0px}#city #locations .optician
+a{height:70px;width:60px;left:0;bottom:0px}#city #locations .vineyard
+a{height:50px;width:80px;left: -5px;bottom:0px}#city #locations .fireworker
+a{height:60px;width:70px;left:0px;bottom:0px}#city #locations .dump
+a{width:75px;height:70px;left: -10px;bottom:0px}#city #locations .pirateFortress
+a{width:250px;height:82px;left: -107px;tp: -15px;transform:rotate(1deg)}#city #locations .marineChartArchive
+a{width:75px;height:70px;left: -10px;bottom:0px}#city #locations .chronosForge
+a{width:100px;height:100px;left: -10px;bottom:0px}#city #locations .building .buildingimg, #city #locations .building .hover, #city #locations .building
+.constructionSite{position:absolute}#city #locations .building
+.constructionSite{background-image:url(/cdn/all/both/img/city/baustelle_statisch.png);height:140px;left: -49px;top: -60px;width:145px}#city #locations .building
+.constructionSite.animated{background-image:url(/cdn/all/both/img/city/baustelle_leer.png)}#city #locations .building .constructionSite.animated
+.animated_worker_construction_1{left:34px;position:absolute;top:57px}#city #locations .building .constructionSite.animated
+.animated_worker_construction_2{left:46px;position:absolute;top:64px}#city #locations
+.timetofinish{z-index:500;position:absolute;text-align:center;line-height:23px;height:23px;background-image:url(/cdn/all/both/layout/scroll_bg.png);padding:0
+16px;white-space:nowrap;font-size:10px;color:#50110a;margin:35px
+0 0 -10px}#city #locations .timetofinish .before,
+#city #locations .timetofinish
+.after{display:block;position:absolute;top:0;right:0;width:12px;height:23px}#city #locations .timetofinish
+.before{background-image:url(/cdn/all/both/layout/scroll_leftend.png);left:0px}#city #locations .timetofinish
+.after{background-image:url(/cdn/all/both/layout/scroll_rightend.png);right:0px}#city
+.buildingSpeedupButton{width:14px;height:14px;background:url(/cdn/all/both/buttons/fast_fordward_14_normal.png) no-repeat center top;right:14px;left:auto;top:4px;position:absolute;display:block;cursor:pointer}#dailyTasks
+.buildingSpeedupButton{top:9px;left:13px}#city
+.buildingSpeedupButton.finish{background:url(/cdn/all/both/buttons/fertigstellen_14_normal.png) no-repeat center top}#city  .buildingSpeedupButton:hover{background-position:0px -14px !important}#city  .buildingSpeedupButton:active{background-position:0px -28px !important}#city
+.buildingSpeedupButton.free.finish{background:url(/cdn/all/both/buttons/fertigstellen_14_blue_orange.png) no-repeat center top}#city
+.buildingSpeedupButton.free{background:url(/cdn/all/both/buttons/fast_fordward_14_blue_orange.png) no-repeat center top}#city #locations
+.timetofinish.buildingSpeedup{padding-right:32px}#city #locations
+.timetofinish.portSpeedup{padding-right:32px;top:25px}#city #locations
+.buildingUpgradeIcon{background:url(/cdn/all/both/icons/arrow_upgrade.png) no-repeat left 6px;padding-left:18px}#city #locations
+.position0{left:884px;top:462px}#city #locations
+.position1{left:730px;top:738px}#city #locations
+.position2{left:1085px;top:717px}#city #locations
+.position3{left:1209px;top:535px}#city #locations
+.position4{left:1010px;top:556px}#city #locations
+.position5{left:851px;top:596px}#city #locations
+.position6{left:649px;top:577px}#city #locations
+.position7{left:491px;top:537px}#city #locations
+.position8{left:490px;top:416px}#city #locations
+.position9{left:650px;top:457px}#city #locations
+.position10{left:1051px;top:418px}#city #locations
+.position11{left:1207px;top:376px}#city #locations
+.position12{left:908px;top:312px}#city #locations
+.position13{left:770px;top:359px}#city #locations
+.position14{left:452px;top:284px}#city #locations
+.position15{left:528px;top:717px}#city #locations
+.position16{left:1088px;top:319px}#city #locations
+.position17{left:1088px;top:892px}#city #locations
+.position18{left:1332px;top:585px}#city #locations
+.position19{left:1320px;top:203px}#city #locations
+.position20{left:1490px;top:636px}#city #locations
+.position21{left:1442px;top:763px}#city #locations
+.position22{left:1319px;top:699px}#city #locations
+.position23{left:439px;top:634px}#city #locations
+.position24{left:573px;top:981px}#city #locations #position24:not(.buildingGround){left:411px;top:903px}#city #locations #position24.buildingGround, #city #locations #position24.constructionSite,
+#city #locations #position24.lockedPosition, #city #locations #position24
+.cityScroll{left:573px;top:981px}#city #locations #position24.building.level0
+.img_pos{left:111px !important;top:13px !important}#city #locations
+.img_pos{width:172px;height:140px;position:absolute;background-position:0 0;background-repeat:no-repeat}#city #locations .buildingGround
+.img_pos{bottom: -10px;height:78px;left: -30px;width:129px}#city #locations .buildingGround.wall
+.img_pos{top: -31px;height:99px;left: -50px;width:196px}#city #locations .barracks
+.img_pos{left:-55px;top:-69px}#city #locations .pirateFortress
+.img_pos{left:-148px;top:-75px;width:340px;height:250px}#city #locations .position1.port
+.img_pos{left:-45px;top:-48px;width:209px;height:148px}#city #locations .position2.port
+.img_pos{left:-57px;top:-43px;width:209px;height:148px}#city #locations .shipyard
+.img_pos{left:-70px;top:-64px;width:191px;height:126px}#city #locations .museum
+.img_pos{left:-48px;top:-72px}#city #locations .warehouse
+.img_pos{left:-59px;top:-68px}#city #locations .wall
+.img_pos{left:-43px;top:-49px;width:201px;height:111px}#city #locations .tavern
+.img_pos{left:-50px;top:-69px}#city #locations .palace
+.img_pos{left:-50px;top:-72px}#city #locations .palaceColony
+.img_pos{left:-56px;top:-68px}#city #locations .academy
+.img_pos{left:-50px;top:-73px}#city #locations .workshop
+.img_pos{left:-44px;top:-69px}#city #locations .safehouse
+.img_pos{left:-46px;top:-71px}#city #locations .temple
+.img_pos{left:-55px;top:-71px}#city #locations .branchOffice
+.img_pos{left:-48px;top:-71px}#city #locations .embassy
+.img_pos{left:-49px;top:-74px}#city #locations .townHall
+.img_pos{left:-42px;top:-65px}#city #locations .forester
+.img_pos{left:-48px;top:-74px}#city #locations .stonemason
+.img_pos{left:-47px;top:-70px}#city #locations .glassblowing
+.img_pos{left:-43px;top:-71px}#city #locations .winegrower
+.img_pos{left:-46px;top:-69px}#city #locations .alchemist
+.img_pos{left:-47px;top:-72px}#city #locations .carpentering
+.img_pos{left:-44px;top:-71px}#city #locations .architect
+.img_pos{left:-47px;top:-71px}#city #locations .optician
+.img_pos{left:-51px;top:-66px}#city #locations .vineyard
+.img_pos{left:-45px;top:-69px}#city #locations .fireworker
+.img_pos{left:-47px;top:-67px}#city #locations .dump
+.img_pos{left:-46px;top:-69px}#city #locations .lockedPosition
+.img_pos{left:-22px;top:-23px;height:78px;width:128px}#city #locations .building.level0
+.img_pos{height:140px;left: -49px;top: -60px;width:145px}#city #locations .blackMarket
+.img_pos{left:-56px;top:-58px}#city #locations .marineChartArchive
+.img_pos{left:-60px;top:-66px}#city #locations .shrineOfOlympus
+.img_pos{left:-42px;top:-62px}#city #locations .chronosForge
+.img_pos{left:-45px;top:-70px}#city #locations .empty
+.img_pos{left:-60px;top:-66px}#city #locations .buildingGround.land
+.buildingimg{background-image:url(/cdn/all/both/img/city/flag_red.png)}#city #locations .buildingGround.shore
+.buildingimg{background-image:url(/cdn/all/both/img/city/flag_blue.png)}#city #locations .buildingGround.dockyard
+.buildingimg{background-image:url(/cdn/all/both/img/city/flag_blue.png)}#city #locations .buildingGround.wall
+.buildingimg{background-image:url(/cdn/all/both/img/city/flag_yellow.png)}#city #locations .buildingGround.sea
+.buildingimg{background-image:url(/cdn/all/both/img/city/flag_black.png)}#city #locations .barracks
+.buildingimg{background-image:url(/cdn/all/both/img/city/barracks_r.png)}#city #locations .barracks.busy
+.buildingimg{background-image:url(/cdn/all/both/img/city/barracks_r_mit_soldaten.png)}#city #locations .position1.port
+.buildingimg{background-image:url(/cdn/all/both/img/city/port_r.png)}#city #locations .position2.port
+.buildingimg{background-image:url(/cdn/all/both/img/city/port_l.png)}#city #locations .position1.port.busy
+.buildingimg{background-image:url(/cdn/all/both/img/city/port_r_mit_schiff.png)}#city #locations .position2.port.busy
+.buildingimg{background-image:url(/cdn/all/both/img/city/port_l_mit_schiff.png)}#city #locations .position1.shipyard
+.buildingimg{background-image:url(/cdn/all/both/img/city/shipyard_r.png)}#city #locations .position2.shipyard
+.buildingimg{background-image:url(/cdn/all/both/img/city/shipyard_l.png)}#city #locations .museum
+.buildingimg{background-image:url(/cdn/all/both/img/city/museum_l.png)}#city #locations .warehouse
+.buildingimg{background-image:url(/cdn/all/both/img/city/warehouse_l.png)}#city #locations .wall
+.buildingimg{background-image:url(/cdn/all/both/img/city/wall.png)}#city #locations .tavern
+.buildingimg{background-image:url(/cdn/all/both/img/city/taverne_l.png)}#city #locations .palace
+.buildingimg{background-image:url(/cdn/all/both/img/city/palace_l.png)}#city #locations .palaceColony
+.buildingimg{background-image:url(/cdn/all/both/img/city/palaceColony_l.png)}#city #locations .academy
+.buildingimg{background-image:url(/cdn/all/both/img/city/academy_l.png)}#city #locations .workshop
+.buildingimg{background-image:url(/cdn/all/both/img/city/workshop_l.png)}#city #locations .safehouse
+.buildingimg{background-image:url(/cdn/all/both/img/city/safehouse_l.png)}#city #locations .temple
+.buildingimg{background-image:url(/cdn/all/both/img/city/temple_l.png)}#city #locations .branchOffice
+.buildingimg{background-image:url(/cdn/all/both/img/city/branchoffice_l.png)}#city #locations .embassy
+.buildingimg{background-image:url(/cdn/all/both/img/city/embassy_l.png)}#city #locations .townHall
+.buildingimg{background-image:url(/cdn/all/both/img/city/townhall_l.png)}#city #locations .forester
+.buildingimg{background-image:url(/cdn/all/both/img/city/forester_l.png)}#city #locations .stonemason
+.buildingimg{background-image:url(/cdn/all/both/img/city/stonemason_l.png)}#city #locations .glassblowing
+.buildingimg{background-image:url(/cdn/all/both/img/city/glassblowing_l.png)}#city #locations .winegrower
+.buildingimg{background-image:url(/cdn/all/both/img/city/winegrower_l.png)}#city #locations .alchemist
+.buildingimg{background-image:url(/cdn/all/both/img/city/alchemist_l.png)}#city #locations .carpentering
+.buildingimg{background-image:url(/cdn/all/both/img/city/carpentering_l.png)}#city #locations .architect
+.buildingimg{background-image:url(/cdn/all/both/img/city/architect_l.png)}#city #locations .optician
+.buildingimg{background-image:url(/cdn/all/both/img/city/optician_l.png)}#city #locations .vineyard
+.buildingimg{background-image:url(/cdn/all/both/img/city/vineyard_l.png)}#city #locations .fireworker
+.buildingimg{background-image:url(/cdn/all/both/img/city/fireworker_l.png)}#city #locations .dump
+.buildingimg{background-image:url(/cdn/all/both/img/city/dump_l.png)}#city #locations .pirateFortress
+.buildingimg{background:url(/cdn/all/both/img/city/pirateFortress_l.png) 0 -21px no-repeat}#city #locations .pirateFortress.level0 .buildingimg, #city #locations .pirateFortress.level0
+.hover{background-position:0 0}#city #locations .blackMarket
+.buildingimg{background-image:url(/cdn/all/both/img/city/blackmarket_l.png)}#city #locations .lockedPosition
+.buildingimg{background-image:url(/cdn/all/both/img/city/baustelle_nur_untergrund.png)  !important}#city #locations .building.level0
+.buildingimg{background-image:url(/cdn/all/both/img/city/baustelle_statisch.png)  !important}#city .animated #locations .embassy
+.buildingimg{background-image:url(/cdn/all/both/img/city/embassy_animated_l.png)}#city .animated #locations .townHall
+.buildingimg{background-image:url(/cdn/all/both/img/city/townhall_animated_l.png)}#city .animated #locations .buildingGround.land
+.buildingimg{background-image:url(/cdn/all/both/img/city/baustelle_land_rot.png)}#city .animated #locations .buildingGround.shore
+.buildingimg{background-image:url(/cdn/all/both/img/city/baustelle_wasser_rot.png)}#city .animated #locations .buildingGround.wall
+.buildingimg{background-image:url(/cdn/all/both/img/city/baustelle_mauer_rot.png)}#city .animated #locations .buildingGround.land
+.buildingimg{background-image:url(/cdn/all/both/img/city/baustelle_land_rot.png)}#city .animated #locations .buildingGround.dockyard
+.buildingimg{background-image:url(/cdn/all/both/img/city/baustelle_wasser_rot.png)}#city .animated #locations .barracks.busy
+.buildingimg{background-image:url(/cdn/all/both/img/city/barracks_animated_r.png)}#city .animated #locations .barracks .buildingimg,
+#city .animated #locations .barracks.busy
+.buildingimg{background-image:url(/cdn/all/both/img/city/barracks_animated_r.png)}#city .animated #locations .position1.port.busy
+.buildingimg{background-image:url(/cdn/all/both/img/city/hafen_r_neu.png)}#city .animated #locations .position2.port.busy
+.buildingimg{background:url(/cdn/all/both/img/city/hafen_l_neu.png) 5px 0px}#city .animated #locations .building.level0
+.buildingimg{background-image:url(/cdn/all/both/img/city/baustelle_leer.png)  !important}#city .animated #locations .pirateFortress
+.buildingimg{background:url(/cdn/all/both/img/city/pirateFortress_animated_l.png) 0 -21px no-repeat}#city .animated #locations .pirateFortress.level0
+.buildingimg{background-position:0 0}#city #locations .marineChartArchive
+.buildingimg{background-image:url(/cdn/all/both/img/city/marinechartarchive_l.png)}#city #locations .shrineOfOlympus
+.buildingimg{background-image:url(/cdn/all/both/img/city/shrineOfOlympus_l.png)}#city #locations .chronosForge
+.buildingimg{background-image:url(/cdn/all/both/img/city/chronosForge_l.png)}#city #locations #position17.lockedPosition
+.buildingimg{background-image:url(/cdn/all/both/pixel.png)  !important}#city #locations .building.townHall
+.flag_position{left:88px;top:1px}#city #locations .building.embassy
+.flag_position{left:75px;top:13px}#city #locations .building.embassy
+.flag_position2{left:23px;top:29px}#city #locations .building.embassy
+.flag_position3{left:79px;top:57px}#city .animated #locations .buildingGround
+.flag_position{left:61px;top:3px}#city .animated #locations .buildingGround.wall
+.flag_position{left:96px;top:5px}#city .animated #locations .buildingGround.shore
+.flag_position{left:62px;top:3px}#city .own #locations
+.occupier_img1{width:17px;height:39px;background-image:url(/cdn/all/both/img/city/besatzer_schatten1.png)}#city .own #locations
+.occupier_img2{width:17px;height:38px;background-image:url(/cdn/all/both/img/city/besatzer_schatten2.png)}#city .own #locations
+.occupier_pos1{left:335px;top:175px}#city .own #locations
+.occupier_pos2{left:365px;top:190px}#city .own #locations
+.occupier_pos3{left:150px;top:60px}#city .own #locations
+.occupier_pos4{left:512px;top:30px}#city .own #locations
+.occupier_pos5{left:410px;top:335px}#city .foreign #locations .building
+a{cursor:move}#city
+#pirateFortressBackground{background-image:url(/cdn/all/both/img/city/freie_insel_01.jpg);position:absolute;width:312px;height:227px;top:824px;left:960px}#city
+#pirateFortressShip{background-image:url(/cdn/all/both/img/city/piratenschiff.png);position:absolute;width:153px;height:108px;top:980px;left:917px}#city
+#cityRegistrationGifts{background-image:url(/cdn/all/both/img/city/registrationGift.png);width:106px;height:107px;top:456px;left:771px;cursor:pointer;z-index:1000;position:absolute}#city #cityRegistrationGifts:hover{background-image:url(/cdn/all/both/img/city/hover/registrationGift_glow.png)}#city
+.textLineThrough{text-decoration:line-through;color:darkgreen}#city
+#cityDailyTasks{width:103px;height:83px;top:609px;left:1168px;cursor:pointer;z-index:100;position:absolute}#city
+#cityDailyTasks.level1{background-image:url(/cdn/all/both/img/city/IK_stadt_daily_level1.jpg)}#city
+#cityDailyTasks.level2{background-image:url(/cdn/all/both/img/city/IK_stadt_daily_level2.jpg)}#city
+#cityDailyTasks.level3{background-image:url(/cdn/all/both/img/city/IK_stadt_daily_level3.jpg)}#city
+#cityDailyTasks.level4{background-image:url(/cdn/all/both/img/city/IK_stadt_daily_level4.jpg)}#city
+#cityDailyTasks.level5{background-image:url(/cdn/all/both/img/city/IK_stadt_daily_level5.jpg)}#city #cityDailyTasks.level1:hover{background-image:url(/cdn/all/both/img/city/IK_stadt_daily_level1_glow.jpg)}#city #cityDailyTasks.level2:hover{background-image:url(/cdn/all/both/img/city/IK_stadt_daily_level2_glow.jpg)}#city #cityDailyTasks.level3:hover{background-image:url(/cdn/all/both/img/city/IK_stadt_daily_level3_glow.jpg)}#city #cityDailyTasks.level4:hover{background-image:url(/cdn/all/both/img/city/IK_stadt_daily_level4_glow.jpg)}#city #cityDailyTasks.level5:hover{background-image:url(/cdn/all/both/img/city/IK_stadt_daily_level5_glow.jpg)}#city
+#cityDailyTasks.level1.animated{background-image:url(/cdn/all/both/img/city/IK_stadt_daily_level1_ani.jpg)}#city
+#cityDailyTasks.level2.animated{background-image:url(/cdn/all/both/img/city/IK_stadt_daily_level2_ani.jpg)}#city
+#cityDailyTasks.level3.animated{background-image:url(/cdn/all/both/img/city/IK_stadt_daily_level3_ani.jpg)}#city
+#cityDailyTasks.level4.animated{background-image:url(/cdn/all/both/img/city/IK_stadt_daily_level4_ani.jpg)}#city
+#cityDailyTasks.level5.animated{background-image:url(/cdn/all/both/img/city/IK_stadt_daily_level5_ani.jpg)}#city #cityDailyTasks.level1.animated:hover{background-image:url(/cdn/all/both/img/city/IK_stadt_daily_level1_ani_glow.jpg)}#city #cityDailyTasks.level2.animated:hover{background-image:url(/cdn/all/both/img/city/IK_stadt_daily_level2_ani_glow.jpg)}#city #cityDailyTasks.level3.animated:hover{background-image:url(/cdn/all/both/img/city/IK_stadt_daily_level3_ani_glow.jpg)}#city #cityDailyTasks.level4.animated:hover{background-image:url(/cdn/all/both/img/city/IK_stadt_daily_level4_ani_glow.jpg)}#city #cityDailyTasks.level5.animated:hover{background-image:url(/cdn/all/both/img/city/IK_stadt_daily_level5_ani_glow.jpg)}#city
+#cityAmbrosiaFountain{position:absolute;left:1596px;top:697px}#city #cityAmbrosiaFountain
+.buildingimg{background-image:url(/cdn/all/both/img/city/Ambrosiabrunnen_stein_leer.png)}#city #cityAmbrosiaFountain.fountain_active_full
+.buildingimg{background-image:url(/cdn/all/both/img/city/Ambrosiabrunnen_stein_uebervoll.png)}#city #cityAmbrosiaFountain.fountain_active_empty
+.buildingimg{background-image:url(/cdn/all/both/img/city/Ambrosiabrunnen_stein_normal.png)}#city #cityAmbrosiaFountain.fountain_active_empty.animated .buildingimg,
+#city #cityAmbrosiaFountain.fountain_active_full.animated
+.buildingimg{background-image:url(/cdn/all/both/img/city/Ambrosiabrunnen_stein_leer.png)}#city
+#cityAmbrosiaFountainLink{display:block;position:absolute;width:117px;height:110px;z-index:310;cursor:pointer}#city .fountain_foreign
+#cityAmbrosiaFountainLink{display:none}#city #cityAmbrosiaFountain
+.hover{background-image:url(/cdn/all/both/img/city/hover/Ambrosiabrunnen_stein_glow.png)}#city #cityCinema.active
+.hover{background-image:url(/cdn/all/both/img/city/hover/Kino_aktiv_Glow.png);height:106px;width:120px;z-index:310;position:absolute}#city .animated
+#cityCinema.active{background-image:url(/cdn/all/both/img/city/Kino_aktiv.png);position:absolute;top:395px;left:1607px;height:106px;width:120px;cursor:pointer;z-index:310}#city
+#cityCinema.active{background-image:url(/cdn/all/both/img/city/Kino_aktiv_no_anim.png);position:absolute;top:395px;left:1607px;height:106px;width:120px;cursor:pointer;z-index:310}#city #cityCinema.inactive
+.hover{background-image:url(/cdn/all/both/img/city/hover/Kino_inaktiv_Glow.png);height:106px;width:120px;z-index:310;position:absolute}#city
+#cityCinema.inactive{background-image:url(/cdn/all/both/img/city/Kino_inaktiv.png);position:absolute;top:395px;left:1607px;height:106px;width:120px;cursor:pointer;z-index:310}#city
+#cityCinemaLink{display:block;height:106px;width:120px;z-index:310;position:absolute}#city
+.stomt{background:radial-gradient(circle at center, #8cd9ed 15%, #3598ab 25%, transparent 55%);position:absolute;top:660px;left:93px;width:125px;height:91px;cursor:pointer;z-index:1}#city .stomt
+.scroll_img{top:34px;left:10px}#cityMilitary .stats
+li{background-repeat:no-repeat;background-position:left top;line-height:35px;float:left;padding-left:43px;padding-bottom:3px;width:296px}#js_CityPosition24Img:empty{width:342px !important;height:272px !important}#js_CityPosition24Countdown{left:576px;top:1012px}#position24:not(.buildingGround):not(.constructionSite) #js_CityPosition24Link{bottom: -172px !important;left:35px !important;width:394px !important;height:149px !important}#position24:not(.buildingGround):not(.constructionSite) .img_pos{width:341px !important;height:272px !important}#locations
+.draggableElement{position:absolute;top: -44px;left: -24px;width:105px;height:87px;z-index: -1}#port .content
+.tcap{background-color:#F4DCA7;font-weight:bold;margin:0
+3px;padding:4px}#port
+.loading_speed_table{margin:10px
+auto;width:200px}#port .table01
+tr.struggle{background-color:#DFC5C3}#port .table01
+td{text-align:center}#port .table01
+.sum{border-top:2px dotted #E4B873}#port .table01
+.status{width:140px}#port .table01
+.destination{width:150px;text-align:left}#port .content .table01
+.city{text-align:left;background:url(/cdn/all/both/layout/icon-city2.png) no-repeat 5px center;padding-left:30px}#port .content
+.cities{overflow:hidden;padding:5px
+0 10px 8px}#port .content .cities
+.cityBox{padding:5px
+0px;float:left;position:relative;width:133px;height:120px;cursor:pointer}#port .content .table01
+.origin{width:98px}#port .content .cities li
+.city_box_bg{background:url(/cdn/all/both/layout/bg_port_button.jpg) no-repeat left center;color:#542c0f;display:block;width:133px;height:120px}#port .content .cities li .city_box_bg:hover{background:url(/cdn/all/both/layout/bg_port_button_hover3.jpg) no-repeat left center;text-decoration:none}#port .content .cities li
+.city_box_bg.down{background:url(/cdn/all/both/layout/bg_port_button_down.jpg) no-repeat left center}#port .content .cities li .city_box_bg.disabled, #port .content .cities li .city_box_bg.disabled:hover, #port .content .cities li
+.city_box_bg.disabled.down{background-image:url(/cdn/all/both/layout/bg_port_button_grey.jpg)}#port .content
+.sendGoodsBox{position:relative;width:600px}#port
+.citiesContentBox{min-height:120px}#port .content .cities
+.boxContent{position:relative;top:5px;left:0;height:120px;width:120px}#port .content .cities .cityBox
+.coords{background:url(/cdn/all/both/layout/icon-island.png) no-repeat center top;position:absolute;top:0px;width:50px;height:20px;padding-top:16px;text-align:center;font-size:10px}#port .content .cities .cityBox
+.resource{background:url(/cdn/all/both/resources/icon_wood.png) no-repeat center top;position:absolute;top:4px;right:3px;width:25px;height:20px}#port .content .cities .cityBox
+.wine{background:url(/cdn/all/both/resources/icon_wine.png) no-repeat center top}#port .content .cities .cityBox
+.marble{background:url(/cdn/all/both/resources/icon_marble.png) no-repeat center top}#port .content .cities .cityBox
+.crystal{background:url(/cdn/all/both/resources/icon_glass.png) no-repeat center top}#port .content .cities .cityBox
+.sulfur{background:url(/cdn/all/both/resources/icon_sulfur.png) no-repeat center top}#port .content .cities .cityBox
+.symbol{background:url(/cdn/all/both/img/island/city_blue.png) no-repeat center top;position:absolute;top:15px;right:23px;width:72px;height:80px}#port .content .cities .cityBox
+.level1{background-position:-3px 0}#port .content .cities .cityBox  .level2,
+#port .content .cities .cityBox
+.level3{background-position:-74px 0}#port .content .cities .cityBox   .level4,
+#port .content .cities .cityBox   .level5,
+#port .content .cities .cityBox
+.level6{background-position:-149px 0}#port .content .cities .cityBox  .level7,
+#port .content .cities .cityBox  .level8,
+#port .content .cities .cityBox
+.level9{background-position:-228px 0}#port .content .cities .cityBox  .level10,
+#port .content .cities .cityBox  .level11,
+#port .content .cities .cityBox
+.level12{background-position:-300px 0}#port .content .cities .cityBox  .level13,
+#port .content .cities .cityBox  .level14,
+#port .content .cities .cityBox
+.level15{background-position:-378px 0}#port .content .cities .cityBox  .level16,
+#port .content .cities .cityBox
+.level17{background-position:-454px 0}#port .content .cities .cityBox  .level18,
+#port .content .cities .cityBox  .level19,
+#port .content .cities .cityBox  .level20,
+#port .content .cities .cityBox  .level21,
+#port .content .cities .cityBox  .level22,
+#port .content .cities .cityBox  .level23,
+#port .content .cities .cityBox
+.level24{background-position:-529px 0}#port .content .cities .cityBox
+.roll{position:absolute;top:4px;right:10px;width:25px;height:20px}#port .content .cities .cityBox
+.name{position:absolute;top:81px;left:8px;text-align:center;line-height:23px;height:23px;background:url(/cdn/all/both/layout/scroll_bg.png) repeat-x center top;white-space:nowrap;font-size:10px;width:107px}#port .cityBox .before, #port .cityBox
+.after{display:block;position:absolute;top:0;width:12px;height:23px}#port .content .cityBox
+.before{background:url(/cdn/all/both/layout/scroll_leftend.png) no-repeat center top;left:0}#port .content .cityBox
+.after{background:url(/cdn/all/both/layout/scroll_rightend.png) no-repeat center top;right:0}#port
+.cityBox.inactive{background:url(/cdn/all/both/layout/bg_port_button_grey.jpg) no-repeat scroll left center transparent}#port .cities .cityBox.inactive
+.name{background:url(/cdn/all/both/layout/port_banner_grey.png) no-repeat scroll center top transparent}#port .cities .cityBox.inactive
+.symbol{background:url(/cdn/all/both/layout/port_flag_grey.png) no-repeat scroll center top transparent;top:30px}#port .cities .cityBox.inactive
+.resource{background:url(/cdn/all/both/layout/port_questionmark_grey.png) no-repeat scroll center top transparent}#port .cities .cityBox.inactive
+.coords{background:url(/cdn/all/both/layout/port_island_grey.png) no-repeat scroll center top transparent}#port .sendTransporterBox
+.footer{width:678px}#port .buyTransporter
+.tradeShip{background:url(/cdn/all/both/characters/fleet/120x100/ship_transport_r_120x100.png) no-repeat scroll left top transparent;height:141px;position:relative;width:330px;margin-top:10px}#port .buyTransporter .tradeShip
+.helpLink{position:absolute;height:100px;width:120px}#port .buyTransporter
+.tradeShip.phoenician{background:url(/cdn/all/both/characters/fleet/120x100/ship_phoenician_transport_r_120x100.png) no-repeat scroll left top transparent}#port .buyTransporter
+.tradeShip.freightersShips{background:url(/cdn/all/both/characters/fleet/120x100/ship_freighter_r_120x100.png) no-repeat scroll left top transparent}#port .buyTransporter
+.tradeShip.phoenicianFreightersShips{background:url(/cdn/all/both/characters/fleet/120x100/ship_phoenician_freighter_r_120x100.png) no-repeat scroll left top transparent}#port
+.buyTransporter{min-height:458px;height:auto;display:flex;flex-direction:row;margin-bottom:10px}#port .tradeShipColumn, #port
+.freighterColumn{flex-direction:column}#port
+.tradeShip{z-index:1000}#port .buyTransporter .tradeShip
+.scroll_view{left:19px;position:absolute;top:97px}#port .buyTransporter
+.bonus_ship_table{width:265px;background-color:#FFFBEC;border:1px
+solid #FBE7C0;position:relative;margin-left:65px;margin-top:10px}#port .buyTransporter .bonus_ship_table
+.right{padding:10px
+6px 10px 0}#port .buyTransporter .bonus_ship_table
+th{font-weight:bold;text-align:left}#port .buyTransporter .bonus_ship_table
+.text{text-align:left;padding-left:32px}#port .buyTransporter
+.grantedTransporters{background:url(/cdn/all/both/friends/player_icon_blue_20.png) no-repeat left center}#port .buyTransporter
+.transporters{background:url(/cdn/all/both/relatedCities/trade_ship_20.png) no-repeat left center}#port .buyTransporter
+.phoenician_transporter{background:url(/cdn/all/both/relatedCities/phoenician_transporter_small.png) no-repeat left center}#port .buyTransporter
+.freighter_25{background:url(/cdn/all/both/civil/freighter_25.png) no-repeat left center}#port .buyTransporter
+.phoenician_freighter_25{background:url(/cdn/all/both/civil/phoenician_freighter_25.png) no-repeat left center}#port .buyTransporter
+.governmentSymbol{background:url(/cdn/all/both/government/zepter_20.png) no-repeat left center}#port .buyTransporter
+.dailyActivityBonusSymbol{background:url(/cdn/all/both/dailyActivity/icon_daily_bonus.png) no-repeat scroll left center transparent}#port .buyTransporter
+.sumLeft{background:url(/cdn/all/both/layout/sigma.png) no-repeat scroll 5px 5px transparent}#port .buyTransporter
+.buy_column{height:135px;position:relative;width:210px;margin-left:120px}#port .buyTransporter .buy_column
+.new_ship_costs{margin-top:30px;text-align:center}#port .buyTransporter .new_ship_costs
+.costs{font-weight:bold}#port .buyTransporter .new_ship_costs
+.gold{background:url(/cdn/all/both/resources/icon_gold.png) no-repeat scroll left 0 transparent;padding:4px
+0 4px 28px}#port .buyTransporter .new_ship_costs
+.ambrosia{background:url(/cdn/all/both/premium/ambrosia_icon.png) no-repeat scroll left 0 transparent;padding:4px
+0 4px 28px}#port .buyTransporter
+.button.gold{margin:0
+auto;padding:10px
+15px;position:relative;top:25px}#port .buyTransporter
+.bonus_ship_table_div{display:inline-block;left:408px;position:relative;top: -84px}#port .buyTransporter
+.note{background:url(/cdn/all/both/layout/help_smaller.png) no-repeat;width:9px;height:15px}#buildUnits #units
+hr{margin:22px
+160px 22px 130px;color:#bc575d;background-color:#bc575d;border:none;border-color:#bc575d;height:1px}#buildUnits
+.unit{position:relative;padding:10px
+0;background:url(/cdn/all/both/interface/bg_build.png) repeat-y top right;min-height:140px;background-position:539px 0px;border-bottom:1px solid #fae3ba}#buildUnits .unit h4, #buildUnits #units .unit
+p{margin-left:130px;width:394px}#buildUnits .unitinfo
+img{position:absolute;top:10px;left:5px;height:100px}#buildUnits .unit .att-icon{left:459px;position:absolute;top:12px}#buildUnits .unit .def-icon{left:493px;position:absolute;top:12px}#buildUnits .unit
+.scroll_view{position:absolute;bottom:44px;left:30px}#buildUnits  .unit
+.resources{height:22px;margin:0
+160px;text-align:right}#deleteConfirmPopup
+.resources{height:22px;margin:0
+160px;text-align:right}#deleteConfirmPopup .resources
+li{display:inline;width:auto;padding-top:3px;padding-bottom:3px;margin:0px
+8px;line-height:22px}#deleteConfirmPopup .resources
+li.citizens{position:absolute;left:10px}#deleteConfirmPopup .resources
+li.wood{position:absolute;left:100px}#deleteConfirmPopup .resources
+li.wine{position:absolute;left:190px}#deleteConfirmPopup .resources
+li.glass{position:absolute;left:370px}#deleteConfirmPopup .resources
+li.sulfur{position:absolute;left:280px}#buildUnits .unit .resources
+li{display:inline;width:auto;padding-top:3px;padding-bottom:3px;margin:0px
+8px;line-height:22px}#buildUnits .unit .resources
+li.citizens{position:absolute;left:125px}#buildUnits .unit .resources
+li.wood{position:absolute;left:182px}#buildUnits .unit .resources li.wine,
+#buildUnits .unit .resources li.marble,
+#buildUnits  .unit .resources
+li.glass{position:absolute;left:247px}#js_garrisonEditForm #buildUnits .unit .resources
+li.glass{position:absolute;left:437px}#buildUnits  .unit .resources
+li.sulfur{position:absolute;left:308px}#buildUnits  .unit .resources
+li.upkeep{position:absolute;left:372px}#buildUnits  .unit .resources
+li.time{position:absolute;left:430px}#buildUnits .unit
+.forminput{position:absolute;bottom:42px;left:539px;width:136px}#buildUnits .unit .forminput
+.textfield{width:60px;text-align:center;display:inline-block}#buildUnits .unit .forminput
+.textfieldContainer{text-align:center}#buildUnits .contentBox01h .content
+#unitCountIcons{margin:10px
+0px 0px 15px;width:634px;height:70px}#buildUnits #selected_units.contentBox01h .content
+.divider{background-color:#bc575d;width:634px;height:1px;overflow:hidden;margin-left:20px}#buildUnits .contentBox01h .content
+#unit_basket{margin-top:10px;margin-left:20px;border-collapse:collapse;margin-top:0;margin-bottom:0}#buildUnits .contentBox01h .content #unit_basket
+td{padding:0}#buildUnits .army span.textLabel, #shipyard .army
+span.textLabel{display:none}#buildUnits #unit_basket .army
+.unitcounttextlabel{text-align:center}#buildUnits #unit_basket
+div.army.nobckrd{background-image:none}#buildUnits
+#button_purchase{margin:20px}#buildUnits #button_purchase
+.button{margin-top:0px}#buildUnits
+#cost_wrapper{text-align:right;padding-bottom:10px}#buildUnits #accumulatedUnitCosts #accumulatedResourcesCosts
+li{padding:3px
+0 0 28px;background-repeat:no-repeat;background-position:left top;height:26px;position:absolute;max-width:130px}#buildUnits #accumulatedUnitCosts #accumulatedResourcesCosts
+li.citizens{background-image:url(/cdn/all/both/resources/icon_citizen.png);padding-left:25px;left:20px;height:20px}#buildUnits #accumulatedUnitCosts #accumulatedResourcesCosts
+li.wood{background-image:url(/cdn/all/both/resources/icon_wood.png);left:85px;height:20px}#buildUnits #accumulatedUnitCosts #accumulatedResourcesCosts
+li.wine{background-image:url(/cdn/all/both/resources/icon_wine.png);left:155px;height:20px}#buildUnits #accumulatedUnitCosts #accumulatedResourcesCosts
+li.crystal{background-image:url(/cdn/all/both/resources/icon_crystal.png);left:225px;height:20px}#buildUnits #accumulatedUnitCosts #accumulatedResourcesCosts
+li.sulfur{background-image:url(/cdn/all/both/resources/icon_sulfur.png);left:295px;height:20px}#buildUnits #accumulatedUnitCosts #accumulatedResourcesCosts
+li.upkeep{background-image:url(/cdn/all/both/resources/icon_upkeep.png);left:365px;height:20px}#buildUnits #accumulatedUnitCosts #accumulatedResourcesCosts
+li.time{background-image:url(/cdn/all/both/resources/icon_time.png);padding-left:23px;left:435px;height:20px}#buildUnits #accumulatedUnitCosts #accumulatedResourcesCosts
+li.citizens_inactive{background-image:url(/cdn/all/both/resources/icon_citizen_inactive.png);padding-left:25px;left:20px}#buildUnits #accumulatedUnitCosts #accumulatedResourcesCosts
+li.wood_inactive{background-image:url(/cdn/all/both/resources/icon_wood_inactive.png);left:85px}#buildUnits #accumulatedUnitCosts #accumulatedResourcesCosts
+li.wine_inactive{background-image:url(/cdn/all/both/resources/icon_wine_inactive.png);left:155px}#buildUnits #accumulatedUnitCosts #accumulatedResourcesCosts
+li.crystal_inactive{background-image:url(/cdn/all/both/resources/icon_crystal_inactive.png);left:225px}#buildUnits #accumulatedUnitCosts #accumulatedResourcesCosts
+li.sulfur_inactive{background-image:url(/cdn/all/both/resources/icon_sulfur_inactive.png);left:295px}#buildUnits #accumulatedUnitCosts #accumulatedResourcesCosts
+li.upkeep_inactive{background-image:url(/cdn/all/both/resources/icon_upkeep_inactive.png);left:365px}#buildUnits #accumulatedUnitCosts #accumulatedResourcesCosts
+li.time_inactive{background-image:url(/cdn/all/both/resources/icon_time_inactive.png);padding-left:23px;left:435px}#buildUnits #unitCountIcons
+.nounitsselected{width:634px;text-align:center;height:60px;margin-left:20px}#buildUnits
+.army{background-repeat:no-repeat;text-align:center;background-image:url(/cdn/all/both/characters/military/unitsprites_x34_y35.png);width:35px;margin:0
+0 0 0px;padding-top:36px;height:24px}#shipyard
+.army.ship{background-image:url(/cdn/all/both/characters/fleet/unitfleets_x34_y34.png)}#buildUnits #constructionList
+.army_wrapper{float:left;margin-left:7px;margin-top:5px}#buildUnits #unit_basket
+.s317{background-position: -576px 0px}#buildUnits #constructionList
+.army{height:auto}#buildUnits .army
+.unitcounttextlabel{font-size:10px}#barracks
+.s302{background-position: -36px 0}#barracks
+.s303{background-position: -72px 0}#barracks
+.s304{background-position: -144px 0}#barracks
+.s305{background-position: -396px 0}#barracks
+.s306{background-position: -360px 0}#barracks
+.s307{background-position: -432px 0}#barracks
+.s308{background-position: -252px 0}#barracks
+.s309{background-position: -324px 0}#barracks
+.s310{background-position: -216px 0}#barracks
+.s311{background-position: -180px 0}#barracks
+.s312{background-position: -288px 0}#barracks
+.s313{background-position: -108px 0}#barracks
+.s314{background-position: -468px 0px}#barracks
+.s315{background-position: -540px 0px}#barracks
+.s316{background-position: -504px 0px}#shipyard
+.s210{background-position: -36px 0}#shipyard
+.s211{background-position: -108px 0}#shipyard
+.s212{background-position: -252px 0}#shipyard
+.s213{background-position: -72px 0}#shipyard
+.s214{background-position: -144px 0}#shipyard
+.s215{background-position: -216px 0}#shipyard
+.s216{background-position: -180px 0}#shipyard
+.s217{background-position: -396px 0}#shipyard
+.s218{background-position: -360px 0}#shipyard
+.s219{background-position: -324px 0}#shipyard
+.s220{background-position: -288px 0}#container .contentBox01h .content
+.unit_selection_spacer{position:absolute;text-align:center;width:635px}#container
+#js_unitCountIcons{height:63px}#buildUnits .unitinfo
+.notResearched{opacity:0.3;-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=30)";filter:alpha(opacity=30)}#buildUnits #units .forminput
+.error{text-align:center;padding:5px}#buildUnits
+.premiumOffer{float:none;clear:left;height:auto;margin:5px
+auto;width:334px}#deleteConfirmPopup .resources
+li{width:50px!important}#buildingGround
+#buildings{position:relative;padding:3px}#buildingGround
+.building{position:relative;padding:10px
+0px;background:url(/cdn/all/both/interface/bg_build.png) repeat-y top right;border-bottom:1px solid #fae3ba}#buildingGround .building.notResearched
+.buildingimg{opacity:0.3;-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=30)";filter:alpha(opacity=30)}#buildingGround .building
+h4{line-height:22px;margin-bottom:2px;margin-left:180px;width:350px}#buildingGround #buildings .building
+p{margin-left:168px;width:350px}#buildingGround .building
+.resources{margin-left:180px;width:400px}#buildingGround .building .resources
+li{float:left;padding-top:3px;padding-bottom:3px;padding-right:15px;width:auto}#buildingGround .building .resources
+li.upkeep{margin-left:22px}#buildingGround .building
+hr{margin-left:185px;width:343px;text-align:left}#buildingGround  .building
+.build{position:absolute;display:block;width:100px;top:42px;left:550px;padding-left:3px;padding-right:3px}#buildingGround #buildings .building
+p.cannotbuild{position:absolute;margin:0;top:42px;left:537px;width:113px;text-align:center;color:#960}#upgradeInProgress
+.isUpgrading{float:left;margin:0
+20px;text-align:center}#upgradeInProgress .isUpgrading
+.buildingSpeedupButton{top:-33px;right:-156px;position:relative;width:28px;height:28px;background:url(/cdn/all/both/buttons/fast_fordward_28_normal.png) no-repeat center top}#upgradeInProgress .isUpgrading
+.buildingSpeedupButton.finish{background:url(/cdn/all/both/buttons/fertigstellen_28_normal.png) no-repeat center top}#upgradeInProgress .isUpgrading  .buildingSpeedupButton:hover{background-position:0px -28px !important}#upgradeInProgress .isUpgrading  .buildingSpeedupButton:active{background-position:0px -56px !important}#upgradeInProgress .isUpgrading
+.buildingSpeedupButton.free.finish{background:url(/cdn/all/both/buttons/fertigstellen_28_blue_orange.png) no-repeat center top}#upgradeInProgress .isUpgrading
+.buildingSpeedupButton.free{background:url(/cdn/all/both/buttons/fast_fordward_28_blue_orange.png) no-repeat center top}#upgradeInProgress
+.button.isUpgrading{margin:20px
+20px 0 20px}#upgradeInProgress .buildingLevel
+.arrow{background:url(/cdn/all/both/interface/arrow_right.png) no-repeat scroll 0 2px transparent;display:inline-block;width:15px;height:18px;margin:0
+3px 0 3px}#upgradeInProgress .buildingLevel
+span{display:inline-block;font-size:20px}#buildings_demolition
+p{margin:10px;text-align:left}#completeBuildingDemolition
+p{margin:10px;text-align:left}#NEResOfferPremium .content .yes, #demolition .content .yes, #NEResOfferPremium .content .no, #demolition .content
+.no{width:200px;margin:0px
+auto 30px 90px;padding-left:40px;line-height:38px;font-size:14px;float:left}#NEResOfferPremium .content .yes, #demolition .content
+.yes{background:url(/cdn/all/both/buttons/yes.png) no-repeat left top}#NEResOfferPremium .content .no, #demolition .content
+.no{display:block;background:url(/cdn/all/both/buttons/no.png) no-repeat left top}#NEResOfferPremium .content ul.resources, #demolition .content
+ul.resources{width:400px;margin:5px
+auto}#spyMissions .realMission, #spyMissions
+.decoyMission{margin-left:10px;width:284px}#spyMissions
+.city_name{width:92px;text-align:center}#spyMissions
+.margin_left90{margin-left:90px !important}#spyMissions .spyImg-big{margin:50px
+4px;background:url(/cdn/all/both/spy/spy_70x100.png) no-repeat;width:70px;height:100px}#spyMissions .spyImg_small, #spyMissions
+.decoyImg_small{background:url(/cdn/all/both/characters/40h/spy_r.png) no-repeat;height:40px;width:19px}#spyMissions
+.decoyImg_small{background:url(/cdn/all/both/characters/40h/citizen_r.png) no-repeat}#spyMissions
+.missionImg{border:1px
+solid #E4B873;height:200px;width:280px}#spyMissions
+.missionImg.mission_colonies{background:url(/cdn/all/both/spy/mission_colonies.jpg)}#spyMissions
+.missionImg.mission_diplomacy{background:url(/cdn/all/both/spy/mission_diplomacy.jpg)}#spyMissions
+.missionImg.mission_garrison{background:url(/cdn/all/both/spy/mission_garrison.jpg)}#spyMissions
+.missionImg.mission_invasion{background:url(/cdn/all/both/spy/mission_invasion.jpg)}#spyMissions
+.missionImg.mission_messages{background:url(/cdn/all/both/spy/mission_messages.jpg)}#spyMissions
+.missionImg.mission_military_movements{background:url(/cdn/all/both/spy/mission_military_movements.jpg)}#spyMissions
+.missionImg.mission_offices{background:url(/cdn/all/both/spy/mission_offices.jpg)}#spyMissions
+.missionImg.mission_online_status{background:url(/cdn/all/both/spy/mission_onlinestatus.jpg)}#spyMissions
+.missionImg.mission_research{background:url(/cdn/all/both/spy/mission_research.jpg)}#spyMissions
+.missionImg.mission_retreat{background:url(/cdn/all/both/spy/mission_retreat.jpg)}#spyMissions
+.missionImg.mission_storage{background:url(/cdn/all/both/spy/mission_storage.jpg)}#spyMissions
+.missionImg.mission_military_production{background:url(/cdn/all/both/spy/mission_military_production.jpg)}#spyMissions
+.missionImg.mission_ally_rank{background:url(/cdn/all/both/spy/mission_ally_rank.jpg)}#spyMissions
+.missionImg.mission_form_of_government{background:url(/cdn/all/both/spy/mission_form_of_government.jpg)}#spyMissions
+.missionImg.mission_upgrades{background:url(/cdn/all/both/spy/mission_upgrades.jpg)}#spyMissions
+.missionImg.decoy_mission_gold{background:url(/cdn/all/both/spy/decoy_gold.jpg)}#spyMissions
+.missionImg.decoy_mission_wine{background:url(/cdn/all/both/spy/decoy_wine.jpg)}#spyMissions
+.missionImg.decoy_mission_sulfur{background:url(/cdn/all/both/spy/decoy_sulfur.jpg)}#spyMissions
+.spyMissionSelect{width:500px;height:25px;margin:0px
+auto}#spyMissions
+.scroll_view{padding:0
+12px 0 0;position:relative;text-align:right;width:30px}#spyMissions
+.city_name_header{text-align:center;width:90px;margin:20px
+10px 10px 77px}#spyMissions
+.slider_header{margin-top:20px}#spyMissions
+.slider_row{height:40px}#spyMissions
+.sliderinput{margin:0
+auto;top: -26px;width:178px}#spyMissions .sliderinput
+.sliderbg{background:url(/cdn/all/both/spy/slider_build_bg.png) no-repeat;height:25px;width:110px}#spyMissions .sliderinput .sliderbg
+.sliderthumb{background-image:url(/cdn/all/both/spy/slider_build_thumb.png);height:25px;width:15px}#spyMissions .sliderinput .setMin, #spyMissions  .sliderinput
+.setMax{top:0px}#spyMissions .sliderinput
+.setMax{left:154px}#spyMissions .sliderinput .sliderbg
+.actualValue{background-image:url(/cdn/all/both/spy/slider_build_red.png)}#spyMissions
+.forminput{left:240px;position:relative;top: -55px;width:32px}#spyMissions
+.infoList{padding:0
+8px}#spyMissions .infoList
+.normal_field{border-bottom:1px dotted #fae1b0;padding-bottom:7px}#spyMissions .infoList
+.questionMark{background:url(/cdn/all/both/layout/help_smaller.png) no-repeat;cursor:help;width:9px;height:15px;margin-left:2px}#spyMissions .infoList
+.progbar_field{border-bottom:1px dotted #8F7647;height:25px;padding-top:5px}#spyMissions .infoList
+.progbarWrapper{background-color:#FFF1CF;border:1px
+solid #EDD8A8;height:5px;margin-top:2px;width:260px}#spyMissions .infoList
+.progbar{background:url(/cdn/all/both/spy/spy-progbar.png) repeat-y left top;line-height:5px;font-size:1px !important;height:5px;width:0}#spyMissions .infoList
+.progbar_right{background-position:left bottom}#spyMissions .spy_summary
+.summary_time{background:url(/cdn/all/both/spy/bg-spy2-box.png) no-repeat left top;width:300px;height:54px;margin:0
+20px;padding:5px
+0 5px}#spyMissions
+.spy_target_city{margin:12px
+14px}#safehouseMissions
+.button{display:block;left:470px;position:absolute;top:50px;text-decoration:none}#safehouseMissions
+.statusBar{height:20px;width:300px;margin:0px
+auto}#safehouseMissions  .statusBar
+.bar{background:url(/cdn/all/both/layout/bg-spy-detection-bar.png) no-repeat}#safehouseMissions
+#missionlist{margin:20px
+0px 10px 0px;padding-left:30px;padding:0;margin:0px
+auto}#safehouseMissions  #missionlist
+li{position:relative;margin-bottom:25px;border-bottom:1px solid #E4B873;width:580px;padding:10px
+0px;margin:0px
+auto}#safehouseMissions
+.missionText{margin:0px;position:relative;margin-bottom:10px}#safehouseMissions  li
+div.missionType{font-weight:bold}#safehouseMissions  li
+div.missionDesc{padding:10px
+5px;width:450px}#safehouseMissions  li  .missionCosts
+.gold{padding:2px
+20px 2px 0px;background:url(/cdn/all/both/resources/icon_gold.png) no-repeat right}#safehouseMissions
+div.percentage{font-weight:bold;text-align:left;position:absolute;top:20px;left:500px}#safehouse #buildForm
+.scroll_view{margin-top:10px}#safehouse #buildForm
+.sliderinput{margin: -28px 0 0 100px}#safehouse #buildForm
+.button{bottom:60px;position:absolute}#safehouse #buildForm
+.textfield{bottom:20px;position:absolute}#safehouse
+.costs{height:26px;margin:4px
+0 0 69px}#safehouse .costs .resources
+li{float:left;width:80px}#safehouse
+.spy_img{background:url(/cdn/all/both/characters/military/120x100/spy_120x100.png) no-repeat -32px 0 transparent;min-height:100px;padding-left:75px}#safehouse
+.whiteLine{border:1px
+solid #FEFBE8;color:#FEFBE8}#safehouse
+.spyinfo{background:url(/cdn/all/both/layout/spy-test.jpg) no-repeat 10px 10px;position:relative;border:1px
+solid #f3ddb2;padding:10px
+0}#safehouse .spyinfo
+li{padding:5px
+0px 5px 25px;font-weight:bold;display:inline-block;clear:both;float:left}#safehouse .spyinfo
+li.user{background:url(/cdn/all/both/resources/icon_citizen.png) no-repeat}#safehouse .spyinfo
+li.city{background:url(/cdn/all/both/layout/icon-city2.png) no-repeat left center}#safehouse .spyinfo
+li.status{background:url(/cdn/all/both/layout/icon-status-small.png) no-repeat left center;width:260px}#safehouse .spyinfo
+ul{margin-left:130px;clear:both;overflow:hidden}#safehouse ul
+.risk{position:relative}#safehouse ul .risk .statusBar, #safehouseMissions
+.statusBar{width:205px;height:10px;border:1px
+solid #775726;background-color:#fefbe8;overflow:hidden}#safehouse ul .risk .statusBar .bar, #safehouseMissions  .statusBar
+.bar{height:100%;background-color:#deaf64;border-right:1px solid #960;background:url(/cdn/all/both/layout/bg-spy-detection-bar-205.png) no-repeat;overflow:hidden}#safehouse ul li.risk
+div.percentage{width:30px;text-align:left;position:absolute;top:18px;left:240px;font-weight:bold;display:inline}#safehouse .spyinfo div
+a{font-size:10px}#safehouse .spyinfo
+div.missionSendSpies{background:url(/cdn/all/both/actions/espionage_disabled.png) no-repeat center top;width:54px;height:50px;position:absolute;top:10px;left:425px}#safehouse .spyinfo
+.missionBtn{width:80px;height:50px;position:absolute;top:10px}#safehouse .spyinfo
+.missionSendSpies{left:425px}#safehouse .spyinfo
+.missionButton{left:475px}#safehouse .spyinfo
+.missionButton.shifted{left:500px}#safehouse .spyinfo
+.missionAbort{left:575px}#safehouse .spyinfo .missionBtn
+a{display:block;text-align:center;padding-top:35px;color:#542c0f;text-decoration:none}#safehouse .spyinfo div.missionSendSpies
+a{background:url(/cdn/all/both/actions/espionage.png) no-repeat center top}#safehouse .spyinfo div.missionSendSpies
+a.disabled{background:url(/cdn/all/both/actions/espionage_disabled.png) no-repeat center top;cursor:default}#safehouse .spyinfo .missionButton
+a{background:url(/cdn/all/both/layout/icon-mission.png) no-repeat center top}#safehouse .spyinfo div.missionButton
+a.disabled{background:url(/cdn/all/both/actions/espionage_disabled.png) no-repeat center top;cursor:default}#safehouse .spyinfo .missionAbort
+a{background:url(/cdn/all/both/layout/icon-missionAbort.png) no-repeat center top}#safehouse .spyinfo div.missionAbort
+a.disabled{background:url(/cdn/all/both/actions/espionage_retreat_disabled.png) no-repeat center top;cursor:default}#safehouse .spyinfo
+.table01{margin:5px
+0px}#safehouse .table01
+td.icon{width:20px;height:20px;background-position:center;background-repeat:no-repeat}#safehouse .table01
+td.time{background-image:url(/cdn/all/both/layout/icon-clock.png)}#safehouse .table01
+td.money{background-image:url(/cdn/all/both/layout/gold.png)}#safehouse .table01
+td.garrison{background-image:url(/cdn/all/both/layout/icon-spyreport-garrison.png)}#safehouse .table01
+td.arrived{background-image:url(/cdn/all/both/layout/icon-city2.png)}#safehouse .table01
+td.return{background-image:url(/cdn/all/both/layout/icon-backx20.png)}#safehouse .table01
+td.message{background-image:url(/cdn/all/both/layout/icon-message.png)}#safehouse .table01
+td.fleet{background-image:url(/cdn/all/both/layout/icon-spyreport-fleet.png)}#safehouse .table01
+td.research{background-image:url(/cdn/all/both/layout/icon-spyreport-research.png)}#safehouse .table01
+td.online{background-image:url(/cdn/all/both/layout/icon-status-small.png)}#safehouse
+.summary{color:#906646;font-size:18px;text-align:left}#safehouse .reportText .noReport, #safehouse .reportText .report, #safehouse .reportText .reportTable
+th{font-weight:bold;text-align:left;margin:10px
+0px;padding:4px}#safehouse .table01
+.reportText{background-color:#FAEAC6}#safehouse .table01 .record, #safehouse .table01 .record
+.reportTable{width:100%}#safehouse .table01 .record .reportTable
+th{background-color:#FDF7DD;border:2px
+solid #FAEAC6}#safehouse .table01 .record
+tr{background-color:transparent}#safehouse .table01.dotted .record
+td{border-bottom:none}#safehouse .table01 .record .reportTable tr
+.category{width:270px}#safehouse .reportText
+td.job{font-weight:bold;width:120px}#safehouse .reportText
+tr.status{border-bottom:2px dotted #e4b873;border-collapse:separate;padding:3px
+6px}#safehouse tr.pgnt
+div.last{float:left;width:15%}#safehouse tr.pgnt
+div.text{float:left;width:80%;padding:5px
+0px;text-align:center}#safehouse tr.pgnt
+div.next{float:right;width:5%}#safehouse
+.building_icon{width:80px;margin-right:10px;height:50px}#safehouse
+.building_icon.barracks{background-image:url(/cdn/all/both/buildings/y50/y50_barracks.png)}#safehouse
+.building_icon.shipyard{background-image:url(/cdn/all/both/buildings/y50/y50_shipyard.png)}#safehouse
+.unit_list_wrapper{width:380px}#safehouse
+.rightBorderDotted{border-right:1px dotted #E4B873}#safehouse
+.noRightBorder{border-right:none}#safehouse
+.techList{width:16px;height:16px;margin-left:5px}#safehouse
+.techList.offensive{background-image:url(/cdn/all/both/layout/sword-icon2.png)}#safehouse
+.techList.defensive{background-image:url(/cdn/all/both/layout/shield-icon1.png)}#safehouse .disc-list
+li{list-style-type:disc;margin-left:15px}#safehouse
+.spy_stats{background:url(/cdn/all/both/characters/spy_espionage.png) no-repeat;position:relative;border:1px
+solid #f3ddb2;width:90px;height:113px;float:left}#safehouse
+.spy_stats_content{padding-left:115px}#embassyEditAlly
+textarea{height:130px;width:510px}#embassyCommitAlliance .table01
+.city{background:url(/cdn/all/both/layout/icon-city2.png) no-repeat 3px center;padding-left:10px}#embassyCommitAlliance
+.positionButton{text-align:center;margin:10px;padding-top:2px;height:26px}#editAllyPage #js_allypage_preview, #allyPage .allypage , #embassy
+.allypage{text-align:left;padding:4px
+12px}#js_allypage_input_area{width:660px;margin:10px
+5px 5px 5px;padding-top:0}#js_homepage_link{width:500px;margin-top:10px}#embassyAssignDi
+.scroll_view{position:absolute;left:37px;top:68px}#container #embassyAssignDi
+.sliderinput{margin:10px
+auto}#embassyAssignDi
+.slider_top{position:relative;top:6px}#embassyAssignDi
+input.textfield{right:37px;position:absolute;text-align:center;top:65px;width:70px}#embassyEditRanks .table01
+td{padding:5px}#embassyEditRanks .table01
+.colIcon{padding:0;width:23px}#embassyEditRanks .checkbox_row, #embassyEditRanksEdit
+.checkbox_row{line-height:20px}#embassyEditRanks .promotion, #embassyEditRanksEdit
+.promotion{line-height:24px}#embassyEditRanks .info_box, #embassyEditRanksEdit
+.info_box{background-color:#FDE8C3;border:1px
+solid #E4B873;min-height:50px;margin:12px;padding:5px;width:280px}#embassyEditRanks .content .new_rank_table p , #embassyEditRanksEdit .content .new_rank_table
+p{height:18px;margin:2px
+0;padding:0px}#embassyCharges
+.list{padding-top:5px;padding-bottom:5px;text-align:center;margin:10px
+auto;width:300px;border:1px
+solid #E4B873;background-color:#FFFAE8}#embassyCharges
+.listElement{padding-top:5px;padding-bottom:5px;background-color:#FFFAE8;width:300px}#embassyCharges
+.listElement.alt{background-color:#FDF7DD}#embassyCharges
+.charge{display:inline-block;width:100px;text-align:left;height:20px}#embassyCharges
+.member{display:inline-block;height:20px}#embassyAssignRanks .table01
+td.colIcon{padding:0
+0 0 0}#editHomepageLink{margin-bottom:10px}.embassy-paginate{float:left;display:block;line-height:28px;margin:0px
+10px}.embassy-paginate-arrow{float:left;display:block;line-height:28px}.favour{font-size:14px;margin-bottom:5px}.favour>div{display:inline-block}.leftMargin30{margin-left:30px}.favourDescription{min-height:70px}

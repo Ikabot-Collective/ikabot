@@ -1,0 +1,1728 @@
+#mission .summaryBox .glass,
+#mission .summaryBox
+.crystal{background:url(/cdn/all/both/resources/icon_glass.png) no-repeat   3% center}#mission .summaryBox
+.costsInfo2{line-height:22px}#missionSummary
+.travelTime{position:absolute;top:0px}#missionSummary .travelTime
+#journeyTime{position:absolute;left:400px;width:60px;text-align:right;top:15px}#missionSummary .travelTime
+#returnTime{position:absolute;left:487px;width:60px;text-align:left;top:26px}#missionSummary
+.submit{position:absolute;left:595px;width:50px;top:10px;text-align:center}#mission
+.timespan{position:relative;width:175px;margin:16px
+auto;background-color:#fffbec;border:1px
+solid #fbe7c0;background-image:url(/cdn/all/both/resources/icon_time.png);background-position:16px 30px;background-repeat:no-repeat}#mission .timespan
+.dropdown{left:0}#mission .timespan
+label{display:block;padding:2px;font-weight:bold;text-align:center;color:#906646;background-color:#faeac6}#transport
+ul.tradeRoute{height:60px;position:relative}#transport .tradeRoute
+li.text{position:absolute;top:10px;left:100px;width:50px;text-align:right;padding-top:5px}#transport .tradeRoute
+li.time{position:absolute;top:10px;left:150px}#transport .tradeRoute
+li.save{position:absolute;top:10px;left:290px}#transport .tradeRoute li.save
+input{margin:0px}#mission #armyPreview
+#battlefield{background-position:-150px -4px;height:192px;left:0;margin:10px
+auto;position:relative;top:0;width:654px}#mission #armyPreview
+#battlefield.battlefield_city{background-image:url(/cdn/all/both/combatreport/battlefield_city_A_D.jpg)}#mission #armyPreview
+#battlefield.battlefield_sea{background-image:url(/cdn/all/both/combatreport/battlefield_sea_A_D.jpg)}#mission #armyPreview #battlefield
+ul{position:absolute;list-style:none outside none;max-width:400px;text-align:left}#mission #armyPreview #battlefield
+#loc_mainline{top:130px;left:169px}#mission #armyPreview #battlefield
+#loc_ranged{top:70px;left:169px}#mission #armyPreview #battlefield
+#loc_artillery{top:10px;left:169px}#mission #armyPreview #battlefield
+#loc_left_flank{top:130px;left:10px}#mission #armyPreview #battlefield
+#loc_right_flank{top:130px;left:509px}#mission #armyPreview #battlefield
+#loc_air{top:10px;left:10px}#mission #armyPreview #battlefield
+#loc_air_fighter{top:10px;left:507px}#mission #armyPreview
+.slot{float:left;width:45px}#mission #armyPreview
+.image{margin:0px
+auto 2px auto;width:35px;height:35px}#mission #armyPreview
+.image.empty{background-image:url(/cdn/all/both/combatreport/empty.png)}#mission #armyPreview
+.image.army{background-image:url(/cdn/all/both/characters/military/unitsprites_x34_y35_enhanced.png)}#mission #armyPreview
+.image.fleet{background-image:url(/cdn/all/both/characters/fleet/unitfleets_x34_y34.png)}#mission #armyPreview
+.image.slinger{background-position:0px -36px}#mission #armyPreview
+.image.swordsman{background-position: -36px -36px}#mission #armyPreview
+.image.phalanx{background-position: -72px -36px}#mission #armyPreview
+.image.marksman{background-position: -144px -36px}#mission #armyPreview
+.image.mortar{background-position: -396px -36px}#mission #armyPreview
+.image.catapult{background-position: -360px -36px}#mission #armyPreview
+.image.ram{background-position: -432px -36px}#mission #armyPreview
+.image.steamgiant{background-position: -252px -36px}#mission #armyPreview
+.image.bombardier{background-position: -324px -36px}#mission #armyPreview
+.image.cook{background-position: -216px -36px}#mission #armyPreview
+.image.medic{background-position: -180px -36px}#mission #armyPreview
+.image.gyrocopter{background-position: -288px -36px}#mission #armyPreview
+.image.archer{background-position: -108px -36px}#mission #armyPreview
+.image.wall{background-position: -468px -36px}#mission #armyPreview
+.image.spearman{background-position: -540px -36px}#mission #armyPreview
+.image.barbarian{background-position: -504px -36px}#mission #armyPreview
+.image.spartan{background-position: -612px -36px}#mission #armyPreview .image.ship_transport,
+#mission #armyPreview
+.image.ship_premium_transport{background-position:0px 0px}#mission #armyPreview
+.image.ship_ram{background-position: -36px 0}#mission #armyPreview
+.image.ship_flamethrower{background-position: -108px 0}#mission #armyPreview
+.image.ship_submarine{background-position: -252px 0}#mission #armyPreview
+.image.ship_ballista{background-position: -72px 0}#mission #armyPreview
+.image.ship_catapult{background-position: -144px 0}#mission #armyPreview
+.image.ship_mortar{background-position: -216px 0}#mission #armyPreview
+.image.ship_steamboat{background-position: -180px 0}#mission #armyPreview
+.image.ship_rocketship{background-position: -396px 0}#mission #armyPreview
+.image.ship_paddlespeedship{background-position: -360px 0}#mission #armyPreview
+.image.ship_ballooncarrier{background-position: -324px 0}#mission #armyPreview
+.image.ship_tender{background-position: -288px 0}#mission #armyPreview
+.text{text-align:center;background-color:#EFDDB4;margin:0
+3px}#mission #armyPreview
+.reserve{margin:10px;height:70px}#moveCity
+.cityMoveDiv{padding:5px
+10px 10px 190px;background:url(/cdn/all/both/premium/movecity.jpg) left top no-repeat;min-height:86px;margin:3px}#moveCity
+.cityMoveCitySelect{width:175px;height:100px;padding-right:45px}#moveCity
+.notenough{color:#999;font-weight:normal;font-size:11px;text-decoration:none}#moveCity
+.moveCityPic{float:left}#moveCity
+.ambrosiaSymbolLeft{background:url(/cdn/all/both/premium/ambrosia_transparent.png) top left no-repeat;padding-left:65px;height:100px}#moveCity
+.ambrosiaSymbolRight{background:url(/cdn/all/both/premium/ambrosia_transparent.png) top right no-repeat;padding-right:65px;height:100px}#createColony
+.noPalace{position:relative;margin:16px
+100px;padding:4px;background-color:#fffbec;border:1px
+solid #fbe7c0}#createColony .noPalace
+h4{font-weight:bold;margin-top:8px;color:#900;margin-left:170px}#createColony .noPalace
+img{float:left;margin-top:4px}#createColony .errors
+h4{font-weight:bold;margin-top:8px;color:#900;margin:4px
+60px 4px 60px}#createColony .errors
+li{list-style:disc inside;margin:2px
+60px 2px 60px;color:#900}#createColony .colonyCosts
+p{text-align:center;font-weight:bold}#createColony .colonyCosts
+img{position:absolute;top:0px;left:-150px}#createColony .colonyCosts
+.resources{margin-left:110px}#createColony .noPalace
+p{margin-left:170px}#createColony .errors
+ul{margin-bottom:20px}#mission #createColony .notices
+.warning{margin:10px
+17px 0 12px}#mission .notices
+.warning{margin:10px
+20px 10px 0px}#createColony
+.colonyCosts{width:300px;padding:4px;background-color:#fffbec;border:1px
+solid #fbe7c0;position:relative;margin:16px
+auto}#createColony
+.townHall{display:inline;float:left;margin:10px
+0px 0px 20px}#createColony  #missionSummary
+.common{position:absolute;top:32px;left:441px}#createColony  #missionSummary
+.centerButton{padding-top:28px}#createColony #missionSummary
+.ambrosiaCost{position:absolute;top:30px;left:190px;background:url(/cdn/all/both/premium/ambrosia_icon.png) 4px 2px no-repeat;padding:6px
+30px}#unitdescription
+.costs{background-color:#FFFBEC;border:1px
+solid #FBE7C0;left:50px;margin:16px
+auto;padding:4px;position:relative;width:300px}#unitdescription  .costs
+img{left:-150px;position:absolute;top:0px}#unitdescription  .costs
+ul.resources{margin-left:30px}#unitdescription
+ul.specs{width:90px;margin:5px}#unitdescription ul.specs
+li{background-repeat:no-repeat;padding-left:40px;margin:5px
+0px}#unitdescription ul.specs
+.unitCharacterRange{background-image:url(/cdn/all/both/unitdesc/unit_type.png);height:28px;line-height:28px}#unitdescription ul.specs
+.unitAttackPower{background-image:url(/cdn/all/both/unitdesc/unit_attack.png);height:27px;line-height:27px}#unitdescription ul.specs
+.unitSpeed{background-image:url(/cdn/all/both/unitdesc/unit_speed.png);height:35px;line-height:35px}#unitdescription  .costs #unitValues,
+#unitdescription  .costs
+#unitCosts{width:280px;margin:10px
+0px 10px 15px}#unitdescription  .costs #unitValues th,
+#unitdescription  .costs #unitCosts
+th{height:20px;padding-bottom:5px;border-bottom:1px solid #fbe7c0;font-weight:bold}#unitdescription  .costs #unitValues
+td.attribute{width:55px}#unitdescription  .costs #unitValues
+img{position:relative;left:auto;top:auto}#unitdescription  .costs #unitValues
+td.value{vertical-align:middle;padding-right:20px}#container
+#unit{width:255px;height:232px;margin-left:3px;float:left}#container
+#infoBox{float:right;padding:6px
+18px 0 0;line-height:18px;color:#542c0f}#container #infoBox
+.infoBoxHeader{width:374px;height:7px;background-image:url(/cdn/all/both/ikipedia/infoBox_header.png)}#container #infoBox
+.infoBoxFooter{width:374px;height:7px;background-image:url(/cdn/all/both/ikipedia/infoBox_footer.png)}#container #infoBox
+.infoBoxContent{border:1px
+solid #e5ba76;padding:5px
+5px 5px 25px;width:343px;height:320px;overflow:auto}#container  .infoBoxContent
+h3{font-weight:bold;font-size:12px;color:#542c0f;background:url(/cdn/all/both/ikipedia/helm.png) no-repeat left top;height:34px;padding:8px
+0 0 25px}#container  #infoBox
+.damageFocusContainer{width:150px;border:1px
+solid #4d0e0c;margin:5px
+0 5px 110px}#container #infoBox
+.damageFocus{background-color:#ff4646;height:6px}#container #infoBox
+span.textLabel{display:block;float:left;width:110px}#container #infoBox
+.weapon{background:url(/cdn/all/both/workshop/angriff_gold.png) no-repeat left top;padding:0
+0 0 70px;margin:0
+0 10px 0}#container #infoBox
+.weaponName{font-weight:bold;margin:10px
+0 0 0}#container #infoBox
+.req{font-weight:bold;display:block}#container #infoBox .available, #container #infoBox
+.notAvailable{display:block;width:100%}#unitdescription
+#unit.s301{background-image:url(/cdn/all/both/ikipedia/301.png)}#unitdescription
+#unit.s302{background-image:url(/cdn/all/both/ikipedia/302.png)}#unitdescription
+#unit.s303{background-image:url(/cdn/all/both/ikipedia/303.png)}#unitdescription
+#unit.s304{background-image:url(/cdn/all/both/ikipedia/304.png)}#unitdescription
+#unit.s305{background-image:url(/cdn/all/both/ikipedia/305.png)}#unitdescription
+#unit.s306{background-image:url(/cdn/all/both/ikipedia/306.png)}#unitdescription
+#unit.s307{background-image:url(/cdn/all/both/ikipedia/307.png)}#unitdescription
+#unit.s308{background-image:url(/cdn/all/both/ikipedia/308.png)}#unitdescription
+#unit.s309{background-image:url(/cdn/all/both/ikipedia/309.png)}#unitdescription
+#unit.s310{background-image:url(/cdn/all/both/ikipedia/310.png)}#unitdescription
+#unit.s311{background-image:url(/cdn/all/both/ikipedia/311.png)}#unitdescription
+#unit.s312{background-image:url(/cdn/all/both/ikipedia/312.png)}#unitdescription
+#unit.s313{background-image:url(/cdn/all/both/ikipedia/313.png)}#unitdescription
+#unit.s314{background-image:url(/cdn/all/both/ikipedia/314.png)}#unitdescription
+#unit.s315{background-image:url(/cdn/all/both/ikipedia/315.png)}#unitdescription
+#unit.s316{background-image:url(/cdn/all/both/ikipedia/316.png)}#unitdescription
+#unit.s320{background-image:url(/cdn/all/both/ikipedia/320.png)}#unitdescription
+#unit.s201{background-image:url(/cdn/all/both/ikipedia/201.png)}#unitdescription
+#unit.s204{background-image:url(/cdn/all/both/ikipedia/204.png)}#unitdescription
+#unit.s210{background-image:url(/cdn/all/both/ikipedia/210.png)}#unitdescription
+#unit.s211{background-image:url(/cdn/all/both/ikipedia/211.png)}#unitdescription
+#unit.s212{background-image:url(/cdn/all/both/ikipedia/212.png)}#unitdescription
+#unit.s213{background-image:url(/cdn/all/both/ikipedia/213.png)}#unitdescription
+#unit.s214{background-image:url(/cdn/all/both/ikipedia/214.png)}#unitdescription
+#unit.s215{background-image:url(/cdn/all/both/ikipedia/215.png)}#unitdescription
+#unit.s216{background-image:url(/cdn/all/both/ikipedia/216.png)}#unitdescription
+#unit.s217{background-image:url(/cdn/all/both/ikipedia/217.png)}#unitdescription
+#unit.s218{background-image:url(/cdn/all/both/ikipedia/218.png)}#unitdescription
+#unit.s219{background-image:url(/cdn/all/both/ikipedia/219.png)}#unitdescription
+#unit.s220{background-image:url(/cdn/all/both/ikipedia/220.png)}#unitdescription
+#unit.s319{background-image:url(/cdn/all/both/ikipedia/319.png)}#unitdescription
+#unit.s321{background-image:url(/cdn/all/both/ikipedia/321.png)}#unitdescription
+#unit.s322{background-image:url(/cdn/all/both/ikipedia/322.png)}#unitdescription
+#unit.s323{background-image:url(/cdn/all/both/ikipedia/323.png)}#unitdescription
+#unit.s324{background-image:url(/cdn/all/both/ikipedia/324.png)}#unitdescription
+#unit.s325{background-image:url(/cdn/all/both/ikipedia/325.png)}#unitdescription
+#unit.s326{background-image:url(/cdn/all/both/ikipedia/326.png)}#unitdescription
+#unit.s327{background-image:url(/cdn/all/both/ikipedia/327.png)}#unitdescription
+#unit.s221{background-image:url(/cdn/all/both/ikipedia/221.png)}#unitdescription
+#unit.s222{background-image:url(/cdn/all/both/ikipedia/222.png)}#unitdescription
+#unit.s223{background-image:url(/cdn/all/both/ikipedia/223.png)}#unitdescription
+#unit.s224{background-image:url(/cdn/all/both/ikipedia/224.png)}#unitdescription
+#unit.s225{background-image:url(/cdn/all/both/ikipedia/225.png)}#unitdescription
+#unit.s226{background-image:url(/cdn/all/both/ikipedia/226.png)}#unitdescription
+#unit.s227{background-image:url(/cdn/all/both/ikipedia/227.png)}#unitdescription
+#unit.s228{background-image:url(/cdn/all/both/ikipedia/228.png)}#unitdescription
+#unit.s229{background-image:url(/cdn/all/both/ikipedia/229.png)}#unitdescription
+#unit.s230{background-image:url(/cdn/all/both/ikipedia/230.png)}#container
+#unitRes{background-image:url(/cdn/all/both/ikipedia/ressborder.png);width:259px;height:71px;margin:284px
+0 0 15px}#container #unitRes
+ul.resources{position:absolute}#container #unitRes ul.resources
+li{overflow:visible;position:absolute}#container #unitRes  ul.resources
+li.firstpos{left:-1px;top:0px;width:35px;padding-left:33px}#container #unitRes  ul.resources li.secondpos, #container #unitRes  ul.resources
+li.eighthpos{left:65px;top:0px;width:33px}#container #unitRes  ul.resources
+li.thirdpos{left:128px;top:0px;width:33px}#container #unitRes  ul.resources
+li.fourthpos{left:186px;top:0px;width:33px}#container #unitRes  ul.resources
+li.fifthpos{left:11px;top:27px;width:33px;padding-left:26px}#container #unitRes  ul.resources
+li.sixthpos{left:67px;top:27px;width:33px;padding-left:38px}#container #unitRes  ul.resources
+li.seventhpos{left:136px;top:27px;width:60px}#container #unitRes  ul.resources
+li{margin:3px
+8px 0 8px}#container #unitRes ul.resources
+li.weight{background:url(/cdn/all/both/ikipedia/weight.png) no-repeat 5px 4px}#container #unitRes ul.resources
+li.completionTime{background:url(/cdn/all/both/resources/icon_time.png) no-repeat 5px 4px}#container #unitRes ul.resources
+li.building_level{background:url(/cdn/all/both/unitdesc/level_green1.png) no-repeat 5px 1px}#container #unitRes ul.resources
+li.noData{width:250px;padding:0;margin:0;text-align:center}#unitdescription
+.shortdesc{padding:370px
+20px 30px 20px}#unitdescription
+.troops{margin:0
+auto}#unitdescription .troops
+td{padding:2px}#unitdescription .troops .dummy_armybutton,
+#unitdescription .troops
+.dummy_armybutton_active{margin:1px}#cityMilitary .table01
+.count{height:27px}#cityMilitary
+.allied{background-color:#caf9b1}#cityMilitary
+.treaty{background-color:#fefa85}#cityMilitary
+.occupation_warning{height:30px;line-height:27px;margin:10px
+3px;padding:0
+10px;width:652px}#container
+.fleet_small{background-image:url(/cdn/all/both/characters/fleet/unitfleets_x34_y34_enhanced.png);background-repeat:no-repeat}#container .spy_small,
+#container
+.army_small{background-image:url(/cdn/all/both/characters/military/unitsprites_x34_y35_enhanced.png);background-repeat:no-repeat}#container
+.fleet_small.normal.s201{background-position:0px -36px}#container
+.fleet_small.normal.s210{background-position: -36px -36px}#container
+.fleet_small.normal.s211{background-position: -108px -36px}#container
+.fleet_small.normal.s212{background-position: -252px -36px}#container
+.fleet_small.normal.s213{background-position: -72px -36px}#container
+.fleet_small.normal.s214{background-position: -144px -36px}#container
+.fleet_small.normal.s215{background-position: -216px -36px}#container
+.fleet_small.normal.s216{background-position: -180px -36px}#container
+.fleet_small.normal.s217{background-position: -396px -36px}#container
+.fleet_small.normal.s218{background-position: -360px -36px}#container
+.fleet_small.normal.s219{background-position: -324px -36px}#container
+.fleet_small.normal.s220{background-position: -288px -36px}#container
+.fleet_small.normal.s221{background-position: -432px -36px}#container
+.fleet_small.normal.s222{background-position: -468px -36px}#container
+.fleet_small.normal.s224{background-position: -504px -36px}#container
+.fleet_small.normal.s226{background-position: -540px -36px}#container
+.fleet_small.normal.s228{background-position: -576px -36px}#container
+.fleet_small.normal.s227{background-position: -612px -36px}#container
+.fleet_small.normal.s223{background-position: -648px -36px}#container
+.fleet_small.normal.s225{background-position: -684px -36px}#container
+.fleet_small.normal.s230{background-position: -720px -36px}#container
+.fleet_small.normal.s229{background-position: -756px -36px}#container
+.army_small.normal.s301{background-position:0 -36px}#container
+.army_small.normal.s302{background-position: -36px -36px}#container
+.army_small.normal.s303{background-position: -72px -36px}#container
+.army_small.normal.s304{background-position: -144px -36px}#container
+.army_small.normal.s305{background-position: -395px -36px}#container
+.army_small.normal.s306{background-position: -360px -36px}#container
+.army_small.normal.s307{background-position: -432px -36px}#container
+.army_small.normal.s308{background-position: -252px -36px}#container
+.army_small.normal.s309{background-position: -324px -36px}#container
+.army_small.normal.s310{background-position: -216px -36px}#container
+.army_small.normal.s311{background-position: -180px -36px}#container
+.army_small.normal.s312{background-position: -288px -36px}#container
+.army_small.normal.s313{background-position: -108px -36px}#container
+.army_small.normal.s314{background-position: -468px -36px}#container
+.army_small.normal.s315{background-position: -540px -36px}#container
+.army_small.normal.s316{background-position: -759px -36px}#container
+.army_small.normal.s317{background-position: -576px -36px}#container
+.army_small.normal.s319{background-position: -612px -36px}#container
+.army_small.normal.s320{background-position: -685px -36px}#container
+.army_small.normal.s321{background-position: -648px -36px}#container
+.army_small.normal.s322{background-position: -722px -36px}#container
+.army_small.normal.s323{background-position: -833px -36px}#container
+.army_small.normal.s324{background-position: -907px -36px}#container
+.army_small.normal.s325{background-position: -944px -36px}#container
+.army_small.normal.s326{background-position: -796px -36px}#container
+.army_small.normal.s327{background-position: -870px -36px}#container
+.spy_small.normal.s999{background-position: -576px -36px}#container
+.fleet_small.disabled.s201{background-position:0px -72px}#container
+.fleet_small.disabled.s210{background-position: -36px -72px}#container
+.fleet_small.disabled.s211{background-position: -108px -72px}#container
+.fleet_small.disabled.s212{background-position: -252px -72px}#container
+.fleet_small.disabled.s213{background-position: -72px -72px}#container
+.fleet_small.disabled.s214{background-position: -144px -72px}#container
+.fleet_small.disabled.s215{background-position: -216px -72px}#container
+.fleet_small.disabled.s216{background-position: -180px -72px}#container
+.fleet_small.disabled.s217{background-position: -396px -72px}#container
+.fleet_small.disabled.s218{background-position: -360px -72px}#container
+.fleet_small.disabled.s219{background-position: -324px -72px}#container
+.fleet_small.disabled.s220{background-position: -288px -72px}#container
+.army_small.disabled.s301{background-position:0 -72px}#container
+.army_small.disabled.s302{background-position: -36px -72px}#container
+.army_small.disabled.s303{background-position: -72px -72px}#container
+.army_small.disabled.s304{background-position: -144px -72px}#container
+.army_small.disabled.s305{background-position: -395px -72px}#container
+.army_small.disabled.s306{background-position: -360px -72px}#container
+.army_small.disabled.s307{background-position: -432px -72px}#container
+.army_small.disabled.s308{background-position: -252px -72px}#container
+.army_small.disabled.s309{background-position: -324px -72px}#container
+.army_small.disabled.s310{background-position: -216px -72px}#container
+.army_small.disabled.s311{background-position: -180px -72px}#container
+.army_small.disabled.s312{background-position: -288px -72px}#container
+.army_small.disabled.s313{background-position: -108px -72px}#container
+.army_small.disabled.s314{background-position: -468px -72px}#container
+.army_small.disabled.s315{background-position: -540px -72px}#container
+.army_small.disabled.s316{background-position: -759px -72px}#container
+.army_small.disabled.s317{background-position: -576px -72px}#container
+.army_small.disabled.s319{background-position: -612px -72px}#container
+.army_small.disabled.s320{background-position: -685px -72px}#container
+.army_small.disabled.s321{background-position: -648px -72px}#container
+.army_small.disabled.s322{background-position: -722px -72px}#container
+.army_small.disabled.s323{background-position: -833px -72px}#container
+.army_small.disabled.s324{background-position: -907px -72px}#container
+.army_small.disabled.s325{background-position: -944px -72px}#container
+.army_small.disabled.s326{background-position: -796px -72px}#container
+.army_small.disabled.s327{background-position: -870px -72px}#container
+.spy_small.disabled.s999{background-position: -576px -72px}#container
+.unit_list.buttons{text-align:center;width:50px;height:14px;padding:50px
+0 0 0;margin:0
+8px 0 8px}#container
+.unit_list.small_icons{height:36px;margin-left:4px;text-align:center;width:35px}#container .unit_list.small_icons
+.unitcounttextlabel{margin:0
+0 0 0;text-align:center;width:35px}#container
+.troop_movements_unit_list{padding-left:4px}#container
+.unit_selection_spacer{height:54px}#container
+.upgrade_levels{width:60px;height:60px;background-repeat:no-repeat}#container
+.upgrade_levels.upgrade_level_offensive_1{background-image:url(/cdn/all/both/workshop/angriff_bronze.png)}#container
+.upgrade_levels.upgrade_level_offensive_2{background-image:url(/cdn/all/both/workshop/angriff_silber.png)}#container
+.upgrade_levels.upgrade_level_offensive_3{background-image:url(/cdn/all/both/workshop/angriff_gold.png)}#container
+.upgrade_levels.upgrade_level_defensive_1{background-image:url(/cdn/all/both/workshop/verteidigung_bronze.png)}#container
+.upgrade_levels.upgrade_level_defensive_2{background-image:url(/cdn/all/both/workshop/verteidigung_silber.png)}#container
+.upgrade_levels.upgrade_level_defensive_3{background-image:url(/cdn/all/both/workshop/verteidigung_gold.png)}.piracyRaidMainbox{display:block;height:125px;left:15px;position:relative;top:-15px;width:650px;font-size:14px}.piracyRaidMainbox
+.piracyContentBox{display:inline-block;position:absolute;font-weight:bold}.piracyRaidMainbox
+.attackerBox{text-align:left;padding-left:4px;position:absolute}.piracyRaidMainbox
+.centerBox{text-align:center;left:247px;padding-top:21px}.piracyRaidMainbox
+.defenderBox{text-align:right;right:0px;padding-right:5px;width:225px}.piracyRaidMainbox .defenderBox
+.crewImage{margin-left:159px}.piracyRaidMainbox .attackerBox
+.crewImage{margin-left:5px}.piracyRaidMainbox .defenderBox
+.scroll_view{margin-left:152px;margin-bottom:9px}.piracyRaidMainbox .attackerBox
+.scroll_view{margin-bottom:9px}.piracyRaidMainbox
+.crewImage{background:url(/cdn/all/both/characters/piratecrew.png) no-repeat;height:96px}.piracyRaidMainbox
+.shipImage{background-image:url(/cdn/all/both/img/city/piratenschiff.png);width:153px;height:108px}.cityinfo{width:95%;margin:0
+auto}.cityinfo
+li{margin:2px
+10px;line-height:1em;position:relative}.cityinfo
+.layoutHelper{height:0}.cityinfo .layoutHelper
+.col1{width:80px}.cityinfo .layoutHelper
+.col2{width:40px}.cityinfo .layoutHelper
+.col3{width:51px}.cityinfo .layoutHelper
+.col4{width:36px}.cityinfo
+.owner{font-weight:700}.cityinfo
+.scoreValue{text-align:right;margin-right:2px}.cityinfo
+.nameValue{text-align:left;margin-left:2px}.cityinfo
+.score.sub{font-size:10px}.cityinfo .score.sub
+span{margin-left:8px}.cityinfo
+td.icons{padding:0}.cityinfo
+.icon{display:block;float:right;width:13px;height:9px;margin:1px
+0 1px 2px}.cityinfo .icon:hover{background-position:0 -9px}.cityinfo
+.alt{background-color:#FDF1D4}.cityinfo .owner
+#js_selectedCityOwnerName{display:inline-block;overflow:hidden;text-overflow:ellipsis;width:100px}#takeOffer .ambrosiaTotal, #takeOffer
+.itemTotal{border:1px
+solid #E4B873;float:left;width:53px;height:66px;line-height:110px;font-size:14px;font-weight:700;margin:10px
+0 0 0;text-align:center}#takeOffer
+.ambrosiaTotal{background:url(/cdn/all/both/premium/ambrosia_icon.png) no-repeat 19px 10px;margin-left:40px}#takeOffer
+.itemIcon{margin:8px
+0 0 10px}#takeOffer
+.orderPrice{float:left;width:53px;height:23px;line-height:26px;font-size:14px;font-weight:700}#mission .summaryBox
+ul.routeInfo{padding-left:10px}.goToNextLine::after{content:"\a"}#mission  .summaryBox ul.routeInfo
+li.journeyFreighters{background:url(/cdn/all/both/civil/freighter_49.png) no-repeat;height:60px;padding-left:30px;margin-top: -50px;position:absolute;left:400px;top:83px}#mission .summaryBox .journeyFreighters input#freightersCount, #mission .summaryBox .journeyFreighters
+span{font-weight:700;color:#906646;font-size:14px;margin-left:3px;padding-top:27px}#mission .summaryBox
+.journeyFreighters{position:relative;top:30px}#mission .summaryBox .journeyFreighters
+#totalFreighters{margin-right:20px}#mission #transport
+p.travelTime{font-weight:bold;margin-top:4px}#mission #transport p.travelTime
+span{font-weight:normal}#mission #abyssalAmbushParticipateForm .troop-strength{margin:30px
+auto;width:420px}#mission #abyssalAmbushParticipateForm .troop-strength .progress-bar{width:100%;margin:12px
+0;font-family:sans-serif}#mission #abyssalAmbushParticipateForm .troop-strength .progress-bar
+.title{display:block;margin-bottom:4px;font-size:12px;font-weight:bold;color:#000}#mission #abyssalAmbushParticipateForm .troop-strength .progress-bar .progress-track{position:relative;width:100%;height:20px;background-color:#fff;border-radius:12px;border:1px
+solid #CCA569;overflow:hidden}#mission #abyssalAmbushParticipateForm .troop-strength .progress-bar .progress-track
+span{position:absolute;top:0;left:0;z-index:1;text-align:center;line-height:20px;color:#000;font-weight:normal;display:block;width:100%}#mission #abyssalAmbushParticipateForm .troop-strength .progress-bar .progress-fill{position:absolute;top:0;left:0;height:100%;width:0;background:rgb(252, 152, 45);border-radius:inherit;transition:width 0.3s ease-in-out;color:#fff}#mission #abyssalAmbushParticipateForm
+.grid{display:flex;flex-wrap:wrap;gap:20px 10px;padding:20px;justify-content:center;margin:25px}#mission #abyssalAmbushParticipateForm .grid
+.item{display:flex;flex-direction:column;align-items:center}#mission #abyssalAmbushParticipateForm .grid .item
+.box{width:34px;height:34px;overflow:hidden;border:1px
+solid #333;border-radius:4px}#mission #abyssalAmbushParticipateForm .grid .item
+span{margin-top:4px;padding:2px
+5px;border-radius:4px;text-align:center;font-size:10px;font-weight:bold;color:white;min-width:30px}#mission #abyssalAmbushParticipateForm .grid .item
+span.green{background:rgba(164, 215, 164, 0.8);color:rgba(0, 102, 68, 1)}#mission #abyssalAmbushParticipateForm .grid .item
+span.yellow{background:rgba(249, 217, 122, 0.8);;color:rgba(90, 66, 0, 1)}#mission #abyssalAmbushParticipateForm .grid .item
+span.orange{background:rgba(246, 168, 75, 0.8);color:rgba(90, 45, 0, 1)}#mission #abyssalAmbushParticipateForm .grid .item
+span.red{background:rgba(224, 124, 124, 0.8);color:rgba(74, 0, 0, 1)}#mission #abyssalAmbushParticipateForm
+.row{display:grid;grid-template-columns:repeat(3, 1fr);gap:0.5rem;width:100%;align-items:center}#mission #abyssalAmbushParticipateForm
+.col{padding:1rem}#mission #abyssalAmbushParticipateForm input[type="submit"]{padding:6px
+20px;display:block;width:100%}.text-center{text-align:center}#abyssalAmbushParticipate
+.mainHeader.hd{position:relative}#abyssalAmbushParticipate .mainHeader.hd
+.close{position:absolute;left:708px !important;top:4px !important}#container #abyssalAmbush .event_description, #container #abyssalAmbushParticipate
+.event_description{padding:5px;margin:5px
+15px 5px 0;border:3px
+solid rgb(209, 163, 111)}#container #abyssalAmbush .event_center
+img{display:inline-block;width:155px;height:155px;padding:0px;margin:15px;border:solid 2px #c9a584}#container #abyssalAmbush .event_center
+.event_right_block{text-align:left;display:inline-block;margin:15px;width:454px;vertical-align:top}#container #abyssalAmbush .event_center .event_right_block
+.event_monster_name{font-weight:bold;font-size:18px;line-height:40px}#container #abyssalAmbush .event_center .event_right_block
+.event_monster_lore{padding:5px
+0}#container #abyssalAmbush .event_center .event_right_block
+.event_monster_stage{font-weight:bold;font-size:16px;margin:5px
+0}#container #abyssalAmbush .event_center .event_right_block
+.event_monster_fight_now{display:block;font-weight:bold;font-size:14px;margin:5px
+0}#container #abyssalAmbush
+.table01{width:100%}#container #abyssalAmbush .table01
+td{text-align:center !important}#container #abyssalAmbush .table01.damage_score_table
+tr{height:30px}#container #abyssalAmbush .table01.damage_score_table
+tr.first{background-color:#e5d6b5}#container #abyssalAmbush .table01.damage_score_table
+tr.second{background-color:#f0e0be}#container #abyssalAmbush .table01.damage_score_table
+tr.third{background-color:#f9e8c5}#container #abyssalAmbush .event_user_rank
+.paginator{display:flex;justify-content:center}#container #abyssalAmbush
+.hitpoints_progress{width:31.944444444444%;border-radius:10px;height:15px;background:#ff9300;position:absolute;line-height:15px}#container
+.abyssalAmbushInfoBar{background-image:url(/cdn/all/both/minimized/abyssalAmbushInfoBarBackground.jpg);background-size:cover;border-radius:6px;position:absolute;top:46px;left:50%;transform:translateX(-50%);width:600px;padding:5px;z-index:999;display:flex;justify-content:space-between;pointer-events:auto}#container .abyssalAmbushInfoBar
+.dismissInfoBar{position:absolute;top:5px;right:10px;font-size:9pt;cursor:pointer}#container .abyssalAmbushInfoBar .dismissInfoBar
+span{display:block;padding:2px
+5px}#container .abyssalAmbushInfoBar .dismissInfoBar span:hover{color:rgba(0,0,0,0.5)}#container .abyssalAmbushInfoBar
+.left_content{width:50px}#container .abyssalAmbushInfoBar
+.right_content{width:540px;display:flex;padding:5px
+0;flex-direction:column;justify-content:space-evenly}#container .abyssalAmbushInfoBar .left_content
+img{width:100%;height:50px}#container .abyssalAmbushInfoBar .right_content
+.hitpoints{width:500px}#container .abyssalAmbushInfoBar .hitpoints
+.labels{display:flex;justify-content:space-between;padding:2px}#container .abyssalAmbushInfoBar .hitpoints .labels
+h2{font-weight:600}#container .abyssalAmbushInfoBar .hitpoints .labels .join-the-fight{position:relative;font-size:11px}#container .abyssalAmbushInfoBar
+.toEventHighScore{text-decoration:#542c0f;text-decoration-line:revert-layer}#container .abyssalAmbushInfoBar .hitpoints .labels .icon-attack-class{background-image:url(/cdn/all/both/advisors/military/icon-attack.png);display:block;float:left;width:15px;height:15px;background-repeat:no-repeat;background-position:center;background-size:15px}#container .abyssalAmbushInfoBar
+.hitpoints_progress{width:31.944444444444%;border-radius:10px;height:15px;background:#ff9300;position:absolute;line-height:15px}#container #abyssalAmbush
+.hitpoints_text{position:absolute;justify-self:center;height:15px;line-height:15px;color:black;-webkit-user-select:none;-ms-user-select:none;user-select:none}#container .abyssalAmbushInfoBar
+.hitpoints_text{position:absolute;justify-self:center;height:15px;line-height:15px;color:black;-webkit-user-select:none;-ms-user-select:none;user-select:none}#container #abyssalAmbush
+.bar_border{border:1px
+solid black;width:100%;border-radius:10px;border:1px
+solid #CCA569;background:#FFF;margin:5px
+0;min-height:15px!important;line-height:15px;position:relative;display:grid}#container .abyssalAmbushInfoBar .hitpoints
+.bar_border{border:1px
+solid black;width:100%;border-radius:10px;border:1px
+solid #CCA569;background:#FFF;margin:5px
+0;min-height:15px!important;line-height:15px;position:relative;display:grid}#container .abyssalAmbushInfoBar .right_content
+.arrow{width:25px}#container .abyssalAmbushInfoBar .right_content .arrow
+.js_toggleBig{position:absolute;top:30px;right:20px;cursor:pointer;width:18px;height:16px;background:transparent url(/cdn/all/both/interface/window_control_sprite.png) no-repeat scroll -90px 0;border-spacing:0}#container .abyssalAmbushInfoBar .right_content .inline_links
+a{text-decoration:underline;margin-right:20px}#container .abyssalAmbushInfoBar .right_content .inline_links a:last-child{margin-right:0px}#container .abyssalAmbushInfoBar .right_content .inline_links a:hover{text-decoration:none}@media(max-width: 1700px){#container
+.abyssalAmbushInfoBar{top:173px}}#container #abyssalAmbushParticipate .abyssalAmbushSummary
+.plunderbutton{background:#eccf8e url(/cdn/all/both/input/button.png) repeat-x;border:3px
+double rgb(93, 76, 47);width:150px;height:34px;margin:10px
+auto}#container #abyssalAmbushParticipate .abyssalAmbushSummary
+.plunder_warning_text{margin:0
+auto !important}#container #abyssalAmbushParticipate .abyssalAmbushSummary .plunderbutton:disabled{border:3px
+double rgba(93, 76, 47, 0.3)}#container #abyssalAmbushParticipate .abyssalAmbushSummary
+.travelTime{position:relative;width:100%;background:url(/cdn/all/both/layout/bg_occupation_box.jpg) left top no-repeat;background-position: -400px 0;height:70px}#container #abyssalAmbushParticipate
+#js_plunderWarningText{text-align:right;display:none}#container #abyssalAmbushParticipate
+#js_plunderWarningText.plunder_warning_text.green{color:#0eaa03}#container #abyssalAmbushParticipate
+#js_plunderWarningText.plunder_warning_text.red{color:#aa0303}#container #abyssalAmbushParticipate
+#js_plunderWarningText.plunder_warning_text{display:block}#container #abyssalAmbushParticipate .abyssalAmbushSummary
+.totalTroopStrength{position:absolute;display:flex;align-items:center;top:30px;left:250px}#container #abyssalAmbushParticipate .abyssalAmbushSummary .travelTime
+#journeyTime{position:absolute;left:0px;width:80px;text-align:right;top:15px}#container #abyssalAmbushParticipate .abyssalAmbushSummary .travelTime
+#returnTime{position:absolute;left:130px;width:60px;text-align:left;top:26px}#container #abyssalAmbushParticipate
+.loadingTime{margin-left:18px}#container #abyssalAmbushParticipate #transport
+.itemIcon{margin:8px
+0 0 10px}#container #abyssalAmbushParticipate #transport
+.orderPrice{float:left;width:53px;height:23px;line-height:26px;font-size:14px;font-weight:700}#container #abyssalAmbushParticipate
+#armyPreview{background:none}#abyssalAmbush
+.close{top:0!important}#abyssalAmbush
+.back{display:none;top: -2px!important}#abyssalAmbushParticipate
+.close{top:0!important}#abyssalAmbushParticipate
+.back{display:none;top: -2px!important}.abyssalAmbushIcon{background-repeat:no-repeat;background-size:contain;position:absolute;top: -43px;inset-inline-start: -36px;width:180px;height:180px;pointer-events:none}.abyssalAmbushIconPreview{background-size:132% !important;background-position:center;background-repeat:no-repeat;position:absolute;width:121px;height:123px;top: -8px;inset-inline-start:3px;pointer-events:none}#abyssalAmbush
+.tab_item{width:674px}.toolbar
+ul{display:flex;align-items:center;gap:10px;list-style:none;margin:0;padding:10px
+0;width:655px}.toolbar ul li:first-child{width:20%}.toolbar ul li:last-child{width:80%}#abyssalAmbush .toolbar select,
+#abyssalAmbush .toolbar input[type="text"]{padding:6px
+10px;border:1px
+solid #ccc;border-radius:4px;font-size:14px;width:100%}#abyssalAmbush .tab_item table
+tr.highlight{background-color:#cae877 !important;border-top:1px solid white}@charset "utf-8";#container
+#minimizedBoxes{height:50px;left:590px;position:absolute;top: -50px;width:416px}#container
+.is_minimized{background:url(/cdn/all/both/interface/minimized_sprite.png) no-repeat 0 0 transparent;cursor:pointer;float:right;height:50px;margin:0
+2px;position:relative;width:50px;z-index:10000}#container
+.is_minimized.hover{background-position:0 -50px}#container .is_minimized
+.btn_img{height:40px;width:40px;position:relative;top:5px;left:5px}#container .mainContentBox
+.minimize{background-position: -144px 0;left:682px}#container .mainContentBox .minimize:hover{background-position: -144px -19px}#container .mainContentBox
+.is_minimized{background-position: -126px 0}#container .mainContentBox .is_minimized:hover{background-position: -126px -19px}#container .templateView.minimizing:before, #container .templateView.minimizing:after{content:"" !important}#container .mainContentBoxZShopSmall
+.minimize{left:748px}#container .mainContentBoxZShopBig
+.minimize{left:748px}#container .mainContentBox900
+.minimize{left:854px}#container .mainContentBox500
+.minimize{left:454px}#container #tradeAdvisor_c:before, #container #premiumTradeAdvisor_c:before, #container #tradeRoutes_c:before,
+#container #registrationGifts_c:before, #container #dailyTasks_c:before, #container #dailyTasksRewards_c:before,
+#container #premiumTradeAdvisorCitizens_c:before, #container #premiumTradeAdvisorBuildings_c:before{content:url(/cdn/all/both/minimized/tradeAdvisor.png)}#container #militaryAdvisor_c:before, #container #retreat_c:before, #container #premiumMilitaryAdvisor_c:before,
+#container #militaryAdvisorCombatList_c:before, #container #militaryAdvisorWarList_c:before, #container #militaryAdvisorOldWars_c:before, #container #militaryAdvisorOldAllyWars_c:before,
+#container #militaryAdvisorWarDetails_c:before, #container #militaryAdvisorAllyWarDetails_c:before{content:url(/cdn/all/both/minimized/militaryAdvisor.png)}#container #researchAdvisor_c:before, #container #researchDetail_c:before, #container #premiumResearchAdvisor_c:before{content:url(/cdn/all/both/minimized/researchAdvisor.png)}#container #diplomacyAdvisor_c:before, #container #diplomacyIslandBoard_c:before, #container #diplomacyAdvisorOutBox_c:before,
+#container #diplomacyAdvisorArchive_c:before, #container #diplomacyAdvisorArchiveOutBox_c:before,
+#container #diplomacyTreaty_c:before, #container #diplomacyAlly_c:before, #container #diplomacyAdvisorSearchUser_c:before,
+#container #diplomacyAlly_c:before, #container #premiumDiplomacyAdvisor_c:before, #container #ignoreList_c:before,
+#container #diplomacyAllyMemberlist_c:before, #container #diplomacyAllySearch_c:before, #container #diplomacyAllyInfo_c:before{content:url(/cdn/all/both/minimized/diplomacyAdvisor.png)}#container #resource_c:before{content:url(/cdn/all/both/minimized/resource.png)}#container #tradegood_c:before{content:url(/cdn/all/both/minimized/tradegood.png)}#container #premium_c:before, #container #premiumPayment_c:before, #itunesPayment_c:before, #container #zShopUpdateInfo_c:before,
+#container #premiumDetails_c:before{content:url(/cdn/all/both/minimized/premium.png)}#container #premiumTrader_c:before{content:url(/cdn/all/both/minimized/trader.png)}#container #wonder_c:before{content:url(/cdn/all/both/minimized/wonder.png)}#container #finances_c:before{content:url(/cdn/all/both/minimized/finances.png)}#container #merchantNavy_c:before{content:url(/cdn/all/both/minimized/merchantNavy.png)}#container #options_c:before{content:url(/cdn/all/both/minimized/transport.png)}#container #premiumDummy_c:before{content:url(/cdn/all/both/minimized/dummys.png)}#container #cityMilitary_c:before, #container #relatedCities_c:before{content:url(/cdn/all/both/minimized/citymilitary.png)}#container #deployment_c:before{content:url(/cdn/all/both/minimized/movearmy.png)}#container #deploymentFleet_c:before{content:url(/cdn/all/both/minimized/movefleet.png)}#container #sendIKMessage_c:before{content:url(/cdn/all/both/minimized/diplomacy.png)}#container #transport_c:before{content:url(/cdn/all/both/minimized/transport.png)}#container #defendCity_c:before{content:url(/cdn/all/both/minimized/defendcity.png)}#container #defendPort_c:before{content:url(/cdn/all/both/minimized/defendport.png)}#container #piracyRaid_c:before{content:url(/cdn/all/both/minimized/piracyRaid.png)}#container #plunder_c:before{content:url(/cdn/all/both/minimized/plunder.png)}#container #blockade_c:before{content:url(/cdn/all/both/minimized/blockade.png)}#container #occupy_c:before{content:url(/cdn/all/both/minimized/occupy.png)}#container #sendSpy_c:before, #container #spyMissions_c:before{content:url(/cdn/all/both/minimized/sendspy.png)}#container #garrisonEdit_c:before{content:url(/cdn/all/both/minimized/garrisonEdit.png)}#container #fleetGarrisonEdit_c:before{content:url(/cdn/all/both/minimized/movefleet.png)}#container #abyssalAmbush_c:before{content:url(/cdn/all/both/minimized/abyssalAmbushIcon.jpg);top:143px;transform:scale(1.1)}#container #abyssalAmbushParticipate_c:before{content:url(/cdn/all/both/minimized/abyssalAmbushIcon.jpg);top:143px;transform:scale(1.1)}#container #militaryAdvisorAbyssalAmbushReportView_c:before{content:url(/cdn/all/both/minimized/abyssalAmbushIcon.jpg);top:143px;transform:scale(1.1)}#container #options_c:before,
+#container #optionsAccount_c:before,
+#container #optionsNotification_c:before,
+#container #optionsIPSharing_c:before,
+#container #options_deletion_confirm_c:before{content:url(/cdn/all/both/minimized/options.png)}#container #reportPlayer_c:before{content:url(/cdn/all/both/minimized/reportPlayer.png)}#container #version_c:before, #container #credits_c:before{content:url(/cdn/all/both/minimized/gf.png)}#container #informations_c:before, #container #formOfRuleDetail_c:before, #container #unitdescription_c:before,
+#container #ikipedia_c:before, #container #wonderDetail_c:before, #container #buildingDetail_c:before{content:url(/cdn/all/both/layout/help.png);padding:5px
+0 0 2px}#container #highscore_c:before, #container #highscoreAlly_c:before{content:url(/cdn/all/both/minimized/highscore.png)}#container #finances_c:before{content:url(/cdn/all/both/minimized/finances.png)}#container #error_c:before, #container #noluxury_c:before{content:url(/cdn/all/both/minimized/error.png)}#container #friendListEdit2_c:before,
+#container #friendListEdit_c:before{content:url(/cdn/all/both/minimized/friends.png)}#container #normalServerBadges_c:before,
+#container #eventServerBadges_c:before,
+#container #avatarDetails_c:before,
+#container #achievement_c:before,
+#container #avatarProfile_c:before{content:url(/cdn/all/both/minimized/profile.png)}#container #buildingGround_c:before, #container #colonize_c:before, #container #colonizeExtreme_c:before{content:url(/cdn/all/both/minimized/buildingground.png)}#container #militaryAdvisorReportView_c:before, #container #militaryAdvisorDetailedReportView_c:before{content:url(/cdn/all/both/advisors/military/bang_soldier.png)}#container #takeOffer_c:before{content:url(/cdn/all/both/minimized/trade.png)}#container #errorInsufficientFunds_c:before{content:url(/cdn/all/both/minimized/allResources.png)}#container #helios_c:before, #container #heliosConstruction_c:before{content:url(/cdn/all/both/world/heliostower.png);padding-left:10px}#container #eventServerStatus_c:before,
+#container #normalServerStatus_c:before,
+#container #servermergeReservation_c:before,
+#container #servermergeAfterMerge_c:before{content:url(/cdn/all/both/minimized/weltinfo.png)}#container #militaryReportExport_c:before{content:url(/cdn/all/both/advisors/military/bang_soldier.png)}#container #premiumResourceShop_c:before{content:url(/cdn/all/both/minimized/resourceShop.png)}#container #confirmResourcePremiumBuy_c:before{content:url(/cdn/all/both/minimized/resourceShop.png)}#container #redVsBlueInfo_c:before{content:url(/cdn/all/both/minimized/defendcity.png)}#container #retentionQuest_c:before{content:url(/cdn/all/both/minimized/tradeAdvisor.png)}#container #barbarianTruce_c:before,
+#container #barbarianVillage_c:before{content:url(/cdn/all/both/minimized/IK_Icon%20Barbarendorf%20allgemein.png)}#container #options_umod_confirm_c:before{content:url(/cdn/all/both/layout/icon-palm.png);margin:10px
+0 0 12px}#container #ambrosiaFountain_c:before{content:url(/cdn/all/both/minimized/fountain.png)}#container #inventory_c:before,
+#container #inventoryTreasureMap_c:before,
+#container #inventoryTreasureMapArchive_c:before{content:url(/cdn/all/both/minimized/kiste_offen.png);padding:5px
+0 0 0}#container #barbarianShadyTrader_c:before{content:url(/cdn/all/both/minimized/zwielichtiger_Haendler_Icon_40x40.png)}#container #barbarianFleet_c:before{padding-left:6px;content:url(/cdn/all/both/minimized/Barbarenschiff_Icon_29x40.png)}#island #container
+#minimizedBoxes{left:830px;width:210px}#worldmap_iso #container
+#minimizedBoxes{left:830px;width:210px}#premiumOffers
+th.feature{min-width:290px}#container
+.buy_ambrosia{cursor:pointer;padding-left:40px!important}#container .buy_ambrosia
+a{display:block;line-height:16px;padding:5px
+0}#premiumDetails
+ul{margin:8px
+30px}#premiumDetails ul
+li{list-style-type:disc;margin-left:10px}#premiumDetails
+.slide_container{padding-left:10px}#premiumDetails
+#premiumOffers{padding-top:5px}#premiumDetails .slide_container #navCarousel
+.item{background:url(/cdn/all/both/premium/bg_premium_features_selected.png) no-repeat scroll left center transparent;height:100px;width:160px;padding-right:3px;float:left}#premiumDetails .slide_container #navCarousel
+.item.selected{background-image:url(/cdn/all/both/premium/bg_premium_features.png)}#premiumDetails .slide_container #contentCarousel
+.item{height:auto;margin:3px;width:672px;display:none}#premiumDetails .slide_container #contentCarousel
+.item.selected{display:block}#premiumDetails .slide_container .item
+.navimg{left:33px;position:relative;top:9px}#premiumDetails .slide_container .item
+h3{line-height:85%;margin-top:10px;font-size:11px;text-align:center}#premiumDetails
+.left_arrow{cursor:pointer;left:10px;position:absolute;top:10px;width:17px}#premiumDetails
+.right_arrow{cursor:pointer;left:655px;position:absolute;top:10px;width:17px}#premiumDetails #premiumAccountDetail .item
+.details{margin:20px}#premiumDummy
+.unit_list_wrapper{border:1px
+solid #FAE3BA;margin:10px
+auto;padding:0}#premiumDummy .missionWrapper
+.realMission{float:none;height:45px;left:38px;position:relative;top: -42px;width:286px}#premiumDummy
+.dummyHeader{padding:5px}#premiumDummy .missionWrapper
+.unit_slider{display:block;height:45px;width:auto;position:relative}#premiumDummy
+.buy_btn_tooltip{bottom:75px;right:28px}#premiumDummy .missionWrapper
+.spycount{border:none}#premiumDummy .missionWrapper
+.unit_icon{float:none;left:0;position:relative;top:0}#premiumDummy
+.dark_background{background-color:#FFF5D6;border-right:1px solid #FAE3BA}#premiumDummy
+.choose_city{margin:15px
+30px;width:auto}#premiumDummy
+.city_dummy_infos{background-color:#FFF5D6;border:1px
+solid #F4DDB5;margin:10px
+auto;width:95%}#premiumDummy .city_dummy_infos
+.package_info{border-bottom:1px dashed #F4DDB5;padding:0
+15px 15px 15px}#premiumDummy .city_dummy_infos .package_info
+.infotext_desc{margin:6px
+0}#premiumDummy .city_dummy_infos .package_info
+.infotext_packagename{padding:0
+15px 3px 0}#premiumDummy .item_table .dummy_item
+.unit_info{font-size:11px;margin:3px
+0px}#premiumDummy .choose_city
+.td_city_extend{padding-left:30px}#premiumDummy
+.max_unit_input{left:430px;position:relative;top: -28px}#premiumDummy
+.item_table{margin:10px
+auto}#premiumDummy .item_table .dummy_item
+h4{margin:5px;text-align:center}#premiumDummy .item_table
+td{width:190px;padding-right:10px;padding-bottom:9px}#premiumDummy
+.buy_ambrosia{padding-left:25px;margin:0
+auto}#premiumDummy .item_table
+.dummy_item{background:url(/cdn/all/both/premium/bg_premium_features_large_selected.png) no-repeat scroll left top transparent;cursor:pointer;vertical-align:top;height:200px}#premiumDummy .item_table
+.dummy_item_hover{background:url(/cdn/all/both/premium/bg_premium_features_large_hover.png) no-repeat scroll left top transparent}#premiumDummy .item_table
+.dummy_item_selected{background:url(/cdn/all/both/premium/bg_premium_features_large.png) no-repeat scroll left top transparent}#premiumDummy .item_table
+.dummy_item_disabled{background:url(/cdn/all/both/premium/bg_premium_features_large_disabled.png) no-repeat scroll left top transparent;color:#777 !important;cursor:default}#premiumDummy .item_table .dummy_item_disabled .dummy_info .duration,
+#premiumDummy .item_table .dummy_item_disabled .dummy_info
+.cost{color:#777 !important}#premiumDummy .item_table .dummy_item
+.dummy_icon_large{float:left;margin:3px
+20px}#premiumDummy .item_table .dummy_item
+.dummy_info{float:left;margin-top:13px}#premiumDummy .summary_box
+.summary_element{position:absolute}#premiumDummy .item_table .dummy_item .dummy_info .cost,
+#premiumDummy .summary_box
+.cost{margin-top:6px}#premiumDummy .summary_box
+.sum_package{left:90px;text-align:center;top:21px;width:77px}#premiumDummy .summary_box
+.sum_city{left:230px;top:27px}#premiumDummy .summary_box
+.remaining_time{left:368px;top:27px}#premiumDummy .summary_box
+.cost{left:425px;top:20px}#premiumDummy .citySpecialSelect
+.dropbutton{width:175px}.dummyCitySelect
+.citytype{background:none;float:right;height:24px;width:24px}.dummyCitySelect .dropbutton
+.citytype{margin-right:28px}.dropdownContainer.dummyCitySelect
+.dummy_active{background-repeat:no-repeat;background-position:right}.dropdownContainer.dummyCitySelect
+.small_dummy_active{background-image:url(/cdn/all/both/premium/icon_dummy_small.png)}.dropdownContainer.dummyCitySelect
+.medium_dummy_active{background-image:url(/cdn/all/both/premium/icon_dummy_medium.png)}.dropdownContainer.dummyCitySelect
+.huge_dummy_active{background-image:url(/cdn/all/both/premium/icon_dummy_huge.png)}#premiumDummy .sliderinput .sliderbg
+.sliderthumb{top:0px}#premiumDummy
+.hintbox{background-color:#FAE0AE;border:1px
+solid #E4B873;color:#542C0F;font-size:12px;left:333px;line-height:18px;margin: -25px 0 15px;padding-left:5px;position:relative;width:320px}#premiumDummy .hintbox
+h3{font-weight:bold;height:auto;margin:4px}#premiumDummy .summary_box
+.remaining_time{padding-right:10px;text-align:right}#premiumDummy
+.summary_box{background:url(/cdn/all/both/premium/dummy_summary_s.jpg) no-repeat scroll 0 0 transparent;height:55px;position:relative;width:471px}#premiumDummy
+.summary_small{background:url(/cdn/all/both/premium/dummy_summary_s.jpg) no-repeat scroll 0 0 transparent}#premiumDummy
+.summary_medium{background:url(/cdn/all/both/premium/dummy_summary_m.jpg) no-repeat scroll 0 0 transparent}#premiumDummy
+.summary_huge{background:url(/cdn/all/both/premium/dummy_summary_l.jpg) no-repeat scroll 0 0 transparent}#premiumDummy
+.buy_button{left:471px;padding:7px
+5px;position:relative;top: -27px}#premiumDummy
+.extend_button{bottom:14px;left:370px;position:relative}#premiumDummy .button_disabled
+.ambrosiaIcon{background-position:right -21px}#premiumDummy .summary_box
+.ambrosia_available{left:471px;position:relative;top:60px}#premiumDummy .army
+.active_troops{height:60px;margin:0;padding:0}#premiumDummy .army .troops
+.new_dummy_value{background-image:none;margin-bottom:0;margin-right:1px;width:36px}#premiumDummy .army .troops
+.troops_firstrow{padding-right:5px;padding-left:5px;text-align:right;vertical-align:bottom}#premiumDummy .army .active_troops
+span{font-weight:500}#container .troops
+.dummy_armybutton{background-repeat:no-repeat;font-weight:bold}#container .troops .dummy_armybutton, #container .troops
+.dummy_armybutton_active{cursor:pointer;float:left;height:35px;text-align:center;width:35px}#container .troops
+.dummy_armybutton_disabled{color:#aaa}#container .troops .dummy_armybutton_active,
+#container .troops
+.dummy_armybutton_disabled{cursor:default}#container .troops .button_landunits, #container .troops
+.button_landunits_city{background-image:url(/cdn/all/both/characters/military/unitsprites_x34_y35_enhanced.png)}#container
+.dummy_armybutton.swordsman{background-position: -36px 0px}#container
+.dummy_armybutton.phalanx{background-position: -72px 0px}#container
+.dummy_armybutton.slinger{background-position:0 0px}#container
+.dummy_armybutton.archer{background-position: -108px 0px}#container
+.dummy_armybutton.marksman{background-position: -144px 0px}#container
+.dummy_armybutton.medic{background-position: -180px 0px}#container
+.dummy_armybutton.cook{background-position: -216px 0px}#container
+.dummy_armybutton.steamgiant{background-position: -251px 0px}#container
+.dummy_armybutton.gyrocopter{background-position: -288px 0px}#container
+.dummy_armybutton.bombardier{background-position: -324px 0px}#container
+.dummy_armybutton.catapult{background-position: -360px 0px}#container
+.dummy_armybutton.mortar{background-position: -395px 0px}#container
+.dummy_armybutton.ram{background-position: -431px 0px}#container
+.dummy_armybutton.spearman{background-position: -540px 0px}#container
+.dummy_armybutton.barbarian{background-position: -759px 0px}#container
+.dummy_armybutton.spartan{background-position: -612px 0px}#container
+.dummy_armybutton.barbarianClub{background-position: -685px 0px}#container
+.dummy_armybutton.barbarianKnive{background-position: -648px 0px}#container
+.dummy_armybutton.barbarianRam{background-position: -907px 0px}#container
+.dummy_armybutton.barbarianAxethrow{background-position: -722px 0px}#container
+.dummy_armybutton.barbarianWalker{background-position: -833px 0px}#container
+.dummy_armybutton.barbarianCatapult{background-position: -944px 0px}#container
+.dummy_armybutton.barbarianZeppelin{background-position: -870px 0px}#container
+.dummy_armybutton.barbarianFighter{background-position: -796px 0px}#container .dummy_armybutton_hover.swordsman, #container
+.dummy_armybutton_active.swordsman{background-position: -36px -36px}#container .dummy_armybutton_hover.phalanx, #container
+.dummy_armybutton_active.phalanx{background-position: -72px -36px}#container .dummy_armybutton_hover.archer, #container
+.dummy_armybutton_active.archer{background-position: -108px -36px}#container .dummy_armybutton_hover.slinger, #container
+.dummy_armybutton_active.slinger{background-position:0 -36px}#container .dummy_armybutton_hover.marksman, #container
+.dummy_armybutton_active.marksman{background-position: -144px -36px}#container .dummy_armybutton_hover.medic, #container
+.dummy_armybutton_active.medic{background-position: -180px -36px}#container .dummy_armybutton_hover.cook, #container
+.dummy_armybutton_active.cook{background-position: -216px -36px}#container .dummy_armybutton_hover.steamgiant, #container
+.dummy_armybutton_active.steamgiant{background-position: -251px -36px}#container .dummy_armybutton_hover.gyrocopter, #container
+.dummy_armybutton_active.gyrocopter{background-position: -288px -36px}#container .dummy_armybutton_hover.bombardier, #container
+.dummy_armybutton_active.bombardier{background-position: -324px -36px}#container .dummy_armybutton_hover.catapult, #container
+.dummy_armybutton_active.catapult{background-position: -360px -36px}#container .dummy_armybutton_hover.mortar, #container
+.dummy_armybutton_active.mortar{background-position: -395px -36px}#container .dummy_armybutton_hover.ram, #container
+.dummy_armybutton_active.ram{background-position: -431px -36px}#container .dummy_armybutton_hover.spearman, #container
+.dummy_armybutton_active.spearman{background-position: -540px -36px}#container .dummy_armybutton_hover.barbarian, #container
+.dummy_armybutton_active.barbarian{background-position: -759px -36px}#container .dummy_armybutton_hover.spartan, #container
+.dummy_armybutton_active.spartan{background-position: -612px -36px}#container .dummy_armybutton_hover.barbarianClub, #container
+.dummy_armybutton_active.barbarianClub{background-position: -685px -36px}#container .dummy_armybutton_hover.barbarianKnive, #container
+.dummy_armybutton_active.barbarianKnive{background-position: -648px -36px}#container .dummy_armybutton_hover.barbarianRam, #container
+.dummy_armybutton_active.barbarianRam{background-position: -907px -36px}#container .dummy_armybutton_hover.barbarianAxethrow, #container
+.dummy_armybutton_active.barbarianAxethrow{background-position: -722px -36px}#container .dummy_armybutton_hover.barbarianWalker, #container
+.dummy_armybutton_active.barbarianWalker{background-position: -833px -36px}#container .dummy_armybutton_hover.barbarianCatapult, #container
+.dummy_armybutton_active.barbarianCatapult{background-position: -944px -36px}#container .dummy_armybutton_hover.barbarianZeppelin, #container
+.dummy_armybutton_active.barbarianZeppelin{background-position: -870px -36px}#container .dummy_armybutton_hover.barbarianFighter, #container
+.dummy_armybutton_active.barbarianFighter{background-position: -796px -36px}#container
+.dummy_armybutton_disabled.swordsman{background-position: -36px -72px}#container
+.dummy_armybutton_disabled.phalanx{background-position: -72px -72px}#container
+.dummy_armybutton_disabled.archer{background-position: -108px -72px}#container
+.dummy_armybutton_disabled.slinger{background-position:0 -72px}#container
+.dummy_armybutton_disabled.marksman{background-position: -144px -72px}#container
+.dummy_armybutton_disabled.medic{background-position: -180px -72px}#container
+.dummy_armybutton_disabled.cook{background-position: -216px -72px}#container
+.dummy_armybutton_disabled.steamgiant{background-position: -251px -72px}#container
+.dummy_armybutton_disabled.gyrocopter{background-position: -288px -72px}#container
+.dummy_armybutton_disabled.bombardier{background-position: -324px -72px}#container
+.dummy_armybutton_disabled.catapult{background-position: -360px -72px}#container
+.dummy_armybutton_disabled.mortar{background-position: -395px -72px}#container
+.dummy_armybutton_disabled.ram{background-position: -431px -72px}#container
+.dummy_armybutton_disabled.spearman{background-position: -540px -72px}#container
+.dummy_armybutton_disabled.barbarian{background-position: -759px -72px}#container
+.dummy_armybutton_disabled.spartan{background-position: -612px -72px}#container
+.dummy_armybutton_disabled.barbarianClub{background-position: -685px -72px}#container
+.dummy_armybutton_disabled.barbarianKnive{background-position: -648px -72px}#container
+.dummy_armybutton_disabled.barbarianRam{background-position: -907px -72px}#container
+.dummy_armybutton_disabled.barbarianAxethrow{background-position: -722px -72px}#container
+.dummy_armybutton_disabled.barbarianWalker{background-position: -833px -72px}#container
+.dummy_armybutton_disabled.barbarianCatapult{background-position: -944px -72px}#container
+.dummy_armybutton_disabled.barbarianZeppelin{background-position: -870px -72px}#container
+.dummy_armybutton_disabled.barbarianFighter{background-position: -796px -72px}#container .troops .button_seaunits,
+#container .troops
+.button_seaunits_city{background-image:url(/cdn/all/both/premium/unitfleets_x34_y34.png)}#container
+.dummy_armybutton.ship_ram{background-position:  -36px 0}#container
+.dummy_armybutton.ship_ballista{background-position:  -72px 0}#container
+.dummy_armybutton.ship_flamethrower{background-position: -108px 0}#container
+.dummy_armybutton.ship_catapult{background-position: -144px 0}#container
+.dummy_armybutton.ship_steamboat{background-position: -180px 0}#container
+.dummy_armybutton.ship_mortar{background-position: -216px 0}#container
+.dummy_armybutton.ship_submarine{background-position: -252px 0}#container
+.dummy_armybutton.ship_tender{background-position: -288px 0}#container
+.dummy_armybutton.ship_ballooncarrier{background-position: -324px 0}#container
+.dummy_armybutton.ship_paddlespeedship{background-position: -360px 0}#container
+.dummy_armybutton.ship_rocketship{background-position: -396px 0}#container
+.dummy_armybutton.ship_barbarian_light_battleship{background-position: -432px 0}#container
+.dummy_armybutton.ship_barbarian_light_ranged{background-position: -468px 0}#container
+.dummy_armybutton.ship_barbarian_heavy_ranged{background-position: -504px 0}#container
+.dummy_armybutton.ship_barbarian_heavy_ranged_II{background-position: -540px 0}#container
+.dummy_armybutton.ship_barbarian_first_strike_II{background-position: -576px 0}#container
+.dummy_armybutton.ship_barbarian_first_strike_I{background-position: -612px 0}#container
+.dummy_armybutton.ship_barbarian_heavy_battleship{background-position: -648px 0}#container
+.dummy_armybutton.ship_barbarian_heavy_battleship_II{background-position: -684px 0}#container
+.dummy_armybutton.ship_barbarian_carrier{background-position: -720px 0}#container
+.dummy_armybutton.ship_barbarian_anti_carrier{background-position: -756px 0}#container
+.dummy_armybutton.ship_freighter{background-position: -792px 0}#container .dummy_armybutton_hover.ship_transport,
+#container
+.dummy_armybutton_active.ship_transport{background-position:0 -36px}#container .dummy_armybutton_hover.ship_ram,
+#container
+.dummy_armybutton_active.ship_ram{background-position:  -36px -36px}#container .dummy_armybutton_hover.ship_ballista,
+#container
+.dummy_armybutton_active.ship_ballista{background-position:  -72px -36px}#container .dummy_armybutton_hover.ship_flamethrower,
+#container
+.dummy_armybutton_active.ship_flamethrower{background-position: -108px -36px}#container .dummy_armybutton_hover.ship_catapult,
+#container
+.dummy_armybutton_active.ship_catapult{background-position: -144px -36px}#container .dummy_armybutton_hover.ship_steamboat,
+#container
+.dummy_armybutton_active.ship_steamboat{background-position: -180px -36px}#container .dummy_armybutton_hover.ship_mortar,
+#container
+.dummy_armybutton_active.ship_mortar{background-position: -216px -36px}#container .dummy_armybutton_hover.ship_submarine,
+#container
+.dummy_armybutton_active.ship_submarine{background-position: -252px -36px}#container .dummy_armybutton_hover.ship_tender,
+#container
+.dummy_armybutton_active.ship_tender{background-position: -288px -36px}#container .dummy_armybutton_hover.ship_ballooncarrier,
+#container
+.dummy_armybutton_active.ship_ballooncarrier{background-position: -324px -36px}#container .dummy_armybutton_hover.ship_paddlespeedship,
+#container
+.dummy_armybutton_active.ship_paddlespeedship{background-position: -360px -36px}#container .dummy_armybutton_hover.ship_rocketship,
+#container
+.dummy_armybutton_active.ship_rocketship{background-position: -396px -36px}#container .dummy_armybutton_active.ship_barbarian_light_battleship,
+#container
+.dummy_armybutton_hover.ship_barbarian_light_battleship{background-position: -432px -36px}#container .dummy_armybutton_active.ship_barbarian_light_ranged,
+#container
+.dummy_armybutton_hover.ship_barbarian_light_ranged{background-position: -468px -36px}#container .dummy_armybutton_active.ship_barbarian_heavy_ranged,
+#container
+.dummy_armybutton_hover.ship_barbarian_heavy_ranged{background-position: -504px -36px}#container .dummy_armybutton_active.ship_barbarian_heavy_ranged_II,
+#container
+.dummy_armybutton_hover.ship_barbarian_heavy_ranged_II{background-position: -540px -36px}#container .dummy_armybutton_active.ship_barbarian_first_strike_II,
+#container
+.dummy_armybutton_hover.ship_barbarian_first_strike_II{background-position: -576px -36px}#container .dummy_armybutton_active.ship_barbarian_first_strike_I,
+#container
+.dummy_armybutton_hover.ship_barbarian_first_strike_I{background-position: -612px -36px}#container .dummy_armybutton_active.ship_barbarian_heavy_battleship,
+#container
+.dummy_armybutton_hover.ship_barbarian_heavy_battleship{background-position: -648px -36px}#container .dummy_armybutton_active.ship_barbarian_heavy_battleship_II,
+#container
+.dummy_armybutton_hover.ship_barbarian_heavy_battleship_II{background-position: -684px -36px}#container .dummy_armybutton_active.ship_barbarian_carrier,
+#container
+.dummy_armybutton_hover.ship_barbarian_carrier{background-position: -720px -36px}#container .dummy_armybutton_active.ship_barbarian_anti_carrier,
+#container
+.dummy_armybutton_hover.ship_barbarian_anti_carrier{background-position: -756px -36px}#container .dummy_armybutton_active.ship_freighter,
+#container
+.dummy_armybutton_hover.ship_freighter{background-position: -792px -36px}#container
+.dummy_armybutton_disabled.ship_ram{background-position:  -36px -72px}#container
+.dummy_armybutton_disabled.ship_ballista{background-position:  -72px -72px}#container
+.dummy_armybutton_disabled.ship_flamethrower{background-position: -108px -72px}#container
+.dummy_armybutton_disabled.ship_catapult{background-position: -144px -72px}#container
+.dummy_armybutton_disabled.ship_steamboat{background-position: -180px -72px}#container
+.dummy_armybutton_disabled.ship_mortar{background-position: -216px -72px}#container
+.dummy_armybutton_disabled.ship_submarine{background-position: -252px -72px}#container
+.dummy_armybutton_disabled.ship_tender{background-position: -288px -72px}#container
+.dummy_armybutton_disabled.ship_ballooncarrier{background-position: -324px -72px}#container
+.dummy_armybutton_disabled.ship_paddlespeedship{background-position: -360px -72px}#container
+.dummy_armybutton_disabled.ship_rocketship{background-position: -396px -72px}#container
+.dummy_armybutton_disabled.ship_barbarian_light_battleship{background-position: -432px -72px}#container
+.dummy_armybutton_disabled.ship_barbarian_light_ranged{background-position: -468px -72px}#container
+.dummy_armybutton_disabled.ship_barbarian_heavy_ranged{background-position: -504px -72px}#container
+.dummy_armybutton_disabled.ship_barbarian_heavy_ranged_II{background-position: -540px -72px}#container
+.dummy_armybutton_disabled.ship_barbarian_first_strike_II{background-position: -576px -72px}#container
+.dummy_armybutton_disabled.ship_barbarian_first_strike_I{background-position: -612px -72px}#container
+.dummy_armybutton_disabled.ship_barbarian_heavy_battleship{background-position: -648px -72px}#container
+.dummy_armybutton_disabled.ship_barbarian_heavy_battleship_II{background-position: -684px -72px}#container
+.dummy_armybutton_disabled.ship_barbarian_carrier{background-position: -720px -72px}#container
+.dummy_armybutton_disabled.ship_barbarian_anti_carrier{background-position: -756px -72px}#container
+.dummy_armybutton_disabled.ship_freighter{background-position: -792px -72px}#premiumDummy
+.sliderinput{margin:10px
+0 0 60px}#premiumDummy
+.max_unit_input{left:430px;position:relative;text-align:center;top: -26px;width:60px}#premiumDummy .army
+.troops_slider{background-color:#FFF5D6;border-top:1px solid #F4DDB5;border-bottom:1px solid #F4DDB5;margin:3px}#premiumDummy .army
+.dummy_row_active{background-color:#FFEDCB;border:1px
+solid #E4B873}#premiumDummy .army .troops_slider .unit_slider,
+#premiumDummy .army .troops_slider
+.ship_slider{background-position:left center;background-repeat:no-repeat;height:60px;margin-left:50px;padding:10px
+5px 0 5px}#premiumDummy .army .troops_slider
+#slider_phalanx{background-image:url(/cdn/all/both/characters/military/x60_y60/y60_phalanx_faceright.png)}#premiumDummy .army .troops_slider
+#slider_steamgiant{background-image:url(/cdn/all/both/characters/military/x60_y60/y60_steamgiant_faceright.png)}#premiumDummy .army .troops_slider
+#slider_spearman{background-image:url(/cdn/all/both/characters/military/x60_y60/y60_spearman_faceright.png)}#premiumDummy .army .troops_slider
+#slider_swordsman{background-image:url(/cdn/all/both/characters/military/x60_y60/y60_swordsman_faceright.png)}#premiumDummy .army .troops_slider
+#slider_slinger{background-image:url(/cdn/all/both/characters/military/x60_y60/y60_slinger_faceright.png)}#premiumDummy .army .troops_slider
+#slider_archer{background-image:url(/cdn/all/both/characters/military/x60_y60/y60_archer_faceright.png)}#premiumDummy .army .troops_slider
+#slider_marksman{background-image:url(/cdn/all/both/characters/military/x60_y60/y60_marksman_faceright.png)}#premiumDummy .army .troops_slider
+#slider_ram{background-image:url(/cdn/all/both/characters/military/x60_y60/y60_ram_faceright.png)}#premiumDummy .army .troops_slider
+#slider_catapult{background-image:url(/cdn/all/both/characters/military/x60_y60/y60_catapult_faceright.png)}#premiumDummy .army .troops_slider
+#slider_mortar{background-image:url(/cdn/all/both/characters/military/x60_y60/y60_mortar_faceright.png)}#premiumDummy .army .troops_slider
+#slider_gyrocopter{background-image:url(/cdn/all/both/characters/military/x60_y60/y60_gyrocopter_faceright.png)}#premiumDummy .army .troops_slider
+#slider_bombardier{background-image:url(/cdn/all/both/characters/military/x60_y60/y60_bombardier_faceright.png)}#premiumDummy .army .troops_slider
+#slider_cook{background-image:url(/cdn/all/both/characters/military/x60_y60/y60_cook_faceright.png)}#premiumDummy .army .troops_slider
+#slider_medic{background-image:url(/cdn/all/both/characters/military/x60_y60/y60_medic_faceright.png)}#premiumDummy .army .troops_slider
+#slider_ship_ram{background-image:url(/cdn/all/both/characters/fleet/60x60/ship_ram_faceright.png)}#premiumDummy .army .troops_slider
+#slider_ship_steamboat{background-image:url(/cdn/all/both/characters/fleet/60x60/ship_steamboat_faceright.png)}#premiumDummy .army .troops_slider
+#slider_ship_flamethrower{background-image:url(/cdn/all/both/characters/fleet/60x60/ship_flamethrower_faceright.png)}#premiumDummy .army .troops_slider
+#slider_ship_ballista{background-image:url(/cdn/all/both/characters/fleet/60x60/ship_ballista_faceright.png)}#premiumDummy .army .troops_slider
+#slider_ship_catapult{background-image:url(/cdn/all/both/characters/fleet/60x60/ship_catapult_faceright.png)}#premiumDummy .army .troops_slider
+#slider_ship_mortar{background-image:url(/cdn/all/both/characters/fleet/60x60/ship_mortar_faceright.png)}#premiumDummy .army .troops_slider
+#slider_ship_submarine{background-image:url(/cdn/all/both/characters/fleet/60x60/ship_submarine_faceright.png)}#premiumDummy .army .troops_slider
+#slider_ship_rocketship{background-image:url(/cdn/all/both/characters/fleet/60x60/ship_rocketship_faceright.png)}#premiumDummy .army .troops_slider
+#slider_ship_paddlespeedship{background-image:url(/cdn/all/both/characters/fleet/60x60/ship_paddlespeedship_faceright.png)}#premiumDummy .army .troops_slider
+#slider_ship_ballooncarrier{background-image:url(/cdn/all/both/characters/fleet/60x60/ship_ballooncarrier_faceright.png)}#premiumDummy .army .troops_slider
+#slider_ship_tender{background-image:url(/cdn/all/both/characters/fleet/60x60/ship_tender_faceright.png)}#premiumDummy .army .troops
+.old_city_dummies{font-weight:400}#premiumDummy
+.dummy_navigation{background:url(/cdn/all/both/premium/dummy_summary2.jpg) no-repeat scroll 0 0 transparent;height:35px;margin-bottom:15px;margin-top:10px;width:650px}#premiumDummy .dummy_navigation
+.nav_step{background:none left top no-repeat transparent;float:left;height:35px;line-height:35px;margin-left:8px;min-width:48px;padding:0
+30px 0 45px}#premiumDummy .dummy_navigation
+#navigationStep1{background-image:url(/cdn/all/both/premium/dummy_nav_step1.png)}#premiumDummy .dummy_navigation
+#navigationStep2{background-image:url(/cdn/all/both/premium/dummy_nav_step2.png)}#premiumDummy .dummy_navigation
+#navigationStep3{background-image:url(/cdn/all/both/premium/dummy_nav_step3.png)}#premiumDummy .army .dummyHeader
+h4{margin:10px
+0 0 10px}#premiumDummy .army .dummies_active, #premiumDummy .city_dummy_infos .army .troops .dummy_armybutton_active
+span{position:relative;top:35px}#premiumDummy .army
+.troops{margin:5px
+0 10px 5px;width:auto}#premiumDummy .army .troops
+td{padding-top:1px;padding-bottom:1px;text-align:center;vertical-align:middle}#premiumDummy .army
+.active_troops_col{background-color:#FFF5D6;border:1px
+solid #F4DDB5;-moz-border-radius:5px;-webkit-border-radius:5px;border-radius:5px}#premiumDummy .summary_box .ambrosia_available
+img{margin-bottom:4px;vertical-align:middle}#premiumResourceAssign{margin-top:25px}ul#premiumResourceAssign.resources li, ul#premiumResourceAssign.resources li.sulfur, ul#premiumResourceAssign.resources
+li.marble{margin:5px
+20px 5px 22px;width:600px;height:60px;position:relative;background-position:10px 27px}#premiumResourceAssign
+.sliderinput{position:absolute;top:22px;left:40px;margin:0}#premiumResourceAssign
+.startvalue{display:none}#premiumResourceAssign
+.diffvalue{position:absolute;top:0;left:40px;text-align:center;width:400px}#premiumResourceAssign
+.textfield{position:absolute;top:25px;left:442px;width:170px;text-align:center}#premiumResourceAssign li
+.summary{position:absolute;left:40px;width:400px;text-align:center}ul#premiumResourceAssign.resources
+li.summaryBox{border:none;height:30px}#premiumTrader div.hidden, #premiumTrader
+li.hidden{display:none}#premiumTrader
+#tradeBtn{width:auto;padding-left:5px;padding-right:5px}#premiumTrader
+.tradeButton{width:auto;text-align:center;height:60px}#premiumTrader .tradeButton
+.buy_ambrosia{display:inline-block;padding:0
+10px;margin-top:20px;width:auto}#premiumPayment
+#header{background-image:url(combatreport/bg_header.jpg)}#premiumPayment
+#footer{background-image:url(combatreport/bg_footer.jpg)}#premiumPayment
+#container2{background:url(combatreport/bg_content.jpg) repeat-y}#premiumPayment
+#breadcrumbs{background-image:url(combatreport/breadcrumbs.png)}#premiumPayment
+#conExtraDiv1{background-image:none}#premiumPayment
+.paymentFrameDiv{width:820px;margin:0
+auto 20px}html .premiumOffer
+.offerHeader{height:14px;margin-top:3px}html .premiumOffer .offerHeader
+.offerName{float:left;width:70px;height:14px;margin:0
+10px;white-space:nowrap;overflow:hidden}html .premiumOffer .offerHeader
+.optionsDesc{float:left;width:130px;height:14px;margin:0
+5px;white-space:nowrap;overflow:hidden}html .premiumOffer .offerHeader
+.priceDesc{float:left;width:80px;height:14px;margin:0
+5px;white-space:nowrap;overflow:hidden}html .premiumOffer
+.offerBox{margin:0
+0 0 40px}html .premiumOffer
+.offer{float:left;width:62px;height:62px;margin:5px}html .premiumOffer .offer
+.offerIcon.citizensPackage{background:url(/cdn/all/ltr/premium/buerger_buergerin.png) no-repeat 0 0;width:48px;height:72px;margin:0
+auto}html .premiumOffer .offer
+.offerIcon.itemIcon{border:#d2a368 solid 1px}html .premiumOffer .offer
+.offerDesc{margin:4px
+0;white-space:nowrap;overflow:hidden}html .premiumOffer
+.optionButton{cursor:pointer;float:left;width:37px;height:66px;margin:5px
+0 5px 5px;background:url(/cdn/all/ltr/premium/offerOptionButtons.png) no-repeat 0 0}html .premiumOffer
+.optionButton.active{background-position: -74px 0}html .premiumOffer .optionButton
+.icon{width:30px;height:36px}html .premiumOffer .optionButton.days
+.icon{background:url(/cdn/all/ltr/premium/days.png) no-repeat 0 0;margin:4px
+5px}html .premiumOffer .optionButton.days.twoDays
+.icon{background-position:0 0}html .premiumOffer .optionButton.days.sevenDays
+.icon{background-position: -40px 0}html .premiumOffer .optionButton.days.tenDays
+.icon{background-position: -120px 0}html .premiumOffer .optionButton.days.thirtyDays
+.icon{background-position: -80px 0}html .premiumOffer .optionButton.days.sixtyDays
+.icon{background-position: -160px 0}html .premiumOffer .optionButton.citizensAmount
+.icon{background:url(/cdn/all/ltr/premium/citizens.png) no-repeat 0 0;margin:0
+4px}html .premiumOffer .optionButton.citizensAmount.fiveCitizens
+.icon{background-position:3px 0}html .premiumOffer .optionButton.citizensAmount.tenCitizens
+.icon{background-position: -37px 0}html .premiumOffer .optionButton.citizensAmount.twentyCitizens
+.icon{background-position: -76px 0}.offerWrapper{background:#FDF7DD;border:1px
+solid #E4B773;border-radius:2px;float:left;margin:5px;width:265px}.orderAvailable{clear:right;float:left}.orderButton{cursor:pointer;float:left;width:58px;height:66px;margin:5px
+0 0 5px;background:url(/cdn/all/ltr/premium/orderButtons_Sprite.png) no-repeat top left;text-align:center}.paragraphBesidesOrderButton{float:left;width:360px;margin:5px;min-height:69px}.orderButton.inventory{background-position: -116px 0}.orderButton.ambrosia{background-position: -58px 0}.orderButton.chargeAmbrosia{background-position: -174px 0;color:red}.orderButton.inventory:hover{background-position: -116px -66px}.orderButton.ambrosia:hover{background-position: -58px -66px}.orderButton.chargeAmbrosia:hover{background-position: -174px -66px}.orderButton.inventory:active{background-position: -116px -132px}.orderButton.ambrosia:active{background-position: -58px -132px}.orderButton.chargeAmbrosia:active{background-position: -174px -132px}.orderButton.disabled.inventory{background-position: -116px -198px}.orderButton.disabled.ambrosia{background-position: -58px -198px}.orderButton.disabled.chargeAmbrosia{background-position: -174px -198px}.orderButton
+.orderButtonIcon{float:left;width:42px;height:42px}.orderButton
+.orderPrice{float:left;width:58px;height:23px;line-height:23px;font-size:14px;font-weight:700}.orderButton .orderButtonIcon
+.itemIcon{margin:8px
+0 0 12px}.orderAvailable{float:left;width:53px;height:66px;line-height:110px;font-size:14px;font-weight:700;margin:10px
+0 0 0;text-align:center}.orderAvailable.ambrosia,.orderAvailable.chargeAmbrosia{background:url(/cdn/all/ltr/premium/ambrosia_bg.png) no-repeat #FAF3D7}.orderAvailable.inventory{background:url(/cdn/all/ltr/premium/inventory_bg.png) no-repeat #FAF3D7}a.orderButton{float:left;display:block;margin:10px
+10px 0 0}html .premiumOffer
+.clear{clear:both}html .premiumOffer
+.amountAndActiveBox{background-color:#f8e4b8;padding:4px
+0;height:28px}#missionSummary
+.orderButton{margin-left:250px;margin-bottom:10px}html #container
+.premiumOfferBox{height:124px;padding:0;margin: -1px 2px 0px 2px}html #container #setWorkersBox
+.premiumOfferBox{background-color:#fdf7dd}html
+.premiumOffer{height:80px;margin:3px
+8px;width:664px}html
+td.premiumOffer{height:80px;margin:3px
+8px;width:336px}html .premiumOffer.first, html
+.premiumOffer.second{margin:0
+auto;float:left;position:relative;width:317px}.adVideoButton{background:url(/cdn/all/both/advideo/theaterButton.png) no-repeat;height:20px;width:38px;display:inline-block}.adVideoButton:hover{background-position:0 -20px}.adVideoButton.noScreening{background-position:0 -40px}.adVideoButton.noScreening:hover{background-position:0 -60px}html .premiumOffer
+.description{padding:5px
+0}html .premiumOffer
+.feature{font-size:36px;line-height:30px;padding-left:74px;padding-right:7px;font-weight:bold;background-position:5% 50%;background-repeat:no-repeat}html .premiumOffer
+td.feature{padding-top:0px}html .premiumOffer tr.woodbonus
+td.feature{background-image:url(/cdn/all/both/premium/b_premium_wood.jpg)}html .premiumOffer tr.marblebonus
+td.feature{background-image:url(/cdn/all/both/premium/b_premium_marble.jpg)}html .premiumOffer tr.sulfurbonus
+td.feature{background-image:url(/cdn/all/both/premium/b_premium_sulfur.jpg)}html .premiumOffer tr.crystalbonus
+td.feature{background-image:url(/cdn/all/both/premium/b_premium_crystal.jpg)}html .premiumOffer tr.winebonus
+td.feature{background-image:url(/cdn/all/both/premium/b_premium_wine.jpg)}html .premiumOffer tr.safecapacitybonus
+td.feature{background-image:url(/cdn/all/both/premium/b_premium_safecapacity.jpg)}html .premiumOffer tr.storagecapacitybonus
+td.feature{background-image:url(/cdn/all/both/premium/b_premium_storagecapacity.jpg)}html .premiumOffer tr.extendPremiumTraderoutes
+td.feature{background-image:url(/cdn/all/both/premium/b_premium_trade_route.jpg)}html .premiumOffer
+a.notenough{color:#999}#container
+.dark_box{background-color:#FAE0AE;border:1px
+solid #E4B773;margin:10px
+3px 0 3px;padding:2px
+10px;vertical-align:middle;width:654px}html
+.orderBtnTraderoute{background:url(/cdn/all/both/premium/premium-order-btn-traderoute.png) no-repeat left top;color:#6F4729;cursor:pointer;display:block;height:44px;overflow:hidden;text-decoration:none;text-align:left;width:103px;line-height:22px}html
+.orderBtnTradeRouteInnerEnoughAmbrosia{position:relative;left:77px;top:23px;color:#000;font-weight:700}html #sidebar
+.offerBox{height:auto}html #sidebar
+.premiumOffer{clear:both;height:auto;width:auto!important}html #sidebar
+.offerHeader{display:none}html #sidebar
+.options{display:block;float:left;overflow:auto;width:126px;margin:0
+0 0 10px}html #sidebar
+.optionButton{margin:0
+0 5px 5px}html #sidebar
+.orderButton{margin:10px
+0 5px 77px}html #sidebar
+.orderAvailable{margin:10px
+0 5px 12px}html #sidebar
+.offer{clear:both;display:block;float:none;width:auto;height:auto;padding:0;margin:0}html #sidebar
+.itemIcon{display:block;float:left;margin-top:1px}html .premiumbuy
+.premiumOffer{height:auto}.orderBtnTraderoute:hover{background-position:left -44px}.orderBtnTraderoute:active{background-position:left -88px}.ambrosiaIcon{background:url(/cdn/all/both/premium/ambrosia_sprite.png) no-repeat right top;height:22px;min-width:20px;padding:6px
+20px 0 0}#container .premiumJet:hover
+.jetBtn{display:block;margin:10px
+0 0 -104px}#container
+.orderIcon{background-image:url(/cdn/all/both/premium/premium-order-icons-sprite.png);background-repeat:no-repeat;height:35px;width:32px;margin:0
+auto}#container
+.orderIconSmall{background-image:url(/cdn/all/both/premium/premium_jet_sprite.png);background-repeat:no-repeat;height:18px;width:36px;margin:0
+auto}#container
+.orderIconSmall.ambrosiaSmall{height:21px !important;line-height:21px;width:15px !important;margin:0
+auto}.safecapacityIcon{background-position:0 0}.resourceBonusIcon{background-position: -64px 0}.wineBonusIcon{background-position: -128px 0}.marbleBonusIcon{background-position: -32px 0}.sulfurBonusIcon{background-position: -96px 0}.crystalBonusIcon{background-position: -160px 0}.storagecapacityIcon{background-position: -316px 0}#container .premiumOffer
+.buy{left:30px;position:relative;top: -58px}.btnIngameCountdown{background-image:url(/cdn/all/both/premium/bg_ingame_countdown.png);background-position:left -75px;position:relative;height:51px;max-width:184px;padding:12px
+35px 6px 25px;z-index:99}.btnIngameCountdown:after{content:'';display:block;position:absolute;right: -5px;top:0px;width:51px;height:69px;background-image:url(/cdn/all/both/premium/bg_ingame_countdown_after.png);background-position:0px -75px}.btnIngameCountdown:hover{text-decoration:none;background-position:left 0px;cursor:pointer}.btnIngameCountdown:hover:after{background-position:0px 0px}.btnIngameCountdown.smallText{padding:10px
+40px 0 24px;height:57px}.smallText
+.ingameCountdownText{font-size:10px;line-height:10px;width:84px;text-align:center}.smallText
+.ingameCountdown{padding-left:20px}.btnIngameCountdown.happyHour{background-image:url(/cdn/all/both/premium/bg_happyhour.png);padding:12px
+55px 6px 25px;max-width:165px}.btnIngameCountdown.happyHour:after{background-image:url(/cdn/all/both/premium/bg_happyhour_after.png);width:67px}#btnHappyHour{background-image:url(/cdn/all/both/premium/bg_happyhour.png);background-position:0px -75px;position:relative;height:51px;max-width:190px;padding:12px
+55px 6px 25px;z-index:99}#btnHappyHour:after{content:'';display:block;position:absolute;right: -5px;top:0px;width:67px;height:69px;background-image:url(/cdn/all/both/premium/bg_happyhour_after.png);background-position:0px -75px}#btnHappyHour:hover{text-decoration:none;background-position:0 0px;cursor:pointer}#btnHappyHour:hover:after{background-position:0px 0px}#btnHappyHour.smallHappyHourText{padding:10px
+60px 0 24px;height:57px}.smallHappyHourText
+.happyHourText{font-size:10px;line-height:10px;width:84px;text-align:center}.smallHappyHourText
+#happyHourCountdown{padding-left:20px}.gainAmbrosiaSymbol{background:url(/cdn/all/both/premium/ambrosia_icon.png) center left no-repeat transparent;text-align:left;width:16px;height:20px;float:left}.inlineAmbrosia{position:relative;float:left;top: -5px}#container .table01.gainAmbrosiaTable
+.gainAmbrosia{font-weight:bold;font-size:16px;padding:0}.oldGainAmbrosia{text-decoration:line-through;color:red}#container
+.table01.gainAmbrosiaTable{width:350px;text-align:center;border:1px
+solid #E4B873;margin:10px
+auto}#container .table01.gainAmbrosiaTable
+tr{height:25px;line-height:25px}#setPremiumTransports
+.buy_ambrosia{position:absolute;left:362px;top:32px;width:140px}#premiumResourceShop
+.buy_ambrosia.red_box.center{width:194px}.buy_ambrosia{background:#fcddd2 url(/cdn/all/both/premium/Ambrosia_aufladen_Icon.png) center left no-repeat!important;min-height:47px}#premiumResourceShop .zShopResourcePackages
+.buy_ambrosia.red_box.center{width:auto}#confirmResourcePremiumBuy
+.bd.mainContentScroll{height:auto !important}#premiumResourceShop .resourceShop.resImage .amountDiv
+.resourceShop.packageAmount{top: -4px;position:relative;font-weight:bold}#premiumResourceShop .table01
+td{padding:0px}#premiumTrader
+.resourceShopButton{clear:both}#premiumTrader .resourceShopButton
+a{display:block;margin:10px;float:right;clear:both;width:100px}#premiumTrader
+.orderButton{margin-left:280px;margin-bottom:10px}#ambrosiaFountain
+.mainMenu{padding:5px
+5px}#ambrosiaFountain
+.button{line-height:20px;padding:7px
+10px;min-width:176px}#ambrosiaFountain .rebuyDiv
+.button{background-color:#EBC482;white-space:pre-line}#ambrosiaFountain .rebuyDiv .button
+span{display:inline-block}.touchPanel #ambrosiaFountain
+.button{line-height:30px}.touchPanel #ambrosiaFountain .button
+.gainAmbrosiaSymbol{position:relative;top:5px}#ambrosiaFountain .mainMenu
+div{margin:10px;width:180px}#ambrosiaFountain
+.fountainImg{position:relative;margin:0
+3px;height:500px}#ambrosiaFountain
+.rebuyBox{border-top:1px solid #e4b773;padding:10px;position:absolute;bottom:0px;width:655px}#ambrosiaFountain .rebuyBox>span{display:inline-block;float:left;width:50%;line-height:41px}#ambrosiaFountain .rebuyBox
+#js_buyAmbrosiaButton{display:inline-block}#ambrosiaFountain
+.button.green{background:#ddeb82 url(/cdn/all/both/input/button_green.png) repeat-x scroll 0 0}#ambrosiaFountain
+.fountainImg.buy{background:url(/cdn/all/both/premium/fountain/Background_stein.jpg) top center no-repeat}#ambrosiaFountain
+.fountainImg.stone{background:url(/cdn/all/both/premium/fountain/Background_stein_klein2.jpg) top right no-repeat}#ambrosiaFountain
+.fountainImg.bronze{background:url(/cdn/all/both/premium/fountain/Background_bronze_klein2.jpg) top right no-repeat}#ambrosiaFountain
+.fountainImg.silver{background:url(/cdn/all/both/premium/fountain/Background_silber_klein2.jpg) top right no-repeat}#ambrosiaFountain
+.fountainImg.gold{background:url(/cdn/all/both/premium/fountain/Background_gold_klein2.jpg) top right no-repeat}.fountainTable{width:670px;margin:10px
+5px;bottom:75px;position:absolute;height:174px}#ambrosiaFountain .fountainTable
+.highlightbox{padding:2px;margin: -2px 0px 0px 7px;width:55px;font-weight:bold}#ambrosiaFountain .fountainTable
+.highlightbox.green{background-color:#fffae8}#ambrosiaFountain .fountainTable .highlightbox
+div{padding:2px}#ambrosiaFountain .fountainTable
+td{text-align:center;vertical-align:bottom}#ambrosiaFountain
+ul{margin:15px
+15px 15px 25px}#ambrosiaFountain
+li{list-style-type:disc;margin-bottom:5px}#container #ambrosiaFountain
+.warning{height:50px;padding:3px
+80px 3px 80px !important;display:table}#container #ambrosiaFountain .warning
+div{display:table-cell;vertical-align:middle}#js_buyAmbrosiaButton{margin:0
+auto}#js_buyAmbrosiaButton
+span{padding-right:0px !important}#ambrosiaFountain
+.gainAmbrosiaSymbol{padding-right:8px;background-position:right}.touchPanel #ambrosiaFountain
+.gainAmbrosiaSymbol{line-height:22px}#tab_zShop
+iframe{border:none}#container .mainContentBoxZShopSmall #tab_zShop
+iframe{width:750px;height:552px;margin-left:5px}#container .mainContentBoxZShopBig #tab_zShop
+iframe{width:1036px;height:667px}.rebuyDiv{float:right;width:50%}.popup_contentbox
+.chooseAutoExtension{border:1px
+solid #811709;background-color:papayawhip;padding:10px;margin-top:10px}.popup_contentbox .chooseAutoExtension
+.chooseRow{position:relative;margin-top:5px}.popup_contentbox .chooseAutoExtension
+.elevatedLabel{position:absolute;left:20px;top:0}#container .popupMessage .elevatedLabel
+img{margin-right:0;margin-top: -10px;padding-top:0;padding-bottom:inherit;float:none}#premiumResourceShop a.orderButton, #premiumResourceShop
+.orderAvailable{margin-top: -6px}#premiumResourceShop
+a.orderButton{margin: -6px 4px 4px 8px}#premiumResourceShop
+.packageContainer{background:#FFFAE8;border:#ddbf81 solid 2px;clear:both;display:block;overflow:hidden;min-height:188px}#premiumResourceShop
+.centerBuyButton{margin-left:46px;margin-top:15px}#premiumResourceShop
+.centerBuyButtonPackages{display:flex;flex-direction:row;justify-content:center;align-items:center}#premiumResourceShop
+.resourceShopWarning{width:200px;padding:0!important;margin:0
+auto}#premiumResourceShop
+.buyPackage{display:block;font-weight:bold;margin:0
+auto;text-align:center}#premiumResourceShop .buyPackage
+.itemIcon{border:#946c39 solid 2px;margin:8px
+auto 0 auto}#premiumResourceShop .buyPackage .itemIcon:before{float:left;position:relative}#premiumResourceShop .itemIcon:after{display:none}.buyPackageAmount{padding:3px;margin:0
+auto;position:relative;top: -21px;background-color:#9fee9f;border-radius:5px}.buyPackageIcon{background-repeat:no-repeat;background-position:0 1px;padding:0
+0 0 18px}.buyPackageIcon.sulfur{background-image:url(/cdn/all/both/resources/icon_sulfur_small.png)}.buyPackageIcon.crystal{background-image:url(/cdn/all/both/resources/icon_crystal_small.png)}.buyPackageIcon.wine{background-image:url(/cdn/all/both/resources/icon_wine_small.png)}.buyPackageIcon.marble{background-image:url(/cdn/all/both/resources/icon_marble_small.png)}.buyPackageIcon.wood{background-image:url(/cdn/all/both/resources/icon_wood_small.png)}.buyPackageIcon{background-image:url(/cdn/all/both/premium/ambrosia_icon.png)}.table01
+.entry{cursor:pointer}#tab_diplomacyAdvisor .table01
+tr.globalmessage{background-color:#FEFF6F}.globalmessage .msgText
+a{font-weight:bold;color:#87cefa}#tab_diplomacyAdvisor .table01 .new
+td{font-weight:bold}#embassyHomeSecretaryApplications .table01 .msgText,
+#tab_diplomacyAdvisor .table01
+.msgText{text-align:left;max-width:657px;word-wrap:break-word}#tab_diplomacyAdvisor .table01
+.action{margin:0
+auto}#embassyHomeSecretaryApplications .text td,
+#tab_diplomacyAdvisor .text
+td{background-color:#FAEAC6}#tab_diplomacyAdvisor .table01
+.warning{margin:10px
+100px}#tab_diplomacyAdvisor .table01 .warning
+.reaction{padding:5px}#tab_diplomacyAdvisor .answerYes, #tab_diplomacyAdvisor
+.answerNo{background-repeat:no-repeat;background-position:left center;padding-left:20px;text-align:left;margin:0px
+auto}#tab_diplomacyAdvisor
+.answerYes{background-image:url(/cdn/all/both/layout/answeryes.png)}#tab_diplomacyAdvisor
+.answerNo{background-image:url(/cdn/all/both/layout/answerno.png)}#tab_diplomacyAdvisor .table_messages
+.contentBox01{margin-top:10px}#tab_diplomacyAdvisor .table_messages
+.subject{text-align:left}#tab_diplomacyAdvisor  .table01
+td.cities{width:50px}#tab_diplomacyAdvisor .table01
+.reply{padding:10px}#tab_diplomacyAdvisor .reply
+.button{margin-left:5px}#tab_diplomacyAdvisor .reply
+.button_bar{float:left}#tab_diplomacyAdvisor
+.button_bar_right{float:right}#tab_diplomacyAdvisor
+.button_bar_msg{border-top:1px dotted #E4B873;display:block;margin:5px
+0;padding:10px
+0 0 0}.searchUserButton{position:relative;text-align:center;top:25px}.userSearchContainer{margin:5px
+10px 5px 21px}html .userSearchContainer
+.textfield{margin:5px
+14px;width:200px}#diplomacyAlly .board_header_table
+.header_bar{background-color:#ECD5AC;line-height:30px}#diplomacyAlly .board_header_table .header_bar
+.breadcrumbs{width:1%;white-space:nowrap;padding-left:12px}#diplomacyAlly .board_header_table .header_bar .topic_title,
+#diplomacyAlly .board_header_table .header_bar
+.thread_title{padding-left:4px}#diplomacyAlly .board_header_table .header_bar .topic_actions,
+#diplomacyAlly .board_header_table .header_bar
+.thread_actions{width:60px;white-space:nowrap;padding-right:12px;text-align:right}.page_bar{padding:2px;display:inline-block;top:3px;position:relative}div.page_bar{display:block;float:left}#diplomacyAlly .board_header_table
+.page_bar{display:table-cell;padding:10px
+10px 15px 10px;text-align:center}.page_link{background-color:#ECD5AC;border:1px
+solid #E0AE65;padding:2px;min-width:14px}a.page_link{background-color:#FFFAE8}a.page_link:hover{background-color:#ECD5AC;color:#b3713f;text-decoration:none}.page_prev{background-image:url(/cdn/all/both/interface/btn_min.png);display:inline-block;height:24px;width:24px}.page_next{background-image:url(/cdn/all/both/interface/btn_max.png);display:inline-block;height:24px;width:24px}div.paginator .page_prev, div.paginator
+.page_prev{display:block;float:left}#culturalPossessions_assign #moveCulturalGoods
+img{margin-right:4px}#culturalPossessions_assign #moveCulturalGoods
+li{height:64px}#culturalPossessions_assign #moveCulturalGoods li
+.city{position:relative;padding-top:42px;width:100px;background:url(/cdn/all/both/buildings/building_museum_x40.png) no-repeat 24px top}#culturalPossessions_assign #moveCulturalGoods
+.sliderinput{left: -40px;top: -64px}#culturalPossessions_assign #moveCulturalGoods
+.assignedCulturalGoods{left:493px;position:relative;top: -100px;width:59px;height:45px;text-align:center;white-space:nowrap}#culturalPossessions_assign #moveCulturalGoods
+.satisfaction{left:560px;line-height:32px;padding-left:40px;position:relative;top: -147px;height:32px}#culturalPossessions_assign #moveCulturalGoods
+.ecstatic{background:url(/cdn/all/both/smilies/ecstatic_x32.png) no-repeat left center}#culturalPossessions_assign #moveCulturalGoods
+.happy{background:url(/cdn/all/both/smilies/happy_x32.png) no-repeat left center}#culturalPossessions_assign #moveCulturalGoods
+.neutral{background:url(/cdn/all/both/smilies/neutral_x32.png) no-repeat left center}#culturalPossessions_assign #moveCulturalGoods
+.sad{background:url(/cdn/all/both/smilies/sad_x32.png) no-repeat left center}#culturalPossessions_assign #moveCulturalGoods
+.outraged{background:url(/cdn/all/both/smilies/outraged_x32.png) no-repeat left center}#culturalPossessions_search .table01
+td{height:32px}#museum .culturalGoods
+.content{background:url(/cdn/all/both/museum/culturalgoods.png) no-repeat 5% 5%}#museum .culturalGoods .content
+p{margin-left:140px}#museum .culturalGoods .content p
+*{margin-left:0px}#museum .table01
+.actions{padding-left:20px}#museum a.writeMsg, #museum
+a.cancelTreaty{margin:0
+3px}#museum .culturalGoods .goods
+.value{background:url(/cdn/all/both/museum/icon32_culturalgood.png) no-repeat scroll right center transparent;line-height:22px;padding:0
+39px 4px 10px}#culturalPossessions_search
+.search_option{margin:10px
+140px}#warehouseList
+td{height:40px}#allyMemberList
+tr.highlight{background-color:#DFAD64}#allyMemberList
+tr{height:34px}#allyMemberList
+.user_status{background:url(/cdn/all/both/layout/bulb-off.png) center center no-repeat;background-position:3% 50%;height:27px;width:65px}#allyMemberList
+td.user_status{padding:4px
+5px 4px 20px}#allyMemberList
+.magnify_icon{border-radius:3px;cursor:pointer;height:20px;padding:4px
+25px 4px 3px;text-align:right;width:55px}#allyMemberList
+.online{background-image:url(/cdn/all/both/layout/bulb-on.png)}#allyMemberList
+.inactive{background-image:url(/cdn/all/both/layout/bulb-inactive.png)}#allyMemberList
+.vacation{background-image:url(/cdn/all/both/layout/icon-palm.png)}#allyMemberList
+.action{width:80px}#allyMemberList
+.cityInfo{width:100px}.infoTip{width:auto;max-width:500px;top:10px}#container .infoTip
+a.city{background:url(/cdn/all/both/layout/icon-city2.png) no-repeat left center;padding-left:28px}#allyMemberList
+.iconButton{float:left;width:20px}#diplomacyAlly .topic_table tr:nth-child(2) .gclose{display:none}#diplomacyAlly .topic_table tr:nth-last-child(2) .gopen{display:none}#diplomacyAlly .topic_table td, #diplomacyAlly .topic_table
+th{padding:4px
+0}#diplomacyAlly .topic_table
+tr{background-color:transparent}#diplomacyAlly .topic_table
+td{cursor:pointer}#diplomacyAlly .topic_table
+.openCloseArrow{padding-left:10px;width:12px}#diplomacyAlly .topic_table
+.footerText{padding:10px}#diplomacyAlly .topic_table
+.topic_num_threads{width:100px}#diplomacyAlly .topic_table
+.topic_actions{width:60px;white-space:nowrap}#diplomacyAlly .topic_table
+.topic_last_update{width:140px;text-align:center}#diplomacyAlly .topic_table
+.topic_title{line-height:30px;padding-left:22px}#diplomacyAlly .thread_table
+td{cursor:pointer;padding:4px
+0px}#diplomacyAlly .thread_table
+.thread_title{line-height:30px;padding:0
+0 0 40px;text-align:left}#diplomacyAlly .thread_table .thread_title a:hover{text-decoration:none}#diplomacyAlly .thread_table .thread_lastupdate, #diplomacyAlly .topic_table
+.topic_lastupdate{width:140px;text-align:center}#diplomacyAlly .thread_table
+.thread_actions{width:60px;white-space:nowrap}#diplomacyAlly
+.thread_icon{padding:0
+10px 0 0;vertical-align:middle}#diplomacyAlly .thread_table
+.thread_replies{text-align:center;width:auto}#diplomacyAlly .thread_table
+.thread_lastupdate{background-color:#FFF5D6;border-left:1px solid #FBE7C0}#diplomacyAlly .thread_table
+td.thread_actions{background-color:#FFF5D6;width:60px}#diplomacyAlly
+.posting_table{table-layout:fixed}#diplomacyAlly .posting_table
+.posting_left_column{background-color:#FAEAC6;border-right:1px solid #FBE7C0;padding-top:20px;text-align:center;vertical-align:top;width:100px}#diplomacyAlly .posting_table
+.posting_right_column{background-color:#FFFAE8;max-width:507px;overflow:hidden}#diplomacyAlly
+.posting_header{border-bottom:2px dotted #E4B873;height:26px;padding-left:6px;text-align:left}#diplomacyAlly .posting_header
+.posting_number{padding-left:15px}#diplomacyAlly
+.posting_content{padding:10px;text-align:left}#diplomacyAlly
+.posting_footer{border-top:2px dotted #E4B873;font-size:10px;padding:6px}.editor_popup{background-color:#FAE0AE;border:1px
+solid #E4B873;margin:5px
+0 0 5px;padding:5px;position:absolute;text-align:left;margin-top:25px;width:215px;z-index:7000}.editor_popup.color_popup{left:170px}.editor_popup.smiley_popup{left:194px}.board_editor_textarea{height:210px;resize:none;width:100%}.editor_colors
+ul{list-style:none outside none;margin:0;padding:1px
+0 0 1px;width:auto}.editor_colors ul li,
+.editor_colors ul li
+a{display:block;float:left;height:15px;margin:0
+1px 1px 0;padding:0;width:15px;overflow:hidden}.smiley_popup{width:334px}.smiley_popup table
+tr{background-color:transparent}#diplomacyAlly
+.posting_table{border:1px
+solid #E0AE65;margin:5px
+auto;width:650px}#diplomacyAlly .thread_header_table
+.topic_actions{width:60px}#diplomacyAlly .thread_header_table
+.topic_num_threads{width:auto;min-width:10%}#diplomacyAlly  .posting_table
+.posting_link{color:#906646}#diplomacyAlly
+.posting_table_footer{background-color:#FBE7C0;padding:3px
+10px;text-align:right}#diplomacyAlly
+.quote{background-color:#FAEAC6;border:1px
+solid #E4B873;text-align:left;margin:auto 0px auto 0px;padding:2px}#diplomacyAlly
+.spoiler{background-color:#FAEAC6;border:1px
+solid #E4B873;text-align:left;margin:auto 0px auto 0px;padding:2px}#diplomacyAlly
+.spoilerwarning{color:#c60000;font-size:16px;font-weight:bold}#diplomacyAlly
+.thread_buttons{margin:3px
+10px;text-align:right}#diplomacyAlly  .thread_buttons
+.button{line-height:26px}#diplomacyAlly  .edit_mode .title_text,
+#diplomacyAlly  .edit_mode
+img{display:none}#diplomacyAlly .posting_table
+.player_icons{margin:5px
+auto;width:33px}#diplomacyAlly .posting_table
+.playerIcon{float:left}#diplomacyAlly .posting_table
+.textLabel{height:1px;left: -9999px;overflow:hidden;position:absolute;width:1px}#diplomacyAlly
+.popupMessage{left:320px;position:absolute;top:180px}#diplomacyAlly
+.board_table_button{margin:0
+10px}#diplomacyAlly
+a.button{line-height:24px}#diplomacyAlly
+.thread_title_input{margin:15px
+7px 0 7px}#diplomacyAlly .thread_title_input
+input{width:100%}#diplomacyAlly .thread_table
+td.thread_actions{background-color:#FFF5D6;width:60px}.editor_button{background-image:url(/cdn/all/both/board/board_buttons_editor_sprite.png);cursor:pointer;float:left;height:24px;width:24px}.editor_button.color_picker{background-position:0px 0px}.editor_button.color_picker:hover{background-position:0px -24px}.editor_button.smiley_picker{background-position: -24px 0px}.editor_button.smiley_picker:hover{background-position: -24px -24px}.editor_button.code_insert{background-position: -48px 0px}.editor_button.code_insert:hover{background-position: -48px -24px}.editor_button.pic_insert{background-position: -72px 0px}.editor_button.pic_insert:hover{background-position: -72px -24px}.editor_button.link_insert{background-position: -96px 0px}.editor_button.link_insert:hover{background-position: -96px -24px}.editor_button.quote_insert{background-position: -120px 0px}.editor_button.quote_insert:hover{background-position: -120px -24px}.editor_button.font_bold{background-position: -144px 0px}.editor_button.font_bold:hover{background-position: -144px -24px}.editor_button.font_italic{background-position: -168px 0px}.editor_button.font_italic:hover{background-position: -168px -24px}.editor_button.font_underlined{background-position: -192px 0px}.editor_button.font_underlined:hover{background-position: -192px -24px}.editor_button.strike_through{background-position: -216px 0px}.editor_button.strike_through:hover{background-position: -216px -24px}.editor_button.align_left{background-position: -240px 0px}.editor_button.align_left:hover{background-position: -240px -24px}.editor_button.align_center{background-position: -264px 0px}.editor_button.align_center:hover{background-position: -264px -24px}.editor_button.align_right{background-position: -288px 0px}.editor_button.align_right:hover{background-position: -288px -24px}.editor_button.spoiler_insert{background-position: -312px 0px}.editor_button.spoiler_insert:hover{background-position: -312px -24px}#diplomacyAlly
+.board_button{background-image:url(/cdn/all/both/board/board_buttons_sprite.png);cursor:pointer;display:block;float:left;height:18px;margin:0
+3px;width:18px}#diplomacyAlly
+.delete_button{background-position:0px 0px}#diplomacyAlly .delete_button:hover{background-position:0px -18px}#diplomacyAlly
+.warning_button{background-position: -18px 0px}#diplomacyAlly .warning_button:hover{background-position: -18px -18px}#diplomacyAlly
+.edit_button{background-position: -36px 0px}#diplomacyAlly .edit_button:hover{background-position: -36px -18px}#diplomacyAlly
+.quote_button{background-position: -54px 0px}#diplomacyAlly .quote_button:hover{background-position: -54px -18px}#diplomacyAlly
+.topic_button{background-position: -72px 0px}#diplomacyAlly .topic_button:hover{background-position: -72px -18px}#diplomacyAlly
+.top_button{background:url(/cdn/all/both/board/board_top.png) center top no-repeat transparent;margin:10px
+5px;width:30px}#diplomacyAlly
+.new_topic_input{height:18px;margin:10px
+0}.allyMailIcon{background:url(/cdn/all/both/interface/icon_send_message.png) repeat-y;display:inline-block;height:9px;width:13px}.allyMailIcon:hover{background-position:0 18px}#diplomacyIslandBoard
+.new_msg_btn{float:right;margin:7px
+18px 7px 0}#diplomacyIslandBoard
+.postMessage{margin:10px
+20px}#diplomacyIslandBoard
+.newMessage{margin:20px}#diplomacyIslandBoard .newMessage
+.textfield{width:500px}#diplomacyIslandBoard .newMessage
+textarea{height:100px;margin:0;width:500px;resize:none}#diplomacyIslandBoard
+.content{word-wrap:break-word}#diplomacyTreaty .table01
+td{height:24px}#diplomacyTreaty #culturalTreaties
+td{height:40px}#militaryAdvisor .military_event_table
+tr{height:38px}#militaryAdvisorReportView
+li.time{padding-right:20px}#militaryAdvisorReportView  td
+span.loss{font-weight:bold}#militaryAdvisorReportView #reportInboxLeft
+a{color:#542c0f}html #militaryAdvisorReportView
+#vs{width:100px;margin:0
+auto;font-size:24px;font-weight:bold;text-align:center}html #militaryAdvisorReportView
+#command{border:1px
+solid #E2B977;font-size:11px;color:#542c0f;background-color:#fdf7dd}#militaryAdvisor .combats_in_progress
+.locationheader{background:url(/cdn/all/both/advisors/military/miladv_ui_sprite.jpg) no-repeat scroll 0 -136px transparent;height:38px;line-height:38px;margin-left:4px}#militaryAdvisor .combats_in_progress
+.seaimg{width:168px;height:38px;position:absolute;left:510px;top:0px;background:url(/cdn/all/both/advisors/military/miladv_ui_sprite.jpg) -510px -38px no-repeat}#militaryAdvisor .combats_in_progress
+.landimg{width:168px;height:38px;position:absolute;left:0px;top:0px;background:url(/cdn/all/both/advisors/military/miladv_ui_sprite.jpg) 0px -38px no-repeat}#militaryAdvisor .combats_in_progress
+.battle{position:relative;width:672px;height:30px;background:url(/cdn/all/both/advisors/military/miladv_ui_sprite.jpg) 0px -75px no-repeat}#militaryAdvisor .combats_in_progress .battle
+.name{position:absolute;top:0px;left:0px;width:110px;height:30px;text-align:center;line-height:28px}#militaryAdvisor .combats_in_progress
+.powerbar{position:absolute;top:0px;left:110px;width:470px;height:30px;background:url(/cdn/all/both/advisors/military/miladv_ui_sprite.jpg) -110px -105px no-repeat}#militaryAdvisor .combats_in_progress
+.boomcover{position:absolute;right:-16px}#militaryAdvisor .combats_in_progress .seabattle
+.boomcover{top:-1px}#militaryAdvisor .combats_in_progress .landbattle
+.boomcover{top:-3px}#militaryAdvisor .combats_in_progress .powerbar
+.friendly{position:absolute;top:0px;left:0px;width:50%;height:30px;background:url(/cdn/all/both/advisors/military/miladv_ui_sprite.jpg) -110px -75px no-repeat;z-index:100}#militaryAdvisor .combats_in_progress .powerbar .units,
+#militaryAdvisor .combats_in_progress .powerbar
+.players{display:inline;color:#fdf7dd;font-size:11px;height:22px;line-height:22px;margin-top:3px}#militaryAdvisor .combats_in_progress .friendly
+.units{float:left}#militaryAdvisor .combats_in_progress .friendly
+.players{float:left;padding-right:22px;margin-left:10px;background:url(/cdn/all/both/advisors/military/general_blue.jpg) right top no-repeat}#militaryAdvisor .combats_in_progress .hostile
+.units{float:right}#militaryAdvisor .combats_in_progress .hostile
+.players{float:right;padding-left:22px;margin-right:10px;background:url(/cdn/all/both/advisors/military/general_red.jpg) left top no-repeat}#militaryAdvisor .combats_in_progress .powerbar
+.hostile{position:absolute;top:0px;right:0px;width:100%;height:30px;z-index:90;text-align:right}#militaryAdvisor .combats_in_progress
+.btnViewBattle{position:absolute;top:3px;right:52px;width:40px;height:24px;background:url(/cdn/all/both/advisors/military/miladv_ui_sprite.jpg) -200px -6px no-repeat}#militaryAdvisor .combats_in_progress .btnViewBattle:hover{background-position:-240px -6px}#militaryAdvisor .combats_in_progress .battle
+.btnViewBattle_down{background-position:-280px -6px}#militaryAdvisor .combats_in_progress
+.btnEventLog{position:absolute;top:3px;right:4px;width:40px;height:24px;background:url(/cdn/all/both/advisors/military/miladv_ui_sprite.jpg) -320px -6px no-repeat;color:#6b4628;line-height:22px;text-align:right;padding-right:6px}#militaryAdvisor .combats_in_progress .btnEventLog:hover{background-position:-366px -6px}#militaryAdvisor .combats_in_progress .battle
+.btnEventLog_down{background-position:-412px -6px}#militaryAdvisor .combats_in_progress
+.eventbar{height:22px;line-height:22px;background:url(/cdn/all/both/interface/x674_dropdown.png) 0px 0px no-repeat;margin-left:3px;padding:0
+20px;cursor:pointer}#militaryAdvisor .combats_in_progress .eventbar:hover{background-position:0px -23px}#militaryAdvisor .combats_in_progress
+.eventbar.extended{background-position:0px -46px}#militaryAdvisor .combats_in_progress .eventbar.extended:hover{background-position:0px -69px}#militaryAdvisor tr.own td,#militaryAdvisor tr.own td
+a{color:#1f09f8}#militaryAdvisor tr.ally td,#militaryAdvisor tr.ally td
+a{color:darkgreen}#militaryAdvisor tr.hostile td, #militaryAdvisor tr.hostile td
+a{color:#f71f1f}#militaryAdvisor
+.info{padding:8px}#militaryMovements
+.military_units{text-align:center}#militaryMovements
+.magnify_icon{background-position:center center}#militaryMovementsFleetMovementsFilters{margin:0
+3px}#militaryMovementsFleetMovementsFilters>div.missionFilter{float:left;width:35px;height:36px;border:solid 1px;margin:3px;opacity:0.3}#militaryMovementsFleetMovementsFilters>div.missionFilter:not(.selected):hover{opacity:0.5}#militaryMovementsFleetMovementsFilters>div.missionFilter.selected{opacity:1}#militaryMovementsFleetMovementsFilters > div.missionFilter
+div.mission_icon{width:35px}#militaryMovementsFleetMovementsFilters > div.missionFilter
+div.mission_icon.all{text-align:center;line-height:22px;height:22px;background-color:#fbe7c0}#militaryMovementsFleetMovementsFilters > div.missionFilter
+div.amount{text-align:center;line-height:14px;margin-top: -3px;background-color:#c99868}#militaryMovementsFleetMovementsFilters > div.missionFilter[data-filter="all"] div.amount{margin:0}#militaryAdvisorReportView #troopsReport
+h4{background-color:#faeac6;height:24px;font-size:12px;font-weight:bold;color:#612d04;padding:8px
+0 0 11px}#militaryAdvisorReportView #troopsReport
+.attacker{background:url(/cdn/all/both/unitdesc/unit_attack.png) left top no-repeat;margin:10px
+0 0 8px;padding-left:50px}#militaryAdvisorReportView #troopsReport
+.defender{background:url(/cdn/all/both/unitdesc/unit_defend.png) left top no-repeat;margin:10px
+0 0 8px;padding-left:50px}#militaryAdvisorReportView #troopsReport
+.defenderLine{background:url(/cdn/all/both/advisors/military/defender.png) left center no-repeat;text-align:left;padding-left:25px}#militaryAdvisorReportView #troopsReport
+.attackerLine{background:url(/cdn/all/both/advisors/military/attacker.png) left center no-repeat;text-align:left;padding-left:25px}#militaryAdvisorReportView #troopsReport
+label{display:block;width:100px}#militaryAdvisorReportView #troopsReport
+h5{background-color:#542c0f;color:#faeac6;font-weight:bold;padding:8px
+0 8px 11px;margin:10px
+3px 0 3px}#militaryAdvisorReportView #troopsReport .overview
+.col1{font-weight:bold;padding:10px
+0 0 11px;text-align:left;width:100px}#militaryAdvisorReportView #troopsReport
+.strengthGraph{margin:20px}#militaryAdvisorReportView #troopsReport .strengthGraph
+.strengthBox{display:flex;width:100%;margin:5px}#militaryAdvisorReportView #troopsReport .strengthGraph .strengthBox
+.unitName{min-width:130px;width:20%}#militaryAdvisorReportView #troopsReport .strengthGraph
+.strengthLine{width:100px;border-radius:3px;margin:0px
+5px}#militaryAdvisorReportView #troopsReport .strengthGraph .combatInfo
+p{margin-top:15px}.strengthLow{background:rgb(248, 206, 204);border:2px
+solid rgb(184,84,80)}.strengthMedium{background:rgb(176, 227, 230);border:2px
+solid rgb(14,128,136)}.strengthHigh{background:rgb(204, 204, 0);border:2px
+solid rgb(215, 155, 0)}#militaryAdvisorReportView #troopsReport .strengthGraph
+.combatInfo{margin-top:15px}#militaryAdvisorReportView .textred, #militaryAdvisorReportView .textred
+a{color:#950000}#militaryAdvisorReportView .textgreen, #militaryAdvisorReportView .textgreen
+a{color:#007000}#militaryAdvisorReportView .textblue, #militaryAdvisorReportView .textblue
+a{color:#1f09f8}#container .table01.militaryList
+td{border:2px
+solid #faeac6;padding:4px
+5px}#militaryAdvisorReportView #troopsReport
+li{display:block;float:left;width:auto}#militaryAdvisorReportView #troopsReport
+ul{clear:both;overflow:hidden}#container .table01.militaryList
+td.numbers{border-right:2px solid #fdf7dd;width:50px}#container .table01.militaryList
+td.alt{background-color:#fffae8}#container .table01.militaryList tr.line
+td{background-color:#542c0f;padding:0;height:2px}.militaryList
+td.numbers2{text-align:left;width:50px}#container .table01.militaryList td.nobg,
+#container .table01.militaryList
+td.headline{background-color:#faeac6}.militaryList .army,
+.militaryList
+.fleet{width:50px;height:50px;margin:0
+auto}.militaryList
+.army{background-image:url(/cdn/all/both/characters/military/buttons_sprite.png);background-repeat:no-repeat}.militaryList
+.fleet{background-image:url(/cdn/all/both/characters/fleet/buttons_sprite.png);background-repeat:no-repeat}.militaryList
+.s302{background-position: -50px 0px}.militaryList
+.s303{background-position: -100px 0px}.militaryList
+.s304{background-position: -200px 0px}.militaryList
+.s305{background-position: -550px 0px}.militaryList
+.s306{background-position: -500px 0px}.militaryList
+.s307{background-position: -600px 0px}.militaryList
+.s308{background-position: -350px 0px}.militaryList
+.s309{background-position: -450px 0px}.militaryList
+.s310{background-position: -300px 0px}.militaryList
+.s311{background-position: -250px 0px}.militaryList
+.s312{background-position: -400px 0px}.militaryList
+.s313{background-position: -150px 0px}.militaryList
+.s314{background-position: -650px 0px}.militaryList
+.s315{background-position: -750px 0px}.militaryList
+.s316{background-position: -1095px 0px}.militaryList
+.s317{background-position: -800px 0px}.militaryList
+.s318{background-position: -850px 0px}.militaryList
+.s202{background-position: -50px 0px}.militaryList
+.s210{background-position: -50px 0px}.militaryList
+.s211{background-position: -150px 0px}.militaryList
+.s212{background-position: -350px 0px}.militaryList
+.s213{background-position: -100px 0px}.militaryList
+.s214{background-position: -200px 0px}.militaryList
+.s215{background-position: -300px 0px}.militaryList
+.s216{background-position: -250px 0px}.militaryList
+.s217{background-position: -550px 0px}.militaryList
+.s218{background-position: -500px 0px}.militaryList
+.s219{background-position: -450px 0px}.militaryList
+.s220{background-position: -400px 0px}.militaryList
+.s319{background-position: -900px 0px}.militaryList
+.s320{background-position: -997px 0px}.militaryList
+.s321{background-position: -949px 0px}.militaryList
+.s322{background-position: -1047px 0px}.militaryList
+.s323{background-position: -1194px 0px}.militaryList
+.s324{background-position: -1292px 0px}.militaryList
+.s325{background-position: -1342px 0px}.militaryList
+.s326{background-position: -1144px 0px}.militaryList
+.s327{background-position: -1243px 0px}.militaryList
+.s221{background-position: -600px 0px}.militaryList
+.s222{background-position: -650px 0px}.militaryList
+.s224{background-position: -700px 0px}.militaryList
+.s226{background-position: -750px 0px}.militaryList
+.s227{background-position: -850px 0px}.militaryList
+.s228{background-position: -800px 0px}.militaryList
+.s223{background-position: -900px 0px}.militaryList
+.s225{background-position: -950px 0px}.militaryList
+.s230{background-position: -1000px 0px}.militaryList
+.s229{background-position: -1050px 0px}.militaryList
+.amount{display:block;position:relative;width:50px;text-align:center;top:47px}.troop_movements_unit_list.militaryList .army,
+.troop_movements_unit_list.militaryList
+.fleet{height:65px}#militaryAdvisorReportView
+.link{float:left;text-align:center;margin:10px
+0 0 0;width:50%}#militaryAdvisorReportView .link
+a{float:right;margin:0
+5px 0 0}#militaryAdvisorReportView .link:last-of-type
+a{float:left;margin:0
+0 0 5px}#militaryAdvisorReportView #troopsReport .result
+div{padding:10px}#militaryAdvisorReportView #troopsReport .result
+.winners{background:url(/cdn/all/both/layout/medallie32x32_gold.png) left 12px no-repeat}#militaryAdvisorReportView #troopsReport .result
+.losers{background:url(/cdn/all/both/combatreport/losers.png)  left 12px no-repeat}#militaryAdvisorReportView #troopsReport .result .winners, #militaryAdvisorReportView #troopsReport .result
+.losers{padding-left:46px}.watchBattle{background:url(/cdn/all/both/advisors/military/icon-watch-battle-small.png) no-repeat;width:31px;height:17px;display:inline-block}.watchBattle:hover{background-position:0 -17px}.combathover{background-color:#ECD5AC !important}#militaryAdvisorDetailedReportView
+.pointer{cursor:pointer}#militaryAdvisor .source a, #militaryAdvisor .source span, #militaryAdvisor .target a, #militaryAdvisor .target
+span{display:block}#tradeAdvisor .table01
+.wichtig{background:url(/cdn/all/both/icons/wichtig.png) center 8px  no-repeat;width:9px}#tradeAdvisor a.allyLink, #tradeAdvisor #inboxCity
+a{font-weight:bold}#tradeAdvisor .table01
+td.date{white-space:nowrap}#tradeAdvisor #inboxCity
+td{vertical-align:top}#tradeAdvisor .table01
+td.city{padding-left:9px;padding-right:0px;width:84px;min-width:84px}#tradeAdvisor .table01
+td.island{background:url(/cdn/all/both/layout/icon-island.png) no-repeat 3px center;padding-left:20px}#tradeAdvisor .table01 td.subject
+.resources{display:table}#tradeAdvisor .table01 td.subject .resources
+li{display:inline-block;width:auto}#tradeAdvisor .table01 td.subject .resources
+li.value{padding-left:0px;padding-right:15px}#tradeAdvisor .table01
+.attention{padding-left:22px;background:url(/cdn/all/both/icons/attention.png) no-repeat 2px center}#tradeAdvisor .table01 .building, #tradeAdvisor .table01
+.wonder{padding-left:22px}.filter{padding-left:11px}.filterEntry{float:left;background:url(/cdn/all/both/icons/tradeAdvisorFilter/Button_Standard.png) left center no-repeat;;padding:2px
+0px 2px 2px;width:164px;height:26px;cursor:pointer}#tradeAdvisor
+.filterEntryButton{display:inline-block;width:136px}#tab_diplomacyAlly .filterEntryButton,
+#diplomacyAllyInfo .filterEntryButton,
+#diplomacyAllyMemberlist .filterEntryButton,
+#diplomacyAllySearch .filterEntryButton,
+#tab_diplomacyAdvisor
+.filterEntryButton{display:inline-block;width:160px}.filterEntry:hover{background-image:url(/cdn/all/both/icons/tradeAdvisorFilter/Button_Hover.png)}.filterEntry a:hover{text-decoration:none}.filterEntry:active{background-image:url(/cdn/all/both/icons/tradeAdvisorFilter/Button_Active.png)}.filterEntry.active{background-image:url(/cdn/all/both/icons/tradeAdvisorFilter/Button_Active.png)}.filterEntry.active
+.name{font-weight:bold}.filterEntry
+.icon{display:inline-block;height:20px;width:20px;position:relative;top:3px}.filterEntry
+.checkbox_label{max-width:84px;text-overflow:ellipsis;word-wrap:break-word;overflow:hidden;white-space:nowrap}.filterEntry
+.image{display:inline-block;position:relative;top:1px;left:2px;margin-right:3px}.filterEntry
+.name{display:inline-block}.diplomacy .filterEntry
+.name{margin-left:3px}.category{width:26px;height:26px;display:inline-block}.category.all{background:url(/cdn/all/both/icons/tradeAdvisorFilter/Icon_Alle_Rahmen_26x26.png) left center no-repeat}.category.military{background:url(/cdn/all/both/icons/tradeAdvisorFilter/Icon_Militaer_Rahmen_26x26.png) left center no-repeat}.category.transport{background:url(/cdn/all/both/icons/tradeAdvisorFilter/Icon_Warentransport_Rahmen_26x26.png) left center no-repeat}.category.production{background:url(/cdn/all/both/icons/tradeAdvisorFilter/Icon_Produktion_Rahmen_26x26.png) left center no-repeat}.category.espionage{background:url(/cdn/all/both/icons/tradeAdvisorFilter/Icon_Spionage_Rahmen_26x26.png) left center no-repeat}.category.diplomacy{background:url(/cdn/all/both/icons/tradeAdvisorFilter/Icon_Diplomatie_Rahmen_26x26.png) left center no-repeat}.category.plus{background:url(/cdn/all/both/icons/tradeAdvisorFilter/Icon_IkariamPlus_News_Rahmen_26x26.png) left center no-repeat}.category.piracy{background:url(/cdn/all/both/icons/tradeAdvisorFilter/Icon_Piraterie_Rahmen_26x26.png) left center no-repeat}.icon.all{background:url(/cdn/all/both/icons/tradeAdvisorFilter/Icon_Alle_20x20.png) left center no-repeat;padding-left:23px;left:22px}.icon.military{background:url(/cdn/all/both/icons/tradeAdvisorFilter/Icon_Militaer_20x20.png) left center no-repeat}.icon.transport{background:url(/cdn/all/both/icons/tradeAdvisorFilter/Icon_Warentransport_20x20.png) left center no-repeat}.icon.production{background:url(/cdn/all/both/icons/tradeAdvisorFilter/Icon_Produktion_20x20.png) left center no-repeat}.icon.espionage{background:url(/cdn/all/both/icons/tradeAdvisorFilter/Icon_Spionage_20x20.png) left center no-repeat}.icon.diplomacy{background:url(/cdn/all/both/icons/tradeAdvisorFilter/Icon_Diplomatie_20x20.png) left center no-repeat}.icon.plus{background:url(/cdn/all/both/icons/tradeAdvisorFilter/Icon_IkariamPlus_News_20x20.png) left center no-repeat}.icon.piracy{background:url(/cdn/all/both/icons/tradeAdvisorFilter/Icon_Piraterie_20x20.png) left center no-repeat}.filterEntry
+.icon.scroll{background:url(/cdn/all/both/board/schriftrolle_closed2.png) 0px 6px no-repeat;width:16px;margin-left:3px}.filterEntry.active
+.icon.scroll{background:url(/cdn/all/both/board/schriftrolle_offen2.png) 0px 2px no-repeat;width:16px;margin-left:3px}#container .tradeRouteBox
+.tradeRoute{background:url(/cdn/all/both/transport/bgCitiesFromTo.png) left top no-repeat;height:42px;margin-left:8px;margin-top:6px}#container .tradeRouteBox
+.tradeRoute.add_info{background:url(/cdn/all/both/transport/bgTradegoodAndTime.png) left top no-repeat;margin-top:0}#container .tradeRouteBox
+.traderoute_title_cell{display:table-cell}#container .tradeRouteBox
+.traderoute_title_cell.data{width:455px}#container .tradeRouteBox
+.traderoute_title_cell.premium_duration{width:110px}#container .tradeRouteBox
+.premium_cost{width:50px}#container .tradeRouteBox .tradeRoute
+.row_container{padding:10px}#container .tradeRouteBox .tradeRoute
+.row_container.startCity{padding:10px
+21px 10px 47px}#container .tradeRouteBox .tradeRoute
+.row_container.number{padding:10px
+0px 0px 50px}#container .tradeRouteBox .tradeRoute
+.row_container.time{padding:10px
+20px 0px 36px}#container .tradeRouteBox .tradeRoute
+.row_container.endCity{padding:10px
+0px 10px 0px}#container .tradeRouteBox .tradeRoute.add_info
+.row_container.tradegood{padding:10px
+0px 10px 5px}#container .tradeRouteBox .tradeRoute .row_container.status, #container .tradeRouteBox .tradeRoute
+.row_container.renew{padding-top:15px;text-align:center;width:95px}#container .tradeRouteBox .tradeRoute
+.row_container.renew.buy_ambrosia{padding:2px;margin-top:5px}#container .buy_ambrosia
+span{display:block}#container .tradeRouteBox .tradeRoute
+.row_container.extend{padding:15px
+0 15px 30px}#container .tradeRouteBox .tradeRoute .row_container.save, #container .tradeRouteBox .tradeRoute
+.row_container.delete{padding:13px
+0 0 10px;width:18px}#container .tradeRouteBox .tradeRoute .delete a, #container .tradeRouteBox .tradeRoute .save
+input{cursor:pointer;display:block;width:18px;height:18px;background:url(/cdn/all/both/transport/board_buttons_sprite.png) 0px 0px;border:0px}#container .tradeRouteBox .tradeRoute .save
+input{background-position: -90px 0px}#container .tradeRouteBox .tradeRoute .save input:hover{background-position: -90px -18px}#container .tradeRouteBox .tradeRoute .delete a:hover{background-position:0px -18px}#container .tradeRouteBox
+.centerButton{border-top:1px dotted #E4B873;margin-top:25px;height:25px;padding-top:10px}#container .tradeRouteBox .premiumExtendBox
+.premiumFeatureLabel{left:22px;position:relative;top: -20px}#container
+ul.unitlist{list-style:none;margin:2px
+0;padding:0}#militaryAdvisorDetailedReportView
+ul.unitlist{margin-left:150px;margin-bottom:10px}#container ul.unitlist
+li{width:36px;float:left;text-align:center;padding:35px
+0 0 0;margin:0
+4px 0 0}#militaryAdvisorDetailedReportView ul.unitlist
+li{margin-bottom:18px}#militaryAdvisorReportView #troopsReport
+.result{border:2px
+solid #fedc9c;width:80%;margin:10px
+auto;background:url(/cdn/all/both/combatreport/resultbg.png) repeat-x #f9e3aa}#container
+.advisor_s301{}#container
+.advisor_s302{background-position: -36px 0}#container
+.advisor_s303{background-position: -72px 0}#container
+.advisor_s304{background-position: -144px 0}#container
+.advisor_s305{background-position: -396px 0}#container
+.advisor_s306{background-position: -360px 0}#container
+.advisor_s307{background-position: -432px 0}#container
+.advisor_s308{background-position: -252px 0}#container
+.advisor_s309{background-position: -324px 0}#container
+.advisor_s310{background-position: -216px 0}#container
+.advisor_s311{background-position: -180px 0}#container
+.advisor_s312{background-position: -288px 0}#container
+.advisor_s313{background-position: -108px 0}#container
+.advisor_s314{background-position: -468px 0px}#container
+.advisor_s315{background-position: -540px 0px}#container
+.advisor_s316{background-position: -504px 0px}#container
+.advisor_s317{background-position: -576px 0px}#container
+.advisor_s301d{background-position:0 -36px}#container
+.advisor_s302d{background-position: -36px -36px}#container
+.advisor_s303d{background-position: -72px -36px}#container
+.advisor_s304d{background-position: -144px -36px}#container
+.advisor_s305d{background-position: -396px -36px}#container
+.advisor_s306d{background-position: -360px -36px}#container
+.advisor_s307d{background-position: -432px -36px}#container
+.advisor_s308d{background-position: -252px -36px}#container
+.advisor_s309d{background-position: -324px -36px}#container
+.advisor_s310d{background-position: -216px -36px}#container
+.advisor_s311d{background-position: -180px -36px}#container
+.advisor_s312d{background-position: -288px -36px}#container
+.advisor_s313d{background-position: -108px -36px}#container
+.advisor_s314d{background-position: -468px -36px}#container
+.advisor_s315d{background-position: -540px -36px}#container
+.advisor_s316d{background-position: -504px -36px}#container
+.advisor_s317d{background-position: -576px -36px}#container
+.advisor_s201{}#container
+.advisor_s210{background-position: -36px 0}#container
+.advisor_s211{background-position: -108px 0}#container
+.advisor_s212{background-position: -252px 0}#container
+.advisor_s213{background-position: -72px 0}#container
+.advisor_s214{background-position: -144px 0}#container
+.advisor_s215{background-position: -216px 0}#container
+.advisor_s216{background-position: -180px 0}#container
+.advisor_s201d{}#container
+.advisor_s210d{background-position: -36px -36px}#container
+.advisor_s211d{background-position: -108px -36px}#container
+.advisor_s212d{background-position: -252px -36px}#container
+.advisor_s213d{background-position: -72px -36px}#container
+.advisor_s214d{background-position: -144px -36px}#container
+.advisor_s215d{background-position: -216px -36px}#container
+.advisor_s216d{background-position: -180px -36px}#researchAdvisor .researchTypes
+.researchType{margin:3px;min-height:134px;position:relative;padding:10px
+0}#researchAdvisor .seafaring
+img{border:2px
+solid #00F}#researchAdvisor .economy
+img{border:2px
+solid #FF0}#researchAdvisor .knowledge
+img{border:2px
+solid #92CBFF}#researchAdvisor .military
+img{border:2px
+solid #F00}#researchAdvisor
+.researchTypeLabel{text-align:center;position:relative;width:150px;height:36px;top:0px;left:0px}#researchAdvisor  .researchType
+.leftCol{position:absolute;top:13px;left:13px}#researchAdvisor .researchType
+.researchDesc{margin-left:180px;width:350px}#researchAdvisor .researchType
+.rightCol{left:550px;position:absolute;top:30px;width:120px}#researchAdvisor .researchType
+.researchPoints{background:url(/cdn/all/both/resources/icon_research.png) no-repeat scroll left top transparent;height:26px;line-height:26px;margin-bottom:15px;padding-left:20px}ol.research_type{float:left;line-height:26px;margin:10px
+0 15px 10px;width:227px}.research_type
+li{height:26px;list-style-position:inside;list-style-type:decimal;margin:0
+0 1px 0;padding-left:5px}.research_type li:hover{background-color:#FAE0AE}.research_type
+a{line-height:26px;margin-left:5px;overflow:hidden;text-overflow:ellipsis;-o-text-overflow:ellipsis;white-space:nowrap;width:180px;display:inline-block;position:absolute}.research_type
+.explored{background:url(/cdn/all/both/resources/icon_research.png) no-repeat 98% 50%}.research_type
+.unexplored{color:#e3ae87}.research_type
+.explorable{background:url(/cdn/all/both/resources/icon_research_explorable.png) no-repeat 98% 50%}.research_type
+.unexplorable{background:url(/cdn/all/both/resources/icon_research_overcharged.png) no-repeat 98% 50%}.research_type
+.selected{background-color:#FAE0AE}.current_research{margin-bottom:10px;margin-left:235px;padding:10px;width:420px}.current_research
+.curr_research_wrapper{border:1px
+solid #fcdbaa;margin:0
+0 15px;padding:5px
+5px 32px 5px}.current_research
+.research_name{color:#906646;font-size:16px;font-weight:700}.current_research
+span.desc{float:left;font-weight:bold;margin:4px
+0 0 0;width:130px}#container .contentBox01h .current_research
+p{padding:4px
+0}#container .contentBox01h .current_research p.txt,
+#container .current_research
+ul{margin-bottom:15px;margin-left:140px}#container .current_research
+ul{padding:2px
+0}#container .current_research
+li{line-height:20px}.arrow_ok{background:url(/cdn/all/both/interface/check_mark_17px.png) no-repeat top;height:17px;position:absolute;width:30px;margin-top: -2px}.research_cost{background:url(/cdn/all/both/resources/icon_research.png) no-repeat center right;padding-top:4px;padding-right:16px;padding-bottom:2px}.current_research
+.research_cost{height:24px;line-height:16px}#researchAdvisor
+.research_overview_list{background:#FAE0AE;height:25px;margin-top:10px;margin-left:3px;width:674px}#researchAdvisor .research_overview_list
+li{float:left;line-height:22px;padding-left:27px;text-align:left}#researchAdvisor .research_overview_list
+.scientists{background:url(/cdn/all/both/resources/icon_scientist.png) no-repeat top left;margin-left:15px;width:163px}#researchAdvisor .research_overview_list
+.time{background-image:url(/cdn/all/both/resources/icon_research_time.png);background-position:2px 1px;background-repeat:no-repeat;width:145px}#researchAdvisor .research_overview_list
+.points{background-image:url(/cdn/all/both/resources/icon_research.png);background-position:10px 2px;background-repeat:no-repeat;width:260px}#researchAdvisor .research_overview_list
+.researchAdvisorTabletHelpButton{width:10px;padding-left:0px;margin-top:5px}#researchAdvisor
+.questionMark{background:url(/cdn/all/both/layout/help_smaller.png) no-repeat;cursor:help;width:9px;height:15px;margin-left:2px}#researchAdvisor
+.premium_research_link{background:#FCEAC9;border:1px
+solid #fcdbaa;padding:5px
+5px 34px}#researchAdvisor .premium_research_link
+.content_p{margin-left:150px}#researchAdvisor .premium_research_link
+img{float:left;margin:7px
+5px 10px 0}#premiumTradeAdvisor
+th{background-color:#FAEAC6;color:#906646;font-weight:bold;text-align:center}#premiumTradeAdvisor  th,
+#premiumTradeAdvisor
+td{padding:3px
+0px;vertical-align:middle;border:2px
+solid #FAEAC6}#premiumTradeAdvisor #buildingsOverview
+.building{width:15%;text-align:center;font-size:1.1em}#premiumTradeAdvisor  #buildingsOverview
+th.city{background:none;text-align:left;width:25%;font-weight:normal;padding-left:10px}#premiumTradeAdvisor #buildingsOverview tr.headingrow
+th{background-color:#FAEAC6;text-align:center;padding:0px}#premiumTradeAdvisor #populationOverview
+td.first{text-align:left}#premiumTradeAdvisor #resourceOverview
+td{text-align:right}#premiumTradeAdvisor #populationOverview table
+td.satisfaction{text-align:center;padding:0}#premiumTradeAdvisor #populationOverview table
+td.satisfaction_good{text-align:right;color:green;font-weight:bold;padding:0}#premiumTradeAdvisor #populationOverview table
+td.satisfaction_bad{text-align:right;color:red;font-weight:bold;padding:0}#premiumTradeAdvisor #populationOverview td.city,
+#premiumTradeAdvisor #resourceOverview
+td.city{text-align:left;padding-left:10px;padding-right:6px}#premiumTradeAdvisor #resourceOverview
+td.stock{font-weight:bold;border-left-color:#f2d9ab;padding-right:6px}#premiumTradeAdvisor
+td.total{font-weight:bold}#premiumTradeAdvisor #resourceOverview td.wood,
+#premiumTradeAdvisor #resourceOverview td.wine,
+#premiumTradeAdvisor #resourceOverview td.marble,
+#premiumTradeAdvisor #resourceOverview td.glass,
+#premiumTradeAdvisor #resourceOverview td.sulfur,
+#premiumTradeAdvisor #resourceOverview td.crystal,
+#premiumTradeAdvisor #resourceOverview
+td.lvl{text-align:right;padding-right:6px}#premiumTradeAdvisor #resourceOverview td
+div.level{border-left:1px dotted #c66f5c;border-right:1px dotted #c66f5c;float:right;text-align:center;width:22px;margin-left:8px}#premiumMilitaryAdvisor  table
+td.city{text-align:left}#premiumMilitaryAdvisor  table td,
+#premiumMilitaryAdvisor  table
+th{border:2px
+solid #FAEAC6;text-align:center}#premiumMilitaryAdvisor .table01 tr.total
+td{font-weight:bold;border-top:1px solid #000}#premiumMilitaryAdvisor .table01
+th{color:#906646;font-weight:bold;text-align:center}#premiumMilitaryAdvisor .table01 th,
+#premiumMilitaryAdvisor .table01
+td{padding:3px
+6px;vertical-align:middle}#premiumMilitaryAdvisor .table01 th.shipyard,
+#premiumMilitaryAdvisor .table01
+th.barracks{padding-left:0;padding-right:0;height:70px}#premiumMilitaryAdvisor #overall td.ships,
+#premiumMilitaryAdvisor #overall
+td.units{text-align:center}#premiumResearchAdvisor
+.table01{margin:0pt auto;width:672px;border-collapse:collapse;margin-bottom:1px;padding:0}#premiumResearchAdvisor .table01 td,
+#premiumResearchAdvisor .table01
+th{border:2px
+solid #FAEAC6;padding:3px
+6px;vertical-align:middle}#premiumResearchAdvisor .table01
+td.city{padding-left:30px}#premiumResearchAdvisor .table01
+td.academyLVL{width:100px}#premiumResearchAdvisor .table01 td.academyLVL,
+#premiumResearchAdvisor .table01 td.costs,
+#premiumResearchAdvisor .table01 td.scientists,
+#premiumResearchAdvisor .table01
+td.goto{text-align:center}#premiumResearchAdvisor .table01
+td.field{padding-left:30px}#premiumTradeAdvisor  .overview
+th.text{text-align:right;padding-right:5px;padding-top:10px}#premiumTradeAdvisor  .overview
+th.image{padding-top:10px;text-align:left;padding-left:10px}#premiumTradeAdvisor  .overview
+th.first{text-align:center}#premiumTradeAdvisor .overview
+td.city{border-left:0px;border-right:2px solid #FAEAC6}#premiumTradeAdvisor  .overview
+td{padding-right:5px}#premiumTradeAdvisor  .overview
+td.text{text-align:right}#premiumTradeAdvisorBuildings .building
+.upgrade{background:url(/cdn/all/both/upgrade/arrow_upgrade.png) no-repeat;padding-left:22px;margin:auto;width:70px;height:16px}#premiumTradeAdvisorBuildings .table01
+td{text-align:center}#premiumTradeAdvisorBuildings .building .upgrade span,
+#premiumTradeAdvisorBuildings .building .upgradeList
+span{font-size:10px}#premiumTradeAdvisorBuildings .building
+.upgradeList{background:url(/cdn/all/both/upgrade/arrow_upgradelist.png) no-repeat;padding-left:20px;margin:auto;width:70px;height:16px}#premiumDiplomacyAdvisor .table01
+td.city{text-align:left;padding-right:15px}#premiumDiplomacyAdvisor .table01 td, #premiumDiplomacyAdvisor .table01
+th{border:2px
+solid #FAEAC6}#premiumDiplomacyAdvisor .table01 th,
+#premiumDiplomacyAdvisor .table01
+td{padding:3px
+6px;vertical-align:middle}#premiumDiplomacyAdvisor .overall td.ships, #premiumDiplomacyAdvisor .overall td.units,
+#premiumDiplomacyAdvisor .table01 td.risk, #premiumDiplomacyAdvisor .table01 td.spystatus,
+#premiumDiplomacyAdvisor .table01
+td.reports{text-align:center}#premium
+.matrix{width:672px;margin-left:1px}#premium   .contentBox01h
+.matrix{margin-bottom:2px}#premium   .contentBox01h .matrix
+td{padding:3px
+0px 3px 5px;vertical-align:middle;border:2px
+solid #faeac6;cursor:pointer}#premium  .contentBox01h .matrix  td
+img{padding-bottom:2px}#premium  .contentBox01h .matrix
+th{background-color:#faeac6;color:#906646;font-weight:bold;text-align:center;padding-top:10px;padding-bottom:3px}#premium  .contentBox01h .matrix
+td.active{height:40px;background:url(/cdn/all/both/smilies/ecstatic_x32.png) no-repeat 50% 50%}#premium  .contentBox01h .matrix
+td.inactive{height:40px;background:url(/cdn/all/both/layout/help.png) no-repeat 50% 50%;text-align:center;font-weight:bold}#premium   .contentBox01h .matrix td.inactive
+.tooltip{text-align:left;font-weight:normal}#premium   .contentBox01h .matrix
+td.active_short{height:40px;background:url(/cdn/all/both/smilies/neutral_x32.png) no-repeat 50% 50%}#premium .contentBox01h div.content
+.matrix{background-color:#f2d9ab}#premium  .contentBox01h .matrix div.tooltip
+.payment{width:100%}#premium  .contentBox01h .matrix div.tooltip .payment
+td{border:none;margin:0px;padding:0px;line-height:14px}#premium  .contentBox01h .matrix div.tooltip .payment
+td.active{float:right;background-image:none;line-height:14px;height:16px}#premium  .contentBox01h .matrix div.tooltip .payment td
+div.extend{float:right;padding-left:15px;background:url(/cdn/all/both/layout/icon-clock_8x10px.png) no-repeat 4px 2px}#premium  .contentBox01h .matrix div.tooltip .payment td.buy,
+#premium  .contentBox01h .matrix div.tooltip .payment
+td.active{float:right;width:200px;text-align:right;font-weight:normal}#premiumMilitaryAdvisor table td
+.allied{background-color:#caf9b1}#premiumMilitaryAdvisor table td
+.treaty{background-color:#fefa85}#premiumTradeAdvisor
+.selector_label{padding:5px
+0 0 0;margin:0
+5px 0 0}#container
+.armyListItem{width:35px;float:left;text-align:center;margin:4px
+4px 16px 0;height:35px}#container .armyListItem
+.amount{margin-top:37px}#container
+.fleetListItem{width:34px;float:left;text-align:center;margin:4px
+4px 16px 0;height:34px}#container .fleetListItem
+.amount{margin-top:36px}.embassyTable
+.watchBattle{position:relative;top:3px;margin-left:4px}.warTargetButton{background-image:url(/cdn/all/both/buttons/warTargetButton.png);cursor:pointer;display:block;float:left;height:18px;margin:0
+3px;width:18px;min-width:18px}.warTargetButton:hover{background-position:0px -18px}.warTargetButton.delete{background-position: -18px 0px}.warTargetButton.delete:hover{background-position: -18px -18px}.messageTreasureMapLink{background:url(/cdn/all/both/minimized/Kartenteil.png) no-repeat center top;width:70px;padding-top:40px;display:block;white-space:nowrap}.header-button-container{display:flex;justify-content:space-between;align-items:center}#js_researchAdvisorConservationLink{margin:0
+0 0 0 !important}#transport .summaryBox ul.speedInfo
+li.rowTitle{margin-right:20px !important}#transport .summaryBox ul.cargoInfo
+li.rowTitle{margin-right:20px !important}#merchantNavy .table01 th, #merchantNavy .table01
+td{padding:0}#merchantNavy .table01
+td.transports{color:#906646;text-align:right}#merchantNavy
+.mission_icon{text-align:center}#merchantNavy  .table01
+td.premiumJet{padding-left:3px;padding-right:3px}#merchantNavy .table01 td.premiumJet
+.orderButton{margin:5px
+5px 5px 0}#merchantNavy  .table01 td.premiumJet
+.orderAvailable{margin:5px
+0}#merchantNavy
+.eventRow{height:38px}#merchantNavy .table01
+.actions{padding-right:10px}#merchantNavy  .table01
+td.gotoforeign{background:url(/cdn/all/both/icons/stage_gotoforeign.png) no-repeat center center}#merchantNavy  .table01
+td.gotoown{background:url(/cdn/all/both/icons/stage_gotoown.png) no-repeat center center}#merchantNavy  .table01
+td.returning{background:url(/cdn/all/both/icons/stage_returning.png) no-repeat center center}#merchantNavy  .table01
+.payload{color:#906646;margin-left:10px;text-align:left;width:525px}#merchantNavy  .table01 .payload
+.textLabel{float:left;text-align:right;padding:2px
+2px;font-size:10px}#merchantNavy  .table01
+.space{font-size:10px}#merchantNavy  .table01 .space
+img{vertical-align:middle}#merchantNavy
+.titleNavyImg{position:relative;top:25px}#merchantNavy
+.tableWrapper{margin-top:-43px}#merchantNavy #grantedTransporters
+.governmentSymbolSmall{background:url(/cdn/all/both/government/zepter_20.png) no-repeat left top;width:20px;height:20px;position:absolute;display:block}#transport .ambrosiaTotal, #transport
+.itemTotal{border:1px
+solid #E4B873;float:left;width:53px;height:66px;line-height:110px;font-size:14px;font-weight:700;margin:10px
+0 0 0;text-align:center}#transport
+.ambrosiaTotal{background:url(/cdn/all/both/premium/ambrosia_icon.png) no-repeat 19px 10px;margin-left:40px}#transport_c .itemIcon, #colonize_c .jetContainer
+.itemIcon{margin:8px
+0 0 10px}#transport_c
+.orderPrice{float:left;width:53px;height:23px;line-height:26px;font-size:14px;font-weight:700}.jetContainer{clear:both;display:block;overflow:hidden;margin:20px
+auto;text-align:center;font-weight:bold;width:400px}.jetContainer
+.costs{float:left;padding-top:37px;padding-right:10px}#transport_c
+.orderAvailable{border:1px
+solid #E4B873;border-left:none}#mission
+.js_completeTransportCapacity{position:absolute;top:57px;left:137px}#colonize
+.journeyPremiumTransporters{display:none}#colonize
+.journeyFreighters{display:none}.portLoadingIcon{background:url(/cdn/all/both/icons/portLoadingIcon.png) no-repeat left 5px;padding-left:18px}.transporterSpeed{background:url(/cdn/all/both/icons/transporterSpeed.png) no-repeat left 0;min-height:20px}.cargoUpgradeIcon{position:absolute;left: -20px;top: -10px}#container
+#tutorialAdvisor{cursor:pointer;left:300px;position:absolute;top:205px;z-index:50000000}#container #tutorialAdvisor
+#advisorImage{background-image:url(/cdn/all/both/tutorial/advisors.png);width:66px;height:67px}#container #tutorialAdvisor
+#advisorImage.lighten{background-image:url(/cdn/all/both/tutorial/advisors_lighten.png)}#container #tutorialAdvisor #advisorImage
+a{display:block;width:66px;height:67px}#container
+.aniArrow{position:absolute;width:40px;height:48px;z-index:10000;background-image:url(/cdn/all/both/tutorial/arrow.png);display:none}#container .mainContentBox
+.aniArrow.on_close_button{right:5px;z-index:100000}#container
+#tutorialAdvisorCloseLink{background-image:url(/cdn/all/both/layout/notice_close.png);position:absolute;left:535px;top:9px;height:18px;width:18px;cursor:pointer;display:none}#popupMessage
+.questText{margin:10px;text-align:left}#popupMessage
+.questText.quest_10{margin:0
+10px 0}#popupMessage
+.smallNotice{margin:0
+10px 13px 120px}#popupMessage
+.additionalParagraph{margin:0
+10px 0 120px}#popupMessage
+.allAdvisors{background:url(/cdn/all/both/tutorial/alladvisors_city.jpg) no-repeat scroll 0 0 transparent;float:left;height:100px;margin:0
+10px;width:100px}#popupMessage
+.advisor_city{background:url(/cdn/all/both/tutorial/advisor_city.jpg) no-repeat scroll 0 0 transparent;float:left;height:100px;margin:0
+10px;width:100px}#popupMessage
+.advisor_science{background:url(/cdn/all/both/tutorial/advisor_science.jpg) no-repeat scroll 0 0 transparent;float:left;height:100px;margin:0
+10px;width:100px}#popupMessage
+.questSteps{text-align:left;padding:10px
+10px 10px 135px}#popupMessage .questSteps
+li{display:list-item;list-style-type:disc}#popupMessage
+.questHint{margin:15px
+10px 10px}#popupMessage
+.tutorial_ok{display:block;margin:0
+auto;width:60px}#popupMessage
+.rewardHeader{text-align:left;font-size:15px;font-weight:bold;border-bottom:1px solid #C39969;padding-left:10px;margin-top:15px}.rewardBox{border:1px
+solid #E4B773;margin-top:25px;padding-bottom:5px;background-color:papayawhip}#popupMessage
+.questReward{padding:0px
+10px;margin:0}#popupMessage .questReward
+li{display:block;float:left;text-align:left;width:150px;padding:15px
+15px 0 45px;height:30px;background-repeat:no-repeat;background-position:left 10px}#js_tutorialRewardMessage .questReward
+li{width:174px}.registeredName{background-image:url(/cdn/all/both/transport/board_buttons_sprite.png);width:18px;height:18px;top:2px;right: -21px;position:absolute}.registeredName.unchanged{background:none}.registeredName.valid{background-position:18px 0}.registeredName.invalid{background-position:0 0;cursor:help}.registeredNameInputContainer{display:inline-block;position:relative}.registeredNameInputContainer
+input{width:105px;margin:2px
+0;padding:1px
+1px 1px 3px}#container #tutorialAdvisorCloseLink:hover{background-image:url(/cdn/all/both/layout/notice_close_hover.png)}#container #tutorialAdvisor
+.allAdvisors{background-position:0px 0px}#container #tutorialAdvisor
+.researchAdvisor{background-position: -66px 0px}#container #tutorialAdvisor
+.cityAdvisor{background-position: -132px 0px}#container #tutorialAdvisor
+.diplomacyAdvisor{background-position: -198px 0px}#container #tutorialAdvisor
+.militaryAdvisor{background-position: -264px 0px}#container
+#TutorialCheckboxImg{float:none;vertical-align:top;margin-top: -5px}#container
+a.tutorialLink{font-weight:bold}#container .rewardContainer
+.hint{margin:10px
+0 0 -100px}#container ul.questReward
+li.wood{background-image:url(/cdn/all/both/resources/icon_wood.png)}#container ul.questReward
+li.wine{background-image:url(/cdn/all/both/resources/icon_wine.png)}#container ul.questReward
+li.marble{background-image:url(/cdn/all/both/resources/icon_marble.png)}#container ul.questReward
+li.crystal{background-image:url(/cdn/all/both/resources/icon_crystal.png)}#container ul.questReward
+li.sulfur{background-image:url(/cdn/all/both/resources/icon_sulfur.png)}#container ul.questReward
+li.gold{background-image:url(/cdn/all/both/resources/icon_gold.png)}#container ul.questReward
+li.townhall{background-image:url(/cdn/all/both/buildings/x40_y40/townHall.png);background-position:left center;padding-left:45px}#container ul.questReward
+li.barracks{background-image:url(/cdn/all/both/buildings/x40_y40/barracks.png);background-position:left center;padding-left:45px}#container ul.questReward
+li.warehouse{background-image:url(/cdn/all/both/buildings/x40_y40/warehouse.png);background-position:left center;padding-left:45px}#container ul.questReward
+li.academy{background-image:url(/cdn/all/both/buildings/x40_y40/academy.png);background-position:left center;padding-left:45px}#container ul.questReward
+li.wall{background-image:url(/cdn/all/both/buildings/x40_y40/wall.png);background-position:left center;padding-left:45px}#container ul.questReward
+li.researchPoints{background-image:url(/cdn/all/both/resources/icon_research.png)}#container ul.questReward
+li.spearman{background-image:url(/cdn/all/both/characters/military/x40_y40/y40_spearman_faceright.png)}#container ul.questReward
+li.transporter{background-image:url(/cdn/all/both/characters/fleet/40x40/ship_transport_l_40x40.png);background-position:left center}#container ul.questReward
+li.premiumCurrency{background-image:url(/cdn/all/both/premium/ambrosia_icon.png);width:185px}#js_tutorialMessage
+.checkbox{margin-top: -2px}#container
+.tutorialAdvisorInMessage{left:15px;top:40px;position:absolute}#js_tabBuyTransporter
+#js_tutorialArrow{margin-left:20px}#js_tabBuyTransporter{position:relative}#js_GlobalMenu_ambrosia
+#js_tutorialArrow{margin-left:70px;margin-top:10px}#js_researchAdvisorConservationLink
+#js_tutorialArrow{margin-top:60px}#js_researchAdvisorChangeResearchType1
+#js_tutorialArrow{margin-top:175px}#js_barbarianActionPanel{position:relative}#buildingSpeedup
+#js_tutorialArrow{margin-top:25px;margin-left:20px}.retention_quest_view
+.padded_content{padding:15px}.retention_quest_view
+.right{text-align:right}.retention_quest_view
+.bar{width:30%}.retention_quest_view
+img{display:block;float:left;margin:0
+10px 0 0;padding:5px
+0 10px 0}.retention_quest_view
+.building_img{line-height:55px}.retention_quest_view
+.bar_border{border:1px
+solid #CCA569;background:#FFF;margin:5px
+0;min-height:15px!important;line-height:15px}.retention_quest_view .bar_border
+.bold{text-align:center}.retention_quest_view
+.green_bar{background-image:url(/cdn/all/both/bars/20px/bg_24px_lightgreen.png);height:20px}.retention_quest_view
+.progressbar{background:#FFFFFF!important;margin:5px
+0;height:15px!important;width:100%!important}.retention_quest_view .progressbar
+.bold{position:relative;top: -13px;text-align:center}#container #registrationGifts ul.resources
+li{padding-left:43px;float:left;width:auto;padding-right:20px}#container #registrationGifts ul.resources
+.gold{background-position:10px 2px}#container #registrationGifts ul.resources
+.researchPoints{background-position:14px 2px}#container #registrationGifts ul.resources
+.wine{background-position:9px 2px}#container #registrationGifts ul.resources
+.glass{background-position:9px 2px}#container #registrationGifts
+.registrationGiftsFirstColumn{text-align:left;font-weight:bold;font-size:16px;border-right:solid 1px #f3ddb2}#container #registrationGifts
+.button{min-width:100px}#container #registrationGifts
+tr{line-height:30px}.retention_banner{margin:10px
+0}.popup_contentbox
+.retention_banner{float:none!important;clear:both!important;display:block!important;margin:10px
+0 -20px 0!important}.dailyTaskDifficultyPassive{background-color:#d1d1fb}.dailyTaskDifficultyEasy{background-color:#b1cdb1}.dailyTaskDifficultyDifficult{background-color:#f1b649}.dailyTaskDifficultyBonus{background-color:#f7e45c}#container .table01
+td.sectionHeader{text-align:left;font-weight:bold}#dailyTasks
+a{position:relative}#dailyTasks
+.claimFavorBackground{background:url(/cdn/all/both/resources/favour.png) no-repeat;background-position:30px 0;width:70px;height:25px}#dailyTasks .claimFavorBackground>span{display:inline-block;position:absolute;top:7px;right:53px}#container .table01
+td.centeredColumn{text-align:center}.dailyTasksFavorWarning{text-align:center;font-size:15px;padding-top:15px}#container .dailyTasksFavorWarning
+img{float:none;padding-top:0;padding-bottom:0}.dailyTaskDifficultyPassive
+a{margin-left:10px}#dailyTasks
+.army_small{display:inline-block;width:20px;height:20px;background:url(/cdn/all/both/characters/military/units_or_ships.png) no-repeat 0 0}

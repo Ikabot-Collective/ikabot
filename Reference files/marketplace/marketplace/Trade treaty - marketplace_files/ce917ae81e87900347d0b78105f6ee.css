@@ -1,0 +1,329 @@
+html .button:hover { color: #B3713F; text-decoration:none; }
+html .button_disabled:hover {  color: #542c0f; text-decoration:none; }
+
+
+/* global images */
+#world, #island { background: url(//gf2.geo.gfsrv.net/cdna0/1e3c63e621b7c5439738d8a7efdf2b.jpg) repeat #077DE9; }
+#city { background: url(//gf1.geo.gfsrv.net/cdn3e/112fa07fd8c75ed3e2dfc28c84a9d0.jpg) repeat #E4CA99; }
+
+#header #topnavi {    background-image: url(//gf1.geo.gfsrv.net/cdn0a/7070f81bb6a471eed35bb371d242c8.png); pointer-events:auto; background-size: 642px 156px;}
+#header #advisors {   background-image: url(//gf1.geo.gfsrv.net/cdn0a/c93077a86812c90e741a2fe6a8c58c.png); pointer-events:auto; }
+#container #mapCoordInput, #container #mapCoordInput .submitButton,
+#container #mapControls .scrolling, #container #mapControls .scrolling a {  background-image:url(//gf1.geo.gfsrv.net/cdn3d/dbc6f2ef14580af407a26dadb58aa4.png); }
+#footer .footerright {   background-image: url(//gf1.geo.gfsrv.net/cdnf3/8bbc7349442b4bedab1ec8605da154.png); }
+#footer .footerbg .hideControls { background-image: url(//gf2.geo.gfsrv.net/cdnaf/dd2ec615a44b1c7c007564e3af6801.png) }
+#footer .footerleft { background-image: url(//gf3.geo.gfsrv.net/cdne7/0a9e48c380a22d04934a47f5aa32b5.png); }
+
+/* city */
+#city #worldmap {
+    background:url(//gf1.geo.gfsrv.net/cdn3e/112fa07fd8c75ed3e2dfc28c84a9d0.jpg) repeat-x 0 0 transparent;
+    width: 5240px;
+    height: 1800px;
+} 
+#city .city_water_bottom {
+    background:url(//gf1.geo.gfsrv.net/cdn96/4c2935aeea148923baa9e2ba060b0b.jpg) no-repeat 0 0 transparent;
+    height: 600px;
+    left: 1652px;
+    position: absolute;
+    top: 1200px;
+    width: 1920px;
+}
+
+#city #locations {    
+    height: 1200px;
+    width: 1920px;
+    left: 1652px;
+    margin:0;
+    /*overflow:hidden;*/
+    position:absolute;
+    top: 0;
+}
+
+.city_background {
+    position:absolute;
+    width:960px;
+    height:600px;
+}
+
+#city_background_nw {
+    top: 0;
+    left: 0;
+}
+
+#city_background_ne {
+    top: 0;
+    left: 960px;
+}
+
+#city_background_sw {
+    top: 600px;
+    left: 0;
+}
+
+#city_background_se {
+    top: 600px;;
+    left: 960px;
+}
+
+.phase1 #city_background_nw { background-image:url(//gf1.geo.gfsrv.net/cdnf3/b34b2a90ebf1541b1f28833dd5642e.jpg); }
+.phase1 #city_background_ne { background-image:url(//gf3.geo.gfsrv.net/cdnba/a83c042f318d637106eb71bb53ec5e.jpg); }
+.phase1 #city_background_sw { background-image:url(//gf2.geo.gfsrv.net/cdnad/b242d18913ffa01f483445a5f56727.jpg); }
+.phase1 #city_background_se { background-image:url(//gf1.geo.gfsrv.net/cdn97/e4c67ff779eedb049dbc5e646df97d.jpg); }
+
+.phase2 #city_background_nw { background-image:url(//gf3.geo.gfsrv.net/cdn5f/834d4157dbe90d8ff04f3cbab0fd7b.jpg); }
+.phase2 #city_background_ne { background-image:url(//gf3.geo.gfsrv.net/cdn29/180fea11f00e15aa0297c7db073cbd.jpg); }
+.phase2 #city_background_sw { background-image:url(//gf1.geo.gfsrv.net/cdnc0/76268085023fbfe8b754a91dcae395.jpg); }
+.phase2 #city_background_se { background-image:url(//gf3.geo.gfsrv.net/cdn53/a30360772bf16ff94fd68ee8907093.jpg); }
+
+.phase3 #city_background_nw { background-image:url(//gf2.geo.gfsrv.net/cdn11/ff5fd8e7769e255a9099a94373aebf.jpg); }
+.phase3 #city_background_ne { background-image:url(//gf1.geo.gfsrv.net/cdn68/734a0dbe4f7750097e5c207cb6954d.jpg); }
+.phase3 #city_background_sw { background-image:url(//gf2.geo.gfsrv.net/cdn44/c38b15cedcccc418fdf1b59fc296b5.jpg); }
+.phase3 #city_background_se { background-image:url(//gf3.geo.gfsrv.net/cdn2b/bde979e604a8e98bbb1d15fcaac217.jpg); }
+
+.phase4 #city_background_nw { background-image:url(//gf3.geo.gfsrv.net/cdn5a/dff8bdbf4de132dea3f72516ca43fd.jpg); }
+.phase4 #city_background_ne { background-image:url(//gf2.geo.gfsrv.net/cdn4d/c2ca1931e9085e7e18568385b6568c.jpg); }
+.phase4 #city_background_sw { background-image:url(//gf1.geo.gfsrv.net/cdn92/936a18229734246cc73fe05f6ec3f4.jpg); }
+.phase4 #city_background_se { background-image:url(//gf1.geo.gfsrv.net/cdnf9/8c47b1b1d972107154199a883703cb.jpg); }
+
+.phase5 #city_background_nw { background-image:url(//gf2.geo.gfsrv.net/cdn7a/a96585a13ef2c139cc79dc07274fd9.jpg); }
+.phase5 #city_background_ne { background-image:url(//gf3.geo.gfsrv.net/cdnbf/3abe09ab951cd626f866fe5c9bf95f.jpg); }
+.phase5 #city_background_sw { background-image:url(//gf1.geo.gfsrv.net/cdn64/fa47268a4ecc341cdadcce8fb44e1f.jpg); }
+.phase5 #city_background_se { background-image:url(//gf2.geo.gfsrv.net/cdn46/c24f6236aec37c03f3da7b803089e7.jpg); }
+
+
+#island #worldmap #island_ocean { background-image: url(//gf2.geo.gfsrv.net/cdna0/1e3c63e621b7c5439738d8a7efdf2b.jpg); }
+#island .island1 #cities { background-image:url(//gf1.geo.gfsrv.net/cdn33/07aa0e6b3d8555f4a761484610b7e3.jpg);}
+#island .island2 #cities { background-image:url(//gf3.geo.gfsrv.net/cdn2b/6a98dc3398dc220e05d209a2357cad.jpg);}
+#island .island3 #cities { background-image:url(//gf1.geo.gfsrv.net/cdn37/7337cc19ee6e2f3665476a69b8add2.jpg);}
+#island .island4 #cities { background-image:url(//gf3.geo.gfsrv.net/cdnbe/063710a0bc6a2ef144dd13a7b00105.jpg);}
+#island .island5 #cities { background-image:url(//gf1.geo.gfsrv.net/cdnca/8110b32c04c5ed1531e847c41cdbce.jpg);}
+
+
+#island .island {
+    width:1386px; height:924px;
+}
+#island .island.island1 {
+    background:url(//gf1.geo.gfsrv.net/cdn33/07aa0e6b3d8555f4a761484610b7e3.jpg) top left no-repeat;
+}
+#island .island.island2 {
+    background:url(//gf3.geo.gfsrv.net/cdn2b/6a98dc3398dc220e05d209a2357cad.jpg) top left no-repeat;
+}
+#island .island.island3 {
+    background:url(//gf1.geo.gfsrv.net/cdn37/7337cc19ee6e2f3665476a69b8add2.jpg) top left no-repeat;
+}
+#island .island.island4 {
+    background:url(//gf3.geo.gfsrv.net/cdnbe/063710a0bc6a2ef144dd13a7b00105.jpg) top left no-repeat;
+}
+#island .island.island5 {
+    background:url(//gf1.geo.gfsrv.net/cdnca/8110b32c04c5ed1531e847c41cdbce.jpg) top left no-repeat;
+}
+
+/******************************* Namensbanner *********************************/
+
+#island .scroll_img .center
+{
+    width: auto;
+    padding: 0px 20px;
+    overflow: visible;
+    line-height:23px;
+    height:23px;
+    background-image:url(//gf1.geo.gfsrv.net/cdn0c/b4861d5f8199aea12d97464c52dc2c.png);
+    display: block;
+    left: 12px;
+    position:absolute;
+    white-space: nowrap;
+}
+
+#island .war .scroll_img .center
+{
+    width: auto;
+    padding: 0px 20px;
+    overflow: visible;
+    line-height:23px;
+    height:23px;
+    background-image:url(//gf2.geo.gfsrv.net/cdn14/9ffa83bae08f56cbe4a1927a23a53d.png);
+    display: block;
+    left: 12px;
+    position:absolute;
+    white-space: nowrap;
+}
+
+#island .hover .scroll_img .center,
+#island .selected .scroll_img .center{
+    line-height:38px;
+    height:38px;
+    background-image:url(//gf2.geo.gfsrv.net/cdnac/5a1775a90c9d11935901142939b5c1.png);
+}
+
+#island .hover.war .scroll_img .center,
+#island .selected.war .scroll_img .center{
+    line-height:38px;
+    height:38px;
+    background-image:url(//gf2.geo.gfsrv.net/cdn77/28950ed73c09b697218142efb73786.png);
+}
+
+#island .city .enter_icon,
+#island .selected .city .enter_icon
+{
+    margin-left:  -10px;
+}
+
+#city .scroll_img {
+    background-image:url(//gf1.geo.gfsrv.net/cdn0c/b4861d5f8199aea12d97464c52dc2c.png);
+    display: inline-block;
+    height:23px;
+    left:-30px;
+    line-height:23px;
+    padding: 0 15px;
+    position:relative;
+    text-align: center;
+    top: 28px;
+    min-width: 79px;
+    white-space: nowrap;
+    z-index: 300;
+}
+
+#island .scroll_img {
+    position:relative;
+    bottom: 0;
+    line-height:23px;
+    height:23px;
+    font-size:10px;
+    display:block;
+    padding: 0 15px;
+    width: 79px;
+    left: 0px;
+}
+
+#island .hover .scroll_img,
+#island .selected .scroll_img {
+    position:relative;
+    line-height:23px;
+    height:23px;
+    font-size:10px;
+    display:block;
+    padding: 0 15px;
+    left: 0px;
+    bottom:8px;
+}
+
+
+
+
+
+#city .scroll_img:before,
+#city .scroll_img:after,
+.scroll_img .center:before,
+.scroll_img .center:after,
+.selected .scroll_img .center:before,
+.selected .scroll_img .center:after
+{
+    content: '';
+    position:absolute;
+    top:0;
+    width:12px;
+    height:23px;
+}
+
+#city .scroll_img:before,
+.scroll_img .center:before,
+.selected .scroll_img .center:before
+{
+    background-image:url(//gf1.geo.gfsrv.net/cdn3e/0fdfa40ef9bf403b805bc22e662d84.png);
+    left:0;
+}
+#city .scroll_img:after,
+.scroll_img .center:after,
+.selected .scroll_img .center:after
+{
+    background-image:url(//gf1.geo.gfsrv.net/cdn3e/d9a108a98aabd9e05b2e94591119a9.png);
+    right:0;
+}
+
+#city .war .scroll_img:before,
+.war .scroll_img .center:before,
+.selected.war .scroll_img .center:before
+{
+    background-image:url(//gf1.geo.gfsrv.net/cdnff/df89641dcbdb3adc6c9f4c0c1ea369.png);
+    left:0;
+}
+#city .war .scroll_img:after,
+.war .scroll_img .center:after,
+.selected.war .scroll_img .center:after
+{
+    background-image:url(//gf1.geo.gfsrv.net/cdn38/03a8149b830f5f79217e43ec7662a0.png);
+    right:0;
+}
+
+.selected.war .scroll_img .center:after,
+.selected.war .scroll_img .center:before
+{
+    background-image:url(//gf1.geo.gfsrv.net/cdnfe/07b665b74b9067f5f78760ff28f09a.png);
+    height: 38px;
+    width: 21px;
+    right: -10px;
+    top: 0px;
+}
+
+.selected.war .scroll_img .center:before {
+    background-image:url(//gf3.geo.gfsrv.net/cdnb5/461e95340b23e6cf8b3f035adb0765.png);
+    left: -9px;
+    right: auto;
+}
+
+.selected .scroll_img .center:after,
+.selected .scroll_img .center:before
+{
+    background-image:url(//gf1.geo.gfsrv.net/cdnf2/2dc3bdf13e7f7942bfc83ca8beba5e.png);
+    height: 38px;
+    width: 21px;
+    right: -10px;
+    top: 0px;
+}
+
+.selected .scroll_img .center:before {
+    background-image:url(//gf1.geo.gfsrv.net/cdnf6/43b3362afbced31c657f3d29bff72e.png);
+    left: -9px;
+    right: auto;
+}
+
+#container #bottomBarWrapper .slot_menu {
+    position: static;
+    width: auto;
+    top: 0px;
+    height: 100%;
+}
+
+
+#container #bottomBarWrapper .slot_menu li {
+    /*    float: left;*/
+    display: inline-block;
+    margin: 2px 3px;
+    position: relative;
+    overflow: visible;
+    width: auto !important;
+    height: 38px;
+    line-height: 38px;
+}
+
+#container #bottomBarWrapper.imageNew,
+#container #bottomBarWrapper .image
+{
+    right: auto;
+    left: 2px;
+    top: 2px;
+}
+
+#container #bottomBarWrapper li .name {
+    position: static;
+    display: block;
+
+}
+#container #bottomBarWrapper .city_menu li .name {
+    padding-left: 50px;
+    padding-right: 15px;
+}
+
+#container #bottomBarWrapper li .name .namebox {
+    display: inline-block;
+}

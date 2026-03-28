@@ -66,6 +66,101 @@ def onSellInMarket(html):
     return [int(mad), int(vin), int(mar), int(cri), int(azu)]
 
 
+def getOwnOfferPrices(html):
+    """Parse current prices from own offers form inputs.
+    Parameters
+    ----------
+    html : str
+        HTML from getMarketInfo() (branchOfficeOwnOffers view)
+    Returns
+    -------
+    prices : list[int]
+        [wood_price, wine_price, marble_price, crystal_price, sulfur_price]
+    """
+    prices = re.findall(
+        r'<input type="text" class="textfield"\s*size="\d+"\s*name=".*?Price"\s*id=".*?"\s*maxlength="\d+"\s*value="(\d+)"',
+        html,
+    )
+    return [int(p) for p in prices]
+
+
+def getOwnOfferTradeTypes(html):
+    """Parse current trade types (Buy/Sell) from own offers dropdowns.
+    Parameters
+    ----------
+    html : str
+        HTML from getMarketInfo() (branchOfficeOwnOffers view)
+    Returns
+    -------
+    types : list[str]
+        List of 5 strings, each "333" (Buy) or "444" (Sell)
+    """
+    types = re.findall(
+        r'<option value="(\d+)" selected="">',
+        html,
+    )
+    return types
+
+
+def getPriceLimits(html):
+    """Parse min/max price boundaries per resource from marketplace JS.
+    Parameters
+    ----------
+    html : str
+        HTML from getMarketInfo() (branchOfficeOwnOffers view)
+    Returns
+    -------
+    limits : list[tuple[int, int]]
+        List of 5 (min_price, max_price) tuples
+    """
+    raw = re.findall(r"'upper':\s*(\d+),\s*'lower':\s*(\d+)", html)
+    return [(int(lo), int(hi)) for hi, lo in raw]
+
+
+def scanMarketPrices(session, city, resource_index, scan_type="444"):
+    """Browse marketplace offers to find the current lowest sell or highest buy price.
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    city : dict
+    resource_index : int
+        0=Wood, 1=Wine, 2=Marble, 3=Crystal, 4=Sulfur
+    scan_type : str
+        "444" to browse sell offers (find lowest sell price for undercutting),
+        "333" to browse buy offers (find highest buy price for outbidding)
+    Returns
+    -------
+    best_price : int or None
+        The best price found (lowest for sell, highest for buy), or None if no offers
+    """
+    search_resource = "resource" if resource_index == 0 else str(resource_index)
+    data = {
+        "cityId": city["id"],
+        "position": city["pos"],
+        "view": "branchOffice",
+        "activeTab": "bargain",
+        "type": scan_type,
+        "searchResource": search_resource,
+        "range": city["rango"],
+        "backgroundView": "city",
+        "currentCityId": city["id"],
+        "templateView": "branchOffice",
+        "currentTab": "bargain",
+        "actionRequest": actionRequest,
+        "ajax": "1",
+    }
+    resp = session.post(params=data)
+    html = json.loads(resp, strict=False)[1][1][1]
+    prices = re.findall(r'white-space:nowrap;">(\d+)\s', html)
+    if not prices:
+        return None
+    prices = [int(p) for p in prices]
+    if scan_type == "444":
+        return min(prices)  # lowest sell price to undercut
+    else:
+        return max(prices)  # highest buy price to outbid
+
+
 def getGold(session, city):
     """
     Parameters
