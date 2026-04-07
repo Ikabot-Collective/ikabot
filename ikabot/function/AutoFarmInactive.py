@@ -165,19 +165,17 @@ def AutoFarmInactive(session, event, stdin_fd, predetermined_input):
         # Get cargo ships
         total_ships = getTotalShips(session)
         available_ships = getAvailableShips(session)
-        print(f'\nShips available: {available_ships}/{total_ships}')
-        print('\nHow many cargo ships to send per attack?')
-        cargo_ships = read(min=0, max=total_ships, digit=True)
+        print(f'Ships available: {available_ships}/{total_ships}')
+        cargo_ships = read(msg='Cargo ships per attack: ', min=0, max=total_ships, digit=True)
 
         # Get ship capacity
         ship_capacity = getShipCapacity(session)
-        print(f'\nEach ship can carry {ship_capacity} resources')
+        print(f'Ship capacity: {ship_capacity} resources/ship')
 
         # Get wait time between trips
-        print('\nHow many seconds to wait between attacks? (min 60)')
-        wait_time = read(min=60, max=3600, digit=True)
+        wait_time = read(msg='Wait between attacks (seconds, min 60): ', min=60, max=3600, digit=True)
 
-        print('\nStarting farming operation...')
+        print('Starting farming operation...')
     # ...removed debug prints...
 
         set_child_mode(session)
@@ -209,27 +207,29 @@ def AutoFarmInactive(session, event, stdin_fd, predetermined_input):
             if cargo_ships and cargo_ships > 0:
                 ships_now = getAvailableShips(session)
                 if ships_now < cargo_ships:
-                    setInfoSignal(session, f'Waiting for transports to return (need {cargo_ships}, have {ships_now})')
+                    msg = f'Waiting for transports: need {cargo_ships}, have {ships_now}'
+                    print(msg)
+                    sendToBot(session, msg)
                     # waitForArrival will wait until at least one ship is available; loop until we have enough
                     while True:
                         ships_now = waitForArrival(session)
                         if ships_now >= cargo_ships:
                             break
-                        setInfoSignal(session, f'{ships_now} transports returned, still waiting for {cargo_ships - ships_now} more...')
                         time.sleep(30)
 
             total_farmed = 0
             total_attacks = 0
             for idx, plan in enumerate(target_plans, 1):
                 target_city, trips_for_city = plan
-                setInfoSignal(session, f'Starting attacks on target {idx}/{len(target_plans)}: {target_city["cityName"]} ({trips_for_city} attacks)')
+                msg = f'🎯 Starting attacks on: {target_city["cityName"]} ({trips_for_city} attacks)'
+                print(msg)
+                sendToBot(session, msg)
                 # Ensure current city is the selected source before this target's batch
                 _ensure_current_city(session, source_city['id'])
                 # Check cargo ships availability before attacking each target
                 if cargo_ships and cargo_ships > 0:
                     ships_now = getAvailableShips(session)
                     if ships_now < cargo_ships:
-                        setInfoSignal(session, f'Waiting for transports to return before target {idx} (need {cargo_ships}, have {ships_now})')
                         while True:
                             ships_now = waitForArrival(session)
                             if ships_now >= cargo_ships:
@@ -238,12 +238,13 @@ def AutoFarmInactive(session, event, stdin_fd, predetermined_input):
                 farmed = _do_farming(session, source_city, target_city, attack_units, total_units, cargo_ships, trips_for_city, wait_time)
                 total_farmed += farmed
                 total_attacks += trips_for_city
-            print(f'\nTotal resources farmed from all targets: {total_farmed} (attacks: {total_attacks})')
+            final_msg = f'✅ Farming complete! Total: {total_farmed} resources from {total_attacks} attacks'
+            print(final_msg)
+            sendToBot(session, final_msg)
         except Exception as e:
-            # report error to signals and bot
-            setInfoSignal(session, f'Error during farming: {str(e)}')
+            # report error to bot
             try:
-                sendToBot(session, f'Error during AutoFarmInactive: {traceback.format_exc()}')
+                sendToBot(session, f'❌ Error during farming: {traceback.format_exc()}')
             except Exception:
                 pass
         finally:
@@ -271,17 +272,38 @@ def _do_farming(session, source_city, target_city, attack_units, total_units, ca
                 'templateView': 'militaryAdvisor',
                 'ajax': 1
             }
-            for _ in range(4):
-                military_data = session.post(params=military_view_params)
-                military_data = json.loads(military_data, strict=False)
-                reports = military_data[1][1][2]['viewScriptParams']['militaryAndFleetMovements']
-                for report in reports:
-                    mission = report.get('event', {}).get('mission')
-                    if (mission == 'plunder' or str(mission) == 'plunder') and report['target']['cityId'] == target_city_id:
-                        return report.get('cargo', {})
-                time.sleep(3)
-        except Exception:
-            pass
+            for attempt in range(4):
+                try:
+                    military_data = session.post(params=military_view_params)
+                    military_data = json.loads(military_data, strict=False)
+                    # Try to navigate the response structure safely
+                    if isinstance(military_data, list) and len(military_data) > 2:
+                        if isinstance(military_data[1], list) and len(military_data[1]) > 2:
+                            if isinstance(military_data[1][2], list) and len(military_data[1][2]) > 0:
+                                view_data = military_data[1][2][0]
+                            else:
+                                view_data = military_data[1][2]
+                            if isinstance(view_data, dict) and 'viewScriptParams' in view_data:
+                                reports = view_data['viewScriptParams'].get('militaryAndFleetMovements', [])
+                                if not reports:
+                                    raise ValueError('No military movements found')
+                                for report in reports:
+                                    mission = report.get('event', {}).get('mission')
+                                    if (mission == 'plunder' or str(mission) == 'plunder') and report['target']['cityId'] == target_city_id:
+                                        cargo = report.get('cargo', {})
+                                        if cargo:
+                                            return cargo
+                    if attempt < 3:
+                        time.sleep(3)
+                except (IndexError, KeyError, TypeError, ValueError) as e:
+                    if attempt < 3:
+                        time.sleep(3)
+                    continue
+        except Exception as e:
+            try:
+                sendToBot(session, f'⚠️ Warning: Could not extract plundered resources: {str(e)}')
+            except Exception:
+                pass
         return {}
 
     for trip in range(trips):
@@ -396,21 +418,23 @@ def _do_farming(session, source_city, target_city, attack_units, total_units, ca
                     if 'error' not in plunder_result:
                         break
                     elif attempt < max_retries - 1:
-                        setInfoSignal(session, f'Attack error (attempt {attempt + 1}/{max_retries}): {plunder_result.get("error", "Unknown")}. Retrying...')
                         time.sleep(5)
                 except Exception as e:
                     if attempt < max_retries - 1:
-                        setInfoSignal(session, f'Attack send failed (attempt {attempt + 1}/{max_retries}): {str(e)}. Retrying...')
                         time.sleep(5)
                     else:
                         plunder_result = {'error': str(e)}
 
             if plunder_result and 'error' in plunder_result:
-                setInfoSignal(session, f'Attack failed after {max_retries} attempts: {plunder_result.get("error", "Unknown")}')
+                error_msg = f'❌ Attack failed: {plunder_result.get("error", "Unknown")}'
+                print(error_msg)
+                try:
+                    sendToBot(session, error_msg)
+                except Exception:
+                    pass
                 continue  # Continue to next trip instead of breaking
 
             attack_start_time = time.time()
-            setInfoSignal(session, 'Waiting for battle to complete and resources to be loaded...')
 
             # Estimate battle duration by checking the movement with the longest arrival time
             movements = get_movements(session, source_city['id'])
@@ -452,7 +476,6 @@ def _do_farming(session, source_city, target_city, attack_units, total_units, ca
                 estimated_battle_time = 0
 
             if estimated_battle_time > 0:
-                setInfoSignal(session, f'Waiting {int(estimated_battle_time)}s for battle/round to finish...')
                 # Sleep until the estimated finish time plus a small buffer to avoid tight polling
                 time.sleep(estimated_battle_time + 2)
 
@@ -470,12 +493,14 @@ def _do_farming(session, source_city, target_city, attack_units, total_units, ca
             plundered_resources = get_last_plundered_resources(session, source_city['id'], target_city['id'])
             trip_total = sum(plundered_resources.values()) if plundered_resources else 0
             total_farmed += trip_total
-            attack_details = []
-            for unit_id, amount in attack_units.items():
-                unit_name = total_units[unit_id]["name"]
-                attack_details.append(f"{unit_name}: {amount}")
-            resources_gained = plundered_resources
-            resource_details = ', '.join([f"{res}: {amt}" for res, amt in resources_gained.items() if amt > 0]) if plundered_resources else 'Unknown (not fetched)'
+            
+            # Send Telegram notification with attack results
+            resource_details = ', '.join([f"{res}: {amt}" for res, amt in plundered_resources.items() if amt > 0]) if plundered_resources else 'No resources detected'
+            attack_msg = f"Attack {trip + 1}/{trips}: {target_city['cityName']}\nPlundered: {resource_details}\nTotal: {trip_total}"
+            try:
+                sendToBot(session, attack_msg)
+            except Exception:
+                pass
             # Update status in PID table
             try:
                 short_status = (
@@ -506,6 +531,9 @@ def _do_farming(session, source_city, target_city, attack_units, total_units, ca
                 time.sleep(wait_seconds)
         except Exception as e:
             traceback.print_exc()
-            setInfoSignal(session, f'Error during trip {trip + 1}: {str(e)}')
-            break
+            try:
+                sendToBot(session, f'❌ Error during trip {trip + 1}: {str(e)}')
+            except Exception:
+                pass
+            continue  # Continue to next attack instead of breaking
     return total_farmed
