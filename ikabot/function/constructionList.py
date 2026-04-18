@@ -122,7 +122,7 @@ def expandBuilding(session, cityId, building, waitForResources):
             sendToBot(session, msg)
             return
 
-        url = "action=CityScreen&function=upgradeBuilding&actionRequest={}&cityId={}&position={:d}&level={}&activeTab=tabSendTransporter&backgroundView=city&currentCityId={}&templateView={}&ajax=1".format(
+        url = "action=UpgradeExistingBuilding&actionRequest={}&cityId={}&position={:d}&level={}&activeTab=tabSendTransporter&backgroundView=city&currentCityId={}&templateView={}&ajax=1".format(
             actionRequest,
             cityId,
             position,
