@@ -175,6 +175,7 @@ def executeRoutes(session, routes, useFreighters=False):
                 send,
                 useFreighters,
             )
+            time.sleep(random.randint(5, 15))
 
 
 def get_random_wait_time():
