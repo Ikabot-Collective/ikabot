@@ -96,8 +96,8 @@ def getProductionPerHour(session, city_id):
         raise ValueError(f"Could not determine luxury resource type for city {city_id}")
     luxury_type = int(luxury_type_match.group(1))
 
-    # The group ([\d,\s]+) now matches digits, commas, AND spaces.
-    production_pattern = r'<td id="{}"[^>]*>\s*([\d,\s]+)\s*</td>'
+    # The group ([\d.,\s]+) now matches digits, commas, AND spaces.
+    production_pattern = r'<td id="{}"[^>]*>\s*([\d.,\s]+)\s*</td>'
 
     # Get wood production
     wood_match = re.search(production_pattern.format("js_GlobalMenu_resourceProduction"), prod)
