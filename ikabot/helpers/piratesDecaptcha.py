@@ -19,7 +19,7 @@ if os.name == 'nt':
 else:
     _model_cache_path = '/tmp/ikabot_ikaptcha.onnx'
 
-_url = 'https://github.com/Ikabot-Collective/IkabotAPI/raw/main/apps/decaptcha/pirates_captcha/ikaptcha.onnx'
+_url = 'https://github.com/Ikabot-Collective/IkabotAPI/raw/4ebe57a3f1c11acb357a4bf4b6f7f92e1da287ce/apps/decaptcha/pirates_captcha/ikaptcha.onnx'
 session = None
 
 
@@ -28,31 +28,31 @@ def _load_model():
     if session is not None:
         return session
 
-    model_bytes = None
-
-    try:
-        if os.path.isfile(_model_cache_path):
-            with open(_model_cache_path, 'rb') as f:
-                model_bytes = f.read()
-    except Exception:
-        model_bytes = None
-
-    if model_bytes is None:
+    if os.path.isfile(_model_cache_path):
         try:
-            print('Downloading .onnx model, please wait...')
-            resp = requests.get(_url, timeout=30)
-            resp.raise_for_status()
-            model_bytes = resp.content
+            with open(_model_cache_path, 'rb') as f:
+                cached = f.read()
+            session = InferenceSession(cached)
+            return session
+        except Exception:
             try:
-                with open(_model_cache_path, 'wb') as f:
-                    f.write(model_bytes)
+                os.remove(_model_cache_path)
             except Exception:
                 pass
-        except Exception:
-            model_bytes = None
 
-    if model_bytes is None:
-        raise RuntimeError('Failed to load or download the ONNX model')
+    try:
+        print('Downloading .onnx model, please wait...')
+        resp = requests.get(_url, timeout=30)
+        resp.raise_for_status()
+        model_bytes = resp.content
+    except Exception as e:
+        raise RuntimeError('Failed to download the ONNX model from ' + _url) from e
+
+    try:
+        with open(_model_cache_path, 'wb') as f:
+            f.write(model_bytes)
+    except Exception:
+        pass
 
     session = InferenceSession(model_bytes)
     return session
