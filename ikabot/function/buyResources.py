@@ -70,59 +70,42 @@ def getOffers(session, city):
     offers : list[dict]
     """
     html = getMarketHtml(session, city)
-    hits = re.findall(
-        r'short_text80">(.*?) <br/>\((.*?)\)\s*</td>\s*<td>(\d+)</td>\s*<td>([\d,\s]+)(?:<div class="tooltip">.*?)?</td>\s*<td><img src="([^"]+\.png)"[\s\S]*?white-space:nowrap;">(\d+)\s*[\s\S]*?href="\?view=takeOffer&destinationCityId=(\d+)&oldView=branchOffice&activeTab=bargain&cityId=(\d+)&position=(\d+)&type=(\d+)&resource=(\w+)"',
-        html,
-        re.DOTALL
-    )
 
-    # Clean up the hits by stripping whitespace from each captured string
-    cleaned_hits = []
-    for hit in hits:
-        cleaned_hit = tuple(item.strip() for item in hit)  # Strip whitespace from each item
-        cleaned_hits.append(cleaned_hit)
-    hits = cleaned_hits
-        
+    resource_names = {
+        "resource": "wood",
+        "1": "wine",
+        "2": "marble",
+        "3": "glass",
+        "4": "sulfur",
+    }
+
     offers = []
-    for hit in hits:
-        offer = {
-            "ciudadDestino": hit[0],
-            "jugadorAComprar": hit[1],
-            "bienesXminuto": int(hit[2]),
-            "amountAvailable": int(
-                hit[3].replace(",", "").replace(".", "").replace("<", "").replace(" ", "").replace("\xa0", "")
-            ),
-            "tipo": hit[4],
-            "precio": int(hit[5]),
-            "destinationCityId": hit[6],
-            "cityId": hit[7],
-            "position": hit[8],
-            "type": hit[9],
-            "resource": hit[10],
-        }
+    for row in re.findall(r'<tr[^>]*>([\s\S]*?)</tr>', html):
+        city_match   = re.search(r'<td class="short_text80">(.*?)<br/>\((.*?)\)', row)
+        amount_match = re.search(r'<div class="tooltip">([\d,.]+)</div>', row)
+        price_match  = re.search(r'<td style="white-space:nowrap;">(\d+)', row)
+        href_match   = re.search(
+            r'href="\?view=takeOffer&destinationCityId=(\d+)&oldView=branchOffice&activeTab=bargain&cityId=(\d+)&position=(\d+)&type=(\d+)&resource=(\w+)"',
+            row,
+        )
 
-        # Parse CDN Images to material type
-        if offer["tipo"] == "//gf2.geo.gfsrv.net/cdn19/c3527b2f694fb882563c04df6d8972.png":
-            offer["tipo"] = "wood"
-        elif (
-            offer["tipo"] == "//gf1.geo.gfsrv.net/cdnc6/94ddfda045a8f5ced3397d791fd064.png"
-        ):
-            offer["tipo"] = "wine"
-        elif (
-            offer["tipo"] == "//gf3.geo.gfsrv.net/cdnbf/fc258b990c1a2a36c5aeb9872fc08a.png"
-        ):
-            offer["tipo"] = "marble"
-        elif (
-            offer["tipo"] == "//gf2.geo.gfsrv.net/cdn1e/417b4059940b2ae2680c070a197d8c.png"
-        ):
-            offer["tipo"] = "glass"
-        elif (
-            offer["tipo"] == "//gf1.geo.gfsrv.net/cdn9b/5578a7dfa3e98124439cca4a387a61.png"
-        ):
-            offer["tipo"] = "sulfur"
-        else:
+        if not all([city_match, amount_match, price_match, href_match]):
             continue
 
+        resource_key = href_match.group(5)
+        raw_amount = amount_match.group(1).replace('.', '').replace(',', '')
+        offer = {
+            "ciudadDestino": city_match.group(1).strip(),
+            "jugadorAComprar": city_match.group(2).strip(),
+            "amountAvailable": int(raw_amount),
+            "tipo": resource_names.get(resource_key, resource_key),
+            "precio": int(price_match.group(1)),
+            "destinationCityId": href_match.group(1),
+            "cityId": href_match.group(2),
+            "position": href_match.group(3),
+            "type": href_match.group(4),
+            "resource": resource_key,
+        }
         offers.append(offer)
     return offers
 
