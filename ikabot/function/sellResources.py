@@ -101,7 +101,7 @@ def getOffers(session, my_market_city, resource_type):
     processed_offers = []
     for row in re.findall(r'<tr[^>]*>([\s\S]*?)</tr>', html):
         city_match   = re.search(r'<td class="short_text80">(.*?)<br/>\((.*?)\)', row)
-        amount_match = re.search(r'<div class="tooltip">([\d,]+)</div>', row)
+        amount_match = re.search(r'<div class="tooltip">([\d,.]+)</div>', row)
         price_match  = re.search(r'<td style="white-space:nowrap;">(\d+)', row)
         dist_match   = re.search(r'<td>(\d+)</td>', row)
         dest_match   = re.search(r'href="\?view=takeOffer&destinationCityId=(\d+)', row)
@@ -109,10 +109,11 @@ def getOffers(session, my_market_city, resource_type):
         if not all([city_match, amount_match, price_match, dist_match, dest_match]):
             continue
 
+        raw_amount = amount_match.group(1).replace('.', '').replace(',', '')
         processed_offers.append((
             city_match.group(1).strip(),
             city_match.group(2).strip(),
-            int(amount_match.group(1).replace(',', '')),
+            int(raw_amount),
             int(price_match.group(1)),
             int(dist_match.group(1)),
             int(dest_match.group(1)),
