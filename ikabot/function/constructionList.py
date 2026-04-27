@@ -130,17 +130,28 @@ def expandBuilding(session, cityId, building, waitForResources):
             cityId,
             building["building"],
         )
-        resp = session.post(url)
-        html = session.get(city_url + cityId)
-        city = getCity(html)
-        building = city["position"][position]
-        if building["isBusy"] is False:
-            msg = "{}: The building {} was not extended".format(
-                city["cityName"], building["name"]
-            )
-            sendToBot(session, msg)
-            sendToBot(session, resp)
-            return
+        max_retries = 3
+        for attempt in range(1, max_retries + 1):
+            resp = session.post(url)
+            html = session.get(city_url + cityId)
+            city = getCity(html)
+            building = city["position"][position]
+            if building["isBusy"] is True:
+                break
+            if attempt < max_retries:
+                retry_wait = random.randint(10, 20)
+                msg = "{}: The building {} was not extended (attempt {}/{}). Retrying in {:d} seconds.".format(
+                    city["cityName"], building["name"], attempt, max_retries, retry_wait
+                )
+                sendToBot(session, msg)
+                time.sleep(retry_wait)
+            else:
+                msg = "{}: The building {} was not extended after {} attempts. Giving up.".format(
+                    city["cityName"], building["name"], max_retries
+                )
+                sendToBot(session, msg)
+                sendToBot(session, resp)
+                return
 
         msg = "{}: The building {} is being extended to level {:d}.".format(
             city["cityName"], building["name"], building["level"] + 1
