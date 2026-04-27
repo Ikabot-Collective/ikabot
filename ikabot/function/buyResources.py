@@ -182,6 +182,7 @@ def buyResources(session, event, stdin_fd, predetermined_input):
 
         # get all the offers of the chosen resource from the chosen city
         offers = getOffers(session, city)
+        offers.sort(key=lambda o: o["precio"])
         if len(offers) == 0:
             print("There are no offers available.")
             enter()
