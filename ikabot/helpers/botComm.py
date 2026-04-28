@@ -9,7 +9,7 @@ import random
 import re
 import sys
 import time
-from requests import get
+from requests import get, post as requests_post
 import ikabot.config as config
 from ikabot.config import *
 from ikabot.helpers.gui import *
@@ -31,7 +31,7 @@ def sendToDiscord(session, msg):
     if not webhook_url:
         return
     try:
-        get(webhook_url, json={"content": msg})
+        requests_post(webhook_url, json={"content": msg})
     except Exception:
         pass
 
@@ -73,7 +73,7 @@ def updateDiscordData(session, event=None, stdin_fd=None, predetermined_input=[]
     discord_data = {"discord": {"webhookUrl": webhook_url}}
     session.setSessionData(discord_data, shared=True)
     try:
-        get(webhook_url, json={"content": "Discord notifications successfully configured for ikabot."})
+        requests_post(webhook_url, json={"content": "Discord notifications successfully configured for ikabot."})
         print("\nA test message was sent to your Discord channel.")
     except Exception:
         print("\nWebhook URL saved, but the test message could not be sent. Please verify the URL.")
