@@ -486,3 +486,46 @@ def getTransportLoadingAndTravelTime(html: str, totalResources = 0, useFreighter
     travelTime = uncappedDuration if uncappedDuration > minimumJourneyDuration else minimumJourneyDuration
 
     return  travelTime + loadingTime + queueTime, loadingTime, travelTime, queueTime
+
+def getInventory(session):
+
+    """
+    This function retrieves the inventory of the player.
+    Parameters
+    ----------
+    session : Session
+        the session object used to make requests to the game.
+
+    Returns
+    -------
+    inventory : list
+        a list of dictionaries representing the items in the inventory.
+    """
+    
+    html = session.get(params = {"view": "inventory"})
+
+    # extract inventory json from html
+    match = re.search(r'"inventory":\s*(\[\{.*?\}\])', html, re.DOTALL)
+
+    if not match:
+        return None
+
+    inventory = json.loads(match.group(1))
+    return inventory
+
+
+def getInventoryItem(session, itemId):
+    """
+    This function retrieves the inventory of the player and returns the item with the given itemId. If the item is not found, it returns None.
+    Parameters    ----------
+    session : Session
+        the session object used to make requests to the game.
+    itemId : int
+        the id of the item to be retrieved from the inventory.
+
+    Returns    -------
+    item : json or None
+    """
+    inventory = getInventory(session)
+    item = next((i for i in inventory if i.get("itemId") == itemId), None)
+    return item
