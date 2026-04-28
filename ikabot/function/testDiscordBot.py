@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import sys
 
-from ikabot.helpers.botComm import discordDataIsValid, sendToDiscord
+from ikabot.helpers.botComm import discordDataIsValid, sendToBot
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import enter, read
 
@@ -26,7 +26,7 @@ def testDiscordBot(session, event, stdin_fd, predetermined_input):
             return
         input = read(msg="Enter the message you wish to see: ")
         msg = "Test message: {}".format(input)
-        sendToDiscord(session, msg)
+        sendToBot(session, msg)
         enter()
         event.set()
     except KeyboardInterrupt:
