@@ -328,7 +328,16 @@ def getResourcesNeeded(session, city, building, current_level, final_level):
     return final_costs
 
 
-def sendResourcesNeeded(session, destination_city_id, city_origins, missing_resources, useFreighters=False):
+def _round_up_resources(amount):
+    if amount < 1000:
+        return math.ceil(amount / 100) * 100
+    elif amount < 10000:
+        return math.ceil(amount / 500) * 500
+    else:
+        return math.ceil(amount / 1000) * 1000
+
+
+def sendResourcesNeeded(session, destination_city_id, city_origins, missing_resources, useFreighters=False, useRounding=False):
     """
     Parameters
     ----------
@@ -336,31 +345,46 @@ def sendResourcesNeeded(session, destination_city_id, city_origins, missing_reso
     destination_city_id : int
     city_origins : dict
     missing_resources : dict[int, int]
+    useFreighters : bool
+    useRounding : bool
     """
 
     info = "\nTransport resources to upload building\n"
 
     try:
-        routes = []
         html = session.get(city_url + destination_city_id)
         cityD = getCity(html)
+
+        # build combined routes per origin city so multiple resources
+        # from the same city are sent in a single shipment
+        combined = {}  # origin_city_id -> (cityOrigin, toSend_list)
+
         for i in range(len(materials_names)):
             missing = missing_resources[i]
             if missing <= 0:
                 continue
 
-            # send the resources from each origin city
+            target = _round_up_resources(missing) if useRounding else missing
+            remaining = target
+
             for cityOrigin in city_origins[i]:
-                if missing == 0:
+                if remaining == 0:
                     break
 
                 available = cityOrigin["availableResources"][i]
-                send = min(available, missing)
-                missing -= send
-                toSend = [0] * len(materials_names)
-                toSend[i] = send
-                route = (cityOrigin, cityD, cityD["islandId"], *toSend)
-                routes.append(route)
+                send = min(available, remaining)
+                remaining -= send
+
+                city_id = cityOrigin["id"]
+                if city_id not in combined:
+                    combined[city_id] = (cityOrigin, [0] * len(materials_names))
+                combined[city_id][1][i] += send
+
+        routes = []
+        for city_id, (cityOrigin, toSend) in combined.items():
+            route = (cityOrigin, cityD, cityD["islandId"], *toSend)
+            routes.append(route)
+
         executeRoutes(session, routes, useFreighters)
     except Exception as e:
         msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
@@ -444,13 +468,15 @@ def chooseResourceProviders(session, cities_ids, cities, city_id, resource, miss
     return origin_cities
 
 
-def sendResourcesMenu(session, city_id, missing, useFreighters=False):
+def sendResourcesMenu(session, city_id, missing, useFreighters=False, useRounding=False):
     """
     Parameters
     ----------
     session : ikabot.web.session.Session
     city_id : int
     missing : list[int, int]
+    useFreighters : bool
+    useRounding : bool
     """
     global thread
     cities_ids, cities = getIdsOfCities(session)
@@ -473,9 +499,9 @@ def sendResourcesMenu(session, city_id, missing, useFreighters=False):
 
     if expand:
         print(
-            
+
                 "\nThe resources will be sent and the building will be expanded if possible."
-            
+
         )
     else:
         print("\nThe resources will be sent.")
@@ -491,6 +517,7 @@ def sendResourcesMenu(session, city_id, missing, useFreighters=False):
             origins,
             missing,
             useFreighters,
+            useRounding,
         ),
     )
     thread.start()
@@ -668,8 +695,12 @@ def constructionList(session, event, stdin_fd, predetermined_input):
                         useFreighters = False
                     elif shiptype == 2:
                         useFreighters = True
+                    print("Round up transport amounts? [Y/n]")
+                    print("(amounts will be rounded up but capped at what each city can provide)")
+                    rta_round = read(values=["y", "Y", "n", "N", ""])
+                    useRounding = rta_round.lower() != "n"
                     wait_resources = True
-                    sendResourcesMenu(session, cityId, missing, useFreighters)
+                    sendResourcesMenu(session, cityId, missing, useFreighters, useRounding)
             else:
                 print("\nYou have enough materials")
                 print("Proceed? [Y/n]")
