@@ -266,8 +266,11 @@ def do_it(
             storageCapacity = city["storageCapacity"]
 
             # search for wood donation from inventory (id 2201)
-            donationOnInventory = getInventoryItem(session, 2201)
-            amountOnInventory = int(donationOnInventory.get("count", 0))
+            donation_on_inventory = getInventoryItem(session, 2201)
+            if donation_on_inventory is None:
+                amount_on_inventory = 0
+            else:
+                amount_on_inventory = int(donation_on_inventory.get("count", 0))
 
             # get the percentage
             if donate_method == 1:
@@ -279,7 +282,7 @@ def do_it(
                 max_wood = int(max_wood)
 
                 # calculate the wood that is exceeding the percentage
-                to_donate = (wood + amountOnInventory) - max_wood
+                to_donate = (wood + amount_on_inventory) - max_wood
                 if to_donate <= 0:
                     continue
 
@@ -299,7 +302,7 @@ def do_it(
             elif donate_method == 3:
                 percentage = cities_dict[cityId]["percentage"]
                 # make sure the donation amount is never lower than resources available
-                max_wood = (wood + amountOnInventory) - percentage
+                max_wood = (wood + amount_on_inventory) - percentage
                 max_wood = int(max_wood)
 
                 to_donate = percentage

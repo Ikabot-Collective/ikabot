@@ -80,10 +80,9 @@ def donate(session, event, stdin_fd, predetermined_input):
             wood_total_needed, wood_donated = wood_matches[:2]
             wood_on_inventory = 0
 
-        wood_total_needed = wood_total_needed.replace(",", "").replace(".", "")
-        wood_total_needed = int(wood_total_needed)
-        wood_donated = wood_donated.replace(",", "").replace(".", "")
-        wood_donated = int(wood_donated)
+        # remove all characters that are not numbers
+        wood_total_needed = int(re.sub(r'[^0-9]', '', wood_total_needed))
+        wood_donated = int(re.sub(r'[^0-9]', '', wood_donated))
 
         if resourceUpgrading and tradegoodUpgrading:
             print(
@@ -127,11 +126,11 @@ def donate(session, event, stdin_fd, predetermined_input):
             tradegood_total_needed, tradegood_donated = tradegood_matches
             wood_on_inventory = 0
 
-        tradegood_total_needed = tradegood_total_needed.replace(",", "").replace(".", "")
-        tradegood_total_needed = int(tradegood_total_needed)
-        tradegood_donated = tradegood_donated.replace(",", "").replace(".", "")
-        tradegood_donated = int(tradegood_donated)
-        wood_on_inventory = int(wood_on_inventory.replace(",", "").replace(".", ""))
+        # remove all characters that are not numbers
+        tradegood_total_needed = int(re.sub(r'[^0-9]', '', tradegood_total_needed))
+        tradegood_donated = int(re.sub(r'[^0-9]', '', tradegood_donated))
+        if wood_on_inventory != 0:
+            wood_on_inventory = int(re.sub(r'[^0-9]', '', wood_on_inventory))
 
         print("{} lv:{} {}".format(tradegood_name, tradegoodLevel, tradegoodUpgradeMsg))
         print(
