@@ -8,11 +8,14 @@ import sys
 import time
 
 from dotenv import load_dotenv
+
+
 load_dotenv()
 
 from ikabot.config import *
 from ikabot.function.activateMiracle import activateMiracle
 from ikabot.function.alertAttacks import alertAttacks
+from ikabot.function.alertMessages import alertMessages
 from ikabot.function.alertLowWine import alertLowWine
 from ikabot.function.attackBarbarians import attackBarbarians
 from ikabot.function.autoBarbarians import autoBarbarians
@@ -56,6 +59,7 @@ from ikabot.function.modifyProduction import modifyProduction
 from ikabot.function.reorganizeCityBuildings import reorganizeCityBuildings
 from ikabot.function.UpgradeUnits import UpgradeUnits
 from ikabot.function.developer import developer
+from ikabot.function.sendCulturalTreatyRequests import sendCulturalTreatyRequests
 
 
 def menu(session, checkUpdate=True):
@@ -128,6 +132,7 @@ def menu(session, checkUpdate=True):
         6: loginDaily,
         701: alertAttacks,
         702: alertLowWine,
+        703: alertMessages,
         801: buyResources,
         802: sellResources,
         901: donate,
@@ -159,6 +164,7 @@ def menu(session, checkUpdate=True):
         22: consolidateResources,
         23: modifyProduction,
         24: reorganizeCityBuildings,
+        25: sendCulturalTreatyRequests,
     }
 
     print("(0)  Exit")
@@ -186,12 +192,13 @@ def menu(session, checkUpdate=True):
     print("(22) Consolidate resources")
     print("(23) Set Production of Saw mill / Luxury good")
     print("(24) Reorganize city buildings")
+    print("(25) Send cultural treaty requests")
 
     total_options = len(menu_actions) + 1
     selected = read(min=0, max=total_options, digit=True, empty=True)
-    
+
     # refresh main menu on hitting enter
-    if selected == '':
+    if selected == "":
         return menu(session)
 
     if selected == 7:
@@ -199,8 +206,9 @@ def menu(session, checkUpdate=True):
         print("(0) Back")
         print("(1) Alert attacks")
         print("(2) Alert wine running out")
+        print("(3) Alert new in-game messages")
 
-        selected = read(min=0, max=2, digit=True)
+        selected = read(min=0, max=3, digit=True)
         if selected == 0:
             menu(session)
             return
@@ -262,8 +270,9 @@ def menu(session, checkUpdate=True):
         print("(0) Back")
         print("(1) Monitor islands")
         print("(2) Dump & Search world")
-        
-        selected = read(min=0, max=2, digit=True)
+        print("(3) Monitor inactive players in radius")
+
+        selected = read(min=0, max=3, digit=True)
         if selected == 0:
             menu(session)
             return
@@ -373,6 +382,8 @@ if __name__ == "__main__":
 #############################################################
 # This is necessary to ensure that flask is frozen together #
 # with other requirements when creating ikabot.exe          #
-try: import flask                                           #
-except: pass                                                #
+try:
+    import flask  #
+except:
+    pass  #
 #############################################################
