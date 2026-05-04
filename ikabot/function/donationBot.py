@@ -239,122 +239,115 @@ def do_it(
     waiting_time,
     donate_method,
 ):
-    """
-    Parameters
-    ----------
-    session : ikabot.web.session.Session
-    cities_ids : list[int]
-    cities_dict : dict[int, dict]
-    waiting_time: int
-    """
     for cityId in cities_ids:
-        html = session.get(city_url + cityId)
-        city = getCity(html)
-        cities_dict[cityId]["island"] = city["islandId"]
+        try:
+            html = session.get(city_url + cityId)
+            city = getCity(html)
+            cities_dict[cityId]["island"] = city["islandId"]
+        except Exception:
+            continue
+
+    total_general_donated = 0
 
     while True:
-        total_donated = 0
+        session.setStatus(f"Checking cities... | Total Donated: {total_general_donated}")
+        
         for cityId in cities_ids:
             donation_type = cities_dict[cityId]["donation_type"]
             if donation_type is None:
                 continue
 
-            # get the storageCapacity and the wood this city has
-            html = session.get(city_url + cityId)
-            city = getCity(html)
-            wood = city["availableResources"][0]
-            storageCapacity = city["storageCapacity"]
+            try:
+                html_init = session.get(city_url + cityId)
+                city_init = getCity(html_init)
+                wood_init = int(city_init["availableResources"][0])
+                storage = int(city_init["storageCapacity"])
+                
+                inv_init = getInventoryItem(session, 2201)
+                amount_inv_init = 0
+                if inv_init is not None:
+                    raw_count = str(inv_init.get("count", "0"))
+                    amount_inv_init = int(re.sub(r'[^0-9]', '', raw_count))
+                
+                current_total_init = wood_init + amount_inv_init
 
-            # get the percentage
-            if donate_method == 1:
-                percentage = cities_dict[cityId]["percentage"]
-                percentage /= 100
+                to_donate = 0
+                if donate_method == 1:
+                    max_keep = int(storage * (float(cities_dict[cityId]["percentage"]) / 100))
+                    to_donate = current_total_init - max_keep
+                elif donate_method == 2:
+                    (wood_prod, _, _) = getProductionPerHour(session, cityId)
+                    to_donate = int((float(wood_prod) * float(cities_dict[cityId]["percentage"]) / 100) * (waiting_time / 60))
+                elif donate_method == 3:
+                    to_donate = int(cities_dict[cityId]["percentage"])
 
-                # calculate what is the amount of wood that should be preserved
-                max_wood = storageCapacity * percentage
-                max_wood = int(max_wood)
-
-                # calculate the wood that is exceeding the percentage
-                to_donate = wood - max_wood
                 if to_donate <= 0:
                     continue
 
-            elif donate_method == 2:
-                # get current production rate if changed since starting the bot
-                (wood_prod, good_prod, typeGood) = getProductionPerHour(
-                    session, cityId
-                )
-                percentage = cities_dict[cityId]["percentage"]
-
-                # calculate the amount of wood to be donated from production, based on the given donation frequency
-                to_donate = int((float(wood_prod) * percentage / 100) * (waiting_time / 60))
-                # Note: Connection delay can/will cause "inaccurate" donations especially with low waiting_time
-                if to_donate <= 0:
-                    continue
-
-            elif donate_method == 3:
-                percentage = cities_dict[cityId]["percentage"]
-                # make sure the donation amount is never lower than resources available
-                max_wood = wood - percentage
-                max_wood = int(max_wood)
-
-                to_donate = percentage
-                if max_wood <= 0:
-                    continue
-
-            islandId = cities_dict[cityId]["island"]
-            
-            # donate
-            if donation_type == "both":
-                forrest = int(to_donate / 2)
-                trade = int(to_donate / 2)
-                session.post(
-                    params={
+                islandId = cities_dict[cityId]["island"]
+                
+                def execute_donation(d_type, d_amount):
+                    if d_amount <= 0:
+                        return 0
+                    
+                    # Baseline before this specific donation
+                    inv_ref = getInventoryItem(session, 2201)
+                    amount_ref = int(re.sub(r'[^0-9]', '', str(inv_ref.get("count", "0")))) if inv_ref else 0
+                    
+                    resp = session.post(params={
                         "islandId": islandId,
-                        "type": "resource",
+                        "type": d_type,
                         "action": "IslandScreen",
                         "function": "donate",
-                        "donation": forrest,
+                        "donation": int(d_amount),
                         "backgroundView": "island",
-                        "templateView": donation_type,
+                        "templateView": "resource",
                         "actionRequest": actionRequest,
                         "ajax": "1",
-                    }
-                )
-                wait(1, maxrandom=5)  # just to simulate user interaction
-                session.post(
-                    params={
-                        "islandId": islandId,
-                        "type": "tradegood",
-                        "action": "IslandScreen",
-                        "function": "donate",
-                        "donation": trade,
-                        "backgroundView": "island",
-                        "templateView": donation_type,
-                        "actionRequest": actionRequest,
-                        "ajax": "1",
-                    }
-                )
-            else:
-                session.post(
-                    params={
-                        "islandId": islandId,
-                        "type": donation_type,
-                        "action": "IslandScreen",
-                        "function": "donate",
-                        "donation": to_donate,
-                        "backgroundView": "island",
-                        "templateView": donation_type,
-                        "actionRequest": actionRequest,
-                        "ajax": "1",
-                    }
-                )
-            total_donated += to_donate
-        session.setStatus(
-            f"Donated {total_donated} wood @{getDateTime()}"
-        )
-        msg = "I donated automatically."
-        sendToBotDebug(session, msg, debugON_donationBot)
+                    })
+                    
+                    # 1. Check for rejection feedback (e.g., building expanding)
+                    json_resp = json.loads(resp, strict=False)
+                    for r in json_resp:
+                        if r[0] == "provideFeedback":
+                            for fb in r[1]:
+                                if fb.get("type") == 11: # Rejected
+                                    return 0
+                    
+                    # 2. Verify wood reduction in inventory
+                    # We wait a brief moment for the server to update the inventory count
+                    wait(1)
+                    inv_post = getInventoryItem(session, 2201)
+                    amount_post = int(re.sub(r'[^0-9]', '', str(inv_post.get("count", "0")))) if inv_post else 0
+                    
+                    # Actual spent wood is the difference
+                    spent = amount_ref - amount_post
+                    
+                    # If difference is 0 but no error was shown, it might be a small donation
+                    # from city wood instead of inventory. We return d_amount as fallback.
+                    if spent <= 0:
+                        # Scan city wood to be sure
+                        html_city = session.get(city_url + cityId)
+                        wood_city_post = int(getCity(html_city)["availableResources"][0])
+                        spent = wood_init - wood_city_post
+                    
+                    return max(0, spent) if spent > 0 else int(d_amount)
 
-        # sleep until next donation
+                city_total = 0
+                if donation_type == "both":
+                    half = to_donate // 2
+                    city_total += execute_donation("resource", half + (to_donate % 2))
+                    wait(2, maxrandom=4)
+                    city_total += execute_donation("tradegood", half)
+                else:
+                    city_total += execute_donation(donation_type, to_donate)
+
+                if city_total > 0:
+                    total_general_donated += city_total
+                    session.setStatus(f"Donated: {city_total} | Total: {total_general_donated} @{getDateTime()}")
+                
+                wait(2, maxrandom=5)
+            except Exception:
+                continue
+
         wait(waiting_time * 60)

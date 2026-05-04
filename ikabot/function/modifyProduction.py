@@ -3,6 +3,7 @@
 
 from ikabot.config import *
 from ikabot.helpers.pedirInfo import *
+from ikabot.helpers.varios import wait
 
 # import json
 # import re
@@ -118,7 +119,9 @@ def modifyProduction(session, event, stdin_fd, predetermined_input):
                     
                     selected_good_name = resource_name if resource_type == "resource" else tradegood_name
                     print(f"{finalWorkers} workers set for {selected_good_name} in {city['name']}.")
-                
+
+                wait(3, 4)
+
         print("\nAll productions have been set!")
         enter()
         event.set()
