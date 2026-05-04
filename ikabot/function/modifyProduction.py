@@ -49,17 +49,13 @@ def modifyProduction(session, event, stdin_fd, predetermined_input):
             resource_types_to_modify.append("tradegood")
         elif res_choice == 3:
             resource_types_to_modify.extend(["resource", "tradegood"])
-            
-            
+
         print("What % of production do you want to use? (Default 100%)")
         percentageWorkers = read(min=0, max=100, default=100)
         if percentageWorkers == 100:
             print("Would you like to use overcharge? (y/N)")
             overcharge = read(values=["y", "Y", "n", "N", ""])
-            if overcharge.lower() == "y":
-                use_overcharge = True
-            else:
-                use_overcharge = False
+            use_overcharge = overcharge.lower() == "y"
         else:
             use_overcharge = False
             
@@ -128,4 +124,156 @@ def modifyProduction(session, event, stdin_fd, predetermined_input):
         
     except KeyboardInterrupt:
         event.set()
-        return 
+        return
+
+
+def modifyAcademyWorkers(session, event, stdin_fd, predetermined_input):
+    """
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    event : multiprocessing.Event
+    stdin_fd: int
+    predetermined_input : multiprocessing.managers.SyncManager.list
+    """
+    sys.stdin = os.fdopen(stdin_fd)
+    config.predetermined_input = predetermined_input
+    try:
+        banner()
+        city_ids, _ = ignoreCities(session, msg="In which cities do you want to set academy workers?")
+
+        print("What % of scientists do you want to use? (Default 100%)")
+        percentageWorkers = read(min=0, max=100, default=100)
+
+        banner()
+        for city_id in city_ids:
+            html = session.get(city_url + city_id)
+            city = getCity(html)
+
+            academy_slot = next(
+                (slot for slot in city['position'] if slot.get('building') == 'academy'),
+                None
+            )
+            if academy_slot is None:
+                print(f"No academy in {city['name']}, skipping.")
+                continue
+
+            position = academy_slot['position']
+            url = f"view=academy&cityId={city['id']}&position={position}&backgroundView=city&currentCityId={city['id']}&actionRequest={actionRequest}&ajax=1"
+            resp = session.post(url)
+            resp_json = json.loads(resp, strict=False)
+            max_scientists = resp_json[2][1]['js_AcademySlider']['slider']['max_value']
+
+            if percentageWorkers == 100:
+                finalScientists = max_scientists
+            else:
+                finalScientists = int(max_scientists / 100 * percentageWorkers)
+
+            session.post(params={
+                "action": "IslandScreen", "function": "workerPlan",
+                "screen": "academy", "position": position,
+                "cityId": city["id"], "s": finalScientists,
+                "backgroundView": "city", "currentCityId": city["id"],
+                "templateView": "academy", "actionRequest": actionRequest, "ajax": "1"
+            })
+            print(f"{finalScientists} scientists set for Academy in {city['name']}.")
+
+            wait(3, 4)
+
+        print("\nAll academies have been set!")
+        enter()
+        event.set()
+
+    except KeyboardInterrupt:
+        event.set()
+        return
+
+
+def modifyTavernWorkers(session, event, stdin_fd, predetermined_input):
+    """
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    event : multiprocessing.Event
+    stdin_fd: int
+    predetermined_input : multiprocessing.managers.SyncManager.list
+    """
+    sys.stdin = os.fdopen(stdin_fd)
+    config.predetermined_input = predetermined_input
+    try:
+        banner()
+        city_ids, _ = ignoreCities(session, msg="In which cities do you want to set tavern wine level?")
+
+        print("Set by (1) Percentage or (2) Happiness level?")
+        mode = read(min=1, max=2)
+
+        if mode == 1:
+            print("What % of the tavern level do you want to use? (Default 100%)")
+            percentage = read(min=0, max=100, default=100)
+            target_happiness = None
+        else:
+            print("Target happiness level:")
+            print("(1) Neutral")
+            print("(2) Happy")
+            print("(3) Euphoric")
+            happiness_choice = read(min=1, max=3)
+            target_happiness = {1: "neutral", 2: "happy", 3: "ecstatic"}[happiness_choice]
+            percentage = None
+
+        banner()
+        for city_id in city_ids:
+            html = session.get(city_url + city_id)
+            city = getCity(html)
+
+            tavern_slot = next(
+                (slot for slot in city['position'] if slot.get('building') == 'tavern'),
+                None
+            )
+            if tavern_slot is None:
+                print(f"No tavern in {city['name']}, skipping.")
+                continue
+
+            position = tavern_slot['position']
+            url = f"view=tavern&cityId={city['id']}&position={position}&backgroundView=city&currentCityId={city['id']}&actionRequest={actionRequest}&ajax=1"
+            resp = session.post(url)
+            resp_json = json.loads(resp, strict=False)
+            template_data = resp_json[2][1]
+            params = json.loads(template_data['load_js']['params'])
+
+            building_level = params['buildingLevel']
+            sat_per_wine = params['satPerWine']
+            start_satisfaction = params['startSatisfaction']
+            corruption_factor = params['corruptionFactor']
+            class_names = params['classNamePerSatisfaction']
+            class_values = params['classValuePerSatisfaction']
+
+            if mode == 1:
+                amount = int(building_level * percentage / 100)
+            else:
+                target_value = class_values[class_names.index(target_happiness)]
+                amount = building_level
+                for i, sat in enumerate(sat_per_wine):
+                    if start_satisfaction + sat * corruption_factor >= target_value:
+                        amount = i
+                        break
+                else:
+                    print(f"{city['name']}: cannot reach {target_happiness} even at max wine, setting max ({building_level}).")
+
+            session.post(params={
+                "action": "CityScreen", "function": "assignWinePerTick",
+                "cityId": city["id"], "position": position,
+                "amount": amount, "backgroundView": "city",
+                "currentCityId": city["id"], "templateView": "tavern",
+                "actionRequest": actionRequest, "ajax": "1"
+            })
+            print(f"Tavern wine level set to {amount}/{building_level} in {city['name']}.")
+
+            wait(3, 4)
+
+        print("\nAll taverns have been set!")
+        enter()
+        event.set()
+
+    except KeyboardInterrupt:
+        event.set()
+        return

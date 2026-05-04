@@ -52,7 +52,7 @@ from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.process import updateProcessList
 from ikabot.web.session import *
 from ikabot.function.UpgradeUnits import UpgradeUnits
-from ikabot.function.modifyProduction import modifyProduction
+from ikabot.function.modifyProduction import modifyProduction, modifyAcademyWorkers, modifyTavernWorkers
 from ikabot.function.reorganizeCityBuildings import reorganizeCityBuildings
 from ikabot.function.UpgradeUnits import UpgradeUnits
 from ikabot.function.developer import developer
@@ -157,7 +157,9 @@ def menu(session, checkUpdate=True):
         2108: loadCustomModule,
         2109: developer,
         22: consolidateResources,
-        23: modifyProduction,
+        2301: modifyProduction,
+        2302: modifyAcademyWorkers,
+        2303: modifyTavernWorkers,
         24: reorganizeCityBuildings,
     }
 
@@ -184,7 +186,7 @@ def menu(session, checkUpdate=True):
     print("(20) Dump / Monitor world")
     print("(21) Options / Settings")
     print("(22) Consolidate resources")
-    print("(23) Set Production of Saw mill / Luxury good")
+    print("(23) Set Workers")
     print("(24) Reorganize city buildings")
 
     total_options = len(menu_actions) + 1
@@ -257,6 +259,20 @@ def menu(session, checkUpdate=True):
             return
         if selected > 0:
             selected += 1200
+
+    if selected == 23:
+        banner()
+        print("(0) Back")
+        print("(1) Production")
+        print("(2) Academy")
+        print("(3) Tavern")
+
+        selected = read(min=0, max=3, digit=True)
+        if selected == 0:
+            menu(session)
+            return
+        if selected > 0:
+            selected += 2300
 
     if selected == 20:
         print("(0) Back")
