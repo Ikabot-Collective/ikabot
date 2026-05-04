@@ -97,16 +97,38 @@ def loadCustomModule(session, event, stdin_fd, predetermined_input):
                 # Execution logic
                 path = modules[choice - 3]
                 name = os.path.basename(path).replace('.py', '')
-                
+
+                # Rewrite our entry in processList so ikabot's running-task
+                # display (main menu, killTasks, web server) shows the actual
+                # module name instead of 'loadCustomModule'. The processList
+                # row was created by the menu launcher with action set to the
+                # loader's __name__; replace it now that we know which module
+                # was picked.
+                try:
+                    sd = session.getSessionData()
+                    plist = sd.get('processList', [])
+                    my_pid = os.getpid()
+                    for p in plist:
+                        if p.get('pid') == my_pid:
+                            p['action'] = 'lcm_' + name
+                            break
+                    sd['processList'] = plist
+                    session.setSessionData(sd)
+                    if hasattr(session, 'write_status'):
+                        session.write_status(f'Module: {name}')
+						
+                except Exception:
+                    pass
+
                 banner()
                 print(f'Running module: {name}...\n')
-                
+
                 # Dynamic module loading
                 module = SourceFileLoader(name, path).load_module()
-                
+
                 # Execute the function (must match filename)
                 getattr(module, name)(session, event, stdin_fd, predetermined_input)
-                
+
                 event.set()
                 return
 
