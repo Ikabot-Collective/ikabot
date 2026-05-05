@@ -116,7 +116,7 @@ def loadCustomModule(session, event, stdin_fd, predetermined_input):
                     my_pid = os.getpid()
                     for p in plist:
                         if p.get('pid') == my_pid:
-                            p['action'] = name
+                            p['action'] = 'lcm_' + name
                             break
                     sd['processList'] = plist
                     session.setSessionData(sd)
