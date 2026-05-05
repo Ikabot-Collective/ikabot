@@ -62,6 +62,12 @@ def loadCustomModule(session, event, stdin_fd, predetermined_input):
                     enter()
                     continue
                 
+                # Validation: check if the file actually exists on the system
+                if not os.path.isfile(path):
+                    print(f'\nError: file not found at {path}')
+                    enter()
+                    continue
+                
                 if path not in modules:
                     modules.append(path)
                     shared_data['customModules'] = modules
@@ -110,7 +116,7 @@ def loadCustomModule(session, event, stdin_fd, predetermined_input):
                     my_pid = os.getpid()
                     for p in plist:
                         if p.get('pid') == my_pid:
-                            p['action'] = 'lcm_' + name
+                            p['action'] = name
                             break
                     sd['processList'] = plist
                     session.setSessionData(sd)
