@@ -89,7 +89,7 @@ def get_barbarians_lv(session, island, ship_capacity):
     resp = json.loads(resp, strict=False)
 
     level = int(math.ceil(resp[2][1]["js_islandBarbarianLevel"]["text"]))
-    gold = int(resp[2][1]["js_islandBarbarianResourcegold"]["text"].replace(",", ""))
+    gold = int(resp[2][1]["js_islandBarbarianResourcegold"]["text"].replace(",", "").replace("\xa0", "").replace(" ", ""))
 
     resources = [0] * len(materials_names)
     for i in range(len(materials_names)):
@@ -97,13 +97,13 @@ def get_barbarians_lv(session, island, ship_capacity):
             resources[i] = int(
                 resp[2][1]["js_islandBarbarianResourceresource"]["text"].replace(
                     ",", ""
-                )
+                ).replace("\xa0", "").replace(" ", "")
             )
         else:
             resources[i] = int(
                 resp[2][1]["js_islandBarbarianResourcetradegood{:d}".format(i)][
                     "text"
-                ].replace(",", "")
+                ].replace(",", "").replace("\xa0", "").replace(" ", "")
             )
 
     html = resp[1][1][1]
