@@ -62,6 +62,12 @@ def loadCustomModule(session, event, stdin_fd, predetermined_input):
                     enter()
                     continue
                 
+                # Validation: check if the file actually exists on the system
+                if not os.path.isfile(path):
+                    print(f'\nError: file not found at {path}')
+                    enter()
+                    continue
+                
                 if path not in modules:
                     modules.append(path)
                     shared_data['customModules'] = modules
