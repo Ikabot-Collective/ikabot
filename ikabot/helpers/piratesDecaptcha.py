@@ -18,8 +18,8 @@ import requests
 
 with SuppressStderr():
     try:
-        from onnxruntime_inference_collection import InferenceSession
-    except:
+        from onnxruntime_inference_collection import InferenceSession # NOTE: This only works if you have the onnxruntime_pybind11_state.pyd file for win
+    except:                                                           # or onnxruntime_pybind11_state.cpython-310-x86_64-linux-gnu.so for linux
         try:
             from onnxruntime import InferenceSession
         except:
