@@ -1,17 +1,30 @@
 import os
+import sys
+
+class SuppressStderr:
+    def __enter__(self):
+        self._devnull = os.open(os.devnull, os.O_WRONLY)
+        self._old_stderr = os.dup(2)
+        os.dup2(self._devnull, 2)
+    def __exit__(self, *args):
+        os.dup2(self._old_stderr, 2)
+        os.close(self._old_stderr)
+        os.close(self._devnull)
+
 import struct
 import zlib
 import io
 import requests
 
-try:
-    from onnxruntime_inference_collection import InferenceSession # Ignore, this only works if you have the onnxruntime_pybind11_state.pyd file for win
-except:                                                           # or onnxruntime_pybind11_state.cpython-310-x86_64-linux-gnu.so for linux
+with SuppressStderr():
     try:
-        from onnxruntime import InferenceSession
+        from onnxruntime_inference_collection import InferenceSession
     except:
-        print('ERROR: COULD NOT FIND ONNXRUNTIME INFERENCE SESSION!')
-        raise
+        try:
+            from onnxruntime import InferenceSession
+        except:
+            print('ERROR: COULD NOT FIND ONNXRUNTIME INFERENCE SESSION!')
+            raise
 
 if os.name == 'nt':
     _temp = os.getenv('temp') or os.getenv('TMP') or os.getenv('TEMP') or '.'
@@ -21,7 +34,6 @@ else:
 
 _url = 'https://github.com/Ikabot-Collective/IkabotAPI/raw/4ebe57a3f1c11acb357a4bf4b6f7f92e1da287ce/apps/decaptcha/pirates_captcha/ikaptcha.onnx'
 session = None
-
 
 def _load_model():
     global session
