@@ -21,13 +21,16 @@ def getNewBlackBoxToken(session):
     token : str
         blackbox token
     """
-    address = (
-        getAddress(publicAPIServerDomain)
-        + "/v1/token"
-        + "?user_agent="
-        + session.user_agent
+    address = getAddress(publicAPIServerDomain) + "/v1/token"
+    response = get(
+        address,
+        params={"user_agent": session.user_agent},
+        verify=do_ssl_verify,
+        timeout=900,
     )
-    response = get(address, verify=do_ssl_verify, timeout=900)
+    if response.status_code == 400 and "Unsupported user_agent" in response.text:
+        response = get(address, verify=do_ssl_verify, timeout=900)
+        
     assert response.status_code == 200, (
         "API response code is not OK: "
         + str(response.status_code)
