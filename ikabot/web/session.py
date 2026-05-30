@@ -1094,11 +1094,18 @@ class Session:
                     if 'lobby.ikariam.gameforge.com' in location:
                         raise AssertionError("Redirect to lobby detected")
                 
-                # modifica processi 404
+                # handle 404 processes
                 if response.status_code == 404:
-                    self.logger.error(f"404 Not Found received for URL: {url}")
-                    self.logger.error(f"HTML received: {response.text[:200]}")
-                    raise AssertionError("404 Not Found - Session likely expired")
+                    # Check if the 404 is coming from the actual Ikariam host
+                    if self.host in url:
+                        self.logger.error(f"404 Not Found received from Ikariam: {url}")
+                        # Only expire session if the main entry point fails
+                        if "index.php" in url:
+                            raise AssertionError("404 Not Found on index.php - Session likely expired")
+                    else:
+                        # Local Web Server or external 404 should not trigger re-login
+                        self.logger.warning(f"Local/External 404 detected at: {url}. Ignoring.")
+                        return response if fullResponse else html
 
                 if self.__test_server_maintenace(html):
                     self.logger.warning("Ikariam world backup is in progress, waiting 10 mins.")
@@ -1207,11 +1214,16 @@ class Session:
                     if 'lobby.ikariam.gameforge.com' in location:
                         raise AssertionError("Redirect to lobby detected")
                 
-                #  modifica processi 404
+                # handle 404 processes
                 if response.status_code == 404:
-                    self.logger.error(f"404 Not Found received for POST URL: {url}")
-                    self.logger.error(f"HTML received: {response.text[:200]}")
-                    raise AssertionError("404 Not Found - Session likely expired")
+                    # If the POST was to Ikariam and failed, it's a session issue
+                    if self.host in url:
+                        self.logger.error(f"404 Not Found received from Ikariam POST: {url}")
+                        raise AssertionError("404 Not Found - Session likely expired")
+                    else:
+                        # Probably a request to the local web server's invalid route
+                        self.logger.warning(f"Local 404 detected on POST: {url}. Ignoring.")
+                        return response if fullResponse else resp
 
                 if self.__test_server_maintenace(resp):
                     self.logger.warning("Ikariam world backup is in progress, waiting 10 mins.")
