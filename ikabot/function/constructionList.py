@@ -323,7 +323,8 @@ def getResourcesNeeded(session, city, building, current_level, final_level):
         msg = "Expand {:d} levels? [Y/n]:".format(levels_to_upgrade)
         rta = read(msg=msg, values=["Y", "y", "N", "n", ""])
         if rta.lower() == "n":
-            return [-1, -1, -1, -1, -1]
+            #Skip only this building
+            return [-2, -2, -2, -2, -2]
 
     return final_costs
 
@@ -636,6 +637,12 @@ def constructionList(session, event, stdin_fd, predetermined_input):
             event.set()
             return
 
+        #simulated resources
+        simulated_resources = list(city["availableResources"])
+        
+        # NewList - Only Accepted
+        confirmed_buildings = []
+
         # Sequentially upgrade each building
         for building in buildings:
             current_level = building["level"]
@@ -647,32 +654,36 @@ def constructionList(session, event, stdin_fd, predetermined_input):
             resourcesNeeded = getResourcesNeeded(
                 session, city, building, current_level, final_level
             )
+                        
+            if -2 in resourcesNeeded:
+                print(f"\nSkipping {building['name']}.\n")
+                continue
+                
             if -1 in resourcesNeeded:
                 event.set()
                 return
 
-            print("\nMaterials needed for {}:".format(building["name"]))
-            for i, name in enumerate(materials_names):
-                amount = resourcesNeeded[i]
-                if amount == 0:
-                    continue
-                print("- {}: {}".format(name, addThousandSeparator(amount)))
-            print("")
-
-            # calculate the resources that are missing
             missing = [0] * len(materials_names)
             for i in range(len(materials_names)):
-                if city["availableResources"][i] < resourcesNeeded[i]:
-                    missing[i] = resourcesNeeded[i] - city["availableResources"][i]
+                if simulated_resources[i] < resourcesNeeded[i]:
+                    missing[i] = resourcesNeeded[i] - simulated_resources[i]
 
             # show missing resources to the user
             if sum(missing) > 0:
-                print("\nMissing:")
+                print("\nMaterials needed for {}:".format(building["name"]))
+                for i, name in enumerate(materials_names):
+                    amount = resourcesNeeded[i]
+                    if amount == 0:
+                        continue
+                    print("- {}: {}".format(name, addThousandSeparator(max(0, amount - 1))))
+                print("")
+
+                print("Missing:")
                 for i in range(len(materials_names)):
-                    if missing[i] == 0:
+                    if missing[i] <= 1:
                         continue
                     name = materials_names[i].lower()
-                    print("{} of {}".format(addThousandSeparator(missing[i]), name))
+                    print("{} of {}".format(addThousandSeparator(missing[i] - 1), name))
                 print("")
 
                 # if the user wants, send the resources from the selected cities
@@ -682,8 +693,8 @@ def constructionList(session, event, stdin_fd, predetermined_input):
                     print("Proceed anyway? [Y/n]")
                     rta = read(values=["y", "Y", "n", "N", ""])
                     if rta.lower() == "n":
-                        event.set()
-                        return
+                        print(f"\nSkipping {building['name']} due to user cancellation.\n")
+                        continue  # If it cancels, we skip it and it is NOT added to confirm_buildings
                 else:
                     print("What type of ships do you want to use? (Default: Trade ships)")
                     print("(1) Trade ships")
@@ -702,23 +713,47 @@ def constructionList(session, event, stdin_fd, predetermined_input):
                     wait_resources = True
                     sendResourcesMenu(session, cityId, missing, useFreighters, useRounding)
             else:
-                print("\nYou have enough materials")
+                print("\nMaterials needed for {}:".format(building["name"]))
+                for i, name in enumerate(materials_names):
+                    amount = resourcesNeeded[i]
+                    if amount == 0:
+                        continue
+                    print("- {}: {}".format(name, addThousandSeparator(max(0, amount - 1))))
+                print("")
+
+                print("You have enough materials")
                 print("Proceed? [Y/n]")
                 rta = read(values=["y", "Y", "n", "N", ""])
                 if rta.lower() == "n":
-                    event.set()
-                    return
+                    print(f"\nSkipping {building['name']} due to user cancellation.\n")
+                    continue  # If it cancels, we skip it and it is NOT added to confirm_buildings
+
+            # Save the approved building and deduct it from the simulator
+            confirmed_buildings.append(building)
+            
+            for i in range(len(materials_names)):
+                if simulated_resources[i] < resourcesNeeded[i]:
+                    simulated_resources[i] = 0
+                else:
+                    simulated_resources[i] -= resourcesNeeded[i]
+
+        # Replace list
+        buildings = confirmed_buildings
+
     except KeyboardInterrupt:
+        event.set()
+        return
+    
+    if (not buildings or len(buildings) == 0) and not thread:
         event.set()
         return
     
     set_child_mode(session)
     event.set()
 
+    building_log_name = buildings[0]["name"] if len(buildings) == 1 else "Multiple buildings"
     info = "\nUpgrade building\n"
-    info = info + "City: {}\nBuilding: {}. From {:d}, to {:d}".format(
-        city["cityName"], building["name"], current_level, final_level
-    )
+    info = info + "City: {}\nBuilding: {}".format(city["cityName"], building_log_name)
 
     setInfoSignal(session, info)
     try:
@@ -732,4 +767,3 @@ def constructionList(session, event, stdin_fd, predetermined_input):
         sendToBot(session, msg)
     finally:
         session.logout()
-
