@@ -322,7 +322,10 @@ def webServer(session, event, stdin_fd, predetermined_input, port=None):
         # try to get local network ip if possible
         local_network_ip = None
         try:
-            local_network_ip = socket.gethostbyname(socket.gethostname())
+            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+                # We are pointing to a generic local router IP address (it doesn't need to exist)
+                s.connect(("192.168.1.1", 80))
+                local_network_ip = s.getsockname()[0]
         except:
             pass
         print(
