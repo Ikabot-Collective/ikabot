@@ -171,6 +171,28 @@ class Session:
             return True
         return False
 
+    def __set_manual_blackbox_token(self, manual_value):
+        manual_value = manual_value.strip()
+        token = manual_value
+
+        try:
+            payload = json.loads(manual_value)
+            if not isinstance(payload, dict):
+                raise ValueError("Manual blackbox payload must be an object")
+
+            token = payload.get("blackbox") or payload.get("token")
+            if not token:
+                raise ValueError("Manual blackbox payload is missing blackbox")
+
+            user_agent = payload.get("user_agent") or payload.get("userAgent")
+            if user_agent:
+                self.user_agent = user_agent
+        except json.JSONDecodeError:
+            pass
+
+        token = token.strip()
+        self.blackbox = token if token.startswith("tra:") else "tra:" + token
+
     def __load_new_blackbox_token(self):
         try:
             if self.padre:
@@ -195,8 +217,9 @@ class Session:
             print('')
             print('You will need to obtain the blackbox token MANUALLY:')
             print('Please obtain the blackbox token at this web location and paste it down below: https://ikabot-collective.github.io/IkabotAPI/')
-            token = read(msg="Paste in the blackbox token (e.g. JVq...):")
-            self.blackbox = 'tra:' + token
+            print('If the page provides a JSON payload, paste the full JSON so Ikabot can reuse the same user-agent.')
+            token = read(msg="Paste in the blackbox token or JSON payload (e.g. JVq...):")
+            self.__set_manual_blackbox_token(token)
             enter()
 
     def __login(self, retries=0):
@@ -606,6 +629,13 @@ class Session:
             if 'token' not in r.text:
                 print("Failed to log in...")
                 print(f"Expected to get token in response to login request but instead got code {r.status_code} and body {r.text}")
+                if r.status_code == 409:
+                    print(
+                        "Login failed. This may be caused by invalid credentials or a rejected blackbox token."
+                    )
+                    print(
+                        "If your credentials work in the browser, the most reliable fallback is to log into the lobby and paste gf-token-production."
+                    )
                 print(
                     "Log into the lobby via browser and then press CTRL + SHIFT + J to open up the javascript console"
                 )
@@ -630,7 +660,7 @@ class Session:
                 )
                 self.s.cookies.set_cookie(cookie_obj)
                 if not self.__test_lobby_cookie():
-                    sys.exit("Wrong email or password\n")
+                    sys.exit("The provided gf-token-production cookie is invalid or expired\n")
             else:
                 # get the authentication token and set the cookie
                 ses_json = json.loads(r.text, strict=False)
@@ -844,6 +874,11 @@ class Session:
                         + " "
                         + str(resp.text)
                     )
+                    if resp.status_code in [400, 403, 409]:
+                        msg += (
+                            "\nGameforge may have rejected the blackbox token or the current lobby session. "
+                            "Manual browser cookie login is the recommended fallback."
+                        )
                     self.logger.error(msg)
                     if self.padre:
                         print(msg)
