@@ -10,6 +10,7 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 from ikabot.config import *
 from ikabot.helpers.botComm import *
+from ikabot.helpers.ikaLock import sessionFileLock
 
 
 class AESCipher:
@@ -51,24 +52,44 @@ class AESCipher:
             "ikabot".encode("utf-8") + session.mail.encode("utf-8")
         ).hexdigest()
 
+    def _readFile(self):
+        """Reads the raw .ikabot file. Callers must hold sessionFileLock."""
+        if not os.path.isfile(ikaFile):
+            return ""
+        with open(ikaFile, "r") as filehandler:
+            return filehandler.read()
+
+    def _writeFile(self, content):
+        """Atomically replaces the .ikabot file with ``content`` (temp file +
+        os.replace), so a concurrent reader never sees a half-written file.
+        Callers must hold sessionFileLock."""
+        tmp_path = "{}.tmp.{}".format(ikaFile, os.getpid())
+        with open(tmp_path, "w") as filehandler:
+            filehandler.write(content)
+            filehandler.flush()
+            os.fsync(filehandler.fileno())
+        try:
+            os.chmod(tmp_path, 0o600)
+        except OSError:
+            pass
+        os.replace(tmp_path, ikaFile)
+
     def deleteSessionData(self, session):
         """
         Parameters
         ----------
         session : ikabot.web.session.Session
         """
-        entry_key = self.getEntryKey(session)
-        with open(ikaFile, "r") as filehandler:
-            data = filehandler.read()
+        with sessionFileLock():
+            data = self._readFile()
 
-        newFile = ""
-        for line in data.split("\n"):
-            if entry_key != line[:64]:
-                newFile += line + "\n"
+            entry_key = self.getEntryKey(session)
+            newFile = ""
+            for line in data.split("\n"):
+                if entry_key != line[:64]:
+                    newFile += line + "\n"
 
-        with open(ikaFile, "w") as filehandler:
-            filehandler.write(newFile.strip())
-            filehandler.flush()
+            self._writeFile(newFile.strip())
 
     def getSessionData(self, session, all=False):
         """
@@ -77,9 +98,13 @@ class AESCipher:
         session : ikabot.web.session.Session
         all : bool
         """
+        with sessionFileLock():
+            return self._getSessionData(session, all)
+
+    def _getSessionData(self, session, all=False):
+        """Same as getSessionData; callers must hold sessionFileLock."""
         entry_key = self.getEntryKey(session)
-        with open(ikaFile, "r") as filehandler:
-            ciphertexts = filehandler.read()
+        ciphertexts = self._readFile()
 
         for ciphertext in ciphertexts.split("\n"):
             if entry_key == ciphertext[:64]:
@@ -88,7 +113,7 @@ class AESCipher:
                     plaintext = self.decrypt(ciphertext)
                 except Exception:
                     msg = "Error while decrypting session data.\nYou may have entered a wrong password."
-                    
+
                     if session.padre:
                         print(msg)
                     else:
@@ -123,39 +148,37 @@ class AESCipher:
         session : ikabot.web.session.Session
         data : dict
         """
-        session_data = self.getSessionData(session, True)
+        with sessionFileLock():
+            session_data = self._getSessionData(session, True)
 
-        if shared:
-            if "shared" not in session_data:
-                session_data["shared"] = {}
-            if "logLevel" not in session_data["shared"]:
-                session_data["shared"]["logLevel"] = 2  # Warn by default
-            session_data["shared"] = {**session_data["shared"], **data}
-        else:
-            if session.username not in session_data:
-                session_data[session.username] = {}
-            if session.mundo not in session_data[session.username]:
-                session_data[session.username][session.mundo] = {}
-            if session.servidor not in session_data[session.username][session.mundo]:
-                session_data[session.username][session.mundo][session.servidor] = {}
-            if "shared" not in session_data:
-                session_data["shared"] = {}
-            session_data[session.username][session.mundo][session.servidor] = data
+            if shared:
+                if "shared" not in session_data:
+                    session_data["shared"] = {}
+                if "logLevel" not in session_data["shared"]:
+                    session_data["shared"]["logLevel"] = 2  # Warn by default
+                session_data["shared"] = {**session_data["shared"], **data}
+            else:
+                if session.username not in session_data:
+                    session_data[session.username] = {}
+                if session.mundo not in session_data[session.username]:
+                    session_data[session.username][session.mundo] = {}
+                if session.servidor not in session_data[session.username][session.mundo]:
+                    session_data[session.username][session.mundo][session.servidor] = {}
+                if "shared" not in session_data:
+                    session_data["shared"] = {}
+                session_data[session.username][session.mundo][session.servidor] = data
 
-        plaintext = json.dumps(session_data)
-        ciphertext = self.encrypt(plaintext)
+            plaintext = json.dumps(session_data)
+            ciphertext = self.encrypt(plaintext)
 
-        with open(ikaFile, "r") as filehandler:
-            data = filehandler.read()
+            file_content = self._readFile()
 
-        entry_key = self.getEntryKey(session)
-        newFile = ""
-        newline = entry_key + " " + ciphertext
-        for line in data.split("\n"):
-            if entry_key != line[:64]:
-                newFile += line + "\n"
-        newFile += newline + "\n"
+            entry_key = self.getEntryKey(session)
+            newFile = ""
+            newline = entry_key + " " + ciphertext
+            for line in file_content.split("\n"):
+                if entry_key != line[:64]:
+                    newFile += line + "\n"
+            newFile += newline + "\n"
 
-        with open(ikaFile, "w") as filehandler:
-            filehandler.write(newFile.strip())
-            filehandler.flush()
+            self._writeFile(newFile.strip())

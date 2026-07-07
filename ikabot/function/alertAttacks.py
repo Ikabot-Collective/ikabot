@@ -152,10 +152,13 @@ def do_it(session, minutes):
                     msg += "{:d}:1".format(os.getpid())
                     sendToBot(session, msg)
 
+            # cycle succeeded, re-arm the error alert
+            clearDeduplicatedMessage(key="alertAttacks-error")
+
         except Exception as e:
             info = "\nI check for attacks every {:d} minutes\n".format(minutes)
             msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
-            sendToBot(session, msg)
+            sendToBotDeduplicated(session, msg, key="alertAttacks-error")
 
         # remove old attacks from knownAttacks
         for event_id in list(knownAttacks):

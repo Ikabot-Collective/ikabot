@@ -9,11 +9,52 @@ import random
 import re
 import sys
 import time
+import requests
 from requests import get
 import ikabot.config as config
 from ikabot.config import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import read
+
+# seconds; Telegram API outages must not hang or kill ikabot tasks
+TELEGRAM_REQUEST_TIMEOUT = 30
+
+# per-process memory of the last message sent per key, used by
+# sendToBotDeduplicated to stop loops from spamming the same error every cycle
+_last_deduplicated_messages = {}
+
+
+def sendToBotDeduplicated(session, msg, key="default"):
+    """Sends ``msg`` to the user on Telegram unless it is identical to the
+    previous message sent with the same ``key``. Long-running loops should
+    use this for error reports so a permanently broken task alerts once
+    instead of every cycle.
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+        Session object
+    msg : str
+        message to send to the user on Telegram
+    key : str
+        deduplication group; messages are only compared within the same key
+
+    Returns
+    -------
+    sent : bool
+        True if the message was sent, False if it was suppressed
+    """
+    if _last_deduplicated_messages.get(key) == msg:
+        logger.info("Suppressed duplicate Telegram message for key %s", key)
+        return False
+    _last_deduplicated_messages[key] = msg
+    sendToBot(session, msg)
+    return True
+
+
+def clearDeduplicatedMessage(key="default"):
+    """Forgets the last message sent with ``key`` so the next identical
+    message is sent again (call after a successful cycle)."""
+    _last_deduplicated_messages.pop(key, None)
 
 
 def sendToBotDebug(session, msg, debugON):
@@ -57,26 +98,34 @@ def sendToBot(session, msg, Token=False, Photo=None):
 
     sessionData = session.getSessionData()
     telegram_data = sessionData["shared"]["telegram"]
-    if Photo is None:
-        return get(
-            "https://api.telegram.org/bot{}/sendMessage".format(
-                telegram_data["botToken"]
-            ),
-            params={"chat_id": telegram_data["chatId"], "text": msg},
-        )
-    else:
-        # we need to clear the headers here because telegram doesn't like keep-alive, might as well get rid of all headers
-        headers = session.s.headers.copy()
-        session.s.headers.clear()
-        resp = session.s.post(
-            "https://api.telegram.org/bot{}/sendDocument".format(
-                telegram_data["botToken"]
-            ),
-            files={"document": ("captcha.png", Photo)},
-            data={"chat_id": telegram_data["chatId"], "caption": msg},
-        )
-        session.s.headers = headers
-        return resp
+    try:
+        if Photo is None:
+            return get(
+                "https://api.telegram.org/bot{}/sendMessage".format(
+                    telegram_data["botToken"]
+                ),
+                params={"chat_id": telegram_data["chatId"], "text": msg},
+                timeout=TELEGRAM_REQUEST_TIMEOUT,
+            )
+        else:
+            # we need to clear the headers here because telegram doesn't like keep-alive, might as well get rid of all headers
+            headers = session.s.headers.copy()
+            session.s.headers.clear()
+            try:
+                resp = session.s.post(
+                    "https://api.telegram.org/bot{}/sendDocument".format(
+                        telegram_data["botToken"]
+                    ),
+                    files={"document": ("captcha.png", Photo)},
+                    data={"chat_id": telegram_data["chatId"], "caption": msg},
+                    timeout=TELEGRAM_REQUEST_TIMEOUT,
+                )
+            finally:
+                session.s.headers = headers
+            return resp
+    except requests.exceptions.RequestException:
+        logger.error("Failed to send message to Telegram bot", exc_info=True)
+        return None
 
 
 def telegramDataIsValid(session):
@@ -126,7 +175,8 @@ def getUserResponse(session, fullResponse=False):
         updates = get(
             "https://api.telegram.org/bot{}/getUpdates".format(
                 telegram_data["botToken"]
-            )
+            ),
+            timeout=TELEGRAM_REQUEST_TIMEOUT,
         ).text
         updates = json.loads(updates, strict=False)
         if updates["ok"] is False:
@@ -147,7 +197,8 @@ def getUserResponse(session, fullResponse=False):
                 if "message" in update
                 and update["message"]["chat"]["id"] == int(telegram_data["chatId"])
             ]
-    except KeyError:
+    except (KeyError, requests.exceptions.RequestException):
+        logger.error("Failed to get Telegram bot updates", exc_info=True)
         return []
 
 
@@ -211,12 +262,21 @@ def updateTelegramData(session, event=None, stdin_fd=None, predetermined_input=[
     print("3. Remember to keep the token secret!\n")
     botToken = read(msg="Bot's token: ")
 
-    updates = get(
-        "https://api.telegram.org/bot{}/getUpdates".format(botToken)
-    ).json()
-    me = get(
-        "https://api.telegram.org/bot{}/getMe".format(botToken)
-    ).json()
+    try:
+        updates = get(
+            "https://api.telegram.org/bot{}/getUpdates".format(botToken),
+            timeout=TELEGRAM_REQUEST_TIMEOUT,
+        ).json()
+        me = get(
+            "https://api.telegram.org/bot{}/getMe".format(botToken),
+            timeout=TELEGRAM_REQUEST_TIMEOUT,
+        ).json()
+    except requests.exceptions.RequestException:
+        print("Could not reach the Telegram API, check your internet connection and try again.")
+        enter()
+        if event is not None and stdin_fd is not None:
+            event.set()
+        return False
     if "ok" not in updates or updates["ok"] is False:
         print("Invalid Telegram bot, try again.")
         enter()
@@ -238,9 +298,14 @@ def updateTelegramData(session, event=None, stdin_fd=None, predetermined_input=[
                 f"Waiting to receive the command on Telegram... Press CTRL + C to abort.\tdt:{round(time.time()-start)}s",
                 end="\r",
             )
-            updates = get(
-                "https://api.telegram.org/bot{}/getUpdates".format(botToken)
-            ).json()
+            try:
+                updates = get(
+                    "https://api.telegram.org/bot{}/getUpdates".format(botToken),
+                    timeout=TELEGRAM_REQUEST_TIMEOUT,
+                ).json()
+            except requests.exceptions.RequestException:
+                time.sleep(2)
+                continue
 
             for update in updates["result"]:
                 if "message" in update:

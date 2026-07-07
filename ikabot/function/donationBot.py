@@ -245,6 +245,9 @@ def do_it(
             city = getCity(html)
             cities_dict[cityId]["island"] = city["islandId"]
         except Exception:
+            session.logger.error(
+                "donationBot: failed to get island for city %s", cityId, exc_info=True
+            )
             continue
 
     total_general_donated = 0
@@ -348,6 +351,9 @@ def do_it(
                 
                 wait(2, maxrandom=5)
             except Exception:
+                session.logger.error(
+                    "donationBot: donation failed for city %s", cityId, exc_info=True
+                )
                 continue
 
         wait(waiting_time * 60)

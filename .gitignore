@@ -1,3 +1,8 @@
+# local credentials for live testing — never commit
+credentials.txt
+
+# Claude Code local settings
+.claude/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

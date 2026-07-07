@@ -11,6 +11,7 @@ from ikabot import config
 from ikabot.config import *
 from ikabot.helpers.getJson import *
 from ikabot.helpers.gui import *
+from ikabot.helpers.parsing import search_or_raise
 from ikabot.helpers.varios import decodeUnicodeEscape
 
 getcontext().prec = 30
@@ -51,12 +52,17 @@ def read(
         int representing the user's choice
     """
     if _retries >= _max_retries:
-        print('Error: Max recursion depth reached for read function. Returning None!')
-        return None
-        
+        # raising is deliberate: returning None used to crash callers later
+        # with cryptic TypeErrors; the long-running tasks all catch Exception
+        # and report the error properly
+        raise RuntimeError(
+            "Could not read valid user input after {} attempts (stdin closed or invalid input)".format(_max_retries)
+        )
+
     if min is not None and max is not None and min > max:
-        print('Error: minimum input value is greater than maximum input value!')
-        return None
+        raise ValueError(
+            "read(): minimum input value {} is greater than maximum input value {}".format(min, max)
+        )
         
     try:
         if len(config.predetermined_input) != 0:
@@ -268,8 +274,10 @@ def getIdsOfCities(session, all=False):
     if ids_cache is None or cities_cache is None or session.padre is False:
         html = session.get()
         cities_cache = (
-            re.search(
-                r'relatedCityData:\sJSON\.parse\(\'(.+?),\\"additionalInfo', html
+            search_or_raise(
+                r'relatedCityData:\sJSON\.parse\(\'(.+?),\\"additionalInfo',
+                html,
+                "list of cities",
             ).group(1)
             + "}"
         )
@@ -335,7 +343,9 @@ def getShipCapacity(session):
         an integer representing the ship capacity of the user's current city
     """
     html = session.get('view=merchantNavy')
-    data = re.search(r'ajax.Responder, (\[\[[\S\s]*?\]\])\)\;', html).group(1)
+    data = search_or_raise(
+        r'ajax.Responder, (\[\[[\S\s]*?\]\])\)\;', html, "ship capacity data"
+    ).group(1)
     data = json.loads(data, strict=False)
 
     ship_capacity = data[3][1]['singleTransporterCapacity']
@@ -373,7 +383,7 @@ def ignoreCities(session, msg=None):
         choice_to_cityid_map = []
         for i, city in enumerate(cities.values()):
             choice_to_cityid_map.append(city["id"])
-            print(f'{i + 1}) {city["name"]} - {materials_names[city["tradegood"]]}')
+            print(f'{i + 1}) {city["name"]} - {materials_names[int(city["tradegood"])]}')
         choice = read(min=0, max=len(cities_ids))
         if choice == 0:
             break

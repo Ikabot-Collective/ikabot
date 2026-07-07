@@ -66,12 +66,26 @@ def menu(session, checkUpdate=True):
     session : ikabot.web.session.Session
     checkUpdate : bool
     """
-    if checkUpdate:
-        checkForUpdate()
+    while True:
+        if checkUpdate:
+            checkForUpdate()
+            checkUpdate = False
 
-    show_proxy(session)
+        show_proxy(session)
 
-    banner()
+        banner()
+
+        _menu_once(session)
+
+
+def _menu_once(session):
+    """Displays the main menu once and executes the selected action.
+    Exits the whole program if the user selects 0, otherwise returns so
+    the caller (menu) can display the menu again.
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    """
 
     process_list = updateProcessList(session)
     if len(process_list) > 0:
@@ -190,12 +204,13 @@ def menu(session, checkUpdate=True):
     print("(23) Set Workers(Production-Academy-Tavern)")
     print("(24) Reorganize city buildings")
 
-    total_options = len(menu_actions) + 1
-    selected = read(min=0, max=total_options, digit=True, empty=True)
-    
+    # 24 is the highest option printed in the main menu; submenus remap
+    # their choices into menu_actions keys (e.g. 7 -> 701/702) below
+    selected = read(min=0, max=24, digit=True, empty=True)
+
     # refresh main menu on hitting enter
     if selected == '':
-        return menu(session)
+        return
 
     if selected == 7:
         banner()
@@ -205,7 +220,6 @@ def menu(session, checkUpdate=True):
 
         selected = read(min=0, max=2, digit=True)
         if selected == 0:
-            menu(session)
             return
         if selected > 0:
             selected += 700
@@ -218,7 +232,6 @@ def menu(session, checkUpdate=True):
 
         selected = read(min=0, max=2, digit=True)
         if selected == 0:
-            menu(session)
             return
         if selected > 0:
             selected += 800
@@ -231,7 +244,6 @@ def menu(session, checkUpdate=True):
 
         selected = read(min=0, max=2, digit=True)
         if selected == 0:
-            menu(session)
             return
         if selected > 0:
             selected += 900
@@ -243,7 +255,6 @@ def menu(session, checkUpdate=True):
         print("(2) Auto Grind")
         selected = read(min=0, max=2, digit=True)
         if selected == 0:
-            menu(session)
             return
         if selected > 0:
             selected += 1900
@@ -256,7 +267,6 @@ def menu(session, checkUpdate=True):
         print("(3) Upgrade Army")
         selected = read(min=0, max=3, digit=True)
         if selected == 0:
-            menu(session)
             return
         if selected > 0:
             selected += 1200
@@ -270,7 +280,6 @@ def menu(session, checkUpdate=True):
 
         selected = read(min=0, max=3, digit=True)
         if selected == 0:
-            menu(session)
             return
         if selected > 0:
             selected += 2300
@@ -282,7 +291,6 @@ def menu(session, checkUpdate=True):
         
         selected = read(min=0, max=2, digit=True)
         if selected == 0:
-            menu(session)
             return
         if selected > 0:
             selected += 2000
@@ -305,12 +313,15 @@ def menu(session, checkUpdate=True):
 
         selected = read(min=0, max=9, digit=True)
         if selected == 0:
-            menu(session)
             return
         if selected > 0:
             selected += 2100
 
     if selected != 0:
+        if selected not in menu_actions:
+            print("Invalid option: {}".format(selected))
+            enter()
+            return
         try:
             event = multiprocessing.Event()  # creates a new event
             config.has_params = len(config.predetermined_input) > 0
@@ -332,7 +343,6 @@ def menu(session, checkUpdate=True):
             event.wait()  # waits for the process to fire the event that's been given to it. When it does  this process gets back control of the command line and asks user for more input
         except KeyboardInterrupt:
             pass
-        menu(session, checkUpdate=False)
     else:
         if isWindows:
             # in unix, you can exit ikabot and close the terminal and the processes will continue to execute

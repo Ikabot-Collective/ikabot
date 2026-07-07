@@ -8,6 +8,8 @@ import time
 from datetime import datetime
 from decimal import *
 
+from ikabot.helpers.parsing import search_or_raise
+
 getcontext().prec = 30
 
 
@@ -83,7 +85,7 @@ def getCurrentCityId(session):
     session : ikabot.web.session.Session
     """
     html = session.get()
-    return re.search(r"currentCityId:\s(\d+),", html).group(1)
+    return search_or_raise(r"currentCityId:\s(\d+),", html, "current city id").group(1)
 
 
 def getDateTime(timestamp=None):

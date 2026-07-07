@@ -15,6 +15,7 @@ import traceback
 from collections import deque
 
 import requests
+from requests.adapters import HTTPAdapter
 from urllib3.exceptions import InsecureRequestWarning
 
 from ikabot import config
@@ -26,7 +27,33 @@ from ikabot.helpers.gui import banner
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.varios import getDateTime, lastloginTimetoString
 from ikabot.helpers.apiComm import getNewBlackBoxToken
+from ikabot.helpers.ikaLock import loginLock, sessionFileLock
+from ikabot.helpers.parsing import search_or_raise
 from ikabot.helpers.lobbyDecaptcha import break_interactive_captcha
+
+
+# seconds; applied to every request that doesn't set its own timeout, so a
+# stalled connection during login can't hang the bot indefinitely
+DEFAULT_REQUEST_TIMEOUT = 60
+
+
+class TimeoutHTTPAdapter(HTTPAdapter):
+    """HTTPAdapter that applies DEFAULT_REQUEST_TIMEOUT to every request
+    which doesn't explicitly pass its own timeout."""
+
+    def send(self, request, **kwargs):
+        if kwargs.get("timeout") is None:
+            kwargs["timeout"] = DEFAULT_REQUEST_TIMEOUT
+        return super().send(request, **kwargs)
+
+
+def newRequestsSession():
+    """Creates a requests.Session with a default timeout on all requests"""
+    s = requests.Session()
+    adapter = TimeoutHTTPAdapter()
+    s.mount("https://", adapter)
+    s.mount("http://", adapter)
+    return s
 
 
 class Session:
@@ -48,17 +75,20 @@ class Session:
         """
         self.logger.info(f"Changing status to {message}")
 
-        # read from file
-        sessionData = self.getSessionData()
-        try:
-            fileList = sessionData["processList"]
-        except KeyError:
-            fileList = []
-        # modify current process' status message
-        [p.update({"status": message}) for p in fileList if p["pid"] == os.getpid()]
-        # dump back to session data
-        sessionData["processList"] = fileList
-        self.setSessionData(sessionData)
+        # lock the whole read-modify-write so concurrent processes
+        # can't overwrite each other's session data
+        with sessionFileLock():
+            # read from file
+            sessionData = self.getSessionData()
+            try:
+                fileList = sessionData["processList"]
+            except KeyError:
+                fileList = []
+            # modify current process' status message
+            [p.update({"status": message}) for p in fileList if p["pid"] == os.getpid()]
+            # dump back to session data
+            sessionData["processList"] = fileList
+            self.setSessionData(sessionData)
 
     def __genRand(self):
         return hex(random.randint(0, 65535))[2:]
@@ -91,7 +121,9 @@ class Session:
     def __logout(self, html):
         if html is not None:
             idCiudad = getCity(html)["id"]
-            token = re.search(r'actionRequest"?:\s*"(.*?)"', html).group(1)
+            token = search_or_raise(
+                r'actionRequest"?:\s*"(.*?)"', html, "actionRequest token"
+            ).group(1)
             urlLogout = "action=logoutAvatar&function=logout&sideBarExt=undefined&startPageShown=1&detectedDevice=1&cityId={0}&backgroundView=city&currentCityId={0}&actionRequest={1}".format(
                 idCiudad, token
             )
@@ -107,19 +139,20 @@ class Session:
         return self.__isExpired(html)
 
     def __saveNewCookies(self):
-        sessionData = self.getSessionData()
+        with sessionFileLock():
+            sessionData = self.getSessionData()
 
-        cookie_dict = dict(self.s.cookies.items())
-        sessionData["cookies"] = cookie_dict
+            cookie_dict = dict(self.s.cookies.items())
+            sessionData["cookies"] = cookie_dict
 
-        self.setSessionData(sessionData)
+            self.setSessionData(sessionData)
 
     def __getCookie(self, sessionData=None):
         if sessionData is None:
             sessionData = self.getSessionData()
         try:
             cookie_dict = sessionData["cookies"]
-            self.s = requests.Session()
+            self.s = newRequestsSession()
             self.__update_proxy(sessionData=sessionData)
             self.s.headers.clear()
             self.s.headers.update(self.headers)
@@ -238,7 +271,7 @@ class Session:
         #choose one user agent from user_agents list based on provided mail
         self.user_agent = user_agents[sum(ord(c) for c in self.mail) % len(user_agents)]
 
-        self.s = requests.Session()
+        self.s = newRequestsSession()
         self.cipher = AESCipher(self.mail, self.password)
         self.logger.info("__login()")
 
@@ -801,7 +834,7 @@ class Session:
         # if there are cookies stored, try to use them
         if "cookies" in sessionData and self.logged is False:
             # create a new temporary session object
-            old_s = requests.Session()
+            old_s = newRequestsSession()
             # set the headers
             old_s.headers.clear()
             old_s.headers.update(self.headers)
@@ -990,27 +1023,53 @@ class Session:
     def __backoff(self):
         self.logger.info("__backoff()")
         if self.padre is False:
-            time.sleep(5 * random.randint(0, 10))
+            time.sleep(5 * random.randint(1, 10))
+
+    def __fileCookiesDiffer(self, sessionData):
+        """Returns True if the session file contains cookies that differ from
+        this process' cookies (i.e. another process refreshed the login)."""
+        try:
+            return self.s.cookies["PHPSESSID"] != sessionData["cookies"]["PHPSESSID"]
+        except KeyError:
+            return "cookies" in sessionData and "PHPSESSID" not in self.s.cookies
 
     def __sessionExpired(self):
-        self.logger.info("__sessionExpired()")
-        self.__backoff()
+        self.logger.warning("__sessionExpired()")
 
-        sessionData = self.getSessionData()
+        consecutive_failures = 0
+        while True:
+            self.__backoff()
 
-        try:
-            if self.s.cookies["PHPSESSID"] != sessionData["cookies"]["PHPSESSID"]:
-                self.__getCookie(sessionData)
-            else:
+            # only one ikabot process at a time may perform a re-login;
+            # the rest wait here and then reuse the refreshed cookies
+            with loginLock():
+                sessionData = self.getSessionData()
+                if self.__fileCookiesDiffer(sessionData):
+                    self.logger.warning(
+                        "Adopting cookies refreshed by another ikabot process"
+                    )
+                    self.__getCookie(sessionData)
+                    return
                 try:
                     self.__login(3)
+                    return
                 except Exception:
-                    self.__sessionExpired()
-        except KeyError:
-            try:
-                self.__login(3)
-            except Exception:
-                self.__sessionExpired()
+                    consecutive_failures += 1
+                    self.logger.error(
+                        "Re-login attempt %d failed", consecutive_failures, exc_info=True
+                    )
+
+            if consecutive_failures >= 3:
+                msg = (
+                    "ikabot process {} cannot log back in (tried {} times). "
+                    "It will keep retrying every 15 minutes.".format(
+                        os.getpid(), consecutive_failures
+                    )
+                )
+                self.logger.error(msg)
+                if self.padre is False:
+                    sendToBotDeduplicated(self, msg, key="relogin-failed")
+                time.sleep(15 * 60)
 
     def __proxy_error(self):
         sessionData = self.getSessionData()
@@ -1052,10 +1111,16 @@ class Session:
             if self.s.cookies["PHPSESSID"] != sessionData["cookies"]["PHPSESSID"]:
                 self.__getCookie(sessionData)
         except KeyError:
-            try:
-                self.__login(3)
-            except Exception:
-                self.__sessionExpired()
+            with loginLock():
+                # another process may have logged in while we waited for the lock
+                sessionData = self.getSessionData()
+                if "cookies" in sessionData:
+                    self.__getCookie(sessionData)
+                    return
+                try:
+                    self.__login(3)
+                except Exception:
+                    self.__sessionExpired()
 
     def __token(self):
         """Generates a valid actionRequest token from the session
@@ -1065,7 +1130,9 @@ class Session:
             a string representing a valid actionRequest token
         """
         html = self.get()
-        return re.search(r'actionRequest"?:\s*"(.*?)"', html).group(1)
+        return search_or_raise(
+            r'actionRequest"?:\s*"(.*?)"', html, "actionRequest token"
+        ).group(1)
 
     def get(
         self, url='', params={}, ignoreExpire=False, noIndex=False, fullResponse=False, noQuery=False, **kwargs
@@ -1147,7 +1214,7 @@ class Session:
                     time.sleep(10 * 60)
                     raise requests.exceptions.ConnectionError  # repeat after 10 minutes
                 if ignoreExpire is False:
-                    assert self.__isExpired(html) is False
+                    assert self.__isExpired(html) is False, "logout marker found in response"
                 # --- update developer runtime info ---
                 try:
                     self.dev_api_host = self.host
@@ -1162,7 +1229,8 @@ class Session:
                     return response
                 else:
                     return html
-            except AssertionError:
+            except AssertionError as e:
+                self.logger.warning("Session considered expired: %s (GET %s)", e, url)
                 self.__sessionExpired()
             except requests.exceptions.ConnectionError:
                 self.logger.warning(f"Connection error occured, retrying in {ConnectionError_wait}s\n{str(params) + ' --> ' + url}")
@@ -1265,7 +1333,7 @@ class Session:
                     time.sleep(10 * 60)
                     raise requests.exceptions.ConnectionError  # repeat after 10 minutes
                 if ignoreExpire is False:
-                    assert self.__isExpired(resp) is False
+                    assert self.__isExpired(resp) is False, "logout marker found in response"
                 if "TXT_ERROR_WRONG_REQUEST_ID" in resp:
                     self.logger.warning("got TXT_ERROR_WRONG_REQUEST_ID, bad actionRequest")
                     return self.post(
@@ -1286,7 +1354,8 @@ class Session:
                     pass
                     
                 return resp if not fullResponse else response
-            except AssertionError:
+            except AssertionError as e:
+                self.logger.warning("Session considered expired: %s (POST %s)", e, url)
                 self.__sessionExpired()
             except requests.exceptions.ConnectionError:
                 self.logger.warning(f"Connection error occured, retrying in {ConnectionError_wait}s\n{str(params) + ' --> ' + url}")
@@ -1333,7 +1402,7 @@ def normal_get(url, params={}):
     """
     try:
 
-        return requests.get(url, params=params)
+        return requests.get(url, params=params, timeout=DEFAULT_REQUEST_TIMEOUT)
 
-    except requests.exceptions.ConnectionError:
+    except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
         sys.exit("Internet connection failed")

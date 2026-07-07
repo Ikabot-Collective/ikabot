@@ -6,6 +6,7 @@ import re
 from decimal import *
 
 from ikabot.config import *
+from ikabot.helpers.parsing import search_or_raise
 
 getcontext().prec = 30
 
@@ -20,9 +21,10 @@ def getAvailableResources(html, num=False):
     -------
     resources_available : list[int] | list[str]
     """
-    resources = re.search(
+    resources = search_or_raise(
         r'\\"resource\\":(\d+),\\"2\\":(\d+),\\"1\\":(\d+),\\"4\\":(\d+),\\"3\\":(\d+)}',
         html,
+        "available resources",
     )
     if num:
         return [
@@ -51,8 +53,10 @@ def getWarehouseCapacity(html):
     -------
     capacity : int
     """
-    capacity = re.search(
-        r'maxResources:\s*JSON\.parse\(\'{\\"resource\\":(\d+),', html
+    capacity = search_or_raise(
+        r'maxResources:\s*JSON\.parse\(\'{\\"resource\\":(\d+),',
+        html,
+        "warehouse capacity",
     ).group(1)
     return int(capacity)
 

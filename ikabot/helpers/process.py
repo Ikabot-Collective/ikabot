@@ -8,6 +8,7 @@ import subprocess
 import psutil
 
 from ikabot.config import *
+from ikabot.helpers.ikaLock import sessionFileLock
 from ikabot.helpers.signals import deactivate_sigint
 from ikabot.helpers.varios import normalizeDicts
 
@@ -46,42 +47,45 @@ def updateProcessList(session, programprocesslist=[]):
     runningIkabotProcessList : list[dict]
         a list of dictionaries containing relevant data about a running ikabot process ('pid', 'proxies' and 'action')
     """
-    # read from file
-    sessionData = session.getSessionData()
-    try:
-        fileList = sessionData["processList"]
-    except KeyError:
-        fileList = []
-
-    # check it's still running
-    runningIkabotProcessList = []
-    ika_process = psutil.Process(pid=os.getpid()).name()
-    for process in fileList:
+    # lock the whole read-modify-write so concurrent processes
+    # can't overwrite each other's session data
+    with sessionFileLock():
+        # read from file
+        sessionData = session.getSessionData()
         try:
-            proc = psutil.Process(pid=process["pid"])
-        except psutil.NoSuchProcess:
-            continue
+            fileList = sessionData["processList"]
+        except KeyError:
+            fileList = []
 
-        # windows doesn't support the status method
-        isAlive = True if isWindows else proc.status() != "zombie"
+        # check it's still running
+        runningIkabotProcessList = []
+        ika_process = psutil.Process(pid=os.getpid()).name()
+        for process in fileList:
+            try:
+                proc = psutil.Process(pid=process["pid"])
+            except psutil.NoSuchProcess:
+                continue
 
-        if proc.name() == ika_process and isAlive:
-            runningIkabotProcessList.append(process)
+            # windows doesn't support the status method
+            isAlive = True if isWindows else proc.status() != "zombie"
 
-    # add new to the list and write to file only if it's given
-    for process in programprocesslist:
-        if process not in runningIkabotProcessList:
-            runningIkabotProcessList.append(process)
+            if proc.name() == ika_process and isAlive:
+                runningIkabotProcessList.append(process)
 
-    # check if all proceses have new status field
-    if len([p for p in runningIkabotProcessList if "status" not in p]) == len(
-        runningIkabotProcessList
-    ) and len(runningIkabotProcessList):
-        runningIkabotProcessList[0]["status"] = "running"
+        # add new to the list and write to file only if it's given
+        for process in programprocesslist:
+            if process not in runningIkabotProcessList:
+                runningIkabotProcessList.append(process)
 
-    # write to file
-    sessionData["processList"] = runningIkabotProcessList
-    session.setSessionData(sessionData)
+        # check if all proceses have new status field
+        if len([p for p in runningIkabotProcessList if "status" not in p]) == len(
+            runningIkabotProcessList
+        ) and len(runningIkabotProcessList):
+            runningIkabotProcessList[0]["status"] = "running"
+
+        # write to file
+        sessionData["processList"] = runningIkabotProcessList
+        session.setSessionData(sessionData)
 
     # normalize process list (all processes must have properties pid, action, date and status)
     normalized_processes = normalizeDicts(runningIkabotProcessList)

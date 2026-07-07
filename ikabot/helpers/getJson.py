@@ -5,6 +5,7 @@ import json
 import re
 import time
 from math import ceil, floor
+from ikabot.helpers.parsing import search_or_raise
 from ikabot.helpers.resources import *
 from ikabot.helpers.varios import decodeUnicodeEscape
 from ikabot.config import *
@@ -235,7 +236,9 @@ def getFreeCitizens(html: str) -> int:
     freeCitizens : int
         an integer representing the amount of free citizens in the given city.
     """
-    freeCitizens = re.search(r'js_GlobalMenu_citizens">(.*?)</span>', html).group(1)
+    freeCitizens = search_or_raise(
+        r'js_GlobalMenu_citizens">(.*?)</span>', html, "free citizens"
+    ).group(1)
     freeCitizens = re.sub(r'\D', '', freeCitizens)
     return int(freeCitizens)
 
@@ -334,7 +337,9 @@ def getIsland(html: str) -> IslandDict:
     island : Island
         this function returns a json parsed Island object.
     """
-    isla = re.search(r'ajax.Responder, (\[\[[\S\s]*?\]\])\)\;', html).group(1)
+    isla = search_or_raise(
+        r'ajax.Responder, (\[\[[\S\s]*?\]\])\)\;', html, "island data"
+    ).group(1)
 
     island: IslandDict = json.loads(isla)[1][1]
 
@@ -386,8 +391,10 @@ def getCity(html: str) -> FullCityDict:
         this function returns a json parsed City object. For more information about this object refer to the github wiki page of Ikabot.
     """
 
-    city = re.search(
-        r'"updateBackgroundData",\s?([\s\S]*?)\],\["updateTemplateData"', html
+    city = search_or_raise(
+        r'"updateBackgroundData",\s?([\s\S]*?)\],\["updateTemplateData"',
+        html,
+        "city data",
     ).group(1)
     city = json.loads(city, strict=False)
 
@@ -500,15 +507,17 @@ def getInventory(session):
     -------
     inventory : list
         a list of dictionaries representing the items in the inventory.
+        Empty list if the inventory could not be parsed (empty inventory
+        or unexpected response).
     """
-    
+
     html = session.get(params = {"view": "inventory"})
 
     # extract inventory json from html
     match = re.search(r'"inventory":\s*(\[\{.*?\}\])', html, re.DOTALL)
 
     if not match:
-        return None
+        return []
 
     inventory = json.loads(match.group(1))
     return inventory
@@ -527,5 +536,7 @@ def getInventoryItem(session, itemId):
     item : json or None
     """
     inventory = getInventory(session)
+    if not inventory:
+        return None
     item = next((i for i in inventory if i.get("itemId") == itemId), None)
     return item
