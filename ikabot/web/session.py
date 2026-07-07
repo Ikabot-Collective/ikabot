@@ -34,6 +34,10 @@ class Session:
         self.padre = True
         self.logged = False
         self.blackbox = None
+        self.locale = "en-GB"
+        self.gf_lang = "en"
+        self.accept_language = "en-GB,en;q=0.9"
+        self.timezone_id = "Europe/London"
         self.logger = getLogger(__name__)
         self.requestHistory = deque(maxlen=5)  # keep last 5 requests in history
         # disable ssl verification warning
@@ -135,7 +139,7 @@ class Session:
                 "Host": "lobby.ikariam.gameforge.com",
                 "User-Agent": self.user_agent,
                 "Accept": "*/*",
-                "Accept-Language": "en-US,en;q=0.5",
+                "Accept-Language": self.accept_language,
                 "Accept-Encoding": "gzip, deflate",
                 "DNT": "1",
                 "Connection": "close",
@@ -185,8 +189,9 @@ class Session:
                 raise ValueError("Manual blackbox payload is missing blackbox")
 
             user_agent = payload.get("user_agent") or payload.get("userAgent")
-            if user_agent:
+            if isinstance(user_agent, str) and user_agent:
                 self.user_agent = user_agent
+
         except json.JSONDecodeError:
             pass
 
@@ -262,7 +267,7 @@ class Session:
                 "Host": "lobby.ikariam.gameforge.com",
                 "User-Agent": self.user_agent,
                 "Accept": "*/*",
-                "Accept-Language": "en-US,en;q=0.5",
+                "Accept-Language": self.accept_language,
                 "Accept-Encoding": "gzip, deflate",
                 "DNT": "1",
                 "Connection": "close",
@@ -288,7 +293,7 @@ class Session:
             self.headers = {
                 "User-Agent": self.user_agent,
                 "Accept": "*/*",
-                "Accept-Language": "en-US,en;q=0.5",
+                "Accept-Language": self.accept_language,
                 "Accept-Encoding": "gzip, deflate",
                 "DNT": "1",
                 "Connection": "close",
@@ -306,7 +311,7 @@ class Session:
             self.headers = {
                 "User-Agent": self.user_agent,
                 "Accept": "*/*",
-                "Accept-Language": "en-US,en;q=0.5",
+                "Accept-Language": self.accept_language,
                 "Accept-Encoding": "gzip, deflate",
                 "Referer": "https://lobby.ikariam.gameforge.com/",
                 "Origin": "https://lobby.ikariam.gameforge.com",
@@ -325,7 +330,7 @@ class Session:
                     "Host": "pixelzirkus.gameforge.com",
                     "User-Agent": self.user_agent,
                     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-                    "Accept-Language": "en-US,en;q=0.5",
+                    "Accept-Language": self.accept_language,
                     "Accept-Encoding": "gzip, deflate",
                     "Content-Type": "application/x-www-form-urlencoded",
                     "Origin": "https://lobby.ikariam.gameforge.com",
@@ -339,7 +344,7 @@ class Session:
                 data = {
                     "product": "ikariam",
                     "server_id": "1",
-                    "language": "en",
+                    "language": self.gf_lang,
                     "location": "VISIT",
                     "replacement_kid": "",
                     "fp_eval_id": __fp_eval_id_1,
@@ -357,7 +362,7 @@ class Session:
                     "Host": "pixelzirkus.gameforge.com",
                     "User-Agent": self.user_agent,
                     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-                    "Accept-Language": "en-US,en;q=0.5",
+                    "Accept-Language": self.accept_language,
                     "Accept-Encoding": "gzip, deflate",
                     "Content-Type": "application/x-www-form-urlencoded",
                     "Origin": "https://lobby.ikariam.gameforge.com",
@@ -371,7 +376,7 @@ class Session:
                 data = {
                     "product": "ikariam",
                     "server_id": "1",
-                    "language": "en",
+                    "language": self.gf_lang,
                     "location": "fp_eval",
                     "fp_eval_id": __fp_eval_id_2,
                     "fingerprint": "2175408712",
@@ -390,7 +395,7 @@ class Session:
             # options req (not really needed)
             self.headers = {
                 "Accept": "*/*",
-                "Accept-Language": "en-US,en;q=0.5",
+                "Accept-Language": self.accept_language,
                 "Accept-Encoding": "gzip, deflate, br",
                 "Access-Control-Request-Headers": "content-type,tnt-installation-id",
                 "Access-Control-Request-Method": "POST",
@@ -409,7 +414,7 @@ class Session:
             # send creds
             self.headers = {
                 "Accept": "*/*",
-                "Accept-Language": "en-US,en;q=0.5",
+                "Accept-Language": self.accept_language,
                 "Accept-Encoding": "gzip, deflate, br",
                 "Access-Control-Request-Headers": "content-type,tnt-installation-id",
                 "Access-Control-Request-Method": "POST",
@@ -427,8 +432,8 @@ class Session:
             data = {
                 "identity": self.mail,
                 "password": self.password,
-                "locale": "en-GB",
-                "gfLang": "en",
+                "locale": self.locale,
+                "gfLang": self.gf_lang,
                 "gameId": platformGameId,
                 "gameEnvironmentId": gameEnvironmentId,
                 "blackbox": self.blackbox,
@@ -458,7 +463,7 @@ class Session:
                 while True:
                     self.headers = {
                         "Accept": "*/*",
-                        "Accept-Language": "en-US,en;q=0.5",
+                        "Accept-Language": self.accept_language,
                         "Accept-Encoding": "gzip, deflate, br",
                         "Access-Control-Request-Headers": "content-type,tnt-installation-id",
                         "Access-Control-Request-Method": "POST",
@@ -476,8 +481,8 @@ class Session:
                     data = {
                             "identity": self.mail,
                             "password": self.password,
-                            "locale": "en-GB",
-                            "gfLang": "en",
+                            "locale": self.locale,
+                            "gfLang": self.gf_lang,
                             "gameId": platformGameId,
                             "gameEnvironmentId": gameEnvironmentId,
                             "blackbox": self.blackbox,
@@ -490,7 +495,7 @@ class Session:
                     self.headers = {
                         "accept": "*/*",
                         "accept-encoding": "gzip, deflate, br",
-                        "accept-language": "en-GB,el;q=0.9",
+                        "accept-language": self.accept_language,
                         "dnt": "1",
                         "origin": "https://lobby.ikariam.gameforge.com",
                         "referer": "https://lobby.ikariam.gameforge.com/",
@@ -591,7 +596,7 @@ class Session:
                     if captcha_sent["status"] == "solved":
                         self.headers = {
                             "Accept": "*/*",
-                            "Accept-Language": "en-US,en;q=0.5",
+                            "Accept-Language": self.accept_language,
                             "Accept-Encoding": "gzip, deflate, br",
                             "Access-Control-Request-Headers": "content-type,tnt-installation-id",
                             "Access-Control-Request-Method": "POST",
@@ -610,8 +615,8 @@ class Session:
                         data = {
                             "identity": self.mail,
                             "password": self.password,
-                            "locale": "en-GB",
-                            "gfLang": "en",
+                            "locale": self.locale,
+                            "gfLang": self.gf_lang,
                             "gameId": platformGameId,
                             "gameEnvironmentId": gameEnvironmentId,
                             "blackbox": self.blackbox,
@@ -686,7 +691,7 @@ class Session:
             "Host": "lobby.ikariam.gameforge.com",
             "User-Agent": self.user_agent,
             "Accept": "application/json",
-            "Accept-Language": "en-US,en;q=0.5",
+            "Accept-Language": self.accept_language,
             "Accept-Encoding": "gzip, deflate",
             "Referer": "https://lobby.ikariam.gameforge.com/es_AR/hub",
             "Authorization": "Bearer {}".format(self.s.cookies["gf-token-production"]),
@@ -703,7 +708,7 @@ class Session:
             "Host": "lobby.ikariam.gameforge.com",
             "User-Agent": self.user_agent,
             "Accept": "application/json",
-            "Accept-Language": "en-US,en;q=0.5",
+            "Accept-Language": self.accept_language,
             "Accept-Encoding": "gzip, deflate",
             "Referer": "https://lobby.ikariam.gameforge.com/es_AR/hub",
             "Authorization": "Bearer {}".format(self.s.cookies["gf-token-production"]),
@@ -784,7 +789,7 @@ class Session:
             "Host": self.host,
             "User-Agent": self.user_agent,
             "Accept": "*/*",
-            "Accept-Language": "en-US,en;q=0.5",
+            "Accept-Language": self.accept_language,
             "Accept-Encoding": "gzip, deflate, br",
             "Referer": "https://{}".format(self.host),
             "X-Requested-With": "XMLHttpRequest",
@@ -842,7 +847,7 @@ class Session:
                 "scheme": "https",
                 "accept": "application/json",
                 "accept-encoding": "gzip, deflate, br",
-                "accept-language": "en-US,en;q=0.9",
+                "accept-language": self.accept_language,
                 "authorization": "Bearer " + self.s.cookies["gf-token-production"],
                 "content-type": "application/json",
                 "origin": "https://lobby.ikariam.gameforge.com",
