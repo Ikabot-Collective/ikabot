@@ -22,9 +22,19 @@ def getNewBlackBoxToken(session):
         blackbox token
     """
     address = getAddress(publicAPIServerDomain) + "/v1/token"
+    params = {
+        "user_agent": session.user_agent,
+        "locale": getattr(session, "locale", "en-GB"),
+        "timezone_id": getattr(session, "timezone_id", "Europe/London"),
+    }
     response = get(
-        address, params={"user_agent": session.user_agent}, verify=do_ssl_verify, timeout=900
+        address, params=params, verify=do_ssl_verify, timeout=900
     )
+    if response.status_code in [400, 422]:
+        fallback_params = {"user_agent": session.user_agent}
+        response = get(
+            address, params=fallback_params, verify=do_ssl_verify, timeout=900
+        )
     assert response.status_code == 200, (
         "API response code is not OK: "
         + str(response.status_code)
