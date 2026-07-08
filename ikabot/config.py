@@ -17,6 +17,17 @@ update_msg = ""
 
 isWindows = os.name == "nt"
 
+# Regional Settings (Environment Variables)
+# If login fails with HTTP 409 (Gameforge rejecting the blackbox token / credentials),
+# these environment variables should be set to match your machine's actual region and timezone:
+# - IKABOT_LOCALE: Client's locale tag (e.g., "es-AR", "es-ES", "de-DE", "en-US", fallback: "en-GB")
+# - IKABOT_GF_LANG: Gameforge lobby language (e.g., "es", "de", "en", fallback: "en")
+# - IKABOT_TIMEZONE_ID: Client's timezone ID (e.g., "America/Argentina/Buenos_Aires", "Europe/Madrid", fallback: "Europe/London")
+
+IKABOT_LOCALE = "en-GB"
+IKABOT_GF_LANG = "en"
+IKABOT_TIMEZONE_ID = "Europe/London"
+
 
 LOGS_DIRECTORY_FILE = os.getenv("temp") + "/ikabot.log" if isWindows else "/tmp/ikabot.log"
 DEFAULT_LOG_LEVEL = 30 # Warning

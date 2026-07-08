@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import os
 import traceback
 
 from requests import get, post
@@ -24,8 +25,8 @@ def getNewBlackBoxToken(session):
     address = getAddress(publicAPIServerDomain) + "/v1/token"
     params = {
         "user_agent": session.user_agent,
-        "locale": getattr(session, "locale", "en-GB"),
-        "timezone_id": getattr(session, "timezone_id", "Europe/London"),
+        "locale": getattr(session, "locale", None) or os.environ.get("IKABOT_LOCALE") or getattr(config, "IKABOT_LOCALE", "en-GB") or "en-GB",
+        "timezone_id": getattr(session, "timezone_id", None) or os.environ.get("IKABOT_TIMEZONE_ID") or getattr(config, "IKABOT_TIMEZONE_ID", "Europe/London") or "Europe/London",
     }
     response = get(
         address, params=params, verify=do_ssl_verify, timeout=900

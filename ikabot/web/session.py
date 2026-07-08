@@ -34,10 +34,10 @@ class Session:
         self.padre = True
         self.logged = False
         self.blackbox = None
-        self.locale = "en-GB"
-        self.gf_lang = "en"
-        self.accept_language = "en-GB,en;q=0.9"
-        self.timezone_id = "Europe/London"
+        self.locale = os.environ.get("IKABOT_LOCALE") or getattr(config, "IKABOT_LOCALE", "en-GB") or "en-GB"
+        self.gf_lang = os.environ.get("IKABOT_GF_LANG") or getattr(config, "IKABOT_GF_LANG", "en") or "en"
+        self.accept_language = f"{self.locale},{self.gf_lang};q=0.9"
+        self.timezone_id = os.environ.get("IKABOT_TIMEZONE_ID") or getattr(config, "IKABOT_TIMEZONE_ID", "Europe/London") or "Europe/London"
         self.logger = getLogger(__name__)
         self.requestHistory = deque(maxlen=5)  # keep last 5 requests in history
         # disable ssl verification warning
@@ -693,7 +693,7 @@ class Session:
             "Accept": "application/json",
             "Accept-Language": self.accept_language,
             "Accept-Encoding": "gzip, deflate",
-            "Referer": "https://lobby.ikariam.gameforge.com/es_AR/hub",
+            "Referer": "https://lobby.ikariam.gameforge.com/{}/hub".format(self.locale.replace('-', '_')),
             "Authorization": "Bearer {}".format(self.s.cookies["gf-token-production"]),
             "DNT": "1",
             "Connection": "close",
@@ -710,7 +710,7 @@ class Session:
             "Accept": "application/json",
             "Accept-Language": self.accept_language,
             "Accept-Encoding": "gzip, deflate",
-            "Referer": "https://lobby.ikariam.gameforge.com/es_AR/hub",
+            "Referer": "https://lobby.ikariam.gameforge.com/{}/hub".format(self.locale.replace('-', '_')),
             "Authorization": "Bearer {}".format(self.s.cookies["gf-token-production"]),
             "DNT": "1",
             "Connection": "close",
@@ -851,7 +851,7 @@ class Session:
                 "authorization": "Bearer " + self.s.cookies["gf-token-production"],
                 "content-type": "application/json",
                 "origin": "https://lobby.ikariam.gameforge.com",
-                "referer": "https://lobby.ikariam.gameforge.com/en_GB/accounts",
+                "referer": "https://lobby.ikariam.gameforge.com/{}/accounts".format(self.locale.replace('-', '_')),
                 "user-agent": self.user_agent,
             }
             self.s.headers.clear()
