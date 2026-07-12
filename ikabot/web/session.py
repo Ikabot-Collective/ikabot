@@ -34,10 +34,10 @@ class Session:
         self.padre = True
         self.logged = False
         self.blackbox = None
-        self.locale = "en-GB"
-        self.gf_lang = "en"
-        self.accept_language = "en-GB,en;q=0.9"
-        self.timezone_id = "Europe/London"
+        self.locale = config.IKABOT_LOCALE
+        self.gf_lang = config.IKABOT_GF_LANG
+        self.accept_language = config.build_accept_language(self.locale, self.gf_lang)
+        self.timezone_id = config.IKABOT_TIMEZONE_ID
         self.logger = getLogger(__name__)
         self.requestHistory = deque(maxlen=5)  # keep last 5 requests in history
         # disable ssl verification warning
@@ -191,6 +191,19 @@ class Session:
             user_agent = payload.get("user_agent") or payload.get("userAgent")
             if isinstance(user_agent, str) and user_agent:
                 self.user_agent = user_agent
+
+            locale = payload.get("locale")
+            if not os.environ.get("IKABOT_LOCALE") and isinstance(locale, str) and locale.strip():
+                self.locale = locale.strip()
+                if not os.environ.get("IKABOT_GF_LANG"):
+                    self.gf_lang = self.locale.split("-")[0]
+                self.accept_language = config.build_accept_language(
+                    self.locale, self.gf_lang
+                )
+
+            timezone_id = payload.get("timezone_id") or payload.get("timezoneId")
+            if not os.environ.get("IKABOT_TIMEZONE_ID") and isinstance(timezone_id, str) and timezone_id.strip():
+                self.timezone_id = timezone_id.strip()
 
         except json.JSONDecodeError:
             pass
@@ -693,7 +706,7 @@ class Session:
             "Accept": "application/json",
             "Accept-Language": self.accept_language,
             "Accept-Encoding": "gzip, deflate",
-            "Referer": "https://lobby.ikariam.gameforge.com/es_AR/hub",
+            "Referer": "https://lobby.ikariam.gameforge.com/{}/hub".format(self.locale.replace('-', '_')),
             "Authorization": "Bearer {}".format(self.s.cookies["gf-token-production"]),
             "DNT": "1",
             "Connection": "close",
@@ -710,7 +723,7 @@ class Session:
             "Accept": "application/json",
             "Accept-Language": self.accept_language,
             "Accept-Encoding": "gzip, deflate",
-            "Referer": "https://lobby.ikariam.gameforge.com/es_AR/hub",
+            "Referer": "https://lobby.ikariam.gameforge.com/{}/hub".format(self.locale.replace('-', '_')),
             "Authorization": "Bearer {}".format(self.s.cookies["gf-token-production"]),
             "DNT": "1",
             "Connection": "close",
@@ -851,7 +864,7 @@ class Session:
                 "authorization": "Bearer " + self.s.cookies["gf-token-production"],
                 "content-type": "application/json",
                 "origin": "https://lobby.ikariam.gameforge.com",
-                "referer": "https://lobby.ikariam.gameforge.com/en_GB/accounts",
+                "referer": "https://lobby.ikariam.gameforge.com/{}/accounts".format(self.locale.replace('-', '_')),
                 "user-agent": self.user_agent,
             }
             self.s.headers.clear()

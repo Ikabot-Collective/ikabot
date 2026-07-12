@@ -24,8 +24,8 @@ def getNewBlackBoxToken(session):
     address = getAddress(publicAPIServerDomain) + "/v1/token"
     params = {
         "user_agent": session.user_agent,
-        "locale": getattr(session, "locale", "en-GB"),
-        "timezone_id": getattr(session, "timezone_id", "Europe/London"),
+        "locale": session.locale,
+        "timezone_id": session.timezone_id,
     }
     response = get(
         address, params=params, verify=do_ssl_verify, timeout=900

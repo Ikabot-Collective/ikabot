@@ -17,6 +17,29 @@ update_msg = ""
 
 isWindows = os.name == "nt"
 
+# Regional Settings
+# These environment variables can be set to match the user's browser region and
+# timezone when Gameforge rejects generated blackbox tokens.
+IKABOT_LOCALE = (os.getenv("IKABOT_LOCALE") or "en-GB").strip() or "en-GB"
+IKABOT_GF_LANG = (
+    os.getenv("IKABOT_GF_LANG") or IKABOT_LOCALE.split("-")[0]
+).strip() or "en"
+IKABOT_TIMEZONE_ID = (
+    os.getenv("IKABOT_TIMEZONE_ID") or "Europe/London"
+).strip() or "Europe/London"
+
+
+def build_accept_language(locale_value=IKABOT_LOCALE, gf_lang=IKABOT_GF_LANG):
+    locale_value = (locale_value or IKABOT_LOCALE).strip() or IKABOT_LOCALE
+    gf_lang = (gf_lang or locale_value.split("-")[0]).strip() or "en"
+
+    parts = [locale_value]
+    if gf_lang != locale_value:
+        parts.append(f"{gf_lang};q=0.9")
+    if gf_lang != "en" and locale_value != "en":
+        parts.append("en;q=0.8")
+    return ",".join(parts)
+
 
 LOGS_DIRECTORY_FILE = os.getenv("temp") + "/ikabot.log" if isWindows else "/tmp/ikabot.log"
 DEFAULT_LOG_LEVEL = 30 # Warning
