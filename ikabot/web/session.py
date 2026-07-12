@@ -34,10 +34,10 @@ class Session:
         self.padre = True
         self.logged = False
         self.blackbox = None
-        self.locale = os.environ.get("IKABOT_LOCALE") or getattr(config, "IKABOT_LOCALE", "en-GB") or "en-GB"
-        self.gf_lang = os.environ.get("IKABOT_GF_LANG") or getattr(config, "IKABOT_GF_LANG", "en") or "en"
-        self.accept_language = f"{self.locale},{self.gf_lang};q=0.9"
-        self.timezone_id = os.environ.get("IKABOT_TIMEZONE_ID") or getattr(config, "IKABOT_TIMEZONE_ID", "Europe/London") or "Europe/London"
+        self.locale = config.IKABOT_LOCALE
+        self.gf_lang = config.IKABOT_GF_LANG
+        self.accept_language = config.build_accept_language(self.locale, self.gf_lang)
+        self.timezone_id = config.IKABOT_TIMEZONE_ID
         self.logger = getLogger(__name__)
         self.requestHistory = deque(maxlen=5)  # keep last 5 requests in history
         # disable ssl verification warning
@@ -191,6 +191,19 @@ class Session:
             user_agent = payload.get("user_agent") or payload.get("userAgent")
             if isinstance(user_agent, str) and user_agent:
                 self.user_agent = user_agent
+
+            locale = payload.get("locale")
+            if not os.environ.get("IKABOT_LOCALE") and isinstance(locale, str) and locale.strip():
+                self.locale = locale.strip()
+                if not os.environ.get("IKABOT_GF_LANG"):
+                    self.gf_lang = self.locale.split("-")[0]
+                self.accept_language = config.build_accept_language(
+                    self.locale, self.gf_lang
+                )
+
+            timezone_id = payload.get("timezone_id") or payload.get("timezoneId")
+            if not os.environ.get("IKABOT_TIMEZONE_ID") and isinstance(timezone_id, str) and timezone_id.strip():
+                self.timezone_id = timezone_id.strip()
 
         except json.JSONDecodeError:
             pass

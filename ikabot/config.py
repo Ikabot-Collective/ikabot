@@ -17,16 +17,28 @@ update_msg = ""
 
 isWindows = os.name == "nt"
 
-# Regional Settings (Environment Variables)
-# If login fails with HTTP 409 (Gameforge rejecting the blackbox token / credentials),
-# these environment variables should be set to match your machine's actual region and timezone:
-# - IKABOT_LOCALE: Client's locale tag (e.g., "es-AR", "es-ES", "de-DE", "en-US", fallback: "en-GB")
-# - IKABOT_GF_LANG: Gameforge lobby language (e.g., "es", "de", "en", fallback: "en")
-# - IKABOT_TIMEZONE_ID: Client's timezone ID (e.g., "America/Argentina/Buenos_Aires", "Europe/Madrid", fallback: "Europe/London")
+# Regional Settings
+# These environment variables can be set to match the user's browser region and
+# timezone when Gameforge rejects generated blackbox tokens.
+IKABOT_LOCALE = (os.getenv("IKABOT_LOCALE") or "en-GB").strip() or "en-GB"
+IKABOT_GF_LANG = (
+    os.getenv("IKABOT_GF_LANG") or IKABOT_LOCALE.split("-")[0]
+).strip() or "en"
+IKABOT_TIMEZONE_ID = (
+    os.getenv("IKABOT_TIMEZONE_ID") or "Europe/London"
+).strip() or "Europe/London"
 
-IKABOT_LOCALE = "en-GB"
-IKABOT_GF_LANG = "en"
-IKABOT_TIMEZONE_ID = "Europe/London"
+
+def build_accept_language(locale_value=IKABOT_LOCALE, gf_lang=IKABOT_GF_LANG):
+    locale_value = (locale_value or IKABOT_LOCALE).strip() or IKABOT_LOCALE
+    gf_lang = (gf_lang or locale_value.split("-")[0]).strip() or "en"
+
+    parts = [locale_value]
+    if gf_lang != locale_value:
+        parts.append(f"{gf_lang};q=0.9")
+    if gf_lang != "en" and locale_value != "en":
+        parts.append("en;q=0.8")
+    return ",".join(parts)
 
 
 LOGS_DIRECTORY_FILE = os.getenv("temp") + "/ikabot.log" if isWindows else "/tmp/ikabot.log"
