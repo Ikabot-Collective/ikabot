@@ -310,6 +310,12 @@ def menu(session, checkUpdate=True):
         if selected > 0:
             selected += 2100
 
+    if selected not in menu_actions and selected != 0:
+        print("Invalid option")
+        enter()
+        menu(session, checkUpdate=False)
+        return
+
     if selected != 0:
         try:
             event = multiprocessing.Event()  # creates a new event
