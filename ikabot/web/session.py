@@ -211,6 +211,19 @@ class Session:
         token = token.strip()
         self.blackbox = token if token.startswith("tra:") else "tra:" + token
 
+    def __ask_manual_blackbox_payload(self):
+        print("You can obtain a manual blackbox payload here:")
+        print("https://ikabot-collective.github.io/IkabotAPI/")
+        print("Paste the full JSON payload so Ikabot can reuse the same browser context.")
+        print("Raw blackbox tokens are still accepted for compatibility.")
+        manual_value = read(
+            msg="Paste the manual blackbox payload or raw blackbox token (e.g. JVq...):"
+        )
+        if not manual_value or not manual_value.strip():
+            return False
+        self.__set_manual_blackbox_token(manual_value)
+        return True
+
     def __load_new_blackbox_token(self):
         try:
             if self.padre:
@@ -233,11 +246,9 @@ class Session:
             print(f'{bcolors.RED}[ERROR]{bcolors.ENDC} Failed to obtain new blackbox token from API: ' + str(e)) # using expired fallback token here so that user can insert cookie manually since blackbox generation failed at this point
             print('Please report this issue to developers on github or the discord server!!')
             print('')
-            print('You will need to obtain the blackbox token MANUALLY:')
-            print('Please obtain the blackbox token at this web location and paste it down below: https://ikabot-collective.github.io/IkabotAPI/')
-            print('If the page provides a JSON payload, paste the full JSON so Ikabot can reuse the same user-agent.')
-            token = read(msg="Paste in the blackbox token or JSON payload (e.g. JVq...):")
-            self.__set_manual_blackbox_token(token)
+            print('You will need to obtain the manual blackbox payload:')
+            if not self.__ask_manual_blackbox_payload():
+                sys.exit('Manual blackbox payload was empty')
             enter()
 
     def __login(self, retries=0):
@@ -647,13 +658,46 @@ class Session:
             if 'token' not in r.text:
                 print("Failed to log in...")
                 print(f"Expected to get token in response to login request but instead got code {r.status_code} and body {r.text}")
-                if r.status_code == 409:
+                print(
+                    "Login failed. This may be caused by invalid credentials, a rejected manual blackbox payload/token, or a Gameforge challenge."
+                )
+                if self.padre:
                     print(
-                        "Login failed. This may be caused by invalid credentials or a rejected blackbox token."
+                        "Before using the cookie fallback, you can try a browser-generated manual blackbox payload."
                     )
-                    print(
-                        "If your credentials work in the browser, the most reliable fallback is to log into the lobby and paste gf-token-production."
-                    )
+                    if self.__ask_manual_blackbox_payload():
+                        print("Retrying lobby login with the manual blackbox payload...")
+                        self.headers = {
+                            "Accept": "*/*",
+                            "Accept-Language": self.accept_language,
+                            "Accept-Encoding": "gzip, deflate, br",
+                            "Access-Control-Request-Headers": "content-type,tnt-installation-id",
+                            "Access-Control-Request-Method": "POST",
+                            "Origin": "https://lobby.ikariam.gameforge.com",
+                            "Referer": "https://lobby.ikariam.gameforge.com/",
+                            "Sec-Fetch-Dest": "empty",
+                            "Sec-Fetch-Mode": "no-cors",
+                            "Sec-Fetch-Site": "same-site",
+                            "TE": "trailers",
+                            "TNT-Installation-Id": "",
+                            "User-Agent": self.user_agent,
+                        }
+                        self.s.headers.clear()
+                        self.s.headers.update(self.headers)
+                        data["locale"] = self.locale
+                        data["gfLang"] = self.gf_lang
+                        data["blackbox"] = self.blackbox
+                        r = self.s.post(
+                            "https://spark-web.gameforge.com/api/v2/authProviders/mauth/sessions", json=data
+                        )
+                        if 'token' not in r.text:
+                            print("Manual blackbox payload login failed.")
+                            print(f"Expected to get token in response to login request but instead got code {r.status_code} and body {r.text}")
+
+            if 'token' not in r.text:
+                print(
+                    "Falling back to gf-token-production. This is the most reliable login fallback."
+                )
                 print(
                     "Log into the lobby via browser and then press CTRL + SHIFT + J to open up the javascript console"
                 )
@@ -894,7 +938,7 @@ class Session:
                     )
                     if resp.status_code in [400, 403, 409]:
                         msg += (
-                            "\nGameforge may have rejected the blackbox token or the current lobby session. "
+                            "\nGameforge may have rejected the blackbox payload/token or the current lobby session. "
                             "Manual browser cookie login is the recommended fallback."
                         )
                     self.logger.error(msg)
