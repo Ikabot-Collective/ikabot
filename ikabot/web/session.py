@@ -34,6 +34,7 @@ class Session:
         self.padre = True
         self.logged = False
         self.blackbox = None
+        self.api_user_agent = None
         self.locale = config.IKABOT_LOCALE
         self.gf_lang = config.IKABOT_GF_LANG
         self.accept_language = config.build_accept_language(self.locale, self.gf_lang)
@@ -229,6 +230,8 @@ class Session:
             if self.padre:
                 print("Obtaining new blackbox token, please wait...")
             blackbox_token = getNewBlackBoxToken(self)
+            if self.api_user_agent:
+                self.user_agent = self.api_user_agent
             assert any(
                 c.isupper() for c in blackbox_token
             ), "The token must contain uppercase letters."
@@ -265,7 +268,9 @@ class Session:
             banner()
 
         #choose one user agent from user_agents list based on provided mail
-        self.user_agent = user_agents[sum(ord(c) for c in self.mail) % len(user_agents)]
+        selected_user_agent = user_agents[sum(ord(c) for c in self.mail) % len(user_agents)]
+        self.api_user_agent = selected_user_agent
+        self.user_agent = selected_user_agent
 
         self.s = requests.Session()
         self.cipher = AESCipher(self.mail, self.password)
