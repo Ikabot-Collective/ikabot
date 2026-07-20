@@ -212,20 +212,56 @@ class Session:
         token = token.strip()
         self.blackbox = token if token.startswith("tra:") else "tra:" + token
 
-    def __ask_manual_blackbox_payload(self):
+    def __ask_manual_blackbox_payload(self, allow_skip=False):
         print("You can obtain a manual blackbox payload here:")
         print("https://ikabot-collective.github.io/IkabotAPI/")
         print("Paste the full JSON payload so Ikabot can reuse the same browser context.")
         print("Raw blackbox tokens are still accepted for compatibility.")
+        if allow_skip:
+            print("Press Enter to skip this step and use gf-token-production instead.")
+        msg = "Paste the manual blackbox payload or raw blackbox token (e.g. JVq...):"
+        if allow_skip:
+            msg = "Paste the manual blackbox payload or raw blackbox token, or press Enter to skip:"
         manual_value = read(
-            msg="Paste the manual blackbox payload or raw blackbox token (e.g. JVq...):"
+            msg=msg
         )
         if not manual_value or not manual_value.strip():
             return False
         self.__set_manual_blackbox_token(manual_value)
         return True
 
-    def __load_new_blackbox_token(self):
+    def __ask_lobby_cookie(self):
+        print(
+            "Falling back to gf-token-production. This is the most reliable login fallback."
+        )
+        print(
+            "Log into the lobby via browser and then press CTRL + SHIFT + J to open up the javascript console"
+        )
+        print(
+            "If you can not open the console using CTRL + SHIFT + J then press F12 to open Dev Tools"
+        )
+        print(
+            'In the dev tools there should be a tab called "Console". Press this tab.'
+        )
+        print("Paste in the script below and press enter")
+        print(
+            "document.cookie.split(';').forEach(x => {if (x.includes('production')) console.log(x)})"
+        )
+
+        auth_token = read(msg="\nEnter gf-token-production manually:").split(
+            "="
+        )[-1]
+        cookie_obj = requests.cookies.create_cookie(
+            domain=".gameforge.com",
+            name="gf-token-production",
+            value=auth_token,
+        )
+        self.s.cookies.set_cookie(cookie_obj)
+        if not self.__test_lobby_cookie():
+            sys.exit("The provided gf-token-production cookie is invalid or expired\n")
+        return auth_token
+
+    def __load_new_blackbox_token(self, allow_lobby_cookie_fallback=False):
         try:
             if self.padre:
                 print("Obtaining new blackbox token, please wait...")
@@ -242,6 +278,7 @@ class Session:
                 c.isdigit() for c in blackbox_token
             ), "The token must contain digits."
             self.blackbox = blackbox_token
+            return True
         except Exception as e:
             self.logger.error("Failed to obtain new blackbox token from API: ", exc_info=True)
             if not self.padre: # only exit if running in a child process because user won't be looking at the console to provide the cookies
@@ -249,10 +286,18 @@ class Session:
             print(f'{bcolors.RED}[ERROR]{bcolors.ENDC} Failed to obtain new blackbox token from API: ' + str(e)) # using expired fallback token here so that user can insert cookie manually since blackbox generation failed at this point
             print('Please report this issue to developers on github or the discord server!!')
             print('')
-            print('You will need to obtain the manual blackbox payload:')
-            if not self.__ask_manual_blackbox_payload():
-                sys.exit('Manual blackbox payload was empty')
-            enter()
+            if allow_lobby_cookie_fallback:
+                print('You can provide a manual blackbox payload or skip to gf-token-production:')
+            else:
+                print('You will need to obtain the manual blackbox payload:')
+            if self.__ask_manual_blackbox_payload(allow_skip=allow_lobby_cookie_fallback):
+                enter()
+                return True
+            if allow_lobby_cookie_fallback:
+                self.__ask_lobby_cookie()
+                self.blackbox = None
+                return False
+            sys.exit('Manual blackbox payload was empty')
 
     def __login(self, retries=0):
         if not self.logged:
@@ -289,340 +334,210 @@ class Session:
         if not self.__test_lobby_cookie():
 
             self.logger.warning("Getting new lobby cookie")
-            self.__load_new_blackbox_token()
+            blackbox_loaded = self.__load_new_blackbox_token(allow_lobby_cookie_fallback=True)
+            if not blackbox_loaded:
+                auth_token = self.s.cookies["gf-token-production"]
+            else:
 
-            # get gameEnvironmentId and platformGameId
-            self.headers = {
-                "Host": "lobby.ikariam.gameforge.com",
-                "User-Agent": self.user_agent,
-                "Accept": "*/*",
-                "Accept-Language": self.accept_language,
-                "Accept-Encoding": "gzip, deflate",
-                "DNT": "1",
-                "Connection": "close",
-                "Referer": "https://lobby.ikariam.gameforge.com/",
-            }
-            self.s.headers.clear()
-            self.s.headers.update(self.headers)
-            r = self.s.get(
-                "https://lobby.ikariam.gameforge.com/config/configuration.js"
-            )
-
-            js = r.text
-            gameEnvironmentId = re.search(r'"gameEnvironmentId":"(.*?)"', js)
-            if gameEnvironmentId is None:
-                sys.exit("gameEnvironmentId not found")
-            gameEnvironmentId = gameEnvironmentId.group(1)
-            platformGameId = re.search(r'"platformGameId":"(.*?)"', js)
-            if platformGameId is None:
-                sys.exit("platformGameId not found")
-            platformGameId = platformGameId.group(1)
-
-            # get __cfduid cookie
-            self.headers = {
-                "User-Agent": self.user_agent,
-                "Accept": "*/*",
-                "Accept-Language": self.accept_language,
-                "Accept-Encoding": "gzip, deflate",
-                "DNT": "1",
-                "Connection": "close",
-                "Referer": "https://lobby.ikariam.gameforge.com/",
-            }
-            self.s.headers.clear()
-            self.s.headers.update(self.headers)
-            r = self.s.get("https://gameforge.com/js/connect.js")
-            html = r.text
-            captcha = re.search(r"Attention Required", html)
-            if captcha is not None:
-                sys.exit("Captcha error!")
-
-            # update __cfduid cookie
-            self.headers = {
-                "User-Agent": self.user_agent,
-                "Accept": "*/*",
-                "Accept-Language": self.accept_language,
-                "Accept-Encoding": "gzip, deflate",
-                "Referer": "https://lobby.ikariam.gameforge.com/",
-                "Origin": "https://lobby.ikariam.gameforge.com",
-                "DNT": "1",
-                "Connection": "close",
-            }
-            self.s.headers.clear()
-            self.s.headers.update(self.headers)
-            r = self.s.get("https://gameforge.com/config")
-
-            __fp_eval_id_1 = self.__fp_eval_id()
-            __fp_eval_id_2 = self.__fp_eval_id()
-            try:
-                # get pc_idt cookie
+                # get gameEnvironmentId and platformGameId
                 self.headers = {
-                    "Host": "pixelzirkus.gameforge.com",
+                    "Host": "lobby.ikariam.gameforge.com",
                     "User-Agent": self.user_agent,
-                    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                    "Accept": "*/*",
                     "Accept-Language": self.accept_language,
                     "Accept-Encoding": "gzip, deflate",
-                    "Content-Type": "application/x-www-form-urlencoded",
-                    "Origin": "https://lobby.ikariam.gameforge.com",
                     "DNT": "1",
                     "Connection": "close",
                     "Referer": "https://lobby.ikariam.gameforge.com/",
-                    "Upgrade-Insecure-Requests": "1",
                 }
                 self.s.headers.clear()
                 self.s.headers.update(self.headers)
-                data = {
-                    "product": "ikariam",
-                    "server_id": "1",
-                    "language": self.gf_lang,
-                    "location": "VISIT",
-                    "replacement_kid": "",
-                    "fp_eval_id": __fp_eval_id_1,
-                    "page": "https%3A%2F%2Flobby.ikariam.gameforge.com%2F",
-                    "referrer": "",
-                    "fingerprint": "2175408712",
-                    "fp_exec_time": "1.00",
-                }
-                r = self.s.post(
-                    "https://pixelzirkus.gameforge.com/do/simple", data=data
+                r = self.s.get(
+                    "https://lobby.ikariam.gameforge.com/config/configuration.js"
                 )
 
-                # update pc_idt cookie
+                js = r.text
+                gameEnvironmentId = re.search(r'"gameEnvironmentId":"(.*?)"', js)
+                if gameEnvironmentId is None:
+                    sys.exit("gameEnvironmentId not found")
+                gameEnvironmentId = gameEnvironmentId.group(1)
+                platformGameId = re.search(r'"platformGameId":"(.*?)"', js)
+                if platformGameId is None:
+                    sys.exit("platformGameId not found")
+                platformGameId = platformGameId.group(1)
+
+                # get __cfduid cookie
                 self.headers = {
-                    "Host": "pixelzirkus.gameforge.com",
                     "User-Agent": self.user_agent,
-                    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                    "Accept": "*/*",
                     "Accept-Language": self.accept_language,
                     "Accept-Encoding": "gzip, deflate",
-                    "Content-Type": "application/x-www-form-urlencoded",
-                    "Origin": "https://lobby.ikariam.gameforge.com",
                     "DNT": "1",
                     "Connection": "close",
                     "Referer": "https://lobby.ikariam.gameforge.com/",
-                    "Upgrade-Insecure-Requests": "1",
                 }
                 self.s.headers.clear()
                 self.s.headers.update(self.headers)
-                data = {
-                    "product": "ikariam",
-                    "server_id": "1",
-                    "language": self.gf_lang,
-                    "location": "fp_eval",
-                    "fp_eval_id": __fp_eval_id_2,
-                    "fingerprint": "2175408712",
-                    "fp2_config_id": "1",
-                    "page": "https%3A%2F%2Flobby.ikariam.gameforge.com%2F",
-                    "referrer": "",
-                    "fp2_value": "921af958be7cf2f76db1e448c8a5d89d",
-                    "fp2_exec_time": "96.00",
+                r = self.s.get("https://gameforge.com/js/connect.js")
+                html = r.text
+                captcha = re.search(r"Attention Required", html)
+                if captcha is not None:
+                    sys.exit("Captcha error!")
+
+                # update __cfduid cookie
+                self.headers = {
+                    "User-Agent": self.user_agent,
+                    "Accept": "*/*",
+                    "Accept-Language": self.accept_language,
+                    "Accept-Encoding": "gzip, deflate",
+                    "Referer": "https://lobby.ikariam.gameforge.com/",
+                    "Origin": "https://lobby.ikariam.gameforge.com",
+                    "DNT": "1",
+                    "Connection": "close",
                 }
-                r = self.s.post(
-                    "https://pixelzirkus.gameforge.com/do/simple", data=data
-                )
-            except Exception:
-                pass  # These cookies are not required and sometimes cause issues for people logging in
+                self.s.headers.clear()
+                self.s.headers.update(self.headers)
+                r = self.s.get("https://gameforge.com/config")
 
-            # options req (not really needed)
-            self.headers = {
-                "Accept": "*/*",
-                "Accept-Language": self.accept_language,
-                "Accept-Encoding": "gzip, deflate, br",
-                "Access-Control-Request-Headers": "content-type,tnt-installation-id",
-                "Access-Control-Request-Method": "POST",
-                "Origin": "https://lobby.ikariam.gameforge.com",
-                "Referer": "https://lobby.ikariam.gameforge.com/",
-                "Sec-Fetch-Dest": "empty",
-                "Sec-Fetch-Mode": "no-cors",
-                "Sec-Fetch-Site": "same-site",
-                "TE": "trailers",
-                "User-Agent": self.user_agent,
-            }
-            self.s.headers.clear()
-            self.s.headers.update(self.headers)
-            r = self.s.options("https://gameforge.com/api/v1/auth/thin/sessions")
-
-            # send creds
-            self.headers = {
-                "Accept": "*/*",
-                "Accept-Language": self.accept_language,
-                "Accept-Encoding": "gzip, deflate, br",
-                "Access-Control-Request-Headers": "content-type,tnt-installation-id",
-                "Access-Control-Request-Method": "POST",
-                "Origin": "https://lobby.ikariam.gameforge.com",
-                "Referer": "https://lobby.ikariam.gameforge.com/",
-                "Sec-Fetch-Dest": "empty",
-                "Sec-Fetch-Mode": "no-cors",
-                "Sec-Fetch-Site": "same-site",
-                "TE": "trailers",
-                "TNT-Installation-Id": "",
-                "User-Agent": self.user_agent,
-            }
-            self.s.headers.clear()
-            self.s.headers.update(self.headers)
-            data = {
-                "identity": self.mail,
-                "password": self.password,
-                "locale": self.locale,
-                "gfLang": self.gf_lang,
-                "gameId": platformGameId,
-                "gameEnvironmentId": gameEnvironmentId,
-                "blackbox": self.blackbox,
-            }
-            r = self.s.post(
-                "https://spark-web.gameforge.com/api/v2/authProviders/mauth/sessions", json=data
-            )
-
-            # MFA / 2FA Check. If the server responds with 409, it means 2FA is required.
-            if r.status_code == 409 and 'OTP_REQUIRED' in r.text:
-                if self.padre:
-                    print("Two-factor authentication (2FA) is required.")
-                    mfa_code = read(msg="Enter your 2FA code: ")
-                else:
-                    self.logger.error("2FA is required, but it cannot be requested in a child process.")
-                    sys.exit("Login failure: 2FA is required in a non-interactive process.")
-
-                # Add the OTP code to the original data and send the request again
-                # to the same endpoint.
-                data['otpCode'] = mfa_code
-
-                r = self.s.post(
-                    "https://spark-web.gameforge.com/api/v2/authProviders/mauth/sessions", json=data
-                )
-
-            if "gf-challenge-id" in r.headers and 'token' not in r.text:
-                while True:
+                __fp_eval_id_1 = self.__fp_eval_id()
+                __fp_eval_id_2 = self.__fp_eval_id()
+                try:
+                    # get pc_idt cookie
                     self.headers = {
-                        "Accept": "*/*",
-                        "Accept-Language": self.accept_language,
-                        "Accept-Encoding": "gzip, deflate, br",
-                        "Access-Control-Request-Headers": "content-type,tnt-installation-id",
-                        "Access-Control-Request-Method": "POST",
-                        "Origin": "https://lobby.ikariam.gameforge.com",
-                        "Referer": "https://lobby.ikariam.gameforge.com/",
-                        "Sec-Fetch-Dest": "empty",
-                        "Sec-Fetch-Mode": "no-cors",
-                        "Sec-Fetch-Site": "same-site",
-                        "TE": "trailers",
-                        "TNT-Installation-Id": "",
+                        "Host": "pixelzirkus.gameforge.com",
                         "User-Agent": self.user_agent,
+                        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                        "Accept-Language": self.accept_language,
+                        "Accept-Encoding": "gzip, deflate",
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "Origin": "https://lobby.ikariam.gameforge.com",
+                        "DNT": "1",
+                        "Connection": "close",
+                        "Referer": "https://lobby.ikariam.gameforge.com/",
+                        "Upgrade-Insecure-Requests": "1",
                     }
                     self.s.headers.clear()
                     self.s.headers.update(self.headers)
                     data = {
-                            "identity": self.mail,
-                            "password": self.password,
-                            "locale": self.locale,
-                            "gfLang": self.gf_lang,
-                            "gameId": platformGameId,
-                            "gameEnvironmentId": gameEnvironmentId,
-                            "blackbox": self.blackbox,
-                        }
+                        "product": "ikariam",
+                        "server_id": "1",
+                        "language": self.gf_lang,
+                        "location": "VISIT",
+                        "replacement_kid": "",
+                        "fp_eval_id": __fp_eval_id_1,
+                        "page": "https%3A%2F%2Flobby.ikariam.gameforge.com%2F",
+                        "referrer": "",
+                        "fingerprint": "2175408712",
+                        "fp_exec_time": "1.00",
+                    }
+                    r = self.s.post(
+                        "https://pixelzirkus.gameforge.com/do/simple", data=data
+                    )
+
+                    # update pc_idt cookie
+                    self.headers = {
+                        "Host": "pixelzirkus.gameforge.com",
+                        "User-Agent": self.user_agent,
+                        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                        "Accept-Language": self.accept_language,
+                        "Accept-Encoding": "gzip, deflate",
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "Origin": "https://lobby.ikariam.gameforge.com",
+                        "DNT": "1",
+                        "Connection": "close",
+                        "Referer": "https://lobby.ikariam.gameforge.com/",
+                        "Upgrade-Insecure-Requests": "1",
+                    }
+                    self.s.headers.clear()
+                    self.s.headers.update(self.headers)
+                    data = {
+                        "product": "ikariam",
+                        "server_id": "1",
+                        "language": self.gf_lang,
+                        "location": "fp_eval",
+                        "fp_eval_id": __fp_eval_id_2,
+                        "fingerprint": "2175408712",
+                        "fp2_config_id": "1",
+                        "page": "https%3A%2F%2Flobby.ikariam.gameforge.com%2F",
+                        "referrer": "",
+                        "fp2_value": "921af958be7cf2f76db1e448c8a5d89d",
+                        "fp2_exec_time": "96.00",
+                    }
+                    r = self.s.post(
+                        "https://pixelzirkus.gameforge.com/do/simple", data=data
+                    )
+                except Exception:
+                    pass  # These cookies are not required and sometimes cause issues for people logging in
+
+                # options req (not really needed)
+                self.headers = {
+                    "Accept": "*/*",
+                    "Accept-Language": self.accept_language,
+                    "Accept-Encoding": "gzip, deflate, br",
+                    "Access-Control-Request-Headers": "content-type,tnt-installation-id",
+                    "Access-Control-Request-Method": "POST",
+                    "Origin": "https://lobby.ikariam.gameforge.com",
+                    "Referer": "https://lobby.ikariam.gameforge.com/",
+                    "Sec-Fetch-Dest": "empty",
+                    "Sec-Fetch-Mode": "no-cors",
+                    "Sec-Fetch-Site": "same-site",
+                    "TE": "trailers",
+                    "User-Agent": self.user_agent,
+                }
+                self.s.headers.clear()
+                self.s.headers.update(self.headers)
+                r = self.s.options("https://gameforge.com/api/v1/auth/thin/sessions")
+
+                # send creds
+                self.headers = {
+                    "Accept": "*/*",
+                    "Accept-Language": self.accept_language,
+                    "Accept-Encoding": "gzip, deflate, br",
+                    "Access-Control-Request-Headers": "content-type,tnt-installation-id",
+                    "Access-Control-Request-Method": "POST",
+                    "Origin": "https://lobby.ikariam.gameforge.com",
+                    "Referer": "https://lobby.ikariam.gameforge.com/",
+                    "Sec-Fetch-Dest": "empty",
+                    "Sec-Fetch-Mode": "no-cors",
+                    "Sec-Fetch-Site": "same-site",
+                    "TE": "trailers",
+                    "TNT-Installation-Id": "",
+                    "User-Agent": self.user_agent,
+                }
+                self.s.headers.clear()
+                self.s.headers.update(self.headers)
+                data = {
+                    "identity": self.mail,
+                    "password": self.password,
+                    "locale": self.locale,
+                    "gfLang": self.gf_lang,
+                    "gameId": platformGameId,
+                    "gameEnvironmentId": gameEnvironmentId,
+                    "blackbox": self.blackbox,
+                }
+                r = self.s.post(
+                    "https://spark-web.gameforge.com/api/v2/authProviders/mauth/sessions", json=data
+                )
+
+                # MFA / 2FA Check. If the server responds with 409, it means 2FA is required.
+                if r.status_code == 409 and 'OTP_REQUIRED' in r.text:
+                    if self.padre:
+                        print("Two-factor authentication (2FA) is required.")
+                        mfa_code = read(msg="Enter your 2FA code: ")
+                    else:
+                        self.logger.error("2FA is required, but it cannot be requested in a child process.")
+                        sys.exit("Login failure: 2FA is required in a non-interactive process.")
+
+                    # Add the OTP code to the original data and send the request again
+                    # to the same endpoint.
+                    data['otpCode'] = mfa_code
+
                     r = self.s.post(
                         "https://spark-web.gameforge.com/api/v2/authProviders/mauth/sessions", json=data
                     )
 
-                    challenge_id = r.headers["gf-challenge-id"].split(";")[0]
-                    self.headers = {
-                        "accept": "*/*",
-                        "accept-encoding": "gzip, deflate, br",
-                        "accept-language": self.accept_language,
-                        "dnt": "1",
-                        "origin": "https://lobby.ikariam.gameforge.com",
-                        "referer": "https://lobby.ikariam.gameforge.com/",
-                        "sec-fetch-dest": "empty",
-                        "sec-fetch-mode": "cors",
-                        "sec-fetch-site": "same-site",
-                        "user-agent": self.user_agent,
-                    }
-                    self.s.headers.clear()
-                    self.s.headers.update(self.headers)
-                    request1 = self.s.get(
-                        "https://challenge.gameforge.com/challenge/{}".format(
-                            challenge_id
-                        )
-                    )
-                    request2 = self.s.get(
-                        "https://image-drop-challenge.gameforge.com/index.js"
-                    )
-                    try:
-                        request3 = self.s.post(
-                            "https://pixelzirkus.gameforge.com/do2/simple"
-                        )
-                    except Exception as e:
-                        pass
-
-                    captcha_time = self.s.get(
-                        "https://image-drop-challenge.gameforge.com/challenge/{}/en-GB".format(
-                            challenge_id
-                        )
-                    ).json()["lastUpdated"]
-                    text_image = self.s.get(
-                        "https://image-drop-challenge.gameforge.com/challenge/{}/en-GB/text?{}".format(
-                            challenge_id, captcha_time
-                        )
-                    ).content
-                    drag_icons = self.s.get(
-                        "https://image-drop-challenge.gameforge.com/challenge/{}/en-GB/drag-icons?{}".format(
-                            challenge_id, captcha_time
-                        )
-                    ).content
-                    drop_target = self.s.get(
-                        "https://image-drop-challenge.gameforge.com/challenge/{}/en-GB/drop-target?{}".format(
-                            challenge_id, captcha_time
-                        )
-                    ).content
-                    data = {}
-                    try:
-                        captcha = break_interactive_captcha(text_image, drag_icons)
-                        data = {"answer": captcha}
-                    except Exception as e:
-                        print(
-                            "The interactive captcha has been presented. Automatic captcha resolution failed because: {}".format(
-                                str(e)
-                            )
-                        )
-                        print("Do you want to solve it via Telegram? (Y/n)")
-                        config.predetermined_input[:] = (
-                            []
-                        )  # Unholy way to clear a ListProxy object
-                        answer = read(values=["y", "Y", "n", "N"], default="y")
-                        if answer.lower() == "n":
-                            sys.exit("Captcha error! (Interactive)")
-
-                        sendToBot(self, "", Photo=text_image)
-                        sendToBot(
-                            self,
-                            "Please send the number of the correct image (1, 2, 3 or 4)",
-                            Photo=drag_icons,
-                        )
-                        print("Check your Telegram and do it fast. The captcha expires quickly")
-                        captcha_time = time.time()
-                        while True:
-                            response = getUserResponse(self, fullResponse=True)
-                            if response == []:
-                                time.sleep(5)
-                                continue
-                            response = response[-1]
-                            if response["date"] < captcha_time:
-                                time.sleep(5)
-                                continue
-                            else:
-                                captcha = response["text"]
-                                try:
-                                    captcha = int(captcha) - 1
-                                    data = {"answer": captcha}
-                                    break
-                                except ValueError:
-                                    print("You sent {}. Please send only a number (1, 2, 3 or 4)".format(captcha))
-                                    time.sleep(5)
-                                    continue
-                            time.sleep(5)
-                    captcha_sent = self.s.post(
-                        "https://image-drop-challenge.gameforge.com/challenge/{}/en-GB".format(
-                            challenge_id
-                        ),
-                        json=data,
-                    ).json()
-                    if captcha_sent["status"] == "solved":
+                if "gf-challenge-id" in r.headers and 'token' not in r.text:
+                    while True:
                         self.headers = {
                             "Accept": "*/*",
                             "Accept-Language": self.accept_language,
@@ -636,108 +551,214 @@ class Session:
                             "Sec-Fetch-Site": "same-site",
                             "TE": "trailers",
                             "TNT-Installation-Id": "",
-                            "Gf-Challenge-Id": challenge_id,
                             "User-Agent": self.user_agent,
                         }
                         self.s.headers.clear()
                         self.s.headers.update(self.headers)
                         data = {
-                            "identity": self.mail,
-                            "password": self.password,
-                            "locale": self.locale,
-                            "gfLang": self.gf_lang,
-                            "gameId": platformGameId,
-                            "gameEnvironmentId": gameEnvironmentId,
-                            "blackbox": self.blackbox,
-                        }
+                                "identity": self.mail,
+                                "password": self.password,
+                                "locale": self.locale,
+                                "gfLang": self.gf_lang,
+                                "gameId": platformGameId,
+                                "gameEnvironmentId": gameEnvironmentId,
+                                "blackbox": self.blackbox,
+                            }
                         r = self.s.post(
                             "https://spark-web.gameforge.com/api/v2/authProviders/mauth/sessions", json=data
                         )
-                        if "gf-challenge-id" in r.headers:
-                            self.logger.error("Failed to solve interactive captcha!")
-                            print("Failed to solve interactive captcha, trying again!")
-                            continue
-                        else:
-                            break
 
-            if 'token' not in r.text:
-                print("Failed to log in...")
-                print(f"Expected to get token in response to login request but instead got code {r.status_code} and body {r.text}")
-                print(
-                    "Login failed. This may be caused by invalid credentials, a rejected manual blackbox payload/token, or a Gameforge challenge."
-                )
-                if self.padre:
-                    print(
-                        "Before using the cookie fallback, you can try a browser-generated manual blackbox payload."
-                    )
-                    if self.__ask_manual_blackbox_payload():
-                        print("Retrying lobby login with the manual blackbox payload...")
+                        challenge_id = r.headers["gf-challenge-id"].split(";")[0]
                         self.headers = {
-                            "Accept": "*/*",
-                            "Accept-Language": self.accept_language,
-                            "Accept-Encoding": "gzip, deflate, br",
-                            "Access-Control-Request-Headers": "content-type,tnt-installation-id",
-                            "Access-Control-Request-Method": "POST",
-                            "Origin": "https://lobby.ikariam.gameforge.com",
-                            "Referer": "https://lobby.ikariam.gameforge.com/",
-                            "Sec-Fetch-Dest": "empty",
-                            "Sec-Fetch-Mode": "no-cors",
-                            "Sec-Fetch-Site": "same-site",
-                            "TE": "trailers",
-                            "TNT-Installation-Id": "",
-                            "User-Agent": self.user_agent,
+                            "accept": "*/*",
+                            "accept-encoding": "gzip, deflate, br",
+                            "accept-language": self.accept_language,
+                            "dnt": "1",
+                            "origin": "https://lobby.ikariam.gameforge.com",
+                            "referer": "https://lobby.ikariam.gameforge.com/",
+                            "sec-fetch-dest": "empty",
+                            "sec-fetch-mode": "cors",
+                            "sec-fetch-site": "same-site",
+                            "user-agent": self.user_agent,
                         }
                         self.s.headers.clear()
                         self.s.headers.update(self.headers)
-                        data["locale"] = self.locale
-                        data["gfLang"] = self.gf_lang
-                        data["blackbox"] = self.blackbox
-                        r = self.s.post(
-                            "https://spark-web.gameforge.com/api/v2/authProviders/mauth/sessions", json=data
+                        request1 = self.s.get(
+                            "https://challenge.gameforge.com/challenge/{}".format(
+                                challenge_id
+                            )
                         )
-                        if 'token' not in r.text:
-                            print("Manual blackbox payload login failed.")
-                            print(f"Expected to get token in response to login request but instead got code {r.status_code} and body {r.text}")
+                        request2 = self.s.get(
+                            "https://image-drop-challenge.gameforge.com/index.js"
+                        )
+                        try:
+                            request3 = self.s.post(
+                                "https://pixelzirkus.gameforge.com/do2/simple"
+                            )
+                        except Exception as e:
+                            pass
 
-            if 'token' not in r.text:
-                print(
-                    "Falling back to gf-token-production. This is the most reliable login fallback."
-                )
-                print(
-                    "Log into the lobby via browser and then press CTRL + SHIFT + J to open up the javascript console"
-                )
-                print(
-                    "If you can not open the console using CTRL + SHIFT + J then press F12 to open Dev Tools"
-                )
-                print(
-                    'In the dev tools there should be a tab called "Console". Press this tab.'
-                )
-                print("Paste in the script below and press enter")
-                print(
-                    "document.cookie.split(';').forEach(x => {if (x.includes('production')) console.log(x)})"
-                )
+                        captcha_time = self.s.get(
+                            "https://image-drop-challenge.gameforge.com/challenge/{}/en-GB".format(
+                                challenge_id
+                            )
+                        ).json()["lastUpdated"]
+                        text_image = self.s.get(
+                            "https://image-drop-challenge.gameforge.com/challenge/{}/en-GB/text?{}".format(
+                                challenge_id, captcha_time
+                            )
+                        ).content
+                        drag_icons = self.s.get(
+                            "https://image-drop-challenge.gameforge.com/challenge/{}/en-GB/drag-icons?{}".format(
+                                challenge_id, captcha_time
+                            )
+                        ).content
+                        drop_target = self.s.get(
+                            "https://image-drop-challenge.gameforge.com/challenge/{}/en-GB/drop-target?{}".format(
+                                challenge_id, captcha_time
+                            )
+                        ).content
+                        data = {}
+                        try:
+                            captcha = break_interactive_captcha(text_image, drag_icons)
+                            data = {"answer": captcha}
+                        except Exception as e:
+                            print(
+                                "The interactive captcha has been presented. Automatic captcha resolution failed because: {}".format(
+                                    str(e)
+                                )
+                            )
+                            print("Do you want to solve it via Telegram? (Y/n)")
+                            config.predetermined_input[:] = (
+                                []
+                            )  # Unholy way to clear a ListProxy object
+                            answer = read(values=["y", "Y", "n", "N"], default="y")
+                            if answer.lower() == "n":
+                                sys.exit("Captcha error! (Interactive)")
 
-                auth_token = read(msg="\nEnter gf-token-production manually:").split(
-                    "="
-                )[-1]
-                cookie_obj = requests.cookies.create_cookie(
-                    domain=".gameforge.com",
-                    name="gf-token-production",
-                    value=auth_token,
-                )
-                self.s.cookies.set_cookie(cookie_obj)
-                if not self.__test_lobby_cookie():
-                    sys.exit("The provided gf-token-production cookie is invalid or expired\n")
-            else:
-                # get the authentication token and set the cookie
-                ses_json = json.loads(r.text, strict=False)
-                auth_token = ses_json["token"]
-                cookie_obj = requests.cookies.create_cookie(
-                    domain=".gameforge.com",
-                    name="gf-token-production",
-                    value=auth_token,
-                )
-                self.s.cookies.set_cookie(cookie_obj)
+                            sendToBot(self, "", Photo=text_image)
+                            sendToBot(
+                                self,
+                                "Please send the number of the correct image (1, 2, 3 or 4)",
+                                Photo=drag_icons,
+                            )
+                            print("Check your Telegram and do it fast. The captcha expires quickly")
+                            captcha_time = time.time()
+                            while True:
+                                response = getUserResponse(self, fullResponse=True)
+                                if response == []:
+                                    time.sleep(5)
+                                    continue
+                                response = response[-1]
+                                if response["date"] < captcha_time:
+                                    time.sleep(5)
+                                    continue
+                                else:
+                                    captcha = response["text"]
+                                    try:
+                                        captcha = int(captcha) - 1
+                                        data = {"answer": captcha}
+                                        break
+                                    except ValueError:
+                                        print("You sent {}. Please send only a number (1, 2, 3 or 4)".format(captcha))
+                                        time.sleep(5)
+                                        continue
+                                time.sleep(5)
+                        captcha_sent = self.s.post(
+                            "https://image-drop-challenge.gameforge.com/challenge/{}/en-GB".format(
+                                challenge_id
+                            ),
+                            json=data,
+                        ).json()
+                        if captcha_sent["status"] == "solved":
+                            self.headers = {
+                                "Accept": "*/*",
+                                "Accept-Language": self.accept_language,
+                                "Accept-Encoding": "gzip, deflate, br",
+                                "Access-Control-Request-Headers": "content-type,tnt-installation-id",
+                                "Access-Control-Request-Method": "POST",
+                                "Origin": "https://lobby.ikariam.gameforge.com",
+                                "Referer": "https://lobby.ikariam.gameforge.com/",
+                                "Sec-Fetch-Dest": "empty",
+                                "Sec-Fetch-Mode": "no-cors",
+                                "Sec-Fetch-Site": "same-site",
+                                "TE": "trailers",
+                                "TNT-Installation-Id": "",
+                                "Gf-Challenge-Id": challenge_id,
+                                "User-Agent": self.user_agent,
+                            }
+                            self.s.headers.clear()
+                            self.s.headers.update(self.headers)
+                            data = {
+                                "identity": self.mail,
+                                "password": self.password,
+                                "locale": self.locale,
+                                "gfLang": self.gf_lang,
+                                "gameId": platformGameId,
+                                "gameEnvironmentId": gameEnvironmentId,
+                                "blackbox": self.blackbox,
+                            }
+                            r = self.s.post(
+                                "https://spark-web.gameforge.com/api/v2/authProviders/mauth/sessions", json=data
+                            )
+                            if "gf-challenge-id" in r.headers:
+                                self.logger.error("Failed to solve interactive captcha!")
+                                print("Failed to solve interactive captcha, trying again!")
+                                continue
+                            else:
+                                break
+
+                if 'token' not in r.text:
+                    print("Failed to log in...")
+                    print(f"Expected to get token in response to login request but instead got code {r.status_code} and body {r.text}")
+                    print(
+                        "Login failed. This may be caused by invalid credentials, a rejected manual blackbox payload/token, or a Gameforge challenge."
+                    )
+                    if self.padre:
+                        print(
+                            "Before using the cookie fallback, you can try a browser-generated manual blackbox payload."
+                        )
+                        if self.__ask_manual_blackbox_payload(allow_skip=True):
+                            print("Retrying lobby login with the manual blackbox payload...")
+                            self.headers = {
+                                "Accept": "*/*",
+                                "Accept-Language": self.accept_language,
+                                "Accept-Encoding": "gzip, deflate, br",
+                                "Access-Control-Request-Headers": "content-type,tnt-installation-id",
+                                "Access-Control-Request-Method": "POST",
+                                "Origin": "https://lobby.ikariam.gameforge.com",
+                                "Referer": "https://lobby.ikariam.gameforge.com/",
+                                "Sec-Fetch-Dest": "empty",
+                                "Sec-Fetch-Mode": "no-cors",
+                                "Sec-Fetch-Site": "same-site",
+                                "TE": "trailers",
+                                "TNT-Installation-Id": "",
+                                "User-Agent": self.user_agent,
+                            }
+                            self.s.headers.clear()
+                            self.s.headers.update(self.headers)
+                            data["locale"] = self.locale
+                            data["gfLang"] = self.gf_lang
+                            data["blackbox"] = self.blackbox
+                            r = self.s.post(
+                                "https://spark-web.gameforge.com/api/v2/authProviders/mauth/sessions", json=data
+                            )
+                            if 'token' not in r.text:
+                                print("Manual blackbox payload login failed.")
+                                print(f"Expected to get token in response to login request but instead got code {r.status_code} and body {r.text}")
+
+                if 'token' not in r.text:
+                    auth_token = self.__ask_lobby_cookie()
+                else:
+                    # get the authentication token and set the cookie
+                    ses_json = json.loads(r.text, strict=False)
+                    auth_token = ses_json["token"]
+                    cookie_obj = requests.cookies.create_cookie(
+                        domain=".gameforge.com",
+                        name="gf-token-production",
+                        value=auth_token,
+                    )
+                    self.s.cookies.set_cookie(cookie_obj)
 
             # set the lobby cookie in shared for all world server accounts
 
@@ -816,7 +837,7 @@ class Session:
                     ][0]
                     try: lastlogin =  lastloginTimetoString(account["lastLogin"])
                     except: lastlogin = 'Unknown'
-                    
+
                     i += 1
                     pad = " " * (max_name - len(account["name"]))
                     print(
@@ -1195,7 +1216,7 @@ class Session:
                     location = response.headers.get('Location', '')
                     if 'lobby.ikariam.gameforge.com' in location:
                         raise AssertionError("Redirect to lobby detected")
-                
+
                 # handle 404 processes
                 if response.status_code == 404:
                     # Check if the 404 is coming from the actual Ikariam host
@@ -1315,7 +1336,7 @@ class Session:
                     location = response.headers.get('Location', '')
                     if 'lobby.ikariam.gameforge.com' in location:
                         raise AssertionError("Redirect to lobby detected")
-                
+
                 # handle 404 processes
                 if response.status_code == 404:
                     # If the POST was to Ikariam and failed, it's a session issue
@@ -1351,7 +1372,7 @@ class Session:
                     self.dev_gf_token = cookies.get("gf-token-production")
                 except Exception:
                     pass
-                    
+
                 return resp if not fullResponse else response
             except AssertionError:
                 self.__sessionExpired()
