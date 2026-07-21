@@ -46,7 +46,8 @@ from ikabot.function.vacationMode import vacationMode
 from ikabot.function.webServer import webServer
 from ikabot.function.loadCustomModule import loadCustomModule
 from ikabot.function.activateShrine import activateShrine
-from ikabot.helpers.botComm import telegramDataIsValid, updateTelegramData
+from ikabot.helpers.botComm import telegramDataIsValid, updateTelegramData, discordDataIsValid, updateDiscordData
+from ikabot.function.testDiscordBot import testDiscordBot
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.process import updateProcessList
@@ -149,14 +150,16 @@ def menu(session, checkUpdate=True):
         2001: searchForIslandSpaces,
         2002: dumpWorld,
         2101: proxyConf,
-        2102: updateTelegramData,
         2103: killTasks,
         2104: decaptchaConf,
         2105: logs,
-        2106: testTelegramBot,
-        2107: importExportCookie,
-        2108: loadCustomModule,
-        2109: developer,
+        2106: importExportCookie,
+        2107: loadCustomModule,
+        2108: developer,
+        210211: updateTelegramData,
+        210212: testTelegramBot,
+        210221: updateDiscordData,
+        210222: testDiscordBot,
         22: consolidateResources,
         2301: modifyProduction,
         2302: modifyAcademyWorkers,
@@ -291,24 +294,65 @@ def menu(session, checkUpdate=True):
         banner()
         print("(0) Back")
         print("(1) Configure Proxy")
-        if telegramDataIsValid(session):
-            print("(2) Change the Telegram data")
-        else:
-            print("(2) Enter the Telegram data")
+        print("(2) Notifications")
         print("(3) Kill tasks")
         print("(4) Configure captcha resolver")
         print("(5) Logs")
-        print("(6) Message Telegram Bot")
-        print("(7) Import / Export cookie")
-        print("(8) Load custom ikabot module")
-        print("(9) Developer Data")
+        print("(6) Import / Export cookie")
+        print("(7) Load custom ikabot module")
+        print("(8) Developer Data")
 
-        selected = read(min=0, max=9, digit=True)
+        selected = read(min=0, max=8, digit=True)
         if selected == 0:
             menu(session)
             return
         if selected > 0:
             selected += 2100
+
+    if selected == 2102:
+        banner()
+        print("(0) Back")
+        print("(1) Telegram")
+        print("(2) Discord")
+
+        selected = read(min=0, max=2, digit=True)
+        if selected == 0:
+            menu(session)
+            return
+        if selected > 0:
+            selected += 21020
+
+    if selected == 21021:
+        banner()
+        print("(0) Back")
+        if telegramDataIsValid(session):
+            print("(1) Change the Telegram data")
+        else:
+            print("(1) Enter the Telegram data")
+        print("(2) Test Telegram Bot")
+
+        selected = read(min=0, max=2, digit=True)
+        if selected == 0:
+            menu(session)
+            return
+        if selected > 0:
+            selected += 210210
+
+    if selected == 21022:
+        banner()
+        print("(0) Back")
+        if discordDataIsValid(session):
+            print("(1) Change the Discord webhook")
+        else:
+            print("(1) Enter the Discord webhook")
+        print("(2) Test Discord Bot")
+
+        selected = read(min=0, max=2, digit=True)
+        if selected == 0:
+            menu(session)
+            return
+        if selected > 0:
+            selected += 210220
 
     if selected not in menu_actions and selected != 0:
         print("Invalid option")
