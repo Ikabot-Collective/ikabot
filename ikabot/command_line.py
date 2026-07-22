@@ -28,7 +28,7 @@ from ikabot.function.donationBot import donationBot
 from ikabot.function.dumpWorld import dumpWorld
 from ikabot.function.getStatus import getStatus
 from ikabot.function.importExportCookie import importExportCookie
-from ikabot.function.Research import research
+from ikabot.function.research import research
 from ikabot.function.consolidateResources import consolidateResources
 from ikabot.function.killTasks import killTasks
 from ikabot.function.loginDaily import loginDaily
