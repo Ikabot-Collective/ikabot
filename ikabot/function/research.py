@@ -109,130 +109,137 @@ def research(session, event, stdin_fd, predetermined_input):
     sys.stdin = os.fdopen(stdin_fd)
     config.predetermined_input = predetermined_input
     try:
-        banner()
-
-        print("\nSelect an option:")
-        print("1) Study")
-        print("2) Conduct experiment")
-        print("3) Conduct automatically")
-        option = read(min=1, max=3)
-
-        if option == 1:
-            studies = get_studies(session)
-            keys = list(studies.keys())
-            num_studies = len(
-                [
-                    key
-                    for key in keys
-                    if "js_researchAdvisorChangeResearchTypeTxt" in key
-                ]
-            )
-
-            available = []
-            for num_study in range(num_studies):
-                if "js_researchAdvisorProgressTxt{}".format(num_study) in studies:
-                    available.append(num_study)
-
-            if len(available) == 0:
-                print("There are no available studies.")
-                enter()
-                event.set()
-                return
-
-            print("Which one do you wish to study?")
-            print("0) None")
-            for index, num_study in enumerate(available):
-                print(
-                    "{:d}) {}".format(
-                        index + 1,
-                        studies[
-                            "js_researchAdvisorNextResearchName{}".format(num_study)
-                        ],
-                    )
-                )
-            choice = read(min=0, max=len(available))
-
-            if choice == 0:
-                event.set()
-                return
-
-            study(session, studies, available[choice - 1])
-            print("Done.")
-            enter()
-            event.set()
-        else:
-            if option == 3:
-                max_experiments = 9999999
-                automatic = True
-            else:
-                automatic = False
-            # Experiment
-            experiments = {}
-            total_glass = 0
-            found_academy = -1
-
-            # while (total_glass < 300000 or found_academy < 0):
+        while True:
             banner()
-            print("Pick city: ")
-            city = chooseCity(session)
-            total_glass = int(city["availableResources"][3])
 
-            # Check if enough glass
-            if automatic is False:
-                if total_glass < 300000:
-                    print(
-                        f"Not enough glass ({addThousandSeparator(total_glass)}), try another city. Min=300k"
-                    )
-                    time.sleep(2)
-                    enter()
-                    event.set()
-                    return
+            print("\nSelect an option:")
+            print("0) Back")
+            print("1) Study")
+            print("2) Conduct experiment")
+            print("3) Conduct automatically")
+            option = read(min=0, max=3)
 
-            # Search for Academy
-            for building in city["position"]:
-                if building["building"] == "academy":
-                    found_academy = building["position"]
-
-            if found_academy < 0:
-                print(f"No academy in this town, pick another one")
-                time.sleep(2)
-                enter()
+            if option == 0:
                 event.set()
                 return
 
-            if automatic is False:
-                max_experiments = total_glass // 300000
-                automatic = False
-                banner()
-                print(f"How many experiments? Min=1, Max={max_experiments}")
-                choice = read(min=1, max=max_experiments)
+            if option == 1:
+                try:
+                    studies = get_studies(session)
+                    keys = list(studies.keys())
+                    num_studies = len(
+                        [
+                            key
+                            for key in keys
+                            if "js_researchAdvisorChangeResearchTypeTxt" in key
+                        ]
+                    )
 
-            if automatic is True:
-                choice = 999999
+                    available = []
+                    for num_study in range(num_studies):
+                        if "js_researchAdvisorProgressTxt{}".format(num_study) in studies:
+                            available.append(num_study)
 
-            # Build experiments dict
-            experiments["cityID"] = city["id"]
-            experiments["cityName"] = city["name"]
-            experiments["pos"] = found_academy
-            experiments["qty"] = choice
+                    if len(available) == 0:
+                        print("There are no available studies.")
+                        enter()
+                        continue
 
-            # Process
-            set_child_mode(session)
-            event.set()
+                    print("Which one do you wish to study?")
+                    print("0) None")
+                    for index, num_study in enumerate(available):
+                        print(
+                            "{:d}) {}".format(
+                                index + 1,
+                                studies[
+                                    "js_researchAdvisorNextResearchName{}".format(num_study)
+                                ],
+                            )
+                        )
+                    choice = read(min=0, max=len(available))
 
-            if automatic is False:
-                info = f"Process: Experiments\n\nWill excecute {choice} times every 4h"
+                    if choice == 0:
+                        continue
+
+                    study(session, studies, available[choice - 1])
+                    print("Done.")
+                    enter()
+                except KeyboardInterrupt:
+                    continue
             else:
-                info = f"Process: Experiments\n\nWill excecute every 4h"
+                if option == 3:
+                    max_experiments = 9999999
+                    automatic = True
+                else:
+                    automatic = False
+                # Experiment
+                experiments = {}
+                found_academy = -1
 
-            try:
-                sendToBot(session, info)
-                experiment(session, experiments, automatic)
-            except Exception as e:
-                error_msg = f"Error in:\n{info}\nCause:\n{traceback.format_exc()}"
-                sendToBot(session, error_msg)
-            finally:
-                session.logout()
+                try:
+                    while True:
+                        banner()
+                        print("Pick city: (Ctrl+C to go back)")
+                        city = chooseCity(session)
+
+                        # Search for Academy first
+                        found_academy = -1
+                        for building in city["position"]:
+                            if building["building"] == "academy":
+                                found_academy = building["position"]
+                                break
+
+                        if found_academy < 0:
+                            print(f"No academy found in {city['name']}, try another city.")
+                            enter()
+                            continue
+
+                        # Check crystal (only manual mode)
+                        if automatic is False:
+                            total_glass = int(city["availableResources"][3])
+                            if total_glass < 300000:
+                                print(f"Not enough crystal in {city['name']} ({addThousandSeparator(total_glass)}), min=300k. Try another city.")
+                                enter()
+                                continue
+
+                        break  # City valid, exit loop
+
+                    if automatic is False:
+                        max_experiments = total_glass // 300000
+                        automatic = False
+                        banner()
+                        print(f"How many experiments? Min=1, Max={max_experiments}")
+                        choice = read(min=1, max=max_experiments)
+
+                    if automatic is True:
+                        choice = 999999
+
+                    # Build experiments dict
+                    experiments["cityID"] = city["id"]
+                    experiments["cityName"] = city["name"]
+                    experiments["pos"] = found_academy
+                    experiments["qty"] = choice
+
+                except KeyboardInterrupt:
+                    continue
+
+                # Process
+                set_child_mode(session)
+                event.set()
+
+                if automatic is False:
+                    info = f"Process: Experiments\n\nWill excecute {choice} times every 4h"
+                else:
+                    info = f"Process: Experiments\n\nWill excecute every 4h"
+
+                try:
+                    sendToBot(session, info)
+                    experiment(session, experiments, automatic)
+                except Exception as e:
+                    error_msg = f"Error in:\n{info}\nCause:\n{traceback.format_exc()}"
+                    sendToBot(session, error_msg)
+                finally:
+                    session.logout()
 
     except KeyboardInterrupt:
         event.set()
