@@ -282,7 +282,7 @@ def research(session, event, stdin_fd, predetermined_input):
                             for idx, ac in enumerate(academy_cities, start=1):
                                 print(f"[{idx}] {ac['cityName']}")
                             print("\nEnter numbers separated by space (e.g. 1 3) or 'all':")
-                            sel = read().split()
+                            sel = read().strip().lower().split()
                             if "all" in sel:
                                 selected_cities = academy_cities
                             else:
