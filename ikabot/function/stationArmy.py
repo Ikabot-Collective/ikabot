@@ -45,7 +45,7 @@ def calculateTotals(tooltips, values):
     desc_value_dict = {}
 
     for i, (tooltip, value) in enumerate(zip(tooltips, values)):
-        value = value.replace(",", "")
+        value = value.replace(".", "").replace(",", "").strip()
         is_digit = value.isdigit()
         int_value = int(value) if is_digit else 0
 
