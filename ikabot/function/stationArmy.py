@@ -33,7 +33,7 @@ def getCityMilitaryData(session, city_id):
 
 
 def extractTooltipsAndValues(data):
-    tooltips = re.findall(r'<div class="tooltip"[^>]*>(.*?)</div>', data)
+    tooltips =  re.findall(r'<div[^>]*class="[^"]*tooltip[^"]*"[^>]*>(.*?)</div>', data)
     values = re.findall(r"<td>\s*([^<]+)\s*</td>", data)
     return tooltips, values
 
