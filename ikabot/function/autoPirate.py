@@ -1,6 +1,8 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import base64
+import json
 import re
 import sys
 import time
@@ -22,6 +24,43 @@ try:
     LOCAL_DECAPTCHA = True
 except Exception:
     LOCAL_DECAPTCHA = False
+
+
+def extract_captcha_image(html):
+    """Extract the pirates captcha PNG bytes from the capture response.
+
+    The captcha image is now embedded by the game as a base64 data URI
+    (js_captchaImage.src) inside the JSON response of the capture request,
+    instead of being served on a separate createCaptcha endpoint.
+    """
+    if not isinstance(html, str):
+        return None
+
+    # Prefer parsing the JSON response, which unescapes everything for us.
+    try:
+        data = json.loads(html)
+    except Exception:
+        data = None
+    if isinstance(data, list):
+        for command, payload in data:
+            if command == "updateTemplateData" and isinstance(payload, dict):
+                image = payload.get("js_captchaImage")
+                if isinstance(image, dict) and isinstance(image.get("src"), str):
+                    match = re.search(
+                        r"data:image/png;base64,([A-Za-z0-9+/=]+)", image["src"]
+                    )
+                    if match:
+                        return base64.b64decode(match.group(1))
+
+    # Fallback: parse the base64 straight out of the raw (JSON-escaped) html.
+    match = re.search(r"base64,([A-Za-z0-9+/=\\\\]+)", html)
+    if match:
+        b64 = match.group(1).replace("\\/", "/").replace("\n", "").replace("\r", "")
+        try:
+            return base64.b64decode(b64)
+        except Exception:
+            return None
+    return None
 
 
 def autoPirate(session, event, stdin_fd, predetermined_input):
@@ -212,7 +251,9 @@ def autoPirate(session, event, stdin_fd, predetermined_input):
             )
             html = session.post(url)
 
-            if "function=createCaptcha" in html:
+            if (
+                "function=createCaptcha" in html or "js_captchaImage" in html
+            ):
                 try:
                     for i in range(20):
                         session.setStatus("Resolving captcha " + str(i) + "/20")
@@ -220,9 +261,12 @@ def autoPirate(session, event, stdin_fd, predetermined_input):
                             msg = "Failed to resolve captcha too many times, autoPirate has been terminated."
                             sendToBot(session, msg)
                             raise Exception("Failed to resolve captcha too many times")
-                        picture = session.get(
-                            "action=Options&function=createCaptcha", fullResponse=True
-                        ).content
+                        picture = extract_captcha_image(html)
+                        if picture is None:
+                            picture = session.get(
+                                "action=Options&function=createCaptcha",
+                                fullResponse=True,
+                            ).content
                         captcha = resolveCaptcha(session, picture)
                         session.setStatus("Got captcha: " + captcha)
                         if captcha == "Error":
