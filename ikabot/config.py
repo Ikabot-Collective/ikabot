@@ -17,6 +17,10 @@ update_msg = ""
 
 isWindows = os.name == "nt"
 
+# Multiprocessing configuration for pure-Python local decaptcha
+# Set to False if your environment struggles with Python multiprocessing
+USE_MULTIPROCESSING_DECAPTCHA = True
+
 # Regional Settings
 # These environment variables can be set to match the user's browser region and
 # timezone when Gameforge rejects generated blackbox tokens.

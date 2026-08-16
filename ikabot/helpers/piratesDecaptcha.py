@@ -3,28 +3,38 @@ import sys
 
 class SuppressStderr:
     def __enter__(self):
-        self._devnull = os.open(os.devnull, os.O_WRONLY)
-        self._old_stderr = os.dup(2)
-        os.dup2(self._devnull, 2)
+        self._devnull = None
+        self._old_stderr = None
+        try:
+            self._devnull = os.open(os.devnull, os.O_WRONLY)
+            self._old_stderr = os.dup(2)
+            os.dup2(self._devnull, 2)
+        except Exception:
+            # Fallback for Pyodide, Windows GUI (pythonw), Jupyter, or environments without true fd 2
+            if self._devnull is not None:
+                try:
+                    os.close(self._devnull)
+                except Exception:
+                    pass
+                self._devnull = None
+
     def __exit__(self, *args):
-        os.dup2(self._old_stderr, 2)
-        os.close(self._old_stderr)
-        os.close(self._devnull)
+        if self._old_stderr is not None:
+            try:
+                os.dup2(self._old_stderr, 2)
+                os.close(self._old_stderr)
+            except Exception:
+                pass
+        if self._devnull is not None:
+            try:
+                os.close(self._devnull)
+            except Exception:
+                pass
 
 import struct
 import zlib
 import io
 import requests
-
-with SuppressStderr():
-    try:
-        from onnxruntime_inference_collection import InferenceSession # NOTE: This only works if you have the onnxruntime_pybind11_state.pyd file for win
-    except:                                                           # or onnxruntime_pybind11_state.cpython-310-x86_64-linux-gnu.so for linux
-        try:
-            from onnxruntime import InferenceSession
-        except:
-            print('ERROR: COULD NOT FIND ONNXRUNTIME INFERENCE SESSION!')
-            raise
 
 if os.name == 'nt':
     _temp = os.getenv('temp') or os.getenv('TMP') or os.getenv('TEMP') or '.'
@@ -39,6 +49,12 @@ def _load_model():
     global session
     if session is not None:
         return session
+
+    with SuppressStderr():
+        try:
+            from onnxruntime_inference_collection import InferenceSession # NOTE: This only works if you have the onnxruntime_pybind11_state.pyd file for win
+        except Exception:                                                 # or onnxruntime_pybind11_state.cpython-310-x86_64-linux-gnu.so for linux
+            from onnxruntime import InferenceSession
 
     if os.path.isfile(_model_cache_path):
         try:
@@ -263,6 +279,12 @@ def _ctc_greedy_decode(logits_tbc):
 
 def get_captcha_string(image_bytes):
     """Return the captcha text for a given image."""
+    try:
+        from ikabot.helpers.piratesDecaptchaPure import get_captcha_string as pure_solve
+        return pure_solve(image_bytes)
+    except Exception:
+        pass
+
     width, height, rgb_pixels = read_png(image_bytes)
 
     assert height <= 100 and width <= 500, "Image is too large"
