@@ -39,6 +39,7 @@ from ikabot.function.sellResources import sellResources
 from ikabot.function.sendResources import sendResources
 from ikabot.function.shipMovements import shipMovements
 from ikabot.function.stationArmy import stationArmy
+from ikabot.function.viewArmy import viewArmy
 from ikabot.function.testTelegramBot import testTelegramBot
 from ikabot.function.trainArmy import trainArmy
 from ikabot.function.update import update
@@ -136,8 +137,9 @@ def menu(session, checkUpdate=True):
         10: vacationMode,
         11: activateMiracle,
         1201: trainArmy,
-        1202: stationArmy,
-        1203: UpgradeUnits,
+         1202: stationArmy,
+         1203: UpgradeUnits,
+         1204: viewArmy,
         13: shipMovements,
         14: constructBuilding,
         15: update,
@@ -254,11 +256,14 @@ def menu(session, checkUpdate=True):
         print("(1) Train Army")
         print("(2) Send Troops/Ships")
         print("(3) Upgrade Army")
-        selected = read(min=0, max=3, digit=True)
+        print("(4) View Army")
+        selected = read(min=0, max=4, digit=True)
         if selected == 0:
             menu(session)
             return
-        if selected > 0:
+        if selected == 4:
+            selected = 1204
+        elif selected > 0:
             selected += 1200
 
     if selected == 23:
