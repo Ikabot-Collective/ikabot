@@ -9,11 +9,78 @@ import random
 import re
 import sys
 import time
-from requests import get
+from requests import get, post as requests_post
 import ikabot.config as config
 from ikabot.config import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import read
+
+
+def sendToDiscord(session, msg):
+    """Send a message to a Discord webhook if one is configured.
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    msg : str
+    """
+    sessionData = session.getSessionData()
+    try:
+        webhook_url = sessionData["shared"]["discord"]["webhookUrl"]
+    except KeyError:
+        return
+    if not webhook_url:
+        return
+    try:
+        requests_post(webhook_url, json={"content": msg})
+    except Exception:
+        pass
+
+
+def discordDataIsValid(session):
+    """Return True if a Discord webhook URL is stored in session data.
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    """
+    sessionData = session.getSessionData()
+    try:
+        return len(sessionData["shared"]["discord"]["webhookUrl"]) > 0
+    except KeyError:
+        return False
+
+
+def updateDiscordData(session, event=None, stdin_fd=None, predetermined_input=[]):
+    """Ask the user for a Discord webhook URL and save it to session data.
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    event : multiprocessing.Event
+    stdin_fd : int
+    predetermined_input : multiprocessing.managers.SyncManager.list
+    """
+    if event is not None and stdin_fd is not None:
+        sys.stdin = os.fdopen(stdin_fd)
+    config.predetermined_input = predetermined_input
+    banner()
+    print("To create a Discord webhook:")
+    print("1. Open your Discord server settings > Integrations > Webhooks")
+    print("2. Click 'New Webhook', choose a channel, and copy the webhook URL\n")
+    webhook_url = read(msg="Webhook URL: ").strip()
+    if not webhook_url:
+        if event is not None:
+            event.set()
+        return False
+    discord_data = {"discord": {"webhookUrl": webhook_url}}
+    session.setSessionData(discord_data, shared=True)
+    try:
+        requests_post(webhook_url, json={"content": "Discord notifications successfully configured for ikabot."})
+        print("\nA test message was sent to your Discord channel.")
+    except Exception:
+        print("\nWebhook URL saved, but the test message could not be sent. Please verify the URL.")
+    enter()
+    if event is not None:
+        event.set()
+    return True
 
 
 def sendToBotDebug(session, msg, debugON):
@@ -46,6 +113,8 @@ def sendToBot(session, msg, Token=False, Photo=None):
     """
 
     logger.warning(f"MESSAGE TO TG BOT: {msg}", exc_info=True)
+
+    sendToDiscord(session, msg)
 
     if checkTelegramData(session) is False:
         logger.error("Tried to message TG bot without correct tg data!", exc_info=True)
