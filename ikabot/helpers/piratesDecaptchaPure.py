@@ -165,6 +165,7 @@ def _find_weights_file():
     candidates = [
         Path(__file__).resolve().parents[2] / "assets" / "local_purepython_decaptcha_weights.bin",
         Path(__file__).resolve().parents[1] / "assets" / "local_purepython_decaptcha_weights.bin",
+        Path(__file__).resolve().parent / "assets" / "local_purepython_decaptcha_weights.bin",
         Path(__file__).resolve().parent / "local_purepython_decaptcha_weights.bin",
         Path("assets/local_purepython_decaptcha_weights.bin"),
         Path("local_purepython_decaptcha_weights.bin"),
