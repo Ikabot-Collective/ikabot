@@ -912,4 +912,44 @@ def preprocess_image(image_bytes):
         sy = (dy + 0.5) * y_ratio - 0.5
         y0 = max(0, int(sy))
         y1 = min(y0 + 1, height - 1)
-        wy = m
+        wy = max(0.0, sy - y0)
+        y_coords.append((y0 * width, y1 * width, wy, 1.0 - wy))
+
+    total_pixels = target_h * target_w
+    r_flat = [0.0] * total_pixels
+    g_flat = [0.0] * total_pixels
+    b_flat = [0.0] * total_pixels
+
+    idx = 0
+    for dy in range(target_h):
+        y0_len, y1_len, wy, wy_inv = y_coords[dy]
+        for dx in range(target_w):
+            x0, x1, wx, wx_inv = x_coords[dx]
+            
+            w00 = wx_inv * wy_inv
+            w01 = wx * wy_inv
+            w10 = wx_inv * wy
+            w11 = wx * wy
+            
+            p00 = rgb_pixels[y0_len + x0]
+            p01 = rgb_pixels[y0_len + x1]
+            p10 = rgb_pixels[y1_len + x0]
+            p11 = rgb_pixels[y1_len + x1]
+            
+            r = p00[0]*w00 + p01[0]*w01 + p10[0]*w10 + p11[0]*w11
+            g = p00[1]*w00 + p01[1]*w01 + p10[1]*w10 + p11[1]*w11
+            b = p00[2]*w00 + p01[2]*w01 + p10[2]*w10 + p11[2]*w11
+            
+            r_flat[idx] = (r / 127.5) - 1.0
+            g_flat[idx] = (g / 127.5) - 1.0
+            b_flat[idx] = (b / 127.5) - 1.0
+            idx += 1
+
+    return r_flat + g_flat + b_flat
+
+
+def get_captcha_string(image_bytes):
+    """Main entrypoint required by piratesDecaptcha.py."""
+    weights = get_cached_weights()
+    x_flat = preprocess_image(image_bytes)
+    return predict(x_flat, weights).upper()

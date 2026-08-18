@@ -323,7 +323,10 @@ def resolveCaptcha(session, picture):
         or session_data["decaptcha"]["name"] == "default"
     ):
         if LOCAL_DECAPTCHA:
-            return get_captcha_string(picture)
+            try:
+                return get_captcha_string(picture)
+            except Exception:
+                pass  # Fall back to remote solving if local decaptcha fails
         return getPiratesCaptchaSolution(session, picture)
     elif session_data["decaptcha"]["name"] == "custom":
         files = {"upload_file": picture}
