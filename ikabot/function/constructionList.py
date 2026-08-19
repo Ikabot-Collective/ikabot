@@ -3,6 +3,7 @@
 
 
 import hashlib
+import html
 import json
 import math
 import random
@@ -30,6 +31,26 @@ from ikabot.web.session import normal_get
 sendResources = True
 expand = True
 thread = None
+
+
+def _parseConstructionTime(row):
+    cells = re.findall(r'<td class="costs">(.*?)</td>', row, re.DOTALL)
+    if not cells:
+        return None
+
+    cell = cells[-1]
+    match = re.search(r'data-(?:seconds|duration|time)=["\'](\d+)', cell)
+    if match:
+        return int(match.group(1))
+
+    values = re.findall(r'title=["\']([^"\']+)', cell)
+    values.append(re.sub(r"<[^>]+>", " ", html.unescape(cell)))
+    units = {"d": 86400, "h": 3600, "m": 60, "s": 1}
+    for value in values:
+        parts = re.findall(r"(\d+)\s*([dhms])", value.lower())
+        if parts:
+            return sum(int(amount) * units[unit] for amount, unit in parts)
+    return None
 
 
 def waitForConstruction(session, city_id, final_lvl):
@@ -272,6 +293,7 @@ def getResourcesNeeded(session, city, building, current_level, final_level):
 
     # calculate the cost of the entire upgrade, taking into account all the possible reductions
     final_costs = [0] * len(materials_names)
+    construction_time = 0
     levels_to_upgrade = 0
     for match in matches:
         lv = re.search(r'"level">(\d+)</td>', match).group(1)
@@ -283,6 +305,9 @@ def getResourcesNeeded(session, city, building, current_level, final_level):
             break
 
         levels_to_upgrade += 1
+        level_time = _parseConstructionTime(match)
+        if level_time is not None:
+            construction_time += level_time
         # get the costs for the current level
         costs = re.findall(r'<td class="costs"><div.*>([\d,\.\s\xa0]*)</div></div></td>', match)
         # delete blank spaces (\xa0) in costs
@@ -326,6 +351,7 @@ def getResourcesNeeded(session, city, building, current_level, final_level):
             #Skip only this building
             return [-2, -2, -2, -2, -2]
 
+    building["constructionTime"] = construction_time
     return final_costs
 
 
@@ -739,6 +765,11 @@ def constructionList(session, event, stdin_fd, predetermined_input):
 
         # Replace list
         buildings = confirmed_buildings
+
+        total_time = sum(building["constructionTime"] for building in buildings)
+        total_time += max(0, int(city.get("endUpgradeTime", 0)) - int(time.time()))
+        if buildings:
+            print("\nTotal construction time: {}".format(daysHoursMinutes(total_time)))
 
     except KeyboardInterrupt:
         event.set()
