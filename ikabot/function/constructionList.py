@@ -12,6 +12,7 @@ import threading
 import time
 import traceback
 from decimal import *
+from urllib.parse import parse_qs, urlparse
 
 import requests
 from functools import cache
@@ -53,6 +54,85 @@ def _parseConstructionTime(row):
     return None
 
 
+def _findHtml(value, element_id):
+    if isinstance(value, str):
+        return value if element_id in value else None
+    if isinstance(value, list):
+        for item in value:
+            result = _findHtml(item, element_id)
+            if result is not None:
+                return result
+    if isinstance(value, dict):
+        for item in value.values():
+            result = _findHtml(item, element_id)
+            if result is not None:
+                return result
+    return None
+
+
+def _getFreeSpeedupParams(response, city_id, position):
+    try:
+        popup = _findHtml(json.loads(response, strict=False), "js_buildingSpeedupActivateBtn")
+    except (TypeError, ValueError):
+        return None
+    if popup is None:
+        return None
+
+    button = re.search(
+        r'<a\b(?=[^>]*\bid=["\']js_buildingSpeedupActivateBtn["\'])[^>]*>.*?</a>',
+        popup,
+        re.DOTALL,
+    )
+    if button is None:
+        return None
+    cost = re.search(r'class=["\']ambrosiaIcon["\']>\s*(\d+)\s*</span>', button.group(0))
+    href = re.search(r'href=["\']([^"\']+)', button.group(0))
+    if cost is None or cost.group(1) != "0" or href is None:
+        return None
+
+    query = parse_qs(urlparse(html.unescape(href.group(1))).query)
+    required = {
+        "action": "Premium",
+        "function": "buildingSpeedup",
+        "cityId": str(city_id),
+        "position": str(position),
+        "backgroundView": "city",
+        "currentCityId": str(city_id),
+    }
+    if any(query.get(key) != [value] for key, value in required.items()):
+        return None
+    if len(query.get("level", [])) != 1 or not query["level"][0].isdigit():
+        return None
+    if len(query.get("actionRequest", [])) != 1 or not query["actionRequest"][0]:
+        return None
+
+    return {
+        **required,
+        "level": query["level"][0],
+        "actionRequest": actionRequest,
+        "ajax": "1",
+    }
+
+
+def tryFreeBuildingSpeedup(session, city_id, building):
+    popup_params = {
+        "view": "buildingSpeedup",
+        "cityId": city_id,
+        "position": building["position"],
+        "backgroundView": "city",
+        "currentCityId": city_id,
+        "actionRequest": actionRequest,
+        "ajax": "1",
+    }
+    response = session.post(params=popup_params)
+    speedup_params = _getFreeSpeedupParams(response, city_id, building["position"])
+    if speedup_params is None:
+        return False
+
+    session.post(params=speedup_params)
+    return True
+
+
 def waitForConstruction(session, city_id, final_lvl):
     """
     Parameters
@@ -83,6 +163,15 @@ def waitForConstruction(session, city_id, final_lvl):
         final_time = int(construction_time)
         seconds_to_wait = final_time - current_time
 
+        if 0 < seconds_to_wait <= 300:
+            if tryFreeBuildingSpeedup(session, city_id, construction_building):
+                msg = "{}: Finished {} for 0 Ambrosia".format(
+                    city["cityName"], construction_building["name"]
+                )
+                sendToBotDebug(session, msg, debugON_constructionList)
+            wait(5)
+            continue
+
         msg = "{}: I wait {:d} seconds so that {} gets to the level {:d}".format(
             city["cityName"],
             seconds_to_wait,
@@ -93,7 +182,7 @@ def waitForConstruction(session, city_id, final_lvl):
         session.setStatus(
             f"Waiting until {getDateTime(time.time()+seconds_to_wait+10)[8:]}, {construction_building['name']} {construction_building['level']} -> {construction_building['level']+1} in {city['name']}, final lvl: {final_lvl}"
         )
-        wait(seconds_to_wait + 10)
+        wait(max(5, seconds_to_wait - 300))
 
     html = session.get(city_url + city_id)
     city = getCity(html)
@@ -168,8 +257,10 @@ def expandBuilding(session, cityId, building, waitForResources):
         )
         sendToBotDebug(session, msg, debugON_constructionList)
 
+    city = waitForConstruction(session, cityId, upgradeTo)
+    building = city["position"][position]
     msg = "{}: The building {} finished extending to level: {:d}.".format(
-        city["cityName"], building["name"], building["level"] + 1
+        city["cityName"], building["name"], building["level"]
     )
     sendToBotDebug(session, msg, debugON_constructionList)
 
@@ -307,7 +398,7 @@ def getResourcesNeeded(session, city, building, current_level, final_level):
         levels_to_upgrade += 1
         level_time = _parseConstructionTime(match)
         if level_time is not None:
-            construction_time += level_time
+            construction_time += max(0, level_time - 300)
         # get the costs for the current level
         costs = re.findall(r'<td class="costs"><div.*>([\d,\.\s\xa0]*)</div></div></td>', match)
         # delete blank spaces (\xa0) in costs
@@ -767,7 +858,8 @@ def constructionList(session, event, stdin_fd, predetermined_input):
         buildings = confirmed_buildings
 
         total_time = sum(building["constructionTime"] for building in buildings)
-        total_time += max(0, int(city.get("endUpgradeTime", 0)) - int(time.time()))
+        active_time = int(city.get("endUpgradeTime", 0)) - int(time.time())
+        total_time += max(0, active_time - 300)
         if buildings:
             print("\nTotal construction time: {}".format(daysHoursMinutes(total_time)))
 
