@@ -3,6 +3,7 @@ import json
 from unittest.mock import Mock
 
 from ikabot.function.constructionList import (
+    _formatRemainingTime,
     _getFreeSpeedupParams,
     _parseConstructionTime,
     tryFreeBuildingSpeedup,
@@ -19,6 +20,9 @@ class TestParseConstructionTime(unittest.TestCase):
         row = '<td class="level">2</td><td class="costs"><span data-duration="1234">20M</span></td>'
 
         self.assertEqual(_parseConstructionTime(row), 1234)
+
+    def test_formats_remaining_seconds(self):
+        self.assertEqual(_formatRemainingTime(927), "15M 27S")
 
 
 class TestFreeBuildingSpeedup(unittest.TestCase):
@@ -40,6 +44,31 @@ class TestFreeBuildingSpeedup(unittest.TestCase):
 
     def test_rejects_zero_cost_request_for_another_position(self):
         self.assertIsNone(_getFreeSpeedupParams(self._response(0), "14075", 11))
+
+    def test_accepts_raw_popup_with_reordered_span_attributes(self):
+        response = self._response(0)
+        popup = json.loads(response)[0][1][1].replace(
+            'title="Ambrosia" class="ambrosiaIcon"',
+            'class="ambrosiaIcon" title="Ambrosia"',
+        )
+
+        self.assertIsNotNone(_getFreeSpeedupParams(popup, "14075", 10))
+
+    def test_ignores_earlier_button_reference_in_ajax_response(self):
+        response = json.loads(self._response(0))
+        response.insert(0, ["update", ["#js_buildingSpeedupActivateBtn"]])
+
+        self.assertIsNotNone(
+            _getFreeSpeedupParams(json.dumps(response), "14075", 10)
+        )
+
+    def test_allows_popup_to_omit_replaceable_request_metadata(self):
+        response = self._response(0).replace(
+            "&amp;backgroundView=city&amp;currentCityId=14075&amp;actionRequest=old",
+            "",
+        )
+
+        self.assertIsNotNone(_getFreeSpeedupParams(response, "14075", 10))
 
     def test_never_posts_premium_request_for_nonzero_cost(self):
         session = Mock()
