@@ -176,7 +176,7 @@ def waitForConstruction(session, city_id, final_lvl, construction_queue=None):
         seconds_to_wait = final_time - current_time
         current_remaining = max(0, seconds_to_wait - 300)
         total_remaining = current_remaining + sum(construction_queue or [])
-        status = "{}: {} -> level {} | current {} | total {}".format(
+        status = "{}: {} -> level {} , current {} , total {}".format(
             city["cityName"],
             construction_building["name"],
             construction_building["level"] + 1,
@@ -187,13 +187,13 @@ def waitForConstruction(session, city_id, final_lvl, construction_queue=None):
 
         if 0 < seconds_to_wait <= 300:
             if tryFreeBuildingSpeedup(session, city_id, construction_building):
-                session.setStatus(status + " | free speedup sent")
+                session.setStatus(status + " , free speedup sent")
                 msg = "{}: Finished {} for 0 Ambrosia".format(
                     city["cityName"], construction_building["name"]
                 )
                 sendToBotDebug(session, msg, debugON_constructionList)
             else:
-                session.setStatus(status + " | waiting for zero-cost speedup")
+                session.setStatus(status + " , waiting for zero-cost speedup")
             wait(5)
             continue
 
