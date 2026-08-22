@@ -22,6 +22,10 @@ from ikabot.helpers.varios import addThousandSeparator, getDateTime
 from ikabot.helpers.pedirInfo import getShipCapacity
 
 
+BUY_FROM_ANYONE = 1
+BUY_FROM_PLAYER = 2
+BUY_FROM_CITY = 3
+
 
 def chooseResource(session, city):
     """
@@ -147,6 +151,44 @@ def chooseCommertialCity(commercial_cities):
     return commercial_cities[selected_city_index - 1]
 
 
+def filterOffers(offers):
+    """Lets the user buy from one specific player or one specific city instead of always
+    taking the cheapest offers. The lowest price is not always the desired one, the user
+    might need to trade with someone in particular
+    Parameters
+    ----------
+    offers : list[dict]
+
+    Returns
+    -------
+    (offers, seller) : tuple
+        the offers that belong to the chosen seller, and its name (None if the user did
+        not choose one)
+    """
+    print("Buy from:")
+    print("({:d}) Anyone in range".format(BUY_FROM_ANYONE))
+    print("({:d}) A specific player".format(BUY_FROM_PLAYER))
+    print("({:d}) A specific city".format(BUY_FROM_CITY))
+    choice = read(min=BUY_FROM_ANYONE, max=BUY_FROM_CITY, default=BUY_FROM_ANYONE)
+    if choice == BUY_FROM_ANYONE:
+        return offers, None
+
+    if choice == BUY_FROM_PLAYER:
+        key = "jugadorAComprar"
+        print("\nWhich player do you want to buy from?\n")
+    else:
+        key = "ciudadDestino"
+        print("\nWhich city do you want to buy from?\n")
+
+    # dict.fromkeys removes the duplicates without losing the order of the offers
+    sellers = list(dict.fromkeys([offer[key] for offer in offers]))
+    for i, seller in enumerate(sellers):
+        print("({:d}) {}".format(i + 1, seller))
+    seller = sellers[read(min=1, max=len(sellers)) - 1]
+
+    return [offer for offer in offers if offer[key] == seller], seller
+
+
 def buyResources(session, event, stdin_fd, predetermined_input):
     """
     Parameters
@@ -189,6 +231,10 @@ def buyResources(session, event, stdin_fd, predetermined_input):
             event.set()
             return
 
+        # let the user buy from one seller only
+        (offers, seller) = filterOffers(offers)
+        banner()
+
         # display offers to the user
         total_price = 0
         total_amount = 0
@@ -196,6 +242,11 @@ def buyResources(session, event, stdin_fd, predetermined_input):
             amount = offer["amountAvailable"]
             price = offer["precio"]
             cost = amount * price
+            print(
+                "seller:{} ({})".format(
+                    offer["jugadorAComprar"], offer["ciudadDestino"]
+                )
+            )
             print("amount:{}".format(addThousandSeparator(amount)))
             print("price :{:d}".format(price))
             print("cost  :{}".format(addThousandSeparator(cost)))
@@ -254,6 +305,8 @@ def buyResources(session, event, stdin_fd, predetermined_input):
     info = "\nI will buy {} from {} to {}\n".format(
         addThousandSeparator(amount_to_buy), materials_names[resource], city["cityName"]
     )
+    if seller is not None:
+        info += "Buying from {} only\n".format(seller)
     setInfoSignal(session, info)
     try:
         do_it(session, city, offers, amount_to_buy)
