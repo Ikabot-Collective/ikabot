@@ -398,6 +398,54 @@ def getPiracyCities(session, pirateMissionChoice):
     return piracyCities
 
 
+def getPirateFortressHtml(session, cityId):
+    """Gets the crew tab of the pirate fortress. The fortress always sits on position 17
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    cityId : int
+        id of a city which has a pirate fortress in it
+
+    Returns
+    -------
+    html : str
+    """
+    params = {
+        "view": "pirateFortress",
+        "activeTab": "tabCrew",
+        "cityId": cityId,
+        "position": 17,
+        "backgroundView": "city",
+        "currentCityId": cityId,
+        "templateView": "pirateFortress",
+        "actionRequest": actionRequest,
+        "ajax": 1,
+    }
+    return session.post(params=params)
+
+
+def getPirateFortressPoints(session, cityId):
+    """Gets the capture points and the crew strength of the account. Both are shared by
+    every city, so any city with a pirate fortress can be used to read them
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    cityId : int
+        id of a city which has a pirate fortress in it
+
+    Returns
+    -------
+    (capturePoints, crewPoints) : tuple
+        None if the fortress did not report them
+    """
+    html = getPirateFortressHtml(session, cityId)
+    capturePoints = re.search(r'\\"capturePoints\\":\\"(\d+)\\"', html)
+    crewPoints = re.search(r'\\"crewPoints\\":\\"(\d+)\\"', html)
+    if capturePoints is None or crewPoints is None:
+        return None
+    return int(capturePoints.group(1)), int(crewPoints.group(1))
+
+
 def convertCapturePoints(session, piracyCities, convertPerMission):
     """Converts all the users capture points into crew strength
     Parameters
@@ -405,18 +453,7 @@ def convertCapturePoints(session, piracyCities, convertPerMission):
     session : ikabot.web.session.Session
     piracyCities: a list containing all cities which have a pirate fortress
     """
-    params = {
-        "view": "pirateFortress",
-        "activeTab": "tabCrew",
-        "cityId": piracyCities[0]["id"],
-        "position": 17,
-        "backgroundView": "city",
-        "currentCityId": piracyCities[0]["id"],
-        "templateView": "pirateFortress",
-        "actionRequest": actionRequest,
-        "ajax": 1,
-    }
-    html = session.post(params=params)
+    html = getPirateFortressHtml(session, piracyCities[0]["id"])
     rta = re.search(r'\\"capturePoints\\":\\"(\d+)\\"', html)
     capturePoints = int(rta.group(1))
     if convertPerMission == "all":
