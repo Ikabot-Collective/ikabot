@@ -435,15 +435,17 @@ def getPirateFortressPoints(session, cityId):
 
     Returns
     -------
-    (capturePoints, crewPoints) : tuple
+    (capturePoints, crewStrength) : tuple
         None if the fortress did not report them
     """
     html = getPirateFortressHtml(session, cityId)
     capturePoints = re.search(r'\\"capturePoints\\":\\"(\d+)\\"', html)
-    crewPoints = re.search(r'\\"crewPoints\\":\\"(\d+)\\"', html)
-    if capturePoints is None or crewPoints is None:
+    # crewPoints only counts the crew converted from capture points, the strength the
+    # game shows also includes the basic and the bonus crew
+    crewStrength = re.search(r'\\"completeCrewPoints\\":(\d+)', html)
+    if capturePoints is None or crewStrength is None:
         return None
-    return int(capturePoints.group(1)), int(crewPoints.group(1))
+    return int(capturePoints.group(1)), int(crewStrength.group(1))
 
 
 def convertCapturePoints(session, piracyCities, convertPerMission):

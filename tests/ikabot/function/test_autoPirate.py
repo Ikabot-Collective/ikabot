@@ -28,13 +28,22 @@ class TestGetPirateFortressPoints(unittest.TestCase):
 
     def test_points_are_read_from_the_fortress(self):
         """Both numbers come from the same response"""
-        self.assertEqual(getPirateFortressPoints(self.session, 12345), (80169, 18407))
+        self.assertEqual(getPirateFortressPoints(self.session, 12345), (80169, 19843))
 
-    def test_crew_points_are_not_confused_with_the_other_crew_fields(self):
-        """basicCrewPoints, bonusCrewPoints and completeCrewPoints all end in crewPoints"""
-        (__, crew_points) = getPirateFortressPoints(self.session, 12345)
+    def test_crew_strength_includes_the_basic_and_the_bonus_crew(self):
+        """crewPoints is only the crew converted from capture points, the strength the
+        game shows is completeCrewPoints (18407 + 36 + 1400)"""
+        (__, crew_strength) = getPirateFortressPoints(self.session, 12345)
 
-        self.assertEqual(crew_points, 18407)
+        self.assertEqual(crew_strength, 19843)
+
+    def test_crew_strength_is_read_with_no_capture_points(self):
+        """A player who never converted has crewPoints 0 but still has crew strength"""
+        self.session.post.return_value = FORTRESS_RESPONSE.replace(
+            '\\"crewPoints\\":\\"18407\\"', '\\"crewPoints\\":\\"0\\"'
+        ).replace('\\"completeCrewPoints\\":19843', '\\"completeCrewPoints\\":128')
+
+        self.assertEqual(getPirateFortressPoints(self.session, 12345), (80169, 128))
 
     def test_the_fortress_is_asked_for_the_given_city(self):
         """Any city with a fortress reports the same points, the fortress is on position 17"""
