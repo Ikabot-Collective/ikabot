@@ -65,7 +65,7 @@ def read(
         pass
     
     def _invalid():
-        print("\033[1A\033[K", end="")  # remove line
+        print("\033[1A\033[KInvalid option")
         return read(min=min, max=max, digit=digit, msg=msg, values=values, empty=empty, additionalValues=additionalValues, default=default, _retries=_retries+1, _max_retries=_max_retries)
     
     try:

@@ -5,7 +5,7 @@ import locale
 import os
 
 # Version is changed automatically by the release pipeline
-IKABOT_VERSION = "7.4.0"
+IKABOT_VERSION = "7.5.1"
 
 
 IKABOT_VERSION_TAG = "v" + IKABOT_VERSION
@@ -16,6 +16,33 @@ IKABOT_VERSION_TAG = "v" + IKABOT_VERSION
 update_msg = ""
 
 isWindows = os.name == "nt"
+
+# Multiprocessing configuration for pure-Python local decaptcha
+# Set to False if your environment struggles with Python multiprocessing
+USE_MULTIPROCESSING_DECAPTCHA = True
+
+# Regional Settings
+# These environment variables can be set to match the user's browser region and
+# timezone when Gameforge rejects generated blackbox tokens.
+IKABOT_LOCALE = (os.getenv("IKABOT_LOCALE") or "en-GB").strip() or "en-GB"
+IKABOT_GF_LANG = (
+    os.getenv("IKABOT_GF_LANG") or IKABOT_LOCALE.split("-")[0]
+).strip() or "en"
+IKABOT_TIMEZONE_ID = (
+    os.getenv("IKABOT_TIMEZONE_ID") or "Europe/London"
+).strip() or "Europe/London"
+
+
+def build_accept_language(locale_value=IKABOT_LOCALE, gf_lang=IKABOT_GF_LANG):
+    locale_value = (locale_value or IKABOT_LOCALE).strip() or IKABOT_LOCALE
+    gf_lang = (gf_lang or locale_value.split("-")[0]).strip() or "en"
+
+    parts = [locale_value]
+    if gf_lang != locale_value:
+        parts.append(f"{gf_lang};q=0.9")
+    if gf_lang != "en" and locale_value != "en":
+        parts.append("en;q=0.8")
+    return ",".join(parts)
 
 
 LOGS_DIRECTORY_FILE = os.getenv("temp") + "/ikabot.log" if isWindows else "/tmp/ikabot.log"
@@ -109,7 +136,6 @@ enable_CustomPort = False
 user_agents = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.3",
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.3",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.",
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.",
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.3",
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36 Edg/117.0.2045.4",
@@ -120,14 +146,10 @@ user_agents = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.3",
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.3",
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 OPR/108.0.0.",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.",
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.3",
-    "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.",
     "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36 Edg/109.0.1518.14",
     "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36 Edg/109.0.1518.10",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/118.",
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.3",
-    "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Geck",
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.2",
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 Edg/112.0.1722.3",
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 Edg/123.0.0.",

@@ -33,8 +33,8 @@ def getCityMilitaryData(session, city_id):
 
 
 def extractTooltipsAndValues(data):
-    tooltips = re.findall(r'<div class="tooltip">(.*?)</div>', data)
-    values = re.findall(r"<td>\s*([\d.,-]+)\s*</td>", data)
+    tooltips =  re.findall(r'<div[^>]*class="[^"]*tooltip[^"]*"[^>]*>(.*?)</div>', data)
+    values = re.findall(r"<td>\s*([^<]+)\s*</td>", data)
     return tooltips, values
 
 
@@ -45,11 +45,11 @@ def calculateTotals(tooltips, values):
     desc_value_dict = {}
 
     for i, (tooltip, value) in enumerate(zip(tooltips, values)):
-        value = value.replace(",", "")
+        value = re.sub(r'[\.,\s]|&nbsp;', '', value)
         is_digit = value.isdigit()
         int_value = int(value) if is_digit else 0
 
-        if value.isdigit() and int_value > 0:
+        if is_digit and int_value > 0:
             desc_value_dict.setdefault(tooltip, []).append(int_value)
 
             if i <= 14:

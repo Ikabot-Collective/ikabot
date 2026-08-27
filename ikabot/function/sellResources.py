@@ -98,16 +98,27 @@ def getOffers(session, my_market_city, resource_type):
     resp = session.post(params=data)
     html = json.loads(resp, strict=False)[1][1][1]
 
-    offers_found = re.findall(
-        r'<td class="short_text80">(.*?)<br/>\((.*?)\)[\s\S]*?<div class="tooltip">([\d,]+)</div>[\s\S]*?<td style="white-space:nowrap;">(\d+)[\s\S]*?<td>(\d+)</td>[\s\S]*?href="\?view=takeOffer&destinationCityId=(\d+)',
-        html
-    )
-    # Process the found offers, removing commas and converting to integers
     processed_offers = []
-    for city_name, user_name, amount, price, dist, dest_id in offers_found:
-        clean_amount = int(amount.replace(',', ''))
-        processed_offers.append((city_name.strip(), user_name.strip(), clean_amount, int(price), int(dist), int(dest_id)))
-    
+    for row in re.findall(r'<tr[^>]*>([\s\S]*?)</tr>', html):
+        city_match   = re.search(r'<td class="short_text80">(.*?)<br/>\((.*?)\)', row)
+        amount_match = re.search(r'<div class="tooltip">([\d,.]+)</div>', row)
+        price_match  = re.search(r'<td style="white-space:nowrap;">(\d+)', row)
+        dist_match   = re.search(r'<td>(\d+)</td>', row)
+        dest_match   = re.search(r'href="\?view=takeOffer&destinationCityId=(\d+)', row)
+
+        if not all([city_match, amount_match, price_match, dist_match, dest_match]):
+            continue
+
+        raw_amount = amount_match.group(1).replace('.', '').replace(',', '')
+        processed_offers.append((
+            city_match.group(1).strip(),
+            city_match.group(2).strip(),
+            int(raw_amount),
+            int(price_match.group(1)),
+            int(dist_match.group(1)),
+            int(dest_match.group(1)),
+        ))
+
     return processed_offers
 
 

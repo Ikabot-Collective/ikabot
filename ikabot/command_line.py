@@ -28,7 +28,7 @@ from ikabot.function.donationBot import donationBot
 from ikabot.function.dumpWorld import dumpWorld
 from ikabot.function.getStatus import getStatus
 from ikabot.function.importExportCookie import importExportCookie
-from ikabot.function.Research import research
+from ikabot.function.research import research
 from ikabot.function.consolidateResources import consolidateResources
 from ikabot.function.killTasks import killTasks
 from ikabot.function.loginDaily import loginDaily
@@ -39,6 +39,7 @@ from ikabot.function.sellResources import sellResources
 from ikabot.function.sendResources import sendResources
 from ikabot.function.shipMovements import shipMovements
 from ikabot.function.stationArmy import stationArmy
+from ikabot.function.viewArmy import viewArmy
 from ikabot.function.testTelegramBot import testTelegramBot
 from ikabot.function.trainArmy import trainArmy
 from ikabot.function.update import update
@@ -46,7 +47,8 @@ from ikabot.function.vacationMode import vacationMode
 from ikabot.function.webServer import webServer
 from ikabot.function.loadCustomModule import loadCustomModule
 from ikabot.function.activateShrine import activateShrine
-from ikabot.helpers.botComm import telegramDataIsValid, updateTelegramData
+from ikabot.helpers.botComm import telegramDataIsValid, updateTelegramData, discordDataIsValid, updateDiscordData
+from ikabot.function.testDiscordBot import testDiscordBot
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.process import updateProcessList
@@ -136,8 +138,9 @@ def menu(session, checkUpdate=True):
         10: vacationMode,
         11: activateMiracle,
         1201: trainArmy,
-        1202: stationArmy,
-        1203: UpgradeUnits,
+         1202: stationArmy,
+         1203: UpgradeUnits,
+         1204: viewArmy,
         13: shipMovements,
         14: constructBuilding,
         15: update,
@@ -149,14 +152,16 @@ def menu(session, checkUpdate=True):
         2001: searchForIslandSpaces,
         2002: dumpWorld,
         2101: proxyConf,
-        2102: updateTelegramData,
         2103: killTasks,
         2104: decaptchaConf,
         2105: logs,
-        2106: testTelegramBot,
-        2107: importExportCookie,
-        2108: loadCustomModule,
-        2109: developer,
+        2106: importExportCookie,
+        2107: loadCustomModule,
+        2108: developer,
+        210211: updateTelegramData,
+        210212: testTelegramBot,
+        210221: updateDiscordData,
+        210222: testDiscordBot,
         22: consolidateResources,
         2301: modifyProduction,
         2302: modifyAcademyWorkers,
@@ -254,11 +259,14 @@ def menu(session, checkUpdate=True):
         print("(1) Train Army")
         print("(2) Send Troops/Ships")
         print("(3) Upgrade Army")
-        selected = read(min=0, max=3, digit=True)
+        print("(4) View Army")
+        selected = read(min=0, max=4, digit=True)
         if selected == 0:
             menu(session)
             return
-        if selected > 0:
+        if selected == 4:
+            selected = 1204
+        elif selected > 0:
             selected += 1200
 
     if selected == 23:
@@ -291,24 +299,71 @@ def menu(session, checkUpdate=True):
         banner()
         print("(0) Back")
         print("(1) Configure Proxy")
-        if telegramDataIsValid(session):
-            print("(2) Change the Telegram data")
-        else:
-            print("(2) Enter the Telegram data")
+        print("(2) Notifications")
         print("(3) Kill tasks")
         print("(4) Configure captcha resolver")
         print("(5) Logs")
-        print("(6) Message Telegram Bot")
-        print("(7) Import / Export cookie")
-        print("(8) Load custom ikabot module")
-        print("(9) Developer Data")
+        print("(6) Import / Export cookie")
+        print("(7) Load custom ikabot module")
+        print("(8) Developer Data")
 
-        selected = read(min=0, max=9, digit=True)
+        selected = read(min=0, max=8, digit=True)
         if selected == 0:
             menu(session)
             return
         if selected > 0:
             selected += 2100
+
+    if selected == 2102:
+        banner()
+        print("(0) Back")
+        print("(1) Telegram")
+        print("(2) Discord")
+
+        selected = read(min=0, max=2, digit=True)
+        if selected == 0:
+            menu(session)
+            return
+        if selected > 0:
+            selected += 21020
+
+    if selected == 21021:
+        banner()
+        print("(0) Back")
+        if telegramDataIsValid(session):
+            print("(1) Change the Telegram data")
+        else:
+            print("(1) Enter the Telegram data")
+        print("(2) Test Telegram Bot")
+
+        selected = read(min=0, max=2, digit=True)
+        if selected == 0:
+            menu(session)
+            return
+        if selected > 0:
+            selected += 210210
+
+    if selected == 21022:
+        banner()
+        print("(0) Back")
+        if discordDataIsValid(session):
+            print("(1) Change the Discord webhook")
+        else:
+            print("(1) Enter the Discord webhook")
+        print("(2) Test Discord Bot")
+
+        selected = read(min=0, max=2, digit=True)
+        if selected == 0:
+            menu(session)
+            return
+        if selected > 0:
+            selected += 210220
+
+    if selected not in menu_actions and selected != 0:
+        print("Invalid option")
+        enter()
+        menu(session, checkUpdate=False)
+        return
 
     if selected != 0:
         try:

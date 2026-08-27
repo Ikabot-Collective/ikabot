@@ -16,7 +16,7 @@ from ikabot.helpers.varios import getDateTime, timeStringToSec, wait
 
 
 earliest_wakeup_time = 24 * 60 * 60
-wine_city = wood_city = luxury_city = favour_tasks = None
+wine_city = wood_city = luxury_city = favour_tasks = collect_ambrosia = None
 
 
 def loginDaily(session, event, stdin_fd, predetermined_input):
@@ -46,6 +46,11 @@ def loginDaily(session, event, stdin_fd, predetermined_input):
             # choose city for luxury resource
             print("Choose the city where the luxury resource bonus will be activated:")
             luxury_city = chooseCity(session)
+        print("Do you want to automatically collect the 'Divine Imagination' ambrosia bonus? (Y|N)")
+        choice = read(values=["y", "Y", "n", "N"])
+        if choice in ["y", "Y"]:
+            global collect_ambrosia
+            collect_ambrosia = True
         print("Do you want to collect the favour automatically? (Y|N)")
         choice = read(values=["y", "Y", "n", "N"])
         if choice in ["y", "Y"]:
@@ -101,6 +106,7 @@ def loginDaily(session, event, stdin_fd, predetermined_input):
             wood_city=wood_city,
             luxury_city=luxury_city,
             favour_tasks=favour_tasks,
+            collect_ambrosia=collect_ambrosia,
         )
     except Exception as e:
         msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
@@ -109,7 +115,7 @@ def loginDaily(session, event, stdin_fd, predetermined_input):
         session.logout()
 
 
-def do_it(session, wine_city, wood_city, luxury_city, favour_tasks):
+def do_it(session, wine_city, wood_city, luxury_city, favour_tasks, collect_ambrosia):
     """
     Parameters
     ----------
@@ -245,6 +251,41 @@ def do_it(session, wine_city, wood_city, luxury_city, favour_tasks):
                 wait(55)
                 session.post(
                     f"view=noViewChange&action=AdVideoRewardAction&function=watchVideo&videoId={str(videoId)}&backgroundView=city&currentCityId={favour_cinetheater_city['id']}&templateView=cinema&actionRequest={actionRequest}&ajax=1"
+                )
+
+        # collect Imaginación divina ambrosia video bonus
+        if collect_ambrosia:
+            html = session.post(city_url + str(wine_city["id"]))
+            html = session.post(
+                f"view=cinema&visit=1&currentCityId={wine_city['id']}&backgroundView=city&actionRequest={actionRequest}&ajax=1"
+            )
+            features = (
+                html.split('id=\\"VideoRewards\\"')[1].split("ul>")[0].split("li>")
+            )
+            features = [f for f in features if "form" in f or "js_nextPossible" in f]
+            if len(features) > 3 and "js_nextPossibleAmbrosia" in features[3]:
+                remaining_time_str = re.search(
+                    r'js_nextPossibleAmbrosia\\">([\S\s]*?)<', features[3]
+                )
+                if remaining_time_str:
+                    remaining_time_str = remaining_time_str.group(1).strip()
+                    sec_to_wait = timeStringToSec(remaining_time_str) + 60
+                    earliest_wakeup_time = (
+                        sec_to_wait if sec_to_wait < earliest_wakeup_time else earliest_wakeup_time
+                    )
+            elif len(features) > 3 and "form" in features[3]:
+                videoId = re.search(
+                    r'name=\\"videoId\\"\s*value=\\"(\d+)\\"', features[3]
+                )
+                assert videoId, "Could not find a match for videoId in ambrosia html"
+                videoId = videoId.group(1)
+                session.post(
+                    f"view=noViewChange&action=AdVideoRewardAction&function=requestBonus&bonusId=54&videoId={str(videoId)}&backgroundView=city&currentCityId={wine_city['id']}&templateView=cinema&actionRequest={actionRequest}&ajax=1"
+                )
+                session.setStatus("Waiting 55s to watch video for ambrosia bonus")
+                wait(55)
+                session.post(
+                    f"view=noViewChange&action=AdVideoRewardAction&function=watchVideo&videoId={str(videoId)}&backgroundView=city&currentCityId={wine_city['id']}&templateView=cinema&actionRequest={actionRequest}&ajax=1"
                 )
 
         # get waiting times for all three cinetheatre features.

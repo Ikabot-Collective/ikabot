@@ -21,13 +21,21 @@ def getNewBlackBoxToken(session):
     token : str
         blackbox token
     """
-    address = (
-        getAddress(publicAPIServerDomain)
-        + "/v1/token"
-        + "?user_agent="
-        + session.user_agent
+    address = getAddress(publicAPIServerDomain) + "/v1/token"
+    user_agent = getattr(session, "api_user_agent", None) or session.user_agent
+    params = {
+        "user_agent": user_agent,
+        "locale": session.locale,
+        "timezone_id": session.timezone_id,
+    }
+    response = get(
+        address, params=params, verify=do_ssl_verify, timeout=900
     )
-    response = get(address, verify=do_ssl_verify, timeout=900)
+    if response.status_code in [400, 422]:
+        fallback_params = {"user_agent": user_agent}
+        response = get(
+            address, params=fallback_params, verify=do_ssl_verify, timeout=900
+        )
     assert response.status_code == 200, (
         "API response code is not OK: "
         + str(response.status_code)
@@ -35,9 +43,11 @@ def getNewBlackBoxToken(session):
         + response.text
     )
     response = response.json()
-    if "status" in response and response["status"] == "error":
-        raise Exception(response["message"])
-    return "tra:" + response
+    if isinstance(response, dict):
+        if response.get("status") == "error":
+            raise Exception(response["message"])
+        raise Exception("Unexpected API response: " + str(response))
+    return "tra:" + response.replace("tra:", "")
 
 
 def getPiratesCaptchaSolution(session, image):
