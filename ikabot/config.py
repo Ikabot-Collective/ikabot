@@ -32,6 +32,11 @@ USE_MULTIPROCESSING_DECAPTCHA = True
 # report a slow solve.
 DECAPTCHA_TIMING_LOG = False
 
+# Solve the pirates captcha locally instead of sending the image to the remote
+# decaptcha API. Set it to False to always use the remote API (via
+# getPiratesCaptchaSolution) for the pirates captcha.
+PIRATE_DECAPTCHA_LOCAL = True
+
 # Regional Settings
 # These environment variables can be set to match the user's browser region and
 # timezone when Gameforge rejects generated blackbox tokens.

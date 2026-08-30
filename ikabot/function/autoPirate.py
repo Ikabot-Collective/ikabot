@@ -77,7 +77,7 @@ def autoPirate(session, event, stdin_fd, predetermined_input):
     banner()
     try:        
 
-        if not LOCAL_DECAPTCHA:
+        if not (PIRATE_DECAPTCHA_LOCAL and LOCAL_DECAPTCHA):
             print("💡 TIP: You can process captchas locally! Run `pip install onnxruntime` to move inference to your client.")
             print("This feature is not available if you are using the precombile binary for Windows!\n\n")
             print("{}⚠️ USING THIS FEATURE WILL EXPOSE YOUR IP ADDRESS TO A THIRD PARTY FOR CAPTCHA SOLVING ⚠️{}\n\n".format(bcolors.WARNING, bcolors.ENDC))
@@ -322,7 +322,7 @@ def resolveCaptcha(session, picture):
         "decaptcha" not in session_data
         or session_data["decaptcha"]["name"] == "default"
     ):
-        if LOCAL_DECAPTCHA:
+        if PIRATE_DECAPTCHA_LOCAL and LOCAL_DECAPTCHA:
             try:
                 return get_captcha_string(picture)
             except Exception:
