@@ -25,6 +25,8 @@ from ikabot.helpers.sessionStorage import (
     set_session_data,
     delete_session_data,
     migrate_legacy_account,
+    get_saved_users,
+    get_user_file_path,
 )
 from ikabot.helpers.botComm import *
 from ikabot.helpers.getJson import getCity
@@ -311,10 +313,32 @@ class Session:
 
             self.mail = read(msg="Mail:")
 
-            if len(config.predetermined_input) != 0:
-                self.password = config.predetermined_input.pop(0)
-            else:
-                self.password = getpass.getpass("Password:")
+            selected_saved = False
+            if not self.mail:
+                # No mail provided. If the default user file does not exist but
+                # other saved accounts do, let the user pick one so the saved
+                # cookies can be reused without re-entering credentials.
+                default_user_file = get_user_file_path("")
+                saved_users = get_saved_users()
+                if saved_users and not os.path.exists(default_user_file):
+                    if len(saved_users) == 1:
+                        selected = saved_users[0]
+                        print("\nNo default account found, using saved account: {}".format(selected))
+                    else:
+                        print("\nNo default account found. Select a saved account:")
+                        for i, user in enumerate(saved_users, start=1):
+                            print("  {}. {}".format(i, user))
+                        selected = saved_users[read(min=1, max=len(saved_users), digit=True) - 1]
+                    self.mail = selected
+                    # Credentials are already stored for this account, skip password prompt
+                    self.password = ""
+                    selected_saved = True
+
+            if not selected_saved:
+                if len(config.predetermined_input) != 0:
+                    self.password = config.predetermined_input.pop(0)
+                else:
+                    self.password = getpass.getpass("Password:")
 
             banner()
 

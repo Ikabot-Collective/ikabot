@@ -62,6 +62,26 @@ def get_user_file_path(email):
     return os.path.join(get_users_dir(), filename)
 
 
+def get_saved_users():
+    """Returns the list of saved user accounts (their emails) found in ~/.ikabot/users,
+    excluding the default account used for empty mail."""
+    users_dir = get_users_dir()
+    if not os.path.isdir(users_dir):
+        return []
+
+    saved = []
+    for filename in sorted(os.listdir(users_dir)):
+        if not filename.endswith(".json"):
+            continue
+        if filename == f"{sanitize_email('')}.json":
+            continue
+        filepath = os.path.join(users_dir, filename)
+        data = read_json_file(filepath, {})
+        email = data.get("email") or filename[: -len(".json")]
+        saved.append(email)
+    return saved
+
+
 def init_storage():
     """
     Initializes the storage layout:
