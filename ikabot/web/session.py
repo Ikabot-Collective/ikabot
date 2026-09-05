@@ -27,6 +27,8 @@ from ikabot.helpers.sessionStorage import (
     migrate_legacy_account,
     get_saved_users,
     get_user_file_path,
+    get_users_dir,
+    find_user_file_for_email,
 )
 from ikabot.helpers.botComm import *
 from ikabot.helpers.getJson import getCity
@@ -312,12 +314,13 @@ class Session:
             banner()
 
             self.mail = read(msg="Mail:")
+            entered_mail = self.mail
 
-            selected_saved = False
-            if not self.mail:
-                # No mail provided. If the default user file does not exist but
-                # other saved accounts do, let the user pick one so the saved
-                # cookies can be reused without re-entering credentials.
+            if not entered_mail:
+                # No mail provided (Enter/Enter). Never ask for a password:
+                # use the stored cookies from default_user.json, or if that
+                # does not exist but other accounts are saved, let the user
+                # pick one so its cookies are reused.
                 default_user_file = get_user_file_path("")
                 saved_users = get_saved_users()
                 if saved_users and not os.path.exists(default_user_file):
@@ -330,15 +333,25 @@ class Session:
                             print("  {}. {}".format(i, user))
                         selected = saved_users[read(min=1, max=len(saved_users), digit=True) - 1]
                     self.mail = selected
-                    # Credentials are already stored for this account, skip password prompt
+                # Cookies are already stored, skip password prompt
+                self.password = ""
+            else:
+                # Mail was typed. If it matches a saved account, reuse its cookies
+                # instead of asking for a password.
+                matching_path, has_duplicates = find_user_file_for_email(entered_mail)
+                if matching_path:
+                    if has_duplicates:
+                        print("\n[Warning] '{}' is present in multiple session files. Using the most recently modified one.".format(entered_mail))
                     self.password = ""
-                    selected_saved = True
-
-            if not selected_saved:
-                if len(config.predetermined_input) != 0:
-                    self.password = config.predetermined_input.pop(0)
                 else:
-                    self.password = getpass.getpass("Password:")
+                    # No saved session for this mail
+                    print("\nNo saved session found for '{}'.".format(entered_mail))
+                    print("Check the files in: {}".format(get_users_dir()))
+                    print("If they are outdated or corrupted, delete them and log in manually.")
+                    if len(config.predetermined_input) != 0:
+                        self.password = config.predetermined_input.pop(0)
+                    else:
+                        self.password = getpass.getpass("Password:")
 
             banner()
 
