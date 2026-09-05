@@ -72,6 +72,7 @@ has_params = False
 menu_cities = ""
 infoUser = ""
 ikaFile = ".ikabot"
+ikaDir = ".ikabot"
 city_url = "view=city&cityId="
 island_url = "view=island&islandId="
 prompt = " >>  "

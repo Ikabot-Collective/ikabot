@@ -20,6 +20,12 @@ from urllib3.exceptions import InsecureRequestWarning
 from ikabot import config
 from ikabot.config import *
 from ikabot.helpers.aesCipher import *
+from ikabot.helpers.sessionStorage import (
+    get_session_data,
+    set_session_data,
+    delete_session_data,
+    migrate_legacy_account,
+)
 from ikabot.helpers.botComm import *
 from ikabot.helpers.getJson import getCity
 from ikabot.helpers.gui import banner
@@ -319,6 +325,7 @@ class Session:
 
         self.s = requests.Session()
         self.cipher = AESCipher(self.mail, self.password)
+        migrate_legacy_account(self.mail, self.password, self.logger)
         self.logger.info("__login()")
 
         # test to see if the lobby cookie in the session file is valid, this will save time on login and will reduce use of blackbox token
@@ -1391,19 +1398,23 @@ class Session:
             os._exit(0)
 
     def setSessionData(self, sessionData, shared=False):
-        """Encrypts relevant session data and writes it to the .ikabot file
+        """Writes relevant session data to disk formatted as JSON (indent=2)
         Parameters
         ----------
         sessionData : dict
-            dictionary containing relevant session data, data is written to file using AESCipher.setSessionData
+            dictionary containing relevant session data
         shared : bool
-            Indicates if the new data should be shared among all accounts asociated with the user-password
+            Indicates if the new data should be shared among all accounts associated with the user-password
         """
-        self.cipher.setSessionData(self, sessionData, shared=shared)
+        set_session_data(self, sessionData, shared=shared)
 
     def getSessionData(self):
-        """Gets relevant session data from the .ikabot file"""
-        return self.cipher.getSessionData(self)
+        """Gets fresh session data from disk (hot-reloaded)"""
+        return get_session_data(self)
+
+    def deleteSessionData(self):
+        """Deletes session data for this user from disk"""
+        delete_session_data(self)
 
 
 def normal_get(url, params={}):
