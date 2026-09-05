@@ -25,6 +25,13 @@ try:
 except Exception:
     LOCAL_DECAPTCHA = False
 
+try:
+    from ikabot.helpers.logging import getLogger
+    _logger = getLogger(__name__)
+except Exception:
+    import logging
+    _logger = logging.getLogger(__name__)
+
 
 def extract_captcha_image(html):
     """Extract the pirates captcha PNG bytes from the capture response.
@@ -270,7 +277,25 @@ def autoPirate(session, event, stdin_fd, predetermined_input):
                         captcha = resolveCaptcha(session, picture)
                         session.setStatus("Got captcha: " + captcha)
                         if captcha == "Error":
+                            # The captcha could not be solved (local solver failed
+                            # or the remote API rejected the image). Wait a moment
+                            # and trigger a fresh capture request so we get a brand
+                            # new captcha (or restore the fortress context) instead
+                            # of re-trying against the same stale HTML.
                             time.sleep(5)
+                            url = "action=PiracyScreen&function=capture&buildingLevel={0}&view=pirateFortress&cityId={1}&position=17&activeTab=tabBootyQuest&backgroundView=city&currentCityId={1}&templateView=pirateFortress&actionRequest={2}&ajax=1".format(
+                                piracyMissionToBuildingLevel[pirateMissionChoice],
+                                piracyCities[0]["id"],
+                                actionRequest,
+                            )
+                            html = session.post(url)
+                            if not (
+                                "function=createCaptcha" in html
+                                or "js_captchaImage" in html
+                            ):
+                                # the fortress is gone/not asking us for a captcha
+                                # anymore; let the outer logic decide what to do
+                                break
                             continue
                         session.post(city_url + str(piracyCities[0]["id"]))
                         params = {
@@ -316,18 +341,44 @@ def autoPirate(session, event, stdin_fd, predetermined_input):
         return
 
 
+def _is_png_bytes(image):
+    """True only if image is a non-empty PNG byte string.
+
+    The captcha solvers expect the actual PNG image, not the surrounding HTML
+    or a redirect/login page. Returning "Error" (so the loop can retry) is
+    safer than sending garbage to the API and getting a silent 500."""
+    try:
+        return (
+            isinstance(image, (bytes, bytearray))
+            and len(image) > 8
+            and bytes(image[:8]) == b"\x89PNG\r\n\x1a\n"
+        )
+    except Exception:
+        return False
+
+
 def resolveCaptcha(session, picture):
     session_data = session.getSessionData()
     if (
         "decaptcha" not in session_data
         or session_data["decaptcha"]["name"] == "default"
     ):
+        if not _is_png_bytes(picture):
+            return "Error"
         if PIRATE_DECAPTCHA_LOCAL and LOCAL_DECAPTCHA:
             try:
                 return get_captcha_string(picture)
             except Exception:
                 pass  # Fall back to remote solving if local decaptcha fails
-        return getPiratesCaptchaSolution(session, picture)
+        if _is_png_bytes(picture):
+            try:
+                return getPiratesCaptchaSolution(session, picture)
+            except Exception as e:
+                _logger.warning(
+                    "Remote pirates captcha API failed: %s" % e
+                )
+                return "Error"
+        return "Error"
     elif session_data["decaptcha"]["name"] == "custom":
         files = {"upload_file": picture}
         captcha = requests.post(
