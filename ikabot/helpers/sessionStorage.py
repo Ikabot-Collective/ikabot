@@ -280,10 +280,7 @@ def get_session_data(session, all_data=False):
     expected by Ikabot.
     """
     global_config = read_json_file(get_global_config_path(), {})
-    mail = getattr(session, "mail", None)
-    if not mail:
-        return {"shared": global_config}
-
+    mail = getattr(session, "mail", None) or ""
     user_file = get_user_file_path(mail)
     user_data = read_json_file(user_file, {})
 
@@ -322,15 +319,7 @@ def set_session_data(session, data, shared=False):
     Always reads latest disk state before writing to prevent overwriting
     concurrent updates or manual human edits.
     """
-    mail = getattr(session, "mail", None)
-    if not mail:
-        # If no mail is set, can only update global config
-        if shared and isinstance(data, dict):
-            global_config = read_json_file(get_global_config_path(), {})
-            global_config.update(data)
-            write_json_file(get_global_config_path(), global_config)
-        return
-
+    mail = getattr(session, "mail", None) or ""
     global_path = get_global_config_path()
     user_path = get_user_file_path(mail)
 
@@ -382,9 +371,7 @@ def set_session_data(session, data, shared=False):
 
 def delete_session_data(session):
     """Deletes the user's session JSON file."""
-    mail = getattr(session, "mail", None)
-    if not mail:
-        return
+    mail = getattr(session, "mail", None) or ""
     user_path = get_user_file_path(mail)
     if os.path.exists(user_path):
         try:
