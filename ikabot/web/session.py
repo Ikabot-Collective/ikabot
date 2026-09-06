@@ -271,6 +271,21 @@ class Session:
             sys.exit("The provided gf-token-production cookie is invalid or expired\n")
         return auth_token
 
+    def __ask_password_if_needed(self):
+        """
+        If the user resumed a saved session without a password (empty mail /
+        saved account selection), asking it on the first prompt would defeat
+        the cookie-based login. But if the lobby cookie has expired we now do
+        need the real credentials to re-authenticate via mauth. Ask for them
+        only in that moment, and only in the parent process.
+        """
+        if not self.password and self.padre:
+            if not self.mail:
+                print("\nThe stored session has expired and no account mail was provided.")
+                self.mail = read(msg="Mail: ")
+            print("\nThe stored session has expired. Enter the password for '{}':".format(self.mail))
+            self.password = getpass.getpass("Password: ")
+
     def __load_new_blackbox_token(self, allow_lobby_cookie_fallback=False):
         try:
             if self.padre:
@@ -333,8 +348,10 @@ class Session:
                             print("  {}. {}".format(i, user))
                         selected = saved_users[read(min=1, max=len(saved_users), digit=True) - 1]
                     self.mail = selected
-                # Cookies are already stored, skip password prompt
-                self.password = ""
+                # Cookies are already stored, skip password prompt (unless we
+                # already learned the password during a previous retry)
+                if not self.password:
+                    self.password = ""
             else:
                 # Mail was typed. If it matches a saved account, reuse its cookies
                 # instead of asking for a password.
@@ -378,6 +395,7 @@ class Session:
         if not self.__test_lobby_cookie():
 
             self.logger.warning("Getting new lobby cookie")
+            self.__ask_password_if_needed()
             blackbox_loaded = self.__load_new_blackbox_token(allow_lobby_cookie_fallback=True)
             if not blackbox_loaded:
                 auth_token = self.s.cookies["gf-token-production"]
