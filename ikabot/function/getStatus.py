@@ -87,9 +87,11 @@ def getStatus(session, event, stdin_fd, predetermined_input):
             total_gold = int(Decimal(json_data["gold"]))
             total_gold_production = int(
                 Decimal(
-                    json_data["scientistsUpkeep"]
-                    + json_data["income"]
+                    json_data["income"]
+                    + json_data["godGoldResult"]
+                    + json_data["badTaxAccountant"]
                     + json_data["upkeep"]
+                    + json_data["scientistsUpkeep"]
                 )
             )
         print("Ships {:d}/{:d}".format(int(available_ships), int(total_ships)))
