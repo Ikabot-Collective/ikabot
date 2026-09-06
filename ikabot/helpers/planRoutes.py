@@ -178,6 +178,39 @@ def executeRoutes(session, routes, useFreighters=False):
             time.sleep(random.randint(5, 15))
 
 
+def splitCargoBetweenFleets(session, toSend):
+    """This function splits a cargo between trade ships and freighters. Trade ships are filled first because they are faster, and whatever doesn't fit in the currently available trade ships is assigned to the freighters. If only one of the two fleets has ships available, the whole cargo is assigned to it
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+        Session object
+    toSend : list
+        array of resources to send
+
+    Returns
+    -------
+    (tradeShipCargo, freighterCargo) : tuple
+        two arrays of resources, the first one to be sent with trade ships and the second one with freighters
+    """
+    tradeShipCargo = [0] * len(toSend)
+    freighterCargo = [0] * len(toSend)
+
+    if getAvailableFreighters(session) == 0:
+        return list(toSend), freighterCargo
+
+    ship_capacity, _ = getShipCapacity(session)
+    tradeShipSpace = getAvailableShips(session) * ship_capacity
+    if tradeShipSpace == 0:
+        return tradeShipCargo, list(toSend)
+
+    for i in range(len(toSend)):
+        tradeShipCargo[i] = min(toSend[i], tradeShipSpace)
+        tradeShipSpace -= tradeShipCargo[i]
+        freighterCargo[i] = toSend[i] - tradeShipCargo[i]
+
+    return tradeShipCargo, freighterCargo
+
+
 def get_random_wait_time():
     return random.randint(0, 20) * 3
 

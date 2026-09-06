@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from ikabot.helpers.logging import getLogger
+from ikabot.helpers.logging import getLogger, setLoggedInPlayer
 import base64
 import datetime
 import getpass
@@ -863,6 +863,7 @@ class Session:
             config.infoUser = "Server:{}".format(self.servidor)
             config.infoUser += ", World:{}".format(self.word)
             config.infoUser += ", Player:{}".format(self.username)
+            setLoggedInPlayer(self.username)
             banner()
 
         self.host = "s{}-{}.ikariam.gameforge.com".format(self.mundo, self.servidor)

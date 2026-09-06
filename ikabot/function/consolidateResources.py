@@ -10,12 +10,22 @@ from ikabot.helpers.botComm import *
 from ikabot.helpers.getJson import getCity
 from ikabot.helpers.gui import banner
 from ikabot.helpers.pedirInfo import *
-from ikabot.helpers.planRoutes import executeRoutes
+from ikabot.helpers.planRoutes import executeRoutes, splitCargoBetweenFleets
 from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.resources import *
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import addThousandSeparator
 from ikabot.helpers.varios import getDateTime
+
+SHIP_TYPE_TRADE_SHIPS = 1
+SHIP_TYPE_FREIGHTERS = 2
+SHIP_TYPE_BOTH = 3
+
+SHIP_TYPE_NAMES = {
+    SHIP_TYPE_TRADE_SHIPS: 'Trade ships',
+    SHIP_TYPE_FREIGHTERS: 'Freighters',
+    SHIP_TYPE_BOTH: 'Trade ships and freighters',
+}
 
 def consolidateResources(session, event, stdin_fd, predetermined_input):
     """
@@ -31,7 +41,7 @@ def consolidateResources(session, event, stdin_fd, predetermined_input):
     try:
         banner()
 
-        citiesIds = getIdsOfCities(session)
+        citiesIds, __ = getIdsOfCities(session)
         if len(citiesIds) == 0:
             event.set()
             return
@@ -40,6 +50,15 @@ def consolidateResources(session, event, stdin_fd, predetermined_input):
             print('You need at least two cities to consolidate resources.')
             event.set()
             return
+
+        banner()
+        print('What type of ships do you want to use? (Default: Trade ships)')
+        print('(1) Trade ships')
+        print('(2) Freighters')
+        print('(3) Both')
+        shipType = read(min=1, max=3, digit=True, empty=True)
+        if shipType == '':
+            shipType = SHIP_TYPE_TRADE_SHIPS
 
         banner()
         source_msg = 'Select source cities to send resources from:'
@@ -90,6 +109,7 @@ def consolidateResources(session, event, stdin_fd, predetermined_input):
             destinationCity['name'], 
             intervalInHours,
         ))
+        print(('Using {}').format(SHIP_TYPE_NAMES[shipType].lower()))
 
         print("\nProceed? [Y/n]")
         rta = read(values=["y", "Y", "n", "N", ""])
@@ -106,7 +126,7 @@ def consolidateResources(session, event, stdin_fd, predetermined_input):
     set_child_mode(session)
     event.set()  # this is where we give back control to main process
 
-    info = 'Consolidate resources from {} to {} every {:d} hours'.format(source_city_names_str, destinationCity['name'], intervalInHours)
+    info = 'Consolidate resources from {} to {} every {:d} hours using {}'.format(source_city_names_str, destinationCity['name'], intervalInHours, SHIP_TYPE_NAMES[shipType].lower())
     setInfoSignal(session, info)
 
     nextExecutionTime = datetime.datetime.now() + datetime.timedelta(hours=intervalInHours)
@@ -116,7 +136,7 @@ def consolidateResources(session, event, stdin_fd, predetermined_input):
     )
 
     try:
-        do_it(session, limits, sourceCities, destinationCity['id'], intervalInHours)
+        do_it(session, limits, sourceCities, destinationCity['id'], intervalInHours, shipType)
     except Exception as e:
         msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
         sendToBot(session, msg)
@@ -124,7 +144,7 @@ def consolidateResources(session, event, stdin_fd, predetermined_input):
         session.logout()
 
 
-def do_it(session, limits, sourceCityIds, destinationCityId, intervalInHours):
+def do_it(session, limits, sourceCityIds, destinationCityId, intervalInHours, shipType=SHIP_TYPE_TRADE_SHIPS):
     """
     Parameters
     ----------
@@ -133,6 +153,8 @@ def do_it(session, limits, sourceCityIds, destinationCityId, intervalInHours):
     sourceCityIds : list[str]
     destinationCityId : int
     intervalInHours : int
+    shipType : int
+        one of SHIP_TYPE_TRADE_SHIPS, SHIP_TYPE_FREIGHTERS or SHIP_TYPE_BOTH
     """
 
     firstRun = True
@@ -177,14 +199,24 @@ def do_it(session, limits, sourceCityIds, destinationCityId, intervalInHours):
                     totalToSend += sendable
 
             if totalToSend != 0:
-                route = (
-                    sourceCity,
-                    destinationCity,
-                    destinationCity["islandId"],
-                    *toSend,
-                )
+                if shipType == SHIP_TYPE_BOTH:
+                    tradeShipCargo, freighterCargo = splitCargoBetweenFleets(session, toSend)
+                elif shipType == SHIP_TYPE_FREIGHTERS:
+                    tradeShipCargo, freighterCargo = [0] * len(toSend), toSend
+                else:
+                    tradeShipCargo, freighterCargo = toSend, [0] * len(toSend)
 
-                executeRoutes(session, [route], useFreighters=False)
+                for cargo, useFreighters in ((tradeShipCargo, False), (freighterCargo, True)):
+                    if sum(cargo) == 0:
+                        continue
+                    route = (
+                        sourceCity,
+                        destinationCity,
+                        destinationCity["islandId"],
+                        *cargo,
+                    )
+                    executeRoutes(session, [route], useFreighters=useFreighters)
+
                 loop_amount_sent += totalToSend
                 total_amount_sent += totalToSend
 

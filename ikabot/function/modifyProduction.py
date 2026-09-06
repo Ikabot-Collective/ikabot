@@ -177,3 +177,64 @@ def modifyAcademyWorkers(session, event, stdin_fd, predetermined_input):
     except KeyboardInterrupt:
         return
     event.set()
+
+
+def modifyTempleWorkers(session, event, stdin_fd, predetermined_input):
+    """
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    event : multiprocessing.Event
+    stdin_fd: int
+    predetermined_input : multiprocessing.managers.SyncManager.list
+    """
+    sys.stdin = os.fdopen(stdin_fd)
+    config.predetermined_input = predetermined_input
+    try:
+        banner()
+        city_ids, _ = ignoreCities(session, msg="In which cities do you want to set priests?")
+
+        print("What % of priests do you want to use? (Default 100%)")
+        percentageWorkers = read(min=0, max=100, default=100)
+
+        banner()
+        for city_id in city_ids:
+            html = session.get(city_url + city_id)
+            city = getCity(html)
+
+            temple_slot = next(
+                (slot for slot in city['position'] if slot.get('building') == 'temple'),
+                None
+            )
+            if temple_slot is None:
+                print(f"No temple in {city['name']}, skipping.")
+                continue
+
+            position = temple_slot['position']
+            url = f"view=temple&cityId={city['id']}&position={position}&backgroundView=city&currentCityId={city['id']}&actionRequest={actionRequest}&ajax=1"
+            resp = session.post(url)
+            resp_json = json.loads(resp, strict=False)
+            max_priests = resp_json[2][1]['js_TempleSlider']['slider']['max_value']
+
+            if percentageWorkers == 100:
+                finalPriests = max_priests
+            else:
+                finalPriests = int(max_priests / 100 * percentageWorkers)
+
+            session.post(params={
+                "action": "CityScreen", "function": "assignPriests",
+                "cityId": city["id"], "position": position,
+                "priests": finalPriests,
+                "backgroundView": "city", "currentCityId": city["id"],
+                "templateView": "temple", "actionRequest": actionRequest, "ajax": "1"
+            })
+            print(f"{finalPriests} priests set for Temple in {city['name']}.")
+
+            wait(3, 4)
+
+        print("\nAll temples have been set!")
+        enter()
+
+    except KeyboardInterrupt:
+        return
+    event.set()

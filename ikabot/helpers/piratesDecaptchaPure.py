@@ -17,6 +17,12 @@ except Exception:
     USE_MULTIPROCESSING = True
 
 try:
+    from ikabot.config import DECAPTCHA_TIMING_LOG
+    TIMING_LOG = bool(DECAPTCHA_TIMING_LOG)
+except Exception:
+    TIMING_LOG = False
+
+try:
     from math import sumprod as _dot
 except ImportError:
     def _dot(a, b, _sum=sum, _map=map, _mul=mul):
@@ -40,45 +46,301 @@ _SPAWN_HAS_WINO = False
 _MP_MIN_OPS = 1_000_000
 
 _WEIGHTS_CACHE = None
+_POOL_WORKERS = 0
+_LAST_SOLVE = 0.0
+_SOLVING = False
+_IDLE_TIMER = None
+
+# Drop the pool, the seats and the weights after this many idle seconds. An
+# account that solved a captcha ten minutes ago should not still be holding
+# ~200 MB of weights and a pool of workers.
+_IDLE_TIMEOUT = 120.0
+# Measured worker footprint is ~44 MB with the packed weights below; the
+# headroom covers interpreter and transient allocations.
+_MB_PER_WORKER = 60
+# Free RAM to leave for the parent process (weights + interpreter) before
+# even considering a pool.
+_MB_BASE = 300
 
 
-def _init_spawn_wino(wino):
+def _init_spawn_wino(packed):
+    """Pool initializer. Rebuilds the per-output-channel weight rows as
+    zero-copy views into the shared array buffers.
+
+    The weights arrive as array.array('d') rather than nested lists of Python
+    floats: the same numbers cost 37.5 MB instead of 152 MB per worker, and
+    unpickling them is a memcpy instead of the allocation of ~4.7 million
+    float objects. That allocation is what fails, in the child, with
+    MemoryError when several accounts start solving at once."""
     global _SPAWN_WINO
+    wino = {}
+    for key, (planes, C_in) in packed.items():
+        rows = []
+        for plane in planes:
+            view = memoryview(plane)
+            rows.append([view[oc * C_in:(oc + 1) * C_in]
+                         for oc in range(len(plane) // C_in)])
+        wino[key] = rows
     _SPAWN_WINO = wino
 
 
-def _get_persistent_pool(wino=None):
-    global _SPAWN_POOL, _SPAWN_HAS_WINO
-    if not USE_MULTIPROCESSING:
-        return None
-    if _SPAWN_POOL is not None and wino is not None and not _SPAWN_HAS_WINO:
-        _SPAWN_POOL.terminate()
-        _SPAWN_POOL.join()
-        _SPAWN_POOL = None
-    if _SPAWN_POOL is None:
-        if wino is not None:
-            _SPAWN_POOL = _MP_CTX.Pool(_MP_CORES, initializer=_init_spawn_wino, initargs=(wino,))
-            _SPAWN_HAS_WINO = True
-        else:
-            _SPAWN_POOL = _MP_CTX.Pool(_MP_CORES)
-        import atexit
+def _pack_wino(weights):
+    """Nested lists -> one array.array('d') per Winograd plane."""
+    import array
+    packed = {}
+    for key, planes in weights.items():
+        if not key.endswith("::wino"):
+            continue
+        C_in = len(planes[0][0])
+        packed[key] = ([array.array('d', [v for row in plane for v in row])
+                        for plane in planes], C_in)
+    return packed
 
-        def _cleanup():
-            if _SPAWN_POOL is not None:
-                _SPAWN_POOL.terminate()
-                _SPAWN_POOL.join()
-        atexit.register(_cleanup)
+
+def _get_persistent_pool(wino=None):
+    """Return the pool if one exists. Never creates one implicitly -- pool
+    creation goes through _ensure_pool(), which first checks whether this
+    machine can afford one right now."""
     return _SPAWN_POOL
 
 
-def _warm_spawn_pool(weights):
-    if not USE_MULTIPROCESSING:
+# ---------------------------------------------------------------------------
+# Machine-wide worker budget
+#
+# Every ikabot task runs in its own process, so without coordination each one
+# independently decides to spawn `physical_cores` workers. With six accounts
+# that is 54 processes on 8 cores, which measured 2.5x SLOWER than not using
+# multiprocessing at all, while exhausting RAM.
+#
+# Instead each solver takes a "seat" (an exclusively locked file) and sizes
+# its pool from how many seats are occupied, so the total number of workers
+# on the machine stays near the core count whether there is one account or a
+# hundred. The lock is held by the OS, so a task killed with TerminateProcess
+# releases its seat -- a counter in a file would leak.
+# ---------------------------------------------------------------------------
+_SEAT_FDS = []
+
+try:
+    import fcntl
+
+    def _trylock(fd):
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            return True
+        except OSError:
+            return False
+except ImportError:
+    try:
+        import msvcrt
+
+        def _trylock(fd):
+            try:
+                msvcrt.locking(fd, msvcrt.LK_NBLCK, 1)
+                return True
+            except OSError:
+                return False
+    except ImportError:
+        def _trylock(fd):
+            return False
+
+
+def _seat_dir():
+    import tempfile
+    return os.path.join(tempfile.gettempdir(), "ikabot_decaptcha_seats")
+
+
+def _seat_path(i):
+    return os.path.join(_seat_dir(), "seat%d.lock" % i)
+
+
+def _claim_seat():
+    """Occupy one seat. Returns False when every core is already solving."""
+    try:
+        os.makedirs(_seat_dir(), exist_ok=True)
+    except OSError:
+        return False
+    for i in range(_MP_CORES):
+        try:
+            fd = os.open(_seat_path(i), os.O_CREAT | os.O_RDWR, 0o666)
+        except OSError:
+            continue
+        if _trylock(fd):
+            _SEAT_FDS.append(fd)
+            return True
+        try:
+            os.close(fd)
+        except OSError:
+            pass
+    return False
+
+
+def _seated():
+    """How many solvers are active machine-wide, this one included."""
+    n = 0
+    for i in range(_MP_CORES):
+        try:
+            fd = os.open(_seat_path(i), os.O_CREAT | os.O_RDWR, 0o666)
+        except OSError:
+            continue
+        # Locking succeeds only if the seat was free; closing immediately
+        # gives back the lock we just took to test it.
+        if not _trylock(fd):
+            n += 1
+        try:
+            os.close(fd)
+        except OSError:
+            pass
+    return n
+
+
+def _release_seats():
+    while _SEAT_FDS:
+        try:
+            os.close(_SEAT_FDS.pop())
+        except OSError:
+            pass
+
+
+def _available_mb():
+    """Free RAM, or infinity when it cannot be determined."""
+    try:
+        with open("/proc/meminfo") as f:
+            for line in f:
+                if line.startswith("MemAvailable:"):
+                    return int(line.split()[1]) / 1024.0
+    except Exception:
+        pass
+    try:
+        import ctypes
+
+        class _MemStatus(ctypes.Structure):
+            _fields_ = [("dwLength", ctypes.c_ulong),
+                        ("dwMemoryLoad", ctypes.c_ulong),
+                        ("ullTotalPhys", ctypes.c_ulonglong),
+                        ("ullAvailPhys", ctypes.c_ulonglong),
+                        ("ullTotalPageFile", ctypes.c_ulonglong),
+                        ("ullAvailPageFile", ctypes.c_ulonglong),
+                        ("ullTotalVirtual", ctypes.c_ulonglong),
+                        ("ullAvailVirtual", ctypes.c_ulonglong),
+                        ("ullAvailExtendedVirtual", ctypes.c_ulonglong)]
+
+        status = _MemStatus()
+        status.dwLength = ctypes.sizeof(status)
+        ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(status))
+        return status.ullAvailPhys / 1048576.0
+    except Exception:
+        pass
+    return float("inf")
+
+
+def _drop_pool():
+    """Give back the workers and the seats. Keeps the weights."""
+    global _SPAWN_POOL, _SPAWN_HAS_WINO, _POOL_WORKERS
+    if _SPAWN_POOL is not None:
+        try:
+            _SPAWN_POOL.terminate()
+            _SPAWN_POOL.join()
+        except Exception:
+            pass
+    _SPAWN_POOL = None
+    _SPAWN_HAS_WINO = False
+    _POOL_WORKERS = 0
+    _release_seats()
+
+
+def _release_all():
+    """Idle cleanup: workers, seats and weights."""
+    global _WEIGHTS_CACHE
+    _drop_pool()
+    _WEIGHTS_CACHE = None
+
+
+def _idle_release():
+    """Timer callback: drop everything once this process stops solving.
+
+    Without this the cleanup would only ever run at the start of the *next*
+    solve, so an account that saw one captcha and then went quiet would hold
+    ~200 MB of weights for the lifetime of the task. With a hundred accounts
+    that is the whole problem again."""
+    import time
+    if _SOLVING or not _LAST_SOLVE:
+        _schedule_idle_release()      # busy or never used; look again later
         return
+    if time.time() - _LAST_SOLVE >= _IDLE_TIMEOUT:
+        _release_all()
+    else:
+        _schedule_idle_release()
+
+
+def _schedule_idle_release():
+    global _IDLE_TIMER
+    try:
+        import threading
+        if _IDLE_TIMER is not None:
+            _IDLE_TIMER.cancel()
+        _IDLE_TIMER = threading.Timer(_IDLE_TIMEOUT, _idle_release)
+        _IDLE_TIMER.daemon = True     # never keeps the task process alive
+        _IDLE_TIMER.start()
+    except Exception:
+        # No threading available (or shutting down): the check at the start
+        # of the next solve still covers the common case.
+        pass
+
+
+def _plan_workers():
+    """How many workers this solve may use, decided from the machine's state
+    right now. Returns 0 to solve in this process."""
+    if not _claim_seat():
+        # Every core already has a solver on it. Piling on makes everyone
+        # slower; measured, plain serial solving wins once the machine is
+        # saturated.
+        return 0
+    seated = _seated()
+    if seated <= 1:
+        # Nobody else is solving: take the machine. Measured on an 8-core
+        # laptop, one solve costs 13.2s serial, 9.3s on 2 workers, 6.6s on 4
+        # and 5.0s on 8, and pool start-up no longer grows with the worker
+        # count now that the weights ship as raw buffers.
+        want = _MP_CORES
+    else:
+        # +1 absorbs the race between sitting down and counting: a solver that
+        # started a millisecond after us has not taken its seat yet.
+        want = _MP_CORES // (seated + 1)
+    # Memory is the hard limit, not the core count.
+    want = min(want, int(max(0.0, _available_mb() - _MB_BASE) // _MB_PER_WORKER))
+    if want < 2:
+        _release_seats()
+        return 0
+    return want
+
+
+def _ensure_pool(weights):
+    """Create a worker pool if the machine can afford one. Returns the number
+    of workers, 0 when solving serially."""
+    global _SPAWN_POOL, _SPAWN_HAS_WINO, _POOL_WORKERS
+    if not USE_MULTIPROCESSING:
+        return 0
+    if _SPAWN_POOL is not None:
+        return _POOL_WORKERS
     _init_mp()
     if _MP_CTX is None:
-        return
-    wino = {k: v for k, v in weights.items() if k.endswith("::wino")}
-    _get_persistent_pool(wino)
+        return 0
+    try:
+        workers = _plan_workers()
+        if workers < 2:
+            return 0
+        _SPAWN_POOL = _MP_CTX.Pool(workers, initializer=_init_spawn_wino,
+                                   initargs=(_pack_wino(weights),))
+        _SPAWN_HAS_WINO = True
+        _POOL_WORKERS = workers
+        import atexit
+        atexit.register(_drop_pool)
+        return workers
+    except Exception:
+        # Out of memory, out of handles, sandboxed multiprocessing -- solving
+        # in this process is always still possible.
+        _drop_pool()
+        return 0
 
 
 def _physical_cores(logical):
@@ -251,11 +513,9 @@ def load_weights(blob_path=None) -> dict:
         if len(shape) == 4 and shape[2] == 3 and shape[3] == 3:
             out[name + "::wino"] = _wino_transform_weights(flat, shape[0], shape[1])
 
-    if USE_MULTIPROCESSING:
-        try:
-            _warm_spawn_pool(out)
-        except Exception:
-            pass
+    # No pool is started here on purpose. Captchas are rare events, so a pool
+    # created at load time would sit idle holding ~1.2 GB for the lifetime of
+    # the task process. _ensure_pool() creates one at solve time instead.
     return out
 
 
@@ -433,9 +693,9 @@ def _matmul_rows(w, b, pixels, K, C_out):
     if USE_MULTIPROCESSING:
         _init_mp()
         P = len(pixels)
-        if _MP_CTX is not None and C_out >= 2 and C_out * P * K >= _MP_MIN_OPS:
+        if _SPAWN_POOL is not None and C_out >= 2 and C_out * P * K >= _MP_MIN_OPS:
             try:
-                n_chunks = min(_MP_CORES, C_out)
+                n_chunks = min(_POOL_WORKERS, C_out)
                 chunk = math.ceil(C_out / n_chunks)
                 ranges = [(i, min(i + chunk, C_out)) for i in range(0, C_out, chunk)]
                 pool = _get_persistent_pool()
@@ -557,11 +817,11 @@ def conv2d_3x3_wino(x, U36, b, C_in, C_out, H, W, key=None):
 
     if USE_MULTIPROCESSING:
         _init_mp()
-        parallel = (_MP_CTX is not None and tw >= 2 and _SPAWN_HAS_WINO
+        parallel = (_SPAWN_POOL is not None and tw >= 2 and _SPAWN_HAS_WINO
                     and key is not None and 36 * C_out * C_in * T >= _MP_MIN_OPS)
         if parallel:
             try:
-                n = min(_MP_CORES, tw)
+                n = min(_POOL_WORKERS, tw)
                 chunk = math.ceil(tw / n)
                 xranges = [(i, min(i + chunk, tw)) for i in range(0, tw, chunk)]
                 pool = _get_persistent_pool()
@@ -738,7 +998,7 @@ def forward(x_chw, weights):
 
     if USE_MULTIPROCESSING:
         _init_mp()
-        if _MP_CTX is not None and _MP_CORES >= 2:
+        if _SPAWN_POOL is not None and _POOL_WORKERS >= 2:
             try:
                 pool = _get_persistent_pool()
                 tasks = [
@@ -948,8 +1208,75 @@ def preprocess_image(image_bytes):
     return r_flat + g_flat + b_flat
 
 
+def _log_timing(fields):
+    """One [decaptcha-timing] line per solve, when DECAPTCHA_TIMING_LOG is on.
+
+    Logged at WARNING because ikabot's default log level is WARNING: the
+    config flag is the opt-in, so a user who turned it on should not also
+    have to raise the log level to see anything."""
+    try:
+        from ikabot.helpers.logging import getLogger
+        getLogger(__name__).warning(
+            "[decaptcha-timing] " + " ".join("%s=%s" % kv for kv in fields))
+    except Exception:
+        pass
+
+
+def _timing_context(workers):
+    import platform
+    import sys
+    return [
+        ("workers", workers),
+        ("cores", _MP_CORES),
+        ("logical", os.cpu_count() or 0),
+        ("start", "fork" if _MP_FORK else "spawn"),
+        ("avail_mb", "%.0f" % _available_mb()),
+        ("py", "%d.%d.%d" % sys.version_info[:3]),
+        ("os", platform.system()),
+        ("machine", platform.machine()),
+    ]
+
+
 def get_captcha_string(image_bytes):
     """Main entrypoint required by piratesDecaptcha.py."""
+    global _LAST_SOLVE, _SOLVING
+    import time
+
+    now = time.time()
+    if _LAST_SOLVE and now - _LAST_SOLVE > _IDLE_TIMEOUT:
+        _release_all()
+
+    _SOLVING = True
+    t0 = time.perf_counter()
     weights = get_cached_weights()
+    t_load = time.perf_counter() - t0
+
+    t0 = time.perf_counter()
     x_flat = preprocess_image(image_bytes)
-    return predict(x_flat, weights).upper()
+    t_pre = time.perf_counter() - t0
+
+    t0 = time.perf_counter()
+    workers = _ensure_pool(weights)
+    t_pool = time.perf_counter() - t0
+
+    t0 = time.perf_counter()
+    try:
+        result = predict(x_flat, weights).upper()
+    finally:
+        if workers == 0:
+            # Nothing to protect until the next solve; let someone else use
+            # the core. A pool keeps its seats until the idle timeout.
+            _release_seats()
+        _LAST_SOLVE = time.time()
+        _SOLVING = False
+        _schedule_idle_release()
+    t_solve = time.perf_counter() - t0
+
+    if TIMING_LOG:
+        _log_timing([("solve_s", "%.2f" % t_solve),
+                     ("pool_s", "%.2f" % t_pool),
+                     ("load_s", "%.2f" % t_load),
+                     ("preprocess_s", "%.2f" % t_pre),
+                     ("total_s", "%.2f" % (t_solve + t_pool + t_load + t_pre)),
+                     ("chars", len(result))] + _timing_context(workers))
+    return result
