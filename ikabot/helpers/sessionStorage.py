@@ -62,6 +62,64 @@ def get_user_file_path(email):
     return os.path.join(get_users_dir(), filename)
 
 
+def get_saved_users():
+    """Returns the list of saved user accounts (their emails) found in ~/.ikabot/users,
+    excluding the default account used for empty mail."""
+    users_dir = get_users_dir()
+    if not os.path.isdir(users_dir):
+        return []
+
+    saved = []
+    for filename in sorted(os.listdir(users_dir)):
+        if not filename.endswith(".json"):
+            continue
+        if filename == f"{sanitize_email('')}.json":
+            continue
+        filepath = os.path.join(users_dir, filename)
+        data = read_json_file(filepath, {})
+        email = data.get("email") or filename[: -len(".json")]
+        saved.append(email)
+    return saved
+
+
+def find_user_file_for_email(email):
+    """
+    Resolves an email to its session JSON file(s) in ~/.ikabot/users.
+
+    Returns a tuple (matching_path, duplicados):
+      - matching_path: path of the most recently modified matching file,
+                       or None if no user file matches the email.
+      - duplicados:    True if more than one file matches the email.
+    The default_user file (empty mail) is never considered a match.
+    """
+    users_dir = get_users_dir()
+    if not os.path.isdir(users_dir):
+        return None, False
+
+    candidates = []
+    for filename in os.listdir(users_dir):
+        if not filename.endswith(".json"):
+            continue
+        if filename == f"{sanitize_email('')}.json":
+            continue
+        filepath = os.path.join(users_dir, filename)
+        data = read_json_file(filepath, {})
+        stored_email = data.get("email") or filename[: -len(".json")]
+        if stored_email and stored_email.lower() == email.strip().lower():
+            candidates.append(filepath)
+
+    if not candidates:
+        return None, False
+
+    # Pick the most recently modified file, considering mtime/size tuple
+    matching_path = max(
+        candidates,
+        key=lambda p: (os.path.getmtime(p) if os.path.exists(p) else 0,
+                       os.path.getsize(p) if os.path.exists(p) else 0),
+    )
+    return matching_path, len(candidates) > 1
+
+
 def init_storage():
     """
     Initializes the storage layout:

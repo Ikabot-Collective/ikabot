@@ -25,6 +25,10 @@ from ikabot.helpers.sessionStorage import (
     set_session_data,
     delete_session_data,
     migrate_legacy_account,
+    get_saved_users,
+    get_user_file_path,
+    get_users_dir,
+    find_user_file_for_email,
 )
 from ikabot.helpers.botComm import *
 from ikabot.helpers.getJson import getCity
@@ -267,6 +271,21 @@ class Session:
             sys.exit("The provided gf-token-production cookie is invalid or expired\n")
         return auth_token
 
+    def __ask_password_if_needed(self):
+        """
+        If the user resumed a saved session without a password (empty mail /
+        saved account selection), asking it on the first prompt would defeat
+        the cookie-based login. But if the lobby cookie has expired we now do
+        need the real credentials to re-authenticate via mauth. Ask for them
+        only in that moment, and only in the parent process.
+        """
+        if not self.password and self.padre:
+            if not self.mail:
+                print("\nThe stored session has expired and no account mail was provided.")
+                self.mail = read(msg="Mail: ")
+            print("\nThe stored session has expired. Enter the password for '{}':".format(self.mail))
+            self.password = getpass.getpass("Password: ")
+
     def __load_new_blackbox_token(self, allow_lobby_cookie_fallback=False):
         try:
             if self.padre:
@@ -310,11 +329,46 @@ class Session:
             banner()
 
             self.mail = read(msg="Mail:")
+            entered_mail = self.mail
 
-            if len(config.predetermined_input) != 0:
-                self.password = config.predetermined_input.pop(0)
+            if not entered_mail:
+                # No mail provided (Enter/Enter). Never ask for a password:
+                # use the stored cookies from default_user.json, or if that
+                # does not exist but other accounts are saved, let the user
+                # pick one so its cookies are reused.
+                default_user_file = get_user_file_path("")
+                saved_users = get_saved_users()
+                if saved_users and not os.path.exists(default_user_file):
+                    if len(saved_users) == 1:
+                        selected = saved_users[0]
+                        print("\nNo default account found, using saved account: {}".format(selected))
+                    else:
+                        print("\nNo default account found. Select a saved account:")
+                        for i, user in enumerate(saved_users, start=1):
+                            print("  {}. {}".format(i, user))
+                        selected = saved_users[read(min=1, max=len(saved_users), digit=True) - 1]
+                    self.mail = selected
+                # Cookies are already stored, skip password prompt (unless we
+                # already learned the password during a previous retry)
+                if not self.password:
+                    self.password = ""
             else:
-                self.password = getpass.getpass("Password:")
+                # Mail was typed. If it matches a saved account, reuse its cookies
+                # instead of asking for a password.
+                matching_path, has_duplicates = find_user_file_for_email(entered_mail)
+                if matching_path:
+                    if has_duplicates:
+                        print("\n[Warning] '{}' is present in multiple session files. Using the most recently modified one.".format(entered_mail))
+                    self.password = ""
+                else:
+                    # No saved session for this mail
+                    print("\nNo saved session found for '{}'.".format(entered_mail))
+                    print("Check the files in: {}".format(get_users_dir()))
+                    print("If they are outdated or corrupted, delete them and log in manually.")
+                    if len(config.predetermined_input) != 0:
+                        self.password = config.predetermined_input.pop(0)
+                    else:
+                        self.password = getpass.getpass("Password:")
 
             banner()
 
@@ -341,6 +395,7 @@ class Session:
         if not self.__test_lobby_cookie():
 
             self.logger.warning("Getting new lobby cookie")
+            self.__ask_password_if_needed()
             blackbox_loaded = self.__load_new_blackbox_token(allow_lobby_cookie_fallback=True)
             if not blackbox_loaded:
                 auth_token = self.s.cookies["gf-token-production"]
