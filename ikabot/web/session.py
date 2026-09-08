@@ -45,6 +45,8 @@ class Session:
         self.logged = False
         self.blackbox = None
         self.api_user_agent = None
+        self.mail = None
+        self.password = None
         self.locale = config.IKABOT_LOCALE
         self.gf_lang = config.IKABOT_GF_LANG
         self.accept_language = config.build_accept_language(self.locale, self.gf_lang)
