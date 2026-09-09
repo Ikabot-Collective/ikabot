@@ -25,6 +25,7 @@ def read(
     empty=False,
     additionalValues=None,
     default=None,
+    ignore_predetermined=False,
     _retries=0,
     _max_retries=20
 ):
@@ -45,6 +46,8 @@ def read(
         a boolean indicating whether or not an empty string is acceptable as input
     additionalValues : list
         list of strings which are additional valid inputs. Can be used with digit = True to validate a string as an input among all digits
+    ignore_predetermined : bool
+        if True, skip config.predetermined_input entirely and force an interactive prompt
     Returns
     -------
     result : int | str
@@ -58,15 +61,16 @@ def read(
         print('Error: minimum input value is greater than maximum input value!')
         return None
         
-    try:
-        if len(config.predetermined_input) != 0:
-            return config.predetermined_input.pop(0)
-    except Exception:
-        pass
+    if not ignore_predetermined:
+        try:
+            if len(config.predetermined_input) != 0:
+                return config.predetermined_input.pop(0)
+        except Exception:
+            pass
     
     def _invalid():
         print("\033[1A\033[KInvalid option")
-        return read(min=min, max=max, digit=digit, msg=msg, values=values, empty=empty, additionalValues=additionalValues, default=default, _retries=_retries+1, _max_retries=_max_retries)
+        return read(min=min, max=max, digit=digit, msg=msg, values=values, empty=empty, additionalValues=additionalValues, default=default, ignore_predetermined=ignore_predetermined, _retries=_retries+1, _max_retries=_max_retries)
     
     try:
         read_input = input(msg)
