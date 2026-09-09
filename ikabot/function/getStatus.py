@@ -6,11 +6,11 @@ This command gathers the whole account in a single pass over the cities: each
 city costs exactly two requests (the city page and one ``updateGlobalData``),
 and everything shown afterwards is parsed from those responses.
 
-The collected data is persisted to a per-account cache file and reused on
-subsequent runs, so re-entering this menu performs no requests at all. The menu
-is then served entirely from memory: a building-levels table/list and a
-per-city detail screen. Option (3) triggers an on-demand re-scan that refreshes
-the cache.
+The collected data is persisted to a per-account cache file in the OS temp
+directory (like ikabot's log file) and reused on subsequent runs, so re-entering
+this menu performs no requests at all. The menu (building-levels table/list and
+per-city detail) is served entirely from that in-memory data. Option (3)
+triggers an on-demand re-scan that refreshes the cache.
 """
 
 import hashlib
@@ -38,20 +38,18 @@ resources_abbr = {"1": "(W)", "2": "(M)", "3": "(C)", "4": "(S)"}
 def getCacheFile(session):
     """Return the per-account cache file path.
 
-    The cache lives next to ikabot's own ``.ikabot`` file (i.e. inside the home
-    directory, where ``command_line.init`` chdirs to at startup) and its name is
-    derived from the account, so different accounts on the same machine never
-    share data. It falls back to the OS temp directory (``%temp%`` on Windows,
-    ``/tmp`` on Linux) when the primary location is not writable.
+    The data is not sensitive (no cookies), so like ikabot's own log file it
+    lives in the OS temp directory (``%temp%`` on Windows, ``/tmp`` on Linux)
+    and is cleaned up by the OS. The name is derived from the account, so
+    different accounts on the same machine never share data.
     """
     account = hashlib.sha256(
         ("ikabot-getstatus-" + getattr(session, "mail", "unknown")).encode("utf-8")
     ).hexdigest()[:16]
     filename = "getstatus_{}.json".format(account)
-    cache_dir = os.path.dirname(os.path.abspath(ikaFile))
-    if not os.access(cache_dir, os.W_OK):
-        cache_dir = os.getenv("temp") if isWindows else "/tmp"
-    return os.path.join(cache_dir, filename)
+    return (
+        os.getenv("temp") + "/" + filename if isWindows else "/tmp/" + filename
+    )
 
 
 def parseCityProduction(html, typeGood):
