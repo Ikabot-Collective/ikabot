@@ -81,9 +81,9 @@ def constructBuilding(session, event, stdin_fd, predetermined_input):
                 for free_space in free_spaces
                 if free_space["type"] == type_space
             ]
-            if len(free_spaces_of_type) > 0:
-                # we take any space in the desired area
-                free_space_of_type = free_spaces_of_type[0]
+            # Iterate through available slots for this surface type until an active/unlocked slot is found.
+            # Slots like position 13 require specific research (e.g., Bureaucracy) and will return empty HTML if locked.
+            for free_space_of_type in free_spaces_of_type:
                 params = {
                     "view": "buildingGround",
                     "cityId": city["id"],
@@ -95,6 +95,7 @@ def constructBuilding(session, event, stdin_fd, predetermined_input):
                 }
                 buildings_response = session.post(params=params, noIndex=True)
                 parsed_response = json.loads(buildings_response, strict=False)
+                
                 # Extract fresh actionRequest from the response
                 try:
                     update_global = [item for item in parsed_response if item[0] == 'updateGlobalData']
@@ -104,11 +105,17 @@ def constructBuilding(session, event, stdin_fd, predetermined_input):
                         current_action_request = actionRequest
                 except Exception:
                     current_action_request = actionRequest
+                
                 buildings_response = parsed_response[1][1]
                 if buildings_response == "":
                     continue
+                
                 html = buildings_response[1]
                 blocks = splitBuildingBlocks(html)
+                # Skip slot if the server returned empty content (e.g., locked slot or special restriction)
+                if len(blocks) == 0:
+                    continue
+
                 for block in blocks:
                     btype = block["type"]
                     block_html = block["html"]
@@ -118,25 +125,33 @@ def constructBuilding(session, event, stdin_fd, predetermined_input):
                     )
                     if not info_match:
                         continue
+                    
                     building_id = info_match.group(2)
+                    building_name = info_match.group(1)
+                    
                     if building_id in seen_ids:
                         continue
+                    
                     seen_ids.add(building_id)
                     costs = parseBuildingCosts(block_html)
                     can_afford = all(
                         costs[i] <= city["availableResources"][i]
                         for i in range(len(materials_names))
                     )
+                    
                     buildings.append(
                         {
                             "building": btype,
-                            "name": info_match.group(1),
+                            "name": building_name,
                             "buildingId": building_id,
                             "type": type_space,
                             "costs": costs,
                             "canAfford": can_afford,
                         }
                     )
+                # Stop checking remaining slots of this surface type once build options are retrieved
+                if len(blocks) > 0:
+                    break
 
         if len(buildings) == 0:
             print("No building can be built.")
