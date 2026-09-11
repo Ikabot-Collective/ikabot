@@ -326,7 +326,7 @@ def do_it(session, wine_city, wood_city, luxury_city, favour_tasks, collect_ambr
                         True  # we don't want to spam the message, only once is enough
                     )
                 break
-            matches = re.findall("<tr([\S\s]*?)tr>", html)
+            matches = re.findall(r"<tr([\S\s]*?)tr>", html)
             rows = [
                 matches[1],
                 matches[2],
