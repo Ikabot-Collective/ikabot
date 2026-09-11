@@ -275,8 +275,8 @@ def autoPirate(session, event, stdin_fd, predetermined_input):
                                 fullResponse=True,
                             ).content
                         captcha = resolveCaptcha(session, picture)
-                        session.setStatus("Got captcha: " + captcha)
                         if captcha == "Error":
+                            session.setStatus("Retrying captcha " + str(i + 1) + "/20")
                             # The captcha could not be solved (local solver failed
                             # or the remote API rejected the image). Wait a moment
                             # and trigger a fresh capture request so we get a brand
@@ -297,6 +297,7 @@ def autoPirate(session, event, stdin_fd, predetermined_input):
                                 # anymore; let the outer logic decide what to do
                                 break
                             continue
+                        session.setStatus("Got captcha: " + captcha)
                         session.post(city_url + str(piracyCities[0]["id"]))
                         params = {
                             "action": "PiracyScreen",
