@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
-        python-version: ['3.9', '3.10', '3.11', '3.12']
+        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
 
     steps:
     - name: Checkout
@@ -44,5 +44,5 @@ jobs:
         python -m pytest tests/ikabot
     - name: Run ikabot
       run: |
-        printf "\n\n" | python -m ikabot &> log.log || cat log.log
+        printf "\n\n\n" | python -m ikabot &> log.log || cat log.log
         grep "Obtaining new blackbox token, please wait..." log.log && exit 0 || exit 1
