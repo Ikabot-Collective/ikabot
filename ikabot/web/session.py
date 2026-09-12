@@ -1211,14 +1211,23 @@ class Session:
                 self.__sessionExpired()
 
     def __token(self):
-        """Generates a valid actionRequest token from the session
+        """Generates a valid actionRequest token from the session, or reuses
+        the one already stored for this account/world/server if it has one
         Returns
         -------
         token : str
             a string representing a valid actionRequest token
         """
+        sessionData = self.getSessionData()
+        token = sessionData.get("actionRequestToken")
+        if token:
+            return token
         html = self.get()
-        return re.search(r'actionRequest"?:\s*"(.*?)"', html).group(1)
+        token = re.search(r'actionRequest"?:\s*"(.*?)"', html).group(1)
+        sessionData.pop("shared", None)
+        sessionData["actionRequestToken"] = token
+        self.setSessionData(sessionData)
+        return token
 
     def get(
         self, url='', params={}, ignoreExpire=False, noIndex=False, fullResponse=False, noQuery=False, **kwargs
@@ -1421,12 +1430,18 @@ class Session:
                     assert self.__isExpired(resp) is False
                 if "TXT_ERROR_WRONG_REQUEST_ID" in resp:
                     self.logger.warning("got TXT_ERROR_WRONG_REQUEST_ID, bad actionRequest")
+                    sessionData = self.getSessionData()
+                    if sessionData.pop("actionRequestToken", None) is not None:
+                        sessionData.pop("shared", None)
+                        self.setSessionData(sessionData)
                     return self.post(
                         url=url_original,
                         payloadPost=payloadPost_original,
                         params=params_original,
                         ignoreExpire=ignoreExpire,
                         noIndex=noIndex,
+                        fullResponse=fullResponse,
+                        noQuery=noQuery,
                     )
                 # --- update developer runtime info ---
                 try:
