@@ -8,54 +8,9 @@ import traceback
 from ikabot.function.vacationMode import activateVacationMode
 from ikabot.helpers.botComm import *
 from ikabot.helpers.gui import enter
-from ikabot.helpers.process import set_child_mode
+from ikabot.helpers.decorators import configurator, task
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import daysHoursMinutes
-
-
-def alertAttacks(session, event, stdin_fd, predetermined_input):
-    """
-    Parameters
-    ----------
-    session : ikabot.web.session.Session
-    event : multiprocessing.Event
-    stdin_fd: int
-    predetermined_input : multiprocessing.managers.SyncManager.list
-    """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
-    try:
-        if checkTelegramData(session) is False:
-            event.set()
-            return
-
-        banner()
-        default = 20
-        minutes = read(
-            msg=
-                "How often should I search for attacks?(min:3, default: {:d}): ".format(default),
-            min=3,
-            default=default,
-        )
-        # min_units = read(msg=_('Attacks with less than how many units should be ignored? (default: 0): '), digit=True, default=0)
-        print("I will check for attacks every {:d} minutes".format(minutes))
-        enter()
-    except KeyboardInterrupt:
-        event.set()
-        return
-
-    set_child_mode(session)
-    event.set()
-
-    info = "\nI check for attacks every {:d} minutes\n".format(minutes)
-    setInfoSignal(session, info)
-    try:
-        do_it(session, minutes)
-    except Exception as e:
-        msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
-        sendToBot(session, msg)
-    finally:
-        session.logout()
 
 
 def respondToAttack(session):
@@ -94,6 +49,7 @@ def respondToAttack(session):
         time.sleep(max(0, 60 * 3 - elapsed))
 
 
+@task("alertAttacks")
 def do_it(session, minutes):
     """
     Parameters
@@ -101,6 +57,8 @@ def do_it(session, minutes):
     session : ikabot.web.session.Session
     minutes : int
     """
+    info = "\nI check for attacks every {:d} minutes\n".format(minutes)
+    setInfoSignal(session, info)
 
     # this thread lets the user react to an attack once the alert is sent
     thread = threading.Thread(target=respondToAttack, args=(session,))
@@ -168,3 +126,29 @@ def do_it(session, minutes):
 
         elapsed = time.time() - start_time
         time.sleep(max(0, minutes * 60 - elapsed))
+@configurator
+def alertAttacks(session, event, stdin_fd, predetermined_input):
+    """
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    event : multiprocessing.Event
+    stdin_fd: int
+    predetermined_input : multiprocessing.managers.SyncManager.list
+    """
+    if checkTelegramData(session) is False:
+        return None
+
+    banner()
+    default = 20
+    minutes = read(
+        msg=
+            "How often should I search for attacks?(min:3, default: {:d}): ".format(default),
+        min=3,
+        default=default,
+    )
+    # min_units = read(msg=_('Attacks with less than how many units should be ignored? (default: 0): '), digit=True, default=0)
+    print("I will check for attacks every {:d} minutes".format(minutes))
+    enter()
+    return {"session": session, "minutes": minutes}
+
