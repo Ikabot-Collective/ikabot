@@ -1,3 +1,4 @@
+from ikabot.helpers.decorators import configurator
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 import base64
@@ -32,6 +33,7 @@ decaptcha_test_pictures = [
 ]
 
 
+@configurator
 def decaptchaConf(session, event, stdin_fd, predetermined_input):
     """
     Parameters
@@ -41,8 +43,6 @@ def decaptchaConf(session, event, stdin_fd, predetermined_input):
     stdin_fd: int
     predetermined_input : multiprocessing.managers.SyncManager.list
     """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
     banner()
     try:
         session_data = session.getSessionData()

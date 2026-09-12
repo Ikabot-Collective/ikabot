@@ -1,3 +1,4 @@
+from ikabot.helpers.decorators import configurator
 import json
 import os
 import re
@@ -136,9 +137,8 @@ def displaySections(city_names, ids, city_ground, city_ships, cities, show_ships
     print("Grand total: {}".format(addThousandSeparator(grand_total)))
 
 
+@configurator
 def viewArmy(session, event, stdin_fd, predetermined_input):
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
     try:
         banner()
         print("(0) Back")

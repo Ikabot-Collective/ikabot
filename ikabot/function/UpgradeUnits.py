@@ -157,7 +157,13 @@ def wait_for_upgrade_start(session, city_id, position, tab):
         time.sleep(1)
         attempts += 1
 
+from ikabot.helpers.decorators import configurator, task
+
+
+@task("UpgradeUnits")
 def execute_sequential_upgrades(session, city_id, city_name, position, tab, tasks):
+    info = f"Workshop upgrade: {len(tasks)} upgrades queued"
+    setInfoSignal(session, info)
     while tasks:
         wait_for_upgrade_completion(session, city_id, position, tab)
         html = session.get(city_url + str(city_id))
@@ -188,11 +194,9 @@ def execute_sequential_upgrades(session, city_id, city_name, position, tab, task
 
     session.setStatus("All workshop upgrades completed")
 
+
+@configurator
 def UpgradeUnits(session, event, stdin_fd, predetermined_input):
-
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
-
     cities_ids, cities_info = getIdsOfCities(session)
 
     workshops = []
@@ -214,8 +218,7 @@ def UpgradeUnits(session, event, stdin_fd, predetermined_input):
     if not workshops:
         print("\nNo workshop found in any city.")
         enter()
-        event.set()
-        return
+        return None
 
     selected_workshops = workshops
     if len(workshops) > 1:
@@ -223,38 +226,31 @@ def UpgradeUnits(session, event, stdin_fd, predetermined_input):
         for idx, w in enumerate(workshops, start=1):
             lvl = w.get("level", 0)
             print(f"[{idx}] {w['name']}, workshop level {lvl}")
-        print("\nEnter numbers separated by space (e.g. 1 3) or 'all' to pick every city:")
-        sel = read().split()
-        if "all" in sel:
-            selected_workshops = workshops
-        else:
-            selected_workshops = []
-            for token in sel:
-                if token.isdigit():
-                    i = int(token)
-                    if 0 < i <= len(workshops):
-                        selected_workshops.append(workshops[i - 1])
+        print("\nEnter a number to pick a city:")
+        sel = read().strip()
+        selected_workshops = []
+        if sel.isdigit():
+            i = int(sel)
+            if 0 < i <= len(workshops):
+                selected_workshops.append(workshops[i - 1])
+        
         if not selected_workshops:
             enter()
-            event.set()
-            return
+            return None
 
-    for idx, w in enumerate(selected_workshops):
+    w = selected_workshops[0]
+    print(f"\n=== City {w['name']} (id {w['city_id']}) ===")
+    return run_workshop_upgrade_interface(
+        session,
+        w["city_id"],
+        w["name"],
+        w["position"],
+        w["action_request"],
+        w.get("level", 0),
+    )
 
-        print(f"\n=== City {w['name']} (id {w['city_id']}) ===")
-        finalize = idx == len(selected_workshops) - 1
-        run_workshop_upgrade_interface(
-            session,
-            w["city_id"],
-            w["name"],
-            w["position"],
-            w["action_request"],
-            event,
-            finalize,
-            w.get("level", 0),
-        )
 
-def run_workshop_upgrade_interface(session, city_id, city_name, position, action_request, event, finalize=True, workshop_level=0):
+def run_workshop_upgrade_interface(session, city_id, city_name, position, action_request, workshop_level=0):
     print("\nWhat would you like to upgrade?")
     print("[1] Units")
     print("[2] Ships")
@@ -277,16 +273,12 @@ def run_workshop_upgrade_interface(session, city_id, city_name, position, action
         data = json.loads(response, strict=False)
     except Exception as e:
         enter()
-        if finalize:
-            event.set()
-        return
+        return None
 
     template_data = next((b[1] for b in data if isinstance(b, list) and b[0] == "updateTemplateData"), None)
     if not template_data:
         enter()
-        if finalize:
-            event.set()
-        return
+        return None
 
     complete_data = template_data.get("completeData", {})
     unit_details = template_data.get("unitDetails", {})
@@ -322,9 +314,7 @@ def run_workshop_upgrade_interface(session, city_id, city_name, position, action
     if not tasks:
         print("\nNo upgrade options available in this city (workshop level may be too low).")
         enter()
-        if finalize:
-            event.set()
-        return
+        return None
 
     for idx, task in enumerate(tasks, start=1):
         print(f"[{idx}] {task['unit']} ({task['type']}): Level {task['from']}")
@@ -335,9 +325,7 @@ def run_workshop_upgrade_interface(session, city_id, city_name, position, action
 
     if not selected_tasks:
         enter()
-        if finalize:
-            event.set()
-        return
+        return None
 
     upgrade_levels = {}
     print("\nFor each selected unit, enter the desired target level.")
@@ -402,9 +390,7 @@ def run_workshop_upgrade_interface(session, city_id, city_name, position, action
     if not selected_tasks:
         print("\nNo upgrades selected after target evaluation. Nothing to do.")
         enter()
-        if finalize:
-            event.set()
-        return
+        return None
 
     print("\nThe following individual upgrades will be queued:")
     for i, t in enumerate(selected_tasks, start=1):
@@ -418,14 +404,13 @@ def run_workshop_upgrade_interface(session, city_id, city_name, position, action
     if confirm != 'y':
         print("Operation cancelled by user.")
         enter()
-        if finalize:
-            event.set()
-        return
-    session.setStatus(f"Queued {len(selected_tasks)} upgrades | Gold: {total_gold:,} | Crystal: {total_crystal:,}")
-    info = f"Workshop upgrade: {len(selected_tasks)} upgrades queued"
-    set_child_mode(session)
-    setInfoSignal(session, info)
-    thread = threading.Thread(target=execute_sequential_upgrades, args=(session, city_id, city_name, position, filter_type, selected_tasks))
-    thread.start()
-    if finalize:
-        event.set()
+        return None
+
+    return {
+        "session": session,
+        "city_id": city_id,
+        "city_name": city_name,
+        "position": position,
+        "tab": filter_type,
+        "tasks": selected_tasks
+    }

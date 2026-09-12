@@ -14,7 +14,7 @@ from ikabot.helpers.getJson import getCity, getIsland
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.planRoutes import executeRoutes
-from ikabot.helpers.process import set_child_mode
+from ikabot.helpers.decorators import configurator, task
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.naval import getAvailableShips, getAvailableFreighters
 from ikabot.helpers.varios import addThousandSeparator, getDateTime
@@ -199,59 +199,47 @@ def readResourceAmount(resource_name):
             print("  Please enter a number, 0, leave blank, or press ' to exit")
 
 
+@task("resourceTransportManager")
+def do_it_unified(session, mode, info="", origin_cities=None, destination_city=None, island=None, interval_hours=None, resource_config=None, useFreighters=None, send_mode=None, telegram_enabled=None, notify_on_start=None, origin_city=None, destination_cities=None):
+    setInfoSignal(session, info)
+    if mode == "consolidate":
+        do_it(session, origin_cities, destination_city, island, interval_hours, resource_config, useFreighters, send_mode, telegram_enabled, notify_on_start)
+    elif mode == "distribute":
+        do_it_distribute(session, origin_city, destination_cities, interval_hours, resource_config, useFreighters, telegram_enabled, notify_on_start)
+
+@configurator
 def resourceTransportManager(session, event, stdin_fd, predetermined_input):
-    """
-    Resource Transport Manager - Main entry point
-    
-    Parameters
-    ----------
-    session : ikabot.web.session.Session
-    event : multiprocessing.Event
-    stdin_fd: int
-    predetermined_input : multiprocessing.managers.SyncManager.list
-    """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
-    
-    try:
-        # Check telegram with skip option
-        telegram_enabled = checkTelegramData(session)
-        if telegram_enabled is False:
-            print_module_banner()
-            print("Telegram notifications are not configured.")
-            print("Do you want to continue without notifications? [Y/n]")
-            rta = read(values=["y", "Y", "n", "N", ""])
-            if rta.lower() == "n":
-                event.set()
-                return
-            # User chose to skip telegram
-            telegram_enabled = None  # Mark as intentionally skipped
-        
-        print_module_banner("Shipping Mode Selection")
-        
-        # Choose shipping mode
-        print("Select shipping mode:")
-        print("(1) Consolidate/Single Shipments: Multiple cities → One destination")
-        print("(2) Distribute: One city → Multiple destinations")
-        print("(') Back to main menu")
-        shipping_mode = read(min=1, max=2, digit=True, additionalValues=["'"])
-        if shipping_mode == "'":
-            event.set()
-            return
-        
-        if shipping_mode == 1:
-            # Existing consolidate mode
-            consolidateMode(session, event, stdin_fd, predetermined_input, telegram_enabled)
-        else:
-            # New distribute mode
-            distributeMode(session, event, stdin_fd, predetermined_input, telegram_enabled)
-            
-    except KeyboardInterrupt:
-        event.set()
-        return
+    # Check telegram with skip option
+    telegram_enabled = checkTelegramData(session)
+    if telegram_enabled is False:
+        print_module_banner()
+        print("Telegram notifications are not configured.")
+        print("Do you want to continue without notifications? [Y/n]")
+        rta = read(values=["y", "Y", "n", "N", ""])
+        if rta.lower() == "n":
+            return None
+        # User chose to skip telegram
+        telegram_enabled = None  # Mark as intentionally skipped
 
+    print_module_banner("Shipping Mode Selection")
 
-def consolidateMode(session, event, stdin_fd, predetermined_input, telegram_enabled):
+    # Choose shipping mode
+    print("Select shipping mode:")
+    print("(1) Consolidate/Single Shipments: Multiple cities → One destination")
+    print("(2) Distribute: One city → Multiple destinations")
+    print("(') Back to main menu")
+    shipping_mode = read(min=1, max=2, digit=True, additionalValues=["'"])
+    if shipping_mode == "'":
+        return None
+
+    if shipping_mode == 1:
+        # Existing consolidate mode
+        return consolidateMode(session, telegram_enabled)
+    else:
+        # New distribute mode
+        return distributeMode(session, telegram_enabled)
+
+def consolidateMode(session, telegram_enabled):
     """
     Multiple source cities → Single destination city
     """
@@ -265,8 +253,7 @@ def consolidateMode(session, event, stdin_fd, predetermined_input, telegram_enab
         print("(') Back to main menu")
         shiptype = read(min=1, max=2, digit=True, additionalValues=["'"])
         if shiptype == "'":
-            event.set()
-            return
+            return None
         useFreighters = (shiptype == 2)
         
         print_module_banner("Source City Selection")
@@ -278,8 +265,7 @@ def consolidateMode(session, event, stdin_fd, predetermined_input, telegram_enab
         print("(') Back to main menu")
         source_option = read(min=1, max=2, digit=True, additionalValues=["'"])
         if source_option == "'":
-            event.set()
-            return
+            return None
         
         origin_cities = []
         if source_option == 1:
@@ -299,8 +285,7 @@ def consolidateMode(session, event, stdin_fd, predetermined_input, telegram_enab
             if not source_city_ids:
                 print("No cities selected!")
                 enter()
-                event.set()
-                return
+                return None
             
             # Get full city data for each selected city
             for city_id in source_city_ids:
@@ -324,8 +309,7 @@ def consolidateMode(session, event, stdin_fd, predetermined_input, telegram_enab
         print("(') Back to main menu")
         send_mode = read(min=1, max=2, digit=True, additionalValues=["'"])
         if send_mode == "'":
-            event.set()
-            return
+            return None
         
         print_module_banner("Resource Configuration")
         print(f"Source cities: {source_cities_summary}")
@@ -382,8 +366,7 @@ def consolidateMode(session, event, stdin_fd, predetermined_input, telegram_enab
                 amount = readResourceAmount(resource)
                 
                 if amount == 'EXIT':
-                    event.set()
-                    return
+                    return None
                 
                 # Check if user wants to restart
                 if amount == 'RESTART':
@@ -426,8 +409,7 @@ def consolidateMode(session, event, stdin_fd, predetermined_input, telegram_enab
         print("(') Back to main menu")
         destination_type = read(min=1, max=2, digit=True, additionalValues=["'"])
         if destination_type == "'":
-            event.set()
-            return
+            return None
         
         if destination_type == 2:
             # External city - get island coordinates (with restart support)
@@ -440,8 +422,7 @@ def consolidateMode(session, event, stdin_fd, predetermined_input, telegram_enab
                 
                 x_coord = read(msg="X coordinate: ", digit=True, additionalValues=["'", "="])
                 if x_coord == "'":
-                    event.set()
-                    return
+                    return None
                 
                 if x_coord == "=":
                     print("\nRestarting coordinate entry...\n")
@@ -449,8 +430,7 @@ def consolidateMode(session, event, stdin_fd, predetermined_input, telegram_enab
                 
                 y_coord = read(msg="Y coordinate: ", digit=True, additionalValues=["'", "="])
                 if y_coord == "'":
-                    event.set()
-                    return
+                    return None
                 
                 if y_coord == "=":
                     print("\nRestarting coordinate entry...\n")
@@ -507,8 +487,7 @@ def consolidateMode(session, event, stdin_fd, predetermined_input, telegram_enab
                 city_choice = read(min=0, max=len(cities_on_island), additionalValues=["'", "="])
                 
                 if city_choice == 0 or city_choice == "'":
-                    event.set()
-                    return
+                    return None
                 
                 if city_choice == "=":
                     print("\nRestarting coordinate entry...\n")
@@ -589,8 +568,7 @@ def consolidateMode(session, event, stdin_fd, predetermined_input, telegram_enab
             print("Error: No source cities remaining after excluding destination!")
             print("The destination city was your only source city.")
             enter()
-            event.set()
-            return
+            return None
         
         # Ask about notifications BEFORE schedule (only if telegram is configured)
         if telegram_enabled is None:
@@ -605,8 +583,7 @@ def consolidateMode(session, event, stdin_fd, predetermined_input, telegram_enab
             print("(') Back to main menu")
             notif_choice = read(min=1, max=3, digit=True, additionalValues=["'"])
             if notif_choice == "'":
-                event.set()
-                return
+                return None
             
             # Set notification mode
             if notif_choice == 1:
@@ -627,8 +604,7 @@ def consolidateMode(session, event, stdin_fd, predetermined_input, telegram_enab
         print("(Press ' to return to main menu)")
         interval_hours = read(min=0, digit=True, additionalValues=["'"])
         if interval_hours == "'":
-            event.set()
-            return
+            return None
         
         print_module_banner("Configuration Summary")
         
@@ -704,31 +680,29 @@ def consolidateMode(session, event, stdin_fd, predetermined_input, telegram_enab
         print("Proceed? [Y/n]")
         rta = read(values=["y", "Y", "n", "N", ""])
         if rta.lower() == "n":
-            event.set()
-            return
+            return None
         
         enter()
         
     except KeyboardInterrupt:
-        event.set()
-        return
+        return None
     
-    set_child_mode(session)
-    event.set()
-    
-    info = f"\nAuto-send resources from {source_cities_summary} to {destination_city['name']} every {interval_hours} hour(s)\n"
-    setInfoSignal(session, info)
-    
-    try:
-        do_it(session, origin_cities, destination_city, island, interval_hours, resource_config, useFreighters, send_mode, telegram_enabled, notify_on_start)
-    except Exception as e:
-        msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
-        sendToBot(session, msg)
-    finally:
-        session.logout()
+    return {
+        "mode": "consolidate",
+        "info": info,
+        "origin_cities": origin_cities,
+        "destination_city": destination_city,
+        "island": island,
+        "interval_hours": interval_hours,
+        "resource_config": resource_config,
+        "useFreighters": useFreighters,
+        "send_mode": send_mode,
+        "telegram_enabled": telegram_enabled,
+        "notify_on_start": notify_on_start
+    }
 
 
-def distributeMode(session, event, stdin_fd, predetermined_input, telegram_enabled):
+def distributeMode(session, telegram_enabled):
     """
     Single source city → Multiple destination cities
     """
@@ -742,8 +716,7 @@ def distributeMode(session, event, stdin_fd, predetermined_input, telegram_enabl
         print("(') Back to main menu")
         shiptype = read(min=1, max=2, digit=True, additionalValues=["'"])
         if shiptype == "'":
-            event.set()
-            return
+            return None
         useFreighters = (shiptype == 2)
         
         print_module_banner("Source City Selection")
@@ -773,8 +746,7 @@ def distributeMode(session, event, stdin_fd, predetermined_input, telegram_enabl
         if not destination_city_ids:
             print("No valid destination cities selected!")
             enter()
-            event.set()
-            return
+            return None
         
         # Get full city data for each destination
         destination_cities = []
@@ -808,8 +780,7 @@ def distributeMode(session, event, stdin_fd, predetermined_input, telegram_enabl
                 amount = readResourceAmount(resource)
                 
                 if amount == 'EXIT':
-                    event.set()
-                    return
+                    return None
                 
                 # Check if user wants to restart
                 if amount == 'RESTART':
@@ -864,8 +835,7 @@ def distributeMode(session, event, stdin_fd, predetermined_input, telegram_enabl
             print("(') Back to main menu")
             notif_choice = read(min=1, max=3, digit=True, additionalValues=["'"])
             if notif_choice == "'":
-                event.set()
-                return
+                return None
             
             # Set notification mode
             if notif_choice == 1:
@@ -886,8 +856,7 @@ def distributeMode(session, event, stdin_fd, predetermined_input, telegram_enabl
         print("(Press ' to return to main menu)")
         interval_hours = read(min=0, digit=True, additionalValues=["'"])
         if interval_hours == "'":
-            event.set()
-            return
+            return None
         
         print_module_banner("Configuration Summary")
         
@@ -906,28 +875,24 @@ def distributeMode(session, event, stdin_fd, predetermined_input, telegram_enabl
         print("Proceed? [Y/n]")
         rta = read(values=["y", "Y", "n", "N", ""])
         if rta.lower() == "n":
-            event.set()
-            return
+            return None
         
         enter()
         
     except KeyboardInterrupt:
-        event.set()
-        return
+        return None
     
-    set_child_mode(session)
-    event.set()
-    
-    info = f"\nDistribute resources from {origin_city['name']} to {len(destination_cities)} cities every {interval_hours} hour(s)\n"
-    setInfoSignal(session, info)
-    
-    try:
-        do_it_distribute(session, origin_city, destination_cities, interval_hours, resource_config, useFreighters, telegram_enabled, notify_on_start)
-    except Exception as e:
-        msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
-        sendToBot(session, msg)
-    finally:
-        session.logout()
+    return {
+        "mode": "distribute",
+        "info": info,
+        "origin_city": origin_city,
+        "destination_cities": destination_cities,
+        "interval_hours": interval_hours,
+        "resource_config": resource_config,
+        "useFreighters": useFreighters,
+        "telegram_enabled": telegram_enabled,
+        "notify_on_start": notify_on_start
+    }
 
 
 def do_it(session, origin_cities, destination_city, island, interval_hours, resource_config, useFreighters, send_mode, telegram_enabled, notify_on_start):
