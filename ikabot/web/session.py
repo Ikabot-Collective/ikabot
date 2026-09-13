@@ -1581,6 +1581,13 @@ class Session:
                 except Exception:
                     pass
 
+                # 'action' requests always need a fresh token afterward
+                if "action" in payloadPost or "action" in params:
+                    sessionData = self.getSessionData()
+                    if sessionData.pop("actionRequestToken", None) is not None:
+                        sessionData.pop("shared", None)
+                        self.setSessionData(sessionData)
+
                 return resp if not fullResponse else response
             except AssertionError:
                 self.__sessionExpired()
