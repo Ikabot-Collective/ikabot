@@ -218,7 +218,18 @@ def write_json_file(filepath, data):
             json.dump(data, f, indent=2, ensure_ascii=False)
             f.flush()
             os.fsync(f.fileno())
-        os.replace(tmp_path, filepath)
+
+        # os.replace() can raise PermissionError on Windows if another
+        # ikabot process has filepath open at the same instant; retry briefly.
+        for attempt in range(5):
+            try:
+                os.replace(tmp_path, filepath)
+                break
+            except PermissionError:
+                if attempt < 4:
+                    time.sleep(0.05 * (attempt + 1))
+                    continue
+                raise
     except Exception as e:
         logger.error(f"Failed to write JSON to {filepath}: {e}")
         if os.path.exists(tmp_path):
