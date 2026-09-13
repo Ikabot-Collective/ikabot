@@ -68,10 +68,12 @@ def updateProcessList(session, programprocesslist=[]):
         if proc.name() == ika_process and isAlive:
             runningIkabotProcessList.append(process)
 
-    # add new to the list and write to file only if it's given
+    # add new to the list and write to file only if it's given (dedup by pid)
+    existing_pids = {p["pid"] for p in runningIkabotProcessList}
     for process in programprocesslist:
-        if process not in runningIkabotProcessList:
+        if process["pid"] not in existing_pids:
             runningIkabotProcessList.append(process)
+            existing_pids.add(process["pid"])
 
     # check if all proceses have new status field
     if len([p for p in runningIkabotProcessList if "status" not in p]) == len(
