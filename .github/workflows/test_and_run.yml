@@ -44,5 +44,5 @@ jobs:
         python -m pytest tests/ikabot
     - name: Run ikabot
       run: |
-        printf "\n\n" | python -m ikabot &> log.log || cat log.log
+        printf "\n\n\n" | python -m ikabot &> log.log || cat log.log
         grep "Obtaining new blackbox token, please wait..." log.log && exit 0 || exit 1

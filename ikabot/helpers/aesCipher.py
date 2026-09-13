@@ -57,18 +57,8 @@ class AESCipher:
         ----------
         session : ikabot.web.session.Session
         """
-        entry_key = self.getEntryKey(session)
-        with open(ikaFile, "r") as filehandler:
-            data = filehandler.read()
-
-        newFile = ""
-        for line in data.split("\n"):
-            if entry_key != line[:64]:
-                newFile += line + "\n"
-
-        with open(ikaFile, "w") as filehandler:
-            filehandler.write(newFile.strip())
-            filehandler.flush()
+        from ikabot.helpers.sessionStorage import delete_session_data
+        delete_session_data(session)
 
     def getSessionData(self, session, all=False):
         """
@@ -77,44 +67,8 @@ class AESCipher:
         session : ikabot.web.session.Session
         all : bool
         """
-        entry_key = self.getEntryKey(session)
-        with open(ikaFile, "r") as filehandler:
-            ciphertexts = filehandler.read()
-
-        for ciphertext in ciphertexts.split("\n"):
-            if entry_key == ciphertext[:64]:
-                ciphertext = ciphertext[64:]
-                try:
-                    plaintext = self.decrypt(ciphertext)
-                except Exception:
-                    msg = "Error while decrypting session data.\nYou may have entered a wrong password."
-                    
-                    if session.padre:
-                        print(msg)
-                    else:
-                        sendToBot(session, msg)
-                    print("\nWould you like to delete the ikabot session data associated with this email address? [y/N]")
-                    rta = read(values=["n", "N", "y", "Y"])
-                    if rta.lower() == "n":
-                        os._exit(0)
-                    self.deleteSessionData(session)
-                    os._exit(0)
-                data_dict = json.loads(plaintext, strict=False)
-                if all:
-                    return data_dict
-                else:
-                    try:
-                        try:
-                            session_data = data_dict[session.username][session.mundo][
-                                session.servidor
-                            ]
-                        except Exception:
-                            session_data = {}
-                        session_data["shared"] = data_dict["shared"]
-                        return session_data
-                    except KeyError:
-                        return {}
-        return {}
+        from ikabot.helpers.sessionStorage import get_session_data
+        return get_session_data(session, all_data=all)
 
     def setSessionData(self, session, data, shared=False):
         """
@@ -123,39 +77,6 @@ class AESCipher:
         session : ikabot.web.session.Session
         data : dict
         """
-        session_data = self.getSessionData(session, True)
+        from ikabot.helpers.sessionStorage import set_session_data
+        set_session_data(session, data, shared=shared)
 
-        if shared:
-            if "shared" not in session_data:
-                session_data["shared"] = {}
-            if "logLevel" not in session_data["shared"]:
-                session_data["shared"]["logLevel"] = 2  # Warn by default
-            session_data["shared"] = {**session_data["shared"], **data}
-        else:
-            if session.username not in session_data:
-                session_data[session.username] = {}
-            if session.mundo not in session_data[session.username]:
-                session_data[session.username][session.mundo] = {}
-            if session.servidor not in session_data[session.username][session.mundo]:
-                session_data[session.username][session.mundo][session.servidor] = {}
-            if "shared" not in session_data:
-                session_data["shared"] = {}
-            session_data[session.username][session.mundo][session.servidor] = data
-
-        plaintext = json.dumps(session_data)
-        ciphertext = self.encrypt(plaintext)
-
-        with open(ikaFile, "r") as filehandler:
-            data = filehandler.read()
-
-        entry_key = self.getEntryKey(session)
-        newFile = ""
-        newline = entry_key + " " + ciphertext
-        for line in data.split("\n"):
-            if entry_key != line[:64]:
-                newFile += line + "\n"
-        newFile += newline + "\n"
-
-        with open(ikaFile, "w") as filehandler:
-            filehandler.write(newFile.strip())
-            filehandler.flush()

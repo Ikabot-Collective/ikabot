@@ -52,6 +52,7 @@ from ikabot.function.testDiscordBot import testDiscordBot
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.process import updateProcessList
+from ikabot.helpers.sessionStorage import init_storage
 from ikabot.web.session import *
 from ikabot.function.UpgradeUnits import UpgradeUnits
 from ikabot.function.modifyProduction import modifyProduction, modifyAcademyWorkers, modifyTempleWorkers
@@ -405,9 +406,7 @@ def menu(session, checkUpdate=True):
 def init():
     home = "USERPROFILE" if isWindows else "HOME"
     os.chdir(os.getenv(home))
-    if not os.path.isfile(ikaFile):
-        open(ikaFile, "w")
-        os.chmod(ikaFile, 0o600)
+    init_storage()
 
 
 def start():
