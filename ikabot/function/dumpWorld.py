@@ -21,16 +21,42 @@ from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import getDateTime, wait
 
-LINE_UP = "\033[1A"
-LINE_CLEAR = "\x1b[2K"
-#              status, history, start_time
-stop_updating = threading.Event()
-lock = threading.Lock()
-shared_data = ["", "", 0, stop_updating, lock]
-home = "USERPROFILE" if isWindows else "HOME"
-selected_islands = set()
+from ikabot.helpers.decorators import configurator, task
+
+@task("dumpWorld")
+def do_dumpWorld(session, waiting_time, coords, radius, shallow, non_empty_islands):
+    stop_updating = threading.Event()
+    lock = threading.Lock()
+    shared_data = ["", "", 0, stop_updating, lock]
+
+    thread = threading.Thread(target=update_terminal, args=(shared_data,), daemon=True)
+    thread.start()
+    
+    info = "\nDumped world data\n"
+    setInfoSignal(session, info)
+
+    start_time = time.time()
+    dump_path = do_it(
+        session, waiting_time, coords, radius, shallow, non_empty_islands, shared_data
+    )
+
+    shared_data[3].set()
+    shared_data[4].acquire()
+    time.sleep(5)
+
+    banner()
+    print(
+        "\n{}SUCCESS!{} World data has been dumped to {} in {}s \n".format(
+            bcolors.GREEN,
+            bcolors.ENDC,
+            dump_path,
+            str(round(time.time() - shared_data[2])),
+        )
+    )
+    enter()
 
 
+@configurator(blocking=True)
 def dumpWorld(session, event, stdin_fd, predetermined_input):
     """
     Parameters
@@ -40,98 +66,67 @@ def dumpWorld(session, event, stdin_fd, predetermined_input):
     stdin_fd: int
     predetermined_input : multiprocessing.managers.SyncManager.list
     """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
-
-    try:
-        banner()
-        if os.path.exists(os.getenv(home) + "/ikabot_world_dumps"):
-            print("1) Create new dump")
-            print("2) Load existing dump")
-            choice = read(min=1, max=2, digit=True)
-            if choice == 2:
-                view_dump(session, event)
-                event.set()
-                return
-        banner()
-        print(
-            "{}⚠️ BEWARE - THE RESULTING DUMP CONTAINS ACCOUNT IDENTIFYING INFORMATION ⚠️{}\n".format(
-                bcolors.WARNING, bcolors.ENDC
-            )
+    banner()
+    if os.path.exists(os.getenv(home) + "/ikabot_world_dumps"):
+        print("1) Create new dump")
+        print("2) Load existing dump")
+        choice = read(min=1, max=2, digit=True)
+        if choice == 2:
+            view_dump(session)
+            return None
+    banner()
+    print(
+        "{}⚠️ BEWARE - THE RESULTING DUMP CONTAINS ACCOUNT IDENTIFYING INFORMATION ⚠️{}\n".format(
+            bcolors.WARNING, bcolors.ENDC
         )
-        print(
-            "This action will take a couple of hours to complete. Are you sure you want to initiate a data dump now? (Y|N)"
-        )
+    )
+    print(
+        "This action will take a couple of hours to complete. Are you sure you want to initiate a data dump now? (Y|N)"
+    )
+    choice = read(values=["y", "Y", "n", "N"])
+    if choice in ["n", "N"]:
+        return None
+    print(
+        "Type in the waiting time between each request in miliseconds (default = 1500): "
+    )
+    choice = read(min=0, max=10000, digit=True, default=1500)
+    waiting_time = int(choice) / 1000
+    print(
+        "Do you want only shallow data about the islands? If yes you will not be able to search the dump by player names but the dump will be quick. (Y|N): "
+    )
+    choice = read(values=["y", "Y", "n", "N"])
+    shallow = choice in ["y", "Y"]
+    coords = None
+    radius = None
+    non_empty_islands = False
+    if not shallow:
+        print("Do you want to only dump a part of the map? (Y|N)")
         choice = read(values=["y", "Y", "n", "N"])
-        if choice in ["n", "N"]:
-            event.set()
-            return
-        print(
-            "Type in the waiting time between each request in miliseconds (default = 1500): "
-        )
-        choice = read(min=0, max=10000, digit=True, default=1500)
-        waiting_time = int(choice) / 1000
-        print(
-            "Do you want only shallow data about the islands? If yes you will not be able to search the dump by player names but the dump will be quick. (Y|N): "
-        )
-        choice = read(values=["y", "Y", "n", "N"])
-        shallow = choice in ["y", "Y"]
-        coords = None
-        radius = None
-        non_empty_islands = False
-        if not shallow:
-            print("Do you want to only dump a part of the map? (Y|N)")
+        if choice in ["y", "Y"]:
+            print('Type in a center point (x,y): (type "skip" to skip this step)')
+            input = read()
+            if input.strip().lower() != "skip":
+                coords = input.replace("(", "").replace(")", "").split(",")
+                coords = (int(coords[0]), int(coords[1]))
+                print(
+                    "Type in a max distance from the center point: (default = 15)"
+                )
+                radius = read(min=0, max=200, digit=True, default=15)
+            print("Do you want to only dump islands with at least 1 town? (Y|N)")
             choice = read(values=["y", "Y", "n", "N"])
-            if choice in ["y", "Y"]:
-                print('Type in a center point (x,y): (type "skip" to skip this step)')
-                input = read()
-                if input.strip().lower() != "skip":
-                    coords = input.replace("(", "").replace(")", "").split(",")
-                    coords = (int(coords[0]), int(coords[1]))
-                    print(
-                        "Type in a max distance from the center point: (default = 15)"
-                    )
-                    radius = read(min=0, max=200, digit=True, default=15)
-                print("Do you want to only dump islands with at least 1 town? (Y|N)")
-                choice = read(values=["y", "Y", "n", "N"])
-                non_empty_islands = choice in ["y", "Y"]
+            non_empty_islands = choice in ["y", "Y"]
 
-        thread = threading.Thread(target=update_terminal, args=(shared_data,), daemon=True)
-        thread.start()
-        set_child_mode(session)
-        info = "\nDumped world data\n"
-        setInfoSignal(session, info)
-
-        dump_path = do_it(
-            session, waiting_time, coords, radius, shallow, non_empty_islands
-        )
-
-        shared_data[3].set()
-        shared_data[4].acquire()
-        time.sleep(5)
-
-        banner()
-        print(
-            "\n{}SUCCESS!{} World data has been dumped to {} in {}s \n".format(
-                bcolors.GREEN,
-                bcolors.ENDC,
-                dump_path,
-                str(round(time.time() - shared_data[2])),
-            )
-        )
-        enter()
-        event.set()
-        return
-    except Exception:
-        shared_data[3].set()
-        shared_data[4].acquire(timeout=10)
-        event.set()
-        msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
-        sendToBot(session, msg)
-        return
+    return {
+        "session": session,
+        "waiting_time": waiting_time,
+        "coords": coords,
+        "radius": radius,
+        "shallow": shallow,
+        "non_empty_islands": non_empty_islands
+    }
 
 
-def do_it(session, waiting_time, coords, radius, shallow, non_empty_islands):
+def do_it(session, waiting_time, coords, radius, shallow, non_empty_islands, shared_data):
     """
     Parameters
     ----------
@@ -143,6 +138,8 @@ def do_it(session, waiting_time, coords, radius, shallow, non_empty_islands):
         Id of the island to start the dump from (0 starts from beginning)
     shallow : str
         String that determines if the data should be shallow (only map accessible data)
+    shared_data : list
+        State sharing list for terminal updates
 
     Returns
     -------
@@ -165,8 +162,8 @@ def do_it(session, waiting_time, coords, radius, shallow, non_empty_islands):
     shared_data.append(world)
     # scan 0 to 50 x and y
     shallow_islands = []
-    update_status("Initiating first map sweep", 0, 0, True)
-    update_status("Getting (0-50,0-50) islands", 25, 1.25)
+    update_status("Initiating first map sweep", 0, 0, shared_data, True)
+    update_status("Getting (0-50,0-50) islands", 25, 1.25, shared_data)
     data = session.post(
         "action=WorldMap&function=getJSONArea&x_min=0&x_max=50&y_min=0&y_max=50"
     )
@@ -184,7 +181,7 @@ def do_it(session, waiting_time, coords, radius, shallow, non_empty_islands):
                     "players": val2[7],
                 }
             )
-    update_status("Getting (50-100,0-50) islands", 50, 2.5)
+    update_status("Getting (50-100,0-50) islands", 50, 2.5, shared_data)
     time.sleep(0.5)
     data = session.post(
         "action=WorldMap&function=getJSONArea&x_min=50&x_max=100&y_min=0&y_max=50"
@@ -203,7 +200,7 @@ def do_it(session, waiting_time, coords, radius, shallow, non_empty_islands):
                     "players": val2[7],
                 }
             )
-    update_status("Getting (0-50,50-100) islands", 75, 3.75)
+    update_status("Getting (0-50,50-100) islands", 75, 3.75, shared_data)
     time.sleep(0.5)
     data = session.post(
         "action=WorldMap&function=getJSONArea&x_min=0&x_max=50&y_min=50&y_max=100"
@@ -222,7 +219,7 @@ def do_it(session, waiting_time, coords, radius, shallow, non_empty_islands):
                     "players": val2[7],
                 }
             )
-    update_status("Getting (50-100,50-100) islands", 100, 5)
+    update_status("Getting (50-100,50-100) islands", 100, 5, shared_data)
     time.sleep(0.5)
     data = session.post(
         "action=WorldMap&function=getJSONArea&x_min=50&x_max=100&y_min=50&y_max=100"
@@ -270,7 +267,7 @@ def do_it(session, waiting_time, coords, radius, shallow, non_empty_islands):
 
     if shallow:
         dump_name = dump_name.replace(".json.gz", "_shallow") + ".json.gz"
-        update_status("Shallow dump is on. Dumping data...", 100, 100, True)
+        update_status("Shallow dump is on. Dumping data...", 100, 100, shared_data, True)
         world["islands"] = shallow_islands
         dump(world, dump_path, dump_name)
         return dump_path + dump_name
@@ -298,19 +295,20 @@ def do_it(session, waiting_time, coords, radius, shallow, non_empty_islands):
         ),
         100,
         5,
+        shared_data,
         True,
     )
-    update_status("Getting data for each island. This will take a while...", 0, 5, True)
+    update_status("Getting data for each island. This will take a while...", 0, 5, shared_data, True)
 
     # scan each island
 
     all_island = sorted(all_island)
     dump_islands(shared_data, all_island, waiting_time, session)
-    update_status("Got {} individual islands".format(len(all_island)), 100, 100, True)
+    update_status("Got {} individual islands".format(len(all_island)), 100, 100, shared_data, True)
 
     name_suffix = "_partial" if partial else ""
     dump_name = dump_name.replace(".json.gz", name_suffix) + ".json.gz"
-    update_status("Dumping data to {}".format(dump_path + dump_name), 100, 100, True)
+    update_status("Dumping data to {}".format(dump_path + dump_name), 100, 100, shared_data, True)
     dump(shared_data[5], dump_path, dump_name)
     return dump_path + dump_name
 
@@ -335,6 +333,7 @@ def dump_islands(shared_data, all_island, waiting_time, session):
             ),
             len(shared_data[5]["islands"]) / world_islands_number * 100,
             5 + (len(shared_data[5]["islands"]) / world_islands_number * 95),
+            shared_data
         )
         html = ""
         try:
@@ -342,9 +341,9 @@ def dump_islands(shared_data, all_island, waiting_time, session):
         except Exception:
             # try again
             html = session.get("view=island&islandId=" + str(island_id))
-        island = getIsland(html)
+        island_data = getIsland(html)
         shared_data[4].acquire()
-        shared_data[5]["islands"].append(island)
+        shared_data[5]["islands"].append(island_data)
         shared_data[4].release()
         time.sleep(waiting_time)
 
@@ -370,11 +369,11 @@ def update_terminal(shared_data):
             )
             shared_data[4].release()
             time.sleep(0.05)
-        if stop_updating.is_set():
+        if shared_data[3].is_set():
             return
 
 
-def update_status(message, percent, percent_total, add_history=False):
+def update_status(message, percent, percent_total, shared_data, add_history=False):
     shared_data[4].acquire()
     shared_data[0] = (
         message
@@ -389,8 +388,8 @@ def update_status(message, percent, percent_total, add_history=False):
     shared_data[4].release()
 
 
-def view_dump(session, event):
-
+def view_dump(session):
+    selected_islands = set()
 
     files = [
         file.replace("\\", "/")
@@ -416,7 +415,7 @@ def view_dump(session, event):
 
     while True:
         banner()
-        print_map(selected_dump["islands"])
+        print_map(selected_dump["islands"], selected_islands)
         print("0) Back")
         print("1) Search islands by island criteria")
         if not selected_dump["shallow"]:
@@ -427,7 +426,6 @@ def view_dump(session, event):
 
         choice = read(min=0, max=5, digit=True)
         if choice == 0:
-            event.set()
             return
         elif choice == 1:
             print(
@@ -668,12 +666,14 @@ def view_dump(session, event):
 
 
 
-def print_map(islands):
+def print_map(islands, selected_islands):
     """Prints out a 100x100 matrix with all world islands on it. Selected islands are colored red.
     Parameters
     ----------
     islands : [object]
         List of island objects to be displayed
+    selected_islands: set
+        Set of selected island IDs
     """
 
     map = [

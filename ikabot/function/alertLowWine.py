@@ -13,63 +13,13 @@ from ikabot.helpers.botComm import *
 from ikabot.helpers.getJson import getCity
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import getIdsOfCities
-from ikabot.helpers.process import set_child_mode
+from ikabot.helpers.decorators import configurator, task
 from ikabot.helpers.resources import getWineConsumptionPerHour, getAvailableResources, getProductionPerHour
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import daysHoursMinutes
 from ikabot.helpers.planRoutes import *
 
 getcontext().prec = 30
-
-def alertLowWine(session, event, stdin_fd, predetermined_input):
-    """
-    Parameters
-    ----------
-    session : ikabot.web.session.Session
-    event : multiprocessing.Event
-    stdin_fd: int
-    predetermined_input : multiprocessing.managers.SyncManager.list
-    """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
-    try:
-        if checkTelegramData(session) is False:
-            event.set()
-            return
-        banner()
-        hours = read(
-            msg=(
-                "How many hours should be left until the wine runs out in a city so that it's alerted? : "
-            ),
-            min=1,
-        )
-        auto_transfer = read(msg=("Would you like to automatically transfer wine if necessary? (y/n) : ")).strip().lower()
-        
-        if auto_transfer in ["y", "yes"]:
-            auto_transfer = True
-            transfer_amount = read(msg=("How much wine should be sent automatically? : "), min=1)
-        else:
-            auto_transfer = False
-            transfer_amount = 0
-        print("It will be alerted when the wine runs out in less than {:d} hours in any city, and {:,d} wine will be transferred if necessary.".format(hours, transfer_amount))
-
-        enter()
-    except KeyboardInterrupt:
-        event.set()
-        return
-
-    set_child_mode(session)
-    event.set()
-
-    info = ("\nI alert if the wine runs out in less than {:d} hours\n".format(hours))
-    setInfoSignal(session, info)
-    try:
-        do_it(session, hours, auto_transfer, transfer_amount)
-    except Exception as e:
-        msg = (f"Error in:\n{info}\nCause:\n{traceback.format_exc()}")
-        sendToBot(session, msg)
-    finally:
-        session.logout()
 
 def getMovementsFromHtml(session):
     """
@@ -123,6 +73,7 @@ def isWineTransportInProgress(session, destinationCityId):
 
     return None
 
+@task("alertLowWine")
 def do_it(session, hours, auto_transfer, transfer_amount):
     """
     Parameters
@@ -132,6 +83,8 @@ def do_it(session, hours, auto_transfer, transfer_amount):
     auto_transfer : bool
     transfer_amount : int
     """
+    info = "\nI alert if the wine runs out in less than {:d} hours\n".format(hours)
+    setInfoSignal(session, info)
     was_alerted = {}
     message_log = []
     routes = []  # Store all routes for batch execution
@@ -248,3 +201,35 @@ def do_it(session, hours, auto_transfer, transfer_amount):
             executeRoutes(session, routes, useFreighters=False)
             routes.clear()
         time.sleep(60 * 60)
+@configurator
+def alertLowWine(session, event, stdin_fd, predetermined_input):
+    """
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    event : multiprocessing.Event
+    stdin_fd: int
+    predetermined_input : multiprocessing.managers.SyncManager.list
+    """
+    if checkTelegramData(session) is False:
+        return None
+    banner()
+    hours = read(
+        msg=(
+            "How many hours should be left until the wine runs out in a city so that it's alerted? : "
+        ),
+        min=1,
+    )
+    auto_transfer = read(msg=("Would you like to automatically transfer wine if necessary? (y/n) : ")).strip().lower()
+    
+    if auto_transfer in ["y", "yes"]:
+        auto_transfer = True
+        transfer_amount = read(msg=("How much wine should be sent automatically? : "), min=1)
+    else:
+        auto_transfer = False
+        transfer_amount = 0
+    print("It will be alerted when the wine runs out in less than {:d} hours in any city, and {:,d} wine will be transferred if necessary.".format(hours, transfer_amount))
+
+    enter()
+    return {"session": session, "hours": hours, "auto_transfer": auto_transfer, "transfer_amount": transfer_amount}
+

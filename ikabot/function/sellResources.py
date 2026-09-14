@@ -14,7 +14,7 @@ from ikabot.helpers.market import *
 from ikabot.helpers.naval import getTotalShips
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.planRoutes import waitForArrival
-from ikabot.helpers.process import set_child_mode
+from ikabot.helpers.decorators import configurator, task
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import addThousandSeparator, wait, getDateTime
 from ikabot.helpers.pedirInfo import getShipCapacity
@@ -122,14 +122,13 @@ def getOffers(session, my_market_city, resource_type):
     return processed_offers
 
 
-def sellToOffers(session, city_to_buy_from, resource_type, event):
+def sellToOffers(session, city_to_buy_from, resource_type):
     """
     Parameters
     ----------
     session : ikabot.web.session.Session
     city_to_buy_from : dict
     resource_type : int
-    event : multiprocessing.Event
     """
     banner()
 
@@ -138,8 +137,7 @@ def sellToOffers(session, city_to_buy_from, resource_type, event):
     if len(offers) == 0:
         print("No offers available.")
         enter()
-        event.set()
-        return
+        return None
 
     print("Which offers do you want to sell to?\n")
 
@@ -166,8 +164,7 @@ def sellToOffers(session, city_to_buy_from, resource_type, event):
         profit += amount * price
 
     if len(chosen_offers) == 0:
-        event.set()
-        return
+        return None
 
     available = city_to_buy_from["availableResources"][resource_type]
     amount_to_sell = min(available, total_amount)
@@ -180,8 +177,7 @@ def sellToOffers(session, city_to_buy_from, resource_type, event):
     )
     amount_to_sell = read(min=0, max=amount_to_sell)
     if amount_to_sell == 0:
-        event.set()
-        return
+        return None
 
     left_to_sell = amount_to_sell
     profit = 0
@@ -202,35 +198,24 @@ def sellToOffers(session, city_to_buy_from, resource_type, event):
     )
     rta = read(values=["y", "Y", "n", "N", ""])
     if rta.lower() == "n":
-        event.set()
-        return
+        return None
 
-    set_child_mode(session)
-    event.set()
-
-    info = "\nI sell {} of {} in {}\n".format(
-        addThousandSeparator(amount_to_sell),
-        materials_names[resource_type],
-        city_to_buy_from["name"],
-    )
-    setInfoSignal(session, info)
-    try:
-        do_it1(session, amount_to_sell, chosen_offers, resource_type, city_to_buy_from)
-    except Exception as e:
-        msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
-        sendToBot(session, msg)
-    finally:
-        session.logout()
+    return {
+        "mode": "sell_to_offers",
+        "amount_to_sell": amount_to_sell,
+        "offers": chosen_offers,
+        "resource_type": resource_type,
+        "city_to_buy_from": city_to_buy_from,
+    }
 
 
-def createOffer(session, my_offering_market_city, resource_type, event):
+def createOffer(session, my_offering_market_city, resource_type):
     """
     Parameters
     ----------
     session : ikabot.web.session.Session
     my_offering_market_city : dict
     resource_type : int
-    event : multiprocessing.Event
     """
     banner()
 
@@ -247,8 +232,7 @@ def createOffer(session, my_offering_market_city, resource_type, event):
     )
     amount_to_sell = read(min=0, max=total_available_amount_of_resource)
     if amount_to_sell == 0:
-        event.set()
-        return
+        return None
 
     price_max, price_min = re.findall(r"\'upper\': (\d+),\s*\'lower\': (\d+)", html)[
         resource_type
@@ -269,78 +253,66 @@ def createOffer(session, my_offering_market_city, resource_type, event):
     print("\nProceed? [Y/n]")
     rta = read(values=["y", "Y", "n", "N", ""])
     if rta.lower() == "n":
-        event.set()
-        return
+        return None
 
-    set_child_mode(session)
-    event.set()
+    return {
+        "mode": "create_offer",
+        "amount_to_sell": amount_to_sell,
+        "price": price,
+        "resource_type": resource_type,
+        "sell_market_capacity": sell_market_capacity,
+        "city": my_offering_market_city,
+    }
 
-    info = "\nI sell {} of {} in {}\n".format(
-        addThousandSeparator(amount_to_sell),
-        materials_names[resource_type],
-        my_offering_market_city["name"],
-    )
-    setInfoSignal(session, info)
-    try:
-        do_it2(
-            session,
-            amount_to_sell,
-            price,
-            resource_type,
-            sell_market_capacity,
-            my_offering_market_city,
+
+@task("sellResources")
+def do_it(session, mode, amount_to_sell=None, offers=None, resource_type=None, city_to_buy_from=None, price=None, sell_market_capacity=None, city=None):
+    if mode == "sell_to_offers":
+        info = "\nI sell {} of {} in {}\n".format(
+            addThousandSeparator(amount_to_sell),
+            materials_names[resource_type],
+            city_to_buy_from["name"],
         )
-    except Exception as e:
-        msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
-        sendToBot(session, msg)
-    finally:
-        session.logout()
+        setInfoSignal(session, info)
+        do_it1(session, amount_to_sell, offers, resource_type, city_to_buy_from)
+    elif mode == "create_offer":
+        info = "\nI sell {} of {} in {}\n".format(
+            addThousandSeparator(amount_to_sell),
+            materials_names[resource_type],
+            city["name"],
+        )
+        setInfoSignal(session, info)
+        do_it2(session, amount_to_sell, price, resource_type, sell_market_capacity, city)
 
-
+@configurator
 def sellResources(session, event, stdin_fd, predetermined_input):
-    """
-    Parameters
-    ----------
-    session : ikabot.web.session.Session
-    event : multiprocessing.Event
-    stdin_fd: int
-    predetermined_input : multiprocessing.managers.SyncManager.list
-    """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
-    try:
+    banner()
+
+    commercial_cities = getCommercialCities(session)
+    if len(commercial_cities) == 0:
+        print("There is no store built")
+        enter()
+        return None
+
+    if len(commercial_cities) == 1:
+        city = commercial_cities[0]
+    else:
+        city = chooseCommercialCity(commercial_cities)
         banner()
 
-        commercial_cities = getCommercialCities(session)
-        if len(commercial_cities) == 0:
-            print("There is no store built")
-            enter()
-            event.set()
-            return
+    print("What resource do you want to sell?")
+    for index, material_name in enumerate(materials_names):
+        print("({:d}) {}".format(index + 1, material_name))
+    selected_material = read(min=1, max=len(materials_names))
+    resource = selected_material - 1
+    banner()
 
-        if len(commercial_cities) == 1:
-            city = commercial_cities[0]
-        else:
-            city = chooseCommercialCity(commercial_cities)
-            banner()
-
-        print("What resource do you want to sell?")
-        for index, material_name in enumerate(materials_names):
-            print("({:d}) {}".format(index + 1, material_name))
-        selected_material = read(min=1, max=len(materials_names))
-        resource = selected_material - 1
-        banner()
-
-        print(
-            
-            "Do you want to sell to existing offers (1) or do you want to make your own offer (2)?"
-            
-        )
-        selected = read(min=1, max=2)
-        [sellToOffers, createOffer][selected - 1](session, city, resource, event)
-    except KeyboardInterrupt:
-        event.set()
-        return
+    print("Do you want to sell to existing offers (1) or do you want to make your own offer (2)?")
+    selected = read(min=1, max=2)
+    if selected == 1:
+        return sellToOffers(session, city, resource)
+    else:
+        return createOffer(session, city, resource)
 
 
 def do_it1(session, left_to_sell, offers, resource_type, city_to_buy_from):

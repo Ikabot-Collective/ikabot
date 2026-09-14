@@ -1,3 +1,4 @@
+from ikabot.helpers.decorators import configurator
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
@@ -61,6 +62,7 @@ def wait_for_key_or_timeout(key, timeout_seconds):
             termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
 
 
+@configurator
 def importExportCookie(session, event, stdin_fd, predetermined_input):
     """
     Parameters
@@ -70,8 +72,6 @@ def importExportCookie(session, event, stdin_fd, predetermined_input):
     stdin_fd: int
     predetermined_input : multiprocessing.managers.SyncManager.list
     """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
     banner()
     try:
         print("Do you want to import or export the cookie?")

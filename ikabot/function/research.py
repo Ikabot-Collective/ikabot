@@ -9,7 +9,7 @@ from ikabot.helpers.botComm import *
 from ikabot.helpers.getJson import getCity
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import *
-from ikabot.helpers.process import set_child_mode
+from ikabot.helpers.decorators import configurator, task
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import *
 
@@ -195,181 +195,152 @@ def experiment_multi(session, cities):
             time.sleep(wait)
 
 
+@task("research")
+def do_it(session, mode, experiments=None, automatic=None, cities=None, info=""):
+    setInfoSignal(session, info)
+    if mode == "experiment":
+        experiment(session, experiments, automatic)
+    elif mode == "experiment_multi":
+        experiment_multi(session, cities)
+
+@configurator
 def research(session, event, stdin_fd, predetermined_input):
-    """
-    Parameters
-    ----------
-    session : ikabot.web.session.Session
-    event : multiprocessing.Event
-    stdin_fd: int
-    predetermined_input : multiprocessing.managers.SyncManager.list
-    """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
-    try:
-        while True:
-            banner()
+    while True:
+        banner()
 
-            print("\nSelect an option:")
-            print("0) Back")
-            print("1) Study")
-            print("2) Conduct experiment")
-            print("3) Conduct automatically")
-            option = read(min=0, max=3)
+        print("\nSelect an option:")
+        print("0) Back")
+        print("1) Study")
+        print("2) Conduct experiment")
+        print("3) Conduct automatically")
+        option = read(min=0, max=3)
 
-            if option == 0:
-                event.set()
-                return
+        if option == 0:
+            return None
 
-            if option == 1:
-                try:
-                    studies = get_studies(session)
-                    keys = list(studies.keys())
-                    num_studies = len(
-                        [
-                            key
-                            for key in keys
-                            if "js_researchAdvisorChangeResearchTypeTxt" in key
-                        ]
+        if option == 1:
+            studies = get_studies(session)
+            keys = list(studies.keys())
+            num_studies = len(
+                [
+                    key
+                    for key in keys
+                    if "js_researchAdvisorChangeResearchTypeTxt" in key
+                ]
+            )
+
+            available = []
+            for num_study in range(num_studies):
+                if "js_researchAdvisorProgressTxt{}".format(num_study) in studies:
+                    available.append(num_study)
+
+            if len(available) == 0:
+                print("There are no available studies.")
+                enter()
+                continue
+
+            print("Which one do you wish to study?")
+            print("0) None")
+            for index, num_study in enumerate(available):
+                print(
+                    "{:d}) {}".format(
+                        index + 1,
+                        studies[
+                            "js_researchAdvisorNextResearchName{}".format(num_study)
+                        ],
                     )
+                )
+            choice = read(min=0, max=len(available))
 
-                    available = []
-                    for num_study in range(num_studies):
-                        if "js_researchAdvisorProgressTxt{}".format(num_study) in studies:
-                            available.append(num_study)
+            if choice == 0:
+                continue
 
-                    if len(available) == 0:
-                        print("There are no available studies.")
+            study(session, studies, available[choice - 1])
+            print("Done.")
+            enter()
+        else:
+            if option == 3:
+                banner()
+                academy_cities = find_academy_cities(session)
+
+                if not academy_cities:
+                    print("No academy found in any city.")
+                    enter()
+                    continue
+
+                if len(academy_cities) == 1:
+                    selected_cities = academy_cities
+                else:
+                    print("\nCities with an academy:")
+                    for idx, ac in enumerate(academy_cities, start=1):
+                        print(f"[{idx}] {ac['cityName']}")
+                    print("\nEnter numbers separated by space (e.g. 1 3) or 'all':")
+                    sel = read().strip().lower().split()
+                    if "all" in sel:
+                        selected_cities = academy_cities
+                    else:
+                        selected_cities = []
+                        for token in sel:
+                            if token.isdigit():
+                                i = int(token)
+                                if 0 < i <= len(academy_cities):
+                                    selected_cities.append(academy_cities[i - 1])
+
+                    if not selected_cities:
+                        continue
+
+                city_names = ", ".join(c["cityName"] for c in selected_cities)
+                info = f"Process: Experiments (automatic)\n\nCities: {city_names}\nWill execute every 4h per city"
+                sendToBot(session, info)
+                return {
+                    "mode": "experiment_multi",
+                    "cities": selected_cities,
+                    "info": info
+                }
+            else:
+                automatic = False
+                experiments = {}
+                found_academy = -1
+
+                while True:
+                    banner()
+                    print("Pick city: (Ctrl+C to go back)")
+                    city = chooseCity(session)
+
+                    found_academy = -1
+                    for building in city["position"]:
+                        if building["building"] == "academy":
+                            found_academy = building["position"]
+                            break
+
+                    if found_academy < 0:
+                        print(f"No academy found in {city['name']}, try another city.")
                         enter()
                         continue
 
-                    print("Which one do you wish to study?")
-                    print("0) None")
-                    for index, num_study in enumerate(available):
-                        print(
-                            "{:d}) {}".format(
-                                index + 1,
-                                studies[
-                                    "js_researchAdvisorNextResearchName{}".format(num_study)
-                                ],
-                            )
-                        )
-                    choice = read(min=0, max=len(available))
-
-                    if choice == 0:
+                    total_glass = int(city["availableResources"][3])
+                    if total_glass < 300000:
+                        print(f"Not enough crystal in {city['name']} ({addThousandSeparator(total_glass)}), min=300k. Try another city.")
+                        enter()
                         continue
 
-                    study(session, studies, available[choice - 1])
-                    print("Done.")
-                    enter()
-                except KeyboardInterrupt:
-                    continue
-            else:
-                if option == 3:
-                    try:
-                        banner()
-                        academy_cities = find_academy_cities(session)
+                    break
 
-                        if not academy_cities:
-                            print("No academy found in any city.")
-                            enter()
-                            continue
+                max_experiments = total_glass // 300000
+                banner()
+                print(f"How many experiments? Min=1, Max={max_experiments}")
+                choice = read(min=1, max=max_experiments)
 
-                        if len(academy_cities) == 1:
-                            selected_cities = academy_cities
-                        else:
-                            print("\nCities with an academy:")
-                            for idx, ac in enumerate(academy_cities, start=1):
-                                print(f"[{idx}] {ac['cityName']}")
-                            print("\nEnter numbers separated by space (e.g. 1 3) or 'all':")
-                            sel = read().strip().lower().split()
-                            if "all" in sel:
-                                selected_cities = academy_cities
-                            else:
-                                selected_cities = []
-                                for token in sel:
-                                    if token.isdigit():
-                                        i = int(token)
-                                        if 0 < i <= len(academy_cities):
-                                            selected_cities.append(academy_cities[i - 1])
+                experiments["cityID"] = city["id"]
+                experiments["cityName"] = city["name"]
+                experiments["pos"] = found_academy
+                experiments["qty"] = choice
 
-                            if not selected_cities:
-                                continue
-
-                    except KeyboardInterrupt:
-                        continue
-
-                    set_child_mode(session)
-                    event.set()
-
-                    city_names = ", ".join(c["cityName"] for c in selected_cities)
-                    info = f"Process: Experiments (automatic)\n\nCities: {city_names}\nWill execute every 4h per city"
-
-                    try:
-                        sendToBot(session, info)
-                        experiment_multi(session, selected_cities)
-                    except Exception as e:
-                        error_msg = f"Error in:\n{info}\nCause:\n{traceback.format_exc()}"
-                        sendToBot(session, error_msg)
-                    finally:
-                        session.logout()
-                else:
-                    automatic = False
-                    experiments = {}
-                    found_academy = -1
-
-                    try:
-                        while True:
-                            banner()
-                            print("Pick city: (Ctrl+C to go back)")
-                            city = chooseCity(session)
-
-                            found_academy = -1
-                            for building in city["position"]:
-                                if building["building"] == "academy":
-                                    found_academy = building["position"]
-                                    break
-
-                            if found_academy < 0:
-                                print(f"No academy found in {city['name']}, try another city.")
-                                enter()
-                                continue
-
-                            total_glass = int(city["availableResources"][3])
-                            if total_glass < 300000:
-                                print(f"Not enough crystal in {city['name']} ({addThousandSeparator(total_glass)}), min=300k. Try another city.")
-                                enter()
-                                continue
-
-                            break
-
-                        max_experiments = total_glass // 300000
-                        banner()
-                        print(f"How many experiments? Min=1, Max={max_experiments}")
-                        choice = read(min=1, max=max_experiments)
-
-                        experiments["cityID"] = city["id"]
-                        experiments["cityName"] = city["name"]
-                        experiments["pos"] = found_academy
-                        experiments["qty"] = choice
-
-                    except KeyboardInterrupt:
-                        continue
-
-                    set_child_mode(session)
-                    event.set()
-
-                    info = f"Process: Experiments\n\nWill excecute {choice} times every 4h"
-
-                    try:
-                        sendToBot(session, info)
-                        experiment(session, experiments, automatic)
-                    except Exception as e:
-                        error_msg = f"Error in:\n{info}\nCause:\n{traceback.format_exc()}"
-                        sendToBot(session, error_msg)
-                    finally:
-                        session.logout()
-
-    except KeyboardInterrupt:
-        event.set()
-        return
+                info = f"Process: Experiments\n\nWill excecute {choice} times every 4h"
+                sendToBot(session, info)
+                return {
+                    "mode": "experiment",
+                    "experiments": experiments,
+                    "automatic": automatic,
+                    "info": info
+                }

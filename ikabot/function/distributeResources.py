@@ -5,6 +5,7 @@ import traceback
 
 from ikabot.config import *
 from ikabot.helpers.botComm import *
+from ikabot.helpers.decorators import configurator, task
 from ikabot.helpers.getJson import getCity
 from ikabot.helpers.gui import banner
 from ikabot.helpers.pedirInfo import *
@@ -15,6 +16,22 @@ from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import addThousandSeparator
 
 
+@task("distributeResources")
+def do_it(session, routes, useFreighters, resource):
+    """
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    routes : list
+    useFreighters : bool
+    resource : int
+    """
+    info = "\nDistribute {}\n".format(materials_names[resource])
+    setInfoSignal(session, info)
+    executeRoutes(session, routes, useFreighters)
+
+
+@configurator
 def distributeResources(session, event, stdin_fd, predetermined_input):
     """
     Parameters
@@ -24,8 +41,6 @@ def distributeResources(session, event, stdin_fd, predetermined_input):
     stdin_fd: int
     predetermined_input : multiprocessing.managers.SyncManager.list
     """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
     try:
         banner()
 
@@ -45,8 +60,7 @@ def distributeResources(session, event, stdin_fd, predetermined_input):
             print("({:d}) {}".format(i + 1, materials_names[i]))
         resource = read(min=0, max=5)
         if resource == 0:
-            event.set()  # give main process control before exiting
-            return
+            return None
         resource -= 1
 
         if resource == 0:
@@ -66,8 +80,7 @@ def distributeResources(session, event, stdin_fd, predetermined_input):
             routes = distribute_unevenly(session, resource, cities_ids, cities)
 
         if routes is None:
-            event.set()
-            return
+            return None
 
         banner()
         print("\nThe following shipments will be made:\n")
@@ -84,26 +97,17 @@ def distributeResources(session, event, stdin_fd, predetermined_input):
         print("\nProceed? [Y/n]")
         rta = read(values=["y", "Y", "n", "N", ""])
         if rta.lower() == "n":
-            event.set()
-            return
+            return None
 
     except KeyboardInterrupt:
-        event.set()
-        return
+        return None
 
-    set_child_mode(session)
-    event.set()  # this is where we give back control to main process
-
-    info = "\nDistribute {}\n".format(materials_names[resource])
-    setInfoSignal(session, info)
-
-    try:
-        executeRoutes(session, routes, useFreighters)  # plan trips for all the routes
-    except Exception as e:
-        msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
-        sendToBot(session, msg)  # sends message to telegram bot
-    finally:
-        session.logout()
+    return {
+        "session": session,
+        "routes": routes,
+        "useFreighters": useFreighters,
+        "resource": resource,
+    }
 
 
 def distribute_evenly(session, resource_type, cities_ids, cities):

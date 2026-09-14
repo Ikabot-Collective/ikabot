@@ -5,16 +5,31 @@ import traceback
 
 from ikabot.config import *
 from ikabot.helpers.botComm import *
+from ikabot.helpers.decorators import configurator, task
 from ikabot.helpers.getJson import getCity
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.planRoutes import executeRoutes
-from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.resources import *
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import addThousandSeparator
 
 
+@task("sendResources")
+def do_it(session, routes, useFreighters):
+    """
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    routes : list
+    useFreighters : bool
+    """
+    info = "\nSend resources\n"
+    setInfoSignal(session, info)
+    executeRoutes(session, routes, useFreighters)
+
+
+@configurator
 def sendResources(session, event, stdin_fd, predetermined_input):
     """
     Parameters
@@ -24,8 +39,6 @@ def sendResources(session, event, stdin_fd, predetermined_input):
     stdin_fd: int
     predetermined_input : multiprocessing.managers.SyncManager.list
     """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
     try:
         print("What type of ships do you want to use? (Default: Trade ships)")
         print("(1) Trade ships")
@@ -50,8 +63,7 @@ def sendResources(session, event, stdin_fd, predetermined_input):
                     rta = read(values=["y", "Y", "n", "N", ""])
                     if rta.lower() != "n":
                         break
-                event.set()
-                return
+                return None
 
             banner()
             print("Destination city")
@@ -139,19 +151,13 @@ def sendResources(session, event, stdin_fd, predetermined_input):
                 if rta.lower() != "y":
                     break
     except KeyboardInterrupt:
-        event.set()
-        return
+        return None
 
-    set_child_mode(session)
-    event.set()
+    if not routes:
+        return None
 
-    info = "\nSend resources\n"
-
-    setInfoSignal(session, info)
-    try:
-        executeRoutes(session, routes, useFreighters)
-    except Exception as e:
-        msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
-        sendToBot(session, msg)
-    finally:
-        session.logout()
+    return {
+        "session": session,
+        "routes": routes,
+        "useFreighters": useFreighters,
+    }

@@ -33,6 +33,8 @@ except Exception:
     _logger = logging.getLogger(__name__)
 
 
+from ikabot.helpers.decorators import configurator, task
+
 def extract_captcha_image(html):
     """Extract the pirates captcha PNG bytes from the capture response.
 
@@ -69,114 +71,25 @@ def extract_captcha_image(html):
             return None
     return None
 
-
-def autoPirate(session, event, stdin_fd, predetermined_input):
-    """
-    Parameters
-    ----------
-    session : ikabot.web.session.Session
-    event : multiprocessing.Event
-    stdin_fd: int
-    predetermined_input : multiprocessing.managers.SyncManager.list
-    """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
-    banner()
-    try:        
-
-        if not (PIRATE_DECAPTCHA_LOCAL and LOCAL_DECAPTCHA):
-            print("💡 TIP: You can process captchas locally! Run `pip install onnxruntime` to move inference to your client.")
-            print("This feature is not available if you are using the precombile binary for Windows!\n\n")
-            print("{}⚠️ USING THIS FEATURE WILL EXPOSE YOUR IP ADDRESS TO A THIRD PARTY FOR CAPTCHA SOLVING ⚠️{}\n\n".format(bcolors.WARNING, bcolors.ENDC))
-        else:
-            print("{}[SUCCESS]{} You are using local decaptcha!\n\n".format(bcolors.GREEN, bcolors.ENDC))
-    
-        print("How many pirate missions should I do? (min = 1)")
-        pirateCount = read(min=1, digit=True)
-        print("Should I schedule pirate missions by the time of day? (y/N)")
-        scheduleInput = read(values=["y", "Y", "n", "N", ""])
-        if scheduleInput.lower() == "y":
-            pirateSchedule = True
-            print(
-                """Which pirate mission should I do at daytime? (Default mission)
-        (1) 2m 30s
-        (2) 7m 30s
-        (3) 15m
-        (4) 30m
-        (5) 1h
-        (6) 2h
-        (7) 4h
-        (8) 8h
-        (9) 16h
-        """
-            )
-            pirateMissionDayChoice = read(min=1, max=9, digit=True)
-            print(
-                """At which hours should I operate at daytime? (Default: 9 hours from 10 till 18)
-            """
-            )
-            print("From: ")
-            dayStart = read()
-            if dayStart == "":
-                dayStart = 10
-            else:
-                dayStart = int(dayStart)
-
-            print("Till: ")
-            dayEnd = read()
-            if dayEnd == "":
-                dayEnd = 18
-            else:
-                dayEnd = int(dayEnd)
-
-            print(
-                """Which pirate mission should I do at night time?
-            (1) 2m 30s
-            (2) 7m 30s
-            (3) 15m
-            (4) 30m
-            (5) 1h
-            (6) 2h
-            (7) 4h
-            (8) 8h
-            (9) 16h
-            """
-            )
-            pirateMissionNightChoice = read(min=1, max=9, digit=True)
-
-            print(
-                """At which hours should I operate at night time? (Default: 15 hours from 19 till 9): 
-            """
-            )
-            print("From: ")
-            nightStart = read()
-            if nightStart == "":
-                nightStart = 19
-            else:
-                nightStart = int(nightStart)
-
-            print("Till: ")
-            nightEnd = read()
-            if nightEnd == "":
-                nightEnd = 9
-            else:
-                nightEnd = int(nightEnd)
-        else:
-            pirateSchedule = False
-            print(
-                """Which pirate mission should I do?
-        (1) 2m 30s
-        (2) 7m 30s
-        (3) 15m
-        (4) 30m
-        (5) 1h
-        (6) 2h
-        (7) 4h
-        (8) 8h
-        (9) 16h
-        """
-            )
-            pirateMissionChoice = read(min=1, max=9, digit=True)
+@task("autoPirate")
+def do_pirate_missions(
+    session,
+    pirateCount,
+    pirateSchedule,
+    pirateMissionChoice,
+    pirateMissionDayChoice,
+    pirateMissionNightChoice,
+    dayStart,
+    dayEnd,
+    nightStart,
+    nightEnd,
+    autoConvert,
+    convertPerMission,
+    maxRandomWaitingTime,
+    piracyCities
+):
+    while pirateCount > 0:
+        session.setStatus("Pirating for " + str(pirateCount) + " more runs")
         if pirateSchedule == True:
             current_hour = int(time.strftime("%H"))
             if current_hour >= dayStart and current_hour <= dayEnd:
@@ -185,71 +98,27 @@ def autoPirate(session, event, stdin_fd, predetermined_input):
                 pirateMissionChoice = pirateMissionNightChoice
             else:
                 pirateMissionChoice = pirateMissionDayChoice
-        print(
-            "Do you want me to automatically convert capture points to crew strength? (Y|N)"
-        )
-        autoConvert = read(values=["y", "Y", "n", "N"])
-        if autoConvert.lower() == "y":
-            print(
-                'How many points should I convert every time I do a mission? (Type "all" to convert all points at once)'
-            )
-            convertPerMission = read(min=0, additionalValues=["all"], digit=True)
-        print(
-            "Enter a maximum additional random waiting time between missions in seconds. (min = 0)"
-        )
-        maxRandomWaitingTime = read(min=0, digit=True)
-        piracyCities = getPiracyCities(session, pirateMissionChoice)
+        pirateCount -= 1
+        piracyCities = getPiracyCities(
+            session, pirateMissionChoice
+        )  # this is done again inside the loop in case the user destroys / creates another pirate fortress while this module is running
         if piracyCities == []:
-            print(
-                "You do not have any city with a pirate fortress capable of executing this mission!"
+            raise Exception(
+                "No city with pirate fortress capable of executing selected mission"
             )
-            enter()
-            event.set()
-            return
-
-        print(
-            "YAAAAAR!"
-        )  # get data for options such as auto-convert to crew strength, time intervals, number of piracy attempts... ^^
-        enter()
-    except KeyboardInterrupt:
-        event.set()
-        return
-
-    set_child_mode(session)
-    event.set()
-
-    try:
-        while pirateCount > 0:
-            session.setStatus("Pirating for " + str(pirateCount) + " more runs")
-            if pirateSchedule == True:
-                current_hour = int(time.strftime("%H"))
-                if current_hour >= dayStart and current_hour <= dayEnd:
-                    pirateMissionChoice = pirateMissionDayChoice
-                elif current_hour >= nightStart or current_hour <= nightEnd:
-                    pirateMissionChoice = pirateMissionNightChoice
-                else:
-                    pirateMissionChoice = pirateMissionDayChoice
-            pirateCount -= 1
-            piracyCities = getPiracyCities(
-                session, pirateMissionChoice
-            )  # this is done again inside the loop in case the user destroys / creates another pirate fortress while this module is running
-            if piracyCities == []:
-                raise Exception(
-                    "No city with pirate fortress capable of executing selected mission"
-                )
-            html = session.post(
-                city_url + str(piracyCities[0]["id"])
-            )  # this is needed because for some reason you need to look at the town where you are sending a request from in the line below, before you send that request
-            if (
-                '"showPirateFortressShip":0' in html
-            ):  # this is in case the user has manually run a capture run, in that case, there is no need to wait 150secs instead we can check every 5
-                url = "view=pirateFortress&cityId={}&position=17&backgroundView=city&currentCityId={}&actionRequest={}&ajax=1".format(
-                    piracyCities[0]["id"], piracyCities[0]["id"], actionRequest
-                )
-                html = session.post(url)
-                wait(getCurrentMissionWaitingTime(html), maxRandomWaitingTime)
-                pirateCount += 1  # don't count this as an iteration of the loop
-                continue
+        html = session.post(
+            city_url + str(piracyCities[0]["id"])
+        )  # this is needed because for some reason you need to look at the town where you are sending a request from in the line below, before you send that request
+        if (
+            '"showPirateFortressShip":0' in html
+        ):  # this is in case the user has manually run a capture run, in that case, there is no need to wait 150secs instead we can check every 5
+            url = "view=pirateFortress&cityId={}&position=17&backgroundView=city&currentCityId={}&actionRequest={}&ajax=1".format(
+                piracyCities[0]["id"], piracyCities[0]["id"], actionRequest
+            )
+            html = session.post(url)
+            wait(getCurrentMissionWaitingTime(html), maxRandomWaitingTime)
+            pirateCount += 1  # don't count this as an iteration of the loop
+            continue
 
             url = "action=PiracyScreen&function=capture&buildingLevel={0}&view=pirateFortress&cityId={1}&position=17&activeTab=tabBootyQuest&backgroundView=city&currentCityId={1}&templateView=pirateFortress&actionRequest={2}&ajax=1".format(
                 piracyMissionToBuildingLevel[pirateMissionChoice],
@@ -334,12 +203,170 @@ def autoPirate(session, event, stdin_fd, predetermined_input):
                 convertCapturePoints(session, piracyCities, convertPerMission)
             wait(piracyMissionWaitingTime[pirateMissionChoice], maxRandomWaitingTime)
 
-    except Exception:
-        info = ""
-        msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
-        sendToBot(session, msg)
-        event.set()
-        return
+@configurator
+def autoPirate(session, event, stdin_fd, predetermined_input):
+    """
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    event : multiprocessing.Event
+    stdin_fd: int
+    predetermined_input : multiprocessing.managers.SyncManager.list
+    """
+    banner()
+
+    if not (PIRATE_DECAPTCHA_LOCAL and LOCAL_DECAPTCHA):
+        print("💡 TIP: You can process captchas locally! Run `pip install onnxruntime` to move inference to your client.")
+        print("This feature is not available if you are using the precombile binary for Windows!\n\n")
+        print("{}⚠️ USING THIS FEATURE WILL EXPOSE YOUR IP ADDRESS TO A THIRD PARTY FOR CAPTCHA SOLVING ⚠️{}\n\n".format(bcolors.WARNING, bcolors.ENDC))
+    else:
+        print("{}[SUCCESS]{} You are using local decaptcha!\n\n".format(bcolors.GREEN, bcolors.ENDC))
+
+    print("How many pirate missions should I do? (min = 1)")
+    pirateCount = read(min=1, digit=True)
+    print("Should I schedule pirate missions by the time of day? (y/N)")
+    scheduleInput = read(values=["y", "Y", "n", "N", ""])
+    pirateMissionDayChoice = None
+    pirateMissionNightChoice = None
+    dayStart = None
+    dayEnd = None
+    nightStart = None
+    nightEnd = None
+    pirateMissionChoice = None
+
+    if scheduleInput.lower() == "y":
+        pirateSchedule = True
+        print(
+            """Which pirate mission should I do at daytime? (Default mission)
+    (1) 2m 30s
+    (2) 7m 30s
+    (3) 15m
+    (4) 30m
+    (5) 1h
+    (6) 2h
+    (7) 4h
+    (8) 8h
+    (9) 16h
+    """
+        )
+        pirateMissionDayChoice = read(min=1, max=9, digit=True)
+        print(
+            """At which hours should I operate at daytime? (Default: 9 hours from 10 till 18)
+        """
+        )
+        print("From: ")
+        dayStart = read()
+        if dayStart == "":
+            dayStart = 10
+        else:
+            dayStart = int(dayStart)
+
+        print("Till: ")
+        dayEnd = read()
+        if dayEnd == "":
+            dayEnd = 18
+        else:
+            dayEnd = int(dayEnd)
+
+        print(
+            """Which pirate mission should I do at night time?
+        (1) 2m 30s
+        (2) 7m 30s
+        (3) 15m
+        (4) 30m
+        (5) 1h
+        (6) 2h
+        (7) 4h
+        (8) 8h
+        (9) 16h
+        """
+        )
+        pirateMissionNightChoice = read(min=1, max=9, digit=True)
+
+        print(
+            """At which hours should I operate at night time? (Default: 15 hours from 19 till 9): 
+        """
+        )
+        print("From: ")
+        nightStart = read()
+        if nightStart == "":
+            nightStart = 19
+        else:
+            nightStart = int(nightStart)
+
+        print("Till: ")
+        nightEnd = read()
+        if nightEnd == "":
+            nightEnd = 9
+        else:
+            nightEnd = int(nightEnd)
+    else:
+        pirateSchedule = False
+        print(
+            """Which pirate mission should I do?
+    (1) 2m 30s
+    (2) 7m 30s
+    (3) 15m
+    (4) 30m
+    (5) 1h
+    (6) 2h
+    (7) 4h
+    (8) 8h
+    (9) 16h
+    """
+        )
+        pirateMissionChoice = read(min=1, max=9, digit=True)
+    if pirateSchedule == True:
+        current_hour = int(time.strftime("%H"))
+        if current_hour >= dayStart and current_hour <= dayEnd:
+            pirateMissionChoice = pirateMissionDayChoice
+        elif current_hour >= nightStart or current_hour <= nightEnd:
+            pirateMissionChoice = pirateMissionNightChoice
+        else:
+            pirateMissionChoice = pirateMissionDayChoice
+    print(
+        "Do you want me to automatically convert capture points to crew strength? (Y|N)"
+    )
+    autoConvert = read(values=["y", "Y", "n", "N"])
+    convertPerMission = 0
+    if autoConvert.lower() == "y":
+        print(
+            'How many points should I convert every time I do a mission? (Type "all" to convert all points at once)'
+        )
+        convertPerMission = read(min=0, additionalValues=["all"], digit=True)
+    print(
+        "Enter a maximum additional random waiting time between missions in seconds. (min = 0)"
+    )
+    maxRandomWaitingTime = read(min=0, digit=True)
+    piracyCities = getPiracyCities(session, pirateMissionChoice)
+    if piracyCities == []:
+        print(
+            "You do not have any city with a pirate fortress capable of executing this mission!"
+        )
+        enter()
+        return None
+
+    print(
+        "YAAAAAR!"
+    )  # get data for options such as auto-convert to crew strength, time intervals, number of piracy attempts... ^^
+    enter()
+    
+    return {
+        "session": session,
+        "pirateCount": pirateCount,
+        "pirateSchedule": pirateSchedule,
+        "pirateMissionChoice": pirateMissionChoice,
+        "pirateMissionDayChoice": pirateMissionDayChoice,
+        "pirateMissionNightChoice": pirateMissionNightChoice,
+        "dayStart": dayStart,
+        "dayEnd": dayEnd,
+        "nightStart": nightStart,
+        "nightEnd": nightEnd,
+        "autoConvert": autoConvert,
+        "convertPerMission": convertPerMission,
+        "maxRandomWaitingTime": maxRandomWaitingTime,
+        "piracyCities": piracyCities
+    }
 
 
 def _is_png_bytes(image):
