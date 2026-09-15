@@ -5,7 +5,7 @@ import locale
 import os
 
 # Version is changed automatically by the release pipeline
-IKABOT_VERSION = "7.6.0"
+IKABOT_VERSION = "7.6.1"
 
 
 IKABOT_VERSION_TAG = "v" + IKABOT_VERSION
@@ -77,6 +77,7 @@ has_params = False
 menu_cities = ""
 infoUser = ""
 ikaFile = ".ikabot"
+ikaDir = ".ikabot"
 city_url = "view=city&cityId="
 island_url = "view=island&islandId="
 prompt = " >>  "

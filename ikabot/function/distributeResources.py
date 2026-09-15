@@ -124,11 +124,16 @@ def distribute_evenly(session, resource_type, cities_ids, cities):
             city_url + cityID
         )  # load html from the get request for that particular city
         city = getCity(html)  # convert the html to a city object
+        if city.get("harbourOccupied"):
+            continue
 
         resourceTotal += city["availableResources"][
             resource_type
         ]  # the cities resources are added to the total
         allCities[cityID] = city  # adds the city to all cities
+
+    if len(allCities) < 2:
+        return []
 
     # if a city doesn't have enough storage to fit resourceAverage
     # ikabot will send enough resources to fill the store to the max

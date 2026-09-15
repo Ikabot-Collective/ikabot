@@ -27,6 +27,42 @@ def test_distribute_evenly(monkeypatch, session, cities):
     ]
 
 
+def test_distribute_evenly_excludes_blockaded_cities(monkeypatch, session, cities):
+    resource_type = materials_names_tec.index("wine")
+    cities[0]["harbourOccupied"] = True
+    cities[0]["availableResources"][resource_type] = 600
+    cities[1]["availableResources"][resource_type] = 600
+    cities[2]["availableResources"][resource_type] = 0
+    monkeypatch.setattr(
+        ikabot.function.distributeResources, "getCity", lambda city: city
+    )
+
+    routes = distribute_evenly(
+        session, resource_type, [city["id"] for city in cities], cities
+    )
+
+    assert routes == [(cities[1], cities[2], cities[2]["islandId"], 0, 300, 0, 0, 0)]
+
+
+def test_distribute_evenly_with_only_blockaded_cities_returns_no_routes(
+    monkeypatch, session, cities
+):
+    for city in cities:
+        city["harbourOccupied"] = True
+    monkeypatch.setattr(
+        ikabot.function.distributeResources, "getCity", lambda city: city
+    )
+
+    routes = distribute_evenly(
+        session,
+        materials_names_tec.index("wine"),
+        [city["id"] for city in cities],
+        cities,
+    )
+
+    assert routes == []
+
+
 @pytest.fixture()
 def cities():
     city_1 = {
