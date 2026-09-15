@@ -1557,7 +1557,7 @@ class Session:
                     self.__printSessionRotated()
                     sys.exit(1)
                 if "TXT_ERROR_WRONG_REQUEST_ID" in resp:
-                    self.logger.warning("got TXT_ERROR_WRONG_REQUEST_ID, bad actionRequest")
+                    self.logger.info("got TXT_ERROR_WRONG_REQUEST_ID, bad actionRequest")
                     sessionData = self.getSessionData()
                     if sessionData.pop("actionRequestToken", None) is not None:
                         sessionData.pop("shared", None)
@@ -1581,10 +1581,15 @@ class Session:
                 except Exception:
                     pass
 
-                # 'action' requests always need a fresh token afterward
+                # an action consumes the token and the response carries the next one
                 if "action" in payloadPost or "action" in params:
+                    new_token = re.search(r'actionRequest"?:\s*"(.*?)"', resp)
                     sessionData = self.getSessionData()
-                    if sessionData.pop("actionRequestToken", None) is not None:
+                    if new_token:
+                        sessionData.pop("shared", None)
+                        sessionData["actionRequestToken"] = new_token.group(1)
+                        self.setSessionData(sessionData)
+                    elif sessionData.pop("actionRequestToken", None) is not None:
                         sessionData.pop("shared", None)
                         self.setSessionData(sessionData)
 
