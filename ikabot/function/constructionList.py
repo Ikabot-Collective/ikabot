@@ -87,19 +87,24 @@ def _getFreeSpeedupParams(response, city_id, position):
     if popup is None:
         return None
 
-    button = re.search(
+    buttons = re.findall(
         r'<a\b(?=[^>]*\bid=["\']js_buildingSpeedupActivateBtn["\'])[^>]*>.*?</a>',
         popup,
         re.DOTALL,
     )
-    if button is None:
+    if len(buttons) != 1:
         return None
-    cost = re.search(
+    button = buttons[0]
+
+    costs = re.findall(
         r'<span\b(?=[^>]*\bclass=["\'][^"\']*\bambrosiaIcon\b[^"\']*["\'])[^>]*>\s*(\d+)\s*</span>',
-        button.group(0),
+        button,
     )
-    href = re.search(r'href=["\']([^"\']+)', button.group(0))
-    if cost is None or cost.group(1) != "0" or href is None:
+    if len(costs) != 1 or costs[0] != "0":
+        return None
+
+    href = re.search(r'href=["\']([^"\']+)', button)
+    if href is None:
         return None
 
     query = parse_qs(urlparse(html.unescape(href.group(1))).query)
