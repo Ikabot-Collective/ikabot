@@ -201,6 +201,7 @@ def sellToOffers(session, city_to_buy_from, resource_type):
         return None
 
     return {
+        "session": session,
         "mode": "sell_to_offers",
         "amount_to_sell": amount_to_sell,
         "offers": chosen_offers,
@@ -256,6 +257,7 @@ def createOffer(session, my_offering_market_city, resource_type):
         return None
 
     return {
+        "session": session,
         "mode": "create_offer",
         "amount_to_sell": amount_to_sell,
         "price": price,
