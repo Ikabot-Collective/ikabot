@@ -1,3 +1,4 @@
+from ikabot.helpers.decorators import configurator
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Account status overview.
@@ -516,6 +517,7 @@ def collectData(session):
     }
 
 
+@configurator
 def getStatus(session, event, stdin_fd, predetermined_input):
     """
     Parameters
@@ -530,8 +532,6 @@ def getStatus(session, event, stdin_fd, predetermined_input):
     entirely from that in-memory data without any further requests. Selecting
     (3) re-scans the account on demand and refreshes the cache.
     """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
     try:
         banner()
         color_arr = [

@@ -1,3 +1,4 @@
+from ikabot.helpers.decorators import configurator
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
@@ -68,6 +69,7 @@ def read_proxy(session):
     return proxy_dict
 
 
+@configurator
 def proxyConf(session, event, stdin_fd, predetermined_input):
     """
     Parameters
@@ -77,8 +79,6 @@ def proxyConf(session, event, stdin_fd, predetermined_input):
     stdin_fd: int
     predetermined_input : multiprocessing.managers.SyncManager.list
     """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
     try:
         banner()
         print(

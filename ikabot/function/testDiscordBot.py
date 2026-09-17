@@ -1,3 +1,4 @@
+from ikabot.helpers.decorators import configurator
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 import sys
@@ -7,6 +8,7 @@ from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import enter, read
 
 
+@configurator
 def testDiscordBot(session, event, stdin_fd, predetermined_input):
     """
     Parameters
@@ -16,8 +18,6 @@ def testDiscordBot(session, event, stdin_fd, predetermined_input):
     stdin_fd: int
     predetermined_input : multiprocessing.managers.SyncManager.list
     """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
     try:
         if not discordDataIsValid(session):
             print("No Discord webhook configured. Please set it up first.")

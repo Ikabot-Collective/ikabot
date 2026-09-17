@@ -1,3 +1,4 @@
+from ikabot.helpers.decorators import configurator
 import re
 
 from ikabot.config import *
@@ -134,9 +135,8 @@ def sendArmy(session, origin_city, destination_city, type_army, army_available):
     session.post(params=params)
 
 
+@configurator
 def stationArmy(session, event, stdin_fd, predetermined_input):
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
     type_army = True
     try:
         banner()

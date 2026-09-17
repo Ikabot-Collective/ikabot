@@ -2,9 +2,11 @@ from ikabot.helpers.dns import getAddress
 import ikabot
 import os
 import sys
+from ikabot.helpers.decorators import configurator
 
+
+@configurator
 def developer(session, event, stdin_fd, *args):
-    sys.stdin = os.fdopen(stdin_fd)
     print("\n=== Developer Information ===\n")
 
     # 1. Get the ikabot package directory
@@ -31,5 +33,4 @@ def developer(session, event, stdin_fd, *args):
     print("ikariam:", cookies.get("ikariam", "Not set"))
     print("gf-token-production:", cookies.get("gf-token-production", "Not set"))
     input("\nPress enter to return...")
-
-    event.set()
+    return None
