@@ -60,6 +60,13 @@ def send_upgrade_request(session, city_id, position, unit_id, upgrade_type, acti
 
         low = resp_text.lower()
 
+        # a genuinely successful response is a full game-state blob that can
+        # legitimately contain a provideFeedback message not recognized below
+        # (e.g. "Tu orden se ha cumplido" -- "Your order was fulfilled"), so the
+        # success marker must be checked before any failure-keyword matching.
+        if resp_text.startswith('[["updateGlobalData"'):
+            return True, None
+
         if "not enough" in low or "insufficient resources" in low or "insufficient" in low:
             return False, "insufficient_resources"
 
@@ -84,12 +91,9 @@ def send_upgrade_request(session, city_id, position, unit_id, upgrade_type, acti
         except Exception:
             pass
 
-        if ("upgrade failed" in low or "cannot upgrade" in low or "invalid request" in low or 
+        if ("upgrade failed" in low or "cannot upgrade" in low or "invalid request" in low or
             "server error" in low or "exception" in low):
             return False, "server_error"
-
-        if resp_text.startswith('[["updateGlobalData"'):
-            return True, None
 
         return False, "unknown_response"
     except Exception as e:
@@ -160,10 +164,7 @@ def wait_for_upgrade_start(session, city_id, position, tab):
 from ikabot.helpers.decorators import configurator, task
 
 
-@task("UpgradeUnits")
-def execute_sequential_upgrades(session, city_id, city_name, position, tab, tasks):
-    info = f"Workshop upgrade: {len(tasks)} upgrades queued"
-    setInfoSignal(session, info)
+def run_city_upgrades(session, city_id, city_name, position, tab, tasks):
     while tasks:
         wait_for_upgrade_completion(session, city_id, position, tab)
         html = session.get(city_url + str(city_id))
@@ -176,7 +177,7 @@ def execute_sequential_upgrades(session, city_id, city_name, position, tab, task
         session.setStatus(f"Upgrading {task['unit']} ({task['type']}) {from_lvl}→{to_lvl}")
         success, error = send_upgrade_request(session, city_id, position, task['unitId'], task['upgradeType'], action_request, tab)
         if not success:
-            
+
             if error in ("insufficient_resources", "insufficient_workshop_level", "feedback"):
                 session.setStatus(f"Upgrade aborted: {error}")
                 city_name_str = city_name if isinstance(city_name, str) else str(city_name)
@@ -193,6 +194,23 @@ def execute_sequential_upgrades(session, city_id, city_name, position, tab, task
             wait_for_upgrade_start(session, city_id, position, tab)
 
     session.setStatus("All workshop upgrades completed")
+
+
+@task("UpgradeUnits")
+def execute_sequential_upgrades(session, jobs):
+    plural = "city" if len(jobs) == 1 else "cities"
+    info = f"Workshop upgrade: {len(jobs)} {plural} queued"
+    setInfoSignal(session, info)
+    threads = []
+    for job in jobs:
+        t = threading.Thread(
+            target=run_city_upgrades,
+            args=(session, job["city_id"], job["city_name"], job["position"], job["tab"], job["tasks"]),
+        )
+        t.start()
+        threads.append(t)
+    for t in threads:
+        t.join()
 
 
 @configurator
@@ -226,28 +244,43 @@ def UpgradeUnits(session, event, stdin_fd, predetermined_input):
         for idx, w in enumerate(workshops, start=1):
             lvl = w.get("level", 0)
             print(f"[{idx}] {w['name']}, workshop level {lvl}")
-        print("\nEnter a number to pick a city:")
-        sel = read().strip()
-        selected_workshops = []
-        if sel.isdigit():
-            i = int(sel)
-            if 0 < i <= len(workshops):
-                selected_workshops.append(workshops[i - 1])
-        
+        print("\nEnter numbers separated by space or comma (e.g. 1 3) or 'all' to pick every city:")
+        sel = read().strip().lower().replace(",", " ").split()
+        if "all" in sel:
+            selected_workshops = workshops
+        else:
+            selected_workshops = []
+            for token in sel:
+                if token.isdigit():
+                    i = int(token)
+                    if 0 < i <= len(workshops):
+                        selected_workshops.append(workshops[i - 1])
+
         if not selected_workshops:
             enter()
             return None
 
-    w = selected_workshops[0]
-    print(f"\n=== City {w['name']} (id {w['city_id']}) ===")
-    return run_workshop_upgrade_interface(
-        session,
-        w["city_id"],
-        w["name"],
-        w["position"],
-        w["action_request"],
-        w.get("level", 0),
-    )
+    jobs = []
+    for w in selected_workshops:
+        print(f"\n=== City {w['name']} (id {w['city_id']}) ===")
+        job = run_workshop_upgrade_interface(
+            session,
+            w["city_id"],
+            w["name"],
+            w["position"],
+            w["action_request"],
+            w.get("level", 0),
+        )
+        if job:
+            jobs.append(job)
+
+    if not jobs:
+        return None
+
+    return {
+        "session": session,
+        "jobs": jobs
+    }
 
 
 def run_workshop_upgrade_interface(session, city_id, city_name, position, action_request, workshop_level=0):
@@ -364,11 +397,11 @@ def run_workshop_upgrade_interface(session, city_id, city_name, position, action
             continue
 
         try:
-            cost_gold = int(base_task['gold'].replace(',', '').replace('.', ''))
+            cost_gold = int(base_task['gold'].replace(',', '').replace('.', '').replace(' ', '').replace('\xa0', ''))
         except Exception:
             cost_gold = 0
         try:
-            cost_crystal = int(base_task['crystal'].replace(',', '').replace('.', ''))
+            cost_crystal = int(base_task['crystal'].replace(',', '').replace('.', '').replace(' ', '').replace('\xa0', ''))
         except Exception:
             cost_crystal = 0
 
@@ -407,7 +440,6 @@ def run_workshop_upgrade_interface(session, city_id, city_name, position, action
         return None
 
     return {
-        "session": session,
         "city_id": city_id,
         "city_name": city_name,
         "position": position,
