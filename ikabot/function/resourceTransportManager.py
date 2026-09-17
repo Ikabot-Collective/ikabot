@@ -687,7 +687,10 @@ def consolidateMode(session, telegram_enabled):
     except KeyboardInterrupt:
         return None
     
+    info = f"\nAuto-send resources from {source_cities_summary} to {destination_city['name']} every {interval_hours} hour(s)\n"
+
     return {
+        "session": session,
         "mode": "consolidate",
         "info": info,
         "origin_cities": origin_cities,
@@ -882,7 +885,10 @@ def distributeMode(session, telegram_enabled):
     except KeyboardInterrupt:
         return None
     
+    info = f"\nDistribute resources from {origin_city['name']} to {len(destination_cities)} cities every {interval_hours} hour(s)\n"
+
     return {
+        "session": session,
         "mode": "distribute",
         "info": info,
         "origin_city": origin_city,
