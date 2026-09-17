@@ -60,6 +60,13 @@ def send_upgrade_request(session, city_id, position, unit_id, upgrade_type, acti
 
         low = resp_text.lower()
 
+        # a genuinely successful response is a full game-state blob that can
+        # legitimately contain a provideFeedback message not recognized below
+        # (e.g. "Tu orden se ha cumplido" -- "Your order was fulfilled"), so the
+        # success marker must be checked before any failure-keyword matching.
+        if resp_text.startswith('[["updateGlobalData"'):
+            return True, None
+
         if "not enough" in low or "insufficient resources" in low or "insufficient" in low:
             return False, "insufficient_resources"
 
@@ -87,9 +94,6 @@ def send_upgrade_request(session, city_id, position, unit_id, upgrade_type, acti
         if ("upgrade failed" in low or "cannot upgrade" in low or "invalid request" in low or
             "server error" in low or "exception" in low):
             return False, "server_error"
-
-        if resp_text.startswith('[["updateGlobalData"'):
-            return True, None
 
         return False, "unknown_response"
     except Exception as e:
@@ -393,11 +397,11 @@ def run_workshop_upgrade_interface(session, city_id, city_name, position, action
             continue
 
         try:
-            cost_gold = int(base_task['gold'].replace(',', '').replace('.', ''))
+            cost_gold = int(base_task['gold'].replace(',', '').replace('.', '').replace(' ', '').replace('\xa0', ''))
         except Exception:
             cost_gold = 0
         try:
-            cost_crystal = int(base_task['crystal'].replace(',', '').replace('.', ''))
+            cost_crystal = int(base_task['crystal'].replace(',', '').replace('.', '').replace(' ', '').replace('\xa0', ''))
         except Exception:
             cost_crystal = 0
 
