@@ -274,8 +274,8 @@ def research(session, event, stdin_fd, predetermined_input):
                     print("\nCities with an academy:")
                     for idx, ac in enumerate(academy_cities, start=1):
                         print(f"[{idx}] {ac['cityName']}")
-                    print("\nEnter numbers separated by space (e.g. 1 3) or 'all':")
-                    sel = read().strip().lower().split()
+                    print("\nEnter numbers separated by space or comma (e.g. 1 3) or 'all':")
+                    sel = read().strip().lower().replace(",", " ").split()
                     if "all" in sel:
                         selected_cities = academy_cities
                     else:
@@ -293,6 +293,7 @@ def research(session, event, stdin_fd, predetermined_input):
                 info = f"Process: Experiments (automatic)\n\nCities: {city_names}\nWill execute every 4h per city"
                 sendToBot(session, info)
                 return {
+                    "session": session,
                     "mode": "experiment_multi",
                     "cities": selected_cities,
                     "info": info
@@ -339,6 +340,7 @@ def research(session, event, stdin_fd, predetermined_input):
                 info = f"Process: Experiments\n\nWill excecute {choice} times every 4h"
                 sendToBot(session, info)
                 return {
+                    "session": session,
                     "mode": "experiment",
                     "experiments": experiments,
                     "automatic": automatic,
