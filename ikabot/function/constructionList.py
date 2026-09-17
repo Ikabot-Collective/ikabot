@@ -96,11 +96,10 @@ def _getFreeSpeedupParams(response, city_id, position):
         return None
     button = buttons[0]
 
-    costs = re.findall(
-        r'<span\b(?=[^>]*\bclass=["\'][^"\']*\bambrosiaIcon\b[^"\']*["\'])[^>]*>\s*(\d+)\s*</span>',
-        button,
-    )
-    if len(costs) != 1 or costs[0] != "0":
+    span_pattern = r'<span\b(?=[^>]*\bclass=["\'][^"\']*\bambrosiaIcon\b[^"\']*["\'])[^>]*>'
+    ambrosia_spans = re.findall(span_pattern, button)
+    costs = re.findall(span_pattern + r'\s*(\d+)\s*</span>', button)
+    if len(ambrosia_spans) != 1 or len(costs) != 1 or costs[0] != "0":
         return None
 
     href = re.search(r'href=["\']([^"\']+)', button)
