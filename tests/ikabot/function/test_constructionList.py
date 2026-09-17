@@ -35,6 +35,56 @@ class TestFreeBuildingSpeedup(unittest.TestCase):
     def test_rejects_nonzero_ambrosia_cost(self):
         self.assertIsNone(_getFreeSpeedupParams(self._response(4), "14075", 10))
 
+    def test_rejects_various_nonzero_ambrosia_costs(self):
+        for cost in (1, 4, 20, 100, 1500):
+            with self.subTest(cost=cost):
+                self.assertIsNone(
+                    _getFreeSpeedupParams(self._response(cost), "14075", 10)
+                )
+
+    def test_rejects_nonzero_cost_with_surrounding_whitespace(self):
+        response = self._response_with_span(
+            '<span title="Ambrosia" class="ambrosiaIcon">\n  20\n</span>'
+        )
+
+        self.assertIsNone(_getFreeSpeedupParams(response, "14075", 10))
+
+    def test_rejects_nonzero_cost_with_reordered_span_attributes(self):
+        response = self._response_with_span(
+            '<span class="ambrosiaIcon" title="Ambrosia">20</span>'
+        )
+
+        self.assertIsNone(_getFreeSpeedupParams(response, "14075", 10))
+
+    def test_rejects_nonzero_cost_in_raw_popup(self):
+        popup = json.loads(self._response(20))[0][1][1]
+
+        self.assertIsNone(_getFreeSpeedupParams(popup, "14075", 10))
+
+    def test_rejects_nonzero_cost_with_non_numeric_text(self):
+        response = self._response_with_span(
+            '<span title="Ambrosia" class="ambrosiaIcon">20 Ambrosia</span>'
+        )
+
+        self.assertIsNone(_getFreeSpeedupParams(response, "14075", 10))
+
+    def test_rejects_zero_outer_span_hiding_nonzero_inner_cost(self):
+        response = self._response_with_span(
+            '<span class="ambrosiaIcon">0<span class="ambrosiaIcon">20</span></span>'
+        )
+
+        self.assertIsNone(_getFreeSpeedupParams(response, "14075", 10))
+
+    def test_rejects_duplicate_spans_with_mixed_zero_and_nonzero_costs(self):
+        for spans in (
+            '<span class="ambrosiaIcon">0</span> <span class="ambrosiaIcon">20</span>',
+            '<span class="ambrosiaIcon">20</span> <span class="ambrosiaIcon">0</span>',
+        ):
+            with self.subTest(spans=spans):
+                response = self._response_with_span(spans)
+
+                self.assertIsNone(_getFreeSpeedupParams(response, "14075", 10))
+
     def test_builds_guarded_zero_cost_request(self):
         params = _getFreeSpeedupParams(self._response(0), "14075", 10)
 
@@ -44,6 +94,27 @@ class TestFreeBuildingSpeedup(unittest.TestCase):
 
     def test_rejects_zero_cost_request_for_another_position(self):
         self.assertIsNone(_getFreeSpeedupParams(self._response(0), "14075", 11))
+
+    def _response_with_span(self, span):
+        response = json.loads(self._response(0))
+        response[0][1][1] = response[0][1][1].replace(
+            '<span title="Ambrosia" class="ambrosiaIcon">0</span>', span
+        )
+        return json.dumps(response)
+
+    def test_rejects_nested_ambrosia_spans_hiding_nonzero_cost(self):
+        response = self._response_with_span(
+            '<span class="ambrosiaIcon">20<span class="ambrosiaIcon">0</span></span>'
+        )
+
+        self.assertIsNone(_getFreeSpeedupParams(response, "14075", 10))
+
+    def test_rejects_duplicate_ambrosia_spans_in_one_button(self):
+        response = self._response_with_span(
+            '<span class="ambrosiaIcon">0</span> <span class="ambrosiaIcon">0</span>'
+        )
+
+        self.assertIsNone(_getFreeSpeedupParams(response, "14075", 10))
 
     def test_accepts_raw_popup_with_reordered_span_attributes(self):
         response = self._response(0)
@@ -73,6 +144,26 @@ class TestFreeBuildingSpeedup(unittest.TestCase):
     def test_never_posts_premium_request_for_nonzero_cost(self):
         session = Mock()
         session.post.return_value = self._response(4)
+
+        self.assertFalse(tryFreeBuildingSpeedup(session, "14075", {"position": 10}))
+        self.assertEqual(session.post.call_count, 1)
+
+    def test_never_posts_premium_request_for_any_nonzero_cost(self):
+        for cost in (1, 20, 1500):
+            with self.subTest(cost=cost):
+                session = Mock()
+                session.post.return_value = self._response(cost)
+
+                self.assertFalse(
+                    tryFreeBuildingSpeedup(session, "14075", {"position": 10})
+                )
+                self.assertEqual(session.post.call_count, 1)
+
+    def test_never_posts_premium_request_for_nested_nonzero_cost(self):
+        session = Mock()
+        session.post.return_value = self._response_with_span(
+            '<span class="ambrosiaIcon">20<span class="ambrosiaIcon">0</span></span>'
+        )
 
         self.assertFalse(tryFreeBuildingSpeedup(session, "14075", {"position": 10}))
         self.assertEqual(session.post.call_count, 1)
