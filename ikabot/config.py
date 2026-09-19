@@ -66,6 +66,8 @@ DEFAULT_LOG_LEVEL = 30 # Warning
 
 publicAPIServerDomain = "ikagod.twilightparadox.com"
 do_ssl_verify = True
+# (connect, read) timeout in seconds for the blackbox token request; after it expires the manual token prompt is offered
+blackboxTokenTimeout = (10, int(os.getenv("IKABOT_BLACKBOX_TIMEOUT", "60")))
 ids_cache = None
 cities_cache = None
 has_params = False

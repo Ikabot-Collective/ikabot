@@ -4,6 +4,7 @@
 import traceback
 
 from requests import get, post
+from requests.exceptions import ConnectTimeout, ReadTimeout
 
 from ikabot.config import *
 from ikabot.helpers.dns import getAddress
@@ -28,13 +29,21 @@ def getNewBlackBoxToken(session):
         "locale": session.locale,
         "timezone_id": session.timezone_id,
     }
-    response = get(
-        address, params=params, verify=do_ssl_verify, timeout=900
-    )
-    if response.status_code in [400, 422]:
-        fallback_params = {"user_agent": user_agent}
+    try:
         response = get(
-            address, params=fallback_params, verify=do_ssl_verify, timeout=900
+            address, params=params, verify=do_ssl_verify, timeout=blackboxTokenTimeout
+        )
+        if response.status_code in [400, 422]:
+            fallback_params = {"user_agent": user_agent}
+            response = get(
+                address,
+                params=fallback_params,
+                verify=do_ssl_verify,
+                timeout=blackboxTokenTimeout,
+            )
+    except (ReadTimeout, ConnectTimeout):
+        raise Exception(
+            "The token API did not respond within {}s".format(blackboxTokenTimeout[1])
         )
     assert response.status_code == 200, (
         "API response code is not OK: "
