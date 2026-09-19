@@ -12,6 +12,7 @@ import re
 import sys
 import time
 import traceback
+import urllib.parse
 from collections import deque
 
 import requests
@@ -120,25 +121,27 @@ class Session:
     def __isExpired(self, html):
         return "index.php?logout" in html or '<a class="logout"' in html
 
-    def __isSessionRotated(self, html):
-        """Detects when the current session has been invalidated by logging in
-        from another device/browser. Ikariam answers such requests either with a
-        language-independent protocol command that forces a reload to the lobby:
-            [["custom",["reload",{"link":"https://lobby.ikariam.gameforge.com/es_ES",...}]]]
-        or by serving the Gameforge lobby landing page (once the redirect to it
-        has already been followed).
-        """
+    def __isSessionRotated(self, html, response=None):
+        """Detects a session takeover by another device/browser via the actual
+        redirect/host, not by scanning page content (which false-positived on
+        ordinary pages containing normal marketing/cookie-banner strings)."""
         if not isinstance(html, str):
             return False
-        # Protocol command forcing a reload to the lobby
-        if '"reload"' in html and "ikariam.gameforge.com" in html:
-            return True
-        # Lobby landing page (redirect already followed / cached)
-        if (
-            "lobby.ikariam.gameforge.com" in html
-            and ("statichub" in html or "consent.gameforge.com" in html)
+        if re.search(
+            r'"reload"\s*,\s*\{\s*"link"\s*:\s*"https://lobby\.ikariam\.gameforge\.com',
+            html,
         ):
             return True
+        if response is not None:
+            try:
+                candidate_urls = [response.url] + [
+                    h.headers.get("Location", "") for h in response.history
+                ]
+                for candidate in candidate_urls:
+                    if (urllib.parse.urlsplit(candidate).hostname or "") == "lobby.ikariam.gameforge.com":
+                        return True
+            except Exception:
+                pass
         return False
 
     def __printSessionRotated(self):
@@ -1056,7 +1059,7 @@ class Session:
             # that another login (browser/device) already took over. In that
             # case the bot should not reuse them: a fresh login will win the
             # session back from the other device.
-            if cookies_are_valid and self.__isSessionRotated(html):
+            if cookies_are_valid and self.__isSessionRotated(html, response=old_resp):
                 self.logger.warning("Stored cookies were invalidated by another active session; performing a fresh login")
                 cookies_are_valid = False
             if cookies_are_valid and old_resp.status_code == 404:
@@ -1420,7 +1423,7 @@ class Session:
                     raise requests.exceptions.ConnectionError  # repeat after 10 minutes
                 if ignoreExpire is False:
                     assert self.__isExpired(html) is False
-                if self.__isSessionRotated(html):
+                if self.__isSessionRotated(html, response=response):
                     self.__printSessionRotated()
                     sys.exit(1)
                 # --- update developer runtime info ---
@@ -1553,7 +1556,7 @@ class Session:
                     raise requests.exceptions.ConnectionError  # repeat after 10 minutes
                 if ignoreExpire is False:
                     assert self.__isExpired(resp) is False
-                if self.__isSessionRotated(resp):
+                if self.__isSessionRotated(resp, response=response):
                     self.__printSessionRotated()
                     sys.exit(1)
                 if "TXT_ERROR_WRONG_REQUEST_ID" in resp:
