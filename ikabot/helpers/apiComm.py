@@ -41,10 +41,16 @@ def getNewBlackBoxToken(session):
                 verify=do_ssl_verify,
                 timeout=blackboxTokenTimeout,
             )
-    except (ReadTimeout, ConnectTimeout):
+    except ConnectTimeout as exc:
+        raise Exception(
+            "The connection to the token API timed out after {}s".format(
+                blackboxTokenTimeout[0]
+            )
+        ) from exc
+    except ReadTimeout as exc:
         raise Exception(
             "The token API did not respond within {}s".format(blackboxTokenTimeout[1])
-        )
+        ) from exc
     assert response.status_code == 200, (
         "API response code is not OK: "
         + str(response.status_code)
