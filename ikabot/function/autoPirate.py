@@ -218,6 +218,7 @@ def autoPirate(session, event, stdin_fd, predetermined_input):
     set_child_mode(session)
     event.set()
 
+    cachedCityId = piracyCities[0]["id"] if piracyCities else None
     try:
         while pirateCount > 0:
             session.setStatus("Pirating for " + str(pirateCount) + " more runs")
@@ -230,13 +231,21 @@ def autoPirate(session, event, stdin_fd, predetermined_input):
                 else:
                     pirateMissionChoice = pirateMissionDayChoice
             pirateCount -= 1
-            piracyCities = getPiracyCities(
-                session, pirateMissionChoice
-            )  # this is done again inside the loop in case the user destroys / creates another pirate fortress while this module is running
-            if piracyCities == []:
-                raise Exception(
-                    "No city with pirate fortress capable of executing selected mission"
-                )
+            # try the last used fortress city first, fall back to a full scan if it's gone
+            cachedCity = (
+                getPiracyCityById(session, cachedCityId, pirateMissionChoice)
+                if cachedCityId is not None
+                else None
+            )
+            if cachedCity is not None:
+                piracyCities = [cachedCity]
+            else:
+                piracyCities = getPiracyCities(session, pirateMissionChoice)
+                if piracyCities == []:
+                    raise Exception(
+                        "No city with pirate fortress capable of executing selected mission"
+                    )
+            cachedCityId = piracyCities[0]["id"]
             html = session.post(
                 city_url + str(piracyCities[0]["id"])
             )  # this is needed because for some reason you need to look at the town where you are sending a request from in the line below, before you send that request
@@ -424,6 +433,30 @@ def resolveCaptcha(session, picture):
             time.sleep(5)
 
 
+def getPiracyCityById(session, city_id, pirateMissionChoice):
+    """Checks a single city for a pirate fortress capable of the given mission.
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    city_id : str | int
+    pirateMissionChoice : str
+
+    Returns
+    -------
+    city : dict | None
+        the city (as returned by getCity) if it has a usable pirate fortress, None otherwise
+    """
+    html = session.get(city_url + str(city_id))
+    city = getCity(html)
+    for building in city["position"]:
+        if (
+            building["building"] == "pirateFortress"
+            and building["level"] >= piracyMissionToBuildingLevel[pirateMissionChoice]
+        ):
+            return city
+    return None
+
+
 def getPiracyCities(session, pirateMissionChoice):
     """Gets all user's cities which have a pirate fortress in them
     Parameters
@@ -437,16 +470,9 @@ def getPiracyCities(session, pirateMissionChoice):
     cities_ids = getIdsOfCities(session)[0]
     piracyCities = []
     for city_id in cities_ids:
-        html = session.get(city_url + city_id)
-        city = getCity(html)
-        for pos, building in enumerate(city["position"]):
-            if (
-                building["building"] == "pirateFortress"
-                and building["level"]
-                >= piracyMissionToBuildingLevel[pirateMissionChoice]
-            ):
-                piracyCities.append(city)
-                break
+        city = getPiracyCityById(session, city_id, pirateMissionChoice)
+        if city is not None:
+            piracyCities.append(city)
     return piracyCities
 
 
