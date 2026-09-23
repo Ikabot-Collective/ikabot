@@ -106,6 +106,11 @@ def modifyProduction(session, event, stdin_fd, predetermined_input):
                     selected_good_name = resource_name if resource_type == "resource" else tradegood_name
                     print(f"{finalWorkers} workers set for {selected_good_name} in {city['name']}.")
 
+                    # Ikariam silently ignores a workerPlan request that arrives too soon
+                    # after another one on the same island, so space out resource/tradegood.
+                    if resource_type != resource_types_to_modify[-1]:
+                        wait(2, 2)
+
                 wait(3, 4)
 
         print("\nAll productions have been set!")
