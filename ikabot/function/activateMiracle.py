@@ -14,6 +14,66 @@ from ikabot.helpers.decorators import configurator, task
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import *
 
+MAX_WONDER_ACTIVATION_LEVEL = 5
+
+
+def find_temple_position(city):
+    """
+    Parameters
+    ----------
+    city : dict
+        a city dict as returned by getCity
+
+    Returns
+    -------
+    str or None : the "position" index of the city's temple, or None if it has none
+    """
+    for i in range(len(city["position"])):
+        if city["position"][i]["building"] == "temple":
+            return str(i)
+    return None
+
+
+def get_temple_info(session, city):
+    """
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    city : dict
+        a city dict as returned by getCity, with "pos" set to the temple's position
+
+    Returns
+    -------
+    dict : {"level": int, "available": bool, "available_in": int or None}
+    """
+    params = {
+        "view": "temple",
+        "cityId": city["id"],
+        "position": city["pos"],
+        "backgroundView": "city",
+        "currentCityId": city["id"],
+        "actionRequest": actionRequest,
+        "ajax": "1",
+    }
+    data = session.post(params=params)
+    data = json.loads(data, strict=False)
+    html = data[1][1][1]
+    match = re.search(r'<div id="wonderLevelDisplay"[^>]*>\s*(\d+)\s*</div>', html)
+    level = int(match.group(1)) if match else 0
+
+    data = data[2][1]
+    available = data["js_WonderViewButton"]["buttonState"] == "enabled"
+    available_in = None
+    if available is False:
+        for elem in data:
+            if isinstance(data[elem], dict) and "countdown" in data[elem]:
+                enddate = data[elem]["countdown"]["enddate"]
+                currentdate = data[elem]["countdown"]["currentdate"]
+                available_in = int(float(enddate)) - int(float(currentdate))
+                break
+
+    return {"level": level, "available": available, "available_in": available_in}
+
 
 def obtainMiraclesAvailable(session):
     """
@@ -36,72 +96,38 @@ def obtainMiraclesAvailable(session):
     ids, cities = getIdsOfCities(session)
     for city_id in cities:
         city_info = cities[city_id]
-        # get the wonder for this city
-        wonder = [
-            island["wonder"]
-            for island in islands
-            if city_info["coords"] == "[{}:{}] ".format(island["x"], island["y"])
-        ][0]
-
         html = session.get(city_url + str(city_info["id"]))
         city = getCity(html)
 
-        # make sure that the city has a temple
-        for i in range(len(city["position"])):
-            if city["position"][i]["building"] == "temple":
-                city["pos"] = str(i)
-                break
-        else:
+        pos = find_temple_position(city)
+        if pos is None:
+            continue
+        city["pos"] = pos
+
+        target_island = next((isl for isl in islands if isl["id"] == city["islandId"]), None)
+        if target_island is None:
             continue
 
-        # get wonder information
-        params = {
-            "view": "temple",
-            "cityId": city["id"],
-            "position": city["pos"],
-            "backgroundView": "city",
-            "currentCityId": city["id"],
-            "actionRequest": actionRequest,
-            "ajax": "1",
-        }
-        data = session.post(params=params)
-        data = json.loads(data, strict=False)
-        html = data[1][1][1]
-        match = re.search(r'<div id="wonderLevelDisplay"[^>]*>\s*(\d+)\s*</div>', html)
-        level = 0
-        if match:
-            level = int(match.group(1))
+        temple_info = get_temple_info(session, city)
 
-        # Check if we already have this wonder type in our activable list
-        existing_best = next((i for i in islands if i["activable"] and i["wonder"] == wonder), None)
-        
-        if existing_best:
-            # If the current city has a higher level, deactivate the previous one
-            if level > existing_best["wonderActivationLevel"]:
+        # wonder level belongs to the island, not the temple; keep the highest
+        # instance of this wonder type across all islands
+        existing_best = next(
+            (isl for isl in islands if isl["activable"] and isl["wonder"] == target_island["wonder"]),
+            None,
+        )
+        if existing_best is not None:
+            if temple_info["level"] > existing_best["wonderActivationLevel"]:
                 existing_best["activable"] = False
             else:
-                # If existing is better or equal, skip this city
                 continue
 
-        data = data[2][1]
-        available = data["js_WonderViewButton"]["buttonState"] == "enabled"
-        if available is False:
-            for elem in data:
-                if isinstance(data[elem], dict) and "countdown" in data[elem]:
-                    enddate = data[elem]["countdown"]["enddate"]
-                    currentdate = data[elem]["countdown"]["currentdate"]
-                    break
-
-        # set the information on the island which wonder we can activate
-        for island in islands:
-            if island["id"] == city["islandId"]:
-                island["activable"] = True
-                island["ciudad"] = city
-                island["wonderActivationLevel"] = level
-                island["available"] = available
-                if available is False:
-                    island["available_in"] = int(float(enddate)) - int(float(currentdate))
-                break
+        target_island["activable"] = True
+        target_island["ciudad"] = city
+        target_island["wonderActivationLevel"] = temple_info["level"]
+        target_island["available"] = temple_info["available"]
+        if temple_info["available"] is False:
+            target_island["available_in"] = temple_info["available_in"]
 
     # only return island which wonder we can activate
     return [island for island in islands if island["activable"]]
@@ -213,6 +239,38 @@ def wait_for_miracle(session, island):
         wait(wait_time + 5)
 
 
+def refresh_best_city(session, island):
+    """
+    Switches `island` to the highest-level instance of its wonder type,
+    if a different island now has one.
+
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    island : dict
+    """
+    candidates = obtainMiraclesAvailable(session)
+    best = next((isl for isl in candidates if isl["wonder"] == island["wonder"]), None)
+
+    if best is None or best["ciudad"]["id"] == island["ciudad"]["id"]:
+        return
+
+    msg = "Switching miracle {} activation from {} (level {}) to {} (level {})".format(
+        island["wonderName"],
+        island["ciudad"]["name"],
+        island["wonderActivationLevel"],
+        best["ciudad"]["name"],
+        best["wonderActivationLevel"],
+    )
+    sendToBotDebug(session, msg, debugON_activateMiracle)
+
+    island["ciudad"] = best["ciudad"]
+    island["wonderActivationLevel"] = best["wonderActivationLevel"]
+    island["available"] = best["available"]
+    if best["available"] is False:
+        island["available_in"] = best["available_in"]
+
+
 @task("activateMiracle")
 def do_it(session, island, iterations):
     """
@@ -229,6 +287,9 @@ def do_it(session, island, iterations):
     iterations_left = iterations
     session.setStatus(f"Waiting to activate {island['wonderName']}...")
     for i in range(iterations):
+
+        if island["wonderActivationLevel"] < MAX_WONDER_ACTIVATION_LEVEL:
+            refresh_best_city(session, island)
 
         wait_for_miracle(session, island)
 
