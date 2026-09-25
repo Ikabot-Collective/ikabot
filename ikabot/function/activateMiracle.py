@@ -4,6 +4,7 @@
 import json
 import re
 import traceback
+import unicodedata
 
 from ikabot.config import *
 from ikabot.helpers.botComm import *
@@ -15,6 +16,58 @@ from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import *
 
 MAX_WONDER_ACTIVATION_LEVEL = 5
+
+# fixed per-wonder-type shortcut letter, independent of the account's menu
+# order (same 8 types as ikabot/function/dumpWorld.py's wonder_dict)
+WONDER_SHORTCUTS = {
+    "1": "f",  # Hephaistos
+    "2": "h",  # Hades
+    "3": "d",  # Demeter
+    "4": "a",  # Athene
+    "5": "m",  # Hermes
+    "6": "r",  # Ares
+    "7": "p",  # Poseidon
+    "8": "c",  # Colossus
+}
+
+
+def wonder_letters(name):
+    """
+    Parameters
+    ----------
+    name : str
+
+    Returns
+    -------
+    list[str] : the letters of `name`, accent-stripped and lowercased, in order
+    """
+    decomposed = unicodedata.normalize("NFKD", name)
+    return [c.lower() for c in decomposed if c.isalpha()]
+
+
+def assign_shortcut_letters(islands):
+    """
+    Parameters
+    ----------
+    islands : list[dict]
+
+    Returns
+    -------
+    list[str or None] : one shortcut letter per island (same order/length as
+        `islands`), unique among the returned letters, falling back to the
+        first free letter of the wonder's name when its type has no fixed
+        shortcut or that shortcut is already taken
+    """
+    used = set()
+    letters = []
+    for island in islands:
+        letter = WONDER_SHORTCUTS.get(island["wonder"])
+        if letter is None or letter in used:
+            letter = next((c for c in wonder_letters(island["wonderName"]) if c not in used), None)
+        if letter is not None:
+            used.add(letter)
+        letters.append(letter)
+    return letters
 
 
 def find_temple_position(city):
@@ -75,6 +128,17 @@ def get_temple_info(session, city):
     return {"level": level, "available": available, "available_in": available_in}
 
 
+# which island each of the player's temple-holding cities sits on, and each
+# island's own (static) data -- neither changes during a run, so caching them
+# lets repeated obtainMiraclesAvailable calls (e.g. from refresh_best_city
+# inside a long do_it loop) skip straight to just re-checking temple level and
+# availability, instead of re-fetching every city and island each time.
+# A city missing from _CITY_TEMPLE_CACHE is always re-checked (never cached
+# as "no temple"), so a newly-built temple is picked up on the next call.
+_CITY_TEMPLE_CACHE = {}
+_ISLAND_CACHE = {}
+
+
 def obtainMiraclesAvailable(session):
     """
     Parameters
@@ -85,35 +149,41 @@ def obtainMiraclesAvailable(session):
     -------
     islands: list[dict]
     """
-    idsIslands = getIslandsIds(session)
-    islands = []
-    for idIsland in idsIslands:
-        html = session.get(island_url + idIsland)
-        island = getIsland(html)
-        island["activable"] = False
-        islands.append(island)
-
     ids, cities = getIdsOfCities(session)
+    islands = {}
+
     for city_id in cities:
         city_info = cities[city_id]
-        html = session.get(city_url + str(city_info["id"]))
-        city = getCity(html)
+        temple_city = _CITY_TEMPLE_CACHE.get(city_id)
 
-        pos = find_temple_position(city)
-        if pos is None:
-            continue
-        city["pos"] = pos
+        if temple_city is None:
+            html = session.get(city_url + str(city_info["id"]))
+            city = getCity(html)
+            pos = find_temple_position(city)
+            if pos is None:
+                continue
+            temple_city = {"id": city["id"], "name": city["name"], "islandId": city["islandId"], "pos": pos}
+            _CITY_TEMPLE_CACHE[city_id] = temple_city
 
-        target_island = next((isl for isl in islands if isl["id"] == city["islandId"]), None)
+        island_id = temple_city["islandId"]
+        cached_island = _ISLAND_CACHE.get(island_id)
+        if cached_island is None:
+            html = session.get(island_url + island_id)
+            cached_island = getIsland(html)
+            _ISLAND_CACHE[island_id] = cached_island
+
+        target_island = islands.get(island_id)
         if target_island is None:
-            continue
+            target_island = dict(cached_island)
+            target_island["activable"] = False
+            islands[island_id] = target_island
 
-        temple_info = get_temple_info(session, city)
+        temple_info = get_temple_info(session, temple_city)
 
         # wonder level belongs to the island, not the temple; keep the highest
         # instance of this wonder type across all islands
         existing_best = next(
-            (isl for isl in islands if isl["activable"] and isl["wonder"] == target_island["wonder"]),
+            (isl for isl in islands.values() if isl["activable"] and isl["wonder"] == target_island["wonder"]),
             None,
         )
         if existing_best is not None:
@@ -123,14 +193,14 @@ def obtainMiraclesAvailable(session):
                 continue
 
         target_island["activable"] = True
-        target_island["ciudad"] = city
+        target_island["ciudad"] = temple_city
         target_island["wonderActivationLevel"] = temple_info["level"]
         target_island["available"] = temple_info["available"]
         if temple_info["available"] is False:
             target_island["available_in"] = temple_info["available_in"]
 
     # only return island which wonder we can activate
-    return [island for island in islands if island["activable"]]
+    return [island for island in islands.values() if island["activable"]]
 
 
 def activateMiracleHttpCall(session, island):
@@ -172,24 +242,31 @@ def chooseIsland(islands):
     print("Which miracle do you want to activate?")
     # Sort islands by level descending, then by name
     sorted_islands = sorted(islands, key=lambda x: (-x["wonderActivationLevel"], x["wonderName"]))
+    letters = assign_shortcut_letters(sorted_islands)
+    by_letter = {letter: island for letter, island in zip(letters, sorted_islands) if letter is not None}
+
     i = 0
     print("(0) Exit")
-    for island in sorted_islands:
+    for island, letter in zip(sorted_islands, letters):
         i += 1
+        prefix = "({:d}/{})".format(i, letter) if letter else "({:d})".format(i)
         if island["available"]:
-            print("({:d}) {} (level {})".format(i, island["wonderName"], island["wonderActivationLevel"]))
+            print("{} {} (level {})".format(prefix, island["wonderName"], island["wonderActivationLevel"]))
         else:
             print(
-                "({:d}) {} (level {}) (available in: {})".format(
-                    i, island["wonderName"], island["wonderActivationLevel"], daysHoursMinutes(island["available_in"])
+                "{} {} (level {}) (available in: {})".format(
+                    prefix, island["wonderName"], island["wonderActivationLevel"], daysHoursMinutes(island["available_in"])
                 )
             )
 
-    index = read(min=0, max=i)
+    additional_values = [v for letter in by_letter for v in (letter, letter.upper())]
+    index = read(min=0, max=i, additionalValues=additional_values)
+
+    if isinstance(index, str):
+        return by_letter[index.lower()]
     if index == 0:
         return None
-    island = sorted_islands[index - 1]
-    return island
+    return sorted_islands[index - 1]
 
 
 def activateMiracle(session, event, stdin_fd, predetermined_input):
