@@ -163,7 +163,12 @@ def configurator(_func=None, *, blocking=False):
             # Set up stdin and predetermined input for the child process
             try:
                 if stdin_fd is not None:
-                    sys.stdin = os.fdopen(stdin_fd)
+                    # closefd=False: a nested @configurator call (e.g. a custom
+                    # module loaded via loadCustomModule) reuses this same
+                    # stdin_fd and reopens it too. Closing the fd when this
+                    # wrapper's stdin object is replaced/garbage-collected
+                    # would break the outer process's terminal input.
+                    sys.stdin = os.fdopen(stdin_fd, closefd=False)
             except Exception:
                 pass
             config.predetermined_input = predetermined_input
