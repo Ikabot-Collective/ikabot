@@ -133,7 +133,7 @@ def shipMovements(session, event, stdin_fd, predetermined_input):
                     if tradegood != "gold":
                         index = materials_names_tec.index(tradegood)
                         tradegood = materials_names[index]
-                    total_load += int(amount.replace(",", "").replace(".", ""))
+                    total_load += int(amount.replace(",", "").replace(".", "").replace(" ", "").replace("\xa0", ""))
                     print("{} of {}".format(amount, tradegood))
                 ship_capacity, freighter_capacity = getShipCapacity(session)
                 ships = int(math.ceil((Decimal(total_load) / Decimal(ship_capacity))))
