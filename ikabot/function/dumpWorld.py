@@ -23,6 +23,8 @@ from ikabot.helpers.varios import getDateTime, wait
 
 from ikabot.helpers.decorators import configurator, task
 
+home = "USERPROFILE" if isWindows else "HOME"
+
 @task("dumpWorld")
 def do_dumpWorld(session, waiting_time, coords, radius, shallow, non_empty_islands):
     stop_updating = threading.Event()
