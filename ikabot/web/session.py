@@ -1286,7 +1286,11 @@ class Session:
         if "proxy" in sessionData and sessionData["proxy"]["set"] is True:
             obj.proxies.update(sessionData["proxy"]["conf"])
         else:
-            obj.proxies.update({})
+            # clear(), not update({}): an empty dict merges in zero keys, so a
+            # proxy applied earlier in this same process's life (session.s
+            # already has "http"/"https" set) would otherwise never actually
+            # get dropped once the user disables it from the menu.
+            obj.proxies.clear()
 
     def __checkCookie(self):
         self.logger.info("__checkCookie()")
