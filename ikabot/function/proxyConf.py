@@ -44,6 +44,7 @@ def test_proxy(session, proxy_dict):
             session.urlBase,
             proxies=proxy_dict,
             verify=config.do_ssl_verify,
+            timeout=10,
         )
     except Exception as e:
         print('Proxy test failure. Error: ' + str(e))
