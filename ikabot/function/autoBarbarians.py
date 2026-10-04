@@ -135,6 +135,17 @@ DEFAULT_SCHEMATICS = {
         },
     ],
 }
+
+
+try:
+    from ikabot.helpers.logging import getLogger
+
+    _logger = getLogger(__name__)
+except Exception:
+    import logging
+
+    _logger = logging.getLogger(__name__)
+
 FIVE_MINUTES = 5 * 60
 DEVELOPMENT = False
 
@@ -448,6 +459,10 @@ def do_it(session, island, city, float_city, schematic, units_data, ship_capacit
         babarians_info = get_barbarians_lv(session, island, ship_capacity)
         barbarians_plan = get_barbarians_attack_plan(babarians_info, schematic)
         if barbarians_plan is None:
+            _logger.warning(
+                "autoBarbarians stopped: barbarians level %s is outside the attack scheme",
+                babarians_info["level"],
+            )
             if send_notifications:
                 sendToBot(
                     session,
@@ -481,6 +496,12 @@ def do_it(session, island, city, float_city, schematic, units_data, ship_capacit
                 "waiting for availability of ({}) boats".format(schematic_ships)
             )
             if attempts["ships"] > 20:
+                _logger.warning(
+                    "autoBarbarians stopped: ships unavailable for too long (barbarians level %s, need %s, available %s)",
+                    babarians_info["level"],
+                    schematic_ships,
+                    ships_available,
+                )
                 if send_notifications:
                     sendToBot(
                         session,
@@ -492,6 +513,20 @@ def do_it(session, island, city, float_city, schematic, units_data, ship_capacit
             has_units_in_city(session, city, barbarians_plan["needed_units"]["total"])
             is False
         ):
+            needed_units = barbarians_plan["needed_units"]["total"]
+            city_units = get_units(session, city)
+            missing = {
+                unit_id: amount
+                - city_units.get(str(unit_id), {"amount": 0})["amount"]
+                for unit_id, amount in needed_units.items()
+                if city_units.get(str(unit_id), {"amount": 0})["amount"] < amount
+            }
+            _logger.warning(
+                "autoBarbarians stopped: not enough troops in city %s for barbarians level %s, missing (unit id: amount): %s",
+                city["id"],
+                babarians_info["level"],
+                missing,
+            )
             if send_notifications:
                 sendToBot(
                     session,
