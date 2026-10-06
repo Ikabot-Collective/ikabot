@@ -1289,7 +1289,8 @@ class Session:
         if "proxy" in sessionData and sessionData["proxy"]["set"] is True:
             obj.proxies.update(sessionData["proxy"]["conf"])
         else:
-            obj.proxies.update({})
+            # update({}) wouldn't remove an already-set proxy; clear() does.
+            obj.proxies.clear()
 
     def __checkCookie(self):
         self.logger.info("__checkCookie()")
