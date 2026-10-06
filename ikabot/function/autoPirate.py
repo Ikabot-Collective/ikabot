@@ -33,6 +33,29 @@ except Exception:
     _logger = logging.getLogger(__name__)
 
 
+def isHourInRange(hour, start, end):
+    """Inclusive hour range, supports ranges that cross midnight (e.g. 19 till 9)."""
+    if start <= end:
+        return start <= hour <= end
+    return hour >= start or hour <= end
+
+
+def getScheduledMission(dayStart, dayEnd, nightStart, nightEnd, dayChoice, nightChoice):
+    """Returns the mission for the current hour, or None if it is outside both ranges."""
+    hour = time.localtime().tm_hour
+    if isHourInRange(hour, dayStart, dayEnd):
+        return dayChoice
+    if isHourInRange(hour, nightStart, nightEnd):
+        return nightChoice
+    return None
+
+
+def getSecondsUntilNextRange(dayStart, nightStart):
+    now = time.localtime()
+    hours = min((start - now.tm_hour) % 24 or 24 for start in (dayStart, nightStart))
+    return hours * 3600 - now.tm_min * 60 - now.tm_sec
+
+
 def extract_captcha_image(html):
     """Extract the pirates captcha PNG bytes from the capture response.
 
@@ -116,18 +139,10 @@ def autoPirate(session, event, stdin_fd, predetermined_input):
             """
             )
             print("From: ")
-            dayStart = read()
-            if dayStart == "":
-                dayStart = 10
-            else:
-                dayStart = int(dayStart)
+            dayStart = read(min=0, max=23, digit=True, default=10)
 
             print("Till: ")
-            dayEnd = read()
-            if dayEnd == "":
-                dayEnd = 18
-            else:
-                dayEnd = int(dayEnd)
+            dayEnd = read(min=0, max=23, digit=True, default=18)
 
             print(
                 """Which pirate mission should I do at night time?
@@ -149,18 +164,10 @@ def autoPirate(session, event, stdin_fd, predetermined_input):
             """
             )
             print("From: ")
-            nightStart = read()
-            if nightStart == "":
-                nightStart = 19
-            else:
-                nightStart = int(nightStart)
+            nightStart = read(min=0, max=23, digit=True, default=19)
 
             print("Till: ")
-            nightEnd = read()
-            if nightEnd == "":
-                nightEnd = 9
-            else:
-                nightEnd = int(nightEnd)
+            nightEnd = read(min=0, max=23, digit=True, default=9)
         else:
             pirateSchedule = False
             print(
@@ -178,12 +185,11 @@ def autoPirate(session, event, stdin_fd, predetermined_input):
             )
             pirateMissionChoice = read(min=1, max=9, digit=True)
         if pirateSchedule == True:
-            current_hour = int(time.strftime("%H"))
-            if current_hour >= dayStart and current_hour <= dayEnd:
-                pirateMissionChoice = pirateMissionDayChoice
-            elif current_hour >= nightStart or current_hour <= nightEnd:
-                pirateMissionChoice = pirateMissionNightChoice
-            else:
+            pirateMissionChoice = getScheduledMission(
+                dayStart, dayEnd, nightStart, nightEnd,
+                pirateMissionDayChoice, pirateMissionNightChoice,
+            )
+            if pirateMissionChoice is None:
                 pirateMissionChoice = pirateMissionDayChoice
         print(
             "Do you want me to automatically convert capture points to crew strength? (Y|N)"
@@ -223,13 +229,14 @@ def autoPirate(session, event, stdin_fd, predetermined_input):
         while pirateCount > 0:
             session.setStatus("Pirating for " + str(pirateCount) + " more runs")
             if pirateSchedule == True:
-                current_hour = int(time.strftime("%H"))
-                if current_hour >= dayStart and current_hour <= dayEnd:
-                    pirateMissionChoice = pirateMissionDayChoice
-                elif current_hour >= nightStart or current_hour <= nightEnd:
-                    pirateMissionChoice = pirateMissionNightChoice
-                else:
-                    pirateMissionChoice = pirateMissionDayChoice
+                pirateMissionChoice = getScheduledMission(
+                    dayStart, dayEnd, nightStart, nightEnd,
+                    pirateMissionDayChoice, pirateMissionNightChoice,
+                )
+                if pirateMissionChoice is None:
+                    session.setStatus("Outside of scheduled hours, waiting for the next range")
+                    wait(getSecondsUntilNextRange(dayStart, nightStart))
+                    continue
             pirateCount -= 1
             # try the last used fortress city first, fall back to a full scan if it's gone
             cachedCity = (
