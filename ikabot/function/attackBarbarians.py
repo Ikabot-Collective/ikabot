@@ -24,6 +24,13 @@ from ikabot.helpers.pedirInfo import getShipCapacity
 getcontext().prec = 30
 
 
+def parse_game_int(text):
+    """Parse a number rendered by the game, dropping any thousand separator."""
+    for sep in (",", ".", " ", "\xa0", " "):
+        text = text.replace(sep, "")
+    return int(text.replace("-", "0"))
+
+
 def choose_island(session):
     idsIslands = getIslandsIds(session)
     islands = []
@@ -90,28 +97,25 @@ def get_barbarians_lv(session, island, ship_capacity):
     resp = json.loads(resp, strict=False)
 
     level = int(math.ceil(resp[2][1]["js_islandBarbarianLevel"]["text"]))
-    gold = int(resp[2][1]["js_islandBarbarianResourcegold"]["text"].replace(",", "").replace("\xa0", "").replace(" ", ""))
+    gold = parse_game_int(resp[2][1]["js_islandBarbarianResourcegold"]["text"])
 
     resources = [0] * len(materials_names)
     for i in range(len(materials_names)):
         if i == 0:
-            resources[i] = int(
-                resp[2][1]["js_islandBarbarianResourceresource"]["text"].replace(
-                    ",", ""
-                ).replace("\xa0", "").replace(" ", "")
+            resources[i] = parse_game_int(
+                resp[2][1]["js_islandBarbarianResourceresource"]["text"]
             )
         else:
-            resources[i] = int(
-                resp[2][1]["js_islandBarbarianResourcetradegood{:d}".format(i)][
-                    "text"
-                ].replace(",", "").replace("\xa0", "").replace(" ", "")
+            resources[i] = parse_game_int(
+                resp[2][1]["js_islandBarbarianResourcetradegood{:d}".format(i)]["text"]
             )
 
     html = resp[1][1][1]
     troops = re.findall(
-        r'<div class="army \w*?">\s*<div class=".*?">(.*?)</div>\s*</div>\s*</td>\s*</tr>\s*<tr>\s*<td class="center">\s*(\d+)',
+        r'<div class="army \w*?">\s*<div class=".*?">(.*?)</div>\s*</div>\s*</td>\s*</tr>\s*<tr>\s*<td class="center">\s*([\d.,\xa0 ]+)',
         html,
     )
+    troops = [(name, parse_game_int(amount)) for name, amount in troops]
 
     total_cargo = sum(resources)
     ships = math.ceil(Decimal(total_cargo) / Decimal(ship_capacity))
@@ -152,7 +156,7 @@ def get_units(session, city):
 
     units = {}
     for i in range(len(unit_id_names)):
-        amount = int(unit_amounts[i].replace(",", "").replace("-", "0"))
+        amount = parse_game_int(unit_amounts[i])
         unit_id = unit_id_names[i][0][1:]
         unit_name = unit_id_names[i][1]
         units[unit_id] = {}
