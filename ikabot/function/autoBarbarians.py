@@ -134,6 +134,17 @@ DEFAULT_SCHEMATICS = {
         },
     ],
 }
+
+
+try:
+    from ikabot.helpers.logging import getLogger
+
+    _logger = getLogger(__name__)
+except Exception:
+    import logging
+
+    _logger = logging.getLogger(__name__)
+
 FIVE_MINUTES = 5 * 60
 DEVELOPMENT = False
 
@@ -243,7 +254,9 @@ def autoBarbarians(session, event, stdin_fd, predetermined_input):
         main_city_units = schematic_informations["main_city_units"]
         schematic_ships = schematic_informations["schematic_ships"]
 
-        ships_available = waitForArrival(session)
+        # just read the current count here; waitForArrival() would block the menu in
+        # silence until a fleet returns, and do_it() already waits for real ships later
+        ships_available = getAvailableShips(session)
         print(
             "For this sequence of attacks you need to have the following troops:\n"
         )
@@ -269,6 +282,10 @@ def autoBarbarians(session, event, stdin_fd, predetermined_input):
                 event.set()
                 return
 
+        banner()
+        print("Do you want to receive Telegram/Discord notifications for this grind? [Y/n]")
+        send_notifications = read(values=["y", "Y", "n", "N"], default="y") not in ["n", "N"]
+
     except KeyboardInterrupt:
         event.set()
         return
@@ -282,7 +299,7 @@ def autoBarbarians(session, event, stdin_fd, predetermined_input):
     setInfoSignal(session, info)
 
     try:
-        do_it(session, island, city, float_city, schematic, units_data, ship_capacity)
+        do_it(session, island, city, float_city, schematic, units_data, ship_capacity, send_notifications)
     except Exception as e:
         msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
         sendToBot(session, msg)
@@ -578,7 +595,7 @@ def has_units_in_city(session, city, units):
     )
 
 
-def do_it(session, island, city, float_city, schematic, units_data, ship_capacity):
+def do_it(session, island, city, float_city, schematic, units_data, ship_capacity, send_notifications=True):
     attempts = {"ships": 0}
     first_loop = True
     while True:
@@ -591,14 +608,17 @@ def do_it(session, island, city, float_city, schematic, units_data, ship_capacit
         babarians_info = get_barbarians_lv(session, island, ship_capacity)
         barbarians_plan = get_barbarians_attack_plan(babarians_info, schematic)
         if barbarians_plan is None:
-            sendToBot(
-                session,
-                
+            _logger.warning(
+                "autoBarbarians stopped: barbarians level %s is outside the attack scheme",
+                babarians_info["level"],
+            )
+            if send_notifications:
+                sendToBot(
+                    session,
                     "It was not possible to continue the attack on the barbarians because they reached a level that is outside the attack scheme.".format(
                         island["x"], island["y"]
-                    )
-                ,
-            )
+                    ),
+                )
             break
         if island["barbarians"]["destroyed"] == 1:
             loot(
@@ -625,33 +645,50 @@ def do_it(session, island, city, float_city, schematic, units_data, ship_capacit
                 "waiting for availability of ({}) boats".format(schematic_ships)
             )
             if attempts["ships"] > 20:
-                sendToBot(
-                    session,
-                    
-                        "It was not possible to continue the attack on the barbarians due to the long unavailability of ships."
-                    ,
+                _logger.warning(
+                    "autoBarbarians stopped: ships unavailable for too long (barbarians level %s, need %s, available %s)",
+                    babarians_info["level"],
+                    schematic_ships,
+                    ships_available,
                 )
+                if send_notifications:
+                    sendToBot(
+                        session,
+                        "It was not possible to continue the attack on the barbarians due to the long unavailability of ships.",
+                    )
                 break
             continue
         if (
             has_units_in_city(session, city, barbarians_plan["needed_units"]["total"])
             is False
         ):
+            needed_units = barbarians_plan["needed_units"]["total"]
+            city_units = get_units(session, city)
+            missing = {
+                unit_id: amount
+                - city_units.get(str(unit_id), {"amount": 0})["amount"]
+                for unit_id, amount in needed_units.items()
+                if city_units.get(str(unit_id), {"amount": 0})["amount"] < amount
+            }
+            _logger.warning(
+                "autoBarbarians stopped: not enough troops in city %s for barbarians level %s, missing (unit id: amount): %s",
+                city["id"],
+                babarians_info["level"],
+                missing,
+            )
+            if send_notifications:
+                sendToBot(
+                    session,
+                    "It was not possible to continue the attack on the barbarians due to the lack of necessary troops in the city(ies).",
+                )
+            break
+        if send_notifications:
             sendToBot(
                 session,
-                
-                    "It was not possible to continue the attack on the barbarians due to the lack of necessary troops in the city(ies)."
-                ,
-            )
-            break
-        sendToBot(
-            session,
-            
                 "Starting attack on barbarians[{}:{}] level ({}).".format(
                     island["x"], island["y"], babarians_info["level"]
-                )
-            ,
-        )
+                ),
+            )
         do_attack(
             session,
             island,
@@ -666,14 +703,13 @@ def do_it(session, island, city, float_city, schematic, units_data, ship_capacit
             attempts[attempt_key] = 0
 
     babarians_info = get_barbarians_lv(session, island, ship_capacity)
-    sendToBot(
-        session,
-        
+    if send_notifications:
+        sendToBot(
+            session,
             "Ended attack sequence on bariarians[{}:{}].".format(
                 island["x"], island["y"], babarians_info["level"]
-            )
-        ,
-    )
+            ),
+        )
 
 
 def do_attack(session, island, city, schematic, ship_capacity, float_city=None, units_data={}):
@@ -818,8 +854,9 @@ def loot(session, island, city, schematic, ship_capacity, float_city=None, units
         destin_city = (
             city if schematic["looting"]["from_float"] is False else float_city
         )
+        # load_troops() expects a dict with a "units" key; schematic["looting"] has that shape
         attack_data, ships_needed, travel_time = get_send_attack_data(
-            session, island, destin_city, schematic, units_data, ship_capacity
+            session, island, destin_city, schematic["looting"], units_data, ship_capacity
         )
         attack_data["transporter"] = min(ships_available, ships_needed)
 
@@ -841,8 +878,9 @@ def loot(session, island, city, schematic, ship_capacity, float_city=None, units
         session.post(params=attack_data)
 
         if send_scatter:
+            # same "units" key requirement as above
             ram_attack_data, ram_travel_time, _ = get_send_attack_data(
-                session, island, destin_city, {"307": 1}, units_data, ship_capacity
+                session, island, destin_city, {"from_float": False, "units": {"307": 1}}, units_data, ship_capacity
             )
             session.post(params=ram_attack_data)
             new_countdown = wait_next_scatter(session, ram_travel_time)
