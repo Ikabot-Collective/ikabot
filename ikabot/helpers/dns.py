@@ -188,7 +188,7 @@ def getAddressWithNSlookup(domain):
         raise e
 
 
-def getAddress(domain="ikagod.twilightparadox.com"):
+def getAddress(domain=publicAPIServerDomain):
     """Makes multiple attempts to obtain the ikabot public API server address
     Parameters
     ----------
