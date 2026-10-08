@@ -3,11 +3,21 @@
 
 from ikabot.helpers.logging import getLogger
 logger = getLogger(__name__)
+import re
 import socket
 import struct
 
 from ikabot.config import *
 from ikabot.helpers.process import run
+
+
+def addDefaultScheme(address):
+    """Returns the address as is if it already starts with http:// or https://
+    (as configured in the TXT record), otherwise prepends http:// (legacy records)."""
+    address = address.strip()
+    if re.match(r"^https?://", address, re.IGNORECASE):
+        return address
+    return "http://" + address
 
 
 def getDNSTXTRecordWithSocket(domain, DNS_server="8.8.8.8"):
@@ -104,7 +114,7 @@ def getDNSTXTRecordWithSocket(domain, DNS_server="8.8.8.8"):
 
     query = build_query(domain)
     response = send_query(query)
-    return "http://" + parse_response(response)
+    return addDefaultScheme(parse_response(response))
 
 
 def getDNSTXTRecordWithNSlookup(domain, DNS_server="8.8.8.8"):
@@ -127,7 +137,7 @@ def getDNSTXTRecordWithNSlookup(domain, DNS_server="8.8.8.8"):
         raise Exception(
             f'The command "nslookup -q=txt {domain} {DNS_server}" returned bad data: {text}'
         )
-    return "http://" + parts[1]
+    return addDefaultScheme(parts[1])
 
 
 def getAddressWithSocket(domain):
@@ -194,7 +204,7 @@ def getAddress(domain="ikagod.twilightparadox.com"):
         return custom_address
     try:
         address = getAddressWithSocket(domain)
-        assert "." in address or ":" in address.replace("http://", ""), (
+        assert "." in address or ":" in re.sub(r"^https?://", "", address), (
             "Bad server address: " + address
         )
         return address.replace("/ikagod/ikabot", "")
@@ -202,7 +212,7 @@ def getAddress(domain="ikagod.twilightparadox.com"):
         logger.warning("Failed to obtain public API address from socket, falling back to nslookup: ", exc_info=True)
     try:
         address = getAddressWithNSlookup(domain)
-        assert "." in address or ":" in address.replace("http://", ""), (
+        assert "." in address or ":" in re.sub(r"^https?://", "", address), (
             "Bad server address: " + address
         )  # address is either hostname, IPv4 or IPv6
         return address.replace("/ikagod/ikabot", "")
