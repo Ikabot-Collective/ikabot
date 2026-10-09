@@ -26,7 +26,7 @@ def developer(session, event, stdin_fd, *args):
     print("\nGame host:", getattr(session, "host", "Not available"))
     print("Game URL base:", getattr(session, "urlBase", "Not available"))
 
-    cookies = session.s.cookies.get_dict()
+    cookies = session.getSessionData().get("cookies", {})
     print("\nCookies:")
     print("ikariam:", cookies.get("ikariam", "Not set"))
     print("gf-token-production:", cookies.get("gf-token-production", "Not set"))
