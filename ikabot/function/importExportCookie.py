@@ -102,6 +102,11 @@ def _redirectedToLobby(response):
         return False
 
 
+def _clearIkariamCookies(session):
+    for c in [c for c in session.s.cookies if c.name == "ikariam"]:
+        session.s.cookies.clear(c.domain, c.path, c.name)
+
+
 def importCookie(session):
     banner()
     print(
@@ -115,8 +120,9 @@ def importCookie(session):
     newcookie = newcookie.strip()
     newcookie = newcookie.replace("ikariam=", "")
     cookies = session.getSessionData()["cookies"]
-    oldcookie = cookies.get("ikariam")
     cookies["ikariam"] = newcookie
+    oldcookies = [c for c in session.s.cookies if c.name == "ikariam"]
+    _clearIkariamCookies(session)
     if session.host in session.s.cookies._cookies:
         session.s.cookies.set("ikariam", newcookie, domain=session.host, path="/")
     else:
@@ -130,10 +136,27 @@ def importCookie(session):
         or response.status_code == 404
         or _redirectedToLobby(response)
     ):
-        if oldcookie is not None:
-            session.s.cookies.set("ikariam", oldcookie, domain=session.host, path="/")
+        previous_alive = False
+        if oldcookies:
+            _clearIkariamCookies(session)
+            for c in oldcookies:
+                session.s.cookies.set_cookie(c)
+            check = session.s.get(session.urlBase)
+            previous_alive = not (
+                session.isExpired(check.text)
+                or check.status_code == 404
+                or _redirectedToLobby(check)
+            )
+        if previous_alive:
+            print(
+                "{}Failure!{} The cookie you provided is not valid. This session keeps using the previous cookie.".format(
+                    bcolors.RED, bcolors.ENDC
+                )
+            )
+            enter()
+            return
         print(
-            "{}Failure!{} All your other sessions have just been invalidated!".format(
+            "{}Failure!{} The cookie you provided is not valid and the previous session is no longer valid either.".format(
                 bcolors.RED, bcolors.ENDC
             )
         )
