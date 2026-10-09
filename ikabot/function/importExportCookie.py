@@ -5,6 +5,7 @@ from ikabot.helpers.decorators import configurator
 import json
 import sys
 import time
+import urllib.parse
 from datetime import datetime
 
 import requests
@@ -90,6 +91,17 @@ def importExportCookie(session, event, stdin_fd, predetermined_input):
         return
 
 
+def _redirectedToLobby(response):
+    try:
+        candidates = [response.url] + [h.headers.get("Location", "") for h in response.history]
+        return any(
+            (urllib.parse.urlsplit(c).hostname or "") == "lobby.ikariam.gameforge.com"
+            for c in candidates
+        )
+    except Exception:
+        return False
+
+
 def importCookie(session):
     banner()
     print(
@@ -103,15 +115,23 @@ def importCookie(session):
     newcookie = newcookie.strip()
     newcookie = newcookie.replace("ikariam=", "")
     cookies = session.getSessionData()["cookies"]
+    oldcookie = cookies.get("ikariam")
     cookies["ikariam"] = newcookie
     if session.host in session.s.cookies._cookies:
         session.s.cookies.set("ikariam", newcookie, domain=session.host, path="/")
     else:
         session.s.cookies.set("ikariam", newcookie, domain="", path="/")
 
-    html = session.s.get(session.urlBase).text
+    response = session.s.get(session.urlBase)
+    html = response.text
 
-    if session.isExpired(html):
+    if (
+        session.isExpired(html)
+        or response.status_code == 404
+        or _redirectedToLobby(response)
+    ):
+        if oldcookie is not None:
+            session.s.cookies.set("ikariam", oldcookie, domain=session.host, path="/")
         print(
             "{}Failure!{} All your other sessions have just been invalidated!".format(
                 bcolors.RED, bcolors.ENDC
