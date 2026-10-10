@@ -86,7 +86,7 @@ def getOffers(session, city):
     offers = []
     for row in re.findall(r'<tr[^>]*>([\s\S]*?)</tr>', html):
         city_match   = re.search(r'<td class="short_text80">(.*?)<br/>\((.*?)\)', row)
-        amount_match = re.search(r'<div class="tooltip">([\d,.]+)</div>', row)
+        amount_match = re.search(r'<div class="tooltip"[^>]*>(\d[^<]*)</div>', row)
         price_match  = re.search(r'<td style="white-space:nowrap;">(\d+)', row)
         href_match   = re.search(
             r'href="\?view=takeOffer&destinationCityId=(\d+)&oldView=branchOffice&activeTab=bargain&cityId=(\d+)&position=(\d+)&type=(\d+)&resource=(\w+)"',
@@ -97,7 +97,7 @@ def getOffers(session, city):
             continue
 
         resource_key = href_match.group(5)
-        raw_amount = amount_match.group(1).replace('.', '').replace(',', '')
+        raw_amount = re.sub(r'\D', '', amount_match.group(1))
         offer = {
             "ciudadDestino": city_match.group(1).strip(),
             "jugadorAComprar": city_match.group(2).strip(),
