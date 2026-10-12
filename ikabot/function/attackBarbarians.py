@@ -10,6 +10,7 @@ from decimal import *
 
 from ikabot.config import *
 from ikabot.helpers.botComm import *
+from ikabot.helpers.decorators import configurator, task
 from ikabot.helpers.getJson import getCity
 from ikabot.helpers.gui import *
 from ikabot.helpers.naval import *
@@ -21,6 +22,13 @@ from ikabot.helpers.varios import *
 from ikabot.helpers.pedirInfo import getShipCapacity
 
 getcontext().prec = 30
+
+
+def parse_game_int(text):
+    """Parse a number rendered by the game, dropping any thousand separator."""
+    for sep in (",", ".", " ", "\xa0", " "):
+        text = text.replace(sep, "")
+    return int(text.replace("-", "0"))
 
 
 def choose_island(session):
@@ -89,28 +97,25 @@ def get_barbarians_lv(session, island, ship_capacity):
     resp = json.loads(resp, strict=False)
 
     level = int(math.ceil(resp[2][1]["js_islandBarbarianLevel"]["text"]))
-    gold = int(resp[2][1]["js_islandBarbarianResourcegold"]["text"].replace(",", "").replace("\xa0", "").replace(" ", ""))
+    gold = parse_game_int(resp[2][1]["js_islandBarbarianResourcegold"]["text"])
 
     resources = [0] * len(materials_names)
     for i in range(len(materials_names)):
         if i == 0:
-            resources[i] = int(
-                resp[2][1]["js_islandBarbarianResourceresource"]["text"].replace(
-                    ",", ""
-                ).replace("\xa0", "").replace(" ", "")
+            resources[i] = parse_game_int(
+                resp[2][1]["js_islandBarbarianResourceresource"]["text"]
             )
         else:
-            resources[i] = int(
-                resp[2][1]["js_islandBarbarianResourcetradegood{:d}".format(i)][
-                    "text"
-                ].replace(",", "").replace("\xa0", "").replace(" ", "")
+            resources[i] = parse_game_int(
+                resp[2][1]["js_islandBarbarianResourcetradegood{:d}".format(i)]["text"]
             )
 
     html = resp[1][1][1]
     troops = re.findall(
-        r'<div class="army \w*?">\s*<div class=".*?">(.*?)</div>\s*</div>\s*</td>\s*</tr>\s*<tr>\s*<td class="center">\s*(\d+)',
+        r'<div class="army \w*?">\s*<div class=".*?">(.*?)</div>\s*</div>\s*</td>\s*</tr>\s*<tr>\s*<td class="center">\s*([\d.,\xa0 ]+)',
         html,
     )
+    troops = [(name, parse_game_int(amount)) for name, amount in troops]
 
     total_cargo = sum(resources)
     ships = math.ceil(Decimal(total_cargo) / Decimal(ship_capacity))
@@ -151,7 +156,7 @@ def get_units(session, city):
 
     units = {}
     for i in range(len(unit_id_names)):
-        amount = int(unit_amounts[i].replace(",", "").replace("-", "0"))
+        amount = parse_game_int(unit_amounts[i])
         unit_id = unit_id_names[i][0][1:]
         unit_name = unit_id_names[i][1]
         units[unit_id] = {}
@@ -260,66 +265,6 @@ def plan_attack(session, city, babarians_info):
     return plan
 
 
-def attackBarbarians(session, event, stdin_fd, predetermined_input):
-    """
-    Parameters
-    ----------
-    session : ikabot.web.session.Session
-    event : multiprocessing.Event
-    stdin_fd: int
-    predetermined_input : multiprocessing.managers.SyncManager.list
-    """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
-    try:
-        banner()
-
-        island = choose_island(session)
-        if island is None:
-            event.set()
-            return
-        ship_capacity, freighter_capacity = getShipCapacity(session)
-        babarians_info = get_barbarians_lv(session, island, ship_capacity)
-
-        banner()
-        print("The barbarians have:")
-        for name, amount in babarians_info["troops"]:
-            print("{} units of {}".format(amount, name))
-        print("")
-
-        banner()
-        print("From which city do you want to attack?")
-        city = chooseCity(session)
-
-        plan = plan_attack(session, city, babarians_info)
-        if plan is None:
-            event.set()
-            return
-
-        banner()
-        print(
-            "The barbarians in [{}:{}] will be attacked.".format(
-                island["x"], island["y"]
-            )
-        )
-        enter()
-
-    except KeyboardInterrupt:
-        event.set()
-        return
-
-    set_child_mode(session)
-    event.set()
-
-    info = "\nI attack the barbarians in [{}:{}]\n".format(island["x"], island["y"])
-    setInfoSignal(session, info)
-    try:
-        do_it(session, island, city, babarians_info, plan, ship_capacity)
-    except Exception as e:
-        msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
-        sendToBot(session, msg)
-    finally:
-        session.logout()
 
 
 def get_unit_data(session, city_id, unit_id):
@@ -635,7 +580,10 @@ def loot(session, island, city, units_data, loot_round, ship_capacity):
         session.post(params=attack_data)
 
 
+@task("attackBarbarians")
 def do_it(session, island, city, babarians_info, plan, ship_capacity):
+    info = "\nI attack the barbarians in [{}:{}]\n".format(island["x"], island["y"])
+    setInfoSignal(session, info)
 
     units_data = {}
 
@@ -717,3 +665,45 @@ def do_it(session, island, city, babarians_info, plan, ship_capacity):
     last_round = plan[-1]
     if last_round["loot"]:
         loot(session, city, island, units_data, last_round, ship_capacity)
+
+
+@configurator
+def attackBarbarians(session, event, stdin_fd, predetermined_input):
+    banner()
+
+    island = choose_island(session)
+    if island is None:
+        return None
+    ship_capacity, freighter_capacity = getShipCapacity(session)
+    babarians_info = get_barbarians_lv(session, island, ship_capacity)
+
+    banner()
+    print("The barbarians have:")
+    for name, amount in babarians_info["troops"]:
+        print("{} units of {}".format(amount, name))
+    print("")
+
+    banner()
+    print("From which city do you want to attack?")
+    city = chooseCity(session)
+
+    plan = plan_attack(session, city, babarians_info)
+    if plan is None:
+        return None
+
+    banner()
+    print(
+        "The barbarians in [{}:{}] will be attacked.".format(
+            island["x"], island["y"]
+        )
+    )
+    enter()
+
+    return {
+        "session": session,
+        "island": island,
+        "city": city,
+        "babarians_info": babarians_info,
+        "plan": plan,
+        "ship_capacity": ship_capacity,
+    }

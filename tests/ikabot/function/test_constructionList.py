@@ -1,6 +1,7 @@
 import unittest
 import json
-from unittest.mock import Mock
+import importlib
+from unittest.mock import Mock, call, patch
 
 from ikabot.function.constructionList import (
     _formatRemainingTime,
@@ -8,6 +9,8 @@ from ikabot.function.constructionList import (
     _parseConstructionTime,
     tryFreeBuildingSpeedup,
 )
+
+construction = importlib.import_module("ikabot.function.constructionList")
 
 
 class TestParseConstructionTime(unittest.TestCase):
@@ -172,5 +175,132 @@ class TestFreeBuildingSpeedup(unittest.TestCase):
         session = Mock()
         session.post.side_effect = [self._response(0), "ok"]
 
-        self.assertTrue(tryFreeBuildingSpeedup(session, "14075", {"position": 10}))
+        with patch.object(construction, "wait"):
+            self.assertTrue(tryFreeBuildingSpeedup(session, "14075", {"position": 10}))
         self.assertEqual(session.post.call_count, 2)
+
+
+class TestConstructionTaskHandoff(unittest.TestCase):
+    def setUp(self):
+        self.session = Mock()
+        self.event = Mock()
+        self.buildings = [
+            {"name": "Town hall", "level": 1, "isBusy": False, "upgradeTo": 3,
+             "constructionTime": 1500, "constructionTimes": [600, 900]},
+            {"name": "Warehouse", "level": 2, "isBusy": False, "upgradeTo": 3,
+             "constructionTime": 1800, "constructionTimes": [1800]},
+        ]
+        self.city = {
+            "id": "14075", "cityName": "Athens", "position": [],
+            "availableResources": [1000] * 5, "endUpgradeTime": 1600,
+        }
+        self.mocks = {
+            "banner": Mock(),
+            "chooseCity": Mock(return_value=self.city),
+            "getBuildingsToExpand": Mock(return_value=self.buildings),
+            "getCostsReducers": Mock(return_value=[0] * 5),
+            "getResourcesNeeded": Mock(return_value=[10, 0, 0, 0, 0]),
+            "read": Mock(return_value="y"),
+            "expandBuilding": Mock(),
+            "sendResourcesMenu": Mock(),
+            "setInfoSignal": Mock(),
+            "sendToBot": Mock(),
+        }
+        for patcher in (
+            patch.multiple(construction, **self.mocks),
+            patch.object(construction.time, "time", return_value=1000),
+            patch("ikabot.helpers.decorators.set_child_mode"),
+        ):
+            patcher.start()
+            self.addCleanup(patcher.stop)
+
+    def run_configurator(self):
+        construction.constructionList(self.session, self.event, None, [])
+        self.event.set.assert_called_once()
+        self.session.logout.assert_called_once()
+        self.mocks["sendToBot"].assert_not_called()
+
+    def test_passes_one_shared_queue_to_all_background_upgrades(self):
+        snapshots = []
+
+        def expand(session, city_id, building, wait_resources, queue):
+            snapshots.append(list(queue))
+            del queue[:len(building["constructionTimes"])]
+
+        self.mocks["expandBuilding"].side_effect = expand
+        self.run_configurator()
+
+        self.assertEqual(snapshots, [[600, 900, 1800], [1800]])
+        self.session.setStatus.assert_called_once_with(
+            "Athens: queued 3 upgrades | total 1H"
+        )
+        self.mocks["sendResourcesMenu"].assert_not_called()
+
+    def test_excludes_cancelled_buildings_from_queue_and_total(self):
+        self.mocks["read"].side_effect = ["y", "n"]
+        self.run_configurator()
+
+        self.mocks["expandBuilding"].assert_called_once_with(
+            self.session, "14075", self.buildings[0], False, [600, 900]
+        )
+        self.session.setStatus.assert_called_once_with(
+            "Athens: queued 2 upgrades | total 30M"
+        )
+
+    def test_skipped_building_does_not_need_construction_times(self):
+        del self.buildings[1]["constructionTime"]
+        del self.buildings[1]["constructionTimes"]
+        self.mocks["getResourcesNeeded"].side_effect = [
+            [10, 0, 0, 0, 0], [-2] * 5,
+        ]
+        self.run_configurator()
+
+        self.mocks["expandBuilding"].assert_called_once_with(
+            self.session, "14075", self.buildings[0], False, [600, 900]
+        )
+
+    def test_preserves_multiple_resource_shipments_without_upgrading(self):
+        self.city["availableResources"] = [0] * 5
+        self.mocks["read"].side_effect = ["y", 2, "y", "y", 1, "n"]
+        origins = [{0: [{"id": "source1"}]}, {0: [{"id": "source2"}]}]
+        self.mocks["sendResourcesMenu"].side_effect = [
+            (origins[0], False), (origins[1], False),
+        ]
+        threads = [Mock(), Mock()]
+        with patch.object(construction.threading, "Thread", side_effect=threads) as factory:
+            self.run_configurator()
+
+        self.assertEqual(factory.call_args_list, [
+            call(target=construction.sendResourcesNeeded,
+                 args=(self.session, "14075", origins[0], [10, 0, 0, 0, 0], True, True)),
+            call(target=construction.sendResourcesNeeded,
+                 args=(self.session, "14075", origins[1], [10, 0, 0, 0, 0], False, False)),
+        ])
+        for thread in threads:
+            thread.start.assert_called_once()
+            thread.join.assert_called_once()
+        self.mocks["expandBuilding"].assert_not_called()
+
+
+class TestConstructionSpeedupOptIn(unittest.TestCase):
+    def test_speedup_requires_opt_in_and_last_five_minutes(self):
+        for enabled, remaining, expected_calls in (
+            (False, 200, 0), (True, 200, 1), (True, 301, 0),
+        ):
+            with self.subTest(enabled=enabled, remaining=remaining):
+                session = Mock()
+                building = {"name": "Town hall", "level": 2, "completed": 1000 + remaining}
+                active = {"cityName": "Athens", "position": [building]}
+                finished = {"cityName": "Athens", "position": []}
+                with (
+                    patch.object(construction, "CONSTRUCTION_FREE_SPEEDUP", enabled),
+                    patch.object(construction.time, "time", return_value=1000),
+                    patch.object(construction, "getCity", side_effect=[active, finished, finished]),
+                    patch.object(construction, "tryFreeBuildingSpeedup", return_value=True) as speedup,
+                    patch.object(construction, "sendToBotDebug"),
+                    patch.object(construction, "wait"),
+                ):
+                    result = construction.waitForConstruction(session, "14075", 3, [600])
+
+                self.assertIs(result, finished)
+                self.assertEqual(speedup.call_count, expected_calls)

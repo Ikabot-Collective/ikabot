@@ -59,7 +59,7 @@ def updateDiscordData(session, event=None, stdin_fd=None, predetermined_input=[]
     predetermined_input : multiprocessing.managers.SyncManager.list
     """
     if event is not None and stdin_fd is not None:
-        sys.stdin = os.fdopen(stdin_fd)
+        sys.stdin = os.fdopen(stdin_fd, closefd=False)
     config.predetermined_input = predetermined_input
     banner()
     print("To create a Discord webhook:")
@@ -271,7 +271,7 @@ def updateTelegramData(session, event=None, stdin_fd=None, predetermined_input=[
         a boolean indicating whether or not the Telegram data has been successfully updated
     """
     if event is not None and stdin_fd is not None:
-        sys.stdin = os.fdopen(stdin_fd)  # give process access to terminal
+        sys.stdin = os.fdopen(stdin_fd, closefd=False)  # give process access to terminal
     config.predetermined_input = predetermined_input
     banner()
     print("To create your own Telegram bot, read this: https://core.telegram.org/bots#3-how-do-i-create-a-bot")

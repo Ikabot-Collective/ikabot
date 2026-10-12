@@ -1,3 +1,4 @@
+from ikabot.helpers.decorators import configurator
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
@@ -44,6 +45,7 @@ def test_proxy(session, proxy_dict):
             session.urlBase,
             proxies=proxy_dict,
             verify=config.do_ssl_verify,
+            timeout=10,
         )
     except Exception as e:
         print('Proxy test failure. Error: ' + str(e))
@@ -57,7 +59,15 @@ def read_proxy(session):
         "Enter the proxy: protocol://username:password@address:port\n(examples: socks5://127.0.0.1:9050, https://45.117.163.22:8080):"
         
     )
-    proxy_str = read(msg="proxy: ")
+    print("Enter 0 to go back.")
+    while True:
+        proxy_str = read(msg="proxy: ", additionalValues=["0"])
+        if proxy_str == "0":
+            return None
+        if not proxy_str.strip():
+            print("The proxy address can't be empty.")
+            continue
+        break
     proxy_dict = {"http": proxy_str, "https": proxy_str}
     if test_proxy(session, proxy_dict) is False:
         print("The proxy does not work.")
@@ -68,6 +78,7 @@ def read_proxy(session):
     return proxy_dict
 
 
+@configurator
 def proxyConf(session, event, stdin_fd, predetermined_input):
     """
     Parameters
@@ -77,8 +88,6 @@ def proxyConf(session, event, stdin_fd, predetermined_input):
     stdin_fd: int
     predetermined_input : multiprocessing.managers.SyncManager.list
     """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
     try:
         banner()
         print(

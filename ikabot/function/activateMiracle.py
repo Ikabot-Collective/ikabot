@@ -4,15 +4,139 @@
 import json
 import re
 import traceback
+import unicodedata
 
 from ikabot.config import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.getJson import getCity
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import *
-from ikabot.helpers.process import set_child_mode
+from ikabot.helpers.decorators import configurator, task
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import *
+
+MAX_WONDER_ACTIVATION_LEVEL = 5
+
+# fixed per-wonder-type shortcut letter, independent of the account's menu
+# order (same 8 types as ikabot/function/dumpWorld.py's wonder_dict)
+WONDER_SHORTCUTS = {
+    "1": "f",  # Hephaistos
+    "2": "h",  # Hades
+    "3": "d",  # Demeter
+    "4": "a",  # Athene
+    "5": "m",  # Hermes
+    "6": "r",  # Ares
+    "7": "p",  # Poseidon
+    "8": "c",  # Colossus
+}
+
+
+def wonder_letters(name):
+    """
+    Parameters
+    ----------
+    name : str
+
+    Returns
+    -------
+    list[str] : the letters of `name`, accent-stripped and lowercased, in order
+    """
+    decomposed = unicodedata.normalize("NFKD", name)
+    return [c.lower() for c in decomposed if c.isalpha()]
+
+
+def assign_shortcut_letters(islands):
+    """
+    Parameters
+    ----------
+    islands : list[dict]
+
+    Returns
+    -------
+    list[str or None] : one shortcut letter per island (same order/length as
+        `islands`), unique among the returned letters, falling back to the
+        first free letter of the wonder's name when its type has no fixed
+        shortcut or that shortcut is already taken
+    """
+    used = set()
+    letters = []
+    for island in islands:
+        letter = WONDER_SHORTCUTS.get(island["wonder"])
+        if letter is None or letter in used:
+            letter = next((c for c in wonder_letters(island["wonderName"]) if c not in used), None)
+        if letter is not None:
+            used.add(letter)
+        letters.append(letter)
+    return letters
+
+
+def find_temple_position(city):
+    """
+    Parameters
+    ----------
+    city : dict
+        a city dict as returned by getCity
+
+    Returns
+    -------
+    str or None : the "position" index of the city's temple, or None if it has none
+    """
+    for i in range(len(city["position"])):
+        if city["position"][i]["building"] == "temple":
+            return str(i)
+    return None
+
+
+def get_temple_info(session, city):
+    """
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    city : dict
+        a city dict as returned by getCity, with "pos" set to the temple's position
+
+    Returns
+    -------
+    dict : {"level": int, "available": bool, "available_in": int or None}
+    """
+    params = {
+        "view": "temple",
+        "cityId": city["id"],
+        "position": city["pos"],
+        "backgroundView": "city",
+        "currentCityId": city["id"],
+        "actionRequest": actionRequest,
+        "ajax": "1",
+    }
+    data = session.post(params=params)
+    data = json.loads(data, strict=False)
+    html = data[1][1][1]
+    match = re.search(r'<div id="wonderLevelDisplay"[^>]*>\s*(\d+)\s*</div>', html)
+    level = int(match.group(1)) if match else 0
+
+    data = data[2][1]
+    available = data["js_WonderViewButton"]["buttonState"] == "enabled"
+    available_in = None
+    if available is False:
+        for elem in data:
+            if isinstance(data[elem], dict) and "countdown" in data[elem]:
+                enddate = data[elem]["countdown"]["enddate"]
+                currentdate = data[elem]["countdown"]["currentdate"]
+                available_in = int(float(enddate)) - int(float(currentdate))
+                break
+
+    return {"level": level, "available": available, "available_in": available_in}
+
+
+# which island each of the player's temple-holding cities sits on, and each
+# island's own (static) data -- neither changes during a run, so caching them
+# lets repeated obtainMiraclesAvailable calls (e.g. from refresh_best_city
+# inside a long do_it loop) skip straight to just re-checking temple level and
+# availability, instead of re-fetching every city and island each time.
+# A city missing from _CITY_TEMPLE_CACHE is always re-checked (never cached
+# as "no temple"), so a newly-built temple is picked up on the next call.
+_CITY_TEMPLE_CACHE = {}
+_ISLAND_CACHE = {}
 
 
 def obtainMiraclesAvailable(session):
@@ -25,86 +149,58 @@ def obtainMiraclesAvailable(session):
     -------
     islands: list[dict]
     """
-    idsIslands = getIslandsIds(session)
-    islands = []
-    for idIsland in idsIslands:
-        html = session.get(island_url + idIsland)
-        island = getIsland(html)
-        island["activable"] = False
-        islands.append(island)
-
     ids, cities = getIdsOfCities(session)
+    islands = {}
+
     for city_id in cities:
         city_info = cities[city_id]
-        # get the wonder for this city
-        wonder = [
-            island["wonder"]
-            for island in islands
-            if city_info["coords"] == "[{}:{}] ".format(island["x"], island["y"])
-        ][0]
+        temple_city = _CITY_TEMPLE_CACHE.get(city_id)
 
-        html = session.get(city_url + str(city_info["id"]))
-        city = getCity(html)
+        if temple_city is None:
+            html = session.get(city_url + str(city_info["id"]))
+            city = getCity(html)
+            pos = find_temple_position(city)
+            if pos is None:
+                continue
+            temple_city = {"id": city["id"], "name": city["name"], "islandId": city["islandId"], "pos": pos}
+            _CITY_TEMPLE_CACHE[city_id] = temple_city
 
-        # make sure that the city has a temple
-        for i in range(len(city["position"])):
-            if city["position"][i]["building"] == "temple":
-                city["pos"] = str(i)
-                break
-        else:
-            continue
+        island_id = temple_city["islandId"]
+        cached_island = _ISLAND_CACHE.get(island_id)
+        if cached_island is None:
+            html = session.get(island_url + island_id)
+            cached_island = getIsland(html)
+            _ISLAND_CACHE[island_id] = cached_island
 
-        # get wonder information
-        params = {
-            "view": "temple",
-            "cityId": city["id"],
-            "position": city["pos"],
-            "backgroundView": "city",
-            "currentCityId": city["id"],
-            "actionRequest": actionRequest,
-            "ajax": "1",
-        }
-        data = session.post(params=params)
-        data = json.loads(data, strict=False)
-        html = data[1][1][1]
-        match = re.search(r'<div id="wonderLevelDisplay"[^>]*>\s*(\d+)\s*</div>', html)
-        level = 0
-        if match:
-            level = int(match.group(1))
+        target_island = islands.get(island_id)
+        if target_island is None:
+            target_island = dict(cached_island)
+            target_island["activable"] = False
+            islands[island_id] = target_island
 
-        # Check if we already have this wonder type in our activable list
-        existing_best = next((i for i in islands if i["activable"] and i["wonder"] == wonder), None)
-        
-        if existing_best:
-            # If the current city has a higher level, deactivate the previous one
-            if level > existing_best["wonderActivationLevel"]:
+        temple_info = get_temple_info(session, temple_city)
+
+        # wonder level belongs to the island, not the temple; keep the highest
+        # instance of this wonder type across all islands
+        existing_best = next(
+            (isl for isl in islands.values() if isl["activable"] and isl["wonder"] == target_island["wonder"]),
+            None,
+        )
+        if existing_best is not None:
+            if temple_info["level"] > existing_best["wonderActivationLevel"]:
                 existing_best["activable"] = False
             else:
-                # If existing is better or equal, skip this city
                 continue
 
-        data = data[2][1]
-        available = data["js_WonderViewButton"]["buttonState"] == "enabled"
-        if available is False:
-            for elem in data:
-                if isinstance(data[elem], dict) and "countdown" in data[elem]:
-                    enddate = data[elem]["countdown"]["enddate"]
-                    currentdate = data[elem]["countdown"]["currentdate"]
-                    break
-
-        # set the information on the island which wonder we can activate
-        for island in islands:
-            if island["id"] == city["islandId"]:
-                island["activable"] = True
-                island["ciudad"] = city
-                island["wonderActivationLevel"] = level
-                island["available"] = available
-                if available is False:
-                    island["available_in"] = int(float(enddate)) - int(float(currentdate))
-                break
+        target_island["activable"] = True
+        target_island["ciudad"] = temple_city
+        target_island["wonderActivationLevel"] = temple_info["level"]
+        target_island["available"] = temple_info["available"]
+        if temple_info["available"] is False:
+            target_island["available_in"] = temple_info["available_in"]
 
     # only return island which wonder we can activate
-    return [island for island in islands if island["activable"]]
+    return [island for island in islands.values() if island["activable"]]
 
 
 def activateMiracleHttpCall(session, island):
@@ -146,176 +242,31 @@ def chooseIsland(islands):
     print("Which miracle do you want to activate?")
     # Sort islands by level descending, then by name
     sorted_islands = sorted(islands, key=lambda x: (-x["wonderActivationLevel"], x["wonderName"]))
+    letters = assign_shortcut_letters(sorted_islands)
+    by_letter = {letter: island for letter, island in zip(letters, sorted_islands) if letter is not None}
+
     i = 0
     print("(0) Exit")
-    for island in sorted_islands:
+    for island, letter in zip(sorted_islands, letters):
         i += 1
+        prefix = "({:d}/{})".format(i, letter) if letter else "({:d})".format(i)
         if island["available"]:
-            print("({:d}) {} (level {})".format(i, island["wonderName"], island["wonderActivationLevel"]))
+            print("{} {} (level {})".format(prefix, island["wonderName"], island["wonderActivationLevel"]))
         else:
             print(
-                "({:d}) {} (level {}) (available in: {})".format(
-                    i, island["wonderName"], island["wonderActivationLevel"], daysHoursMinutes(island["available_in"])
+                "{} {} (level {}) (available in: {})".format(
+                    prefix, island["wonderName"], island["wonderActivationLevel"], daysHoursMinutes(island["available_in"])
                 )
             )
 
-    index = read(min=0, max=i)
+    additional_values = [v for letter in by_letter for v in (letter, letter.upper())]
+    index = read(min=0, max=i, additionalValues=additional_values)
+
+    if isinstance(index, str):
+        return by_letter[index.lower()]
     if index == 0:
         return None
-    island = sorted_islands[index - 1]
-    return island
-
-
-def activateMiracle(session, event, stdin_fd, predetermined_input):
-    """
-    Parameters
-    ----------
-    session : ikabot.web.session.Session
-    event : multiprocessing.Event
-    stdin_fd: int
-    predetermined_input : multiprocessing.managers.SyncManager.list
-    """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
-    try:
-        banner()
-
-        islands = obtainMiraclesAvailable(session)
-        if islands == []:
-            print("There are no miracles available.")
-            enter()
-            event.set()
-            return
-
-        island = chooseIsland(islands)
-        if island is None:
-            event.set()
-            return
-
-        if island["available"]:
-            print("\nThe miracle {} (level {}) will be activated".format(island["wonderName"], island["wonderActivationLevel"]))
-            print("Proceed? [Y/n]")
-            activate_miracle_input = read(values=["y", "Y", "n", "N", ""])
-            if activate_miracle_input.lower() == "n":
-                event.set()
-                return
-
-            miracle_activation_result = activateMiracleHttpCall(session, island)
-
-            if miracle_activation_result[1][1][0] == "error":
-                print(
-                    "The miracle {} could not be activated.".format(
-                        island["wonderName"]
-                    )
-                )
-                enter()
-                event.set()
-                return
-
-            data = miracle_activation_result[2][1]
-            for elem in data:
-                if "countdown" in data[elem]:
-                    enddate = data[elem]["countdown"]["enddate"]
-                    currentdate = data[elem]["countdown"]["currentdate"]
-                    break
-            wait_time = int(float(enddate)) - int(float(currentdate))
-
-            print("The miracle {} was activated.".format(island["wonderName"]))
-            enter()
-            banner()
-
-            while True:
-                print("Do you wish to activate it again when it is finished? [y/N]")
-
-                reactivate_again_input = read(values=["y", "Y", "n", "N", ""])
-                if reactivate_again_input.lower() != "y":
-                    event.set()
-                    return
-
-                iterations = read(msg="How many times?: ", digit=True, min=0)
-
-                if iterations == 0:
-                    event.set()
-                    return
-
-                duration = wait_time * iterations
-
-                print("It will finish in:{}".format(daysHoursMinutes(duration)))
-
-                print("Proceed? [Y/n]")
-                reactivate_again_input = read(values=["y", "Y", "n", "N", ""])
-                if reactivate_again_input.lower() == "n":
-                    banner()
-                    continue
-                break
-        else:
-            print(
-                "\nThe miracle {} will be activated in {}".format(
-                    island["wonderName"], daysHoursMinutes(island["available_in"])
-                )
-            )
-            print("Proceed? [Y/n]")
-            user_confirm = read(values=["y", "Y", "n", "N", ""])
-            if user_confirm.lower() == "n":
-                event.set()
-                return
-            wait_time = island["available_in"]
-            iterations = 1
-
-            print("\nThe mirable will be activated.")
-            enter()
-            banner()
-
-            while True:
-                print("Do you wish to activate it again when it is finished? [y/N]")
-
-                reactivate_again_input = read(values=["y", "Y", "n", "N", ""])
-                again = reactivate_again_input.lower() == "y"
-                if again is True:
-                    try:
-                        iterations = read(msg="How many times?: ", digit=True, min=0)
-                    except KeyboardInterrupt:
-                        iterations = 1
-                        break
-
-                    if iterations == 0:
-                        iterations = 1
-                        break
-
-                    iterations += 1
-                    duration = wait_time * iterations
-                    print("It is not possible to calculate the time of finalization. (at least: {})".format(daysHoursMinutes(duration)))
-                    print("Proceed? [Y/n]")
-
-                    try:
-                        activate_input = read(values=["y", "Y", "n", "N", ""])
-                    except KeyboardInterrupt:
-                        iterations = 1
-                        break
-
-                    if activate_input.lower() == "n":
-                        iterations = 1
-                        banner()
-                        continue
-                break
-    except KeyboardInterrupt:
-        event.set()
-        return
-
-    set_child_mode(session)
-    event.set()
-
-    info = "\nI activate the miracle {} {:d} times\n".format(
-        island["wonderName"], iterations
-    )
-    setInfoSignal(session, info)
-    try:
-        do_it(session, island, iterations)
-    except Exception as e:
-        msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
-        sendToBot(session, msg)
-    finally:
-        session.logout()
+    return sorted_islands[index - 1]
 
 
 def wait_for_miracle(session, island):
@@ -365,6 +316,39 @@ def wait_for_miracle(session, island):
         wait(wait_time + 5)
 
 
+def refresh_best_city(session, island):
+    """
+    Switches `island` to the highest-level instance of its wonder type,
+    if a different island now has one.
+
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    island : dict
+    """
+    candidates = obtainMiraclesAvailable(session)
+    best = next((isl for isl in candidates if isl["wonder"] == island["wonder"]), None)
+
+    if best is None or best["ciudad"]["id"] == island["ciudad"]["id"]:
+        return
+
+    msg = "Switching miracle {} activation from {} (level {}) to {} (level {})".format(
+        island["wonderName"],
+        island["ciudad"]["name"],
+        island["wonderActivationLevel"],
+        best["ciudad"]["name"],
+        best["wonderActivationLevel"],
+    )
+    sendToBotDebug(session, msg, debugON_activateMiracle)
+
+    island["ciudad"] = best["ciudad"]
+    island["wonderActivationLevel"] = best["wonderActivationLevel"]
+    island["available"] = best["available"]
+    if best["available"] is False:
+        island["available_in"] = best["available_in"]
+
+
+@task("activateMiracle")
 def do_it(session, island, iterations):
     """
     Parameters
@@ -373,9 +357,16 @@ def do_it(session, island, iterations):
     island : dict
     iterations : int
     """
+    info = "\nI activate the miracle {} {:d} times\n".format(
+        island["wonderName"], iterations
+    )
+    setInfoSignal(session, info)
     iterations_left = iterations
     session.setStatus(f"Waiting to activate {island['wonderName']}...")
     for i in range(iterations):
+
+        if island["wonderActivationLevel"] < MAX_WONDER_ACTIVATION_LEVEL:
+            refresh_best_city(session, island)
 
         wait_for_miracle(session, island)
 
@@ -393,3 +384,133 @@ def do_it(session, island, iterations):
         )
         msg = "Miracle {} successfully activated".format(island["wonderName"])
         sendToBotDebug(session, msg, debugON_activateMiracle)
+@configurator
+def activateMiracle(session, event, stdin_fd, predetermined_input):
+    """
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    event : multiprocessing.Event
+    stdin_fd: int
+    predetermined_input : multiprocessing.managers.SyncManager.list
+    """
+    banner()
+
+    islands = obtainMiraclesAvailable(session)
+    if islands == []:
+        print("There are no miracles available.")
+        enter()
+        return None
+
+    island = chooseIsland(islands)
+    if island is None:
+        return None
+
+    if island["available"]:
+        print("\nThe miracle {} (level {}) will be activated".format(island["wonderName"], island["wonderActivationLevel"]))
+        print("Proceed? [Y/n]")
+        activate_miracle_input = read(values=["y", "Y", "n", "N", ""])
+        if activate_miracle_input.lower() == "n":
+            event.set()
+            return
+
+        miracle_activation_result = activateMiracleHttpCall(session, island)
+
+        if miracle_activation_result[1][1][0] == "error":
+            print(
+                "The miracle {} could not be activated.".format(
+                    island["wonderName"]
+                )
+            )
+            enter()
+            event.set()
+            return
+
+        data = miracle_activation_result[2][1]
+        for elem in data:
+            if "countdown" in data[elem]:
+                enddate = data[elem]["countdown"]["enddate"]
+                currentdate = data[elem]["countdown"]["currentdate"]
+                break
+        wait_time = int(float(enddate)) - int(float(currentdate))
+
+        print("The miracle {} was activated.".format(island["wonderName"]))
+        enter()
+        banner()
+
+        while True:
+            print("Do you wish to activate it again when it is finished? [y/N]")
+
+            reactivate_again_input = read(values=["y", "Y", "n", "N", ""])
+            if reactivate_again_input.lower() != "y":
+                event.set()
+                return
+
+            iterations = read(msg="How many times?: ", digit=True, min=0)
+
+            if iterations == 0:
+                event.set()
+                return
+
+            duration = wait_time * iterations
+
+            print("It will finish in:{}".format(daysHoursMinutes(duration)))
+
+            print("Proceed? [Y/n]")
+            reactivate_again_input = read(values=["y", "Y", "n", "N", ""])
+            if reactivate_again_input.lower() == "n":
+                banner()
+                continue
+            break
+    else:
+        print(
+            "\nThe miracle {} will be activated in {}".format(
+                island["wonderName"], daysHoursMinutes(island["available_in"])
+            )
+        )
+        print("Proceed? [Y/n]")
+        user_confirm = read(values=["y", "Y", "n", "N", ""])
+        if user_confirm.lower() == "n":
+            event.set()
+            return
+        wait_time = island["available_in"]
+        iterations = 1
+
+        print("\nThe mirable will be activated.")
+        enter()
+        banner()
+
+        while True:
+            print("Do you wish to activate it again when it is finished? [y/N]")
+
+            reactivate_again_input = read(values=["y", "Y", "n", "N", ""])
+            again = reactivate_again_input.lower() == "y"
+            if again is True:
+                try:
+                    iterations = read(msg="How many times?: ", digit=True, min=0)
+                except KeyboardInterrupt:
+                    iterations = 1
+                    break
+
+                if iterations == 0:
+                    iterations = 1
+                    break
+
+                iterations += 1
+                duration = wait_time * iterations
+                print("It is not possible to calculate the time of finalization. (at least: {})".format(daysHoursMinutes(duration)))
+                print("Proceed? [Y/n]")
+
+                try:
+                    activate_input = read(values=["y", "Y", "n", "N", ""])
+                except KeyboardInterrupt:
+                    iterations = 1
+                    break
+
+                if activate_input.lower() == "n":
+                    iterations = 1
+                    banner()
+                    continue
+            break
+    return {"session": session, "island": island, "iterations": iterations}
+

@@ -1,3 +1,4 @@
+from ikabot.helpers.decorators import configurator
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
@@ -5,6 +6,7 @@ from ikabot.config import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.varios import wait
 
+@configurator
 def modifyProduction(session, event, stdin_fd, predetermined_input):
     """
     Parameters
@@ -14,8 +16,6 @@ def modifyProduction(session, event, stdin_fd, predetermined_input):
     stdin_fd: int
     predetermined_input : multiprocessing.managers.SyncManager.list
     """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
     try:
         banner()
         mod_msg = "In which cities do you want to modify production?"
@@ -123,6 +123,7 @@ def modifyProduction(session, event, stdin_fd, predetermined_input):
     event.set()
 
 
+@configurator
 def modifyAcademyWorkers(session, event, stdin_fd, predetermined_input):
     """
     Parameters
@@ -132,8 +133,6 @@ def modifyAcademyWorkers(session, event, stdin_fd, predetermined_input):
     stdin_fd: int
     predetermined_input : multiprocessing.managers.SyncManager.list
     """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
     try:
         banner()
         city_ids, _ = ignoreCities(session, msg="In which cities do you want to set academy workers?")
@@ -184,6 +183,7 @@ def modifyAcademyWorkers(session, event, stdin_fd, predetermined_input):
     event.set()
 
 
+@configurator
 def modifyTempleWorkers(session, event, stdin_fd, predetermined_input):
     """
     Parameters
@@ -193,8 +193,6 @@ def modifyTempleWorkers(session, event, stdin_fd, predetermined_input):
     stdin_fd: int
     predetermined_input : multiprocessing.managers.SyncManager.list
     """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
     try:
         banner()
         city_ids, _ = ignoreCities(session, msg="In which cities do you want to set priests?")
