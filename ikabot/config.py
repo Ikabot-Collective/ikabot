@@ -24,6 +24,11 @@ isWindows = os.name == "nt"
 # single-process solve when the machine is busy.
 USE_MULTIPROCESSING_DECAPTCHA = True
 
+# Set to TRUE to enable requesting the zero-cost speedup while a building is finishing # default FALSE
+CONSTRUCTION_FREE_SPEEDUP = (os.getenv("CONSTRUCTION_FREE_SPEEDUP") or "FALSE").strip().upper() == "TRUE"
+# Max seconds to randomly wait before firing the free speedup request
+SPEEDUP_RANDOMWAIT = max(1, int(os.getenv("SPEEDUP_RANDOMWAIT") or 30))
+
 # Set to True to record how long each local captcha solve took, in the ikabot
 # log file (see LOGS_DIRECTORY_FILE below). One line per solve, tagged
 # [decaptcha-timing], with the worker count, the free RAM and the CPU
