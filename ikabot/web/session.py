@@ -1297,7 +1297,10 @@ class Session:
         sessionData = self.getSessionData()
 
         try:
-            if self.s.cookies["PHPSESSID"] != sessionData["cookies"]["PHPSESSID"]:
+            stored_ikariam = sessionData["cookies"].get("ikariam")
+            imported = getattr(self, "_stored_ikariam", None) != stored_ikariam
+            self._stored_ikariam = stored_ikariam
+            if imported or self.s.cookies["PHPSESSID"] != sessionData["cookies"]["PHPSESSID"]:
                 self.__getCookie(sessionData)
         except KeyError:
             try:
