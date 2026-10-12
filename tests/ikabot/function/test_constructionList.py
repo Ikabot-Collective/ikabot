@@ -232,7 +232,7 @@ class TestConstructionTaskHandoff(unittest.TestCase):
 
         self.assertEqual(snapshots, [[600, 900, 1800], [1800]])
         self.session.setStatus.assert_called_once_with(
-            "Athens: queued 3 upgrades | total 1H"
+            "Athens: queued 3 upgrades | total 1H 5M"
         )
         self.mocks["sendResourcesMenu"].assert_not_called()
 
@@ -244,7 +244,7 @@ class TestConstructionTaskHandoff(unittest.TestCase):
             self.session, "14075", self.buildings[0], False, [600, 900]
         )
         self.session.setStatus.assert_called_once_with(
-            "Athens: queued 2 upgrades | total 30M"
+            "Athens: queued 2 upgrades | total 35M"
         )
 
     def test_skipped_building_does_not_need_construction_times(self):
@@ -283,11 +283,19 @@ class TestConstructionTaskHandoff(unittest.TestCase):
 
 
 class TestConstructionSpeedupOptIn(unittest.TestCase):
-    def test_speedup_requires_opt_in_and_last_five_minutes(self):
-        for enabled, remaining, expected_calls in (
-            (False, 200, 0), (True, 200, 1), (True, 301, 0),
+    def test_wait_and_total_follow_real_duration_and_speedup_opt_in(self):
+        for enabled, remaining, speedup_result, expected_calls, expected_wait, total in (
+            (False, 600, True, 0, 610, "20M"),
+            (False, 300, True, 0, 310, "15M"),
+            (False, 200, True, 0, 210, "13M 20S"),
+            (True, 600, True, 0, 300, "20M"),
+            (True, 301, True, 0, 5, "15M 1S"),
+            (True, 300, True, 1, 5, "15M"),
+            (True, 200, True, 1, 5, "13M 20S"),
+            (True, 200, False, 1, 5, "13M 20S"),
+            (True, 0, True, 0, 5, "10M"),
         ):
-            with self.subTest(enabled=enabled, remaining=remaining):
+            with self.subTest(enabled=enabled, remaining=remaining, speedup_result=speedup_result):
                 session = Mock()
                 building = {"name": "Town hall", "level": 2, "completed": 1000 + remaining}
                 active = {"cityName": "Athens", "position": [building]}
@@ -296,11 +304,56 @@ class TestConstructionSpeedupOptIn(unittest.TestCase):
                     patch.object(construction, "CONSTRUCTION_FREE_SPEEDUP", enabled),
                     patch.object(construction.time, "time", return_value=1000),
                     patch.object(construction, "getCity", side_effect=[active, finished, finished]),
-                    patch.object(construction, "tryFreeBuildingSpeedup", return_value=True) as speedup,
+                    patch.object(construction, "tryFreeBuildingSpeedup", return_value=speedup_result) as speedup,
                     patch.object(construction, "sendToBotDebug"),
-                    patch.object(construction, "wait"),
+                    patch.object(construction, "wait") as wait,
                 ):
                     result = construction.waitForConstruction(session, "14075", 3, [600])
 
                 self.assertIs(result, finished)
                 self.assertEqual(speedup.call_count, expected_calls)
+                wait.assert_called_once_with(expected_wait)
+                self.assertTrue(session.setStatus.call_args_list[0].args[0].endswith(
+                    " , total " + total
+                ))
+                if not enabled:
+                    self.assertFalse(any(
+                        "speedup" in call.args[0]
+                        for call in session.setStatus.call_args_list
+                    ))
+
+
+class TestQueuedConstructionDurations(unittest.TestCase):
+    def test_resource_calculation_preserves_full_durations_even_with_speedup_enabled(self):
+        detail_html = '''<div class="selected button_building warehouse"
+            onmouseover="$(this).addClass('hover');" onmouseout="$(this).removeClass('hover');"
+            onclick="ajaxHandlerCall('?view=buildingDetail&buildingId=4&');">'''
+        costs_html = '''<th class="costs"><img src="//cdn/wood.png"/></th>
+            <th class="costs"><img src="//cdn/time.png"/></th>
+            <td class="level">2</td>
+            <td class="costs"><div><div>100</div></div></td>
+            <td class="costs"><span data-duration="600">10M</span></td>
+            <td class="level">3</td>
+            <td class="costs"><div><div>100</div></div></td>
+            <td class="costs"><span data-duration="900">15M</span></td>'''
+
+        for enabled in (False, True):
+            with self.subTest(enabled=enabled):
+                session = Mock()
+                session.getSessionData.return_value = {"reduccion_inv_max": True}
+                session.post.side_effect = [
+                    json.dumps([None, [None, [None, detail_html]]]),
+                    json.dumps([None, [None, [None, costs_html]]]),
+                ]
+                building = {"building": "warehouse"}
+                with (
+                    patch.object(construction, "CONSTRUCTION_FREE_SPEEDUP", enabled),
+                    patch.object(construction, "checkhash", return_value="wood"),
+                ):
+                    costs = construction.getResourcesNeeded(
+                        session, {"id": "14075"}, building, 1, 3, [0] * 5
+                    )
+
+                self.assertEqual(costs, [200, 0, 0, 0, 0])
+                self.assertEqual(building["constructionTimes"], [600, 900])
+                self.assertEqual(building["constructionTime"], 1500)

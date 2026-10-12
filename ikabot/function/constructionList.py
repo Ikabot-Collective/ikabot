@@ -175,7 +175,7 @@ def waitForConstruction(session, city_id, final_lvl, construction_queue=None):
         current_time = int(time.time())
         final_time = int(construction_time)
         seconds_to_wait = final_time - current_time
-        current_remaining = max(0, seconds_to_wait - 300)
+        current_remaining = max(0, seconds_to_wait)
         total_remaining = current_remaining + sum(construction_queue or [])
         status = "{}: {} -> level {} , current {} , total {}".format(
             city["cityName"],
@@ -186,8 +186,8 @@ def waitForConstruction(session, city_id, final_lvl, construction_queue=None):
         )
         session.setStatus(status)
 
-        if 0 < seconds_to_wait <= 300:
-            if CONSTRUCTION_FREE_SPEEDUP and tryFreeBuildingSpeedup(session, city_id, construction_building):
+        if CONSTRUCTION_FREE_SPEEDUP and 0 < seconds_to_wait <= 300:
+            if tryFreeBuildingSpeedup(session, city_id, construction_building):
                 session.setStatus(status + " , free speedup sent")
                 msg = "{}: Finished {} for 0 Ambrosia".format(
                     city["cityName"], construction_building["name"]
@@ -205,7 +205,10 @@ def waitForConstruction(session, city_id, final_lvl, construction_queue=None):
             construction_building["level"] + 1,
         )
         sendToBotDebug(session, msg, debugON_constructionList)
-        wait(max(5, seconds_to_wait - 300))
+        if CONSTRUCTION_FREE_SPEEDUP:
+            wait(max(5, seconds_to_wait - 300))
+        else:
+            wait(max(5, seconds_to_wait + 10))
 
     html = session.get(city_url + city_id)
     city = getCity(html)
@@ -428,7 +431,7 @@ def getResourcesNeeded(session, city, building, current_level, final_level, simu
         levels_to_upgrade += 1
         level_time = _parseConstructionTime(match)
         if level_time is not None:
-            level_time = max(0, level_time - 300)
+            # Keep full durations: optional speedups may be unavailable or rejected.
             construction_time += level_time
             construction_times.append(level_time)
         # get the costs for the current level
@@ -955,7 +958,7 @@ def constructionList(session, event, stdin_fd, predetermined_input):
 
     total_time = sum(building["constructionTime"] for building in buildings)
     active_time = int(city.get("endUpgradeTime", 0)) - int(time.time())
-    total_time += max(0, active_time - 300)
+    total_time += max(0, active_time)
     construction_queue = [
         duration
         for building in buildings
