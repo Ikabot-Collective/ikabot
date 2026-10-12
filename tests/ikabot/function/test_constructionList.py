@@ -173,11 +173,50 @@ class TestFreeBuildingSpeedup(unittest.TestCase):
 
     def test_posts_premium_request_for_zero_cost(self):
         session = Mock()
-        session.post.side_effect = [self._response(0), "ok"]
+        session.post.side_effect = [self._response(0), self._response(0), "ok"]
 
         with patch.object(construction, "wait"):
             self.assertTrue(tryFreeBuildingSpeedup(session, "14075", {"position": 10}))
+        self.assertEqual(session.post.call_count, 3)
+        requests = [request.kwargs["params"] for request in session.post.call_args_list]
+        self.assertEqual(requests[0]["view"], "buildingSpeedup")
+        self.assertEqual(requests[1]["view"], "buildingSpeedup")
+        self.assertEqual(requests[2]["action"], "Premium")
+
+    def test_rechecks_cost_after_random_wait(self):
+        session = Mock()
+        current_cost = [0]
+        session.post.side_effect = lambda **_: self._response(current_cost[0])
+
+        def change_cost_during_wait(*_):
+            self.assertEqual(session.post.call_count, 1)
+            current_cost[0] = 20
+
+        with patch.object(construction, "wait", side_effect=change_cost_during_wait) as mocked_wait:
+            self.assertFalse(tryFreeBuildingSpeedup(session, "14075", {"position": 10}))
+
+        mocked_wait.assert_called_once()
         self.assertEqual(session.post.call_count, 2)
+        for request in session.post.call_args_list:
+            self.assertEqual(request.kwargs["params"].get("view"), "buildingSpeedup")
+
+    def test_rejects_invalid_popup_after_random_wait(self):
+        for response in (
+            "invalid response",
+            self._response_with_span(""),
+            self._response(0).replace("cityId=14075", "cityId=99999"),
+            self._response(0).replace("position=10", "position=11"),
+        ):
+            with self.subTest(response=response):
+                session = Mock()
+                session.post.side_effect = [self._response(0), response]
+
+                with patch.object(construction, "wait"):
+                    self.assertFalse(tryFreeBuildingSpeedup(session, "14075", {"position": 10}))
+
+                self.assertEqual(session.post.call_count, 2)
+                for request in session.post.call_args_list:
+                    self.assertEqual(request.kwargs["params"].get("view"), "buildingSpeedup")
 
 
 class TestConstructionTaskHandoff(unittest.TestCase):

@@ -142,6 +142,12 @@ def tryFreeBuildingSpeedup(session, city_id, building):
         return False
 
     wait(random.randint(1, SPEEDUP_RANDOMWAIT)) # random wait
+    # Recheck the current price and target after the delay before activating.
+    response = session.post(params=popup_params)
+    speedup_params = _getFreeSpeedupParams(response, city_id, building["position"])
+    if speedup_params is None:
+        return False
+
     session.post(params=speedup_params)
     return True
 
