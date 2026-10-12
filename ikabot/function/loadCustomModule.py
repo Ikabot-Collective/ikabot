@@ -8,26 +8,10 @@ from ikabot.helpers.gui import *
 from ikabot.config import *
 from importlib.machinery import SourceFileLoader
 
-def loadCustomModule(session, event, stdin_fd, predetermined_input):
-    """
-    Parameters
-    ----------
-    session : ikabot.web.session.Session
-    event : multiprocessing.Event
-    stdin_fd: int
-    predetermined_input : multiprocessing.managers.SyncManager.list
-    """
-    # Fix for Linux: Reopen stdin to ensure terminal interaction works in threads
-    if sys.platform != "win32":
-        try:
-            sys.stdin = open('/dev/tty', 'r')
-        except Exception:
-            sys.stdin = os.fdopen(stdin_fd)
-    else:
-        sys.stdin = os.fdopen(stdin_fd)
+from ikabot.helpers.decorators import configurator
 
-    config.predetermined_input = predetermined_input
-    
+@configurator
+def loadCustomModule(session, event, stdin_fd, predetermined_input):
     while True:
         try:
             banner()
@@ -48,8 +32,7 @@ def loadCustomModule(session, event, stdin_fd, predetermined_input):
             choice = read(min=0, max=len(modules) + 2, digit=True)
 
             if choice == 0:
-                event.set()
-                return
+                return None
 
             elif choice == 1:
                 banner()
@@ -162,12 +145,11 @@ def loadCustomModule(session, event, stdin_fd, predetermined_input):
                 # Execute the function (must match filename)
                 getattr(module, name)(session, event, stdin_fd, predetermined_input)
 
-                event.set()
-                return
+                return None
 
         except Exception:
             print('\n>> Error in Custom Module Manager:')
             traceback.print_exc()
             enter()
-            event.set()
             break
+    return None

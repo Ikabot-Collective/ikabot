@@ -67,49 +67,15 @@ def get_local_network_ip():
     return None
 
 
-def webServer(session, event, stdin_fd, predetermined_input, port=None):
-    """
-    Parameters
-    ----------
-    session : ikabot.web.session.Session
-    event : multiprocessing.Event
-    stdin_fd: int
-    predetermined_input : multiprocessing.managers.SyncManager.list
-    port : int (optional)
-    """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
+from ikabot.helpers.decorators import configurator, task
 
-    banner()
+@task("webServer")
+def do_webServer(session, port, local_network_ip):
     try:
         import flask
         from flask import Flask, Response, request
     except Exception:
-        print(
-            "You must have flask installed for this feature to work. Do you want to install it now?[Y/N]"
-        )
-        choice = read(values=["y", "Y", "n", "N"])
-        if choice in ["y", "Y"]:
-            print(
-                f"Attempting to install flask... -> {bcolors.GREEN}python3 -m pip install flask{bcolors.ENDC}"
-            )
-            command_output = run("python3 -m pip install flask")
-            print(command_output)
-        else:
-            print("Please install flask manually and try to run this module again...")
-            enter()
-            event.set()
-            return
-        try:
-            import flask
-            from flask import Flask, Response, request
-        except Exception:
-            print(
-                "Failed to install flask. Please install it manually and try to run this module again..."
-            )
-            enter()
-            event.set()
-            return
+        return
 
     sys.flask = flask
 
@@ -146,7 +112,7 @@ def webServer(session, event, stdin_fd, predetermined_input, port=None):
 
         @app.route("/", defaults={"path": ""}, methods=["GET", "POST"])
         @app.route("/<path:path>", methods=["GET", "POST"])
-        def webServer(path):
+        def webServer_route(path):
 
             dest_url = f"{path}"
             
@@ -259,9 +225,6 @@ def webServer(session, event, stdin_fd, predetermined_input, port=None):
                 web_cache[cache_key] = resp.content
                 return response
 
-            # Replace all instances of the target URL with the proxy URL
-            # modified_content = resp.text.replace(session.urlBase.replace( '/index.php?', ''), 'http://localhost:589').replace(session.host, 'localhost:589')
-
             modified_content = resp.text
 
             # prevent losing reference to console object. sneaky gameforge...
@@ -299,99 +262,140 @@ def webServer(session, event, stdin_fd, predetermined_input, port=None):
 
             return proxied_response
 
-        def is_port_in_use(port: int) -> bool:
-            try:
-                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                    return s.connect_ex(("127.0.0.1", port)) == 0
-            except Exception as e:
-                logger.log(
-                    logging.FATAL,
-                    f"Error while checking if port {str(port)} is in use: " + str(e),
-                )
-                raise e
-
-        # If the port is not provided, prompt the user for it if enabled from the config file
-        if config.enable_CustomPort is True:
-            while True:
-                if port is None:
-                    print("Please enter a port number (1 - 65535) to run the web server on (leave empty or 0 for random): ")
-                    port = read(min=0, max=65535, digit=True, empty=True)
-                    if port == "" or port == 0:
-                        port = None
-                        break
-                    else:
-                        port = str(int(port))
-                        if is_port_in_use(int(port)):
-                            print(f"Port {port} is already in use, try another port.")
-                            continue
-                        break
-
-        # If the port is still None, select a random port as in the original script
-        if port is None:
-            port = str(
-                (
-                    sum(ord(c) ** 2 for c in session.mail)
-                    + sum(ord(c) ** 2 for c in session.host)
-                    + sum(ord(c) ** 2 for c in session.username)
-                )
-                % 2000
-                + 43000
-            )
-
-            # bang on ports from `port` to 65535 until an available one is found
-            while True:
-                if not is_port_in_use(int(port)):
-                    break
-                port = str(int(port) + 1)
-
-        # try to get local network ip if possible
-        local_network_ip = get_local_network_ip()
-        print(
-            f"""Ikabot web server is about to be run on {bcolors.BLUE}http://127.0.0.1:{port}{bcolors.ENDC} {'and ' + bcolors.BLUE + 'http://' + str(local_network_ip) + ':' + port + bcolors.ENDC if local_network_ip else ''}"""
-        )
-        print(
-            "You can use this link in your browser to play ikariam without logging ikabot out."
-        )
-        print(
-            "If you wish to access this ikabot web server from another device that is not on this local network"
-        )
-        print(
-            "you can try to run one of the following commands in a separate terminal and use the link that it provides to connect:"
-        )
-        print(
-            f"{bcolors.DARK_GREEN}ssh -o StrictHostKeyChecking=no -R 80:127.0.0.1:{port} serveo.net{bcolors.ENDC}"
-        )
-        print("Or you can try:")
-        print(
-            f"{bcolors.DARK_GREEN}ssh -o StrictHostKeyChecking=no -R 80:127.0.0.1:{port} nokey@localhost.run{bcolors.ENDC}"
-        )
-
-        print(
-            f"\n        {bcolors.WARNING}[WARNING]{bcolors.ENDC} Make sure you don't share this link with anyone you don't trust!"
-        )
-
-        print(
-            "\nPress [ENTER] if you want to run the web server now, or CTRL+C to go back to the main menu"
-        )
-        enter()
-        # Ignore Ctrl+C 
-        signal.signal(signal.SIGINT, signal.SIG_IGN)
         session.setStatus(
             f"""running on http://127.0.0.1:{port} {'and '+'http://' + str(local_network_ip) + ':' + port if local_network_ip else ''}"""
         )
-        event.set()
         
         try:
             # use_reloader=False avoid ghost process
             app.run(host="0.0.0.0", port=int(port), threaded=True, use_reloader=False)
         except (KeyboardInterrupt, SystemExit):
             pass
-        finally:
-            event.set()
 
     except Exception:
-        event.set()
-        return
+        pass
+
+
+@configurator
+def webServer(session, event, stdin_fd, predetermined_input, port=None):
+    """
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    event : multiprocessing.Event
+    stdin_fd: int
+    predetermined_input : multiprocessing.managers.SyncManager.list
+    port : int (optional)
+    """
+    banner()
+    try:
+        import flask
+        from flask import Flask, Response, request
+    except Exception:
+        print(
+            "You must have flask installed for this feature to work. Do you want to install it now?[Y/N]"
+        )
+        choice = read(values=["y", "Y", "n", "N"])
+        if choice in ["y", "Y"]:
+            print(
+                f"Attempting to install flask... -> {bcolors.GREEN}python3 -m pip install flask{bcolors.ENDC}"
+            )
+            command_output = run("python3 -m pip install flask")
+            print(command_output)
+        else:
+            print("Please install flask manually and try to run this module again...")
+            enter()
+            return None
+        try:
+            import flask
+            from flask import Flask, Response, request
+        except Exception:
+            print(
+                "Failed to install flask. Please install it manually and try to run this module again..."
+            )
+            enter()
+            return None
+
+    def is_port_in_use(port: int) -> bool:
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                return s.connect_ex(("127.0.0.1", port)) == 0
+        except Exception as e:
+            return True
+
+    # If the port is not provided, prompt the user for it if enabled from the config file
+    if config.enable_CustomPort is True:
+        while True:
+            if port is None:
+                print("Please enter a port number (1 - 65535) to run the web server on (leave empty or 0 for random): ")
+                port = read(min=0, max=65535, digit=True, empty=True)
+                if port == "" or port == 0:
+                    port = None
+                    break
+                else:
+                    port = str(int(port))
+                    if is_port_in_use(int(port)):
+                        print(f"Port {port} is already in use, try another port.")
+                        continue
+                    break
+
+    # If the port is still None, select a random port as in the original script
+    if port is None:
+        port = str(
+            (
+                sum(ord(c) ** 2 for c in session.mail)
+                + sum(ord(c) ** 2 for c in session.host)
+                + sum(ord(c) ** 2 for c in session.username)
+            )
+            % 2000
+            + 43000
+        )
+
+        # bang on ports from `port` to 65535 until an available one is found
+        while True:
+            if not is_port_in_use(int(port)):
+                break
+            port = str(int(port) + 1)
+
+    # try to get local network ip if possible
+    local_network_ip = get_local_network_ip()
+    print(
+        f"""Ikabot web server is about to be run on {bcolors.BLUE}http://127.0.0.1:{port}{bcolors.ENDC} {'and ' + bcolors.BLUE + 'http://' + str(local_network_ip) + ':' + port + bcolors.ENDC if local_network_ip else ''}"""
+    )
+    print(
+        "You can use this link in your browser to play ikariam without logging ikabot out."
+    )
+    print(
+        "If you wish to access this ikabot web server from another device that is not on this local network"
+    )
+    print(
+        "you can try to run one of the following commands in a separate terminal and use the link that it provides to connect:"
+    )
+    print(
+        f"{bcolors.DARK_GREEN}ssh -o StrictHostKeyChecking=no -R 80:127.0.0.1:{port} serveo.net{bcolors.ENDC}"
+    )
+    print("Or you can try:")
+    print(
+        f"{bcolors.DARK_GREEN}ssh -o StrictHostKeyChecking=no -R 80:127.0.0.1:{port} nokey@localhost.run{bcolors.ENDC}"
+    )
+
+    print(
+        f"\n        {bcolors.WARNING}[WARNING]{bcolors.ENDC} Make sure you don't share this link with anyone you don't trust!"
+    )
+
+    print(
+        "\nPress [ENTER] if you want to run the web server now, or CTRL+C to go back to the main menu"
+    )
+    try:
+        enter()
+    except KeyboardInterrupt:
+        return None
+        
+    return {
+        "session": session,
+        "port": port,
+        "local_network_ip": local_network_ip
+    }
 
 
 def handleIkabotAPIRequest(session, request):

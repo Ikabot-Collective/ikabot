@@ -11,7 +11,7 @@ from ikabot.helpers.getJson import getCity
 from ikabot.helpers.gui import banner
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.planRoutes import executeRoutes, splitCargoBetweenFleets
-from ikabot.helpers.process import set_child_mode
+from ikabot.helpers.decorators import configurator, task
 from ikabot.helpers.resources import *
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import addThousandSeparator
@@ -27,123 +27,7 @@ SHIP_TYPE_NAMES = {
     SHIP_TYPE_BOTH: 'Trade ships and freighters',
 }
 
-def consolidateResources(session, event, stdin_fd, predetermined_input):
-    """
-    Parameters
-    ----------
-    session : ikabot.web.session.Session
-    event : multiprocessing.Event
-    stdin_fd: int
-    predetermined_input : multiprocessing.managers.SyncManager.list
-    """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
-    try:
-        banner()
-
-        citiesIds, __ = getIdsOfCities(session)
-        if len(citiesIds) == 0:
-            event.set()
-            return
-
-        if len(citiesIds) == 1:
-            print('You need at least two cities to consolidate resources.')
-            event.set()
-            return
-
-        banner()
-        print('What type of ships do you want to use? (Default: Trade ships)')
-        print('(1) Trade ships')
-        print('(2) Freighters')
-        print('(3) Both')
-        shipType = read(min=1, max=3, digit=True, empty=True)
-        if shipType == '':
-            shipType = SHIP_TYPE_TRADE_SHIPS
-
-        banner()
-        source_msg = 'Select source cities to send resources from:'
-        sourceCities, sourceCitiesDict = ignoreCities(session, msg=source_msg)
-        
-        if sourceCities is None:
-            event.set()
-            return
-
-        banner()
-        print('Select destination cities to receive resources:')
-        destinationCity = chooseCity(session)
-
-        if destinationCity is None:
-            event.set()
-            return
-        
-        destination_id_str = str(destinationCity['id'])
-        if destination_id_str in sourceCities:
-            sourceCities.remove(destination_id_str)
-            del sourceCitiesDict[destination_id_str]
-
-        banner()
-        print('Define resource limits to keep:')
-    
-        limits = []
-        
-        for i, resource in enumerate(materials_names):
-            prompt = 'Enter maximum {} to keep (skip to keep everything): '.format(resource)
-            resourceLimit = read(msg=prompt, min=-1, default=-1)
-            limits.append(resourceLimit)
-        
-        banner()
-        print('Define how often to execute the process in hours (min - 1 hour):')
-        intervalInHours = read(min=1, default=1)
-
-        banner()
-        print(('The process will transfer everything above specified limits:'))
-        for i, resource in enumerate(materials_names):
-            if limits[i] == -1:
-                print(('- Keep all {}').format(resource))
-            else:
-                print(('- Keep up to {} {} and send excess').format(addThousandSeparator(limits[i]), resource))
-        
-        source_city_names_str = ', '.join([city['name'] for city in sourceCitiesDict.values()])
-        print(('\nFrom {} to {} every {} hours').format(
-            source_city_names_str, 
-            destinationCity['name'], 
-            intervalInHours,
-        ))
-        print(('Using {}').format(SHIP_TYPE_NAMES[shipType].lower()))
-
-        print("\nProceed? [Y/n]")
-        rta = read(values=["y", "Y", "n", "N", ""])
-        if rta.lower() == "n":
-            event.set()
-            return
-
-        enter()
-
-    except KeyboardInterrupt:
-        event.set()
-        return
-
-    set_child_mode(session)
-    event.set()  # this is where we give back control to main process
-
-    info = 'Consolidate resources from {} to {} every {:d} hours using {}'.format(source_city_names_str, destinationCity['name'], intervalInHours, SHIP_TYPE_NAMES[shipType].lower())
-    setInfoSignal(session, info)
-
-    nextExecutionTime = datetime.datetime.now() + datetime.timedelta(hours=intervalInHours)
-
-    session.setStatus(
-        f" {source_city_names_str} -> {destinationCity['name']} | Next at {getDateTime(nextExecutionTime.timestamp())}"
-    )
-
-    try:
-        do_it(session, limits, sourceCities, destinationCity['id'], intervalInHours, shipType)
-    except Exception as e:
-        msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
-        sendToBot(session, msg)
-    finally:
-        session.logout()
-
-
+@task("consolidateResources")
 def do_it(session, limits, sourceCityIds, destinationCityId, intervalInHours, shipType=SHIP_TYPE_TRADE_SHIPS):
     """
     Parameters
@@ -156,6 +40,11 @@ def do_it(session, limits, sourceCityIds, destinationCityId, intervalInHours, sh
     shipType : int
         one of SHIP_TYPE_TRADE_SHIPS, SHIP_TYPE_FREIGHTERS or SHIP_TYPE_BOTH
     """
+    source_city_names = [getCity(session.get(city_url + str(city_id)))['name'] for city_id in sourceCityIds]
+    source_city_names_str = ', '.join(source_city_names)
+    destinationCityName = getCity(session.get(city_url + str(destinationCityId)))['name']
+    info = 'Consolidate resources from {} to {} every {:d} hours using {}'.format(source_city_names_str, destinationCityName, intervalInHours, SHIP_TYPE_NAMES[shipType].lower())
+    setInfoSignal(session, info)
 
     firstRun = True
     nextRunTime = datetime.datetime.now()
@@ -235,3 +124,89 @@ def do_it(session, limits, sourceCityIds, destinationCityId, intervalInHours, sh
         firstRun = False
 
         time.sleep(60 * 60)
+@configurator
+def consolidateResources(session, event, stdin_fd, predetermined_input):
+    """
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    event : multiprocessing.Event
+    stdin_fd: int
+    predetermined_input : multiprocessing.managers.SyncManager.list
+    """
+    banner()
+
+    citiesIds, __ = getIdsOfCities(session)
+    if len(citiesIds) == 0:
+        return None
+
+    if len(citiesIds) == 1:
+        print('You need at least two cities to consolidate resources.')
+        return None
+
+    banner()
+    print('What type of ships do you want to use? (Default: Trade ships)')
+    print('(1) Trade ships')
+    print('(2) Freighters')
+    print('(3) Both')
+    shipType = read(min=1, max=3, digit=True, empty=True)
+    if shipType == '':
+        shipType = SHIP_TYPE_TRADE_SHIPS
+
+    banner()
+    source_msg = 'Select source cities to send resources from:'
+    sourceCities, sourceCitiesDict = ignoreCities(session, msg=source_msg)
+    
+    if sourceCities is None:
+        return None
+
+    banner()
+    print('Select destination cities to receive resources:')
+    destinationCity = chooseCity(session)
+
+    if destinationCity is None:
+        return None
+    
+    destination_id_str = str(destinationCity['id'])
+    if destination_id_str in sourceCities:
+        sourceCities.remove(destination_id_str)
+        del sourceCitiesDict[destination_id_str]
+
+    banner()
+    print('Define resource limits to keep:')
+    
+    limits = []
+    
+    for i, resource in enumerate(materials_names):
+        prompt = 'Enter maximum {} to keep (skip to keep everything): '.format(resource)
+        resourceLimit = read(msg=prompt, min=-1, default=-1)
+        limits.append(resourceLimit)
+    
+    banner()
+    print('Define how often to execute the process in hours (min - 1 hour):')
+    intervalInHours = read(min=1, default=1)
+
+    banner()
+    print(('The process will transfer everything above specified limits:'))
+    for i, resource in enumerate(materials_names):
+        if limits[i] == -1:
+            print(('- Keep all {}').format(resource))
+        else:
+            print(('- Keep up to {} {} and send excess').format(addThousandSeparator(limits[i]), resource))
+    
+    source_city_names_str = ', '.join([city['name'] for city in sourceCitiesDict.values()])
+    print(('\nFrom {} to {} every {} hours').format(
+        source_city_names_str, 
+        destinationCity['name'], 
+        intervalInHours,
+    ))
+    print(('Using {}').format(SHIP_TYPE_NAMES[shipType].lower()))
+
+    print("\nProceed? [Y/n]")
+    rta = read(values=["y", "Y", "n", "N", ""])
+    if rta.lower() == "n":
+        return None
+
+    enter()
+    return {"session": session, "limits": limits, "sourceCityIds": list(sourceCitiesDict.keys()), "destinationCityId": destinationCity["id"], "intervalInHours": intervalInHours, "shipType": shipType}
+

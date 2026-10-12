@@ -412,6 +412,25 @@ def _print_results_table(results):
     print()
 
 
+from ikabot.helpers.decorators import configurator, task
+
+@task("tavernManager")
+def do_tavernManager(session, run_hours, cities_ids, cities, notification_mode):
+    mgr = TavernManager(session, notification_mode)
+    def run_check():
+        results = mgr.process_equilibrium(cities_ids, cities)
+        return results
+
+    info = f"\nTavern Equilibrium: {len(cities_ids)} cities, every {run_hours}h\n"
+    setInfoSignal(session, info)
+
+    while True:
+        wait(run_hours * 3600)
+        run_check()
+        session.setStatus(f"Equilibrium check @{getDateTime()}")
+
+
+@configurator
 def tavernManager(session, event, stdin_fd, predetermined_input):
     """
     Parameters
@@ -421,40 +440,31 @@ def tavernManager(session, event, stdin_fd, predetermined_input):
     stdin_fd: int
     predetermined_input : multiprocessing.managers.SyncManager.list
     """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
+    banner()
 
-    try:
-        banner()
+    print("=" * 60)
+    print("ADVANCED TAVERN WINE CONSUMPTION MANAGER")
+    print("=" * 60)
+    print()
+    print("Select operation mode:")
+    print()
+    print("1. Set tavern level (single city or all cities)")
+    print("2. Equilibrium mode (optimize wine usage)")
+    print()
+    print("(') Back to main menu")
 
-        print("=" * 60)
-        print("ADVANCED TAVERN WINE CONSUMPTION MANAGER")
-        print("=" * 60)
-        print()
-        print("Select operation mode:")
-        print()
-        print("1. Set tavern level (single city or all cities)")
-        print("2. Equilibrium mode (optimize wine usage)")
-        print()
-        print("(') Back to main menu")
+    mode = read(msg="Select mode (1 or 2): ", min=1, max=2, digit=True, additionalValues=["'"])
 
-        mode = read(msg="Select mode (1 or 2): ", min=1, max=2, digit=True, additionalValues=["'"])
+    if mode == "'":
+        return None
 
-        if mode == "'":
-            event.set()
-            return
+    print()
 
-        print()
-
-        if mode == 1:
-            _run_set_mode(session)
-        else:
-            _run_equilibrium_mode(session, event, stdin_fd, predetermined_input)
-
-    except KeyboardInterrupt:
-        pass
-
-    event.set()
+    if mode == 1:
+        _run_set_mode(session)
+        return None
+    else:
+        return _run_equilibrium_mode(session)
 
 
 def _run_set_mode(session):
@@ -511,7 +521,7 @@ def _run_set_mode(session):
     enter()
 
 
-def _run_equilibrium_mode(session, event, stdin_fd, predetermined_input):
+def _run_equilibrium_mode(session):
     print("=" * 60)
     print("EQUILIBRIUM MODE")
     print("=" * 60)
@@ -529,7 +539,7 @@ def _run_equilibrium_mode(session, event, stdin_fd, predetermined_input):
     notification_mode = read(msg="Select (1-3): ", min=1, max=3, digit=True, additionalValues=["'"])
 
     if notification_mode == "'":
-        return
+        return None
 
     print()
 
@@ -541,7 +551,7 @@ def _run_equilibrium_mode(session, event, stdin_fd, predetermined_input):
     city_choice = read(msg="Select (1 or 2): ", min=1, max=2, digit=True, additionalValues=["'"])
 
     if city_choice == "'":
-        return
+        return None
 
     print()
 
@@ -561,7 +571,7 @@ def _run_equilibrium_mode(session, event, stdin_fd, predetermined_input):
     )
 
     if run_hours == "'":
-        return
+        return None
 
     print()
 
@@ -577,7 +587,7 @@ def _run_equilibrium_mode(session, event, stdin_fd, predetermined_input):
         print()
         run_check()
         enter()
-        return
+        return None
 
     print(f"Will check {len(cities_ids)} cities every {run_hours} hour(s)")
     print("Running first check...")
@@ -585,21 +595,10 @@ def _run_equilibrium_mode(session, event, stdin_fd, predetermined_input):
     run_check()
     enter()
 
-    set_child_mode(session)
-    event.set()
-
-    info = f"\nTavern Equilibrium: {len(cities_ids)} cities, every {run_hours}h\n"
-    setInfoSignal(session, info)
-
-    try:
-        while True:
-            wait(run_hours * 3600)
-            run_check()
-            session.setStatus(f"Equilibrium check @{getDateTime()}")
-    except Exception:
-        msg = f"Error in:\n{info}\nCause:\n{traceback.format_exc()}"
-        traceback.print_exc()
-        if notification_mode in (1, 2):
-            sendToBot(session, msg)
-    finally:
-        session.logout()
+    return {
+        "session": session,
+        "run_hours": run_hours,
+        "cities_ids": cities_ids,
+        "cities": cities,
+        "notification_mode": notification_mode
+    }

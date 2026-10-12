@@ -1,3 +1,4 @@
+from ikabot.helpers.decorators import configurator
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
@@ -9,6 +10,7 @@ from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import enter, read
 
 
+@configurator
 def logs(session, event, stdin_fd, predetermined_input):
     """
     Parameters
@@ -18,8 +20,6 @@ def logs(session, event, stdin_fd, predetermined_input):
     stdin_fd: int
     predetermined_input : multiprocessing.managers.SyncManager.list
     """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
     try:
         while True:
             banner()

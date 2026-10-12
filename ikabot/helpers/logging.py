@@ -36,7 +36,7 @@ rotatingFileHandler = logging.handlers.RotatingFileHandler(
                     )
 rotatingFileHandler.addFilter(PlayerNameFilter())
 logConfig = {
-    'format': '%(asctime)s - %(player)s - %(name)s - %(levelname)s - %(message)s',
+    'format': '%(asctime)s - %(player)s - pid=%(process)d - %(name)s - %(levelname)s - %(message)s',
     'level': DEFAULT_LOG_LEVEL,
     'force': True,
     'handlers': [rotatingFileHandler]
