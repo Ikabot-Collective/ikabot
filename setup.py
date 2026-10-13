@@ -12,6 +12,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/Ikabot-Collective/ikabot",
     include_package_data=True,
+    package_data={"ikabot": ["assets/*.bin"]},
     packages=setuptools.find_packages(),
     install_requires=["requests", "requests[socks]", "cryptography", "psutil", "python-dotenv"],
     extras_require={"webServer": ["flask"]},
