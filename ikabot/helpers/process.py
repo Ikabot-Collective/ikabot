@@ -8,6 +8,7 @@ import subprocess
 import psutil
 
 from ikabot.config import *
+from ikabot.helpers.sessionStorage import session_data_lock
 from ikabot.helpers.signals import deactivate_sigint
 from ikabot.helpers.varios import normalizeDicts
 
@@ -33,6 +34,11 @@ def run(command):
 
 
 def updateProcessList(session, programprocesslist=[]):
+    with session_data_lock():
+        return _updateProcessList(session, programprocesslist)
+
+
+def _updateProcessList(session, programprocesslist=[]):
     """This function will return data about all the active ikabot processes. If it is passed the ``programprocesslist`` argument, it will write new processes from that list to the .ikabot file
     Parameters
     ----------
@@ -83,7 +89,7 @@ def updateProcessList(session, programprocesslist=[]):
 
     # write to file
     sessionData["processList"] = runningIkabotProcessList
-    session.setSessionData(sessionData)
+    session.setSessionData(sessionData, keep_process_list=False)
 
     # normalize process list (all processes must have properties pid, action, date and status)
     normalized_processes = normalizeDicts(runningIkabotProcessList)

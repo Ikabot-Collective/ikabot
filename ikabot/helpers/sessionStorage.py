@@ -1,12 +1,14 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import contextlib
 import hashlib
 import json
 import logging
 import os
 import re
 import sys
+import threading
 import time
 
 from ikabot import config
@@ -342,6 +344,58 @@ def migrate_legacy_account(session_or_mail, password, custom_logger=None):
     return True
 
 
+_lock_guard = threading.RLock()
+_lock_depth = 0
+
+
+@contextlib.contextmanager
+def session_data_lock(timeout=15):
+    """Cross-process, re-entrant lock for read-modify-write cycles on the session files.
+    Gives up after ``timeout`` seconds instead of hanging a task."""
+    global _lock_depth
+    with _lock_guard:
+        if _lock_depth > 0:
+            _lock_depth += 1
+            try:
+                yield
+            finally:
+                _lock_depth -= 1
+            return
+
+        fd = None
+        try:
+            os.makedirs(get_ikabot_dir(), exist_ok=True)
+            fd = os.open(os.path.join(get_ikabot_dir(), "session.lock"), os.O_RDWR | os.O_CREAT)
+            deadline = time.time() + timeout
+            while True:
+                try:
+                    if config.isWindows:
+                        import msvcrt
+
+                        os.lseek(fd, 0, os.SEEK_SET)
+                        msvcrt.locking(fd, msvcrt.LK_NBLCK, 1)
+                    else:
+                        import fcntl
+
+                        fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    break
+                except OSError:
+                    if time.time() >= deadline:
+                        logger.warning("Timed out waiting for the session data lock")
+                        break
+                    time.sleep(0.01)
+        except OSError as e:
+            logger.warning(f"Could not set up the session data lock: {e}")
+
+        _lock_depth = 1
+        try:
+            yield
+        finally:
+            _lock_depth = 0
+            if fd is not None:
+                os.close(fd)  # closing the descriptor releases the lock
+
+
 def get_session_data(session, all_data=False):
     """
     ALWAYS reads fresh from disk to support hot-swapping.
@@ -382,12 +436,17 @@ def get_session_data(session, all_data=False):
     return session_data
 
 
-def set_session_data(session, data, shared=False):
+def set_session_data(session, data, shared=False, keep_process_list=True):
     """
     Writes session data to disk formatted as JSON (indent=2).
     Always reads latest disk state before writing to prevent overwriting
     concurrent updates or manual human edits.
     """
+    with session_data_lock():
+        _set_session_data(session, data, shared, keep_process_list)
+
+
+def _set_session_data(session, data, shared, keep_process_list):
     mail = getattr(session, "mail", None) or ""
     global_path = get_global_config_path()
     user_path = get_user_file_path(mail)
@@ -433,6 +492,12 @@ def set_session_data(session, data, shared=False):
                 user_data["players"][username] = {}
             if mundo not in user_data["players"][username]:
                 user_data["players"][username][mundo] = {}
+            if keep_process_list:
+                # tasks write back stale copies of the whole dict; don't let them
+                # drop processes that were registered in the meantime
+                current = user_data["players"][username][mundo].get(servidor, {})
+                if "processList" in current:
+                    data = dict(data, processList=current["processList"])
             user_data["players"][username][mundo][servidor] = data
 
         write_json_file(user_path, user_data)
