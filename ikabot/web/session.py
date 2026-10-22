@@ -1629,6 +1629,9 @@ class Session:
             dictionary containing relevant session data
         shared : bool
             Indicates if the new data should be shared among all accounts associated with the user-password
+        keep_process_list : bool
+            If True (default), keeps the process list already stored on disk. Only pass False, inside
+            session_data_lock(), to modify the list on purpose (see updateProcessEntry)
         """
         set_session_data(self, sessionData, shared=shared, keep_process_list=keep_process_list)
 

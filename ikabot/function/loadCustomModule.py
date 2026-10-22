@@ -122,9 +122,6 @@ def loadCustomModule(session, event, stdin_fd, predetermined_input):
                 # was picked.
                 try:
                     session.updateProcessEntry(os.getpid(), action='lcm_' + name)
-                    if hasattr(session, 'write_status'):
-                        session.write_status(f'Module: {name}')
-						
                 except Exception:
                     pass
 

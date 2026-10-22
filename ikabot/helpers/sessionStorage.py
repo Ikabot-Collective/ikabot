@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import contextlib
+import errno
 import hashlib
 import json
 import logging
@@ -377,7 +378,9 @@ def session_data_lock():
 
                         fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
                     break
-                except OSError:
+                except OSError as e:
+                    if e.errno not in (errno.EACCES, errno.EAGAIN, errno.EWOULDBLOCK, errno.EDEADLK):
+                        raise
                     time.sleep(0.01)
             _lock_depth = 1
             try:
