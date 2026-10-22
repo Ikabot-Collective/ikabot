@@ -34,11 +34,6 @@ def run(command):
 
 
 def updateProcessList(session, programprocesslist=[]):
-    with session_data_lock():
-        return _updateProcessList(session, programprocesslist)
-
-
-def _updateProcessList(session, programprocesslist=[]):
     """This function will return data about all the active ikabot processes. If it is passed the ``programprocesslist`` argument, it will write new processes from that list to the .ikabot file
     Parameters
     ----------
@@ -52,6 +47,11 @@ def _updateProcessList(session, programprocesslist=[]):
     runningIkabotProcessList : list[dict]
         a list of dictionaries containing relevant data about a running ikabot process ('pid', 'proxies' and 'action')
     """
+    with session_data_lock():
+        return _updateProcessList(session, programprocesslist)
+
+
+def _updateProcessList(session, programprocesslist=[]):
     # read from file
     sessionData = session.getSessionData()
     try:
