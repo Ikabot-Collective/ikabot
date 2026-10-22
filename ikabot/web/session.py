@@ -67,16 +67,19 @@ class Session:
         """
         self.logger.info(f"Changing status to {message}")
 
+        self.updateProcessEntry(os.getpid(), status=message)
+
+    def updateProcessEntry(self, pid, **fields):
+        """Updates fields (status, action, ...) of one row of the main menu process list
+        Parameters
+        ----------
+        pid : int
+            pid of the process whose row is modified
+        """
         with session_data_lock():
-            # read from file
             sessionData = self.getSessionData()
-            try:
-                fileList = sessionData["processList"]
-            except KeyError:
-                fileList = []
-            # modify current process' status message
-            [p.update({"status": message}) for p in fileList if p["pid"] == os.getpid()]
-            # dump back to session data
+            fileList = sessionData.get("processList", [])
+            [p.update(fields) for p in fileList if p["pid"] == pid]
             sessionData["processList"] = fileList
             self.setSessionData(sessionData, keep_process_list=False)
 

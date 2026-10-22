@@ -121,15 +121,7 @@ def loadCustomModule(session, event, stdin_fd, predetermined_input):
                 # loader's __name__; replace it now that we know which module
                 # was picked.
                 try:
-                    sd = session.getSessionData()
-                    plist = sd.get('processList', [])
-                    my_pid = os.getpid()
-                    for p in plist:
-                        if p.get('pid') == my_pid:
-                            p['action'] = 'lcm_' + name
-                            break
-                    sd['processList'] = plist
-                    session.setSessionData(sd)
+                    session.updateProcessEntry(os.getpid(), action='lcm_' + name)
                     if hasattr(session, 'write_status'):
                         session.write_status(f'Module: {name}')
 						
