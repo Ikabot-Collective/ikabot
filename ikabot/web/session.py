@@ -1239,6 +1239,31 @@ class Session:
         if self.padre is False:
             time.sleep(5 * random.randint(0, 10))
 
+    def __isSessionAlive(self):
+        """Checks with a light request whether the session is still valid. Some error
+        pages look like an expired session, and logging in again would invalidate the
+        session of every other running task
+        Returns
+        -------
+        alive : bool
+        """
+        try:
+            response = self.s.get(
+                self.urlBase + "view=updateGlobalData&ajax=1",
+                verify=config.do_ssl_verify,
+                timeout=60,
+                allow_redirects=False,
+            )
+        except requests.exceptions.RequestException:
+            return False
+        text = response.text
+        # an expired session gets a redirect or a reload command to the lobby
+        return (
+            response.status_code == 200
+            and not ('"reload"' in text and "lobby.ikariam" in text)
+            and self.__isExpired(text) is False
+        )
+
     def __sessionExpired(self):
         self.logger.info("__sessionExpired()")
         self.__backoff()
@@ -1329,6 +1354,8 @@ class Session:
             self.__printSessionRotated()
             sys.exit(1)
         token = match.group(1)
+        # self.get() may have logged in again, don't write back the old cookies
+        sessionData = self.getSessionData()
         sessionData.pop("shared", None)
         sessionData["actionRequestToken"] = token
         self.setSessionData(sessionData)
@@ -1365,6 +1392,7 @@ class Session:
             url = self.urlBase + url
         if noQuery:
             url = url.replace('?','')
+        error_page_retried = False
         while True:
             try:
                 self.requestHistory.append(
@@ -1425,6 +1453,13 @@ class Session:
                     self.logger.warning("Ikariam world backup is in progress, waiting 10 mins.")
                     time.sleep(10 * 60)
                     raise requests.exceptions.ConnectionError  # repeat after 10 minutes
+                if ignoreExpire is False and self.__isExpired(html) and self.__isSessionAlive():
+                    if error_page_retried:
+                        raise Exception("Ikariam returned an error page, the session is still valid")
+                    self.logger.warning(f"Ikariam returned an error page, retrying: {url}")
+                    error_page_retried = True
+                    time.sleep(5)
+                    continue
                 if ignoreExpire is False:
                     assert self.__isExpired(html) is False
                 if self.__isSessionRotated(html, response=response):
@@ -1558,6 +1593,9 @@ class Session:
                     self.logger.warning("Ikariam world backup is in progress, waiting 10 mins.")
                     time.sleep(10 * 60)
                     raise requests.exceptions.ConnectionError  # repeat after 10 minutes
+                if ignoreExpire is False and self.__isExpired(resp) and self.__isSessionAlive():
+                    # not sent again, it may be an action
+                    raise Exception("Ikariam returned an error page, the session is still valid")
                 if ignoreExpire is False:
                     assert self.__isExpired(resp) is False
                 if self.__isSessionRotated(resp, response=response):
