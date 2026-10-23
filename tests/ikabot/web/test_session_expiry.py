@@ -11,7 +11,7 @@ import requests
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../')))
 
 from ikabot.web import session as session_module
-from ikabot.web.session import Session
+from ikabot.web.session import IkariamErrorPage, Session
 
 BASE = "https://s1-en.ikariam.gameforge.com/index.php?"
 GAME_PAGE = '<html>... actionRequest: "0123456789abcdef0123456789abcdef" ...</html>'
@@ -110,7 +110,7 @@ class TestFalseSessionExpiry(unittest.TestCase):
         session = self.make_session(
             [response(ERROR_PAGE), response(ALIVE), response(ERROR_PAGE), response(ALIVE)]
         )
-        with self.assertRaises(Exception):
+        with self.assertRaises(IkariamErrorPage):
             session.get()
         self.assertEqual(session.relogins, 0)
 
@@ -126,18 +126,35 @@ class TestFalseSessionExpiry(unittest.TestCase):
         session.get()
         self.assertEqual(session.relogins, 1)
 
-    def test_logout_page_logs_in_again(self):
+    def test_logout_page_of_an_expired_session_logs_in_again(self):
         page = '<html><a href="index.php?logout">logout</a></html>'
-        session = self.make_session([response(page), response(page), response(GAME_PAGE)])
+        session = self.make_session([response(page), response(RELOAD), response(GAME_PAGE)])
         session.get()
         self.assertEqual(session.relogins, 1)
 
-    def test_network_error_while_checking_logs_in_again(self):
+    def test_unknown_session_state_does_not_log_in_again(self):
+        unknown_answers = [
+            requests.exceptions.ConnectionError(),
+            requests.exceptions.Timeout(),
+            response("", 500),
+            response("Service Unavailable", 503),
+            response(ERROR_PAGE),
+            response('<a href="index.php?logout">logout</a>'),
+            response('[["popupData",null]]'),
+        ]
+        for answer in unknown_answers:
+            with self.subTest(answer=answer):
+                session = self.make_session([response(ERROR_PAGE), answer, response(GAME_PAGE)])
+                self.assertEqual(session.get(), GAME_PAGE)
+                self.assertEqual(session.relogins, 0)
+
+    def test_unknown_session_state_twice_raises_without_login(self):
         session = self.make_session(
-            [response(ERROR_PAGE), requests.exceptions.ConnectionError(), response(GAME_PAGE)]
+            [response(ERROR_PAGE), response("", 500), response(ERROR_PAGE), requests.exceptions.Timeout()]
         )
-        session.get()
-        self.assertEqual(session.relogins, 1)
+        with self.assertRaises(IkariamErrorPage):
+            session.get()
+        self.assertEqual(session.relogins, 0)
 
     def test_ignore_expire_sends_no_extra_request(self):
         session = self.make_session([response(ERROR_PAGE)])
@@ -146,7 +163,15 @@ class TestFalseSessionExpiry(unittest.TestCase):
 
     def test_post_error_page_with_valid_session_is_not_sent_again(self):
         session = self.make_session([response(ERROR_PAGE), response(ALIVE)])
-        with self.assertRaises(Exception):
+        with self.assertRaises(IkariamErrorPage):
+            session.post("action=Something&function=do")
+        self.assertEqual(session.relogins, 0)
+        self.assertEqual(len(session.s.urls), 2)
+        self.assertNotIn("actionRequestToken", session.stored)
+
+    def test_post_error_page_with_unknown_session_state_is_not_sent_again(self):
+        session = self.make_session([response(ERROR_PAGE), requests.exceptions.ConnectionError()])
+        with self.assertRaises(IkariamErrorPage):
             session.post("action=Something&function=do")
         self.assertEqual(session.relogins, 0)
         self.assertEqual(len(session.s.urls), 2)
