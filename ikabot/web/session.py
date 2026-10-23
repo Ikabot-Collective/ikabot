@@ -128,7 +128,7 @@ class Session:
         if not isinstance(html, str):
             return False
         if re.search(
-            r'"reload"\s*,\s*\{\s*"link"\s*:\s*"https://lobby\.ikariam\.gameforge\.com',
+            r'"reload"\s*,\s*\{\s*"link"\s*:\s*"https:\\?/\\?/lobby\.ikariam\.gameforge\.com',
             html,
         ):
             return True

@@ -156,6 +156,13 @@ class TestFalseSessionExpiry(unittest.TestCase):
         session.post("view=something")
         self.assertEqual(session.relogins, 1)
 
+    def test_reload_to_lobby_is_detected_as_session_rotated(self):
+        session = self.make_session([])
+        self.assertTrue(session._Session__isSessionRotated(RELOAD))
+        self.assertTrue(session._Session__isSessionRotated(RELOAD.replace("\\/", "/")))
+        self.assertFalse(session._Session__isSessionRotated(ALIVE))
+        self.assertFalse(session._Session__isSessionRotated(GAME_PAGE))
+
     def test_new_token_does_not_restore_the_old_cookies(self):
         session = self.make_session(
             [response(ERROR_PAGE), response(RELOAD), response(GAME_PAGE)],
