@@ -31,6 +31,7 @@ logging.setLoggerClass(IkabotLogger)
 # Create custom file logger
 rotatingFileHandler = logging.handlers.RotatingFileHandler(
                 filename=LOGS_DIRECTORY_FILE,
+                encoding="utf-8",
                 maxBytes=10 * 1024 * 1024, #max logfile size is 10 MB
                 backupCount=10, # max number of log files is 10
                     )

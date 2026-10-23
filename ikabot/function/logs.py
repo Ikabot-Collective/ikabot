@@ -73,7 +73,7 @@ def viewLogs():
         f.seek(0, 2)
         size = f.tell()
         f.seek(max(0, size - 10000))
-        print(f.read().decode("utf-8"))
+        print(f.read().decode("utf-8", errors="replace"))
     
     print(bcolors.DARK_GREEN + f"Above are displayed the last 10kb of the log file. The log file can be found at {LOGS_DIRECTORY_FILE}" + bcolors.ENDC)
     enter()
