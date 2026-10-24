@@ -30,6 +30,7 @@ from ikabot.helpers.sessionStorage import (
     get_user_file_path,
     get_users_dir,
     find_user_file_for_email,
+    session_data_lock,
 )
 from ikabot.helpers.botComm import *
 from ikabot.helpers.getJson import getCity
@@ -66,17 +67,21 @@ class Session:
         """
         self.logger.info(f"Changing status to {message}")
 
-        # read from file
-        sessionData = self.getSessionData()
-        try:
-            fileList = sessionData["processList"]
-        except KeyError:
-            fileList = []
-        # modify current process' status message
-        [p.update({"status": message}) for p in fileList if p["pid"] == os.getpid()]
-        # dump back to session data
-        sessionData["processList"] = fileList
-        self.setSessionData(sessionData)
+        self.updateProcessEntry(os.getpid(), status=message)
+
+    def updateProcessEntry(self, pid, **fields):
+        """Updates fields (status, action, ...) of one row of the main menu process list
+        Parameters
+        ----------
+        pid : int
+            pid of the process whose row is modified
+        """
+        with session_data_lock():
+            sessionData = self.getSessionData()
+            fileList = sessionData.get("processList", [])
+            [p.update(fields) for p in fileList if p["pid"] == pid]
+            sessionData["processList"] = fileList
+            self.setSessionData(sessionData, keep_process_list=False)
 
     def __genRand(self):
         return hex(random.randint(0, 65535))[2:]
@@ -1616,7 +1621,7 @@ class Session:
         if self.padre is False:
             os._exit(0)
 
-    def setSessionData(self, sessionData, shared=False):
+    def setSessionData(self, sessionData, shared=False, keep_process_list=True):
         """Writes relevant session data to disk formatted as JSON (indent=2)
         Parameters
         ----------
@@ -1624,8 +1629,11 @@ class Session:
             dictionary containing relevant session data
         shared : bool
             Indicates if the new data should be shared among all accounts associated with the user-password
+        keep_process_list : bool
+            If True (default), keeps the process list already stored on disk. Only pass False, inside
+            session_data_lock(), to modify the list on purpose (see updateProcessEntry)
         """
-        set_session_data(self, sessionData, shared=shared)
+        set_session_data(self, sessionData, shared=shared, keep_process_list=keep_process_list)
 
     def getSessionData(self):
         """Gets fresh session data from disk (hot-reloaded)"""

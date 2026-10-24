@@ -8,6 +8,7 @@ import subprocess
 import psutil
 
 from ikabot.config import *
+from ikabot.helpers.sessionStorage import session_data_lock
 from ikabot.helpers.signals import deactivate_sigint
 from ikabot.helpers.varios import normalizeDicts
 
@@ -46,6 +47,11 @@ def updateProcessList(session, programprocesslist=[]):
     runningIkabotProcessList : list[dict]
         a list of dictionaries containing relevant data about a running ikabot process ('pid', 'proxies' and 'action')
     """
+    with session_data_lock():
+        return _updateProcessList(session, programprocesslist)
+
+
+def _updateProcessList(session, programprocesslist=[]):
     # read from file
     sessionData = session.getSessionData()
     try:
@@ -83,7 +89,7 @@ def updateProcessList(session, programprocesslist=[]):
 
     # write to file
     sessionData["processList"] = runningIkabotProcessList
-    session.setSessionData(sessionData)
+    session.setSessionData(sessionData, keep_process_list=False)
 
     # normalize process list (all processes must have properties pid, action, date and status)
     normalized_processes = normalizeDicts(runningIkabotProcessList)
