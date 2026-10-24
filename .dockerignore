@@ -1,0 +1,15 @@
+.git
+.github
+.venv
+venv
+__pycache__
+*.pyc
+*.egg-info
+assets
+tests
+docs
+*.md
+!README.md
+Dockerfile
+.dockerignore
+.env

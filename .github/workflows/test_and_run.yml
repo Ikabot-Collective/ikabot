@@ -11,7 +11,7 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     continue-on-error: ${{ endsWith(matrix.python-version, '-dev') }}
     strategy:
       matrix:
@@ -20,9 +20,9 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v7
       if: "!endsWith(matrix.python-version, '-dev')"
       with:
         python-version: ${{ matrix.python-version }}
@@ -43,6 +43,8 @@ jobs:
       run: |
         python -m pytest tests/ikabot
     - name: Run ikabot
+      shell: bash
       run: |
-        printf "\n\n\n" | python -m ikabot &> log.log || cat log.log
+        # getpass reads the Windows console instead of stdin, so make it read the piped input
+        printf "\n\n\n" | python -c "import getpass, runpy, sys; getpass.getpass = lambda prompt='Password: ', stream=None: input(prompt); sys.argv = ['ikabot']; runpy.run_module('ikabot', run_name='__main__', alter_sys=True)" &> log.log || cat log.log
         grep "Obtaining new blackbox token, please wait..." log.log && exit 0 || exit 1
