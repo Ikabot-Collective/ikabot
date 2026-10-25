@@ -40,6 +40,10 @@ from ikabot.helpers.apiComm import getNewBlackBoxToken
 from ikabot.helpers.lobbyDecaptcha import break_interactive_captcha
 
 
+class IkariamErrorPage(Exception):
+    """Ikariam returned an error page, but the session is not known to be expired"""
+
+
 class Session:
     def __init__(self):
         self.padre = True
@@ -128,7 +132,7 @@ class Session:
         if not isinstance(html, str):
             return False
         if re.search(
-            r'"reload"\s*,\s*\{\s*"link"\s*:\s*"https://lobby\.ikariam\.gameforge\.com',
+            r'"reload"\s*,\s*\{\s*"link"\s*:\s*"https:\\?/\\?/lobby\.ikariam\.gameforge\.com',
             html,
         ):
             return True
@@ -1239,6 +1243,36 @@ class Session:
         if self.padre is False:
             time.sleep(5 * random.randint(0, 10))
 
+    def __isSessionAlive(self):
+        """Checks with a light request whether the session is still valid. Some error
+        pages look like an expired session, and logging in again would invalidate the
+        session of every other running task
+        Returns
+        -------
+        alive : bool or None
+            None if it could not be determined
+        """
+        try:
+            response = self.s.get(
+                self.urlBase + "view=updateGlobalData&ajax=1",
+                verify=config.do_ssl_verify,
+                timeout=60,
+                allow_redirects=False,
+            )
+        except requests.exceptions.RequestException:
+            return None
+        # an expired session gets a redirect or a reload command to the lobby
+        location = response.headers.get("Location", "")
+        if (urllib.parse.urlsplit(location).hostname or "") == "lobby.ikariam.gameforge.com":
+            return False
+        if self.__isSessionRotated(response.text, response=response):
+            return False
+        try:
+            alive = response.status_code == 200 and json.loads(response.text)[0][0] == "updateGlobalData"
+        except (ValueError, IndexError, KeyError, TypeError):
+            alive = False
+        return True if alive else None
+
     def __sessionExpired(self):
         self.logger.info("__sessionExpired()")
         self.__backoff()
@@ -1329,6 +1363,8 @@ class Session:
             self.__printSessionRotated()
             sys.exit(1)
         token = match.group(1)
+        # self.get() may have logged in again, don't write back the old cookies
+        sessionData = self.getSessionData()
         sessionData.pop("shared", None)
         sessionData["actionRequestToken"] = token
         self.setSessionData(sessionData)
@@ -1345,7 +1381,7 @@ class Session:
         params : dict
             dictionary containing key-value pairs which represent the parameteres of the get request
         ignoreExpire: bool
-            if set to True it will ignore if the current session is expired and will simply return whatever response it gets. If it's set to False, it will make sure that the current session is not expired before sending the get request, if it's expired it will login again
+            if set to True it will ignore if the current session is expired and will simply return whatever response it gets. If it's set to False, it will make sure that the current session is not expired before sending the get request, if it's expired it will login again. If the page only looks expired and the session is not known to be expired, the request is retried once and then IkariamErrorPage is raised
         noIndex : bool
             if set to True it will remove 'index.php' from the end of urlBase before appending url params and sending the get request
         fullResponse : bool
@@ -1365,6 +1401,7 @@ class Session:
             url = self.urlBase + url
         if noQuery:
             url = url.replace('?','')
+        error_page_retried = False
         while True:
             try:
                 self.requestHistory.append(
@@ -1425,6 +1462,13 @@ class Session:
                     self.logger.warning("Ikariam world backup is in progress, waiting 10 mins.")
                     time.sleep(10 * 60)
                     raise requests.exceptions.ConnectionError  # repeat after 10 minutes
+                if ignoreExpire is False and self.__isExpired(html) and self.__isSessionAlive() is not False:
+                    if error_page_retried:
+                        raise IkariamErrorPage(url)
+                    self.logger.warning(f"Ikariam returned an error page, retrying: {url}")
+                    error_page_retried = True
+                    time.sleep(5)
+                    continue
                 if ignoreExpire is False:
                     assert self.__isExpired(html) is False
                 if self.__isSessionRotated(html, response=response):
@@ -1466,7 +1510,7 @@ class Session:
         params : dict
             dictionary containing key-value pairs which represent the parameteres of the post request
         ignoreExpire: bool
-            if set to True it will ignore if the current session is expired and will simply return whatever response it gets. If it's set to False, it will make sure that the current session is not expired before sending the post request, if it's expired it will login again
+            if set to True it will ignore if the current session is expired and will simply return whatever response it gets. If it's set to False, it will make sure that the current session is not expired before sending the post request, if it's expired it will login again. If the page only looks expired and the session is not known to be expired, IkariamErrorPage is raised without sending the request again
         noIndex : bool
             if set to True it will remove 'index.php' from the end of urlBase before appending url and params and sending the post request
 
@@ -1558,6 +1602,13 @@ class Session:
                     self.logger.warning("Ikariam world backup is in progress, waiting 10 mins.")
                     time.sleep(10 * 60)
                     raise requests.exceptions.ConnectionError  # repeat after 10 minutes
+                if ignoreExpire is False and self.__isExpired(resp) and self.__isSessionAlive() is not False:
+                    # not sent again, it may be an action, which may also have used up the token
+                    sessionData = self.getSessionData()
+                    if sessionData.pop("actionRequestToken", None) is not None:
+                        sessionData.pop("shared", None)
+                        self.setSessionData(sessionData)
+                    raise IkariamErrorPage(url)
                 if ignoreExpire is False:
                     assert self.__isExpired(resp) is False
                 if self.__isSessionRotated(resp, response=response):
