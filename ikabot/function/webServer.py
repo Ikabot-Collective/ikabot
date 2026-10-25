@@ -67,6 +67,28 @@ def get_local_network_ip():
     return None
 
 
+def get_request_params(request):
+    """Returns the parameters sent by the browser. When a name is both in the page
+    URL and in the form, the form value wins, as in the game server
+    Parameters
+    ----------
+    request : flask.Request
+
+    Returns
+    -------
+    params : dict
+    """
+    params = {arg: unquote_plus(request.args[arg]) for arg in request.args}
+    try:
+        data = request.get_data(as_text=True)
+        if data:
+            for k, v_list in parse_qs(data, keep_blank_values=True).items():
+                params[k] = v_list[-1] if v_list else ''
+    except Exception:
+        pass
+    return params
+
+
 from ikabot.helpers.decorators import configurator, task
 
 @task("webServer")
@@ -169,17 +191,7 @@ def do_webServer(session, port, local_network_ip):
                     response.headers['Content-Type'] = content_type
                     return response
 
-            new_data = dict()
-            try:
-                data = request.get_data(as_text=True)
-                if data:
-                    parsed = parse_qs(data, keep_blank_values=True)
-                    for k, v_list in parsed.items():
-                        new_data[k] = v_list[-1] if v_list else ''
-            except Exception:
-                pass
-            for arg in request.args:
-                new_data[arg] = unquote_plus(request.args[arg])
+            new_data = get_request_params(request)
             for arg in new_data:
                 if arg == "actionRequest":
                     new_data[arg] = (
