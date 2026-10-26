@@ -371,9 +371,10 @@ def do_it(session, wine_city, wood_city, luxury_city, favour_tasks, collect_ambr
                     f"view=dailyTasks&backgroundView=city&currentCityId={wine_city['id']}&actionRequest={actionRequest}&ajax=1"
                 )
                 # check if favour is full
-                match = re.search(r'"currentFavor":(\d+),"favorLimit":(\d+)', html)
-                assert match, "Can not obtain current favour amount"
-                if int(match.group(1)) >= int(match.group(2)):
+                current_match = re.search(r'"currentFavor":\s*(\d+)', html)
+                limit_match = re.search(r'"favorLimit":\s*(\d+)', html)
+                assert current_match and limit_match, "Can not obtain current favour amount"
+                if int(current_match.group(1)) >= int(limit_match.group(1)):
                     # send notification we are full on favour
                     if not message_sent:
                         sendToBot(session, "Favour was not collected as you are full on it")
@@ -424,6 +425,7 @@ def do_it(session, wine_city, wood_city, luxury_city, favour_tasks, collect_ambr
             if msg != last_error_msg:  # don't resend the same error on every retry
                 sendToBot(session, msg)
                 last_error_msg = msg
+            session.setStatus(f"Error @{getDateTime()}, retrying every 20 min (see the bot message)")
             wait(20 * 60, 20) # wait 20 minutes before retrying if there's an error
 
 
