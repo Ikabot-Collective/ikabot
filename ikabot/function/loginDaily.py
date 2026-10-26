@@ -57,6 +57,8 @@ def collect_resource_favour(session, table, wine_city, earliest_wakeup_time):
 def look(session, table, wine_city, earliest_wakeup_time):
     # collect if collectable, otherwise look at specified view then collect
     for r in table:
+        if "textLineThrough" in r:  # already collected
+            continue
         if "task_amount_28" in r:  # visit shop
             if is_collectable(r):
                 session.post(
@@ -169,11 +171,13 @@ def do_it(session, wine_city, wood_city, luxury_city, favour_tasks, collect_ambr
     info = "\nI enter every day\n"
     setInfoSignal(session, info)
     message_sent = False
+    last_error_msg = None
     
     while True:
         try:
             (ids, cities) = getIdsOfCities(session)
-            earliest_wakeup_time = 24 * 60 * 60
+            # never sleep a full day, so the daily bonus streak is not lost
+            earliest_wakeup_time = 12 * 60 * 60
             # collect daily bonus wine
             html = session.post(city_url + str(wine_city["id"]))
             url = "action=AvatarAction&function=giveDailyActivityBonus&dailyActivityBonusCitySelect={0}&startPageShown=1&detectedDevice=1&autoLogin=on&cityId={0}&activeTab=multiTab2&backgroundView=city&currentCityId={0}&actionRequest={1}&ajax=1".format(
@@ -366,10 +370,10 @@ def do_it(session, wine_city, wood_city, luxury_city, favour_tasks, collect_ambr
                 html = session.post(
                     f"view=dailyTasks&backgroundView=city&currentCityId={wine_city['id']}&actionRequest={actionRequest}&ajax=1"
                 )
-                # check if favour is full (2500)
-                match = re.search(r"currentFavor([\S\s]*?)(\d+)\s*<", html)
+                # check if favour is full
+                match = re.search(r'"currentFavor":(\d+),"favorLimit":(\d+)', html)
                 assert match, "Can not obtain current favour amount"
-                if match.group(2) == "2500":
+                if int(match.group(1)) >= int(match.group(2)):
                     # send notification we are full on favour
                     if not message_sent:
                         sendToBot(session, "Favour was not collected as you are full on it")
@@ -377,16 +381,11 @@ def do_it(session, wine_city, wood_city, luxury_city, favour_tasks, collect_ambr
                             True  # we don't want to spam the message, only once is enough
                         )
                     break
-                matches = re.findall(r"<tr([\S\s]*?)tr>", html)
+                message_sent = False
                 rows = [
-                    matches[1],
-                    matches[2],
-                    matches[4],
-                    matches[5],
-                    matches[7],
-                    matches[8],
-                    matches[10],
-                    matches[11],
+                    row
+                    for row in re.findall(r"<tr([\S\s]*?)tr>", html)
+                    if "task_row_" in row
                 ]
                 earliest_wakeup_time = TASK_FUNCTIONS[task_name](session, rows, wine_city, earliest_wakeup_time)
                 match = re.search(
@@ -415,13 +414,16 @@ def do_it(session, wine_city, wood_city, luxury_city, favour_tasks, collect_ambr
             earliest_wakeup_time = abs(
                 earliest_wakeup_time
             )  # funnily enough, it's possible to have the earliest wakeup time be a negative number, this happens if there is less than 10 minutes remaning until tasks reset
+            last_error_msg = None
             session.setStatus(
                 f"Last activity @{getDateTime()}, next activity @{getDateTime(time.time()+earliest_wakeup_time)}"
             )
             wait(earliest_wakeup_time, 20)
         except Exception as e:
             msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
-            sendToBot(session, msg)
+            if msg != last_error_msg:  # don't resend the same error on every retry
+                sendToBot(session, msg)
+                last_error_msg = msg
             wait(20 * 60, 20) # wait 20 minutes before retrying if there's an error
 
 
@@ -485,9 +487,9 @@ def loginDaily(session, event, stdin_fd, predetermined_input):
                 digit=True,
                 additionalValues=["y", "Y"],
             )
-            if not choice or (not choice.isdigit() and choice.lower() == "y"):
+            if not choice or str(choice).lower() == "y":
                 return
-            choice -= 1
+            choice = int(choice) - 1
             task_key = list(TASK_FUNCTIONS.keys())[choice]
             if task_key in favour_tasks:
                 favour_tasks.remove(task_key)
