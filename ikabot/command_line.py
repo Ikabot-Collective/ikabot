@@ -53,6 +53,12 @@ from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.process import updateProcessList
 from ikabot.helpers.sessionStorage import init_storage
+from ikabot.helpers.ipc import (
+    ensure_ipc_server,
+    is_cli_invocation,
+    run_cli_task,
+    stop_ipc_server,
+)
 from ikabot.web.session import *
 from ikabot.function.UpgradeUnits import UpgradeUnits
 from ikabot.function.modifyProduction import modifyProduction, modifyAcademyWorkers, modifyTempleWorkers
@@ -69,6 +75,9 @@ def menu(session, checkUpdate=True):
     session : ikabot.web.session.Session
     checkUpdate : bool
     """
+    if len(config.predetermined_input) == 0:
+        ensure_ipc_server(default_session=session)
+
     if checkUpdate:
         checkForUpdate()
 
@@ -398,6 +407,7 @@ def menu(session, checkUpdate=True):
             print("Closing this console will kill the processes.")
             enter()
         clear()
+        stop_ipc_server()
         os._exit(
             0
         )  # kills the process which executes this statement, but it does not kill it's child processes
@@ -424,10 +434,16 @@ def start():
         menu(session)
     finally:
         clear()
+        stop_ipc_server()
         session.logout()
 
 
 def main():
+    if sys.platform.startswith("win"):
+        multiprocessing.freeze_support()
+    if is_cli_invocation(sys.argv):
+        run_cli_task(sys.argv[1:])
+        return
     manager = multiprocessing.Manager()
     predetermined_input = manager.list()
     config.predetermined_input = predetermined_input

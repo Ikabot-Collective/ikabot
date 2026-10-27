@@ -45,6 +45,7 @@ Usage
 """
 
 import functools
+import json
 import os
 import sys
 import traceback
@@ -59,6 +60,17 @@ from ikabot.helpers.signals import setInfoSignal
 # Maps configurator function name -> task wrapper function.
 # Populated by the @task decorator at import time.
 _TASK_REGISTRY = {}
+
+
+def _save_task_config(session, result):
+    """Persist the task's JSON-serializable config dict onto its processList entry."""
+    try:
+        clean_config = json.loads(
+            json.dumps({k: v for k, v in result.items() if k != "session"}, default=list)
+        )
+        session.updateProcessEntry(os.getpid(), config=clean_config)
+    except Exception:
+        pass
 
 
 def _send_error(session, info, exc_text):
@@ -194,6 +206,8 @@ def configurator(_func=None, *, blocking=False):
                 # config-only (this is a programming error, but fail safe)
                 event.set()
                 return
+
+            _save_task_config(session, result)
 
             if blocking:
                 # Blocking mode: run the task, THEN release the CLI
