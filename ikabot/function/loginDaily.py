@@ -395,6 +395,9 @@ def do_it(session, wine_city, wood_city, luxury_city, favour_tasks, collect_ambr
                 )
                 assert match, "Can not get remaning daily tasks time"
                 sec_remaining = (int(match.group(1)) - int(match.group(2))) - 600
+                if sec_remaining < 60:
+                    # about 10 minutes or less to the reset, wake up right after it
+                    sec_remaining += 600 + 60
                 earliest_wakeup_time = (
                     sec_remaining
                     if sec_remaining < earliest_wakeup_time
@@ -414,7 +417,7 @@ def do_it(session, wine_city, wood_city, luxury_city, favour_tasks, collect_ambr
                 wait(1)
             earliest_wakeup_time = abs(
                 earliest_wakeup_time
-            )  # funnily enough, it's possible to have the earliest wakeup time be a negative number, this happens if there is less than 10 minutes remaning until tasks reset
+            )  # safety net, a negative wait would make the loop run without pause
             last_error_msg = None
             session.setStatus(
                 f"Last activity @{getDateTime()}, next activity @{getDateTime(time.time()+earliest_wakeup_time)}"
