@@ -94,6 +94,18 @@ def ask_for_port():
         print(f"Port {port} is already in use, try another port.")
 
 
+def get_env_port():
+    """Returns the port set in IKABOT_WEB_PORT, or None when it is unset or not a valid port
+    Returns
+    -------
+    port : str or None
+    """
+    port = config.IKABOT_WEB_PORT
+    if port.isdigit() and 0 < int(port) <= 65535:
+        return str(int(port))
+    return None
+
+
 def get_request_params(request):
     """Returns the parameters sent by the browser. When a name is both in the page
     URL and in the form, the form value wins, as in the game server
@@ -354,6 +366,20 @@ def webServer(session, event, stdin_fd, predetermined_input, port=None):
             )
             enter()
             return None
+
+    # Use the port from IKABOT_WEB_PORT if it is set and free
+    if port is None and config.IKABOT_WEB_PORT:
+        env_port = get_env_port()
+        if env_port is None:
+            print(
+                f"IKABOT_WEB_PORT={config.IKABOT_WEB_PORT} is not a valid port, ignoring it."
+            )
+        elif is_port_in_use(int(env_port)):
+            print(
+                f"Port {env_port} from IKABOT_WEB_PORT is already in use, ignoring it."
+            )
+        else:
+            port = env_port
 
     # If the port is not provided, prompt the user for it if enabled from the config file
     if config.enable_CustomPort is True and port is None:
