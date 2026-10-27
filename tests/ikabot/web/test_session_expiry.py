@@ -198,6 +198,19 @@ class TestFalseSessionExpiry(unittest.TestCase):
         self.assertEqual(session.stored["cookies"]["PHPSESSID"], "new")
         self.assertEqual(session.stored["actionRequestToken"], token)
 
+    def test_action_in_url_stores_the_next_token(self):
+        action_response = '[["updateGlobalData",{"actionRequest":"nexttoken"}],["provideFeedback",[]]]'
+        session = self.make_session([response(action_response)])
+        session.post(f"action=CollectDailyTasksFavor&taskId=27&ajax=1&actionRequest={session_module.actionRequest}")
+        self.assertIn("actionRequest=storedtoken", session.s.urls[0])
+        self.assertEqual(session.stored["actionRequestToken"], "nexttoken")
+
+    def test_view_in_url_keeps_the_stored_token(self):
+        view_response = '[["updateGlobalData",{"actionRequest":"storedtoken"}],["changeView",[]]]'
+        session = self.make_session([response(view_response)])
+        session.post(f"view=dailyTasks&ajax=1&actionRequest={session_module.actionRequest}")
+        self.assertEqual(session.stored["actionRequestToken"], "storedtoken")
+
 
 if __name__ == "__main__":
     unittest.main()

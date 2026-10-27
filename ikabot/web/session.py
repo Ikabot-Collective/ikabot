@@ -1674,7 +1674,9 @@ class Session:
                     pass
 
                 # an action consumes the token and the response carries the next one
-                if "action" in payloadPost or "action" in params:
+                # (most functions pass the action inside the url string, not in params)
+                url_query = urllib.parse.parse_qs(url_original.split("?", 1)[-1])
+                if "action" in payloadPost or "action" in params or "action" in url_query:
                     new_token = re.search(r'actionRequest"?:\s*"(.*?)"', resp)
                     sessionData = self.getSessionData()
                     if new_token:
