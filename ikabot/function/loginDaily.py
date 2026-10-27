@@ -156,6 +156,19 @@ TASK_FUNCTIONS = {
 }
 
 
+def cinema_seconds_left(html, feature, remaining_time_str):
+    """Seconds until a cinetheatre feature can be watched again. The countdown text
+    drops the hours and minutes once there are days left (e.g. "2D 0hs"), so the
+    exact countdown from the view data is used when it is there"""
+    countdown = re.search(rf'"js_nextPossible{feature}":\{{"countdown":\{{([^}}]*)\}}', html)
+    if countdown:
+        current = re.search(r'"currentdate":(\d+)', countdown.group(1))
+        end = re.search(r'"enddate":(\d+)', countdown.group(1))
+        if current and end:
+            return int(end.group(1)) - int(current.group(1))
+    return timeStringToSec(remaining_time_str)
+
+
 @task("loginDaily")
 def do_it(session, wine_city, wood_city, luxury_city, favour_tasks, collect_ambrosia):
     """
@@ -197,8 +210,8 @@ def do_it(session, wine_city, wood_city, luxury_city, favour_tasks, collect_ambr
                         ), f"Could not get remaining time for {feature} cultural feature"
                         remaining_time_str = remaining_time_str.group(1).strip()
                         sec_to_wait = (
-                            timeStringToSec(remaining_time_str) + 60
-                        )  # add 60s because of rounding errors
+                            cinema_seconds_left(html, feature, remaining_time_str) + 60
+                        )  # add 60s because of rounding errors, html is the cinema view just loaded
                         ewt = sec_to_wait if sec_to_wait < ewt else ewt
                 return ewt
 
@@ -322,7 +335,7 @@ def do_it(session, wine_city, wood_city, luxury_city, favour_tasks, collect_ambr
                     )
                     if remaining_time_str:
                         remaining_time_str = remaining_time_str.group(1).strip()
-                        sec_to_wait = timeStringToSec(remaining_time_str) + 60
+                        sec_to_wait = cinema_seconds_left(html, "Ambrosia", remaining_time_str) + 60
                         earliest_wakeup_time = (
                             sec_to_wait if sec_to_wait < earliest_wakeup_time else earliest_wakeup_time
                         )
