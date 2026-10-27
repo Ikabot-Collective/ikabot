@@ -67,6 +67,33 @@ def get_local_network_ip():
     return None
 
 
+def is_port_in_use(port: int) -> bool:
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            return s.connect_ex(("127.0.0.1", port)) == 0
+    except Exception as e:
+        return True
+
+
+def ask_for_port():
+    """Asks the user for the web server port until a free one is given
+    Returns
+    -------
+    port : str or None
+        None when the answer is empty or 0
+    """
+    while True:
+        print(
+            "Please enter a port number (1 - 65535) to run the web server on (leave empty or 0 for random): "
+        )
+        port = read(min=0, max=65535, digit=True, empty=True)
+        if port == "" or port == 0:
+            return None
+        if not is_port_in_use(int(port)):
+            return str(int(port))
+        print(f"Port {port} is already in use, try another port.")
+
+
 def get_request_params(request):
     """Returns the parameters sent by the browser. When a name is both in the page
     URL and in the form, the form value wins, as in the game server
@@ -328,28 +355,9 @@ def webServer(session, event, stdin_fd, predetermined_input, port=None):
             enter()
             return None
 
-    def is_port_in_use(port: int) -> bool:
-        try:
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                return s.connect_ex(("127.0.0.1", port)) == 0
-        except Exception as e:
-            return True
-
     # If the port is not provided, prompt the user for it if enabled from the config file
-    if config.enable_CustomPort is True:
-        while True:
-            if port is None:
-                print("Please enter a port number (1 - 65535) to run the web server on (leave empty or 0 for random): ")
-                port = read(min=0, max=65535, digit=True, empty=True)
-                if port == "" or port == 0:
-                    port = None
-                    break
-                else:
-                    port = str(int(port))
-                    if is_port_in_use(int(port)):
-                        print(f"Port {port} is already in use, try another port.")
-                        continue
-                    break
+    if config.enable_CustomPort is True and port is None:
+        port = ask_for_port()
 
     # If the port is still None, select a random port as in the original script
     if port is None:
