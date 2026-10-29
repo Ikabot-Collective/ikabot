@@ -53,7 +53,7 @@ IKABOT_TIMEZONE_ID = (
     os.getenv("IKABOT_TIMEZONE_ID") or "Europe/London"
 ).strip() or "Europe/London"
 
-# Fixed port for the web server. Leave unset to keep the port derived from the account.
+# Fixed port for the web server, or "ask" to prompt for it. Leave unset to keep the port derived from the account.
 IKABOT_WEB_PORT = (os.getenv("IKABOT_WEB_PORT") or "").strip()
 
 
@@ -165,6 +165,7 @@ MAXIMUM_CITY_NAME_LENGTH = 20
 SECONDS_IN_HOUR = 60 * 60
 
 # Default values for dynamic settings
+# Deprecated: set IKABOT_WEB_PORT=ask instead
 enable_CustomPort = False
 
 user_agents = [
