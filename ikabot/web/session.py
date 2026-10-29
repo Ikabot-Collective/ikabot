@@ -32,6 +32,7 @@ from ikabot.helpers.sessionStorage import (
     find_user_file_for_email,
     session_data_lock,
     read_json_file,
+    get_task_pids_by_account,
 )
 from ikabot.helpers.botComm import *
 from ikabot.helpers.getJson import getCity
@@ -189,7 +190,9 @@ class Session:
         for the event that a killed child never fires, so it would hang forever.
         If the parent process is another ikabot process (menu / webServer launcher),
         terminate it as well. If we are the top-level menu process, the parent is
-        just the terminal/shell and is left alone."""
+        just the terminal/shell and is left alone.
+        A parent that also runs tasks of other accounts (tasks started through the
+        CLI / IPC) is left alone too, and only this account's tasks are terminated."""
         try:
             import psutil
             parent = psutil.Process(os.getppid())
@@ -199,18 +202,43 @@ class Session:
                 parent_cmd = " ".join(parent.cmdline()).lower()
                 if "command_line" in parent_cmd or "ikabot" in parent_cmd:
                     my_pid = os.getpid()
-                    for proc in parent.children(recursive=True):
-                        if proc.pid == my_pid:
+                    siblings = [
+                        proc for proc in parent.children(recursive=True) if proc.pid != my_pid
+                    ]
+                    own_pids, other_pids = self.__accountTaskPids()
+                    # padre is still True while the menu waits for this task's configurator
+                    shared_parent = not self.padre and any(
+                        proc.pid in other_pids for proc in siblings
+                    )
+                    for proc in siblings:
+                        if shared_parent and proc.pid not in own_pids:
                             continue
                         try:
                             proc.terminate()
                         except Exception:
                             pass
-                    parent.terminate()
-                    parent.wait(timeout=5)
+                    if not shared_parent:
+                        parent.terminate()
+                        parent.wait(timeout=5)
         except Exception:
             pass
         os._exit(1)
+
+    def __accountTaskPids(self):
+        """Returns (pids of this account's tasks, pids of every other account's tasks)"""
+        own_key = (
+            (getattr(self, "mail", None) or "").lower(),
+            getattr(self, "username", None),
+            str(getattr(self, "mundo", "")),
+            getattr(self, "servidor", None),
+        )
+        own_pids, other_pids = set(), set()
+        for key, pids in get_task_pids_by_account().items():
+            if key == own_key:
+                own_pids |= pids
+            else:
+                other_pids |= pids
+        return own_pids, other_pids
 
     def isExpired(self, html):
         return self.__isExpired(html)
