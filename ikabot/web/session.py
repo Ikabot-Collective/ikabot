@@ -1696,8 +1696,10 @@ class Session:
         delete_session_data(self)
 
     @classmethod
-    def from_saved(cls, mail=None, world=None, server=None):
-        """Create an authenticated Session non-interactively using saved credentials/cookies."""
+    def from_saved(cls, mail=None, world=None, server=None, player=None):
+        """Create an authenticated Session non-interactively using saved credentials/cookies.
+        ``player`` (in-game name) picks one account when the lobby has several on the same world."""
+        want_player = str(player).strip().lower() if player else None
         if mail and str(mail).strip() and str(mail).strip() != "default_user":
             matching_path, _ = find_user_file_for_email(mail)
             if not matching_path:
@@ -1867,8 +1869,19 @@ class Session:
                 )
 
             avail_str = ", ".join(
-                f"s{num}-{slang} ({wname})" for _, num, slang, _, wname in candidates
+                f"s{num}-{slang} ({wname}) - {acc.get('name', '?')}"
+                for acc, num, slang, _, wname in candidates
             )
+            if want_player:
+                candidates = [
+                    c
+                    for c in candidates
+                    if str(c[0].get("name", "")).lower() == want_player
+                ]
+                if not candidates:
+                    raise ValueError(
+                        f"Player '{player}' not found on '{self.mail or 'default_user'}'. Available: {avail_str}"
+                    )
             if not raw_world:
                 matches = [
                     c
@@ -1879,7 +1892,7 @@ class Session:
                 ]
                 if len(matches) != 1:
                     raise ValueError(
-                        f"Please specify --world (available: {avail_str})."
+                        f"Please specify --world and/or --player (available: {avail_str})."
                     )
             else:
                 matches = []
@@ -1904,10 +1917,15 @@ class Session:
                     )
                 if len(matches) > 1:
                     matched_str = ", ".join(
-                        f"s{num}-{slang}" for _, num, slang, _, _ in matches
+                        f"s{num}-{slang} - {acc.get('name', '?')}"
+                        for acc, num, slang, _, _ in matches
                     )
+                    if len({(num, slang.lower()) for _, num, slang, _, _ in matches}) == 1:
+                        hint = "specify --player"
+                    else:
+                        hint = f"specify e.g. --world=s{want_mundo or '<number>'}-<lang>"
                     raise ValueError(
-                        f"World '{world}' matches multiple servers ({matched_str}); specify e.g. --world=s{want_mundo}-<lang>."
+                        f"World '{world}' matches multiple accounts ({matched_str}); {hint}."
                     )
 
             acc, num, slang, login_lang, wname = matches[0]
@@ -2007,7 +2025,9 @@ class Session:
 
         matched_stored = []
         for item in stored_candidates:
-            _, mundo_k, srv_k, _ = item
+            uname, mundo_k, srv_k, _ = item
+            if want_player and str(uname).lower() != want_player:
+                continue
             if not raw_world:
                 if want_servidor is None or srv_k.lower() == want_servidor:
                     matched_stored.append(item)
