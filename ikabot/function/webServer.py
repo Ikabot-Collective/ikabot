@@ -91,12 +91,29 @@ def get_request_params(request):
 
 from ikabot.helpers.decorators import configurator, task
 
+
+def _port_is_taken(port: int) -> bool:
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            return s.connect_ex(("127.0.0.1", port)) == 0
+    except Exception:
+        return True
+
+
 @task("webServer")
 def do_webServer(session, port, local_network_ip):
     try:
         import flask
         from flask import Flask, Response, request
     except Exception:
+        return
+
+    # Launched from a saved config (CLI / --batch) the configurator's port check did not
+    # run, and on Windows werkzeug's SO_REUSEADDR lets a second server bind a busy port
+    if _port_is_taken(int(port)):
+        msg = "Web server not started: port {} is already in use".format(port)
+        getLogger(__name__).error(msg)
+        sendToBot(session, msg)
         return
 
     sys.flask = flask

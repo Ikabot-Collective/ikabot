@@ -312,7 +312,7 @@ def menu(session, checkUpdate=True):
         print("(0) Back")
         print("(1) Configure Proxy")
         print("(2) Notifications")
-        print("(3) Kill tasks")
+        print("(3) Manage running tasks (kill / view / save)")
         print("(4) Configure captcha resolver")
         print("(5) Logs")
         print("(6) Import / Export cookie")

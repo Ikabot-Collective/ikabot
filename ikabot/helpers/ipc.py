@@ -34,8 +34,20 @@ from ikabot.web.session import Session, parse_world_spec
 
 logger = getLogger(__name__)
 
-_CLI_FLAGS = ("--task", "--email", "--world", "--config", "--server", "--help", "-h")
+_CLI_FLAGS = (
+    "--task",
+    "--email",
+    "--world",
+    "--player",
+    "--config",
+    "--batch",
+    "--server",
+    "--help",
+    "-h",
+)
+_BATCH_ENTRY_KEYS = ("task", "config", "email", "world", "server", "player")
 _MAX_IPC_MSG_BYTES = 16 * 1024 * 1024
+_TASK_STARTUP_TIMEOUT = 60.0
 _LOCAL_SERVER = None
 _LOCAL_SERVER_LOCK = threading.Lock()
 
@@ -48,6 +60,11 @@ def get_ipc_file_path():
 def get_ipc_lock_path():
     """Return path to ~/.ikabot/ipc.lock."""
     return os.path.join(get_ikabot_dir(), "ipc.lock")
+
+
+def get_tasks_dir():
+    """Return path to ~/.ikabot/tasks (saved --batch files)."""
+    return os.path.join(get_ikabot_dir(), "tasks")
 
 
 def is_cli_invocation(argv):
@@ -131,23 +148,27 @@ def _extract_windows_raw_config(raw_cmdline=None):
     return obj if isinstance(obj, dict) else None
 
 
+def _read_arg_file(text, opening):
+    """Return the contents of @file / bare file path arguments, or text unchanged."""
+    if text.startswith("@"):
+        filepath = text[1:].strip()
+        if not os.path.isfile(filepath):
+            raise ValueError(f"File not found: {filepath}")
+        with open(filepath, "r", encoding="utf-8") as f:
+            return f.read().strip()
+    if not text.startswith(opening) and os.path.isfile(text):
+        with open(text, "r", encoding="utf-8") as f:
+            return f.read().strip()
+    return text
+
+
 def parse_config_arg(config_str, raw_cmdline=None):
     """Parse --config value from JSON string, Python dict literal, @file.json,
     or Windows raw command line fallback.
     """
     if config_str is None or str(config_str).strip() == "":
         return {}
-    text = str(config_str).strip()
-
-    if text.startswith("@"):
-        filepath = text[1:].strip()
-        if not os.path.isfile(filepath):
-            raise ValueError(f"Config file not found: {filepath}")
-        with open(filepath, "r", encoding="utf-8") as f:
-            text = f.read().strip()
-    elif not text.startswith("{") and os.path.isfile(text):
-        with open(text, "r", encoding="utf-8") as f:
-            text = f.read().strip()
+    text = _read_arg_file(str(config_str).strip(), "{")
 
     try:
         parsed = json.loads(text)
@@ -174,6 +195,103 @@ def parse_config_arg(config_str, raw_cmdline=None):
     raise ValueError(
         f"Invalid --config dictionary: {config_str!r}. Pass a valid JSON object (e.g. '{{\"minutes\": 20}}')."
     )
+
+
+def parse_batch_arg(batch_str, overrides=None):
+    """Parse --batch value (JSON list of task entries, a single entry, or @file.json)
+    into a list of start_task requests. email/world/server/player given in ``overrides``
+    (the CLI flags) replace the entries' own values; the others are kept.
+    """
+    if batch_str is None or str(batch_str).strip() == "":
+        raise ValueError("--batch cannot be empty.")
+    text = _read_arg_file(str(batch_str).strip(), "[")
+    try:
+        parsed = json.loads(text)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Invalid --batch JSON: {exc}")
+    if isinstance(parsed, dict):
+        parsed = [parsed]
+    if not isinstance(parsed, list) or not parsed:
+        raise ValueError("--batch must be a non-empty JSON list of task entries.")
+
+    overrides = overrides or {}
+    requests = []
+    for idx, entry in enumerate(parsed, start=1):
+        if not isinstance(entry, dict) or not entry.get("task"):
+            raise ValueError(f"Batch entry {idx} must be an object with a 'task' key.")
+        unknown = [k for k in entry if k not in _BATCH_ENTRY_KEYS]
+        if unknown:
+            raise ValueError(
+                f"Batch entry {idx} has unknown key(s) {unknown}. Expected: {list(_BATCH_ENTRY_KEYS)}"
+            )
+        task_config = entry.get("config") or {}
+        if not isinstance(task_config, dict):
+            raise ValueError(f"Batch entry {idx}: 'config' must be an object.")
+        request = {"action": "start_task", "task": entry["task"], "config": task_config}
+        for key in ("email", "world", "server", "player"):
+            request[key] = overrides.get(key) or entry.get(key)
+        requests.append(request)
+    return requests
+
+
+def build_batch_entry(session, process):
+    """Build a --batch entry that relaunches a running task (processList row) on this session's account."""
+    entry = {
+        "task": process["action"],
+        "world": f"s{session.mundo}-{session.servidor}",
+        "player": session.username,
+        "config": process["config"],
+    }
+    if getattr(session, "mail", ""):
+        entry = {"email": session.mail, **entry}
+    return entry
+
+
+def _write_tasks_file(session, name, data):
+    """Write ``data`` to ~/.ikabot/tasks/<player>_s<world>-<lang>_<name>.json and return the path."""
+    stem = f"{session.username}_s{session.mundo}-{session.servidor}_{name}"
+    stem = "".join(c if c.isalnum() or c in "-_" else "_" for c in stem)
+    path = os.path.join(get_tasks_dir(), stem + ".json")
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+    return path
+
+
+def save_task_config(session, process):
+    """Write one running task's config as a --config file (see build_task_command).
+    Returns the path, or None if the task has no config.
+    """
+    if process.get("config") is None:
+        return None
+    return _write_tasks_file(session, process["action"], process["config"])
+
+
+def build_task_command(session, process, config_path):
+    """Return the `ikabot --task=... --config=@...` command that relaunches ``process``."""
+    entry = build_batch_entry(session, process)
+    args = []
+    if entry.get("email"):
+        args.append(f'--email="{entry["email"]}"')
+    args += [
+        f'--world={entry["world"]}',
+        f'--player="{entry["player"]}"',
+        f'--task={entry["task"]}',
+        f'--config="@{config_path}"',
+    ]
+    return "ikabot " + " ".join(args)
+
+
+def save_batch_file(session, processes, name):
+    """Write the configs of ``processes`` to ~/.ikabot/tasks/<player>_s<world>-<lang>_<name>.json
+    as a --batch file. Rows without a config are skipped.
+    Returns (path, saved_count, skipped_actions).
+    """
+    entries = [build_batch_entry(session, p) for p in processes if p.get("config") is not None]
+    skipped = [p["action"] for p in processes if p.get("config") is None]
+    if not entries:
+        return None, 0, skipped
+    return _write_tasks_file(session, name, entries), len(entries), skipped
 
 
 def _lookup_registry(task_name):
@@ -280,8 +398,11 @@ def _validate_task_config(task_name, task_func, config_dict):
     return clean
 
 
-def _run_ipc_task(task_name, session, task_config):
+def _run_ipc_task(task_name, session, task_config, started=None):
     """Child-process entry point for tasks launched via CLI/IPC."""
+    if started is not None:
+        # arguments are unpickled by now: the launching process may exit
+        started.set()
     try:
         sys.stdin = open(os.devnull, "r")
         sys.stdout = open(os.devnull, "w")
@@ -394,11 +515,21 @@ class IPCServer:
                 conn, _ = self._sock.accept()
             except OSError:
                 break
+            # counted from accept() on, so stopping the server can wait for it
+            with self._count_lock:
+                self._active_requests += 1
             threading.Thread(
                 target=self._handle_client, args=(conn,), daemon=True
             ).start()
 
     def _handle_client(self, conn):
+        try:
+            self._serve_connection(conn)
+        finally:
+            with self._count_lock:
+                self._active_requests -= 1
+
+    def _serve_connection(self, conn):
         with conn:
             conn.settimeout(30.0)
             try:
@@ -418,9 +549,13 @@ class IPCServer:
                 except Exception:
                     pass
 
-    def _session_matches(self, sess, email, world, server):
+    def _session_matches(self, sess, email, world, server, player=None):
         if sess is None or not getattr(sess, "logged", False):
             return False
+        if player and str(player).strip():
+            sess_player = (getattr(sess, "username", None) or "").strip().lower()
+            if sess_player != str(player).strip().lower():
+                return False
         sess_mail = (getattr(sess, "mail", None) or "").strip().lower()
         if email and str(email).strip() and str(email).strip() != "default_user":
             if sess_mail != str(email).strip().lower():
@@ -451,19 +586,19 @@ class IPCServer:
                     return False
         return True
 
-    def _get_or_create_session(self, email, world, server):
+    def _get_or_create_session(self, email, world, server, player=None):
         matches = [
             sess
             for sess in self._sessions
-            if self._session_matches(sess, email, world, server)
+            if self._session_matches(sess, email, world, server, player)
         ]
         if len(matches) == 1:
             return matches[0]
         if len(matches) > 1:
             raise ValueError(
-                "Multiple active sessions match; please specify --email and --world."
+                "Multiple active sessions match; please specify --email, --world and/or --player."
             )
-        sess = Session.from_saved(mail=email, world=world, server=server)
+        sess = Session.from_saved(mail=email, world=world, server=server, player=player)
         self._sessions.append(sess)
         return sess
 
@@ -472,8 +607,6 @@ class IPCServer:
         if action == "ping":
             return {"status": "ok", "pid": os.getpid()}
 
-        with self._count_lock:
-            self._active_requests += 1
         try:
             with self._lock:
                 if action == "start_task":
@@ -484,9 +617,6 @@ class IPCServer:
                 raise
             logger.error("IPC request failed", exc_info=True)
             return {"status": "error", "error": str(exc)}
-        finally:
-            with self._count_lock:
-                self._active_requests -= 1
 
     def _start_task(self, request):
         task_name = request.get("task")
@@ -494,17 +624,25 @@ class IPCServer:
         email = request.get("email")
         world = request.get("world")
         server = request.get("server")
+        player = request.get("player")
 
         canonical_name, task_func = _resolve_task(task_name)
         clean_config = _validate_task_config(canonical_name, task_func, config_dict)
-        session = self._get_or_create_session(email, world, server)
+        session = self._get_or_create_session(email, world, server, player)
 
+        started = multiprocessing.Event()
         proc = multiprocessing.Process(
             target=_run_ipc_task,
-            args=(canonical_name, session, clean_config),
+            args=(canonical_name, session, clean_config, started),
             name=canonical_name,
         )
         proc.start()
+        # A spawned child reads its arguments through a handle owned by this process,
+        # so wait for it before answering: a CLI launcher exits right after the answer.
+        if not started.wait(timeout=_TASK_STARTUP_TIMEOUT) and not proc.is_alive():
+            raise RuntimeError(
+                f"Task '{canonical_name}' exited during startup (exit code {proc.exitcode})."
+            )
 
         entry = {
             "pid": proc.pid,
@@ -608,19 +746,40 @@ def build_cli_parser():
         help="Optional server language disambiguator (e.g. en, de)",
     )
     parser.add_argument(
-        "--task", required=True, help="Name of the @task module (e.g. alertAttacks)"
+        "--player",
+        default=None,
+        help="In-game player name, needed when the lobby has several accounts on the same world",
+    )
+    parser.add_argument(
+        "--task", default=None, help="Name of the @task module (e.g. alertAttacks)"
     )
     parser.add_argument(
         "--config",
-        default="{}",
+        default=None,
         help="JSON config dict for the task (or @path/to/config.json)",
     )
+    parser.add_argument(
+        "--batch",
+        default=None,
+        help='JSON list of tasks to start, e.g. [{"task": "alertAttacks", "config": {"minutes": 20}}] '
+        "(or @path/to/tasks.json). Entries may set email/world/server/player; "
+        "those flags, when given on the command line, override them for every entry.",
+    )
     return parser
+
+
+def _check_task_or_batch(parser, args):
+    if args.batch is not None:
+        if args.task is not None or args.config is not None:
+            parser.error("--batch cannot be combined with --task or --config.")
+    elif not args.task:
+        parser.error("one of the arguments --task or --batch is required")
 
 
 def parse_cli_args(argv, raw_cmdline=None):
     parser = build_cli_parser()
     args, extras = parser.parse_known_args(argv)
+    _check_task_or_batch(parser, args)
     if not extras:
         return args, parse_config_arg(args.config, raw_cmdline=raw_cmdline)
 
@@ -635,8 +794,31 @@ def parse_cli_args(argv, raw_cmdline=None):
     parser.error(f"unrecognized arguments: {' '.join(extras)}")
 
 
+def _dispatch_request(request, local_server):
+    """Send one request to the running IPC server, or handle it in this process.
+    Returns (response, local_server); local_server is set once this process owns the IPC server.
+    """
+    if local_server is not None:
+        return local_server.handle_request(request), local_server
+    response = send_ipc_request(request)
+    if response is not None:
+        return response, None
+    # Existing server exited right after ping; claim IPC server locally
+    with _StartupLock():
+        if not ping_ipc_server():
+            local_server = IPCServer().start()
+    if local_server is not None:
+        return local_server.handle_request(request), local_server
+    response = send_ipc_request(request) or {
+        "status": "error",
+        "error": "Failed to communicate with running ikabot IPC server.",
+    }
+    return response, None
+
+
 def run_cli_task(argv):
-    """Entry point for CLI task queries (`ikabot --email=... --world=... --task=... --config=...`)."""
+    """Entry point for CLI task queries (`ikabot --email=... --world=... --task=... --config=...`
+    or `ikabot --batch=@tasks.json`)."""
     if "-h" in argv or "--help" in argv:
         parser = build_cli_parser()
         parser.print_help()
@@ -644,6 +826,18 @@ def run_cli_task(argv):
 
     try:
         args, config_dict = parse_cli_args(argv)
+        account_flags = {
+            "email": args.email,
+            "world": args.world,
+            "server": args.server,
+            "player": args.player,
+        }
+        if args.batch is not None:
+            requests = parse_batch_arg(args.batch, overrides=account_flags)
+        else:
+            requests = [
+                dict(account_flags, action="start_task", task=args.task, config=config_dict)
+            ]
     except Exception as exc:
         print(json.dumps({"status": "error", "error": str(exc)}), flush=True)
         sys.exit(1)
@@ -651,47 +845,26 @@ def run_cli_task(argv):
     os.chdir(get_home_dir())
     init_storage()
 
-    request = {
-        "action": "start_task",
-        "email": args.email,
-        "world": args.world,
-        "server": args.server,
-        "task": args.task,
-        "config": config_dict,
-    }
-
     local_server = None
     with _StartupLock():
         if not ping_ipc_server():
             local_server = IPCServer().start()
 
-    if local_server is None:
-        response = send_ipc_request(request)
-        if response is not None:
-            print(json.dumps(response, ensure_ascii=False), flush=True)
-            sys.exit(0 if response.get("status") == "ok" else 1)
-        # Existing server exited right after ping; claim IPC server locally
-        with _StartupLock():
-            if not ping_ipc_server():
-                local_server = IPCServer().start()
-        if local_server is None:
-            response = send_ipc_request(request) or {
-                "status": "error",
-                "error": "Failed to communicate with running ikabot IPC server.",
-            }
-            print(json.dumps(response, ensure_ascii=False), flush=True)
-            sys.exit(0 if response.get("status") == "ok" else 1)
+    responses = []
+    for request in requests:
+        response, local_server = _dispatch_request(request, local_server)
+        responses.append(response)
 
-    response = local_server.handle_request(request)
-    print(json.dumps(response, ensure_ascii=False), flush=True)
-    if response.get("status") != "ok":
-        local_server.stop()
-        sys.exit(1)
+    output = responses if args.batch is not None else responses[0]
+    print(json.dumps(output, ensure_ascii=False), flush=True)
+    all_ok = all(r.get("status") == "ok" for r in responses)
 
-    try:
-        while multiprocessing.active_children() or local_server.has_active_requests:
-            time.sleep(1.0)
-    except KeyboardInterrupt:
-        pass
-    finally:
+    if local_server is not None:
         local_server.stop()
+        # let requests from other CLI calls that reached us finish
+        while local_server.has_active_requests:
+            time.sleep(0.2)
+
+    # Like the menu's exit, return the shell and leave the tasks running in the
+    # background. os._exit skips multiprocessing's atexit hook, which would wait for them.
+    os._exit(0 if all_ok else 1)

@@ -32,6 +32,7 @@ from ikabot.helpers.sessionStorage import (
     find_user_file_for_email,
     session_data_lock,
     read_json_file,
+    get_task_pids_by_account,
 )
 from ikabot.helpers.botComm import *
 from ikabot.helpers.getJson import getCity
@@ -189,7 +190,9 @@ class Session:
         for the event that a killed child never fires, so it would hang forever.
         If the parent process is another ikabot process (menu / webServer launcher),
         terminate it as well. If we are the top-level menu process, the parent is
-        just the terminal/shell and is left alone."""
+        just the terminal/shell and is left alone.
+        A parent that also runs tasks of other accounts (tasks started through the
+        CLI / IPC) is left alone too, and only this account's tasks are terminated."""
         try:
             import psutil
             parent = psutil.Process(os.getppid())
@@ -199,18 +202,43 @@ class Session:
                 parent_cmd = " ".join(parent.cmdline()).lower()
                 if "command_line" in parent_cmd or "ikabot" in parent_cmd:
                     my_pid = os.getpid()
-                    for proc in parent.children(recursive=True):
-                        if proc.pid == my_pid:
+                    siblings = [
+                        proc for proc in parent.children(recursive=True) if proc.pid != my_pid
+                    ]
+                    own_pids, other_pids = self.__accountTaskPids()
+                    # padre is still True while the menu waits for this task's configurator
+                    shared_parent = not self.padre and any(
+                        proc.pid in other_pids for proc in siblings
+                    )
+                    for proc in siblings:
+                        if shared_parent and proc.pid not in own_pids:
                             continue
                         try:
                             proc.terminate()
                         except Exception:
                             pass
-                    parent.terminate()
-                    parent.wait(timeout=5)
+                    if not shared_parent:
+                        parent.terminate()
+                        parent.wait(timeout=5)
         except Exception:
             pass
         os._exit(1)
+
+    def __accountTaskPids(self):
+        """Returns (pids of this account's tasks, pids of every other account's tasks)"""
+        own_key = (
+            (getattr(self, "mail", None) or "").lower(),
+            getattr(self, "username", None),
+            str(getattr(self, "mundo", "")),
+            getattr(self, "servidor", None),
+        )
+        own_pids, other_pids = set(), set()
+        for key, pids in get_task_pids_by_account().items():
+            if key == own_key:
+                own_pids |= pids
+            else:
+                other_pids |= pids
+        return own_pids, other_pids
 
     def isExpired(self, html):
         return self.__isExpired(html)
@@ -1646,7 +1674,9 @@ class Session:
                     pass
 
                 # an action consumes the token and the response carries the next one
-                if "action" in payloadPost or "action" in params:
+                # (most functions pass the action inside the url string, not in params)
+                url_query = urllib.parse.parse_qs(url_original.split("?", 1)[-1])
+                if "action" in payloadPost or "action" in params or "action" in url_query:
                     new_token = re.search(r'actionRequest"?:\s*"(.*?)"', resp)
                     sessionData = self.getSessionData()
                     if new_token:
@@ -1696,8 +1726,10 @@ class Session:
         delete_session_data(self)
 
     @classmethod
-    def from_saved(cls, mail=None, world=None, server=None):
-        """Create an authenticated Session non-interactively using saved credentials/cookies."""
+    def from_saved(cls, mail=None, world=None, server=None, player=None):
+        """Create an authenticated Session non-interactively using saved credentials/cookies.
+        ``player`` (in-game name) picks one account when the lobby has several on the same world."""
+        want_player = str(player).strip().lower() if player else None
         if mail and str(mail).strip() and str(mail).strip() != "default_user":
             matching_path, _ = find_user_file_for_email(mail)
             if not matching_path:
@@ -1867,8 +1899,19 @@ class Session:
                 )
 
             avail_str = ", ".join(
-                f"s{num}-{slang} ({wname})" for _, num, slang, _, wname in candidates
+                f"s{num}-{slang} ({wname}) - {acc.get('name', '?')}"
+                for acc, num, slang, _, wname in candidates
             )
+            if want_player:
+                candidates = [
+                    c
+                    for c in candidates
+                    if str(c[0].get("name", "")).lower() == want_player
+                ]
+                if not candidates:
+                    raise ValueError(
+                        f"Player '{player}' not found on '{self.mail or 'default_user'}'. Available: {avail_str}"
+                    )
             if not raw_world:
                 matches = [
                     c
@@ -1879,7 +1922,7 @@ class Session:
                 ]
                 if len(matches) != 1:
                     raise ValueError(
-                        f"Please specify --world (available: {avail_str})."
+                        f"Please specify --world and/or --player (available: {avail_str})."
                     )
             else:
                 matches = []
@@ -1904,10 +1947,15 @@ class Session:
                     )
                 if len(matches) > 1:
                     matched_str = ", ".join(
-                        f"s{num}-{slang}" for _, num, slang, _, _ in matches
+                        f"s{num}-{slang} - {acc.get('name', '?')}"
+                        for acc, num, slang, _, _ in matches
                     )
+                    if len({(num, slang.lower()) for _, num, slang, _, _ in matches}) == 1:
+                        hint = "specify --player"
+                    else:
+                        hint = f"specify e.g. --world=s{want_mundo or '<number>'}-<lang>"
                     raise ValueError(
-                        f"World '{world}' matches multiple servers ({matched_str}); specify e.g. --world=s{want_mundo}-<lang>."
+                        f"World '{world}' matches multiple accounts ({matched_str}); {hint}."
                     )
 
             acc, num, slang, login_lang, wname = matches[0]
@@ -2007,7 +2055,9 @@ class Session:
 
         matched_stored = []
         for item in stored_candidates:
-            _, mundo_k, srv_k, _ = item
+            uname, mundo_k, srv_k, _ = item
+            if want_player and str(uname).lower() != want_player:
+                continue
             if not raw_world:
                 if want_servidor is None or srv_k.lower() == want_servidor:
                     matched_stored.append(item)
