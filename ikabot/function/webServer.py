@@ -67,6 +67,72 @@ def get_local_network_ip():
     return None
 
 
+def is_port_in_use(port: int) -> bool:
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            return s.connect_ex(("127.0.0.1", port)) == 0
+    except Exception as e:
+        return True
+
+
+def ask_for_port():
+    """Asks the user for the web server port until a free one is given
+    Returns
+    -------
+    port : str or None
+        None when the answer is empty or 0
+    """
+    while True:
+        print(
+            "Please enter a port number (1 - 65535) to run the web server on (leave empty or 0 for random): "
+        )
+        port = read(min=0, max=65535, digit=True, empty=True)
+        if port == "" or port == 0:
+            return None
+        if not is_port_in_use(int(port)):
+            return str(int(port))
+        print(f"Port {port} is already in use, try another port.")
+
+
+def get_env_port():
+    """Returns the port set in IKABOT_WEB_PORT, or None with a warning when it is not a valid port or is already in use
+    Returns
+    -------
+    port : str or None
+    """
+    port = config.IKABOT_WEB_PORT
+    if not (port.isdigit() and 0 < int(port) <= 65535):
+        print(f"IKABOT_WEB_PORT={port} is not a valid port, ignoring it.")
+        return None
+    port = str(int(port))
+    if is_port_in_use(int(port)):
+        print(f"Port {port} from IKABOT_WEB_PORT is already in use, ignoring it.")
+        return None
+    return port
+
+
+def derived_port(session):
+    """Returns the port derived from the account, or the next free one after it
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+
+    Returns
+    -------
+    port : str
+    """
+    port = (
+        sum(ord(c) ** 2 for c in session.mail)
+        + sum(ord(c) ** 2 for c in session.host)
+        + sum(ord(c) ** 2 for c in session.username)
+    ) % 2000 + 43000
+
+    # bang on ports from `port` to 65535 until an available one is found
+    while is_port_in_use(port):
+        port += 1
+    return str(port)
+
+
 def get_request_params(request):
     """Returns the parameters sent by the browser. When a name is both in the page
     URL and in the form, the form value wins, as in the game server
@@ -345,46 +411,19 @@ def webServer(session, event, stdin_fd, predetermined_input, port=None):
             enter()
             return None
 
-    def is_port_in_use(port: int) -> bool:
-        try:
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                return s.connect_ex(("127.0.0.1", port)) == 0
-        except Exception as e:
-            return True
-
-    # If the port is not provided, prompt the user for it if enabled from the config file
-    if config.enable_CustomPort is True:
-        while True:
-            if port is None:
-                print("Please enter a port number (1 - 65535) to run the web server on (leave empty or 0 for random): ")
-                port = read(min=0, max=65535, digit=True, empty=True)
-                if port == "" or port == 0:
-                    port = None
-                    break
-                else:
-                    port = str(int(port))
-                    if is_port_in_use(int(port)):
-                        print(f"Port {port} is already in use, try another port.")
-                        continue
-                    break
-
-    # If the port is still None, select a random port as in the original script
-    if port is None:
-        port = str(
-            (
-                sum(ord(c) ** 2 for c in session.mail)
-                + sum(ord(c) ** 2 for c in session.host)
-                + sum(ord(c) ** 2 for c in session.username)
-            )
-            % 2000
-            + 43000
+    # IKABOT_WEB_PORT=ask prompts for the port, a number fixes it, unset derives it from the account
+    port_setting = config.IKABOT_WEB_PORT.lower()
+    if port is None and port_setting == "ask":
+        port = ask_for_port()
+    elif port is None and port_setting:
+        port = get_env_port()
+    elif port is None and config.enable_CustomPort is True:
+        print(
+            "enable_CustomPort is deprecated and will be removed, use IKABOT_WEB_PORT=ask instead."
         )
-
-        # bang on ports from `port` to 65535 until an available one is found
-        while True:
-            if not is_port_in_use(int(port)):
-                break
-            port = str(int(port) + 1)
+        port = ask_for_port()
+    if port is None:
+        port = derived_port(session)
 
     # try to get local network ip if possible
     local_network_ip = get_local_network_ip()
