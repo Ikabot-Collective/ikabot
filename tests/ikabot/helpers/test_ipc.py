@@ -359,6 +359,47 @@ class TestIPC(unittest.TestCase):
         self.assertEqual(json.loads(out.getvalue())["status"], "ok")
         self.assertFalse(ping_ipc_server())
 
+    @patch("ikabot.helpers.ipc.updateProcessList")
+    @patch("ikabot.helpers.ipc.multiprocessing.Process")
+    def test_prepare_error_is_returned_and_no_task_starts(self, mock_proc_cls, mock_update_plist):
+        def refuse(session, port=None):
+            raise ValueError(f"port {port} is already in use")
+
+        @task("ipc_prepare_refuse_task", prepare=refuse)
+        def refuse_task(session, port=None):
+            pass
+
+        menu_session = MagicMock(logged=True, mail="", username="PlayerOne", mundo="74", servidor="es")
+        resp = IPCServer(default_session=menu_session).handle_request(
+            {"action": "start_task", "task": "ipc_prepare_refuse_task", "config": {"port": 8080}}
+        )
+        self.assertEqual(
+            resp,
+            {"status": "error", "error": "port 8080 is already in use", "task": "ipc_prepare_refuse_task"},
+        )
+        mock_proc_cls.assert_not_called()
+        mock_update_plist.assert_not_called()
+
+    @patch("ikabot.helpers.ipc.updateProcessList")
+    @patch("ikabot.helpers.ipc.multiprocessing.Process")
+    def test_prepare_fills_in_the_config(self, mock_proc_cls, mock_update_plist):
+        def fill(session, port=None):
+            return {"port": port or "43123"}
+
+        @task("ipc_prepare_fill_task", prepare=fill)
+        def fill_task(session, port=None):
+            pass
+
+        mock_proc_cls.side_effect = self._started_process(MagicMock(pid=55))
+        menu_session = MagicMock(logged=True, mail="", username="PlayerOne", mundo="74", servidor="es")
+        resp = IPCServer(default_session=menu_session).handle_request(
+            {"action": "start_task", "task": "ipc_prepare_fill_task", "config": {}}
+        )
+        self.assertEqual(resp["status"], "ok")
+        self.assertEqual(mock_proc_cls.call_args.kwargs["args"][2], {"port": "43123"})
+        saved_entry = mock_update_plist.call_args.kwargs["programprocesslist"][0]
+        self.assertEqual(saved_entry["config"], {"port": "43123"})
+
 
 if __name__ == "__main__":
     unittest.main()

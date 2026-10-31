@@ -616,7 +616,10 @@ class IPCServer:
             if isinstance(exc, KeyboardInterrupt):
                 raise
             logger.error("IPC request failed", exc_info=True)
-            return {"status": "error", "error": str(exc)}
+            response = {"status": "error", "error": str(exc)}
+            if request.get("task"):
+                response["task"] = request["task"]
+            return response
 
     def _start_task(self, request):
         task_name = request.get("task")
@@ -629,6 +632,12 @@ class IPCServer:
         canonical_name, task_func = _resolve_task(task_name)
         clean_config = _validate_task_config(canonical_name, task_func, config_dict)
         session = self._get_or_create_session(email, world, server, player)
+        prepare = getattr(task_func, "prepare", None)
+        if prepare is not None:
+            # errors found here go back to the CLI instead of only to the task's log
+            prepared = prepare(session, **clean_config)
+            if prepared is not None:
+                clean_config = _validate_task_config(canonical_name, task_func, prepared)
 
         started = multiprocessing.Event()
         proc = multiprocessing.Process(
