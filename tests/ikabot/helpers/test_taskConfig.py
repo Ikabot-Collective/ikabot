@@ -13,7 +13,8 @@ from ikabot.helpers.taskConfig import (
 
 OWN_CITIES = (
     ["111", "222"],
-    {"111": {"id": 111, "name": "Alpha"}, "222": {"id": 222, "name": "Beta"}},
+    # getIdsOfCities strips the backslashes of the unicode escapes: "Néstor" arrives as "Nu00e9stor"
+    {"111": {"id": 111, "name": "Alpha"}, "222": {"id": 222, "name": "Nu00e9stor"}},
 )
 
 
@@ -77,7 +78,7 @@ class TestRequireOwnCity(unittest.TestCase):
         self.assertEqual(requireOwnCity(MagicMock(), 222, "wineCityId"), "222")
 
     def test_another_city_lists_the_own_ones(self, _mock_ids):
-        with self.assertRaisesRegex(ValueError, r"wineCityId 999 is not one of your cities\. Your cities: 111 \(Alpha\), 222 \(Beta\)"):
+        with self.assertRaisesRegex(ValueError, r"wineCityId 999 is not one of your cities\. Your cities: 111 \(Alpha\), 222 \(Néstor\)"):
             requireOwnCity(MagicMock(), "999", "wineCityId")
 
 

@@ -14,6 +14,7 @@ from ikabot.config import city_url
 from ikabot.helpers.botComm import discordDataIsValid, telegramDataIsValid
 from ikabot.helpers.getJson import getCity
 from ikabot.helpers.pedirInfo import getIdsOfCities
+from ikabot.helpers.varios import decodeUnicodeEscape
 
 
 def getCityById(session, city_id):
@@ -141,7 +142,7 @@ def requireOwnCity(session, value, name):
     city_id = asId(value, name)
     ids, cities = getIdsOfCities(session)
     if city_id not in ids:
-        own = ", ".join("{} ({})".format(i, cities[i]["name"]) for i in ids)
+        own = ", ".join("{} ({})".format(i, decodeUnicodeEscape(cities[i]["name"])) for i in ids)
         raise ValueError("{} {} is not one of your cities. Your cities: {}".format(name, city_id, own))
     return city_id
 
