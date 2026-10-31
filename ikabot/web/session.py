@@ -31,6 +31,8 @@ from ikabot.helpers.sessionStorage import (
     get_users_dir,
     find_user_file_for_email,
     session_data_lock,
+    read_json_file,
+    get_task_pids_by_account,
 )
 from ikabot.helpers.botComm import *
 from ikabot.helpers.getJson import getCity
@@ -188,7 +190,9 @@ class Session:
         for the event that a killed child never fires, so it would hang forever.
         If the parent process is another ikabot process (menu / webServer launcher),
         terminate it as well. If we are the top-level menu process, the parent is
-        just the terminal/shell and is left alone."""
+        just the terminal/shell and is left alone.
+        A parent that also runs tasks of other accounts (tasks started through the
+        CLI / IPC) is left alone too, and only this account's tasks are terminated."""
         try:
             import psutil
             parent = psutil.Process(os.getppid())
@@ -198,18 +202,43 @@ class Session:
                 parent_cmd = " ".join(parent.cmdline()).lower()
                 if "command_line" in parent_cmd or "ikabot" in parent_cmd:
                     my_pid = os.getpid()
-                    for proc in parent.children(recursive=True):
-                        if proc.pid == my_pid:
+                    siblings = [
+                        proc for proc in parent.children(recursive=True) if proc.pid != my_pid
+                    ]
+                    own_pids, other_pids = self.__accountTaskPids()
+                    # padre is still True while the menu waits for this task's configurator
+                    shared_parent = not self.padre and any(
+                        proc.pid in other_pids for proc in siblings
+                    )
+                    for proc in siblings:
+                        if shared_parent and proc.pid not in own_pids:
                             continue
                         try:
                             proc.terminate()
                         except Exception:
                             pass
-                    parent.terminate()
-                    parent.wait(timeout=5)
+                    if not shared_parent:
+                        parent.terminate()
+                        parent.wait(timeout=5)
         except Exception:
             pass
         os._exit(1)
+
+    def __accountTaskPids(self):
+        """Returns (pids of this account's tasks, pids of every other account's tasks)"""
+        own_key = (
+            (getattr(self, "mail", None) or "").lower(),
+            getattr(self, "username", None),
+            str(getattr(self, "mundo", "")),
+            getattr(self, "servidor", None),
+        )
+        own_pids, other_pids = set(), set()
+        for key, pids in get_task_pids_by_account().items():
+            if key == own_key:
+                own_pids |= pids
+            else:
+                other_pids |= pids
+        return own_pids, other_pids
 
     def isExpired(self, html):
         return self.__isExpired(html)
@@ -1695,6 +1724,387 @@ class Session:
     def deleteSessionData(self):
         """Deletes session data for this user from disk"""
         delete_session_data(self)
+
+    @classmethod
+    def from_saved(cls, mail=None, world=None, server=None, player=None):
+        """Create an authenticated Session non-interactively using saved credentials/cookies.
+        ``player`` (in-game name) picks one account when the lobby has several on the same world."""
+        want_player = str(player).strip().lower() if player else None
+        if mail and str(mail).strip() and str(mail).strip() != "default_user":
+            matching_path, _ = find_user_file_for_email(mail)
+            if not matching_path:
+                raise ValueError(
+                    f"No saved session found for '{mail}'. Please log in interactively first."
+                )
+            user_data = read_json_file(matching_path, {})
+            resolved_mail = user_data.get("email") or str(mail).strip()
+        else:
+            default_path = get_user_file_path("")
+            if os.path.exists(default_path):
+                user_data = read_json_file(default_path, {})
+                resolved_mail = ""
+            else:
+                saved_users = get_saved_users()
+                if len(saved_users) == 1:
+                    resolved_mail = saved_users[0]
+                    matching_path, _ = find_user_file_for_email(resolved_mail)
+                    user_data = read_json_file(
+                        matching_path or get_user_file_path(resolved_mail), {}
+                    )
+                elif not saved_users:
+                    raise ValueError(
+                        "No saved accounts found. Please log in interactively first."
+                    )
+                else:
+                    raise ValueError(
+                        f"Multiple saved accounts found ({', '.join(saved_users)}); please specify --email."
+                    )
+
+        self = cls.__new__(cls)
+        self.padre = False
+        self.logged = False
+        self.blackbox = None
+        self.mail = resolved_mail
+        self.password = ""
+        self.locale = config.IKABOT_LOCALE
+        self.gf_lang = config.IKABOT_GF_LANG
+        self.accept_language = config.build_accept_language(self.locale, self.gf_lang)
+        self.timezone_id = config.IKABOT_TIMEZONE_ID
+        self.logger = getLogger(__name__)
+        self.requestHistory = deque(maxlen=5)
+        requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
+
+        selected_ua = user_agents[sum(ord(c) for c in self.mail) % len(user_agents)]
+        self.api_user_agent = selected_ua
+        self.user_agent = selected_ua
+        self.s = requests.Session()
+        self.cipher = AESCipher(self.mail, self.password)
+        self.account = None
+
+        want_mundo, want_servidor, raw_world = parse_world_spec(world, server)
+
+        def _world_headers():
+            return {
+                "Host": self.host,
+                "User-Agent": self.user_agent,
+                "Accept": "*/*",
+                "Accept-Language": self.accept_language,
+                "Accept-Encoding": "gzip, deflate, br",
+                "Referer": f"https://{self.host}",
+                "X-Requested-With": "XMLHttpRequest",
+                "Origin": f"https://{self.host}",
+                "DNT": "1",
+                "Connection": "keep-alive",
+                "Pragma": "no-cache",
+                "Cache-Control": "no-cache",
+            }
+
+        def _try_world_cookies(cookie_dict, session_data):
+            old_s = requests.Session()
+            old_s.headers.clear()
+            old_s.headers.update(self.headers)
+            requests.cookies.cookiejar_from_dict(
+                cookie_dict, cookiejar=old_s.cookies, overwrite=True
+            )
+            self.__update_proxy(obj=old_s, sessionData=session_data)
+            try:
+                old_resp = old_s.get(self.urlBase, verify=config.do_ssl_verify)
+                html = old_resp.text
+            except Exception as exc:
+                raise RuntimeError(f"Network/proxy error connecting to {self.host}: {exc}")
+            if self.__isInVacation(html):
+                raise RuntimeError("The account is in vacation mode.")
+            if (
+                not self.__isExpired(html)
+                and not self.__isSessionRotated(html, response=old_resp)
+                and old_resp.status_code != 404
+            ):
+                requests.cookies.cookiejar_from_dict(
+                    cookie_dict, cookiejar=self.s.cookies, overwrite=True
+                )
+                self.__update_proxy(sessionData=session_data)
+                self.s.headers.clear()
+                self.s.headers.update(self.headers)
+                return True
+            return False
+
+        def _finalize():
+            self.logged = True
+            self.dev_api_host = self.host
+            self.dev_url_base = self.urlBase
+            cookies = self.s.cookies.get_dict()
+            self.dev_ikariam_cookie = cookies.get("ikariam")
+            self.dev_gf_token = cookies.get("gf-token-production")
+            return self
+
+        gf_token = (
+            user_data.get("shared", {}).get("lobby", {}).get("gf-token-production")
+        )
+        lobby_ok = False
+        if gf_token:
+            cookie_obj = requests.cookies.create_cookie(
+                domain=".gameforge.com",
+                name="gf-token-production",
+                value=gf_token,
+            )
+            self.s.cookies.set_cookie(cookie_obj)
+            try:
+                lobby_ok = self.__test_lobby_cookie()
+            except Exception:
+                lobby_ok = False
+
+        if lobby_ok:
+            lobby_headers = {
+                "Host": "lobby.ikariam.gameforge.com",
+                "User-Agent": self.user_agent,
+                "Accept": "application/json",
+                "Accept-Language": self.accept_language,
+                "Accept-Encoding": "gzip, deflate",
+                "Referer": "https://lobby.ikariam.gameforge.com/{}/hub".format(
+                    self.locale.replace("-", "_")
+                ),
+                "Authorization": f"Bearer {self.s.cookies['gf-token-production']}",
+                "DNT": "1",
+                "Connection": "close",
+            }
+            self.s.headers.clear()
+            self.s.headers.update(lobby_headers)
+            accounts = json.loads(
+                self.s.get("https://lobby.ikariam.gameforge.com/api/users/me/accounts").text,
+                strict=False,
+            )
+            servers = json.loads(
+                self.s.get("https://lobby.ikariam.gameforge.com/api/servers").text,
+                strict=False,
+            )
+            srv_by_group = {
+                srv["accountGroup"]: (srv["name"], srv["language"])
+                for srv in servers
+                if isinstance(srv, dict) and "accountGroup" in srv
+            }
+            candidates = []
+            for acc in accounts:
+                if not isinstance(acc, dict) or acc.get("blocked") is not False:
+                    continue
+                num = str(acc["server"]["number"])
+                login_lang = acc["server"]["language"]
+                wname, slang = srv_by_group.get(
+                    acc.get("accountGroup"), (f"s{num}", login_lang)
+                )
+                candidates.append((acc, num, slang, login_lang, wname))
+
+            if not candidates:
+                raise ValueError(
+                    f"No unblocked game accounts found for '{self.mail or 'default_user'}'."
+                )
+
+            avail_str = ", ".join(
+                f"s{num}-{slang} ({wname}) - {acc.get('name', '?')}"
+                for acc, num, slang, _, wname in candidates
+            )
+            if want_player:
+                candidates = [
+                    c
+                    for c in candidates
+                    if str(c[0].get("name", "")).lower() == want_player
+                ]
+                if not candidates:
+                    raise ValueError(
+                        f"Player '{player}' not found on '{self.mail or 'default_user'}'. Available: {avail_str}"
+                    )
+            if not raw_world:
+                matches = [
+                    c
+                    for c in candidates
+                    if want_servidor is None
+                    or c[2].lower() == want_servidor
+                    or c[3].lower() == want_servidor
+                ]
+                if len(matches) != 1:
+                    raise ValueError(
+                        f"Please specify --world and/or --player (available: {avail_str})."
+                    )
+            else:
+                matches = []
+                for c in candidates:
+                    _, num, slang, login_lang, wname = c
+                    if want_mundo is not None:
+                        if num == want_mundo and (
+                            want_servidor is None
+                            or slang.lower() == want_servidor
+                            or login_lang.lower() == want_servidor
+                        ):
+                            matches.append(c)
+                    elif wname.strip().lower() == raw_world.strip().lower() and (
+                        want_servidor is None
+                        or slang.lower() == want_servidor
+                        or login_lang.lower() == want_servidor
+                    ):
+                        matches.append(c)
+                if not matches:
+                    raise ValueError(
+                        f"World '{world}' not found on '{self.mail or 'default_user'}'. Available: {avail_str}"
+                    )
+                if len(matches) > 1:
+                    matched_str = ", ".join(
+                        f"s{num}-{slang} - {acc.get('name', '?')}"
+                        for acc, num, slang, _, _ in matches
+                    )
+                    if len({(num, slang.lower()) for _, num, slang, _, _ in matches}) == 1:
+                        hint = "specify --player"
+                    else:
+                        hint = f"specify e.g. --world=s{want_mundo or '<number>'}-<lang>"
+                    raise ValueError(
+                        f"World '{world}' matches multiple accounts ({matched_str}); {hint}."
+                    )
+
+            acc, num, slang, login_lang, wname = matches[0]
+            self.account = acc
+            self.username = acc["name"]
+            self.login_servidor = login_lang
+            self.account_group = acc["accountGroup"]
+            self.mundo = num
+            self.word = wname
+            self.servidor = slang
+            self.host = f"s{self.mundo}-{self.servidor}.ikariam.gameforge.com"
+            self.urlBase = f"https://{self.host}/index.php?"
+            self.headers = _world_headers()
+
+            session_data = self.getSessionData()
+            if "cookies" in session_data and _try_world_cookies(
+                session_data["cookies"], session_data
+            ):
+                return _finalize()
+
+            blackbox_token = getNewBlackBoxToken(self)
+            if self.api_user_agent:
+                self.user_agent = self.api_user_agent
+            if not (
+                any(c.isupper() for c in blackbox_token)
+                and any(c.islower() for c in blackbox_token)
+                and any(c.isdigit() for c in blackbox_token)
+            ):
+                raise RuntimeError("Invalid blackbox token returned from API.")
+            self.blackbox = blackbox_token
+
+            link_headers = {
+                "authority": "lobby.ikariam.gameforge.com",
+                "method": "POST",
+                "path": "/api/users/me/loginLink",
+                "scheme": "https",
+                "accept": "application/json",
+                "accept-encoding": "gzip, deflate, br",
+                "accept-language": self.accept_language,
+                "authorization": "Bearer " + self.s.cookies["gf-token-production"],
+                "content-type": "application/json",
+                "origin": "https://lobby.ikariam.gameforge.com",
+                "referer": "https://lobby.ikariam.gameforge.com/{}/accounts".format(
+                    self.locale.replace("-", "_")
+                ),
+                "user-agent": self.user_agent,
+            }
+            self.s.headers.clear()
+            self.s.headers.update(link_headers)
+            data = {
+                "server": {"language": self.login_servidor, "number": self.mundo},
+                "clickedButton": "account_list",
+                "id": self.account["id"],
+                "blackbox": self.blackbox,
+            }
+            resp = self.s.post(
+                "https://lobby.ikariam.gameforge.com/api/users/me/loginLink", json=data
+            )
+            resp_json = json.loads(resp.text, strict=False)
+            if "url" not in resp_json:
+                raise RuntimeError(
+                    f"Lobby loginLink failed ({resp.status_code}): {resp.text}"
+                )
+            url = resp_json["url"]
+            if not re.search(
+                r"https://s\d+-\w{2}\.ikariam\.gameforge\.com/index\.php\?", url
+            ):
+                raise RuntimeError(f"Unexpected loginLink URL: {url}")
+
+            self.headers = _world_headers()
+            self.s.headers.clear()
+            self.s.headers.update(self.headers)
+            self.__update_proxy(sessionData=session_data)
+            html = self.s.get(url, verify=config.do_ssl_verify).text
+            if self.__isInVacation(html):
+                raise RuntimeError("The account is in vacation mode.")
+            if self.__isExpired(html):
+                raise RuntimeError("Game login failed (session immediately expired).")
+            self.__saveNewCookies()
+            return _finalize()
+
+        # Fallback: lobby token missing/expired — try stored per-world cookies directly
+        players = user_data.get("players", {})
+        stored_candidates = []
+        if isinstance(players, dict):
+            for uname, mundos in players.items():
+                if not isinstance(mundos, dict):
+                    continue
+                for mundo_k, srvs in mundos.items():
+                    if not isinstance(srvs, dict):
+                        continue
+                    for srv_k, pdata in srvs.items():
+                        if isinstance(pdata, dict) and "cookies" in pdata:
+                            stored_candidates.append(
+                                (uname, str(mundo_k), str(srv_k), pdata)
+                            )
+
+        matched_stored = []
+        for item in stored_candidates:
+            uname, mundo_k, srv_k, _ = item
+            if want_player and str(uname).lower() != want_player:
+                continue
+            if not raw_world:
+                if want_servidor is None or srv_k.lower() == want_servidor:
+                    matched_stored.append(item)
+            elif want_mundo is not None and mundo_k == want_mundo and (
+                want_servidor is None or srv_k.lower() == want_servidor
+            ):
+                matched_stored.append(item)
+
+        if len(matched_stored) == 1:
+            uname, mundo_k, srv_k, pdata = matched_stored[0]
+            self.username = uname
+            self.mundo = mundo_k
+            self.servidor = srv_k
+            self.login_servidor = srv_k
+            self.account_group = f"{srv_k}_{mundo_k}"
+            self.word = f"s{mundo_k}-{srv_k}"
+            self.host = f"s{mundo_k}-{srv_k}.ikariam.gameforge.com"
+            self.urlBase = f"https://{self.host}/index.php?"
+            self.headers = _world_headers()
+            session_data = self.getSessionData()
+            if _try_world_cookies(pdata["cookies"], session_data):
+                return _finalize()
+
+        raise RuntimeError(
+            f"Saved session for '{self.mail or 'default_user'}' has expired or has no valid saved cookies for world '{world or ''}'. Please log in interactively first."
+        )
+
+
+def parse_world_spec(world_str, server_str=None):
+    """Parse world selector like 's301', '301', 's301-en', 'en-s301', or 'Alpha'.
+    Returns (mundo: str | None, servidor: str | None, raw_world: str).
+    """
+    explicit_srv = str(server_str).strip().lower() if server_str else None
+    if world_str is None or str(world_str).strip() == "":
+        return None, explicit_srv, ""
+    raw = str(world_str).strip()
+    low = raw.lower()
+    m = re.match(r"^s?(\d+)[-_.](\w{2,4})(?:\.ikariam\.gameforge\.com)?$", low)
+    if m:
+        return m.group(1), explicit_srv or m.group(2), raw
+    m = re.match(r"^([a-z]{2,4})[-_.]?s?(\d+)$", low)
+    if m and m.group(1) != "s":
+        return m.group(2), explicit_srv or m.group(1), raw
+    m = re.match(r"^s?(\d+)$", low)
+    if m:
+        return m.group(1), explicit_srv, raw
+    return None, explicit_srv, raw
 
 
 def normal_get(url, params={}):

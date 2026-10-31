@@ -4,6 +4,7 @@
 import logging
 from ikabot.helpers.logging import getLogger
 import base64
+import importlib.util
 import json
 import pickle
 import re
@@ -157,13 +158,80 @@ def get_request_params(request):
 
 from ikabot.helpers.decorators import configurator, task
 
-@task("webServer")
-def do_webServer(session, port, local_network_ip):
+
+def resolve_task_port(session, port):
+    """Returns the web server port of a task, which may be started without the
+    configurator (CLI / --batch)
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    port : int or str or None
+        None takes IKABOT_WEB_PORT when it holds a free port, else the port derived from the account
+
+    Returns
+    -------
+    port : str or None
+        None when the given port is not a valid port
+    """
+    if port is None or str(port).strip() == "":
+        # a task has no console to ask on, so IKABOT_WEB_PORT=ask falls back to the derived port
+        if config.IKABOT_WEB_PORT and config.IKABOT_WEB_PORT.lower() != "ask":
+            port = get_env_port()
+        return port or derived_port(session)
+    port = str(port).strip()
+    if not (port.isdigit() and 0 < int(port) <= 65535):
+        return None
+    return str(int(port))
+
+
+def _not_started(session, reason):
+    msg = "Web server not started: {}".format(reason)
+    getLogger(__name__).error(msg)
+    sendToBot(session, msg)
+
+
+def prepare_webServer(session, port=None, local_network_ip=None):
+    """Checks the config of a web server started without the configurator (CLI / --batch)
+    and fills in the port and the local network ip
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    port : int or str or None
+    local_network_ip : str or None
+
+    Returns
+    -------
+    config : dict
+    """
+    if importlib.util.find_spec("flask") is None:
+        raise ValueError("flask is not installed, install it with: python3 -m pip install flask")
+    resolved_port = resolve_task_port(session, port)
+    if resolved_port is None:
+        raise ValueError("{!r} is not a valid port".format(port))
+    # on Windows werkzeug's SO_REUSEADDR lets a second server bind a busy port
+    if is_port_in_use(int(resolved_port)):
+        raise ValueError("port {} is already in use".format(resolved_port))
+    if local_network_ip is None:
+        local_network_ip = get_local_network_ip()
+    return {"port": resolved_port, "local_network_ip": local_network_ip}
+
+
+@task("webServer", prepare=prepare_webServer)
+def do_webServer(session, port=None, local_network_ip=None):
     try:
         import flask
         from flask import Flask, Response, request
     except Exception:
+        _not_started(session, "flask is not installed")
         return
+
+    # checked again here: the port may have been taken since the CLI checked it
+    try:
+        prepared = prepare_webServer(session, port, local_network_ip)
+    except ValueError as e:
+        _not_started(session, str(e))
+        return
+    port, local_network_ip = prepared["port"], prepared["local_network_ip"]
 
     sys.flask = flask
 
@@ -351,7 +419,7 @@ def do_webServer(session, port, local_network_ip):
             pass
 
     except Exception:
-        pass
+        getLogger(__name__).error("Web server stopped with an error", exc_info=True)
 
 
 @configurator

@@ -541,7 +541,7 @@ def sendResourcesNeeded(session, destination_city_id, city_origins, missing_reso
             target = _round_up_resources(missing) if useRounding else missing
             remaining = target
 
-            for cityOrigin in city_origins[i]:
+            for cityOrigin in (city_origins.get(i) or city_origins.get(str(i), [])):
                 if remaining == 0:
                     break
 
