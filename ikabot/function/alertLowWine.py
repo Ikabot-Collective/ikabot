@@ -16,6 +16,7 @@ from ikabot.helpers.pedirInfo import getIdsOfCities
 from ikabot.helpers.decorators import configurator, task
 from ikabot.helpers.resources import getWineConsumptionPerHour, getAvailableResources, getProductionPerHour
 from ikabot.helpers.signals import setInfoSignal
+from ikabot.helpers.taskConfig import asBool, asInt, requireNotifications
 from ikabot.helpers.varios import daysHoursMinutes
 from ikabot.helpers.planRoutes import *
 
@@ -73,8 +74,42 @@ def isWineTransportInProgress(session, destinationCityId):
 
     return None
 
-@task("alertLowWine")
-def do_it(session, hours, auto_transfer, transfer_amount):
+CHECK_MINUTES = 60
+
+
+def check_status():
+    """Returns the status shown in the process list after a check
+    Returns
+    -------
+    status : str
+    """
+    return "Every {} min, last check {}".format(CHECK_MINUTES, time.strftime("%H:%M"))
+
+
+def prepare_alertLowWine(session, hours, auto_transfer=False, transfer_amount=0):
+    """Checks the config of an alertLowWine task started from the CLI
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    hours : int
+    auto_transfer : bool
+    transfer_amount : int
+
+    Returns
+    -------
+    config : dict
+    """
+    requireNotifications(session)
+    auto_transfer = asBool(auto_transfer, "auto_transfer")
+    return {
+        "hours": asInt(hours, "hours", minimum=1),
+        "auto_transfer": auto_transfer,
+        "transfer_amount": asInt(transfer_amount, "transfer_amount", minimum=1) if auto_transfer else 0,
+    }
+
+
+@task("alertLowWine", prepare=prepare_alertLowWine)
+def do_it(session, hours, auto_transfer=False, transfer_amount=0):
     """
     Parameters
     ----------
@@ -192,15 +227,17 @@ def do_it(session, hours, auto_transfer, transfer_amount):
             else:
                 was_alerted[cityId] = False
 
+        session.setStatus(check_status())
+
         if message_log:
-            
+
             sendToBot(session, "\n".join(message_log))
             message_log.clear()
 
         if routes:
             executeRoutes(session, routes, useFreighters=False)
             routes.clear()
-        time.sleep(60 * 60)
+        time.sleep(CHECK_MINUTES * 60)
 @configurator
 def alertLowWine(session, event, stdin_fd, predetermined_input):
     """
