@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import time
 import json
 import re
 import traceback
@@ -229,7 +230,10 @@ class TavernManager:
         self._cache.clear()
         results = []
 
-        for city_id in cities_ids:
+        for i, city_id in enumerate(cities_ids):
+            # space out the cities, as modifyProduction does, instead of hitting the server back to back
+            if i > 0:
+                wait(3, 4)
             city = cities[city_id]
             result = {
                 'name': city['name'],
@@ -413,21 +417,83 @@ def _print_results_table(results):
 
 
 from ikabot.helpers.decorators import configurator, task
+from ikabot.helpers.taskConfig import asInt, requireOwnCity
 
-@task("tavernManager")
-def do_tavernManager(session, run_hours, cities_ids, cities, notification_mode):
+
+def prepare_tavernManager(session, run_hours, cities_ids=None, cities=None, notification_mode=2, check_now=True):
+    """Checks the config of a tavernManager task (equilibrium mode) started from the CLI
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    run_hours : int
+        hours between checks, 0 checks once and stops
+    cities_ids : list or None
+        None checks all own cities
+    cities : dict
+        not needed, the names are fetched by the task
+    notification_mode : int
+        1 = every change, 2 = only errors, 3 = none
+    check_now : bool
+        always on from the CLI
+
+    Returns
+    -------
+    config : dict
+    """
+    if cities_ids is not None:
+        if not isinstance(cities_ids, (list, tuple)):
+            raise ValueError("cities_ids must be a list of city ids, got {!r}".format(cities_ids))
+        cities_ids = [requireOwnCity(session, city_id, "cities_ids") for city_id in cities_ids] or None
+    return {
+        "run_hours": asInt(run_hours, "run_hours", minimum=0, maximum=24),
+        "cities_ids": cities_ids,
+        "notification_mode": asInt(notification_mode, "notification_mode", minimum=1, maximum=3),
+    }
+
+
+@task("tavernManager", prepare=prepare_tavernManager)
+def do_tavernManager(session, run_hours, cities_ids=None, cities=None, notification_mode=2, check_now=True):
+    """
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    run_hours : int
+        hours between checks, 0 checks once and stops
+    cities_ids : list or None
+        None checks all own cities
+    cities : dict or None
+        the cities' data as returned by getIdsOfCities; None fetches it on each check
+    notification_mode : int
+    check_now : bool
+        False when the configurator already ran the first check
+    """
     mgr = TavernManager(session, notification_mode)
     def run_check():
-        results = mgr.process_equilibrium(cities_ids, cities)
-        return results
+        if cities is not None:
+            return mgr.process_equilibrium(cities_ids, cities)
+        own_ids, own_cities = getIdsOfCities(session)
+        ids = [city_id for city_id in (cities_ids or own_ids) if city_id in own_cities]
+        return mgr.process_equilibrium(ids, own_cities)
 
-    info = f"\nTavern Equilibrium: {len(cities_ids)} cities, every {run_hours}h\n"
+    which = "{} cities".format(len(cities_ids)) if cities_ids else "all cities"
+    info = f"\nTavern Equilibrium: {which}, every {run_hours}h\n"
     setInfoSignal(session, info)
+
+    if check_now:
+        run_check()
+        if run_hours == 0:
+            session.setStatus(f"Equilibrium check @{getDateTime()}")
+            return
+        session.setStatus(checked_status(run_hours))
 
     while True:
         wait(run_hours * 3600)
         run_check()
-        session.setStatus(f"Equilibrium check @{getDateTime()}")
+        session.setStatus(checked_status(run_hours))
+
+
+def checked_status(run_hours):
+    return "Every {}h, last check {}".format(run_hours, time.strftime("%H:%M"))
 
 
 @configurator
@@ -600,5 +666,6 @@ def _run_equilibrium_mode(session):
         "run_hours": run_hours,
         "cities_ids": cities_ids,
         "cities": cities,
-        "notification_mode": notification_mode
+        "notification_mode": notification_mode,
+        "check_now": False,
     }
