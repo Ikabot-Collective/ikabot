@@ -359,6 +359,13 @@ class TestIPC(unittest.TestCase):
         self.assertEqual(json.loads(out.getvalue())["status"], "ok")
         self.assertFalse(ping_ipc_server())
 
+    def test_cli_answers_in_utf8(self):
+        stdout = MagicMock()
+        with patch("sys.stdout", stdout):
+            with self.assertRaises(SystemExit):
+                run_cli_task(["--world", "s301"])  # no --task: answers with an error
+        stdout.reconfigure.assert_called_once_with(encoding="utf-8")
+
     @patch("ikabot.helpers.ipc.updateProcessList")
     @patch("ikabot.helpers.ipc.multiprocessing.Process")
     def test_prepare_error_is_returned_and_no_task_starts(self, mock_proc_cls, mock_update_plist):
