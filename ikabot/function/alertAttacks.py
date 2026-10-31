@@ -10,6 +10,7 @@ from ikabot.helpers.botComm import *
 from ikabot.helpers.gui import enter
 from ikabot.helpers.decorators import configurator, task
 from ikabot.helpers.signals import setInfoSignal
+from ikabot.helpers.taskConfig import asInt, requireNotifications
 from ikabot.helpers.varios import daysHoursMinutes
 
 
@@ -49,8 +50,40 @@ def respondToAttack(session):
         time.sleep(max(0, 60 * 3 - elapsed))
 
 
-@task("alertAttacks")
-def do_it(session, minutes):
+def check_status(minutes, failed=False):
+    """Returns the status shown in the process list after a check
+    Parameters
+    ----------
+    minutes : int
+    failed : bool
+
+    Returns
+    -------
+    status : str
+    """
+    now = time.strftime("%H:%M")
+    if failed:
+        return "Every {} min, check failed at {}".format(minutes, now)
+    return "Every {} min, last check {}".format(minutes, now)
+
+
+def prepare_alertAttacks(session, minutes=20):
+    """Checks the config of an alertAttacks task started from the CLI
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    minutes : int
+
+    Returns
+    -------
+    config : dict
+    """
+    requireNotifications(session)
+    return {"minutes": asInt(minutes, "minutes", minimum=3)}
+
+
+@task("alertAttacks", prepare=prepare_alertAttacks)
+def do_it(session, minutes=20):
     """
     Parameters
     ----------
@@ -114,10 +147,12 @@ def do_it(session, minutes):
                     msg += "{:d}:1".format(os.getpid())
                     sendToBot(session, msg)
 
+            session.setStatus(check_status(minutes))
         except Exception as e:
             info = "\nI check for attacks every {:d} minutes\n".format(minutes)
             msg = "Error in:\n{}\nCause:\n{}".format(info, traceback.format_exc())
             sendToBot(session, msg)
+            session.setStatus(check_status(minutes, failed=True))
 
         # remove old attacks from knownAttacks
         for event_id in list(knownAttacks):
