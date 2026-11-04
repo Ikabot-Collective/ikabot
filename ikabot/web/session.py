@@ -37,6 +37,7 @@ from ikabot.helpers.getJson import getCity
 from ikabot.helpers.gui import banner, enter
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.varios import getDateTime, lastloginTimetoString
+from ikabot.web.warmPool import ConnectionWarmer, WarmAdapter
 from ikabot.helpers.apiComm import getNewBlackBoxToken
 from ikabot.helpers.lobbyDecaptcha import break_interactive_captcha
 
@@ -62,6 +63,30 @@ class Session:
         # disable ssl verification warning
         requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
         self.__login()
+
+    _warmer = None
+
+    def warmConnections(self, count=4):
+        """Keeps `count` connections to Ikariam open while requests are being sent. Ikariam closes the
+        connection after every answer, so a request which finds one ready saves around 100 ms.
+        Meant for the web server, which waits for the answer of every request
+        """
+        self._warmer = ConnectionWarmer(
+            lambda: self.s,
+            lambda: self.urlBase,
+            lambda: config.do_ssl_verify,
+            target=count,
+        )
+        self._warmer.start()
+
+    def __useWarmConnections(self):
+        if self._warmer is None:
+            return
+        self._warmer.touch()
+        # self.s is replaced when the cookies change
+        if not getattr(self.s, "_ikabot_warm", False):
+            self.s.mount("https://", WarmAdapter())
+            self.s._ikabot_warm = True
 
     def setStatus(self, message):
         """This function will modify the current tasks status message that appears in the table on the main menu
@@ -1399,6 +1424,7 @@ class Session:
         """
         self.__checkCookie()
         self.__update_proxy()
+        self.__useWarmConnections()
 
         if noIndex:
             url = self.urlBase.replace("index.php", "") + url
@@ -1529,6 +1555,7 @@ class Session:
         params_original = params
         self.__checkCookie()
         self.__update_proxy()
+        self.__useWarmConnections()
 
         # add the request id
         token = self.__token()
