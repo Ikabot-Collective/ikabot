@@ -1,6 +1,8 @@
 import datetime
 import http.server
 import os
+import queue
+import socket
 import ssl
 import sys
 import tempfile
@@ -85,6 +87,13 @@ class TestPoolQueue(unittest.TestCase):
         self.assertTrue(old.closed)
         self.assertFalse(fresh.closed)
         self.assertEqual(self.pool.pool.queue, [None, None, None, fresh])
+
+    def test_a_connection_returned_to_a_closed_pool_is_ignored(self):
+        self.pool.close()
+        self.pool._put_conn(fake_conn(open=False))
+        conn = fake_conn()
+        self.pool._put_conn(conn)
+        self.assertTrue(conn.closed)
 
     def test_a_connection_is_not_added_to_a_full_pool(self):
         self.pool.pool.queue[:] = [fake_conn(ts=1)] * 4
@@ -192,6 +201,106 @@ class TestWarmer(unittest.TestCase):
         self.warmer.touch()
         self.assertEqual(self.warmer.warm_once(), 0)
         self.assertEqual(self.accepted(), 0)
+
+
+class DelayProxy:
+    """Sends everything it receives after `delay` seconds, in both directions, like a far away server"""
+
+    def __init__(self, target_port, delay):
+        self.target_port = target_port
+        self.delay = delay
+        self.listener = socket.create_server(("127.0.0.1", 0))
+        self.port = self.listener.getsockname()[1]
+        threading.Thread(target=self._accept, daemon=True).start()
+
+    def _accept(self):
+        while True:
+            try:
+                client, _ = self.listener.accept()
+            except OSError:
+                return
+            upstream = socket.create_connection(("127.0.0.1", self.target_port))
+            for source, destination in ((client, upstream), (upstream, client)):
+                pending = queue.Queue()
+                threading.Thread(
+                    target=self._read, args=(source, pending), daemon=True
+                ).start()
+                threading.Thread(
+                    target=self._write, args=(destination, pending), daemon=True
+                ).start()
+
+    def _read(self, source, pending):
+        while True:
+            try:
+                data = source.recv(65536)
+            except OSError:
+                data = b""
+            pending.put((time.monotonic() + self.delay, data))
+            if not data:
+                return
+
+    def _write(self, destination, pending):
+        while True:
+            due, data = pending.get()
+            time.sleep(max(0, due - time.monotonic()))
+            try:
+                if data:
+                    destination.sendall(data)
+                else:
+                    # a close() with unread data would reset the connection and the client would lose the answer
+                    destination.shutdown(socket.SHUT_WR)
+                    return
+            except OSError:
+                return
+
+    def close(self):
+        self.listener.close()
+
+
+class TestFarAwayServer(unittest.TestCase):
+    """The TLS 1.3 session tickets arrive about one round trip after the handshake. When the server is far
+    away they come later than any fixed wait, and urllib3 throws away a connection it can read from
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        TestWarmer.setUpClass.__func__(cls)
+
+    @classmethod
+    def tearDownClass(cls):
+        TestWarmer.tearDownClass.__func__(cls)
+
+    def check(self, delay):
+        proxy = DelayProxy(self.server.server_address[1], delay)
+        self.addCleanup(proxy.close)
+        url = f"https://127.0.0.1:{proxy.port}/"
+        session = requests.Session()
+        session.mount("https://", WarmAdapter(pool_connections=5, pool_maxsize=5))
+        warmer = ConnectionWarmer(
+            lambda: session, lambda: url + "index.php?", lambda: False, target=2
+        )
+        warnings.simplefilter("ignore")
+        start = self.server.accepted
+        warmer.touch()
+        self.assertEqual(warmer.warm_once(), 2)
+        # the tickets are on their way
+        time.sleep(delay * 6)
+        opened = self.server.accepted - start
+        for _ in range(2):
+            self.assertEqual(session.get(url, verify=False).text, "ok")
+        time.sleep(0.3)
+        self.assertEqual(
+            self.server.accepted - start, opened, "a connection was opened again"
+        )
+
+    def test_a_server_at_100_ms(self):
+        self.check(0.05)
+
+    def test_a_server_at_250_ms(self):
+        self.check(0.125)
+
+    def test_a_server_at_500_ms(self):
+        self.check(0.25)
 
 
 if __name__ == "__main__":

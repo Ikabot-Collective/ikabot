@@ -5,8 +5,8 @@
 
 Ikariam closes the connection after every answer, so each request has to open a new one
 (DNS, TCP and TLS, around 100 ms). It does not close a connection that nobody uses for
-about 10 seconds though, so a few connections are kept ready and a request takes one of
-them instead of opening its own.
+several seconds though (it keeps it for about 19 s), so a few connections are kept ready and
+a request takes one of them instead of opening its own.
 """
 
 import socket
@@ -17,12 +17,44 @@ from urllib.parse import urlsplit
 
 import requests
 from requests.adapters import HTTPAdapter
+from urllib3.connection import HTTPSConnection
 from urllib3.connectionpool import HTTPSConnectionPool
+from urllib3.util.wait import wait_for_read
 
-# Ikariam closes the connections which wait for 30 seconds, and the ones that waited 10 seconds are still open
+# Ikariam was seen keeping an idle connection for 19 seconds and closing it at 20. A connection is
+# renewed before it waited for this long
 WARM_MAX_AGE = 8
 # nothing is opened in advance when no request came in the last seconds
 WARM_ACTIVE_WINDOW = 30
+
+
+def drain(sock):
+    """Reads what is waiting on the socket without blocking. Returns True when there was only
+    TLS records (session tickets), which leave the connection open"""
+    timeout = sock.gettimeout()
+    sock.setblocking(False)
+    try:
+        sock.recv(1)
+    except (ssl.SSLWantReadError, BlockingIOError):
+        return True
+    except OSError:
+        return False
+    finally:
+        sock.settimeout(timeout)
+    # the server closed the connection, or sent something it should not have
+    return False
+
+
+class WarmHTTPSConnection(HTTPSConnection):
+    @property
+    def is_connected(self):
+        # urllib3 asks this before it uses a connection which was waiting in the pool. The TLS session
+        # tickets can arrive late, which makes the socket readable and the connection look closed
+        if self.sock is None:
+            return False
+        if not wait_for_read(self.sock, timeout=0.0):
+            return True
+        return drain(self.sock)
 
 
 class WarmHTTPSConnectionPool(HTTPSConnectionPool):
@@ -30,11 +62,15 @@ class WarmHTTPSConnectionPool(HTTPSConnectionPool):
     A closed connection goes to the bottom, so the ones opened in advance are used first
     """
 
+    ConnectionCls = WarmHTTPSConnection
+
     def _put_conn(self, conn):
         if conn is None or conn.sock is None:
-            with self.pool.mutex:
-                if len(self.pool.queue) < self.pool.maxsize:
-                    self.pool.queue.insert(0, None)
+            # the pool is None once it was closed
+            if self.pool is not None:
+                with self.pool.mutex:
+                    if len(self.pool.queue) < self.pool.maxsize:
+                        self.pool.queue.insert(0, None)
             return
         # the wait of a connection which was kept open starts now
         conn._ikabot_ts = time.monotonic()
@@ -76,11 +112,12 @@ def rebalance(pool, max_age=WARM_MAX_AGE, now=None):
     return len(kept)
 
 
-def settle(conn):
-    """Reads what the server sends right after the TLS handshake (session tickets). Left unread,
-    it makes a connection look closed and urllib3 would throw it away.
+def settle(conn, timeout=0.15):
+    """Waits for what the server sends right after the TLS handshake (session tickets), and reads it.
+    Left unread, it makes a connection look closed. WarmHTTPSConnection reads it as well, this
+    only saves that work to the first request.
     Returns False when the connection is closed or has unexpected data"""
-    conn.sock.settimeout(0.15)
+    conn.sock.settimeout(timeout)
     try:
         conn.sock.recv(1)
     except (TimeoutError, socket.timeout, ssl.SSLWantReadError):
@@ -161,6 +198,8 @@ class ConnectionWarmer:
             request, verify=verify, proxies=session.proxies
         )
         adapter.cert_verify(pool, request.url, verify, None)
+        if pool.pool is None:
+            return 0
 
         missing = self.target - rebalance(pool, self.max_age)
         opened = []
@@ -169,8 +208,10 @@ class ConnectionWarmer:
             try:
                 conn = pool._new_conn()
                 conn.timeout = 10
+                start = time.monotonic()
                 conn.connect()
-                if not settle(conn):
+                # the tickets come about one round trip after the handshake, which took two
+                if not settle(conn, min(1.0, max(0.15, time.monotonic() - start))):
                     conn.close()
                     return
                 conn._ikabot_ts = time.monotonic()
