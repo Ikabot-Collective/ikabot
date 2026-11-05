@@ -376,5 +376,46 @@ class TestFarAwayServer(unittest.TestCase):
         self.check(0.25)
 
 
+class TestPolling(unittest.TestCase):
+    """The game asks for updateGlobalData once a minute while a tab is open, nobody needs connections for that"""
+
+    def setUp(self):
+        from ikabot.web.session import Session
+
+        self.touched = 0
+        self.session = object.__new__(Session)
+        self.session._warmer = SimpleNamespace(touch=self.touch)
+        self.session.s = requests.Session()
+
+    def touch(self):
+        self.touched += 1
+
+    def use(self, *args):
+        self.session._Session__useWarmConnections(*args)
+
+    def test_a_request_keeps_the_connections_ready(self):
+        self.use("", {"view": "city"}, {})
+        self.assertEqual(self.touched, 1)
+
+    def test_the_poll_does_not(self):
+        self.use("view=updateGlobalData&ajax=1", {})
+        self.use("", {"view": "updateGlobalData", "ajax": "1"}, {})
+        self.use("", {}, {"view": "updateGlobalData"})
+        self.assertEqual(self.touched, 0)
+
+    def test_the_poll_still_uses_the_connections(self):
+        self.use("", {"view": "updateGlobalData"})
+        self.assertIsInstance(self.session.s.get_adapter("https://x/"), WarmAdapter)
+
+    def test_other_requests_with_a_payload_which_is_not_a_dict(self):
+        self.use("index.php", {}, "a=1&b=2")
+        self.assertEqual(self.touched, 1)
+
+    def test_nothing_happens_when_the_connections_are_not_warmed(self):
+        self.session._warmer = None
+        self.use("", {"view": "city"})
+        self.assertEqual(self.touched, 0)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -84,10 +84,16 @@ class Session:
         )
         self._warmer.start()
 
-    def __useWarmConnections(self):
+    def __useWarmConnections(self, url="", *params):
         if self._warmer is None:
             return
-        self._warmer.touch()
+        # While a tab of the game is open, it asks for updateGlobalData once a minute. That alone
+        # is not someone browsing, so it does not keep connections ready (it still uses one if any)
+        poll = "view=updateGlobalData" in url or any(
+            isinstance(p, dict) and p.get("view") == "updateGlobalData" for p in params
+        )
+        if not poll:
+            self._warmer.touch()
         # self.s is replaced when the cookies change. Two requests can get here at the same time,
         # and the second adapter would replace the first one and its connections
         s = self.s
@@ -1433,7 +1439,7 @@ class Session:
         """
         self.__checkCookie()
         self.__update_proxy()
-        self.__useWarmConnections()
+        self.__useWarmConnections(url, params)
 
         if noIndex:
             url = self.urlBase.replace("index.php", "") + url
@@ -1569,7 +1575,7 @@ class Session:
         params_original = params
         self.__checkCookie()
         self.__update_proxy()
-        self.__useWarmConnections()
+        self.__useWarmConnections(url, params, payloadPost)
 
         # add the request id
         token = self.__token()
