@@ -9,6 +9,7 @@ several seconds though (it keeps it for about 19 s), so a few connections are ke
 a request takes one of them instead of opening its own.
 """
 
+import logging
 import socket
 import ssl
 import threading
@@ -21,11 +22,34 @@ from urllib3.connection import HTTPSConnection
 from urllib3.connectionpool import HTTPSConnectionPool
 from urllib3.util.wait import wait_for_read
 
+logger = logging.getLogger(__name__)
+
 # Ikariam was seen keeping an idle connection for 19 seconds and closing it at 20. A connection is
 # renewed before it waited for this long
 WARM_MAX_AGE = 8
+# a connection which waited for longer than this is not used, whatever its age looked like
+WARM_MAX_USE_AGE = 12
 # nothing is opened in advance when no request came in the last seconds
 WARM_ACTIVE_WINDOW = 30
+
+
+def mark(conn):
+    """Notes when a connection started to wait. Two clocks are kept: the monotonic one may not count
+    the time the computer sleeps, and the wall clock can be changed"""
+    conn._ikabot_ts = time.monotonic()
+    conn._ikabot_wall = time.time()
+
+
+def idle_time(conn, now=None):
+    """Seconds a connection has been waiting in the pool, 0 for one which never waited"""
+    started = getattr(conn, "_ikabot_ts", None)
+    if started is None:
+        return 0.0
+    idle = (time.monotonic() if now is None else now) - started
+    wall = getattr(conn, "_ikabot_wall", None)
+    if wall is not None:
+        idle = max(idle, time.time() - wall)
+    return idle
 
 
 def drain(sock):
@@ -64,6 +88,14 @@ class WarmHTTPSConnectionPool(HTTPSConnectionPool):
 
     ConnectionCls = WarmHTTPSConnection
 
+    def _get_conn(self, timeout=None):
+        conn = super()._get_conn(timeout)
+        # Ikariam closes a connection which waited for about 20 s, and after the computer slept the
+        # connection can look younger than it is. Closed here, urllib3 reconnects it when it is used
+        if conn.sock is not None and idle_time(conn) > WARM_MAX_USE_AGE:
+            conn.close()
+        return conn
+
     def _put_conn(self, conn):
         if conn is None or conn.sock is None:
             # the pool is None once it was closed
@@ -73,7 +105,7 @@ class WarmHTTPSConnectionPool(HTTPSConnectionPool):
                         self.pool.queue.insert(0, None)
             return
         # the wait of a connection which was kept open starts now
-        conn._ikabot_ts = time.monotonic()
+        mark(conn)
         super()._put_conn(conn)
 
 
@@ -101,12 +133,14 @@ def rebalance(pool, max_age=WARM_MAX_AGE, now=None):
         for conn in queue:
             if conn is None or conn.sock is None:
                 empty += 1
-            elif now - getattr(conn, "_ikabot_ts", now) > max_age:
+            elif idle_time(conn, now) > max_age:
                 dropped.append(conn)
                 empty += 1
             else:
                 kept.append(conn)
-        queue[:] = [None] * empty + kept
+        # urllib3 1.26 keeps the connections in a deque, 2.x in a list
+        queue.clear()
+        queue.extend([None] * empty + kept)
     for conn in dropped:
         conn.close()
     return len(kept)
@@ -133,7 +167,7 @@ def add_connection(pool, conn):
     with pool.pool.mutex:
         queue = pool.pool.queue
         if queue and queue[0] is None:
-            queue.pop(0)
+            del queue[0]
             queue.append(conn)
             return True
     return False
@@ -147,7 +181,7 @@ class ConnectionWarmer:
         get_session,
         get_url,
         get_verify,
-        target=4,
+        target=6,
         max_age=WARM_MAX_AGE,
         active_window=WARM_ACTIVE_WINDOW,
     ):
@@ -167,25 +201,32 @@ class ConnectionWarmer:
     def start(self):
         threading.Thread(target=self._run, daemon=True).start()
 
+    def is_active(self):
+        return time.monotonic() - self._last_touch <= self.active_window
+
     def _run(self):
         while True:
-            # wait longer after a failure, so a network problem is not hammered
-            time.sleep(5 if self._failed else 0.2)
+            # wait longer after a failure, so a network problem is not hammered, and when idle
+            time.sleep(5 if self._failed else 0.2 if self.is_active() else 1)
             self._failed = False
             try:
                 self.warm_once()
             except Exception:
+                logger.debug("Could not open connections in advance", exc_info=True)
                 self._failed = True
 
     def warm_once(self):
         """Opens the missing connections. Returns how many were opened"""
-        if time.monotonic() - self._last_touch > self.active_window:
+        if not self.is_active():
             return 0
         session = self.get_session()
-        if session.proxies:
-            return 0
         parts = urlsplit(self.get_url())
         url = f"{parts.scheme}://{parts.netloc}/"
+        # requests also uses the proxies of the environment (HTTPS_PROXY...), and NO_PROXY, not only
+        # session.proxies. Connections opened directly would never be used when a proxy applies
+        proxies = session.merge_environment_settings(url, {}, None, None, None)[
+            "proxies"
+        ]
         adapter = session.get_adapter(url)
         # requests older than 2.32 can't tell which pool a request will use
         if not isinstance(adapter, WarmAdapter) or not hasattr(
@@ -194,11 +235,16 @@ class ConnectionWarmer:
             return 0
         verify = self.get_verify()
         request = requests.Request("GET", url).prepare()
+        # the pool of direct connections, which requests uses when no proxy applies
         pool = adapter.get_connection_with_tls_context(
-            request, verify=verify, proxies=session.proxies
+            request, verify=verify, proxies={}
         )
         adapter.cert_verify(pool, request.url, verify, None)
         if pool.pool is None:
+            return 0
+        if requests.utils.select_proxy(url, proxies):
+            # the ones opened before the proxy was set would never be used
+            rebalance(pool, max_age=-1)
             return 0
 
         missing = self.target - rebalance(pool, self.max_age)
@@ -214,12 +260,13 @@ class ConnectionWarmer:
                 if not settle(conn, min(1.0, max(0.15, time.monotonic() - start))):
                     conn.close()
                     return
-                conn._ikabot_ts = time.monotonic()
+                mark(conn)
                 if add_connection(pool, conn):
                     opened.append(conn)
                 else:
                     conn.close()
             except Exception:
+                logger.debug("Could not open a connection in advance", exc_info=True)
                 self._failed = True
 
         threads = [

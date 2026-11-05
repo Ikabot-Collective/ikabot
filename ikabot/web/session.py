@@ -68,11 +68,14 @@ class Session:
     _warmer = None
     _warm_mount_lock = threading.Lock()
 
-    def warmConnections(self, count=4):
+    def warmConnections(self, count=6):
         """Keeps `count` connections to Ikariam open while requests are being sent. Ikariam closes the
         connection after every answer, so a request which finds one ready saves around 100 ms.
-        Meant for the web server, which waits for the answer of every request
+        Meant for the web server, which waits for the answer of every request. A browser sends up to
+        6 requests at the same time to one host, hence the default
         """
+        if self._warmer is not None or count <= 0:
+            return
         self._warmer = ConnectionWarmer(
             lambda: self.s,
             lambda: self.urlBase,

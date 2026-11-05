@@ -11,6 +11,7 @@ import time
 import unittest
 import warnings
 from types import SimpleNamespace
+from unittest import mock
 
 import requests
 
@@ -66,13 +67,19 @@ def make_cert(folder):
     return cert_path, key_path
 
 
+def set_queue(pool, items):
+    """The connections of a pool are in a list with urllib3 2.x and in a deque with 1.26"""
+    pool.pool.queue.clear()
+    pool.pool.queue.extend(items)
+
+
 class TestPoolQueue(unittest.TestCase):
     def setUp(self):
         self.pool = WarmHTTPSConnectionPool("localhost", maxsize=4)
 
     def test_a_closed_connection_goes_to_the_bottom(self):
         warm = fake_conn(ts=1)
-        self.pool.pool.queue[:] = [None, None, None, warm]
+        set_queue(self.pool, [None, None, None, warm])
         taken = self.pool.pool.get()
         self.assertIs(taken, warm)
         self.pool._put_conn(fake_conn(open=False))
@@ -81,12 +88,12 @@ class TestPoolQueue(unittest.TestCase):
 
     def test_rebalance_drops_old_connections_and_puts_the_warm_ones_last(self):
         old, fresh = fake_conn(ts=0), fake_conn(ts=95)
-        self.pool.pool.queue[:] = [fresh, None, old, fake_conn(open=False)]
+        set_queue(self.pool, [fresh, None, old, fake_conn(open=False)])
         kept = rebalance(self.pool, max_age=8, now=100)
         self.assertEqual(kept, 1)
         self.assertTrue(old.closed)
         self.assertFalse(fresh.closed)
-        self.assertEqual(self.pool.pool.queue, [None, None, None, fresh])
+        self.assertEqual(list(self.pool.pool.queue), [None, None, None, fresh])
 
     def test_a_connection_returned_to_a_closed_pool_is_ignored(self):
         self.pool.close()
@@ -96,12 +103,12 @@ class TestPoolQueue(unittest.TestCase):
         self.assertTrue(conn.closed)
 
     def test_a_connection_is_not_added_to_a_full_pool(self):
-        self.pool.pool.queue[:] = [fake_conn(ts=1)] * 4
+        set_queue(self.pool, [fake_conn(ts=1)] * 4)
         self.assertFalse(add_connection(self.pool, fake_conn()))
 
     def test_a_warm_connection_is_added_at_the_end(self):
         conn = fake_conn()
-        self.pool.pool.queue[:] = [None, None, None, fake_conn(ts=1)]
+        set_queue(self.pool, [None, None, None, fake_conn(ts=1)])
         self.assertTrue(add_connection(self.pool, conn))
         self.assertIs(self.pool.pool.queue[-1], conn)
         self.assertEqual(len(self.pool.pool.queue), 4)
@@ -196,11 +203,77 @@ class TestWarmer(unittest.TestCase):
         self.assertEqual(self.warmer.warm_once(), 1)
         self.assertEqual(self.warmer.warm_once(), 0)
 
+    def test_a_connection_which_waited_too_long_is_not_used(self):
+        """After the computer slept, the monotonic clock may not have moved while Ikariam closed the connection"""
+        self.warmer.target = 1
+        self.warmer.touch()
+        self.assertEqual(self.warmer.warm_once(), 1)
+        self.assertEqual(self.accepted(1), 1)
+        adapter = self.session.get_adapter(self.url)
+        request = requests.Request("GET", self.url).prepare()
+        pool = adapter.get_connection_with_tls_context(
+            request, verify=False, proxies={}
+        )
+        conn = pool.pool.queue[-1]
+        conn._ikabot_wall -= 3600
+        self.assertEqual(self.session.get(self.url, verify=False).text, "ok")
+        # it was not used, the request opened its own connection
+        self.assertEqual(self.accepted(2), 2)
+
     def test_nothing_is_opened_with_a_proxy(self):
         self.session.proxies["https"] = "http://127.0.0.1:9"
         self.warmer.touch()
         self.assertEqual(self.warmer.warm_once(), 0)
         self.assertEqual(self.accepted(), 0)
+
+    def test_connections_opened_before_a_proxy_was_set_are_closed(self):
+        self.warmer.touch()
+        self.assertEqual(self.warmer.warm_once(), 2)
+        adapter = self.session.get_adapter(self.url)
+        request = requests.Request("GET", self.url).prepare()
+        pool = adapter.get_connection_with_tls_context(
+            request, verify=False, proxies={}
+        )
+        conns = [c for c in pool.pool.queue if c is not None]
+        self.assertEqual(len(conns), 2)
+        self.session.proxies["https"] = "http://127.0.0.1:9"
+        self.assertEqual(self.warmer.warm_once(), 0)
+        self.assertTrue(all(c.sock is None for c in conns))
+
+    def test_nothing_is_opened_with_a_proxy_from_the_environment(self):
+        with mock.patch.dict(
+            os.environ,
+            {"HTTPS_PROXY": "http://127.0.0.1:9", "https_proxy": "http://127.0.0.1:9"},
+        ):
+            os.environ.pop("NO_PROXY", None)
+            os.environ.pop("no_proxy", None)
+            self.warmer.touch()
+            self.assertEqual(self.warmer.warm_once(), 0)
+        self.assertEqual(self.accepted(), 0)
+
+    def test_the_environment_proxy_is_ignored_for_hosts_in_no_proxy(self):
+        with mock.patch.dict(
+            os.environ,
+            {
+                "HTTPS_PROXY": "http://127.0.0.1:9",
+                "https_proxy": "http://127.0.0.1:9",
+                "NO_PROXY": "127.0.0.1",
+                "no_proxy": "127.0.0.1",
+            },
+        ):
+            self.warmer.touch()
+            self.assertEqual(self.warmer.warm_once(), 2)
+        self.assertEqual(self.accepted(2), 2)
+
+    def test_the_environment_proxy_is_ignored_when_the_session_does_not_trust_it(self):
+        self.session.trust_env = False
+        with mock.patch.dict(
+            os.environ,
+            {"HTTPS_PROXY": "http://127.0.0.1:9", "https_proxy": "http://127.0.0.1:9"},
+        ):
+            self.warmer.touch()
+            self.assertEqual(self.warmer.warm_once(), 2)
+        self.assertEqual(self.accepted(2), 2)
 
 
 class DelayProxy:
