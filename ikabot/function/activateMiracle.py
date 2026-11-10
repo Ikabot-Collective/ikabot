@@ -318,14 +318,20 @@ def wait_for_miracle(session, island):
 
 def refresh_best_city(session, island):
     """
-    Switches `island` to the highest-level instance of its wonder type,
-    if a different island now has one.
+    Re-reads the live level of the selected wonder (it can drop after the
+    task started) and switches `island` to the highest-level instance of its
+    wonder type if it is no longer the best.
 
     Parameters
     ----------
     session : ikabot.web.session.Session
     island : dict
     """
+    current = get_temple_info(session, island["ciudad"])
+    island["wonderActivationLevel"] = current["level"]
+    if current["level"] >= MAX_WONDER_ACTIVATION_LEVEL:
+        return
+
     candidates = obtainMiraclesAvailable(session)
     best = next((isl for isl in candidates if isl["wonder"] == island["wonder"]), None)
 
@@ -365,9 +371,8 @@ def do_it(session, island, iterations):
     session.setStatus(f"Waiting to activate {island['wonderName']}...")
     for i in range(iterations):
 
-        if island["wonderActivationLevel"] < MAX_WONDER_ACTIVATION_LEVEL:
-            refresh_best_city(session, island)
-
+        wait_for_miracle(session, island)
+        refresh_best_city(session, island)
         wait_for_miracle(session, island)
 
         response = activateMiracleHttpCall(session, island)
@@ -380,9 +385,11 @@ def do_it(session, island, iterations):
             return
         iterations_left -= 1
         session.setStatus(
-            f"Activated {island['wonderName']} @{getDateTime()}, iterations left: {iterations_left}"
+            f"Activated {island['wonderName']} (level {island['wonderActivationLevel']}, {island['ciudad']['name']}) @{getDateTime()}, iterations left: {iterations_left}"
         )
-        msg = "Miracle {} successfully activated".format(island["wonderName"])
+        msg = "Miracle {} (level {}, {}) successfully activated".format(
+            island["wonderName"], island["wonderActivationLevel"], island["ciudad"]["name"]
+        )
         sendToBotDebug(session, msg, debugON_activateMiracle)
 @configurator
 def activateMiracle(session, event, stdin_fd, predetermined_input):
