@@ -665,7 +665,7 @@ def _run_equilibrium_mode(session):
         "session": session,
         "run_hours": run_hours,
         "cities_ids": cities_ids,
-        "cities": cities,
+        # no "cities": the task fetches them on each check, so the saved config stays small
         "notification_mode": notification_mode,
         "check_now": False,
     }
