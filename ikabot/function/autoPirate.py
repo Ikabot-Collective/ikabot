@@ -15,7 +15,7 @@ from ikabot.helpers.botComm import *
 from ikabot.helpers.getJson import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import *
-from ikabot.helpers.process import run, set_child_mode
+from ikabot.helpers.process import run, set_child_mode, updateProcessList
 from ikabot.helpers.varios import timeStringToSec, wait
 from ikabot.helpers.apiComm import getPiratesCaptchaSolution
 
@@ -34,6 +34,7 @@ except Exception:
 
 
 from ikabot.helpers.decorators import configurator, task
+from ikabot.helpers.taskConfig import asBool, asId, asInt
 
 def isHourInRange(hour, start, end):
     """Inclusive hour range, supports ranges that cross midnight (e.g. 19 till 9)."""
@@ -94,22 +95,103 @@ def extract_captcha_image(html):
             return None
     return None
 
-@task("autoPirate")
+def prepare_autoPirate(
+    session,
+    pirateCount,
+    pirateSchedule=False,
+    pirateMissionChoice=None,
+    pirateMissionDayChoice=None,
+    pirateMissionNightChoice=None,
+    dayStart=10,
+    dayEnd=18,
+    nightStart=19,
+    nightEnd=9,
+    autoConvert="n",
+    convertPerMission=0,
+    maxRandomWaitingTime=0,
+    piracyCities=None,
+):
+    """Checks the config of an autoPirate task started from the CLI
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    pirateCount : int
+        number of missions
+    pirateSchedule : bool
+        True does pirateMissionDayChoice between dayStart and dayEnd and
+        pirateMissionNightChoice between nightStart and nightEnd
+    pirateMissionChoice : int
+        mission 1 (2m 30s) to 9 (16h), used without a schedule
+    autoConvert : bool or str
+    convertPerMission : int or "all"
+    maxRandomWaitingTime : int
+        extra random seconds between missions
+    piracyCities : list
+        only the first city's id is used, as the city to try first
+
+    Returns
+    -------
+    config : dict
+    """
+    pirateSchedule = asBool(pirateSchedule, "pirateSchedule")
+    config = {
+        "pirateCount": asInt(pirateCount, "pirateCount", minimum=1),
+        "pirateSchedule": pirateSchedule,
+        "pirateMissionChoice": None,
+        "pirateMissionDayChoice": None,
+        "pirateMissionNightChoice": None,
+        "dayStart": asInt(dayStart, "dayStart", minimum=0, maximum=23),
+        "dayEnd": asInt(dayEnd, "dayEnd", minimum=0, maximum=23),
+        "nightStart": asInt(nightStart, "nightStart", minimum=0, maximum=23),
+        "nightEnd": asInt(nightEnd, "nightEnd", minimum=0, maximum=23),
+        "autoConvert": "y" if asBool(autoConvert, "autoConvert") else "n",
+        "maxRandomWaitingTime": asInt(maxRandomWaitingTime, "maxRandomWaitingTime", minimum=0),
+    }
+    if pirateSchedule:
+        config["pirateMissionDayChoice"] = asInt(pirateMissionDayChoice, "pirateMissionDayChoice", minimum=1, maximum=9)
+        config["pirateMissionNightChoice"] = asInt(pirateMissionNightChoice, "pirateMissionNightChoice", minimum=1, maximum=9)
+        missions = [config["pirateMissionDayChoice"], config["pirateMissionNightChoice"]]
+    else:
+        config["pirateMissionChoice"] = asInt(pirateMissionChoice, "pirateMissionChoice", minimum=1, maximum=9)
+        missions = [config["pirateMissionChoice"]]
+    if str(convertPerMission).strip().lower() == "all":
+        config["convertPerMission"] = "all"
+    else:
+        config["convertPerMission"] = asInt(convertPerMission, "convertPerMission", minimum=0)
+
+    # missions are shared by the whole account: a second task would wait for the first one's
+    # missions and then race it for the fortress
+    running = [p for p in updateProcessList(session) if p["action"] == "autoPirate"]
+    if running:
+        raise ValueError("autoPirate is already running for this account (pid {})".format(running[0]["pid"]))
+
+    # the hardest mission needs the highest fortress level
+    piracy_cities = getPiracyCities(session, max(missions))
+    if not piracy_cities:
+        raise ValueError("none of your cities has a pirate fortress able to do mission {}".format(max(missions)))
+    first_city = piracyCities[0] if piracyCities else piracy_cities[0]
+    first_city_id = first_city["id"] if isinstance(first_city, dict) else first_city
+    # the task only reads the first city's id: keep the saved config small
+    config["piracyCities"] = [{"id": asId(first_city_id, "piracyCities")}]
+    return config
+
+
+@task("autoPirate", prepare=prepare_autoPirate)
 def do_pirate_missions(
     session,
     pirateCount,
-    pirateSchedule,
-    pirateMissionChoice,
-    pirateMissionDayChoice,
-    pirateMissionNightChoice,
-    dayStart,
-    dayEnd,
-    nightStart,
-    nightEnd,
-    autoConvert,
-    convertPerMission,
-    maxRandomWaitingTime,
-    piracyCities
+    pirateSchedule=False,
+    pirateMissionChoice=None,
+    pirateMissionDayChoice=None,
+    pirateMissionNightChoice=None,
+    dayStart=10,
+    dayEnd=18,
+    nightStart=19,
+    nightEnd=9,
+    autoConvert="n",
+    convertPerMission=0,
+    maxRandomWaitingTime=0,
+    piracyCities=None,
 ):
     cachedCityId = piracyCities[0]["id"] if piracyCities else None
     while pirateCount > 0:

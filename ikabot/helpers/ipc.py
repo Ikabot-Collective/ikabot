@@ -828,6 +828,12 @@ def _dispatch_request(request, local_server):
 def run_cli_task(argv):
     """Entry point for CLI task queries (`ikabot --email=... --world=... --task=... --config=...`
     or `ikabot --batch=@tasks.json`)."""
+    # the JSON answer is read by scripts: write UTF-8 even when stdout is a pipe,
+    # where Windows would use the ANSI code page and break accented names
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except (AttributeError, ValueError):
+        pass
     if "-h" in argv or "--help" in argv:
         parser = build_cli_parser()
         parser.print_help()

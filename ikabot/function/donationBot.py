@@ -12,6 +12,7 @@ from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.decorators import configurator, task
 from ikabot.helpers.resources import getAvailableResources, getProductionPerHour
 from ikabot.helpers.signals import setInfoSignal
+from ikabot.helpers.taskConfig import asId, asInt, requireOwnCity
 from ikabot.helpers.varios import wait, getDateTime
 
 
@@ -89,14 +90,93 @@ def _get_donation_config(cities, donate_method, cityId):
     return donation_type, percentage
 
 
-@task("donationBot")
+DONATION_TYPES = {
+    "resource": "resource", "forest": "resource", "wood": "resource", "f": "resource",
+    "tradegood": "tradegood", "luxury": "tradegood", "t": "tradegood",
+    "both": "both", "b": "both",
+    "none": None, "n": None,
+}
+# default value per donate_method, and the value that disables the donation, as in the menu
+DEFAULT_PERCENTAGE = {1: 80, 2: 50, 3: 10000}
+NO_DONATION_PERCENTAGE = {1: 100, 2: 0, 3: 0}
+
+
+def prepare_donationBot(session, cities_dict, waiting_time=24 * 60, donate_method=1, cities_ids=None):
+    """Checks the config of a donationBot task started from the CLI
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    cities_dict : dict
+        {city id: {"donation_type": ..., "percentage": ...}}; the key "all" applies to every own city
+    waiting_time : int
+        minutes between donations
+    donate_method : int
+        1 = storage percentage to keep, 2 = percentage of production, 3 = fixed amount
+    cities_ids : list
+        built from cities_dict
+
+    Returns
+    -------
+    config : dict
+    """
+    donate_method = asInt(donate_method, "donate_method", minimum=1, maximum=3)
+    if not isinstance(cities_dict, dict) or not cities_dict:
+        raise ValueError(
+            'cities_dict must map city ids (or "all") to {{"donation_type": ..., "percentage": ...}}, got {!r}'.format(cities_dict)
+        )
+    own_ids = getIdsOfCities(session)[0]
+    settings = {}
+    if "all" in cities_dict:
+        for city_id in own_ids:
+            settings[city_id] = cities_dict["all"]
+    for key, value in cities_dict.items():
+        if key == "all":
+            continue
+        city_id = asId(key, "cities_dict")
+        if city_id not in own_ids:
+            requireOwnCity(session, city_id, "cities_dict")  # raises, listing the own cities
+        settings[city_id] = value
+
+    normalized = {}
+    for city_id, value in settings.items():
+        name = "cities_dict[{}]".format(city_id)
+        if not isinstance(value, dict):
+            raise ValueError('{} must be {{"donation_type": ..., "percentage": ...}}, got {!r}'.format(name, value))
+        donation_type = value.get("donation_type")
+        key = "none" if donation_type is None else str(donation_type).strip().lower()
+        if key not in DONATION_TYPES:
+            raise ValueError(
+                "{}.donation_type must be resource, tradegood, both or none, got {!r}".format(name, donation_type)
+            )
+        donation_type = DONATION_TYPES[key]
+        percentage = value.get("percentage")
+        if percentage is None:
+            percentage = DEFAULT_PERCENTAGE[donate_method]
+        percentage = asInt(
+            percentage, name + ".percentage", minimum=0, maximum=None if donate_method == 3 else 100
+        )
+        if donation_type is None or percentage == NO_DONATION_PERCENTAGE[donate_method]:
+            donation_type, percentage = None, None
+        normalized[city_id] = {"donation_type": donation_type, "percentage": percentage}
+
+    return {
+        "cities_ids": list(normalized),
+        "cities_dict": normalized,
+        "waiting_time": asInt(waiting_time, "waiting_time", minimum=1),
+        "donate_method": donate_method,
+    }
+
+
+@task("donationBot", prepare=prepare_donationBot)
 def do_it(
     session,
-    cities_ids,
     cities_dict,
-    waiting_time,
-    donate_method,
+    waiting_time=24 * 60,
+    donate_method=1,
+    cities_ids=None,
 ):
+    if cities_ids is None:
+        cities_ids = list(cities_dict)
     info = "\nI donate every {} minutes\n".format(waiting_time)
     setInfoSignal(session, info)
     for cityId in cities_ids:
@@ -210,7 +290,16 @@ def do_it(
             except Exception:
                 continue
 
+        session.setStatus(checked_status(waiting_time, total_general_donated))
         wait(waiting_time * 60)
+
+
+def checked_status(waiting_time, total_donated):
+    return "Every {} min, last check {} | Total donated: {}".format(
+        waiting_time, time.strftime("%H:%M"), total_donated
+    )
+
+
 @configurator
 def donationBot(session, event, stdin_fd, predetermined_input):
     """
