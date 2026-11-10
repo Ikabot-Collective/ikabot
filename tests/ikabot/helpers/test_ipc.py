@@ -286,6 +286,38 @@ class TestIPC(unittest.TestCase):
             parse_cli_args(["--batch", "[]", "--task", "alertAttacks"])
         self.assertTrue(is_cli_invocation(["ikabot", "--batch=@tasks.json"]))
 
+    def test_parse_cli_args_cities(self):
+        args, cfg = parse_cli_args(["--world", "s301-en", "--player", "PlayerOne", "--cities"])
+        self.assertTrue(args.cities)
+        self.assertEqual(cfg, {})
+        self.assertTrue(is_cli_invocation(["ikabot", "--world=s301-en", "--cities"]))
+        with self.assertRaisesRegex(ValueError, "--cities cannot be combined"):
+            parse_cli_args(["--cities", "--task", "alertAttacks"])
+        with self.assertRaisesRegex(ValueError, "--task, --batch or --cities is required"):
+            parse_cli_args(["--world", "s301"])
+
+    @patch("ikabot.helpers.pedirInfo.getIdsOfCities")
+    def test_list_cities(self, mock_ids):
+        mock_ids.return_value = (
+            ["1111", "2222"],
+            {
+                "1111": {"name": "Alpha", "coords": "[50:60] ", "tradegood": "1"},
+                "2222": {"name": "Nu00e9stor", "coords": "[51:62] ", "tradegood": "4"},
+            },
+        )
+        session = MagicMock(logged=True, mail="", username="PlayerOne", mundo="301", servidor="en")
+        server = IPCServer(default_session=session)
+        resp = server.handle_request({"action": "list_cities", "world": "s301-en"})
+        self.assertEqual(resp["status"], "ok")
+        self.assertEqual(resp["username"], "PlayerOne")
+        self.assertEqual(
+            resp["cities"],
+            [
+                {"id": "1111", "name": "Alpha", "coords": "50:60", "tradegood": "wine"},
+                {"id": "2222", "name": "Néstor", "coords": "51:62", "tradegood": "sulfur"},
+            ],
+        )
+
     def test_session_matches_player(self):
         server = IPCServer()
         sess = MagicMock()
