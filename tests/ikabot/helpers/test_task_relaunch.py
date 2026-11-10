@@ -11,7 +11,7 @@ from unittest.mock import MagicMock, patch
 import ikabot.function.alertAttacks, ikabot.function.alertLowWine, ikabot.function.activateShrine  # noqa
 import ikabot.function.consolidateResources, ikabot.function.searchForIslandSpaces  # noqa
 import ikabot.function.donationBot, ikabot.function.tavernManager, ikabot.function.autoPirate  # noqa
-import ikabot.function.webServer, ikabot.function.loginDaily, ikabot.function.research  # noqa
+import ikabot.function.webServer, ikabot.function.loginDaily, ikabot.function.research, ikabot.function.dumpWorld  # noqa
 from ikabot.helpers.decorators import _TASK_REGISTRY
 from ikabot.helpers.ipc import _validate_task_config
 
@@ -31,6 +31,8 @@ MENU = {
                    "maxRandomWaitingTime": 60, "piracyCities": FORTRESS},
     "webServer": {"port": 43000, "local_network_ip": "192.168.0.10"},
     "loginDaily": {"wine_city": "111", "wood_city": "222", "luxury_city": "222", "favour_tasks": ["resource", "look", "online", "complete"], "collect_ambrosia": True},
+    "dumpWorld": {"waiting_time": 1.5, "coords": (50, 60), "radius": 15, "shallow": False, "non_empty_islands": True, "show_progress": True},
+    "dumpWorld (shallow)": {"waiting_time": 0.5, "coords": None, "radius": None, "shallow": True, "non_empty_islands": False, "show_progress": True},
     "research": {"cities_ids": ["111"], "qty": 2},
     "research (automatic)": {"cities_ids": ["111", "222"], "qty": None},
     # research started from an older menu, which saved the academy cities
