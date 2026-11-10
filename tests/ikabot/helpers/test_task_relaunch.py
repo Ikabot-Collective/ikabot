@@ -11,7 +11,7 @@ from unittest.mock import MagicMock, patch
 import ikabot.function.alertAttacks, ikabot.function.alertLowWine, ikabot.function.activateShrine  # noqa
 import ikabot.function.consolidateResources, ikabot.function.searchForIslandSpaces  # noqa
 import ikabot.function.donationBot, ikabot.function.tavernManager, ikabot.function.autoPirate  # noqa
-import ikabot.function.webServer, ikabot.function.loginDaily  # noqa
+import ikabot.function.webServer, ikabot.function.loginDaily, ikabot.function.research  # noqa
 from ikabot.helpers.decorators import _TASK_REGISTRY
 from ikabot.helpers.ipc import _validate_task_config
 
@@ -31,6 +31,13 @@ MENU = {
                    "maxRandomWaitingTime": 60, "piracyCities": FORTRESS},
     "webServer": {"port": 43000, "local_network_ip": "192.168.0.10"},
     "loginDaily": {"wine_city": "111", "wood_city": "222", "luxury_city": "222", "favour_tasks": ["resource", "look", "online", "complete"], "collect_ambrosia": True},
+    "research": {"cities_ids": ["111"], "qty": 2},
+    "research (automatic)": {"cities_ids": ["111", "222"], "qty": None},
+    # research started from an older menu, which saved the academy cities
+    "research (old menu)": {"mode": "experiment", "experiments": {"cityID": "111", "cityName": "Alpha", "pos": 7, "qty": 2},
+                            "automatic": False, "info": "Process: Experiments"},
+    "research (old menu, automatic)": {"mode": "experiment_multi", "cities": [{"cityID": "111", "cityName": "Alpha", "pos": 7}],
+                                       "info": "Process: Experiments (automatic)"},
     # a loginDaily started from the menu before this change: full cities and the long names
     "loginDaily (old menu)": {"wine_city": {"id": 111, "name": "Alpha", "position": []}, "wood_city": None, "luxury_city": None,
                               "favour_tasks": ["Collect resource favour", "Look at hightscore/shop/inventory"], "collect_ambrosia": False},
@@ -50,6 +57,9 @@ class TestRelaunchFromExportedConfig(unittest.TestCase):
         stack.enter_context(patch("ikabot.function.autoPirate.updateProcessList", return_value=[]))
         stack.enter_context(patch("ikabot.function.searchForIslandSpaces.islandIdFromCoords", return_value=50))
         stack.enter_context(patch("ikabot.function.webServer.is_port_in_use", return_value=False))
+        academy_city = {"id": "111", "name": "Alpha", "position": [{"building": "academy", "position": 7}],
+                        "availableResources": [0, 0, 0, 900000, 0]}
+        stack.enter_context(patch("ikabot.function.research.getCityById", return_value=academy_city))
 
     def test_every_task_relaunches_from_its_exported_config(self):
         session = MagicMock()
