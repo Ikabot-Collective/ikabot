@@ -12,6 +12,7 @@ import ikabot.function.alertAttacks, ikabot.function.alertLowWine, ikabot.functi
 import ikabot.function.consolidateResources, ikabot.function.searchForIslandSpaces  # noqa
 import ikabot.function.donationBot, ikabot.function.tavernManager, ikabot.function.autoPirate  # noqa
 import ikabot.function.webServer, ikabot.function.loginDaily, ikabot.function.research, ikabot.function.dumpWorld  # noqa
+import ikabot.function.sendResources  # noqa
 from ikabot.helpers.decorators import _TASK_REGISTRY
 from ikabot.helpers.ipc import _validate_task_config
 
@@ -33,6 +34,12 @@ MENU = {
     "loginDaily": {"wine_city": "111", "wood_city": "222", "luxury_city": "222", "favour_tasks": ["resource", "look", "online", "complete"], "collect_ambrosia": True},
     "dumpWorld": {"waiting_time": 1.5, "coords": (50, 60), "radius": 15, "shallow": False, "non_empty_islands": True, "show_progress": True},
     "dumpWorld (shallow)": {"waiting_time": 0.5, "coords": None, "radius": None, "shallow": True, "non_empty_islands": False, "show_progress": True},
+    "sendResources": {"routes": [{"from": "111", "to": "222", "resources": [1000, 0, 0, 0, 0]},
+                                 {"from": "111", "to": "9000", "island": "4415", "resources": [0, 500, 0, 0, 0]}],
+                      "useFreighters": False},
+    # sendResources started from an older menu, which saved whole cities in each route
+    "sendResources (old menu)": {"routes": [[{"id": "111", "name": "Alpha", "position": []}, {"id": "9000", "isOwnCity": False},
+                                             "4415", 1000, 0, 0, 0, 0]], "useFreighters": True},
     "research": {"cities_ids": ["111"], "qty": 2},
     "research (automatic)": {"cities_ids": ["111", "222"], "qty": None},
     # research started from an older menu, which saved the academy cities
@@ -62,6 +69,11 @@ class TestRelaunchFromExportedConfig(unittest.TestCase):
         academy_city = {"id": "111", "name": "Alpha", "position": [{"building": "academy", "position": 7}],
                         "availableResources": [0, 0, 0, 900000, 0]}
         stack.enter_context(patch("ikabot.function.research.getCityById", return_value=academy_city))
+        stack.enter_context(patch("ikabot.function.sendResources.getIdsOfCities", return_value=OWN))
+        stocked_city = {"id": "111", "name": "Alpha", "islandId": "77", "availableResources": [5000, 5000, 0, 0, 0]}
+        stack.enter_context(patch("ikabot.function.sendResources.getCityById", return_value=stocked_city))
+        island = {"id": "4415", "x": 50, "y": 60, "cities": [{"type": "city", "id": 9000, "name": "Foreign"}]}
+        stack.enter_context(patch("ikabot.function.sendResources.getIsland", return_value=island))
 
     def test_every_task_relaunches_from_its_exported_config(self):
         session = MagicMock()
