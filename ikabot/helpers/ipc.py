@@ -41,11 +41,14 @@ _CLI_FLAGS = (
     "--player",
     "--config",
     "--batch",
+    "--cities",
     "--server",
     "--help",
     "-h",
 )
 _BATCH_ENTRY_KEYS = ("task", "config", "email", "world", "server", "player")
+# the game's order of the resources (a city's "tradegood" index)
+_TRADEGOODS = ("wood", "wine", "marble", "crystal", "sulfur")
 _MAX_IPC_MSG_BYTES = 16 * 1024 * 1024
 _TASK_STARTUP_TIMEOUT = 60.0
 _LOCAL_SERVER = None
@@ -611,6 +614,8 @@ class IPCServer:
             with self._lock:
                 if action == "start_task":
                     return self._start_task(request)
+                if action == "list_cities":
+                    return self._list_cities(request)
                 return {"status": "error", "error": f"Unknown IPC action: {action!r}"}
         except BaseException as exc:
             if isinstance(exc, KeyboardInterrupt):
@@ -620,6 +625,32 @@ class IPCServer:
             if request.get("task"):
                 response["task"] = request["task"]
             return response
+
+    def _list_cities(self, request):
+        """The account's own cities, so task configs can use their ids."""
+        from ikabot.helpers import pedirInfo
+        from ikabot.helpers.varios import decodeUnicodeEscape
+
+        session = self._get_or_create_session(
+            request.get("email"), request.get("world"), request.get("server"), request.get("player")
+        )
+        pedirInfo.ids_cache = None  # the cache lives as long as the menu: a city may be new or renamed
+        ids, cities = pedirInfo.getIdsOfCities(session)
+        return {
+            "status": "ok",
+            "email": session.mail,
+            "world": f"s{session.mundo}-{session.servidor}",
+            "username": session.username,
+            "cities": [
+                {
+                    "id": city_id,
+                    "name": decodeUnicodeEscape(cities[city_id]["name"]),
+                    "coords": cities[city_id]["coords"].strip().strip("[]"),
+                    "tradegood": _TRADEGOODS[int(cities[city_id]["tradegood"])],
+                }
+                for city_id in ids
+            ],
+        }
 
     def _start_task(self, request):
         task_name = request.get("task")
@@ -774,15 +805,23 @@ def build_cli_parser():
         "(or @path/to/tasks.json). Entries may set email/world/server/player; "
         "those flags, when given on the command line, override them for every entry.",
     )
+    parser.add_argument(
+        "--cities",
+        action="store_true",
+        help="List the account's cities (id, name, island coordinates, trade good) instead of starting a task",
+    )
     return parser
 
 
 def _check_task_or_batch(parser, args):
-    if args.batch is not None:
+    if args.cities:
+        if args.task is not None or args.config is not None or args.batch is not None:
+            parser.error("--cities cannot be combined with --task, --config or --batch.")
+    elif args.batch is not None:
         if args.task is not None or args.config is not None:
             parser.error("--batch cannot be combined with --task or --config.")
     elif not args.task:
-        parser.error("one of the arguments --task or --batch is required")
+        parser.error("one of the arguments --task, --batch or --cities is required")
 
 
 def parse_cli_args(argv, raw_cmdline=None):
@@ -847,7 +886,9 @@ def run_cli_task(argv):
             "server": args.server,
             "player": args.player,
         }
-        if args.batch is not None:
+        if args.cities:
+            requests = [dict(account_flags, action="list_cities")]
+        elif args.batch is not None:
             requests = parse_batch_arg(args.batch, overrides=account_flags)
         else:
             requests = [

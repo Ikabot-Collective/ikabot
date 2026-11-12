@@ -140,14 +140,19 @@ def prepare_autoPirate(
         "pirateMissionChoice": None,
         "pirateMissionDayChoice": None,
         "pirateMissionNightChoice": None,
-        "dayStart": asInt(dayStart, "dayStart", minimum=0, maximum=23),
-        "dayEnd": asInt(dayEnd, "dayEnd", minimum=0, maximum=23),
-        "nightStart": asInt(nightStart, "nightStart", minimum=0, maximum=23),
-        "nightEnd": asInt(nightEnd, "nightEnd", minimum=0, maximum=23),
+        # without a schedule the hours are not used: None, as the menu saves them
+        "dayStart": None,
+        "dayEnd": None,
+        "nightStart": None,
+        "nightEnd": None,
         "autoConvert": "y" if asBool(autoConvert, "autoConvert") else "n",
         "maxRandomWaitingTime": asInt(maxRandomWaitingTime, "maxRandomWaitingTime", minimum=0),
     }
     if pirateSchedule:
+        hours = {"dayStart": dayStart, "dayEnd": dayEnd, "nightStart": nightStart, "nightEnd": nightEnd}
+        default_hours = {"dayStart": 10, "dayEnd": 18, "nightStart": 19, "nightEnd": 9}
+        for key, value in hours.items():
+            config[key] = asInt(default_hours[key] if value is None else value, key, minimum=0, maximum=23)
         config["pirateMissionDayChoice"] = asInt(pirateMissionDayChoice, "pirateMissionDayChoice", minimum=1, maximum=9)
         config["pirateMissionNightChoice"] = asInt(pirateMissionNightChoice, "pirateMissionNightChoice", minimum=1, maximum=9)
         missions = [config["pirateMissionDayChoice"], config["pirateMissionNightChoice"]]
@@ -463,7 +468,8 @@ def autoPirate(session, event, stdin_fd, predetermined_input):
         "autoConvert": autoConvert,
         "convertPerMission": convertPerMission,
         "maxRandomWaitingTime": maxRandomWaitingTime,
-        "piracyCities": piracyCities
+        # the task only reads the first city's id; the whole city would bloat the saved config
+        "piracyCities": [{"id": piracyCities[0]["id"]}],
     }
 
 
