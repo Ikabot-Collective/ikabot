@@ -166,6 +166,7 @@ def do_webServer(session, port, local_network_ip):
         return
 
     sys.flask = flask
+    session.warmConnections()
 
     web_cache = dict()
     # check if webcache already exists and load it if it does
