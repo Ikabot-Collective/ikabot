@@ -28,14 +28,6 @@ from ikabot.helpers.process import run, set_child_mode, updateProcessList
 from ikabot.helpers.varios import wait
 
 
-class ResponseTypes:
-    SUCCESS = 10
-    FAILURE = 11
-    WARNING = 12
-    GREEN = 10
-    RED = 11
-    YELLOW = 12
-
 if isWindows:
     web_cache_file = os.getenv("temp") + "/ikabot.webcache"
 else:
@@ -209,9 +201,6 @@ def do_webServer(session, port, local_network_ip):
             # This prevents collisions between images with the same key.
             cache_key = request.url.replace(f'http://{request.host}/', '')
             
-            if "ikabot=1" in request.url:
-                return handleIkabotAPIRequest(session, request)
-
             # replace mayor
             if "/cdn/all/both/layout/advisors/mayor" in request.url:
                 image_data = (
@@ -450,24 +439,6 @@ def webServer(session, event, stdin_fd, predetermined_input, port=None):
     }
 
 
-def handleIkabotAPIRequest(session, request):
-    if request.args["action"] == "killTask":
-        try:
-            if isWindows:
-                run(f"taskkill /F /PID {request.args['pid']}")
-            else:
-                run(f"kill -9 {request.args['pid']}")
-            return mayorMessageResponse(
-                ResponseTypes.SUCCESS, "Task successfully killed!"
-            )
-        except:
-            return mayorMessageResponse(ResponseTypes.FAILURE, "Failed to kill task!")
-
-
-def mayorMessageResponse(type: ResponseTypes, message: str):
-    return f"""[["provideFeedback",[{{"location":1,"type":{type},"text":"[IKABOT] {message}"}}]]]"""
-
-
 def addSandbox(session, resp, req):
 
     json_result = resp.json()
@@ -528,7 +499,6 @@ def generateTableHTML(process_list):
                 <th>Task</th>
                 <th>Date</th>
                 <th>Status</th>
-                <th>Kill</th>
             </tr>
         """
     i = 0
@@ -541,7 +511,6 @@ def generateTableHTML(process_list):
             <td>{process['action']}</td>\
             <td>{datetime.fromtimestamp(process['date']).strftime('%Y-%m-%d %H:%M:%S')}</td>\
             <td style=\"font-size:0.8em\">{process['status']}</td>\
-            <td><button class=\"button\" onclick=\"ajaxHandlerCall('?action=killTask&pid={process['pid']}&ikabot=1'); ajaxHandlerCall('?           view=ikabotSandbox&activeTab=tab_ikabotSandbox');\">Kill</button></td>\
             </tr>"
         i += 1
 
