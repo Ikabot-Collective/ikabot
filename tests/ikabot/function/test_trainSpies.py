@@ -43,15 +43,93 @@ def settings(target=0, gold_floor=0, crystal_floor=0, max_per_pass=1000):
     }
 
 
-class TestParseSafehouse(unittest.TestCase):
-    def test_reads_the_train_slider(self):
-        """The slider maxValue is in the script, not in translated text"""
-        html = '<script>create_slider({ id: "slider_spy", maxValue: 30, minValue: 0 });</script>'
+# markup captured from a real safehouse (Brazilian server), only the parts the parser reads
+STATS = """<div class="spy_stats_content"> <b>{capacity}</b> <ul class="disc-list">
+ <li>{free}</li> <li>{defence}</li> <li>{used}</li> </ul> </div>"""
+COSTS = """<div class="costs"> <ul class="resources"> <li class="gold" id="js_spygold">{gold}</li>
+ <li class="glass" id="js_spyglass">{crystal}</li> <li class="time" id="js_spycompletion">1m 56s</li>
+ </ul> </div>"""
+SLIDER = """<script>create_slider({{ dir: 'ltr', id: "slider_spy", maxValue: {max},
+ overcharge: 0, iniValue: 0, bg: "sliderbg_spy" }});</script>"""
+# a city with spies on missions lists them below the stats, in the same kind of list
+SPYINFO = """<div class="spyinfo"><ul><li>4 estão em uso</li></ul></div>"""
 
-        self.assertEqual(parseSafehouse(html)["orderMax"], 30)
+
+def safehouseHtml(capacity, free, defence, used, gold="150", crystal="40", slider=None):
+    html = STATS.format(capacity=capacity, free=free, defence=defence, used=used)
+    html += COSTS.format(gold=gold, crystal=crystal)
+    if slider is not None:
+        html += SLIDER.format(max=slider)
+    return html + SPYINFO
+
+
+class TestParseSafehouse(unittest.TestCase):
+    def test_reads_a_safehouse_with_room(self):
+        html = safehouseHtml(
+            "Podes treinar 40",
+            "36 esperam por treino",
+            "4 estão a trabalhar na defesa",
+            "0 estão em uso",
+            slider=36,
+        )
+
+        self.assertEqual(
+            parseSafehouse(html),
+            {
+                "orderMax": 36,
+                "capacity": 40,
+                "freeSlots": 36,
+                "goldPerSpy": 150,
+                "crystalPerSpy": 40,
+            },
+        )
+
+    def test_a_full_safehouse_has_no_train_form(self):
+        """With no free slot the game leaves the slider out, nothing can be ordered"""
+        html = safehouseHtml(
+            "Podes treinar 40",
+            "0 esperam por treino",
+            "6 estão a trabalhar na defesa",
+            "4 estão em uso",
+        )
+
+        result = parseSafehouse(html)
+        self.assertEqual(result["orderMax"], 0)
+        self.assertEqual(result["freeSlots"], 0)
+
+    def test_does_not_depend_on_the_language(self):
+        """The labels are translated, the numbers are taken by position"""
+        html = safehouseHtml(
+            "You can train 40",
+            "Waiting for training: 12",
+            "3 working in defence",
+            "5 in use",
+            slider=12,
+        )
+
+        result = parseSafehouse(html)
+        self.assertEqual(result["capacity"], 40)
+        self.assertEqual(result["freeSlots"], 12)
+
+    def test_thousands_separator_in_the_cost(self):
+        html = safehouseHtml(
+            "40", "10", "30", "0", gold="1.500", crystal="1,200", slider=10
+        )
+
+        result = parseSafehouse(html)
+        self.assertEqual(result["goldPerSpy"], 1500)
+        self.assertEqual(result["crystalPerSpy"], 1200)
+
+    def test_missions_list_does_not_count_as_free_slots(self):
+        """The spies abroad are listed after the stats and must not be read as free slots"""
+        html = safehouseHtml("40", "30", "6", "4", slider=30)
+
+        self.assertEqual(parseSafehouse(html)["freeSlots"], 30)
 
     def test_empty_html_gives_nothing(self):
-        self.assertIsNone(parseSafehouse("")["orderMax"])
+        result = parseSafehouse("")
+        self.assertIsNone(result["orderMax"])
+        self.assertIsNone(result["capacity"])
 
 
 class TestCityNeed(unittest.TestCase):

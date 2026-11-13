@@ -51,13 +51,40 @@ def parseSafehouse(html):
     if not html:
         return safehouse
 
+    # the game leaves the train form out when nothing can be trained (a full safehouse)
     match = re.search(r'id:\s*"slider_spy"\s*,\s*maxValue:\s*(\d+)', html)
-    if match:
-        safehouse["orderMax"] = int(match.group(1))
+    safehouse["orderMax"] = int(match.group(1)) if match else 0
 
-    # TODO: capacity, freeSlots and the cost per spy come from the safehouse dumps,
-    # using ids/classes of the markup and not the translated labels around the numbers
+    # <div class="spy_stats_content"><b>{label} 40</b><ul class="disc-list">
+    #   <li>{free slots}</li><li>{at home, in defence}</li><li>{on missions}</li></ul></div>
+    # the labels are translated, so the numbers are taken by position
+    stats = re.search(
+        r'class="spy_stats_content"[^>]*>\s*<b>(.*?)</b>\s*<ul[^>]*>(.*?)</ul>',
+        html,
+        re.DOTALL,
+    )
+    if stats:
+        safehouse["capacity"] = _number(stats.group(1))
+        counts = re.findall(r"<li[^>]*>(.*?)</li>", stats.group(2), re.DOTALL)
+        if counts:
+            safehouse["freeSlots"] = _number(counts[0])
+
+    safehouse["goldPerSpy"] = _number_by_id(html, "js_spygold")
+    safehouse["crystalPerSpy"] = _number_by_id(html, "js_spyglass")
     return safehouse
+
+
+def _number(text):
+    """The first whole number in a piece of HTML, thousands separators included"""
+    match = re.search(r"\d{1,3}(?:[.,\s\xa0]\d{3})+|\d+", re.sub(r"<[^>]+>", "", text))
+    if match is None:
+        return None
+    return int(re.sub(r"\D", "", match.group(0)))
+
+
+def _number_by_id(html, element_id):
+    match = re.search(r'id="{}"[^>]*>([^<]*)<'.format(element_id), html)
+    return _number(match.group(1)) if match else None
 
 
 def cityNeed(safehouse, target):
