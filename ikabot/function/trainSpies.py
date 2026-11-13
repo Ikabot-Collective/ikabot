@@ -158,7 +158,7 @@ def planSpyTraining(cities, gold, settings):
     -------
     (orders, notes) : tuple
         orders is a list of {id, name, position, amount, gold, crystal}, biggest need first;
-        notes maps a city name to {amount, need, reason} when it got fewer spies than it
+        notes maps a city id to {amount, need, reason} when it got fewer spies than it
         needs; reason is PASS_LIMIT, GOLD_FLOOR, CRYSTAL_FLOOR or UNKNOWN_COST
     """
     gold_budget = max(0, gold - settings["goldFloor"])
@@ -178,7 +178,7 @@ def planSpyTraining(cities, gold, settings):
         gold_per_spy = city["safehouse"].get("goldPerSpy")
         crystal_per_spy = city["safehouse"].get("crystalPerSpy")
         if not gold_per_spy or not crystal_per_spy:
-            notes[city["name"]] = {"amount": 0, "need": need, "reason": UNKNOWN_COST}
+            notes[city["id"]] = {"amount": 0, "need": need, "reason": UNKNOWN_COST}
             continue
 
         spare_crystal = max(0, city["crystal"] - settings["crystalFloor"])
@@ -190,7 +190,7 @@ def planSpyTraining(cities, gold, settings):
         }
         amount = min(need, *limits.values())
         if amount < need:
-            notes[city["name"]] = {
+            notes[city["id"]] = {
                 "amount": amount,
                 "need": need,
                 "reason": min(limits, key=limits.get),
@@ -315,7 +315,8 @@ class SpyTrainer:
         for i, city_id in enumerate(cities_ids):
             if i:
                 pause(READ_DELAY)
-            name = cities[city_id]["name"]
+            # the names keep the unicode escapes without the backslash (Atenu00e9a)
+            name = decodeUnicodeEscape(cities[city_id]["name"])
             try:
                 city = getCity(self.session.get(city_url + str(city_id)))
                 safehouse = next(
@@ -373,8 +374,8 @@ class SpyTrainer:
                 addThousandSeparator(order["gold"]),
                 addThousandSeparator(order["crystal"]),
             )
-            if order["name"] in notes:
-                note += ", " + describeShortfall(notes[order["name"]])
+            if order["id"] in notes:
+                note += ", " + describeShortfall(notes[order["id"]])
             try:
                 if self._train(order):
                     results.append(
@@ -400,7 +401,7 @@ class SpyTrainer:
         for city in gathered:
             if city["id"] in ordered:
                 continue
-            shortfall = notes.get(city["name"])
+            shortfall = notes.get(city["id"])
             if shortfall is None:
                 status, note = "OK", "nothing to train"
             elif shortfall["reason"] == PASS_LIMIT:

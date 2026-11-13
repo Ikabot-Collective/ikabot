@@ -283,6 +283,17 @@ class TestPlanSpyTraining(unittest.TestCase):
         self.assertEqual(orders, [])
         self.assertEqual(notes["A"]["reason"], UNKNOWN_COST)
 
+    def test_notes_of_cities_with_the_same_name_do_not_mix(self):
+        cities = [
+            city("Same", safehouse(capacity=40, free=10, gold=None), city_id="1"),
+            city("Same", safehouse(capacity=40, free=10), crystal=0, city_id="2"),
+        ]
+
+        _, notes = planSpyTraining(cities, 10**6, settings())
+
+        self.assertEqual(notes["1"]["reason"], UNKNOWN_COST)
+        self.assertEqual(notes["2"]["reason"], CRYSTAL_FLOOR)
+
     def test_cities_with_nothing_to_train_are_left_out(self):
         cities = [city("A", safehouse(capacity=40, free=0, order_max=0))]
 
@@ -349,28 +360,53 @@ class TestOrderAccepted(unittest.TestCase):
         self.assertFalse(orderAccepted([["updateGlobalData", {}]]))
 
 
+def runPass(houses, names=None):
+    """Runs one pass over cities with these safehouses, returns (results, pause mock)"""
+    session = Mock()
+    session.get.return_value = "city html"
+    session.post.return_value = json.dumps([["provideFeedback", [{"type": 10}]]])
+    city = {
+        "position": [{"position": 8, "building": "safehouse"}],
+        "availableResources": [0, 0, 0, 100000, 0],
+    }
+    trainer = SpyTrainer(
+        session, {"target": 0, "goldFloor": 0, "crystalFloor": 0, "maxPerPass": 100}
+    )
+    names = names or ["City{}".format(i) for i in range(len(houses))]
+    cities = {str(i): {"name": name} for i, name in enumerate(names)}
+    with patch("ikabot.function.trainSpies.getCity", return_value=city), patch(
+        "ikabot.function.trainSpies.getGold", return_value=(10**7, 0)
+    ), patch.object(SpyTrainer, "_read_safehouse", side_effect=houses), patch(
+        "ikabot.function.trainSpies.pause"
+    ) as pause:
+        results = trainer.run_pass(list(cities), cities)
+    return results, pause
+
+
+class TestRunPass(unittest.TestCase):
+    def test_city_names_with_accents_are_decoded(self):
+        results, _ = runPass(
+            [safehouse(capacity=40, free=10, order_max=10)], names=["Atenu00e9a"]
+        )
+
+        self.assertEqual(results[0]["name"], "Aten\u00e9a")
+
+    def test_cities_with_the_same_name_keep_their_own_status(self):
+        houses = [
+            safehouse(capacity=40, free=10, gold=None),
+            safehouse(capacity=40, free=0),
+        ]
+
+        results, _ = runPass(houses, names=["Same", "Same"])
+
+        self.assertEqual([r["status"] for r in results], ["WARN", "OK"])
+
+
 class TestPauses(unittest.TestCase):
     """A pass over many cities must not fire a burst of requests"""
 
     def run_pass(self, houses):
-        session = Mock()
-        session.get.return_value = "city html"
-        session.post.return_value = json.dumps([["provideFeedback", [{"type": 10}]]])
-        city = {
-            "position": [{"position": 8, "building": "safehouse"}],
-            "availableResources": [0, 0, 0, 100000, 0],
-        }
-        trainer = SpyTrainer(
-            session, {"target": 0, "goldFloor": 0, "crystalFloor": 0, "maxPerPass": 100}
-        )
-        names = {str(i): {"name": "City{}".format(i)} for i in range(len(houses))}
-        with patch("ikabot.function.trainSpies.getCity", return_value=city), patch(
-            "ikabot.function.trainSpies.getGold", return_value=(10**7, 0)
-        ), patch.object(SpyTrainer, "_read_safehouse", side_effect=houses), patch(
-            "ikabot.function.trainSpies.pause"
-        ) as pause:
-            trainer.run_pass(list(names), names)
-        return pause
+        return runPass(houses)[1]
 
     def test_pauses_between_cities_and_between_orders(self):
         houses = [safehouse(capacity=40, free=10, order_max=10) for _ in range(3)]
