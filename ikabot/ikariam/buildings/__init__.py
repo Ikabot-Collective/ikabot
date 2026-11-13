@@ -1,0 +1,1 @@
+"""Each file represents an ikariam building and contains it's respective views."""

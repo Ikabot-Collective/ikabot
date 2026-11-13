@@ -1,0 +1,1 @@
+"""Ikariam model. Attempt at making a python ikariam client."""

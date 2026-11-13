@@ -1,10 +1,11 @@
 from datetime import datetime
-from typing import Callable, List, Optional, Tuple, overload, override
+from typing import Callable, List, Optional, Tuple, overload
 from threading import Thread
 import re
 import asyncio
 import json
-from ikabot.ikariam.data import AllianceHighScoreTableRow, MayorMessage, PlayerHighScoreTableRow, HighScoreTypes
+from ikabot.helpers.varios import decodeUnicodeEscape
+from ikabot.ikariam.data import AllianceHighScoreTableRow, MayorMessage, MilitaryMovement, MovementNode, PlayerHighScoreTableRow, HighScoreTypes, Resources, Units
 from ikabot.ikariam.island import Table
 from ikabot.web.session import Session
 from ikabot.ikariam.city import DropdownCity
@@ -383,11 +384,13 @@ class MayorMessageTable(Table):
         super.__init__(tableHTML)
         self.rows = []
         for row in self._rows:
+            isNewsMatch = re.search(r'highlight', row._class)
             typeMatch = re.search(r'category ([\S\s]*?)"', row._cells[0]._content)
             cityNameMatch = re.search(r'>([\S\s]*?)<', row._cells[1]._content)
             cityIdMatch = re.search(r'cityId=(\d+)', row._cells[1]._content)
             dateMatch = re.search(r'"([\d\.\: ]+)"', row._cells[2]._content)
-            
+
+            isNews = True if isNewsMatch else False
             type = typeMatch.group(1)
             cityName = cityNameMatch.group(1).strip()
             cityId = int(cityIdMatch.group(1))
@@ -398,13 +401,11 @@ class MayorMessageTable(Table):
             month = date.split('.')[1]
             year = date.split('.')[2]
             time = dateStr.split(' ')[-1]
-            hour = dateStr.split(':')[0]
-            minute = dateStr.split(':')[-1]
+            hour = time.split(':')[0]
+            minute = time.split(':')[-1]
             
             subjectHTML = row._cells[3]._content
-            self.rows.append(MayorMessage(type, cityName, cityId, datetime(int(year), int(month), int(day), int(hour), int(minute)), subjectHTML))
-
-
+            self.rows.append(MayorMessage(type, isNews, cityName, cityId, datetime(int(year), int(month), int(day), int(hour), int(minute)), subjectHTML))
 
         ...
 
@@ -443,4 +444,84 @@ class MayorView():
         """Check data.MayorMessageTypes for valid string values of mayorMessageType"""
         ...
 
+class MilitaryTable(): #not an actual html table so doesnt inherit from Table
 
+    view: 'MilitaryView'
+    rows: List[MilitaryMovement]
+
+    def __init__(self, view: 'MilitaryView', militaryMovements: dict) -> None:
+        self.view = view
+        self.__militaryMovements = militaryMovements
+
+        
+        self.rows = []
+        for militaryMovement in militaryMovements:
+            
+            movementId = int(militaryMovement['event']['id'])
+            type = militaryMovement['event']['type']
+            missionId = int(militaryMovement['event']['mission'])
+            missionText = militaryMovement['event']['missionText']
+            isReturning = bool(militaryMovement['event']['isReturning'])
+            isFleetReturning = bool(militaryMovement['event']['isFleetReturning'])
+            isInFight = bool(militaryMovement['event']['isInFight'])
+            isCombatant = bool(militaryMovement['event']['isCombatant'])
+            isOwnLoading = bool(militaryMovement['event']['isFirstOwnLoadingQueueEvent'])
+            isLoadingAccelerated = bool(militaryMovement['event']['loadingAccelerated'])
+            canAbort = bool(militaryMovement['event']['canAbort'])
+            canRetreat = bool(militaryMovement['event']['canRetreat'])
+
+            endTime = datetime.fromtimestamp(militaryMovement['eventTime'])
+            isUnitsHidden = bool(militaryMovement['hideUnits'])
+            #totalUnits = int(militaryMovement['army']['amount'])
+            
+            units = list()
+            [units.append(Units.getUnitByCssClass(unit['cssClass'])(int(unit['amount'].replace('.','').replace(',','')))) for unit in militaryMovement['army']['units']]
+            [units.append(Units.getUnitByCssClass(unit['cssClass'])(int(unit['amount'].replace('.','').replace(',','')))) for unit in militaryMovement['fleet']['ships']]
+            totalUnits = sum([u.count for u in units])
+
+            totalTransportersAndFreighters = sum([u.count for u in units if u.cssClass in ['ship_transport','ship_freighter']])
+
+            resources = list()
+            [resources.append(Resources.getResourceByCssClass(resource['cssClass'].replace('resource_icon','').strip())(int(resource['amount'].replace('.','').replace(',','')))) for resource in militaryMovement['resources']]
+            totalResources = sum([r.count for r in resources])
+
+            isOwnArmyOrFleet = bool(militaryMovement['isOwnArmyOrFleet'])
+            isSameAlliance = bool(militaryMovement['isSameAlliance'])
+            isHostile = bool(militaryMovement['isHostile'])
+            tritonEngines = bool(militaryMovement['tritonEngines'])
+
+            originCityName = decodeUnicodeEscape(militaryMovement['origin']['name'])
+            originPlayerId = int(militaryMovement['origin']['avatarId'])
+            originPlayerName = decodeUnicodeEscape(militaryMovement['origin']['avatarName'])
+            originCityId = int(militaryMovement['origin']['cityId'])
+            originIslandId = int(militaryMovement['origin']['islandId'])
+
+            targetCityName = decodeUnicodeEscape(militaryMovement['target']['name'])
+            targetPlayerId = int(militaryMovement['target']['avatarId'])
+            targetPlayerName = decodeUnicodeEscape(militaryMovement['target']['avatarName'])
+            targetCityId = int(militaryMovement['target']['cityId'])
+            targetIslandId = int(militaryMovement['target']['islandId'])
+
+            origin = MovementNode(originCityName, originPlayerId, originPlayerName, originCityId, originIslandId)
+            target = MovementNode(targetCityName, targetPlayerId, targetPlayerName, targetCityId, targetIslandId)
+
+            
+            self.rows.append(MilitaryMovement(movementId, type, missionId, missionText, isReturning, isFleetReturning, isInFight, isCombatant, isOwnLoading, isLoadingAccelerated, canAbort, canRetreat, endTime, isUnitsHidden, totalUnits, units, totalTransportersAndFreighters, totalResources, resources, isOwnArmyOrFleet, isSameAlliance, isHostile, tritonEngines, origin, target ))
+            
+
+        ...
+
+class MilitaryView():
+
+    client: 'Client'
+    militaryTable: 'MilitaryTable'
+    #occupationTable: 'OccupationTable' # TODO add occupation table and ability to break occupation
+
+    def __init__(self, client: 'Client', militaryAndFleetMovements: dict, updateTemplateData: dict) -> None:
+        
+        self.client =  client
+        self.__military_and_fleet_movements = militaryAndFleetMovements
+        self.__update_template_data = updateTemplateData
+        self.militaryTable = MilitaryTable(self, militaryAndFleetMovements)
+        
+        ...

@@ -402,3 +402,19 @@ class IslandCity(IslandPlace, DropdownCity):
 
     ...
 
+    #{
+# "type":"city",
+# "name":"Lispa\u0161 Sjeban",
+# "id":290764,
+# "level":31,
+# "ownerId":"212924",
+# "ownerName":"Rime",
+# "ownerAllyId":1628,
+# "ownerAllyTag":"KINGS",
+# "hasTreaties":0,
+# "actions":[
+# ],
+# "state":"",
+# "viewAble":2,
+# "infestedByPlague":false
+# },
