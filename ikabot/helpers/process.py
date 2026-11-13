@@ -8,6 +8,7 @@ import subprocess
 import psutil
 
 from ikabot.config import *
+from ikabot.helpers.sessionStorage import session_data_lock
 from ikabot.helpers.signals import deactivate_sigint
 from ikabot.helpers.varios import normalizeDicts
 
@@ -46,6 +47,11 @@ def updateProcessList(session, programprocesslist=[]):
     runningIkabotProcessList : list[dict]
         a list of dictionaries containing relevant data about a running ikabot process ('pid', 'proxies' and 'action')
     """
+    with session_data_lock():
+        return _updateProcessList(session, programprocesslist)
+
+
+def _updateProcessList(session, programprocesslist=[]):
     # read from file
     sessionData = session.getSessionData()
     try:
@@ -68,10 +74,12 @@ def updateProcessList(session, programprocesslist=[]):
         if proc.name() == ika_process and isAlive:
             runningIkabotProcessList.append(process)
 
-    # add new to the list and write to file only if it's given
+    # add new to the list and write to file only if it's given (dedup by pid)
+    existing_pids = {p["pid"] for p in runningIkabotProcessList}
     for process in programprocesslist:
-        if process not in runningIkabotProcessList:
+        if process["pid"] not in existing_pids:
             runningIkabotProcessList.append(process)
+            existing_pids.add(process["pid"])
 
     # check if all proceses have new status field
     if len([p for p in runningIkabotProcessList if "status" not in p]) == len(
@@ -81,7 +89,7 @@ def updateProcessList(session, programprocesslist=[]):
 
     # write to file
     sessionData["processList"] = runningIkabotProcessList
-    session.setSessionData(sessionData)
+    session.setSessionData(sessionData, keep_process_list=False)
 
     # normalize process list (all processes must have properties pid, action, date and status)
     normalized_processes = normalizeDicts(runningIkabotProcessList)

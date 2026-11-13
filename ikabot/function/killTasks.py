@@ -1,7 +1,7 @@
+from ikabot.helpers.decorators import configurator
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 import datetime
-import gettext
 import sys
 
 from ikabot.config import *
@@ -9,10 +9,8 @@ from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import enter, read
 from ikabot.helpers.process import run, updateProcessList
 
-t = gettext.translation("killTasks", localedir, languages=languages, fallback=True)
-_ = t.gettext
 
-
+@configurator
 def killTasks(session, event, stdin_fd, predetermined_input):
     """
     Parameters
@@ -22,8 +20,6 @@ def killTasks(session, event, stdin_fd, predetermined_input):
     stdin_fd: int
     predetermined_input : multiprocessing.managers.SyncManager.list
     """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
     try:
         while True:
             banner()
@@ -32,7 +28,7 @@ def killTasks(session, event, stdin_fd, predetermined_input):
                 process for process in process_list if process["action"] != "killTasks"
             ]
             if len(process_list) == 0:
-                print(_("There are no tasks running"))
+                print("There are no tasks running")
                 enter()
                 event.set()
                 return
@@ -41,19 +37,21 @@ def killTasks(session, event, stdin_fd, predetermined_input):
             for process in process_list:
                 if "date" in process:
                     print(
-                        "({}) {:<35}{:>20}".format(
+                        "({}) {:<35}{:>20} {:>10}".format(
                             process_list.index(process) + 1,
                             process["action"],
                             datetime.datetime.fromtimestamp(process["date"]).strftime(
                                 "%b %d %H:%M:%S"
                             ),
+                            process["pid"]
                         )
                     )
                 else:
                     print(
-                        "({}) {:<35}".format(
+                        "({}) {:<35} {:>10}".format(
                             process_list.index(process) + 1,
                             process["action"],
+                            process["pid"]
                         )
                     )
             choise = read(min=0, max=len(process_list), digit=True)

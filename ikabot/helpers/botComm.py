@@ -1,22 +1,86 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import gettext
+from ikabot.helpers.logging import getLogger
+logger = getLogger(__name__)
 import json
 import os
 import random
 import re
 import sys
 import time
-
+from requests import get, post as requests_post
 import ikabot.config as config
-import ikabot.web.session
 from ikabot.config import *
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import read
 
-t = gettext.translation("botComm", localedir, languages=languages, fallback=True)
-_ = t.gettext
+
+def sendToDiscord(session, msg):
+    """Send a message to a Discord webhook if one is configured.
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    msg : str
+    """
+    sessionData = session.getSessionData()
+    try:
+        webhook_url = sessionData["shared"]["discord"]["webhookUrl"]
+    except KeyError:
+        return
+    if not webhook_url:
+        return
+    try:
+        requests_post(webhook_url, json={"content": msg})
+    except Exception:
+        pass
+
+
+def discordDataIsValid(session):
+    """Return True if a Discord webhook URL is stored in session data.
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    """
+    sessionData = session.getSessionData()
+    try:
+        return len(sessionData["shared"]["discord"]["webhookUrl"]) > 0
+    except KeyError:
+        return False
+
+
+def updateDiscordData(session, event=None, stdin_fd=None, predetermined_input=[]):
+    """Ask the user for a Discord webhook URL and save it to session data.
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    event : multiprocessing.Event
+    stdin_fd : int
+    predetermined_input : multiprocessing.managers.SyncManager.list
+    """
+    if event is not None and stdin_fd is not None:
+        sys.stdin = os.fdopen(stdin_fd, closefd=False)
+    config.predetermined_input = predetermined_input
+    banner()
+    print("To create a Discord webhook:")
+    print("1. Open your Discord server settings > Integrations > Webhooks")
+    print("2. Click 'New Webhook', choose a channel, and copy the webhook URL\n")
+    webhook_url = read(msg="Webhook URL: ").strip()
+    if not webhook_url:
+        if event is not None:
+            event.set()
+        return False
+    discord_data = {"discord": {"webhookUrl": webhook_url}}
+    session.setSessionData(discord_data, shared=True)
+    try:
+        requests_post(webhook_url, json={"content": "Discord notifications successfully configured for ikabot."})
+        print("\nA test message was sent to your Discord channel.")
+    except Exception:
+        print("\nWebhook URL saved, but the test message could not be sent. Please verify the URL.")
+    enter()
+    if event is not None:
+        event.set()
+    return True
 
 
 def sendToBotDebug(session, msg, debugON):
@@ -48,27 +112,22 @@ def sendToBot(session, msg, Token=False, Photo=None):
         a bytes object representing a picture to be sent.
     """
 
-    session.writeLog(
-        msg="MESSAGE TO TG BOT: " + msg,
-        module=__name__,
-        level=logLevels.WARN,
-        logTraceback=True,
-        logRequestHistory=True,
-    )
+    logger.warning(f"MESSAGE TO TG BOT: {msg}", exc_info=True)
+
+    sendToDiscord(session, msg)
+
     if checkTelegramData(session) is False:
-        session.writeLog(
-            msg="Tried to message TG bot without correct tg data!",
-            module=__name__,
-            level=logLevels.ERROR,
-        )
+        logger.error("Tried to message TG bot without correct tg data!", exc_info=True)
         return
     if Token is False:
-        msg = "pid:{}\n{}\n{}".format(os.getpid(), config.infoUser, msg)
+        # A bit hacky, but fixes issue that config.infoUser isn't updated in new processes for sending TG messages.
+        infoUser = "Server:{}, World:{}, Player:{}".format(session.servidor, session.word, session.username)
+        msg = "pid:{}\n{}\n{}".format(os.getpid(), infoUser, msg)
 
     sessionData = session.getSessionData()
     telegram_data = sessionData["shared"]["telegram"]
     if Photo is None:
-        return ikabot.web.session.normal_get(
+        return get(
             "https://api.telegram.org/bot{}/sendMessage".format(
                 telegram_data["botToken"]
             ),
@@ -133,7 +192,7 @@ def getUserResponse(session, fullResponse=False):
     telegram_data = sessionData["shared"]["telegram"]
 
     try:
-        updates = ikabot.web.session.normal_get(
+        updates = get(
             "https://api.telegram.org/bot{}/getUpdates".format(
                 telegram_data["botToken"]
             )
@@ -179,15 +238,12 @@ def checkTelegramData(session):
         if not session.padre:  # stop asking people if process is detached
             return False
         banner()
-        print(_("You must provide valid credentials to communicate by telegram."))
-        print(_("You require the token of the bot you are going to use."))
-        print(
-            _(
-                "For more information about how to obtain them read the readme at https://github.com/physics-sp/ikabot"
-            )
+        print("You must provide valid credentials to communicate by telegram.")
+        print("You require the token of the bot you are going to use.")
+        print("For more information about how to obtain them read the readme at https://github.com/Ikabot-Collective/ikabot"
         )
         rta = read(
-            msg=_("Will you provide the credentials now? [y/N]"),
+            msg="Will you provide the credentials now? [y/N]",
             values=["y", "Y", "n", "N", ""],
         )
         if rta.lower() != "y":
@@ -215,31 +271,23 @@ def updateTelegramData(session, event=None, stdin_fd=None, predetermined_input=[
         a boolean indicating whether or not the Telegram data has been successfully updated
     """
     if event is not None and stdin_fd is not None:
-        sys.stdin = os.fdopen(stdin_fd)  # give process access to terminal
+        sys.stdin = os.fdopen(stdin_fd, closefd=False)  # give process access to terminal
     config.predetermined_input = predetermined_input
     banner()
-    print(
-        _(
-            "To create your own Telegram bot, read this: https://core.telegram.org/bots#3-how-do-i-create-a-bot"
-        )
-    )
-    print(
-        _(
-            "1. Just talk to @botfather in Telegram, send /newbot and then choose the bot's name."
-        )
-    )
-    print(_("2. Obtain your new bot's token"))
-    print(_("3. Remember to keep the token secret!\n"))
-    botToken = read(msg=_("Bot's token: "))
+    print("To create your own Telegram bot, read this: https://core.telegram.org/bots#3-how-do-i-create-a-bot")
+    print("1. Just talk to @botfather in Telegram, send /newbot and then choose the bot's name.")
+    print("2. Obtain your new bot's token")
+    print("3. Remember to keep the token secret!\n")
+    botToken = read(msg="Bot's token: ")
 
-    updates = ikabot.web.session.normal_get(
+    updates = get(
         "https://api.telegram.org/bot{}/getUpdates".format(botToken)
     ).json()
-    me = ikabot.web.session.normal_get(
+    me = get(
         "https://api.telegram.org/bot{}/getMe".format(botToken)
     ).json()
     if "ok" not in updates or updates["ok"] is False:
-        print(_("Invalid Telegram bot, try again."))
+        print("Invalid Telegram bot, try again.")
         enter()
         if event is not None and stdin_fd is not None:
             event.set()
@@ -259,7 +307,7 @@ def updateTelegramData(session, event=None, stdin_fd=None, predetermined_input=[
                 f"Waiting to receive the command on Telegram... Press CTRL + C to abort.\tdt:{round(time.time()-start)}s",
                 end="\r",
             )
-            updates = ikabot.web.session.normal_get(
+            updates = get(
                 "https://api.telegram.org/bot{}/getUpdates".format(botToken)
             ).json()
 
@@ -267,7 +315,7 @@ def updateTelegramData(session, event=None, stdin_fd=None, predetermined_input=[
                 if "message" in update:
                     if "text" in update["message"]:
                         if update["message"]["text"].strip() == f"/ikabot {rand}":
-                            user_id = update["message"]["from"]["id"]
+                            user_id = update["message"]["chat"]["id"]
                             break
             time.sleep(2)
             print(" " * 100, end="\r")

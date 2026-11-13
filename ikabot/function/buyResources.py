@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import gettext
 import json
 import math
 import re
@@ -16,13 +15,16 @@ from ikabot.helpers.market import *
 from ikabot.helpers.naval import getTotalShips
 from ikabot.helpers.pedirInfo import getIdsOfCities, read
 from ikabot.helpers.planRoutes import waitForArrival
-from ikabot.helpers.process import set_child_mode
+from ikabot.helpers.decorators import configurator, task
 from ikabot.helpers.resources import *
 from ikabot.helpers.signals import setInfoSignal
-from ikabot.helpers.varios import addThousandSeparator
+from ikabot.helpers.varios import addThousandSeparator, getDateTime
+from ikabot.helpers.pedirInfo import getShipCapacity
 
-t = gettext.translation("buyResources", localedir, languages=languages, fallback=True)
-_ = t.gettext
+
+BUY_FROM_ANYONE = 1
+BUY_FROM_PLAYER = 2
+BUY_FROM_CITY = 3
 
 
 def chooseResource(session, city):
@@ -32,7 +34,7 @@ def chooseResource(session, city):
     session : ikabot.web.session.Session
     city : dict
     """
-    print(_("Which resource do you want to buy?"))
+    print("Which resource do you want to buy?")
     for index, material_name in enumerate(materials_names):
         print("({:d}) {}".format(index + 1, material_name))
     choise = read(min=1, max=5)
@@ -72,50 +74,42 @@ def getOffers(session, city):
     offers : list[dict]
     """
     html = getMarketHtml(session, city)
-    hits = re.findall(
-        r'short_text80">(.*?) *<br/>\((.*?)\)\s *</td>\s *<td>(\d+)</td>\s *<td>(.*?)/td>\s *<td><img src="(.*?)\.png[\s\S]*?white-space:nowrap;">(\d+)\s[\s\S]*?href="\?view=takeOffer&destinationCityId=(\d+)&oldView=branchOffice&activeTab=bargain&cityId=(\d+)&position=(\d+)&type=(\d+)&resource=(\w+)"',
-        html,
-    )
-    offers = []
-    for hit in hits:
-        offer = {
-            "ciudadDestino": hit[0],
-            "jugadorAComprar": hit[1],
-            "bienesXminuto": int(hit[2]),
-            "amountAvailable": int(
-                hit[3].replace(",", "").replace(".", "").replace("<", "")
-            ),
-            "tipo": hit[4],
-            "precio": int(hit[5]),
-            "destinationCityId": hit[6],
-            "cityId": hit[7],
-            "position": hit[8],
-            "type": hit[9],
-            "resource": hit[10],
-        }
 
-        # Parse CDN Images to material type
-        if offer["tipo"] == "//gf2.geo.gfsrv.net/cdn19/c3527b2f694fb882563c04df6d8972":
-            offer["tipo"] = "wood"
-        elif (
-            offer["tipo"] == "//gf1.geo.gfsrv.net/cdnc6/94ddfda045a8f5ced3397d791fd064"
-        ):
-            offer["tipo"] = "wine"
-        elif (
-            offer["tipo"] == "//gf3.geo.gfsrv.net/cdnbf/fc258b990c1a2a36c5aeb9872fc08a"
-        ):
-            offer["tipo"] = "marble"
-        elif (
-            offer["tipo"] == "//gf2.geo.gfsrv.net/cdn1e/417b4059940b2ae2680c070a197d8c"
-        ):
-            offer["tipo"] = "glass"
-        elif (
-            offer["tipo"] == "//gf1.geo.gfsrv.net/cdn9b/5578a7dfa3e98124439cca4a387a61"
-        ):
-            offer["tipo"] = "sulfur"
-        else:
+    resource_names = {
+        "resource": "wood",
+        "1": "wine",
+        "2": "marble",
+        "3": "glass",
+        "4": "sulfur",
+    }
+
+    offers = []
+    for row in re.findall(r'<tr[^>]*>([\s\S]*?)</tr>', html):
+        city_match   = re.search(r'<td class="short_text80">(.*?)<br/>\((.*?)\)', row)
+        amount_match = re.search(r'<div class="tooltip"[^>]*>(\d[^<]*)</div>', row)
+        price_match  = re.search(r'<td style="white-space:nowrap;">(\d+)', row)
+        href_match   = re.search(
+            r'href="\?view=takeOffer&destinationCityId=(\d+)&oldView=branchOffice&activeTab=bargain&cityId=(\d+)&position=(\d+)&type=(\d+)&resource=(\w+)"',
+            row,
+        )
+
+        if not all([city_match, amount_match, price_match, href_match]):
             continue
 
+        resource_key = href_match.group(5)
+        raw_amount = re.sub(r'\D', '', amount_match.group(1))
+        offer = {
+            "ciudadDestino": city_match.group(1).strip(),
+            "jugadorAComprar": city_match.group(2).strip(),
+            "amountAvailable": int(raw_amount),
+            "tipo": resource_names.get(resource_key, resource_key),
+            "precio": int(price_match.group(1)),
+            "destinationCityId": href_match.group(1),
+            "cityId": href_match.group(2),
+            "position": href_match.group(3),
+            "type": href_match.group(4),
+            "resource": resource_key,
+        }
         offers.append(offer)
     return offers
 
@@ -150,130 +144,52 @@ def chooseCommertialCity(commercial_cities):
     -------
     commercial_city : dict
     """
-    print(_("From which city do you want to buy resources?\n"))
+    print("From which city do you want to buy resources?\n")
     for i, city in enumerate(commercial_cities):
         print("({:d}) {}".format(i + 1, city["name"]))
     selected_city_index = read(min=1, max=len(commercial_cities))
     return commercial_cities[selected_city_index - 1]
 
 
-def buyResources(session, event, stdin_fd, predetermined_input):
-    """
+def filterOffers(offers):
+    """Lets the user buy from one specific player or one specific city instead of always
+    taking the cheapest offers. The lowest price is not always the desired one, the user
+    might need to trade with someone in particular
     Parameters
     ----------
-    session : ikabot.web.session.Session
-    event : multiprocessing.Event
-    stdin_fd: int
-    predetermined_input : multiprocessing.managers.SyncManager.list
+    offers : list[dict]
+
+    Returns
+    -------
+    (offers, seller) : tuple
+        the offers that belong to the chosen seller, and its name (None if the user did
+        not choose one)
     """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
-    try:
-        banner()
+    print("Buy from:")
+    print("({:d}) Anyone in range".format(BUY_FROM_ANYONE))
+    print("({:d}) A specific player".format(BUY_FROM_PLAYER))
+    print("({:d}) A specific city".format(BUY_FROM_CITY))
+    choice = read(min=BUY_FROM_ANYONE, max=BUY_FROM_CITY, default=BUY_FROM_ANYONE)
+    if choice == BUY_FROM_ANYONE:
+        return offers, None
 
-        # get all the cities with a store
-        commercial_cities = getCommercialCities(session)
-        if len(commercial_cities) == 0:
-            print(_("There is no store build"))
-            enter()
-            event.set()
-            return
+    if choice == BUY_FROM_PLAYER:
+        key = "jugadorAComprar"
+        print("\nWhich player do you want to buy from?\n")
+    else:
+        key = "ciudadDestino"
+        print("\nWhich city do you want to buy from?\n")
 
-        # choose which city to buy from
-        if len(commercial_cities) == 1:
-            city = commercial_cities[0]
-        else:
-            city = chooseCommertialCity(commercial_cities)
-            banner()
+    # dict.fromkeys removes the duplicates without losing the order of the offers
+    sellers = list(dict.fromkeys([offer[key] for offer in offers]))
+    for i, seller in enumerate(sellers):
+        print("({:d}) {}".format(i + 1, seller))
+    seller = sellers[read(min=1, max=len(sellers)) - 1]
 
-        # choose resource to buy
-        resource = chooseResource(session, city)
-        banner()
-
-        # get all the offers of the chosen resource from the chosen city
-        offers = getOffers(session, city)
-        if len(offers) == 0:
-            print(_("There are no offers available."))
-            enter()
-            event.set()
-            return
-
-        # display offers to the user
-        total_price = 0
-        total_amount = 0
-        for offer in offers:
-            amount = offer["amountAvailable"]
-            price = offer["precio"]
-            cost = amount * price
-            print(_("amount:{}").format(addThousandSeparator(amount)))
-            print(_("price :{:d}").format(price))
-            print(_("cost  :{}").format(addThousandSeparator(cost)))
-            print("")
-            total_price += cost
-            total_amount += amount
-
-        # ask how much to buy
-        print(
-            _("Total amount available to purchase: {}, for {}").format(
-                addThousandSeparator(total_amount), addThousandSeparator(total_price)
-            )
-        )
-        available = city["freeSpaceForResources"][resource]
-        if available < total_amount:
-            print(
-                _("You just can buy {} due to storing capacity").format(
-                    addThousandSeparator(available)
-                )
-            )
-            total_amount = available
-        print("")
-        amount_to_buy = read(
-            msg=_("How much do you want to buy?: "), min=0, max=total_amount
-        )
-        if amount_to_buy == 0:
-            event.set()
-            return
-
-        # calculate the total cost
-        (gold, __) = getGold(session, city)
-        total_cost = calculateCost(offers, amount_to_buy)
-
-        print(
-            _("\nCurrent gold: {}.\nTotal cost  : {}.\nFinal gold  : {}.").format(
-                addThousandSeparator(gold),
-                addThousandSeparator(total_cost),
-                addThousandSeparator(gold - total_cost),
-            )
-        )
-        print(_("Proceed? [Y/n]"))
-        rta = read(values=["y", "Y", "n", "N", ""])
-        if rta.lower() == "n":
-            event.set()
-            return
-
-        print(_("It will be purchased {}").format(addThousandSeparator(amount_to_buy)))
-        enter()
-    except KeyboardInterrupt:
-        event.set()
-        return
-
-    set_child_mode(session)
-    event.set()
-
-    info = _("\nI will buy {} from {} to {}\n").format(
-        addThousandSeparator(amount_to_buy), materials_names[resource], city["cityName"]
-    )
-    setInfoSignal(session, info)
-    try:
-        do_it(session, city, offers, amount_to_buy)
-    except Exception as e:
-        msg = _("Error in:\n{}\nCause:\n{}").format(info, traceback.format_exc())
-        sendToBot(session, msg)
-    finally:
-        session.logout()
+    return [offer for offer in offers if offer[key] == seller], seller
 
 
-def buy(session, city, offer, amount_to_buy, ships_available):
+def buy(session, city, offer, amount_to_buy, ships_available, ship_capacity):
     """
     Parameters
     ----------
@@ -282,7 +198,7 @@ def buy(session, city, offer, amount_to_buy, ships_available):
     offer : dict
     amount_to_buy : int
     """
-    ships = int(math.ceil((Decimal(amount_to_buy) / Decimal(500))))
+    ships = int(math.ceil((Decimal(amount_to_buy) / Decimal(ship_capacity))))
     data_dict = {
         "action": "transportOperations",
         "function": "buyGoodsAtAnotherBranchOffice",
@@ -333,14 +249,19 @@ def buy(session, city, offer, amount_to_buy, ships_available):
     else:
         data_dict["cargo_tradegood{}".format(resource)] = amount_to_buy
     session.post(params=data_dict)
-    msg = _("I buy {} to {} from {}").format(
+    msg = "I buy {} to {} from {}".format(
         addThousandSeparator(amount_to_buy),
         offer["ciudadDestino"],
         offer["jugadorAComprar"],
     )
     sendToBotDebug(session, msg, debugON_buyResources)
+    resource_name = offer['tipo']
+    session.setStatus(
+        f"Bought {addThousandSeparator(amount_to_buy)} {resource_name} for {offer['precio']} gold from {offer['ciudadDestino']} ({offer['jugadorAComprar']}) ---> {city['name']} | {getDateTime()}"
+    )
 
 
+@task("buyResources")
 def do_it(session, city, offers, amount_to_buy):
     """
     Parameters
@@ -350,19 +271,125 @@ def do_it(session, city, offers, amount_to_buy):
     offers : list[dict]
     amount_to_buy : int
     """
+    info = "\nI will buy {} {} to {}\n".format(
+        addThousandSeparator(amount_to_buy), offers[0]['tipo'] if len(offers) > 0 else "resources", city["cityName"]
+    )
+    setInfoSignal(session, info)
+    ship_capacity, freighter_capacity = getShipCapacity(session)
     while True:
         for offer in offers:
             if amount_to_buy == 0:
                 return
             if offer["amountAvailable"] == 0:
                 continue
-
             ships_available = waitForArrival(session)
-            storageCapacity = ships_available * 500
+            storageCapacity = ships_available * ship_capacity
             buy_amount = min(amount_to_buy, storageCapacity, offer["amountAvailable"])
 
             amount_to_buy -= buy_amount
             offer["amountAvailable"] -= buy_amount
-            buy(session, city, offer, buy_amount, ships_available)
+            buy(session, city, offer, buy_amount, ships_available, ship_capacity)
             # start from the beginning again, so that we always buy from the cheapest offers fisrt
             break
+@configurator
+def buyResources(session, event, stdin_fd, predetermined_input):
+    """
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    event : multiprocessing.Event
+    stdin_fd: int
+    predetermined_input : multiprocessing.managers.SyncManager.list
+    """
+    banner()
+
+    # get all the cities with a store
+    commercial_cities = getCommercialCities(session)
+    if len(commercial_cities) == 0:
+        print("There is no store build")
+        enter()
+        return None
+
+    # choose which city to buy from
+    if len(commercial_cities) == 1:
+        city = commercial_cities[0]
+    else:
+        city = chooseCommertialCity(commercial_cities)
+        banner()
+
+    # choose resource to buy
+    resource = chooseResource(session, city)
+    banner()
+
+    # get all the offers of the chosen resource from the chosen city
+    offers = getOffers(session, city)
+    offers.sort(key=lambda o: o["precio"])
+    if len(offers) == 0:
+        print("There are no offers available.")
+        enter()
+        return None
+
+    # let the user buy from one seller only
+    (offers, seller) = filterOffers(offers)
+    banner()
+
+    # display offers to the user
+    total_price = 0
+    total_amount = 0
+    for offer in offers:
+        amount = offer["amountAvailable"]
+        price = offer["precio"]
+        cost = amount * price
+        print(
+            "seller:{} ({})".format(
+                offer["jugadorAComprar"], offer["ciudadDestino"]
+            )
+        )
+        print("amount:{}".format(addThousandSeparator(amount)))
+        print("price :{:d}".format(price))
+        print("cost  :{}".format(addThousandSeparator(cost)))
+        print("")
+        total_price += cost
+        total_amount += amount
+
+    # ask how much to buy
+    print(
+        "Total amount available to purchase: {}, for {}".format(
+            addThousandSeparator(total_amount), addThousandSeparator(total_price)
+        )
+    )
+    available = city["freeSpaceForResources"][resource]
+    if available < total_amount:
+        print(
+            "You just can buy {} due to storing capacity".format(
+                addThousandSeparator(available)
+            )
+        )
+        total_amount = available
+    print("")
+    amount_to_buy = read(
+        msg="How much do you want to buy?: ", min=0, max=total_amount
+    )
+    if amount_to_buy == 0:
+        return None
+
+    # calculate the total cost
+    (gold, __) = getGold(session, city)
+    total_cost = calculateCost(offers, amount_to_buy)
+
+    print(
+        "\nCurrent gold: {}.\nTotal cost  : {}.\nFinal gold  : {}.".format(
+            addThousandSeparator(gold),
+            addThousandSeparator(total_cost),
+            addThousandSeparator(gold - total_cost),
+        )
+    )
+    print("Proceed? [Y/n]")
+    rta = read(values=["y", "Y", "n", "N", ""])
+    if rta.lower() == "n":
+        return None
+
+    print("It will be purchased {}".format(addThousandSeparator(amount_to_buy)))
+    enter()
+    return {"session": session, "city": city, "offers": offers, "amount_to_buy": amount_to_buy}
+

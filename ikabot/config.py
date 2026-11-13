@@ -1,44 +1,111 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import gettext
 import locale
 import os
-import random
 
-local = locale.setlocale(locale.LC_ALL, "")
-if "es_" in local:
-    languages = ["es"]
-else:
-    languages = ["en"]
-languages = ["none"]
+# Version is changed automatically by the release pipeline
+IKABOT_VERSION = "7.7.2"
 
-localedir = os.path.join(os.path.abspath(os.path.dirname(__file__)), "locale")
-t = gettext.translation("config", localedir, languages=languages, fallback=True)
-_ = t.gettext
 
-# only use common browsers
-if random.randint(0, 1) == 0:
-    user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36"
-else:
-    user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/110.0"
+IKABOT_VERSION_TAG = "v" + IKABOT_VERSION
+
+
+
 
 update_msg = ""
 
 isWindows = os.name == "nt"
 
+# Multiprocessing configuration for pure-Python local decaptcha
+# Set to False if your environment struggles with Python multiprocessing.
+# Leaving this on is safe even with many accounts: the solver sizes itself to
+# the free cores and free RAM it finds at solve time, and falls back to a
+# single-process solve when the machine is busy.
+USE_MULTIPROCESSING_DECAPTCHA = True
+
+# Set to TRUE to enable requesting the zero-cost speedup while a building is finishing # default FALSE
+CONSTRUCTION_FREE_SPEEDUP = (os.getenv("CONSTRUCTION_FREE_SPEEDUP") or "FALSE").strip().upper() == "TRUE"
+# Max seconds to randomly wait before firing the free speedup request
+SPEEDUP_RANDOMWAIT = max(1, int(os.getenv("SPEEDUP_RANDOMWAIT") or 30))
+
+# Set to True to record how long each local captcha solve took, in the ikabot
+# log file (see LOGS_DIRECTORY_FILE below). One line per solve, tagged
+# [decaptcha-timing], with the worker count, the free RAM and the CPU
+# topology it decided from.
+# Off by default. Turn it on to compare performance across machines, or to
+# report a slow solve.
+DECAPTCHA_TIMING_LOG = False
+
+# Solve the pirates captcha locally instead of sending the image to the remote
+# decaptcha API. Set it to False to always use the remote API (via
+# getPiratesCaptchaSolution) for the pirates captcha.
+PIRATE_DECAPTCHA_LOCAL = True
+
+# Regional Settings
+# These environment variables can be set to match the user's browser region and
+# timezone when Gameforge rejects generated blackbox tokens.
+IKABOT_LOCALE = (os.getenv("IKABOT_LOCALE") or "en-GB").strip() or "en-GB"
+IKABOT_GF_LANG = (
+    os.getenv("IKABOT_GF_LANG") or IKABOT_LOCALE.split("-")[0]
+).strip() or "en"
+IKABOT_TIMEZONE_ID = (
+    os.getenv("IKABOT_TIMEZONE_ID") or "Europe/London"
+).strip() or "Europe/London"
+
+# Fixed port for the web server, or "ask" to prompt for it. Leave unset to keep the port derived from the account.
+IKABOT_WEB_PORT = (os.getenv("IKABOT_WEB_PORT") or "").strip()
+
+
+def build_accept_language(locale_value=IKABOT_LOCALE, gf_lang=IKABOT_GF_LANG):
+    locale_value = (locale_value or IKABOT_LOCALE).strip() or IKABOT_LOCALE
+    gf_lang = (gf_lang or locale_value.split("-")[0]).strip() or "en"
+
+    parts = [locale_value]
+    if gf_lang != locale_value:
+        parts.append(f"{gf_lang};q=0.9")
+    if gf_lang != "en" and locale_value != "en":
+        parts.append("en;q=0.8")
+    return ",".join(parts)
+
+
+LOGS_DIRECTORY_FILE = os.getenv("temp") + "/ikabot.log" if isWindows else "/tmp/ikabot.log"
+DEFAULT_LOG_LEVEL = 30 # Warning
+
+publicAPIServerDomain = "ikagod.twilightparadox.com"
 do_ssl_verify = True
+# (connect, read) timeouts in seconds for the blackbox token request.
+# Empty, invalid, or non-positive read timeouts fall back to 60 seconds.
+try:
+    _blackbox_read_timeout = int(os.getenv("IKABOT_BLACKBOX_TIMEOUT", "60"))
+except ValueError:
+    _blackbox_read_timeout = 60
+if _blackbox_read_timeout <= 0:
+    _blackbox_read_timeout = 60
+blackboxTokenTimeout = (10, _blackbox_read_timeout)
 ids_cache = None
 cities_cache = None
 has_params = False
 menu_cities = ""
 infoUser = ""
 ikaFile = ".ikabot"
+ikaDir = ".ikabot"
 city_url = "view=city&cityId="
 island_url = "view=island&islandId="
 prompt = " >>  "
-materials_names = [_("Wood"), _("Wine"), _("Marble"), _("Cristal"), _("Sulfur")]
-materials_names_english = ["Wood", "Wine", "Marble", "Cristal", "Sulfur"]
+materials_names = ["Wood", "Wine", "Marble", "Crystal", "Sulfur"]
+materials_names_english = ["Wood", "Wine", "Marble", "Crystal", "Sulfur"]
+miracle_names_english = [
+    "",
+    "Hephaestus' Forge",
+    "Hades' Holy Grove",
+    "Demeter's gardens",
+    "Athena's Parthenon",
+    "Temple of Hermes",
+    "Ares' Stronghold",
+    "Temple of Poseidon",
+    "Colossus",
+]
 materials_names_tec = ["wood", "wine", "marble", "glass", "sulfur"]
 material_img_hash = [
     "19c3527b2f694fb882563c04df6d8972",
@@ -48,11 +115,11 @@ material_img_hash = [
     "9b5578a7dfa3e98124439cca4a387a61",
 ]
 tradegoods_names = [
-    _("Saw mill"),
-    _("Vineyard"),
-    _("Quarry"),
-    _("Crystal Mine"),
-    _("Sulfur Pit"),
+    "Saw mill",
+    "Vineyard",
+    "Quarry",
+    "Crystal Mine",
+    "Sulfur Pit",
 ]
 ConnectionError_wait = 5 * 60
 actionRequest = "REQUESTID"
@@ -79,17 +146,10 @@ piracyMissionWaitingTime = {
     9: 57600,
 }
 predetermined_input = []
-logLevelsText = ["DEBUG", "INFO", "WARN", "ERROR"]
 
 
-class logLevels:
-    DEBUG = 0
-    INFO = 1
-    WARN = 2
-    ERROR = 3
 
 
-logLevel = logLevels.WARN
 debugON_alertAttacks = False
 debugON_alertLowWine = False
 debugON_donationBot = False
@@ -103,3 +163,29 @@ debugON_activateMiracle = False
 
 MAXIMUM_CITY_NAME_LENGTH = 20
 SECONDS_IN_HOUR = 60 * 60
+
+# Default values for dynamic settings
+# Deprecated: set IKABOT_WEB_PORT=ask instead
+enable_CustomPort = False
+
+user_agents = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.3",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.3",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.3",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36 Edg/117.0.2045.4",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 OPR/108.0.0.",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36 Edg/121.0.0.",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 Edg/112.0.1722.5",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36 Edg/109.0.1518.5",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.3",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.3",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 OPR/108.0.0.",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.3",
+    "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36 Edg/109.0.1518.14",
+    "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36 Edg/109.0.1518.10",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.3",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.2",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 Edg/112.0.1722.3",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 Edg/123.0.0.",
+]

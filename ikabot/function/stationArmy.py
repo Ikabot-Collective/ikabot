@@ -1,14 +1,11 @@
-import gettext
+from ikabot.helpers.decorators import configurator
 import re
 
 from ikabot.config import *
 from ikabot.helpers.naval import getAvailableShips
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.varios import addThousandSeparator
-
-t = gettext.translation("buyResources", localedir, languages=languages, fallback=True)
-_ = t.gettext
-
+from ikabot.helpers.pedirInfo import getShipCapacity
 
 def getCityMilitaryData(session, city_id):
     """
@@ -37,8 +34,8 @@ def getCityMilitaryData(session, city_id):
 
 
 def extractTooltipsAndValues(data):
-    tooltips = re.findall(r'<div class="tooltip">(.*?)</div>', data)
-    values = re.findall(r"<td>\s*([\d.,-]+)\s*</td>", data)
+    tooltips =  re.findall(r'<div[^>]*class="[^"]*tooltip[^"]*"[^>]*>(.*?)</div>', data)
+    values = re.findall(r"<td>\s*([^<]+)\s*</td>", data)
     return tooltips, values
 
 
@@ -49,11 +46,11 @@ def calculateTotals(tooltips, values):
     desc_value_dict = {}
 
     for i, (tooltip, value) in enumerate(zip(tooltips, values)):
-        value = value.replace(",", "")
+        value = re.sub(r'[\.,\s]|&nbsp;', '', value)
         is_digit = value.isdigit()
         int_value = int(value) if is_digit else 0
 
-        if value.isdigit() and int_value > 0:
+        if is_digit and int_value > 0:
             desc_value_dict.setdefault(tooltip, []).append(int_value)
 
             if i <= 14:
@@ -74,6 +71,7 @@ def getArmyAvailable(session, type_army, destination_city_id, origin_city_id, ev
         "actionRequest": actionRequest,
         "ajax": 1,
     }
+    ship_capacity, freighter_capacity = getShipCapacity(session)
 
     data = session.post(params=params)
     amount_results = re.findall(r'<div class=\\"amount\\">(.*?)<\\/div>', data)
@@ -82,7 +80,7 @@ def getArmyAvailable(session, type_army, destination_city_id, origin_city_id, ev
         army_results = re.findall(
             r'name=\\"cargo_army_([^\\]+)_upkeep\\"\\n\s+value=\\"([^\\"]+)\\"', data
         )
-        weight_total_ships = int(getAvailableShips(session)) * 500 if type_army else 0
+        weight_total_ships = int(getAvailableShips(session)) * ship_capacity if type_army else 0
         weight_results = re.findall(r'<div class=\\"weight\\">(.*?)<\\/div>', data)
     else:
         army_results = re.findall(
@@ -137,9 +135,8 @@ def sendArmy(session, origin_city, destination_city, type_army, army_available):
     session.post(params=params)
 
 
+@configurator
 def stationArmy(session, event, stdin_fd, predetermined_input):
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
     type_army = True
     try:
         banner()
@@ -164,12 +161,12 @@ def stationArmy(session, event, stdin_fd, predetermined_input):
             )
 
         print()
-        print(_("(0) Back"))
-        print(_("(1) Move troops"))
-        print(_("(2) Move ships"))
-        print(_("(3) Move all ground units to a city."))
-        print(_("(4) Move all maritime units to a city."))
-        print(_("(5) Move all units to a city."))
+        print("(0) Back")
+        print("(1) Move troops")
+        print("(2) Move ships")
+        print("(3) Move all ground units to a city.")
+        print("(4) Move all maritime units to a city.")
+        print("(5) Move all units to a city.")
 
         selected = read(min=0, max=5, digit=True)
         if selected == 0:

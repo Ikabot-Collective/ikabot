@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import ast
-import gettext
 import gzip
 import json
 import os
@@ -12,7 +11,6 @@ import threading
 import time
 import traceback
 from pathlib import Path
-
 import ikabot.config as config
 from ikabot.config import *
 from ikabot.helpers.botComm import sendToBot
@@ -23,19 +21,44 @@ from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import getDateTime, wait
 
-t = gettext.translation("dumpWorld", localedir, languages=languages, fallback=True)
-_ = t.gettext
+from ikabot.helpers.decorators import configurator, task
 
-LINE_UP = "\033[1A"
-LINE_CLEAR = "\x1b[2K"
-#              status, history, start_time
-stop_updating = threading.Event()
-lock = threading.Lock()
-shared_data = ["", "", 0, stop_updating, lock]
 home = "USERPROFILE" if isWindows else "HOME"
-selected_islands = set()
+
+@task("dumpWorld")
+def do_dumpWorld(session, waiting_time, coords, radius, shallow, non_empty_islands):
+    stop_updating = threading.Event()
+    lock = threading.Lock()
+    shared_data = ["", "", 0, stop_updating, lock]
+
+    thread = threading.Thread(target=update_terminal, args=(shared_data,), daemon=True)
+    thread.start()
+    
+    info = "\nDumped world data\n"
+    setInfoSignal(session, info)
+
+    start_time = time.time()
+    dump_path = do_it(
+        session, waiting_time, coords, radius, shallow, non_empty_islands, shared_data
+    )
+
+    shared_data[3].set()
+    shared_data[4].acquire()
+    time.sleep(5)
+
+    banner()
+    print(
+        "\n{}SUCCESS!{} World data has been dumped to {} in {}s \n".format(
+            bcolors.GREEN,
+            bcolors.ENDC,
+            dump_path,
+            str(round(time.time() - shared_data[2])),
+        )
+    )
+    enter()
 
 
+@configurator(blocking=True)
 def dumpWorld(session, event, stdin_fd, predetermined_input):
     """
     Parameters
@@ -45,88 +68,67 @@ def dumpWorld(session, event, stdin_fd, predetermined_input):
     stdin_fd: int
     predetermined_input : multiprocessing.managers.SyncManager.list
     """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
-
-    try:
-        banner()
-        if os.path.exists(os.getenv(home) + "/ikabot_world_dumps"):
-            print("1) Create new dump")
-            print("2) Load existing dump")
-            choice = read(min=1, max=2, digit=True)
-            if choice == 2:
-                view_dump(session, event)
-                event.set()
-                return
-        banner()
-        print(
-            "{}⚠️ BEWARE - THE RESULTING DUMP CONTAINS ACCOUNT IDENTIFYING INFORMATION ⚠️{}\n".format(
-                bcolors.WARNING, bcolors.ENDC
-            )
+    banner()
+    if os.path.exists(os.getenv(home) + "/ikabot_world_dumps"):
+        print("1) Create new dump")
+        print("2) Load existing dump")
+        choice = read(min=1, max=2, digit=True)
+        if choice == 2:
+            view_dump(session)
+            return None
+    banner()
+    print(
+        "{}⚠️ BEWARE - THE RESULTING DUMP CONTAINS ACCOUNT IDENTIFYING INFORMATION ⚠️{}\n".format(
+            bcolors.WARNING, bcolors.ENDC
         )
-        print(
-            "This action will take a couple of hours to complete. Are you sure you want to initiate a data dump now? (Y|N)"
-        )
+    )
+    print(
+        "This action will take a couple of hours to complete. Are you sure you want to initiate a data dump now? (Y|N)"
+    )
+    choice = read(values=["y", "Y", "n", "N"])
+    if choice in ["n", "N"]:
+        return None
+    print(
+        "Type in the waiting time between each request in miliseconds (default = 1500): "
+    )
+    choice = read(min=0, max=10000, digit=True, default=1500)
+    waiting_time = int(choice) / 1000
+    print(
+        "Do you want only shallow data about the islands? If yes you will not be able to search the dump by player names but the dump will be quick. (Y|N): "
+    )
+    choice = read(values=["y", "Y", "n", "N"])
+    shallow = choice in ["y", "Y"]
+    coords = None
+    radius = None
+    non_empty_islands = False
+    if not shallow:
+        print("Do you want to only dump a part of the map? (Y|N)")
         choice = read(values=["y", "Y", "n", "N"])
-        if choice in ["n", "N"]:
-            event.set()
-            return
-        print(
-            "Type in the waiting time between each request in miliseconds (default = 1500): "
-        )
-        choice = read(min=0, max=10000, digit=True, default=1500)
-        waiting_time = int(choice) / 1000
-        print(
-            "Do you want only shallow data about the islands? If yes you will not be able to search the dump by player names but the dump will be quick. (Y|N): "
-        )
-        choice = read(values=["y", "Y", "n", "N"])
-        shallow = choice in ["y", "Y"]
-        coords = None
-        radius = None
-        if not shallow:
-            print("Do you want to only dump a part of the map? (Y|N)")
-            choice = read(values=["y", "Y", "n", "N"])
-            if choice in ["y", "Y"]:
-                print("Type in a center point (x,y):")
-                coords = read().replace("(", "").replace(")", "").split(",")
+        if choice in ["y", "Y"]:
+            print('Type in a center point (x,y): (type "skip" to skip this step)')
+            input = read()
+            if input.strip().lower() != "skip":
+                coords = input.replace("(", "").replace(")", "").split(",")
                 coords = (int(coords[0]), int(coords[1]))
-                print("Type in a max distance from the center point: (default = 15)")
+                print(
+                    "Type in a max distance from the center point: (default = 15)"
+                )
                 radius = read(min=0, max=200, digit=True, default=15)
+            print("Do you want to only dump islands with at least 1 town? (Y|N)")
+            choice = read(values=["y", "Y", "n", "N"])
+            non_empty_islands = choice in ["y", "Y"]
 
-        thread = threading.Thread(target=update_terminal, args=(shared_data,))
-        thread.start()
-        set_child_mode(session)
-        info = _("\nDumped world data\n")
-        setInfoSignal(session, info)
-
-        dump_path = do_it(session, waiting_time, coords, radius, shallow)
-
-        shared_data[3].set()
-        shared_data[4].acquire()
-        time.sleep(5)
-
-        banner()
-        print(
-            "\n{}SUCCESS!{} World data has been dumped to {} in {}s \n".format(
-                bcolors.GREEN,
-                bcolors.ENDC,
-                dump_path,
-                str(round(time.time() - shared_data[2])),
-            )
-        )
-        enter()
-        event.set()
-        return
-    except Exception:
-        shared_data[3].set()
-        shared_data[4].acquire(timeout=10)
-        event.set()
-        msg = _("Error in:\n{}\nCause:\n{}").format(info, traceback.format_exc())
-        sendToBot(session, msg)
-        return
+    return {
+        "session": session,
+        "waiting_time": waiting_time,
+        "coords": coords,
+        "radius": radius,
+        "shallow": shallow,
+        "non_empty_islands": non_empty_islands
+    }
 
 
-def do_it(session, waiting_time, coords, radius, shallow):
+def do_it(session, waiting_time, coords, radius, shallow, non_empty_islands, shared_data):
     """
     Parameters
     ----------
@@ -138,6 +140,8 @@ def do_it(session, waiting_time, coords, radius, shallow):
         Id of the island to start the dump from (0 starts from beginning)
     shallow : str
         String that determines if the data should be shallow (only map accessible data)
+    shared_data : list
+        State sharing list for terminal updates
 
     Returns
     -------
@@ -145,6 +149,9 @@ def do_it(session, waiting_time, coords, radius, shallow):
     """
 
     shared_data[2] = time.time()
+    partial = (
+        True if (coords and radius and radius >= 0) or non_empty_islands else False
+    )
     world = {
         "name": "s" + str(session.mundo) + "-" + str(session.servidor),
         "self_name": session.username,
@@ -152,12 +159,13 @@ def do_it(session, waiting_time, coords, radius, shallow):
         "dump_end_date": 0,
         "islands": [],
         "shallow": shallow,
+        "partial": partial,
     }
     shared_data.append(world)
     # scan 0 to 50 x and y
     shallow_islands = []
-    update_status("Initiating first map sweep", 0, 0, True)
-    update_status("Getting (0-50,0-50) islands", 25, 1.25)
+    update_status("Initiating first map sweep", 0, 0, shared_data, True)
+    update_status("Getting (0-50,0-50) islands", 25, 1.25, shared_data)
     data = session.post(
         "action=WorldMap&function=getJSONArea&x_min=0&x_max=50&y_min=0&y_max=50"
     )
@@ -175,7 +183,7 @@ def do_it(session, waiting_time, coords, radius, shallow):
                     "players": val2[7],
                 }
             )
-    update_status("Getting (50-100,0-50) islands", 50, 2.5)
+    update_status("Getting (50-100,0-50) islands", 50, 2.5, shared_data)
     time.sleep(0.5)
     data = session.post(
         "action=WorldMap&function=getJSONArea&x_min=50&x_max=100&y_min=0&y_max=50"
@@ -194,7 +202,7 @@ def do_it(session, waiting_time, coords, radius, shallow):
                     "players": val2[7],
                 }
             )
-    update_status("Getting (0-50,50-100) islands", 75, 3.75)
+    update_status("Getting (0-50,50-100) islands", 75, 3.75, shared_data)
     time.sleep(0.5)
     data = session.post(
         "action=WorldMap&function=getJSONArea&x_min=0&x_max=50&y_min=50&y_max=100"
@@ -213,7 +221,7 @@ def do_it(session, waiting_time, coords, radius, shallow):
                     "players": val2[7],
                 }
             )
-    update_status("Getting (50-100,50-100) islands", 100, 5)
+    update_status("Getting (50-100,50-100) islands", 100, 5, shared_data)
     time.sleep(0.5)
     data = session.post(
         "action=WorldMap&function=getJSONArea&x_min=50&x_max=100&y_min=50&y_max=100"
@@ -261,7 +269,7 @@ def do_it(session, waiting_time, coords, radius, shallow):
 
     if shallow:
         dump_name = dump_name.replace(".json.gz", "_shallow") + ".json.gz"
-        update_status("Shallow dump is on. Dumping data...", 100, 100, True)
+        update_status("Shallow dump is on. Dumping data...", 100, 100, shared_data, True)
         world["islands"] = shallow_islands
         dump(world, dump_path, dump_name)
         return dump_path + dump_name
@@ -272,6 +280,8 @@ def do_it(session, waiting_time, coords, radius, shallow):
         island_id = int(island["id"])
         x = int(island["x"])
         y = int(island["y"])
+        if non_empty_islands and not int(island["players"]):
+            continue
         if (
             coords
             and radius
@@ -287,22 +297,21 @@ def do_it(session, waiting_time, coords, radius, shallow):
         ),
         100,
         5,
+        shared_data,
         True,
     )
-    update_status("Getting data for each island. This will take a while...", 0, 5, True)
+    update_status("Getting data for each island. This will take a while...", 0, 5, shared_data, True)
 
     # scan each island
 
     all_island = sorted(all_island)
-
     dump_islands(shared_data, all_island, waiting_time, session)
+    update_status("Got {} individual islands".format(len(all_island)), 100, 100, shared_data, True)
 
-    update_status("Got {} individual islands".format(len(all_island)), 100, 100, True)
-
-    update_status("Dumping data to {}".format(dump_path + dump_name), 100, 100, True)
-
+    name_suffix = "_partial" if partial else ""
+    dump_name = dump_name.replace(".json.gz", name_suffix) + ".json.gz"
+    update_status("Dumping data to {}".format(dump_path + dump_name), 100, 100, shared_data, True)
     dump(shared_data[5], dump_path, dump_name)
-
     return dump_path + dump_name
 
 
@@ -326,6 +335,7 @@ def dump_islands(shared_data, all_island, waiting_time, session):
             ),
             len(shared_data[5]["islands"]) / world_islands_number * 100,
             5 + (len(shared_data[5]["islands"]) / world_islands_number * 95),
+            shared_data
         )
         html = ""
         try:
@@ -333,9 +343,9 @@ def dump_islands(shared_data, all_island, waiting_time, session):
         except Exception:
             # try again
             html = session.get("view=island&islandId=" + str(island_id))
-        island = getIsland(html)
+        island_data = getIsland(html)
         shared_data[4].acquire()
-        shared_data[5]["islands"].append(island)
+        shared_data[5]["islands"].append(island_data)
         shared_data[4].release()
         time.sleep(waiting_time)
 
@@ -361,11 +371,11 @@ def update_terminal(shared_data):
             )
             shared_data[4].release()
             time.sleep(0.05)
-        if stop_updating.is_set():
+        if shared_data[3].is_set():
             return
 
 
-def update_status(message, percent, percent_total, add_history=False):
+def update_status(message, percent, percent_total, shared_data, add_history=False):
     shared_data[4].acquire()
     shared_data[0] = (
         message
@@ -380,7 +390,9 @@ def update_status(message, percent, percent_total, add_history=False):
     shared_data[4].release()
 
 
-def view_dump(session, event):
+def view_dump(session):
+    selected_islands = set()
+
     files = [
         file.replace("\\", "/")
         for file in get_files(os.getenv(home) + "/ikabot_world_dumps")
@@ -405,16 +417,17 @@ def view_dump(session, event):
 
     while True:
         banner()
-        print_map(selected_dump["islands"])
+        print_map(selected_dump["islands"], selected_islands)
         print("0) Back")
         print("1) Search islands by island criteria")
         if not selected_dump["shallow"]:
             print("2) Search islands by player name")
             print("3) Search for nearest inactive players")
+            print("4) Search for alliances")
+            print("5) Search for a specific island by coordinates")
 
-        choice = read(min=0, max=3, digit=True)
+        choice = read(min=0, max=5, digit=True)
         if choice == 0:
-            event.set()
             return
         elif choice == 1:
             print(
@@ -532,14 +545,137 @@ def view_dump(session, event):
             for i, city in enumerate(inactives):
                 print(str(i + 1) + ") " + city["Name"])
             enter()
+        elif choice == 4:
+            if selected_dump["shallow"]:
+                print(
+                    "You can not search by alliance tag because this dump is shallow and doesn't contain data about alliances!"
+                )
+                enter()
+                continue
+            while True:
+                alliance = (read(msg="Enter the alliance TAG you want to search for (ONLY tags): ")).lower()
+                user_islands = dict()
+                alliance_found = False # Flag to check if any alliance is found
+                for island in selected_dump['islands']:
+                    for city in island["cities"]:
+                        if "AllyTag" in city and city["AllyTag"].lower() == alliance:
+                            user_name = city["Name"]
+                            user_id = city["Id"]
+                            if user_name not in user_islands:
+                                user_islands[user_name] = {"id": user_id, "islands": set()}
+                            user_islands[user_name]["islands"].add((island["x"], island["y"]))
+                            alliance_found = True # Set FLag to True if alliance has been found
+                if alliance_found:
+                    for user_name, infe in user_islands.items():
+                        print(f"Player:{bcolors.CYAN} {user_name}{bcolors.ENDC}, Alliance:{bcolors.CYAN} {alliance}{bcolors.ENDC}")
+                        island_coordss = ", ".join([f"{x}:{y}" for x, y in infe['islands']])
+                        print(f"- {bcolors.STONE}Islands{bcolors.ENDC}: {bcolors.YELLOW}{island_coordss}{bcolors.ENDC}")
+                else:
+                    print("No alliance with this tag was found.")
+                # Ask if the user wants to search again
+                search_again = input("Do you want to search for another alliance ? (yes/no): ").lower()
+
+                if search_again != 'yes':
+                    break  # Exit the loop if the user doesn't want to search again
+        elif choice == 5:
+            if selected_dump["shallow"]:
+                print(
+                    "You can not search by coordinates because this dump is shallow and doesn't contain full data about islands!"
+                )
+                enter()
+                continue
+            while True:
+                coords = (read(msg="Enter the coordinates of the island you want to search for (xx:yy): "))
+                try:
+                    x, y = map(int, coords.split(':'))
+                except ValueError:
+                    print("Invalid input format. Please enter coordinates in the form xx:yy")
+                    continue # Prompt again for the correct input
+                island_found = False # Flag to check if the island has been found
+                player_state_dict = {
+                        "": "Active",
+                        "inactive": "Inactive",
+                        "vacation": "Vacation Mode"
+                        }
+                tradegood_dict = {
+                        1: "Wine",
+                        2: 'Marble',
+                        3: "Crystal",
+                        4: "Sulphur"
+                        }
+                wonder_dict = {
+                        "1": "Hephaistos",
+                        "2": "Hades",
+                        "3": "Demeter",
+                        "4": "Athene",
+                        "5": "Hermes",
+                        "6": "Ares",
+                        "7": "Poseidon",
+                        "8": "Colossus"
+                        }
+                for island in selected_dump['islands']:
+                    if island["x"] == x and island["y"] == y:
+                        player_data = {} # Dictionary to track players and their stats
+                        # First count the number of cities for each player on the island
+                        player_city_count = {}
+                        for city in island['cities']:
+                            if city['type'] == 'city':
+                                player_id = city['Id']
+                                if player_id not in player_city_count:
+                                    player_city_count[player_id] = 0
+                                player_city_count[player_id] += 1
+                        # Now process each city and collect the needed data
+                        for city in island['cities']:
+                            if city['type'] == 'city':
+                                player_name = city['Name']
+                                player_id = city['Id']
+                                player_state = player_state_dict.get(city['state'])
+                                player_alliance = city.get('AllyTag', 'No Alliance')
+                                if player_id not in player_data: # Add only if player ID is not already in the dictionary
+                                    player_score_raw = island['avatarScores'].get(player_id, {}).get('building_score_main')
+                                    player_score_int = int(player_score_raw.replace(',', ''))
+                                    player_score = "{:,}".format(player_score_int // 100)
+                                    city_count = player_city_count[player_id]  # Get the number of cities for this player
+                                    player_data[player_id] = f"{bcolors.CYAN}{player_name}{bcolors.ENDC} - Score: {bcolors.YELLOW}{player_score}{bcolors.ENDC}, Cities: {bcolors.YELLOW}{city_count}{bcolors.ENDC}, State: {bcolors.CYAN}{player_state}{bcolors.ENDC}, Alliance: {bcolors.CYAN}{player_alliance}{bcolors.ENDC}"
+                        isl_name = island['name']
+                        cities_of_type_city = [city for city in island['cities'] if city['type'] == 'city']
+                        sum_cities = len(cities_of_type_city) if cities_of_type_city else 0
+                        wood_lvl = island['resourceLevel']
+                        luxury_lvl = island['tradegoodLevel']
+                        isl_type = tradegood_dict.get(island['tradegood']) 
+                        isl_id = island['id']
+                        wonder = wonder_dict[island['wonder']]
+                        wonder_lvl = island['wonderLevel']
+                        island_found = True # Set flag to True if island has been found
+                        break  # Exit the loop once the island is found
+                if island_found:
+                    print(
+                        f"Island Name: {bcolors.CYAN}{isl_name}{bcolors.ENDC}, Number of cities: {bcolors.YELLOW}{sum_cities}{bcolors.ENDC}, Wonder: {bcolors.CYAN}{wonder}{bcolors.ENDC}, Wonder Level: {bcolors.YELLOW}{wonder_lvl}{bcolors.ENDC}")
+                    print(
+                        f"Forrest Level: {bcolors.YELLOW}{wood_lvl}{bcolors.ENDC}, Luxury Mine Level: {bcolors.YELLOW}{luxury_lvl}{bcolors.ENDC}, Island ID: {bcolors.YELLOW}{isl_id}{bcolors.ENDC}, Island Type: {bcolors.CYAN}{isl_type}{bcolors.ENDC}")
+                    if not player_data:
+                        print(f"No players in this island")
+                    else:
+                        player_data_str = '\n'.join(player_data.values())
+                        print(f"Players:\n{player_data_str}")
+                else:
+                    print(f"No such island was found.")
+                # Ask if the user wants to search again
+                search_again = input("Do you want to search for another island ? (yes/no): ").lower()
+                if search_again != 'yes':
+                    break  # Exit the loop if the user doesn't want to search again
+                    
 
 
-def print_map(islands):
+
+def print_map(islands, selected_islands):
     """Prints out a 100x100 matrix with all world islands on it. Selected islands are colored red.
     Parameters
     ----------
     islands : [object]
         List of island objects to be displayed
+    selected_islands: set
+        Set of selected island IDs
     """
 
     map = [

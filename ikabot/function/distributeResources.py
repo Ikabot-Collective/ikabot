@@ -1,11 +1,11 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import gettext
 import traceback
 
 from ikabot.config import *
 from ikabot.helpers.botComm import *
+from ikabot.helpers.decorators import configurator, task
 from ikabot.helpers.getJson import getCity
 from ikabot.helpers.gui import banner
 from ikabot.helpers.pedirInfo import *
@@ -15,12 +15,23 @@ from ikabot.helpers.resources import *
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import addThousandSeparator
 
-t = gettext.translation(
-    "distributeResources", localedir, languages=languages, fallback=True
-)
-_ = t.gettext
+
+@task("distributeResources")
+def do_it(session, routes, useFreighters, resource):
+    """
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    routes : list
+    useFreighters : bool
+    resource : int
+    """
+    info = "\nDistribute {}\n".format(materials_names[resource])
+    setInfoSignal(session, info)
+    executeRoutes(session, routes, useFreighters)
 
 
+@configurator
 def distributeResources(session, event, stdin_fd, predetermined_input):
     """
     Parameters
@@ -30,19 +41,26 @@ def distributeResources(session, event, stdin_fd, predetermined_input):
     stdin_fd: int
     predetermined_input : multiprocessing.managers.SyncManager.list
     """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
     try:
         banner()
 
-        print(_("What resource do you want to distribute?"))
-        print(_("(0) Exit"))
+        print("What type of ships do you want to use? (Default: Trade ships)")
+        print("(1) Trade ships")
+        print("(2) Freighters")
+        shiptype = read(min=1, max=2, digit=True, empty=True)
+        if shiptype == '':
+            shiptype = 1
+        if shiptype == 1:
+            useFreighters = False
+        elif shiptype == 2:
+            useFreighters = True
+        print("What resource do you want to distribute?")
+        print("(0) Exit")
         for i in range(len(materials_names)):
             print("({:d}) {}".format(i + 1, materials_names[i]))
         resource = read(min=0, max=5)
         if resource == 0:
-            event.set()  # give main process control before exiting
-            return
+            return None
         resource -= 1
 
         if resource == 0:
@@ -53,30 +71,8 @@ def distributeResources(session, event, stdin_fd, predetermined_input):
             print("2) Distribute them evenly among all cities")
             type_distribution = read(min=1, max=2)
             evenly = type_distribution == 2
-
-        (cities_ids, cities) = getIdsOfCities(session)
-        choice = None
-        ignored_cities = []
-        while True:
-            banner()
-            displayed_string = (
-                f'(currently ignoring: {", ".join(ignored_cities)})'
-                if ignored_cities
-                else ""
-            )
-            print(f"Select cities to ignore. {displayed_string}")
-            print("0) Continue")
-            choice_to_cityid_map = []
-            for i, city in enumerate(cities.values()):
-                choice_to_cityid_map.append(city["id"])
-                print(f'{i + 1}) {city["name"]} - {materials_names[city["tradegood"]]}')
-            choice = read(min=0, max=len(cities_ids))
-            if choice == 0:
-                break
-            city_id = choice_to_cityid_map[choice - 1]
-            cities_ids = list(filter(lambda x: x != str(city_id), cities_ids))
-            ignored_cities.append(cities[str(city_id)]["name"])
-            del cities[str(city_id)]
+        distribution_msg = 'Select the cities to participate in the distribution:'
+        cities_ids, cities = ignoreCities(session, msg=distribution_msg)
 
         if evenly:
             routes = distribute_evenly(session, resource, cities_ids, cities)
@@ -84,11 +80,10 @@ def distributeResources(session, event, stdin_fd, predetermined_input):
             routes = distribute_unevenly(session, resource, cities_ids, cities)
 
         if routes is None:
-            event.set()
-            return
+            return None
 
         banner()
-        print(_("\nThe following shipments will be made:\n"))
+        print("\nThe following shipments will be made:\n")
         for route in routes:
             print(
                 "{} -> {} : {} {}".format(
@@ -99,29 +94,20 @@ def distributeResources(session, event, stdin_fd, predetermined_input):
                 )
             )  # displays all routes to be executed in console
 
-        print(_("\nProceed? [Y/n]"))
+        print("\nProceed? [Y/n]")
         rta = read(values=["y", "Y", "n", "N", ""])
         if rta.lower() == "n":
-            event.set()
-            return
+            return None
 
     except KeyboardInterrupt:
-        event.set()
-        return
+        return None
 
-    set_child_mode(session)
-    event.set()  # this is where we give back control to main process
-
-    info = _("\nDistribute {}\n").format(materials_names[resource])
-    setInfoSignal(session, info)
-
-    try:
-        executeRoutes(session, routes)  # plan trips for all the routes
-    except Exception as e:
-        msg = _("Error in:\n{}\nCause:\n{}").format(info, traceback.format_exc())
-        sendToBot(session, msg)  # sends message to telegram bot
-    finally:
-        session.logout()
+    return {
+        "session": session,
+        "routes": routes,
+        "useFreighters": useFreighters,
+        "resource": resource,
+    }
 
 
 def distribute_evenly(session, resource_type, cities_ids, cities):
@@ -142,11 +128,16 @@ def distribute_evenly(session, resource_type, cities_ids, cities):
             city_url + cityID
         )  # load html from the get request for that particular city
         city = getCity(html)  # convert the html to a city object
+        if city.get("harbourOccupied"):
+            continue
 
         resourceTotal += city["availableResources"][
             resource_type
         ]  # the cities resources are added to the total
         allCities[cityID] = city  # adds the city to all cities
+
+    if len(allCities) < 2:
+        return []
 
     # if a city doesn't have enough storage to fit resourceAverage
     # ikabot will send enough resources to fill the store to the max
@@ -292,11 +283,11 @@ def distribute_unevenly(session, resource_type, cities_ids, cities):
                 destination_cities[destination_city_id] = city
 
     if total_available_resources_from_all_cities <= 0:
-        print(_("\nThere are no resources to send."))
+        print("\nThere are no resources to send.")
         enter()
         return None
     if len(destination_cities) == 0:
-        print(_("\nThere is no space available to send resources."))
+        print("\nThere is no space available to send resources.")
         enter()
         return None
 

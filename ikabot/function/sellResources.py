@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import gettext
 import json
 import math
 import time
@@ -15,12 +14,10 @@ from ikabot.helpers.market import *
 from ikabot.helpers.naval import getTotalShips
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.planRoutes import waitForArrival
-from ikabot.helpers.process import set_child_mode
+from ikabot.helpers.decorators import configurator, task
 from ikabot.helpers.signals import setInfoSignal
-from ikabot.helpers.varios import addThousandSeparator, wait
-
-t = gettext.translation("sellResources", localedir, languages=languages, fallback=True)
-_ = t.gettext
+from ikabot.helpers.varios import addThousandSeparator, wait, getDateTime
+from ikabot.helpers.pedirInfo import getShipCapacity
 
 
 def chooseCommercialCity(commercial_cities):
@@ -33,7 +30,7 @@ def chooseCommercialCity(commercial_cities):
     -------
     commercial_city : dict
     """
-    print(_("In which city do you want to sell resources?\n"))
+    print("In which city do you want to sell resources?\n")
     for i, city in enumerate(commercial_cities):
         print("({:d}) {}".format(i + 1, city["name"]))
     ind = read(min=1, max=len(commercial_cities))
@@ -100,32 +97,49 @@ def getOffers(session, my_market_city, resource_type):
     }
     resp = session.post(params=data)
     html = json.loads(resp, strict=False)[1][1][1]
-    return re.findall(
-        r'<td class=".*?">(.*?)<br/>\((.*?)\)\s*</td>\s*<td>(.*?)</td>\s*<td><img src=".*?"\s*alt=".*?"\s*title=".*?"/></td>\s*<td style="white-space:nowrap;">(\d+)\s*<img src=".*?"\s*class=".*?"/>.*?</td>\s*<td>(\d+)</td>\s*<td><a onclick="ajaxHandlerCall\(this\.href\);return false;"\s*href="\?view=takeOffer&destinationCityId=(\d+)&',
-        html,
-    )
+
+    processed_offers = []
+    for row in re.findall(r'<tr[^>]*>([\s\S]*?)</tr>', html):
+        city_match   = re.search(r'<td class="short_text80">(.*?)<br/>\((.*?)\)', row)
+        amount_match = re.search(r'<div class="tooltip">([\d,.]+)</div>', row)
+        price_match  = re.search(r'<td style="white-space:nowrap;">(\d+)', row)
+        dist_match   = re.search(r'<td>(\d+)</td>', row)
+        dest_match   = re.search(r'href="\?view=takeOffer&destinationCityId=(\d+)', row)
+
+        if not all([city_match, amount_match, price_match, dist_match, dest_match]):
+            continue
+
+        raw_amount = amount_match.group(1).replace('.', '').replace(',', '')
+        processed_offers.append((
+            city_match.group(1).strip(),
+            city_match.group(2).strip(),
+            int(raw_amount),
+            int(price_match.group(1)),
+            int(dist_match.group(1)),
+            int(dest_match.group(1)),
+        ))
+
+    return processed_offers
 
 
-def sellToOffers(session, city_to_buy_from, resource_type, event):
+def sellToOffers(session, city_to_buy_from, resource_type):
     """
     Parameters
     ----------
     session : ikabot.web.session.Session
     city_to_buy_from : dict
     resource_type : int
-    event : multiprocessing.Event
     """
     banner()
 
     offers = getOffers(session, city_to_buy_from, resource_type)
 
     if len(offers) == 0:
-        print(_("No offers available."))
+        print("No offers available.")
         enter()
-        event.set()
-        return
+        return None
 
-    print(_("Which offers do you want to sell to?\n"))
+    print("Which offers do you want to sell to?\n")
 
     chosen_offers = []
     total_amount = 0
@@ -133,10 +147,9 @@ def sellToOffers(session, city_to_buy_from, resource_type, event):
     for offer in offers:
         cityname, username, amount, price, dist, destination_city_id = offer
         cityname = cityname.strip()
-        amount = amount.replace(",", "").replace(".", "")
         amount = int(amount)
         price = int(price)
-        msg = _("{} ({}): {} at {:d} each ({} in total) [Y/n]").format(
+        msg = "{} ({}): {} at {:d} each ({} in total) [Y/n]".format(
             cityname,
             username,
             addThousandSeparator(amount),
@@ -151,36 +164,33 @@ def sellToOffers(session, city_to_buy_from, resource_type, event):
         profit += amount * price
 
     if len(chosen_offers) == 0:
-        event.set()
-        return
+        return None
 
     available = city_to_buy_from["availableResources"][resource_type]
     amount_to_sell = min(available, total_amount)
 
     banner()
     print(
-        _("\nHow much do you want to sell? [max = {}]").format(
+        "\nHow much do you want to sell? [max = {}]".format(
             addThousandSeparator(amount_to_sell)
         )
     )
     amount_to_sell = read(min=0, max=amount_to_sell)
     if amount_to_sell == 0:
-        event.set()
-        return
+        return None
 
     left_to_sell = amount_to_sell
     profit = 0
     for offer in chosen_offers:
         cityname, username, amount, price, dist, destination_city_id = offer
         cityname = cityname.strip()
-        amount = amount.replace(",", "").replace(".", "")
         amount = int(amount)
         price = int(price)
         sell = min(amount, left_to_sell)
         left_to_sell -= sell
         profit += sell * price
     print(
-        _("\nSell {} of {} for a total of {}? [Y/n]").format(
+        "\nSell {} of {} for a total of {}? [Y/n]".format(
             addThousandSeparator(amount_to_sell),
             materials_names[resource_type],
             addThousandSeparator(profit),
@@ -188,35 +198,25 @@ def sellToOffers(session, city_to_buy_from, resource_type, event):
     )
     rta = read(values=["y", "Y", "n", "N", ""])
     if rta.lower() == "n":
-        event.set()
-        return
+        return None
 
-    set_child_mode(session)
-    event.set()
-
-    info = _("\nI sell {} of {} in {}\n").format(
-        addThousandSeparator(amount_to_sell),
-        materials_names[resource_type],
-        city_to_buy_from["name"],
-    )
-    setInfoSignal(session, info)
-    try:
-        do_it1(session, amount_to_sell, chosen_offers, resource_type, city_to_buy_from)
-    except Exception as e:
-        msg = _("Error in:\n{}\nCause:\n{}").format(info, traceback.format_exc())
-        sendToBot(session, msg)
-    finally:
-        session.logout()
+    return {
+        "session": session,
+        "mode": "sell_to_offers",
+        "amount_to_sell": amount_to_sell,
+        "offers": chosen_offers,
+        "resource_type": resource_type,
+        "city_to_buy_from": city_to_buy_from,
+    }
 
 
-def createOffer(session, my_offering_market_city, resource_type, event):
+def createOffer(session, my_offering_market_city, resource_type):
     """
     Parameters
     ----------
     session : ikabot.web.session.Session
     my_offering_market_city : dict
     resource_type : int
-    event : multiprocessing.Event
     """
     banner()
 
@@ -227,106 +227,94 @@ def createOffer(session, my_offering_market_city, resource_type, event):
     ]
 
     print(
-        _("How much do you want to sell? [max = {}]").format(
+        "How much do you want to sell? [max = {}]".format(
             addThousandSeparator(total_available_amount_of_resource)
         )
     )
     amount_to_sell = read(min=0, max=total_available_amount_of_resource)
     if amount_to_sell == 0:
-        event.set()
-        return
+        return None
 
     price_max, price_min = re.findall(r"\'upper\': (\d+),\s*\'lower\': (\d+)", html)[
         resource_type
     ]
     price_max = int(price_max)
     price_min = int(price_min)
-    print(_("\nAt what price? [min = {:d}, max = {:d}]").format(price_min, price_max))
+    print("\nAt what price? [min = {:d}, max = {:d}]".format(price_min, price_max))
     price = read(min=price_min, max=price_max)
 
     print(
-        _("\nI will sell {} of {} at {}: {}").format(
+        "\nI will sell {} of {} at {}: {}".format(
             addThousandSeparator(amount_to_sell),
             materials_names[resource_type],
             addThousandSeparator(price),
             addThousandSeparator(price * amount_to_sell),
         )
     )
-    print(_("\nProceed? [Y/n]"))
+    print("\nProceed? [Y/n]")
     rta = read(values=["y", "Y", "n", "N", ""])
     if rta.lower() == "n":
-        event.set()
-        return
+        return None
 
-    set_child_mode(session)
-    event.set()
+    return {
+        "session": session,
+        "mode": "create_offer",
+        "amount_to_sell": amount_to_sell,
+        "price": price,
+        "resource_type": resource_type,
+        "sell_market_capacity": sell_market_capacity,
+        "city": my_offering_market_city,
+    }
 
-    info = _("\nI sell {} of {} in {}\n").format(
-        addThousandSeparator(amount_to_sell),
-        materials_names[resource_type],
-        my_offering_market_city["name"],
-    )
-    setInfoSignal(session, info)
-    try:
-        do_it2(
-            session,
-            amount_to_sell,
-            price,
-            resource_type,
-            sell_market_capacity,
-            my_offering_market_city,
+
+@task("sellResources")
+def do_it(session, mode, amount_to_sell=None, offers=None, resource_type=None, city_to_buy_from=None, price=None, sell_market_capacity=None, city=None):
+    if mode == "sell_to_offers":
+        info = "\nI sell {} of {} in {}\n".format(
+            addThousandSeparator(amount_to_sell),
+            materials_names[resource_type],
+            city_to_buy_from["name"],
         )
-    except Exception as e:
-        msg = _("Error in:\n{}\nCause:\n{}").format(info, traceback.format_exc())
-        sendToBot(session, msg)
-    finally:
-        session.logout()
+        setInfoSignal(session, info)
+        do_it1(session, amount_to_sell, offers, resource_type, city_to_buy_from)
+    elif mode == "create_offer":
+        info = "\nI sell {} of {} in {}\n".format(
+            addThousandSeparator(amount_to_sell),
+            materials_names[resource_type],
+            city["name"],
+        )
+        setInfoSignal(session, info)
+        do_it2(session, amount_to_sell, price, resource_type, sell_market_capacity, city)
 
-
+@configurator
 def sellResources(session, event, stdin_fd, predetermined_input):
-    """
-    Parameters
-    ----------
-    session : ikabot.web.session.Session
-    event : multiprocessing.Event
-    stdin_fd: int
-    predetermined_input : multiprocessing.managers.SyncManager.list
-    """
-    sys.stdin = os.fdopen(stdin_fd)
-    config.predetermined_input = predetermined_input
-    try:
+    banner()
+
+    commercial_cities = getCommercialCities(session)
+    if len(commercial_cities) == 0:
+        print("There is no store built")
+        enter()
+        return None
+
+    if len(commercial_cities) == 1:
+        city = commercial_cities[0]
+    else:
+        city = chooseCommercialCity(commercial_cities)
         banner()
 
-        commercial_cities = getCommercialCities(session)
-        if len(commercial_cities) == 0:
-            print(_("There is no store built"))
-            enter()
-            event.set()
-            return
+    print("What resource do you want to sell?")
+    for index, material_name in enumerate(materials_names):
+        print("({:d}) {}".format(index + 1, material_name))
+    selected_material = read(min=1, max=len(materials_names))
+    resource = selected_material - 1
+    banner()
 
-        if len(commercial_cities) == 1:
-            city = commercial_cities[0]
-        else:
-            city = chooseCommercialCity(commercial_cities)
-            banner()
-
-        print(_("What resource do you want to sell?"))
-        for index, material_name in enumerate(materials_names):
-            print("({:d}) {}".format(index + 1, material_name))
-        selected_material = read(min=1, max=len(materials_names))
-        resource = selected_material - 1
-        banner()
-
-        print(
-            _(
-                "Do you want to sell to existing offers (1) or do you want to make your own offer (2)?"
-            )
-        )
-        selected = read(min=1, max=2)
-        [sellToOffers, createOffer][selected - 1](session, city, resource, event)
-    except KeyboardInterrupt:
-        event.set()
-        return
+    print("Do you want to sell to existing offers (1) or do you want to make your own offer (2)?")
+    selected = read(min=1, max=2)
+    if selected == 1:
+        return sellToOffers(session, city, resource)
+    else:
+        return createOffer(session, city, resource)
 
 
 def do_it1(session, left_to_sell, offers, resource_type, city_to_buy_from):
@@ -339,18 +327,18 @@ def do_it1(session, left_to_sell, offers, resource_type, city_to_buy_from):
     resource_type : int
     city_to_buy_from : dict
     """
+    ship_capacity, freighter_capacity = getShipCapacity(session)
     for offer in offers:
         cityname, username, amount, precio, dist, destination_city_id = offer
         cityname = cityname.strip()
-        amount_to_buy = amount.replace(",", "").replace(".", "")
-        amount_to_buy = int(amount_to_buy)
+        amount_to_buy = int(amount)
         while True:
             amount_to_sell = min(amount_to_buy, left_to_sell)
             ships_available = waitForArrival(session)
-            ships_needed = math.ceil((Decimal(amount_to_sell) / Decimal(500)))
+            ships_needed = math.ceil((Decimal(amount_to_sell) / Decimal(ship_capacity)))
             ships_used = min(ships_available, ships_needed)
             if ships_needed > ships_used:
-                amount_to_sell = ships_used * 500
+                amount_to_sell = ships_used * ship_capacity
             left_to_sell -= amount_to_sell
             amount_to_buy -= amount_to_sell
 
@@ -388,6 +376,11 @@ def do_it1(session, left_to_sell, offers, resource_type, city_to_buy_from):
 
             session.get(city_url + city_to_buy_from["id"], noIndex=True)
             session.post(params=data)
+            
+            resource_name = materials_names[resource_type]
+            session.setStatus(
+                f"Sold {addThousandSeparator(amount_to_sell)} {resource_name} for {precio} gold to {cityname} ({username}) <--- {city_to_buy_from['name']} | {getDateTime()}"
+            )
 
             if left_to_sell == 0:
                 return
@@ -467,7 +460,7 @@ def do_it2(session, amount_to_sell, price, resource_type, sell_market_capacity, 
         html = getMarketInfo(session, city)
         currently_on_sell = onSellInMarket(html)[resource_type]
         if currently_on_sell <= previous_on_sell:
-            msg = _("{} of {} was sold at {:d}").format(
+            msg = "{} of {} was sold at {:d}".format(
                 addThousandSeparator(initial_amount_to_sell),
                 materials_names[resource_type],
                 price,

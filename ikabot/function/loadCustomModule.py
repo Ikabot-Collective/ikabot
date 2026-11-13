@@ -1,0 +1,144 @@
+#! /usr/bin/env python3
+# -*- coding: utf-8 -*-
+import sys
+import os
+import traceback
+from ikabot.helpers.pedirInfo import read, enter
+from ikabot.helpers.gui import *
+from ikabot.config import *
+from importlib.machinery import SourceFileLoader
+
+from ikabot.helpers.decorators import configurator
+
+@configurator
+def loadCustomModule(session, event, stdin_fd, predetermined_input):
+    while True:
+        try:
+            banner()
+            sessionData = session.getSessionData()
+            shared_data = sessionData.get('shared', {})
+            
+            # Load only files that actually exist on the system
+            modules = [path for path in shared_data.get('customModules', []) if os.path.exists(path)]
+            
+            print("0) Back")
+            print("1) Add new module")
+            print("2) Remove a module")
+            
+            # List custom modules starting from index 3
+            for i, module in enumerate(modules):
+                print(f"{i + 3}) {module}")
+
+            choice = read(min=0, max=len(modules) + 2, digit=True)
+
+            if choice == 0:
+                return None
+
+            elif choice == 1:
+                banner()
+                print(f'        {bcolors.WARNING}[WARNING]{bcolors.ENDC} Running third party code can be dangerous.')
+                print('You can add a local .py file or download one from the internet.')
+                print('Example: https://raw.githubusercontent.com/Ikabot-Collective/ikabot/refs/heads/master/ikabot/function/logs.py')
+                print('Enter the full path or URL to the .py module:')
+                input_val = read().strip().replace('\\', '/')
+                
+                if not input_val.endswith('.py'):
+                    print('Error: The file must be a .py file!')
+                    enter()
+                    continue
+                
+                is_url = input_val.startswith(('http://', 'https://'))
+                
+                if is_url:
+                    try:
+                        import urllib.request
+                        custom_dir = os.path.join(os.path.dirname(__file__), 'custom')
+                        os.makedirs(custom_dir, exist_ok=True)
+                        
+                        filename = os.path.basename(input_val)
+                        local_path = os.path.join(custom_dir, filename)
+                        
+                        urllib.request.urlretrieve(input_val, local_path)
+                        
+                        if not os.path.isfile(local_path):
+                            print(f'\nError: Failed to download file from {input_val}')
+                            enter()
+                            continue
+                        
+                        path = local_path.replace('\\', '/')
+                        print(f'\nModule downloaded to: {local_path}')
+                    except Exception as e:
+                        print(f'\nError downloading module: {e}')
+                        enter()
+                        continue
+                else:
+                    if not os.path.isfile(input_val):
+                        print(f'\nError: file not found at {input_val}')
+                        enter()
+                        continue
+                    path = input_val
+                
+                if path not in modules:
+                    modules.append(path)
+                    shared_data['customModules'] = modules
+                    session.setSessionData(shared_data, shared=True)
+                    print("\nModule added successfully.")
+                    enter()
+                continue
+
+            elif choice == 2:
+                banner()
+                if not modules:
+                    print("No modules available to remove.")
+                    enter()
+                    continue
+                
+                print("Note: this only removes the module from the menu, the file is not deleted.")
+                print("Select the module to remove:")
+                for i, m in enumerate(modules):
+                    print(f"{i}) {m}")
+                
+                del_choice = read(min=0, max=len(modules) - 1, digit=True)
+                removed = modules.pop(del_choice)
+                
+                shared_data['customModules'] = modules
+                # Persist deletion to session file
+                session.setSessionData(shared_data, shared=True)
+                
+                print(f"\nModule {os.path.basename(removed)} removed.")
+                enter()
+                continue
+
+            else:
+                # Execution logic
+                path = modules[choice - 3]
+                name = os.path.basename(path).replace('.py', '')
+
+                # Rewrite our entry in processList so ikabot's running-task
+                # display (main menu, killTasks, web server) shows the actual
+                # module name instead of 'loadCustomModule'. The processList
+                # row was created by the menu launcher with action set to the
+                # loader's __name__; replace it now that we know which module
+                # was picked.
+                try:
+                    session.updateProcessEntry(os.getpid(), action='lcm_' + name)
+                except Exception:
+                    pass
+
+                banner()
+                print(f'Running module: {name}...\n')
+
+                # Dynamic module loading
+                module = SourceFileLoader(name, path).load_module()
+
+                # Execute the function (must match filename)
+                getattr(module, name)(session, event, stdin_fd, predetermined_input)
+
+                return None
+
+        except Exception:
+            print('\n>> Error in Custom Module Manager:')
+            traceback.print_exc()
+            enter()
+            break
+    return None
