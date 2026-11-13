@@ -245,6 +245,20 @@ class TestPlanSpyTraining(unittest.TestCase):
 
 
 class TestOrderAccepted(unittest.TestCase):
+    def test_real_buildSpy_response(self):
+        """Feedback the game sent back when one spy was ordered in a live test"""
+        response = [
+            ["updateGlobalData", {}],
+            ["changeView", ["safehouse", ""]],
+            ["updateTemplateData", {}],
+            [
+                "provideFeedback",
+                [{"location": 4, "text": "A tua ordem foi executada.", "type": 10}],
+            ],
+        ]
+
+        self.assertTrue(orderAccepted(response))
+
     def test_success_feedback(self):
         response = [
             ["updateGlobalData", {}],
