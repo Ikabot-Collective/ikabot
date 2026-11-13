@@ -152,7 +152,7 @@ def planSpyTraining(cities, gold, settings):
     gold : int
         the gold the account has
     settings : dict
-        target, goldFloor, crystalFloor and maxPerPass
+        target, goldFloor, crystalFloor and maxPerPass (0 for no limit)
 
     Returns
     -------
@@ -162,7 +162,8 @@ def planSpyTraining(cities, gold, settings):
         needs; reason is PASS_LIMIT, GOLD_FLOOR, CRYSTAL_FLOOR or UNKNOWN_COST
     """
     gold_budget = max(0, gold - settings["goldFloor"])
-    left = settings["maxPerPass"]
+    # None means no limit on the spies ordered in one run
+    left = settings["maxPerPass"] or None
 
     wanted = []
     for city in cities:
@@ -185,7 +186,7 @@ def planSpyTraining(cities, gold, settings):
         limits = {
             CRYSTAL_FLOOR: spare_crystal // crystal_per_spy,
             GOLD_FLOOR: gold_budget // gold_per_spy,
-            PASS_LIMIT: max(0, left),
+            PASS_LIMIT: need if left is None else max(0, left),
         }
         amount = min(need, *limits.values())
         if amount < need:
@@ -208,7 +209,8 @@ def planSpyTraining(cities, gold, settings):
             }
         )
         gold_budget -= amount * gold_per_spy
-        left -= amount
+        if left is not None:
+            left -= amount
 
     return orders, notes
 
@@ -522,8 +524,9 @@ def trainSpies(session, event, stdin_fd, predetermined_input):
 
     print("\nMost spies ordered at a time, all cities together.")
     print("  Spreads the spending over several runs; the cities with more empty")
-    print("  slots are served first. e.g. 50. Default 100:")
-    max_per_pass = read(min=1, digit=True, default=100)
+    print("  slots are served first. e.g. 50.")
+    print("  0 = no limit, every city is filled in this run. Default 100:")
+    max_per_pass = read(min=0, digit=True, default=100)
 
     print("\nTelegram/Discord notifications:")
     print("1. Every time spies are trained")

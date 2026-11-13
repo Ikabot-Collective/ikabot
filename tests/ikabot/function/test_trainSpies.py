@@ -229,6 +229,34 @@ class TestPlanSpyTraining(unittest.TestCase):
         self.assertEqual(notes["B"], {"amount": 2, "need": 8, "reason": PASS_LIMIT})
         self.assertEqual(notes["C"], {"amount": 0, "need": 3, "reason": PASS_LIMIT})
 
+    def test_zero_means_no_limit(self):
+        """Every city is filled in one run, one order each"""
+        cities = [
+            city("A", safehouse(capacity=40, free=35, order_max=35)),
+            city("B", safehouse(capacity=40, free=30, order_max=30)),
+            city("C", safehouse(capacity=40, free=0, order_max=0)),
+        ]
+
+        orders, notes = planSpyTraining(cities, 10**7, settings(max_per_pass=0))
+
+        self.assertEqual(
+            [(o["name"], o["amount"]) for o in orders], [("A", 35), ("B", 30)]
+        )
+        self.assertEqual(notes, {})
+
+    def test_no_limit_still_respects_the_gold_floor(self):
+        cities = [
+            city("A", safehouse(capacity=40, free=35, order_max=35)),
+            city("B", safehouse(capacity=40, free=30, order_max=30)),
+        ]
+
+        orders, notes = planSpyTraining(cities, 6000, settings(max_per_pass=0))
+
+        self.assertEqual(
+            [(o["name"], o["amount"]) for o in orders], [("A", 35), ("B", 5)]
+        )
+        self.assertEqual(notes["B"]["reason"], GOLD_FLOOR)
+
     def test_a_missing_resource_wins_over_the_pass_limit(self):
         """When both stop at the same number, the next run would not fix the missing gold"""
         cities = [city("A", safehouse(capacity=40, free=10, order_max=40))]
