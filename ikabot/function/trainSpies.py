@@ -351,7 +351,12 @@ class SpyTrainer:
         for city in gathered:
             if city["id"] in ordered:
                 continue
-            note = notes.get(city["name"], "Nothing to train")
+            note = notes.get(city["name"], "nothing to train")
+            house = city["safehouse"]
+            if house.get("capacity") is not None and house.get("freeSlots") is not None:
+                note = "{:d}/{:d} spies, {}".format(
+                    house["capacity"] - house["freeSlots"], house["capacity"], note
+                )
             results.append(
                 {
                     "name": city["name"],
@@ -475,7 +480,11 @@ def trainSpies(session, event, stdin_fd, predetermined_input):
         "maxPerPass": int(max_per_pass),
     }
 
-    print("\nTraining spies in {:d} cities...".format(len(cities_ids)))
+    print(
+        "\nTraining spies in {:d} {}...".format(
+            len(cities_ids), "city" if len(cities_ids) == 1 else "cities"
+        )
+    )
     results = SpyTrainer(session, settings, notification_mode).run_pass(
         cities_ids, cities
     )
