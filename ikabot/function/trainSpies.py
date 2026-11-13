@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import json
+import random
 import re
+import time
 import traceback
 
 from ikabot.config import *
@@ -17,6 +19,16 @@ from ikabot.helpers.varios import *
 
 CRYSTAL = 3  # index of crystal in the 5 resource list
 FEEDBACK_SUCCESS = 10  # provideFeedback type the game uses for an accepted order
+
+# random pauses, in seconds, so a pass over many cities does not fire a burst of requests
+READ_DELAY = (2, 6)  # between reading one city and the next
+OPEN_DELAY = (1, 3)  # between opening a city and opening its safehouse
+ORDER_DELAY = (10, 25)  # between two training orders
+
+
+def pause(bounds):
+    """Sleeps a random time within bounds, like a person moving between screens"""
+    time.sleep(random.uniform(*bounds))
 
 
 def parseSafehouse(html):
@@ -268,7 +280,9 @@ class SpyTrainer:
     def _gather(self, cities_ids, cities, results):
         """Reads the safehouse of every city, the cities that cannot train go to results"""
         gathered = []
-        for city_id in cities_ids:
+        for i, city_id in enumerate(cities_ids):
+            if i:
+                pause(READ_DELAY)
             name = cities[city_id]["name"]
             try:
                 city = getCity(self.session.get(city_url + str(city_id)))
@@ -280,6 +294,7 @@ class SpyTrainer:
                         {"name": name, "status": "SKIP", "note": "No safehouse"}
                     )
                     continue
+                pause(OPEN_DELAY)
                 gathered.append(
                     {
                         "id": city_id,
@@ -318,7 +333,9 @@ class SpyTrainer:
         orders, notes = planSpyTraining(gathered, gold, self.settings)
         ordered = {order["id"] for order in orders}
 
-        for order in orders:
+        for i, order in enumerate(orders):
+            if i:
+                pause(ORDER_DELAY)
             note = "{:d} spies ({} gold, {} crystal)".format(
                 order["amount"],
                 addThousandSeparator(order["gold"]),
@@ -416,7 +433,7 @@ def do_trainSpies(session, run_hours, cities_ids, cities, settings, notification
     )
 
     while True:
-        wait(run_hours * 3600)
+        wait(run_hours * 3600, maxrandom=600)
         try:
             trainer.run_pass(cities_ids, cities)
         except Exception:

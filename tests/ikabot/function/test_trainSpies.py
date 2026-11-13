@@ -1,4 +1,6 @@
+import json
 import unittest
+from unittest.mock import Mock, call, patch
 import sys
 import os
 
@@ -7,6 +9,9 @@ sys.path.insert(
 )
 
 from ikabot.function.trainSpies import (
+    ORDER_DELAY,
+    READ_DELAY,
+    SpyTrainer,
     cityNeed,
     orderAccepted,
     parseSafehouse,
@@ -274,6 +279,44 @@ class TestOrderAccepted(unittest.TestCase):
 
     def test_no_feedback(self):
         self.assertFalse(orderAccepted([["updateGlobalData", {}]]))
+
+
+class TestPauses(unittest.TestCase):
+    """A pass over many cities must not fire a burst of requests"""
+
+    def run_pass(self, houses):
+        session = Mock()
+        session.get.return_value = "city html"
+        session.post.return_value = json.dumps([["provideFeedback", [{"type": 10}]]])
+        city = {
+            "position": [{"position": 8, "building": "safehouse"}],
+            "availableResources": [0, 0, 0, 100000, 0],
+        }
+        trainer = SpyTrainer(
+            session, {"target": 0, "goldFloor": 0, "crystalFloor": 0, "maxPerPass": 100}
+        )
+        names = {str(i): {"name": "City{}".format(i)} for i in range(len(houses))}
+        with patch("ikabot.function.trainSpies.getCity", return_value=city), patch(
+            "ikabot.function.trainSpies.getGold", return_value=(10**7, 0)
+        ), patch.object(SpyTrainer, "_read_safehouse", side_effect=houses), patch(
+            "ikabot.function.trainSpies.pause"
+        ) as pause:
+            trainer.run_pass(list(names), names)
+        return pause
+
+    def test_pauses_between_cities_and_between_orders(self):
+        houses = [safehouse(capacity=40, free=10, order_max=10) for _ in range(3)]
+
+        pause = self.run_pass(houses)
+
+        self.assertEqual(pause.call_args_list.count(call(READ_DELAY)), 2)
+        self.assertEqual(pause.call_args_list.count(call(ORDER_DELAY)), 2)
+
+    def test_no_order_pause_for_a_single_order(self):
+        pause = self.run_pass([safehouse(capacity=40, free=10, order_max=10)])
+
+        self.assertNotIn(call(ORDER_DELAY), pause.call_args_list)
+        self.assertNotIn(call(READ_DELAY), pause.call_args_list)
 
 
 if __name__ == "__main__":
