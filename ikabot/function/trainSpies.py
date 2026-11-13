@@ -436,10 +436,13 @@ def trainSpies(session, event, stdin_fd, predetermined_input):
     predetermined_input : multiprocessing.managers.SyncManager.list
     """
     banner()
-    print("Keeps the safehouses trained with spies.\n")
+    print("Trains spies in your safehouses, once or every few hours.")
+    print(
+        "Each spy costs gold (from the account) and crystal (from the city that trains it).\n"
+    )
 
     print("Which cities?")
-    print("1. Select specific cities")
+    print("1. Select specific cities (next screen: pick the cities to leave out)")
     print("2. All cities")
     print("(') Back to main menu")
     choice = read(min=1, max=2, digit=True, additionalValues=["'"])
@@ -450,27 +453,40 @@ def trainSpies(session, event, stdin_fd, predetermined_input):
     else:
         cities_ids, cities = getIdsOfCities(session)
 
-    print("\nHow many spies should each city keep? (0 to fill the safehouse)")
+    print("\nHow many spies should each city have?")
+    print("  0 = fill the safehouse")
+    print(
+        "  N = keep N spies per city (spies at home, on missions and in training count)"
+    )
+    print("  e.g. 10 in a city that has 4 trains 6 more. Default 0:")
     target = read(min=0, digit=True, default=0)
 
-    print("\nGold to always keep (default 0):")
+    print("\nGold the bot must never spend (a spy costs 150 gold).")
+    print("  e.g. 200000 with 210000 in the account spends only 10000 (66 spies).")
+    print("  0 = it may spend all the gold. Default 0:")
     gold_floor = read(min=0, digit=True, default=0)
 
-    print("\nCrystal to always keep in each city (default 0):")
+    print("\nCrystal the bot must never spend in each city (a spy costs 40 crystal,")
+    print("taken from the city that trains it).")
+    print("  e.g. 5000 in a city with 5200 crystal trains only 5 spies.")
+    print("  0 = it may spend all the crystal of the city. Default 0:")
     crystal_floor = read(min=0, digit=True, default=0)
 
-    print("\nMost spies ordered in one pass, all cities together (default 100):")
+    print("\nMost spies ordered at a time, all cities together.")
+    print("  Spreads the spending over several runs; the cities with more empty")
+    print("  slots are served first. e.g. 50. Default 100:")
     max_per_pass = read(min=1, digit=True, default=100)
 
-    print("\nTelegram notifications:")
-    print("1. Notify on every order")
-    print("2. Notify only on errors")
-    print("3. No notifications")
+    print("\nTelegram/Discord notifications:")
+    print("1. Every time spies are trained")
+    print("2. Only on errors")
+    print("3. Never")
     notification_mode = int(read(min=1, max=3, digit=True, default=3))
 
-    print("\nRun mode:")
-    print("0. Run once and exit")
-    print("1-24. Run continuously, checking every X hours")
+    print("\nHow often?")
+    print("  0    = run once now and stop")
+    print("  1-24 = run now and then every X hours in the background,")
+    print("         refilling the slots that become free (e.g. spies lost on missions)")
     run_hours = read(min=0, max=24, digit=True)
 
     settings = {
