@@ -9,7 +9,12 @@ sys.path.insert(
 )
 
 from ikabot.function.trainSpies import (
+    CRYSTAL_FLOOR,
+    GOLD_FLOOR,
     ORDER_DELAY,
+    PASS_LIMIT,
+    UNKNOWN_COST,
+    describeShortfall,
     READ_DELAY,
     SpyTrainer,
     cityNeed,
@@ -196,7 +201,7 @@ class TestPlanSpyTraining(unittest.TestCase):
         self.assertEqual(
             [(o["name"], o["amount"]) for o in orders], [("A", 8), ("B", 2)]
         )
-        self.assertEqual(notes["B"], "2/6, gold floor")
+        self.assertEqual(notes["B"], {"amount": 2, "need": 6, "reason": GOLD_FLOOR})
 
     def test_crystal_floor_is_per_city(self):
         cities = [
@@ -207,7 +212,7 @@ class TestPlanSpyTraining(unittest.TestCase):
         orders, notes = planSpyTraining(cities, 1000000, settings(crystal_floor=5000))
 
         self.assertEqual({o["name"]: o["amount"] for o in orders}, {"A": 5, "B": 10})
-        self.assertEqual(notes["A"], "5/10, crystal floor")
+        self.assertEqual(notes["A"], {"amount": 5, "need": 10, "reason": CRYSTAL_FLOOR})
 
     def test_max_per_pass_is_shared_by_all_cities(self):
         cities = [
@@ -221,8 +226,17 @@ class TestPlanSpyTraining(unittest.TestCase):
         self.assertEqual(
             [(o["name"], o["amount"]) for o in orders], [("A", 10), ("B", 2)]
         )
-        self.assertEqual(notes["B"], "2/8, spies per pass limit")
-        self.assertEqual(notes["C"], "0/3, spies per pass limit")
+        self.assertEqual(notes["B"], {"amount": 2, "need": 8, "reason": PASS_LIMIT})
+        self.assertEqual(notes["C"], {"amount": 0, "need": 3, "reason": PASS_LIMIT})
+
+    def test_a_missing_resource_wins_over_the_pass_limit(self):
+        """When both stop at the same number, the next run would not fix the missing gold"""
+        cities = [city("A", safehouse(capacity=40, free=10, order_max=40))]
+
+        orders, notes = planSpyTraining(cities, 750, settings(max_per_pass=5))
+
+        self.assertEqual(orders[0]["amount"], 5)
+        self.assertEqual(notes["A"]["reason"], GOLD_FLOOR)
 
     def test_no_gold_left_orders_nothing(self):
         cities = [city("A", safehouse(capacity=40, free=10, order_max=40))]
@@ -230,7 +244,7 @@ class TestPlanSpyTraining(unittest.TestCase):
         orders, notes = planSpyTraining(cities, 5000, settings(gold_floor=10000))
 
         self.assertEqual(orders, [])
-        self.assertEqual(notes["A"], "0/10, gold floor")
+        self.assertEqual(notes["A"], {"amount": 0, "need": 10, "reason": GOLD_FLOOR})
 
     def test_unknown_cost_skips_the_city(self):
         """The cost is read from the page, without it nothing is ordered"""
@@ -239,7 +253,7 @@ class TestPlanSpyTraining(unittest.TestCase):
         orders, notes = planSpyTraining(cities, 1000000, settings())
 
         self.assertEqual(orders, [])
-        self.assertEqual(notes["A"], "could not read the cost of a spy")
+        self.assertEqual(notes["A"]["reason"], UNKNOWN_COST)
 
     def test_cities_with_nothing_to_train_are_left_out(self):
         cities = [city("A", safehouse(capacity=40, free=0, order_max=0))]
@@ -247,6 +261,32 @@ class TestPlanSpyTraining(unittest.TestCase):
         orders, notes = planSpyTraining(cities, 1000000, settings())
 
         self.assertEqual((orders, notes), ([], {}))
+
+
+class TestDescribeShortfall(unittest.TestCase):
+    def test_pass_limit_is_left_for_the_next_run(self):
+        note = {"amount": 0, "need": 35, "reason": PASS_LIMIT}
+
+        self.assertEqual(describeShortfall(note), "35 left for the next run")
+
+    def test_missing_gold(self):
+        note = {"amount": 2, "need": 6, "reason": GOLD_FLOOR}
+
+        self.assertEqual(
+            describeShortfall(note), "4 not trained, not enough gold above the floor"
+        )
+
+    def test_missing_crystal(self):
+        note = {"amount": 5, "need": 10, "reason": CRYSTAL_FLOOR}
+
+        self.assertEqual(
+            describeShortfall(note), "5 not trained, not enough crystal above the floor"
+        )
+
+    def test_unknown_cost(self):
+        note = {"amount": 0, "need": 10, "reason": UNKNOWN_COST}
+
+        self.assertEqual(describeShortfall(note), "could not read the cost of a spy")
 
 
 class TestOrderAccepted(unittest.TestCase):

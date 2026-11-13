@@ -26,6 +26,13 @@ OPEN_DELAY = (1, 3)  # between opening a city and opening its safehouse
 ORDER_DELAY = (10, 25)  # between two training orders
 
 
+# why a city got fewer spies than it needs
+PASS_LIMIT = "pass limit"
+GOLD_FLOOR = "gold floor"
+CRYSTAL_FLOOR = "crystal floor"
+UNKNOWN_COST = "unknown cost"
+
+
 def pause(bounds):
     """Sleeps a random time within bounds, like a person moving between screens"""
     time.sleep(random.uniform(*bounds))
@@ -151,7 +158,8 @@ def planSpyTraining(cities, gold, settings):
     -------
     (orders, notes) : tuple
         orders is a list of {id, name, position, amount, gold, crystal}, biggest need first;
-        notes maps a city name to the reason it got fewer spies than it needs
+        notes maps a city name to {amount, need, reason} when it got fewer spies than it
+        needs; reason is PASS_LIMIT, GOLD_FLOOR, CRYSTAL_FLOOR or UNKNOWN_COST
     """
     gold_budget = max(0, gold - settings["goldFloor"])
     left = settings["maxPerPass"]
@@ -169,23 +177,23 @@ def planSpyTraining(cities, gold, settings):
         gold_per_spy = city["safehouse"].get("goldPerSpy")
         crystal_per_spy = city["safehouse"].get("crystalPerSpy")
         if not gold_per_spy or not crystal_per_spy:
-            notes[city["name"]] = "could not read the cost of a spy"
-            continue
-        if left <= 0:
-            notes[city["name"]] = "0/{:d}, spies per pass limit".format(need)
+            notes[city["name"]] = {"amount": 0, "need": need, "reason": UNKNOWN_COST}
             continue
 
         spare_crystal = max(0, city["crystal"] - settings["crystalFloor"])
+        # on a tie the missing resource is the reason, the next run would not fix it
         limits = {
-            "spies per pass limit": left,
-            "crystal floor": spare_crystal // crystal_per_spy,
-            "gold floor": gold_budget // gold_per_spy,
+            CRYSTAL_FLOOR: spare_crystal // crystal_per_spy,
+            GOLD_FLOOR: gold_budget // gold_per_spy,
+            PASS_LIMIT: max(0, left),
         }
         amount = min(need, *limits.values())
         if amount < need:
-            notes[city["name"]] = "{:d}/{:d}, {}".format(
-                amount, need, min(limits, key=limits.get)
-            )
+            notes[city["name"]] = {
+                "amount": amount,
+                "need": need,
+                "reason": min(limits, key=limits.get),
+            }
         if amount <= 0:
             continue
 
@@ -203,6 +211,28 @@ def planSpyTraining(cities, gold, settings):
         left -= amount
 
     return orders, notes
+
+
+def describeShortfall(note):
+    """Tells the user why a city got fewer spies than it needs.
+
+    Parameters
+    ----------
+    note : dict
+        {amount, need, reason} as found in the notes of planSpyTraining
+
+    Returns
+    -------
+    text : str
+    """
+    missing = note["need"] - note["amount"]
+    if note["reason"] == PASS_LIMIT:
+        return "{:d} left for the next run".format(missing)
+    if note["reason"] == GOLD_FLOOR:
+        return "{:d} not trained, not enough gold above the floor".format(missing)
+    if note["reason"] == CRYSTAL_FLOOR:
+        return "{:d} not trained, not enough crystal above the floor".format(missing)
+    return "could not read the cost of a spy"
 
 
 def orderAccepted(response):
@@ -342,7 +372,7 @@ class SpyTrainer:
                 addThousandSeparator(order["crystal"]),
             )
             if order["name"] in notes:
-                note += ", " + notes[order["name"]]
+                note += ", " + describeShortfall(notes[order["name"]])
             try:
                 if self._train(order):
                     results.append(
@@ -368,19 +398,19 @@ class SpyTrainer:
         for city in gathered:
             if city["id"] in ordered:
                 continue
-            note = notes.get(city["name"], "nothing to train")
+            shortfall = notes.get(city["name"])
+            if shortfall is None:
+                status, note = "OK", "nothing to train"
+            elif shortfall["reason"] == PASS_LIMIT:
+                status, note = "NEXT", describeShortfall(shortfall)
+            else:
+                status, note = "WARN", describeShortfall(shortfall)
             house = city["safehouse"]
             if house.get("capacity") is not None and house.get("freeSlots") is not None:
                 note = "{:d}/{:d} spies, {}".format(
                     house["capacity"] - house["freeSlots"], house["capacity"], note
                 )
-            results.append(
-                {
-                    "name": city["name"],
-                    "status": "OK" if city["name"] not in notes else "WARN",
-                    "note": note,
-                }
-            )
+            results.append({"name": city["name"], "status": status, "note": note})
 
         self._notify(results)
         return results
@@ -406,6 +436,7 @@ def _print_results_table(results):
     status_colors = {
         "OK": bcolors.GREEN,
         "TRAINED": bcolors.BLUE,
+        "NEXT": bcolors.CYAN,
         "WARN": bcolors.WARNING,
         "SKIP": bcolors.STONE,
         "ERROR": bcolors.RED,
