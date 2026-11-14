@@ -14,7 +14,7 @@ setuptools.setup(
     include_package_data=True,
     package_data={"ikabot": ["assets/*.bin"]},
     packages=setuptools.find_packages(),
-    install_requires=["requests", "requests[socks]", "cryptography", "psutil", "python-dotenv"],
+    install_requires=["requests>=2.32", "requests[socks]>=2.32", "cryptography", "psutil", "python-dotenv"],
     extras_require={"webServer": ["flask"]},
     entry_points={
         "console_scripts": ["ikabot=ikabot.command_line:main"],

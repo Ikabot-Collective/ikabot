@@ -10,6 +10,7 @@ import os
 import random
 import re
 import sys
+import threading
 import time
 import traceback
 import urllib.parse
@@ -39,6 +40,7 @@ from ikabot.helpers.getJson import getCity
 from ikabot.helpers.gui import banner, enter
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.varios import getDateTime, lastloginTimetoString
+from ikabot.web.warmPool import ConnectionWarmer, WarmAdapter
 from ikabot.helpers.apiComm import getNewBlackBoxToken
 from ikabot.helpers.lobbyDecaptcha import break_interactive_captcha
 
@@ -64,6 +66,44 @@ class Session:
         # disable ssl verification warning
         requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
         self.__login()
+
+    _warmer = None
+    _warm_mount_lock = threading.Lock()
+
+    def warmConnections(self, count=6):
+        """Keeps `count` connections to Ikariam open while requests are being sent. Ikariam closes the
+        connection after every answer, so a request which finds one ready saves around 100 ms.
+        Meant for the web server, which waits for the answer of every request. A browser sends up to
+        6 requests at the same time to one host, hence the default
+        """
+        if self._warmer is not None or count <= 0:
+            return
+        self._warmer = ConnectionWarmer(
+            lambda: self.s,
+            lambda: self.urlBase,
+            lambda: config.do_ssl_verify,
+            target=count,
+        )
+        self._warmer.start()
+
+    def __useWarmConnections(self, url="", *params):
+        if self._warmer is None:
+            return
+        # While a tab of the game is open, it asks for updateGlobalData once a minute. That alone
+        # is not someone browsing, so it does not keep connections ready (it still uses one if any)
+        poll = "view=updateGlobalData" in url or any(
+            isinstance(p, dict) and p.get("view") == "updateGlobalData" for p in params
+        )
+        if not poll:
+            self._warmer.touch()
+        # self.s is replaced when the cookies change. Two requests can get here at the same time,
+        # and the second adapter would replace the first one and its connections
+        s = self.s
+        if not getattr(s, "_ikabot_warm", False):
+            with self._warm_mount_lock:
+                if not getattr(s, "_ikabot_warm", False):
+                    s.mount("https://", WarmAdapter())
+                    s._ikabot_warm = True
 
     def setStatus(self, message):
         """This function will modify the current tasks status message that appears in the table on the main menu
@@ -1428,6 +1468,7 @@ class Session:
         """
         self.__checkCookie()
         self.__update_proxy()
+        self.__useWarmConnections(url, params)
 
         if noIndex:
             url = self.urlBase.replace("index.php", "") + url
@@ -1436,6 +1477,7 @@ class Session:
         if noQuery:
             url = url.replace('?','')
         error_page_retried = False
+        warm_retried = False
         while True:
             try:
                 self.requestHistory.append(
@@ -1525,6 +1567,10 @@ class Session:
             except AssertionError:
                 self.__sessionExpired()
             except requests.exceptions.ConnectionError:
+                if self._warmer is not None and not warm_retried:
+                    # Ikariam can close a connection opened in advance just as it is used, try again at once
+                    warm_retried = True
+                    continue
                 self.logger.warning(f"Connection error occured, retrying in {ConnectionError_wait}s\n{str(params) + ' --> ' + url}")
                 time.sleep(ConnectionError_wait)
             except requests.exceptions.Timeout:
@@ -1558,6 +1604,7 @@ class Session:
         params_original = params
         self.__checkCookie()
         self.__update_proxy()
+        self.__useWarmConnections(url, params, payloadPost)
 
         # add the request id
         token = self.__token()
@@ -1573,6 +1620,7 @@ class Session:
             url = self.urlBase + url
         if noQuery:
             url = url.replace('?','')
+        warm_retried = False
         while True:
             try:
                 self.requestHistory.append(
@@ -1691,6 +1739,10 @@ class Session:
             except AssertionError:
                 self.__sessionExpired()
             except requests.exceptions.ConnectionError:
+                if self._warmer is not None and not warm_retried:
+                    # Ikariam can close a connection opened in advance just as it is used, try again at once
+                    warm_retried = True
+                    continue
                 self.logger.warning(f"Connection error occured, retrying in {ConnectionError_wait}s\n{str(params) + ' --> ' + url}")
                 time.sleep(ConnectionError_wait)
             except requests.exceptions.Timeout:
