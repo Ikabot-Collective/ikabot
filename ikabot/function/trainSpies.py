@@ -369,8 +369,9 @@ class SpyTrainer:
         for i, order in enumerate(orders):
             if i:
                 pause(ORDER_DELAY)
-            note = "{:d} spies ({} gold, {} crystal)".format(
+            note = "{:d} {} ({} gold, {} crystal)".format(
                 order["amount"],
+                "spy" if order["amount"] == 1 else "spies",
                 addThousandSeparator(order["gold"]),
                 addThousandSeparator(order["crystal"]),
             )
