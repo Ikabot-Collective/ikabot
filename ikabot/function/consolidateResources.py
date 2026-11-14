@@ -14,6 +14,7 @@ from ikabot.helpers.planRoutes import executeRoutes, splitCargoBetweenFleets
 from ikabot.helpers.decorators import configurator, task
 from ikabot.helpers.resources import *
 from ikabot.helpers.signals import setInfoSignal
+from ikabot.helpers.taskConfig import asInt, requireOwnCity
 from ikabot.helpers.varios import addThousandSeparator
 from ikabot.helpers.varios import getDateTime
 
@@ -27,8 +28,47 @@ SHIP_TYPE_NAMES = {
     SHIP_TYPE_BOTH: 'Trade ships and freighters',
 }
 
-@task("consolidateResources")
-def do_it(session, limits, sourceCityIds, destinationCityId, intervalInHours, shipType=SHIP_TYPE_TRADE_SHIPS):
+def prepare_consolidateResources(session, limits, sourceCityIds, destinationCityId, intervalInHours=1, shipType=SHIP_TYPE_TRADE_SHIPS):
+    """Checks the config of a consolidateResources task started from the CLI
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    limits : list[int]
+        amount of wood, wine, marble, crystal and sulfur to keep, -1 keeps everything
+    sourceCityIds : list[int or str]
+    destinationCityId : int or str
+    intervalInHours : int
+    shipType : int
+
+    Returns
+    -------
+    config : dict
+    """
+    if not isinstance(limits, (list, tuple)) or len(limits) != len(materials_names):
+        raise ValueError(
+            "limits must be a list of {} amounts to keep ({}), -1 keeps everything, got {!r}".format(
+                len(materials_names), ", ".join(materials_names), limits
+            )
+        )
+    if not isinstance(sourceCityIds, (list, tuple)):
+        raise ValueError("sourceCityIds must be a list of city ids, got {!r}".format(sourceCityIds))
+    destination = requireOwnCity(session, destinationCityId, "destinationCityId")
+    sources = [requireOwnCity(session, city_id, "sourceCityIds") for city_id in sourceCityIds]
+    # the configurator also drops the destination from the sources
+    sources = [city_id for city_id in dict.fromkeys(sources) if city_id != destination]
+    if not sources:
+        raise ValueError("sourceCityIds needs at least one city other than the destination")
+    return {
+        "limits": [asInt(limit, "limits", minimum=-1) for limit in limits],
+        "sourceCityIds": sources,
+        "destinationCityId": destination,
+        "intervalInHours": asInt(intervalInHours, "intervalInHours", minimum=1),
+        "shipType": asInt(shipType, "shipType", minimum=SHIP_TYPE_TRADE_SHIPS, maximum=SHIP_TYPE_BOTH),
+    }
+
+
+@task("consolidateResources", prepare=prepare_consolidateResources)
+def do_it(session, limits, sourceCityIds, destinationCityId, intervalInHours=1, shipType=SHIP_TYPE_TRADE_SHIPS):
     """
     Parameters
     ----------

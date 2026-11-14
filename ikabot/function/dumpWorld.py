@@ -22,18 +22,75 @@ from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import getDateTime, wait
 
 from ikabot.helpers.decorators import configurator, task
+from ikabot.helpers.taskConfig import asBool, asInt
 
 home = "USERPROFILE" if isWindows else "HOME"
 
-@task("dumpWorld")
-def do_dumpWorld(session, waiting_time, coords, radius, shallow, non_empty_islands):
+def prepare_dumpWorld(session, waiting_time=1.5, coords=None, radius=None, shallow=False, non_empty_islands=False, show_progress=False):
+    """Checks the config of a dumpWorld task started from the CLI
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    waiting_time : float
+        seconds between two island requests (the menu asks in milliseconds)
+    coords : list or str
+        [x, y] or "x,y" / "x:y", the center of the part of the map to dump; None dumps the whole map
+    radius : int
+        max distance from coords, 15 when coords is given without it
+    shallow : bool
+        only the map data: quick, but the dump cannot be searched by player
+    non_empty_islands : bool
+        only islands with at least one town
+    show_progress : bool
+        the menu's progress screen, never from the CLI (no console)
+
+    Returns
+    -------
+    config : dict
+    """
+    try:
+        seconds = float(waiting_time)
+    except (TypeError, ValueError):
+        raise ValueError("waiting_time must be a number of seconds, got {!r}".format(waiting_time))
+    if not 0 <= seconds <= 10:
+        raise ValueError("waiting_time must be between 0 and 10 seconds, got {!r}".format(waiting_time))
+    waiting_time = seconds
+    shallow = asBool(shallow, "shallow")
+    non_empty_islands = asBool(non_empty_islands, "non_empty_islands")
+
+    if coords is not None:
+        if isinstance(coords, str):
+            coords = re.split(r"[,:]", coords.strip().strip("()[]"))
+        if not isinstance(coords, (list, tuple)) or len(coords) != 2:
+            raise ValueError('coords must be [x, y] or "x,y", got {!r}'.format(coords))
+        coords = [asInt(coords[0], "coords x", minimum=0, maximum=100), asInt(coords[1], "coords y", minimum=0, maximum=100)]
+        radius = asInt(15 if radius is None else radius, "radius", minimum=0, maximum=200)
+    elif radius is not None:
+        raise ValueError("radius needs coords, the center of the part of the map to dump")
+    if shallow and (coords is not None or non_empty_islands):
+        raise ValueError("coords and non_empty_islands only work with shallow false: a shallow dump always has the whole map")
+
+    return {
+        "waiting_time": waiting_time,
+        "coords": coords,
+        "radius": radius,
+        "shallow": shallow,
+        "non_empty_islands": non_empty_islands,
+    }
+
+
+@task("dumpWorld", prepare=prepare_dumpWorld)
+def do_dumpWorld(session, waiting_time=1.5, coords=None, radius=None, shallow=False, non_empty_islands=False, show_progress=False):
     stop_updating = threading.Event()
     lock = threading.Lock()
     shared_data = ["", "", 0, stop_updating, lock]
 
-    thread = threading.Thread(target=update_terminal, args=(shared_data,), daemon=True)
+    # without a console (CLI) the progress goes to the task's status instead of the screen
+    target = update_terminal if show_progress else update_task_status
+    args = (shared_data,) if show_progress else (shared_data, session)
+    thread = threading.Thread(target=target, args=args, daemon=True)
     thread.start()
-    
+
     info = "\nDumped world data\n"
     setInfoSignal(session, info)
 
@@ -43,6 +100,11 @@ def do_dumpWorld(session, waiting_time, coords, radius, shallow, non_empty_islan
     )
 
     shared_data[3].set()
+    if not show_progress:
+        seconds = round(time.time() - shared_data[2])
+        session.setStatus("Dumped to {} in {}s".format(dump_path, seconds))
+        sendToBot(session, "World data has been dumped to {} in {}s".format(dump_path, seconds))
+        return
     shared_data[4].acquire()
     time.sleep(5)
 
@@ -124,7 +186,8 @@ def dumpWorld(session, event, stdin_fd, predetermined_input):
         "coords": coords,
         "radius": radius,
         "shallow": shallow,
-        "non_empty_islands": non_empty_islands
+        "non_empty_islands": non_empty_islands,
+        "show_progress": True,
     }
 
 
@@ -373,6 +436,16 @@ def update_terminal(shared_data):
             time.sleep(0.05)
         if shared_data[3].is_set():
             return
+
+
+def update_task_status(shared_data, session):
+    """Copies the progress line to the task's status every 30 seconds"""
+    while not shared_data[3].wait(30):
+        shared_data[4].acquire()
+        message = " ".join(shared_data[0].split())
+        shared_data[4].release()
+        if message:
+            session.setStatus(message)
 
 
 def update_status(message, percent, percent_total, shared_data, add_history=False):

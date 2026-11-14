@@ -391,6 +391,39 @@ def session_data_lock():
             os.close(fd)  # closing the descriptor releases the lock
 
 
+def get_task_pids_by_account():
+    """Returns the pids in the process list of every saved account, as
+    {(email, username, mundo, servidor): set of pids}"""
+    result = {}
+    users_dir = get_users_dir()
+    if not os.path.isdir(users_dir):
+        return result
+    for filename in os.listdir(users_dir):
+        if not filename.endswith(".json"):
+            continue
+        data = read_json_file(os.path.join(users_dir, filename), {})
+        email = (data.get("email") or "").lower()
+        players = data.get("players", {})
+        if not isinstance(players, dict):
+            continue
+        for username, mundos in players.items():
+            if not isinstance(mundos, dict):
+                continue
+            for mundo, servers in mundos.items():
+                if not isinstance(servers, dict):
+                    continue
+                for servidor, player_data in servers.items():
+                    if not isinstance(player_data, dict):
+                        continue
+                    pids = {
+                        p.get("pid")
+                        for p in player_data.get("processList", [])
+                        if isinstance(p, dict)
+                    }
+                    result.setdefault((email, username, str(mundo), servidor), set()).update(pids)
+    return result
+
+
 def get_session_data(session, all_data=False):
     """
     ALWAYS reads fresh from disk to support hot-swapping.

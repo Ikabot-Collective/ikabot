@@ -45,6 +45,7 @@ Usage
 """
 
 import functools
+import json
 import os
 import sys
 import traceback
@@ -61,6 +62,17 @@ from ikabot.helpers.signals import setInfoSignal
 _TASK_REGISTRY = {}
 
 
+def _save_task_config(session, result):
+    """Persist the task's JSON-serializable config dict onto its processList entry."""
+    try:
+        clean_config = json.loads(
+            json.dumps({k: v for k, v in result.items() if k != "session"}, default=list)
+        )
+        session.updateProcessEntry(os.getpid(), config=clean_config)
+    except Exception:
+        pass
+
+
 def _send_error(session, info, exc_text):
     """Best-effort error notification via Telegram/Discord bot."""
     try:
@@ -75,7 +87,7 @@ def _send_error(session, info, exc_text):
 # @task decorator
 # ---------------------------------------------------------------------------
 
-def task(configurator_name):
+def task(configurator_name, prepare=None):
     """Register a background task function for a given configurator.
 
     Parameters
@@ -84,6 +96,11 @@ def task(configurator_name):
         The ``__name__`` of the ``@configurator``-decorated function this task
         belongs to.  This is used as the lookup key so the configurator can
         find and invoke its task automatically.
+    prepare : callable, optional
+        ``prepare(session, **config)`` checks a config given on the CLI / IPC
+        before the task process is started. It raises ``ValueError`` with a
+        message for the user, or returns the config to run the task with
+        (e.g. with defaults filled in). The menu's configurator does not use it.
 
     The decorated function **must** accept all its runtime state as explicit
     keyword parameters (no reliance on module-level globals for configuration).
@@ -117,6 +134,7 @@ def task(configurator_name):
         _TASK_REGISTRY[configurator_name] = wrapper
         # Keep a reference to the original unwrapped function for direct use
         wrapper.__wrapped__ = func
+        wrapper.prepare = prepare
         return wrapper
 
     return decorator
@@ -194,6 +212,8 @@ def configurator(_func=None, *, blocking=False):
                 # config-only (this is a programming error, but fail safe)
                 event.set()
                 return
+
+            _save_task_config(session, result)
 
             if blocking:
                 # Blocking mode: run the task, THEN release the CLI
