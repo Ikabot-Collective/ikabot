@@ -18,7 +18,7 @@ RUN apt-get update && \
 WORKDIR /ikabot
 
 # Python deps before the source so code edits don't reinstall them
-RUN pip install "requests[socks]>=2.32" cryptography psutil python-dotenv
+RUN pip install "requests[socks]>=2.32" cryptography psutil python-dotenv beautifulsoup4
 
 COPY . .
 RUN pip install --no-deps -e .

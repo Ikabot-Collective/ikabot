@@ -5,8 +5,10 @@ from typing import List, Optional, overload
 
 @dataclass()
 class Resource(): #TODO test if this is actually usable as an int #inherit from int
+    """Represents a single Ikariam resource type and quantity."""
+
     id: int
-    name: int
+    name: str
     cssClass: str
     count: int
 
@@ -18,6 +20,7 @@ class Resource(): #TODO test if this is actually usable as an int #inherit from 
         return copy
 
 class Resources():
+    """Container and factory for standard Ikariam resource types."""
 
     Wood: Resource = Resource(0, 'Wood', 'wood', 0)
     Wine: Resource = Resource(1, 'Wine', 'wine', 0)
@@ -30,27 +33,30 @@ class Resources():
 
     def __init__(self, wood: int = 0, wine: int = 0, marble: int = 0, crystal: int = 0, sulphur: int = 0, gold: int = 0, citizens: int = 0) -> None:
 
-        self.Wood.count = wood
-        self.Wine.count = wine
-        self.Marble.count = marble
-        self.Crystal.count = crystal
-        self.Sulphur.count = sulphur
-        self.Gold.count = gold
-        self.Citizens.count = citizens
+        self.Wood = Resources.Wood(wood)
+        self.Wine = Resources.Wine(wine)
+        self.Marble = Resources.Marble(marble)
+        self.Crystal = Resources.Crystal(crystal)
+        self.Sulphur = Resources.Sulphur(sulphur)
+        self.Gold = Resources.Gold(gold)
+        self.Citizens = Resources.Citizens(citizens)
     
     @staticmethod
-    def getResourceByCssClass(cssClass: str) -> Resource:
+    def getResourceByCssClass(cssClass: str) -> Optional[Resource]:
         for resource in Resources.__dict__.values():
             if type(resource) is Resource and resource.cssClass == cssClass:
                 return resource
+        return None
     @staticmethod
-    def getResourceByName(name: str) -> Resource:
+    def getResourceByName(name: str) -> Optional[Resource]:
         for resource in Resources.__dict__.values():
             if type(resource) is Resource and resource.name == name:
                 return resource
 
 @dataclass()
 class Unit():
+    """Represents a military unit or ship type with optional quantity."""
+
     id: int
     name: str
     cssClass: str
@@ -130,24 +136,27 @@ class Units():
     Wall: Unit = Unit(314, 'Wall', 'wall', 0, None, False, None, None, None, None, None, None, None)
 
     @staticmethod
-    def getUnitById(id: int) -> Unit:
+    def getUnitById(id: int) -> Optional[Unit]:
         for unit in Units.__dict__.values():
             if type(unit) is Unit and unit.id == id:
                 return unit
+        return None
     @staticmethod
-    def getUnitByName(name: str) -> Unit:
+    def getUnitByName(name: str) -> Optional[Unit]:
         for unit in Units.__dict__.values():
             if type(unit) is Unit and unit.name == name:
                 return unit
+        return None
     @staticmethod
-    def getUnitByCssClass(cssClass: str) -> Unit:
+    def getUnitByCssClass(cssClass: str) -> Optional[Unit]:
         for unit in Units.__dict__.values():
             if type(unit) is Unit and unit.cssClass == cssClass:
                 return unit
-        ...
+        return None
 
 @dataclass()
 class ResourceDonationTableRow():
+    """Row in an island sawmill or luxury mine donation table."""
     
     playerFlagTag: str
     playerName: str
@@ -158,7 +167,9 @@ class ResourceDonationTableRow():
     donated: int
 
 @dataclass()
-class MiracleDontaionTableRow():
+class MiracleDonationTableRow():
+    """Row in an island miracle donation table."""
+
     playerFlagTag: str
     playerName: str
     playerId: int
@@ -168,9 +179,14 @@ class MiracleDontaionTableRow():
     conversionPercent: float
     conversionIslandSharePercent: float
 
+
+MiracleDontaionTableRow = MiracleDonationTableRow
+
 @dataclass() 
 class PlayerHighScoreTableRow():
-    position: int
+    """Row in the player highscore table."""
+
+    position: Optional[int]
     playerTitle: Optional[str]
     playerFlagTag: str
     playerName: str
@@ -185,7 +201,9 @@ class PlayerHighScoreTableRow():
 
 @dataclass()
 class AllianceHighScoreTableRow():
-    position: int
+    """Row in the alliance highscore table."""
+
+    position: Optional[int]
     allianceFlagTag: str
     allianceName: Optional[str] # it's possible that an alliance has been deleted but is still in highscore
     allianceTag: str
@@ -196,6 +214,8 @@ class AllianceHighScoreTableRow():
     averagePoints: int
     
 class HighScoreTypes():
+    """Valid ``highscoreType`` parameter values for player highscores."""
+
     totalScore = 'score'
     masterBuilder = 'building_score_main'
     buildingLevels = 'building_score_secondary'
@@ -208,9 +228,31 @@ class HighScoreTypes():
     trader = 'trade'
     resources = 'resources'
     donations = 'donations'
+    pillaging = 'pillaging'
     capturePoints = 'piracy'
 
+
+class AllianceHighScoreTypes():
+    """Valid ``highscoreType`` parameter values for alliance highscores."""
+
+    totalScore = 'score'
+    averagePoints = 'avg_score'
+    masterBuilder = 'buildingMainScore'
+    buildingLevels = 'buildingSecondaryScore'
+    scientists = 'researchMainScore'
+    levelsOfResearch = 'researchSecondaryScore'
+    generals = 'armyMainScore'
+    gold = 'tradeSecondaryScore'
+    offensivePoints = 'offenseScore'
+    defencePoints = 'defenseScore'
+    trader = 'tradeMainScore'
+    resources = 'resourcesScore'
+    donations = 'donationsScore'
+    capturePoints = 'piracyScore'
+
 class MayorMessageTypes():
+    """Valid category filter names for mayor advisor messages."""
+
     military = 'military'
     transport = 'transport'
     production = 'production'
@@ -222,6 +264,8 @@ class MayorMessageTypes():
 
 @dataclass
 class MayorMessage():
+    """Single message row in the mayor advisor overview."""
+
     type: str
     """Check data.MayorMessageTypes for valid strings"""
     isNew: bool
@@ -229,17 +273,22 @@ class MayorMessage():
     cityId: int
     date: datetime
     subjectHTML: str
+    subject: str = ''
 
 @dataclass
 class MovementNode():
+    """Origin or destination endpoint of a military or fleet movement."""
+
     cityName: str
-    playerId: int
+    playerId: Optional[int]
     playerName: str
-    cityId: int
-    islandId: int
+    cityId: Optional[int]
+    islandId: Optional[int]
 
 @dataclass
 class MilitaryMovement():
+    """Single active army or fleet movement entry from the military advisor."""
+
     movementId: int
     type: str
     missionId: int #various missions have different ids, 13 is for pillage
@@ -265,6 +314,10 @@ class MilitaryMovement():
     tritonEngines: bool
     origin: MovementNode
     target: MovementNode
+    missionState: Optional[int] = None
+    missionIconClass: str = ''
+    eventDateText: str = ''
+    targetHasBarbarianFleet: bool = False
     
 
     

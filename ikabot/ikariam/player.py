@@ -1,6 +1,10 @@
 
 
-class AvatarScore():
+from ikabot.ikariam._parsing import parse_int
+
+
+class AvatarScore:
+    """Player score breakdown returned on island views."""
 
     userId: int
     placement: int
@@ -10,12 +14,11 @@ class AvatarScore():
     gold: int
 
     def __init__(self, data: dict) -> None:
-        
-        self.userId = int(data['avatar_id'].replace(',','')) # all of these numbers have a comma (,) in them. Even the user id -.-
-        self.placement = int(data['place'].replace(',',''))
-        self.buildingScore = int(data['building_score_main'].replace(',',''))
-        self.researchScore = int(data['research_score_main'].replace(',',''))
-        self.armyScore = int(data['army_score_main'].replace(',',''))
-        self.gold = int(data['trader_score_secondary'].replace(',',''))
+        self.userId = parse_int(data["avatar_id"]) or 0
+        self.placement = parse_int(data["place"]) or 0
+        self.buildingScore = parse_int(data["building_score_main"]) or 0
+        self.researchScore = parse_int(data["research_score_main"]) or 0
+        self.armyScore = parse_int(data["army_score_main"]) or 0
+        self.gold = parse_int(data["trader_score_secondary"]) or 0
 
         self.__avatar_score_data = data
