@@ -1,6 +1,8 @@
+import logging
 import multiprocessing
 import os
 import sys
+import tempfile
 import unittest
 from unittest.mock import MagicMock, patch
 
@@ -9,6 +11,28 @@ from ikabot.helpers.decorators import (
     configurator,
     task,
 )
+from ikabot.helpers.sessionStorage import get_session_data, init_storage, set_session_data
+from ikabot.web.session import Session
+
+
+class _RealStorageSession:
+    mail = "test@example.com"
+    username = "user"
+    mundo = "1"
+    servidor = "es"
+    logger = logging.getLogger("test_decorators")
+    padre = True
+
+    def getSessionData(self):
+        return get_session_data(self)
+
+    def setSessionData(self, sessionData, shared=False, keep_process_list=True):
+        set_session_data(self, sessionData, shared=shared, keep_process_list=keep_process_list)
+
+    def logout(self):
+        pass
+
+    updateProcessEntry = Session.updateProcessEntry
 
 
 class TestDecorators(unittest.TestCase):
@@ -102,3 +126,39 @@ class TestDecorators(unittest.TestCase):
 
         interrupted_feature(self.session, self.event, None, [])
         self.assertTrue(self.event.is_set())
+
+    @patch("ikabot.helpers.decorators.set_child_mode")
+    def test_config_saved_to_process_list(self, _mock_set_child_mode):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            with patch.dict(os.environ, {"HOME": tmp_dir, "USERPROFILE": tmp_dir}):
+                init_storage()
+                real_session = _RealStorageSession()
+                set_session_data(
+                    real_session,
+                    {
+                        "processList": [
+                            {
+                                "pid": os.getpid(),
+                                "action": "saved_cfg_feature",
+                                "date": 0,
+                                "status": "started",
+                            }
+                        ]
+                    },
+                    keep_process_list=False,
+                )
+
+                @task("saved_cfg_feature")
+                def saved_cfg_task(session, minutes, coords):
+                    pass
+
+                @configurator
+                def saved_cfg_feature(session, event, stdin_fd, predetermined_input):
+                    return {"session": session, "minutes": 20, "coords": (12, 34)}
+
+                saved_cfg_feature(real_session, self.event, None, [])
+                stored = real_session.getSessionData()["processList"][0]
+                self.assertEqual(
+                    stored["config"],
+                    {"minutes": 20, "coords": [12, 34]},
+                )

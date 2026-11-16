@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import re
 import sys
 import time
 import traceback
@@ -13,10 +14,74 @@ from ikabot.helpers.gui import enter
 from ikabot.helpers.pedirInfo import getIslandsIds
 from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.signals import setInfoSignal
+from ikabot.helpers.taskConfig import asBool, asId, asInt, requireNotifications
 from ikabot.helpers.varios import getDateTime, wait
 
-@task("searchForIslandSpaces")
-def do_it(session, islandList, time, fights):
+def checked_status(coords):
+    """Returns the status shown in the process list after a search
+    Parameters
+    ----------
+    coords : list[str]
+        "X:Y" of the islands searched
+
+    Returns
+    -------
+    status : str
+    """
+    return "Checked islands [{}] @ {}".format(",".join(coords), getDateTime()[-8:])
+
+
+def islandIdFromCoords(session, coords):
+    """Returns the id of the island at "X:Y"
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    coords : str
+
+    Returns
+    -------
+    island_id : str
+    """
+    x, y = coords.replace(" ", "").split(":")
+    html = session.get("view=island&xcoord={}&ycoord={}".format(x, y))
+    return getIsland(html)["id"]
+
+
+def prepare_searchForIslandSpaces(session, time, islandList=None, fights="n"):
+    """Checks the config of a searchForIslandSpaces task started from the CLI
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    time : int
+        minutes between two searches
+    islandList : list
+        island ids or "X:Y" coordinates, empty for all the islands with own cities
+    fights : bool or str
+
+    Returns
+    -------
+    config : dict
+    """
+    requireNotifications(session)
+    if islandList is None:
+        islandList = []
+    if not isinstance(islandList, (list, tuple)):
+        raise ValueError("islandList must be a list of island ids or \"X:Y\" coordinates, got {!r}".format(islandList))
+    island_ids = []
+    for island in islandList:
+        if isinstance(island, str) and re.fullmatch(r"\s*\d+\s*:\s*\d+\s*", island):
+            island_ids.append(str(islandIdFromCoords(session, island)))
+        else:
+            island_ids.append(asId(island, "islandList"))
+    return {
+        "time": asInt(time, "time", minimum=3),
+        "islandList": island_ids,
+        "fights": "y" if asBool(fights, "fights") else "n",
+    }
+
+
+@task("searchForIslandSpaces", prepare=prepare_searchForIslandSpaces)
+def do_it(session, time, islandList=None, fights="n"):
     """
     Parameters
     ----------
@@ -29,7 +94,7 @@ def do_it(session, islandList, time, fights):
     fights : str
         String that can either be y or n. Indicates whether or not to scan for fight activity on islands
     """
-    info = "\nI search for new spaces each hour\n"
+    info = "\nI search for new spaces every {} minutes\n".format(time)
     setInfoSignal(session, info)
 
     # this dict will contain all the cities from each island
@@ -38,13 +103,15 @@ def do_it(session, islandList, time, fights):
 
     while True:
         # this is done inside the loop because the user may colonize in a new island
-        if islandList != []:
+        if islandList:
             islandsIds = islandList
         else:
             islandsIds = getIslandsIds(session)
+        checked_coords = []
         for islandId in islandsIds:
             html = session.get(island_url + islandId)
             island = getIsland(html)
+            checked_coords.append("{}:{}".format(island["x"], island["y"]))
             # cities in the current island
             cities_now = [
                 city_space
@@ -130,9 +197,7 @@ def do_it(session, islandList, time, fights):
                 cities_before_per_island[islandId] = (
                     cities_now.copy()
                 )  # update cities_before_per_island for the current island
-        session.setStatus(
-            f'Checked islands {str([int(i) for i in islandsIds]).replace(" ","")} @ {getDateTime()[-8:]}'
-        )
+        session.setStatus(checked_status(checked_coords))
         wait(time * 60)
 
 @configurator

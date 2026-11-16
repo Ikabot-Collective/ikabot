@@ -11,6 +11,7 @@ from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.decorators import configurator, task
 from ikabot.helpers.signals import setInfoSignal
+from ikabot.helpers.taskConfig import asInt, findBuildingPosition, getCityById, requireOwnCity
 from ikabot.helpers.varios import *
 
 
@@ -195,13 +196,106 @@ def experiment_multi(session, cities):
             time.sleep(wait)
 
 
-@task("research")
-def do_it(session, mode, experiments=None, automatic=None, cities=None, info=""):
-    setInfoSignal(session, info)
-    if mode == "experiment":
-        experiment(session, experiments, automatic)
-    elif mode == "experiment_multi":
-        experiment_multi(session, cities)
+EXPERIMENT_CRYSTAL = 300000
+
+
+def ids_from_saved_config(experiments=None, cities=None):
+    """(cities_ids, qty) of a config saved by an older menu, which held the academy cities"""
+    if experiments:
+        return [experiments["cityID"]], experiments["qty"]
+    if cities:
+        return [city["cityID"] for city in cities], None
+    return None, None
+
+
+def academy_city(session, city_id):
+    """{"cityID", "cityName", "pos"} of a city with an academy, None when it has none"""
+    city = getCityById(session, city_id)
+    pos = findBuildingPosition(city, "academy")
+    if pos is None:
+        return None
+    return {"cityID": city["id"], "cityName": city["name"], "pos": pos}
+
+
+def prepare_research(session, cities_ids=None, qty=None, mode=None, experiments=None, automatic=None, cities=None, info=""):
+    """Checks the config of a research (experiments) task started from the CLI
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    cities_ids : list
+        cities whose academy does the experiments; None uses every city with an academy
+    qty : int or None
+        a number does that many experiments in the only city of cities_ids, every 4 hours, and
+        stops when the crystal runs out; None keeps doing them in every city, every 4 hours
+    mode, experiments, automatic, cities, info
+        a config saved by an older menu; turned into cities_ids and qty
+
+    Returns
+    -------
+    config : dict
+    """
+    if cities_ids is None and qty is None:
+        cities_ids, qty = ids_from_saved_config(experiments, cities)
+    if qty is not None:
+        qty = asInt(qty, "qty", minimum=1)
+    if cities_ids is not None and not isinstance(cities_ids, (list, tuple)):
+        cities_ids = [cities_ids]
+
+    if cities_ids is None:
+        if qty is not None:
+            raise ValueError("qty needs the city to do the experiments in, in cities_ids")
+        academies = find_academy_cities(session)
+        if not academies:
+            raise ValueError("none of your cities has an academy")
+        return {"cities_ids": [str(city["cityID"]) for city in academies], "qty": None}
+
+    cities_ids = list(dict.fromkeys(requireOwnCity(session, city_id, "cities_ids") for city_id in cities_ids))
+    if not cities_ids:
+        raise ValueError("cities_ids is empty; leave it out to use every city with an academy")
+    if qty is not None and len(cities_ids) != 1:
+        raise ValueError("qty works on one city, got {} in cities_ids".format(len(cities_ids)))
+    for city_id in cities_ids:
+        city = getCityById(session, city_id)
+        if findBuildingPosition(city, "academy") is None:
+            raise ValueError("cities_ids {} ({}) has no academy".format(city_id, city["name"]))
+        if qty is not None and int(city["availableResources"][3]) < EXPERIMENT_CRYSTAL:
+            raise ValueError(
+                "not enough crystal in {} for an experiment: {} of {}".format(
+                    city["name"],
+                    addThousandSeparator(int(city["availableResources"][3])),
+                    addThousandSeparator(EXPERIMENT_CRYSTAL),
+                )
+            )
+    return {"cities_ids": cities_ids, "qty": qty}
+
+
+@task("research", prepare=prepare_research)
+def do_it(session, cities_ids=None, qty=None, mode=None, experiments=None, automatic=None, cities=None, info=""):
+    """
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    cities_ids : list
+        cities whose academy does the experiments; None uses every city with an academy
+    qty : int or None
+        number of experiments in the only city of cities_ids; None keeps doing them in every city
+    mode, experiments, automatic, cities, info
+        a config saved by an older menu
+    """
+    if cities_ids is None and qty is None:
+        cities_ids, qty = ids_from_saved_config(experiments, cities)
+    if cities_ids is None:
+        academies = find_academy_cities(session)
+    else:
+        academies = [city for city in (academy_city(session, city_id) for city_id in cities_ids) if city]
+    names = ", ".join(city["cityName"] for city in academies)
+
+    if qty is not None:
+        setInfoSignal(session, f"Process: Experiments\n\nWill excecute {qty} times every 4h in {names}")
+        experiment(session, dict(academies[0], qty=qty), False)
+    else:
+        setInfoSignal(session, f"Process: Experiments (automatic)\n\nCities: {names}\nWill execute every 4h per city")
+        experiment_multi(session, academies)
 
 @configurator
 def research(session, event, stdin_fd, predetermined_input):
@@ -294,13 +388,10 @@ def research(session, event, stdin_fd, predetermined_input):
                 sendToBot(session, info)
                 return {
                     "session": session,
-                    "mode": "experiment_multi",
-                    "cities": selected_cities,
-                    "info": info
+                    "cities_ids": [c["cityID"] for c in selected_cities],
+                    "qty": None,
                 }
             else:
-                automatic = False
-                experiments = {}
                 found_academy = -1
 
                 while True:
@@ -332,17 +423,11 @@ def research(session, event, stdin_fd, predetermined_input):
                 print(f"How many experiments? Min=1, Max={max_experiments}")
                 choice = read(min=1, max=max_experiments)
 
-                experiments["cityID"] = city["id"]
-                experiments["cityName"] = city["name"]
-                experiments["pos"] = found_academy
-                experiments["qty"] = choice
-
                 info = f"Process: Experiments\n\nWill excecute {choice} times every 4h"
                 sendToBot(session, info)
+                # the task finds the academy again: the saved config only holds the city id
                 return {
                     "session": session,
-                    "mode": "experiment",
-                    "experiments": experiments,
-                    "automatic": automatic,
-                    "info": info
+                    "cities_ids": [city["id"]],
+                    "qty": choice,
                 }

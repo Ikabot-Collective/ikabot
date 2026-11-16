@@ -14,6 +14,7 @@ from ikabot.helpers.pedirInfo import chooseCity, getIdsOfCities
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import getDateTime, timeStringToSec, wait
 from ikabot.helpers.decorators import configurator, task
+from ikabot.helpers.taskConfig import asBool, requireOwnCity
 
 
 def is_collectable(row):
@@ -40,14 +41,14 @@ def collect_resource_favour(session, table, wine_city, earliest_wakeup_time):
     if is_collectable(passive1):
         taskId = re.search(r'taskId=([\S\s]*?)\\"', passive1).group(1)
         session.post(
-            f"action=CollectDailyTasksFavor&taskId={taskId}&ajax=1&backgroundView=city&currentCityId={wine_city['id']}&templateView=dailyTasks&actionRequest={actionRequest}&ajax=1"
+            f"action=CollectDailyTasksFavor&taskId={taskId}&ajax=1&backgroundView=city&currentCityId={wine_city}&templateView=dailyTasks&actionRequest={actionRequest}&ajax=1"
         )
         wait(1)
 
     if is_collectable(passive2):
         taskId = re.search(r'taskId=([\S\s]*?)\\"', passive2).group(1)
         session.post(
-            f"action=CollectDailyTasksFavor&taskId={taskId}&ajax=1&backgroundView=city&currentCityId={wine_city['id']}&templateView=dailyTasks&actionRequest={actionRequest}&ajax=1"
+            f"action=CollectDailyTasksFavor&taskId={taskId}&ajax=1&backgroundView=city&currentCityId={wine_city}&templateView=dailyTasks&actionRequest={actionRequest}&ajax=1"
         )
         wait(1)
     
@@ -62,48 +63,48 @@ def look(session, table, wine_city, earliest_wakeup_time):
         if "task_amount_28" in r:  # visit shop
             if is_collectable(r):
                 session.post(
-                    f"action=CollectDailyTasksFavor&taskId=28&ajax=1&backgroundView=city&currentCityId={wine_city['id']}&templateView=dailyTasks&actionRequest={actionRequest}&ajax=1"
+                    f"action=CollectDailyTasksFavor&taskId=28&ajax=1&backgroundView=city&currentCityId={wine_city}&templateView=dailyTasks&actionRequest={actionRequest}&ajax=1"
                 )
                 wait(1)
             else:
                 session.post(
-                    f"view=premium&linkType=2&backgroundView=city&currentCityId={wine_city['id']}&templateView=dailyTasks&actionRequest={actionRequest}&ajax=1"
+                    f"view=premium&linkType=2&backgroundView=city&currentCityId={wine_city}&templateView=dailyTasks&actionRequest={actionRequest}&ajax=1"
                 )
                 wait(1)
                 session.post(
-                    f"action=CollectDailyTasksFavor&taskId=28&ajax=1&backgroundView=city&currentCityId={wine_city['id']}&templateView=dailyTasks&actionRequest={actionRequest}&ajax=1"
+                    f"action=CollectDailyTasksFavor&taskId=28&ajax=1&backgroundView=city&currentCityId={wine_city}&templateView=dailyTasks&actionRequest={actionRequest}&ajax=1"
                 )
                 wait(1)
 
         if "task_amount_27" in r:  # open inventory
             if is_collectable(r):
                 session.post(
-                    f"action=CollectDailyTasksFavor&taskId=27&ajax=1&backgroundView=city&currentCityId={wine_city['id']}&templateView=dailyTasks&actionRequest={actionRequest}&ajax=1"
+                    f"action=CollectDailyTasksFavor&taskId=27&ajax=1&backgroundView=city&currentCityId={wine_city}&templateView=dailyTasks&actionRequest={actionRequest}&ajax=1"
                 )
                 wait(1)
             else:
                 session.post(
-                    f"view=inventory&backgroundView=city&currentCityId={wine_city['id']}&templateView=dailyTasks&actionRequest={actionRequest}&ajax=1"
+                    f"view=inventory&backgroundView=city&currentCityId={wine_city}&templateView=dailyTasks&actionRequest={actionRequest}&ajax=1"
                 )
                 wait(1)
                 session.post(
-                    f"action=CollectDailyTasksFavor&taskId=27&ajax=1&backgroundView=city&currentCityId={wine_city['id']}&templateView=dailyTasks&actionRequest={actionRequest}&ajax=1"
+                    f"action=CollectDailyTasksFavor&taskId=27&ajax=1&backgroundView=city&currentCityId={wine_city}&templateView=dailyTasks&actionRequest={actionRequest}&ajax=1"
                 )
                 wait(1)
 
         if "task_amount_26" in r:  # look at highscore
             if is_collectable(r):
                 session.post(
-                    f"action=CollectDailyTasksFavor&taskId=26&ajax=1&backgroundView=city&currentCityId={wine_city['id']}&templateView=dailyTasks&actionRequest={actionRequest}&ajax=1"
+                    f"action=CollectDailyTasksFavor&taskId=26&ajax=1&backgroundView=city&currentCityId={wine_city}&templateView=dailyTasks&actionRequest={actionRequest}&ajax=1"
                 )
                 wait(1)
             else:
                 session.post(
-                    f"view=highscore&showMe=1&backgroundView=city&currentCityId={wine_city['id']}&actionRequest={actionRequest}&ajax=1"
+                    f"view=highscore&showMe=1&backgroundView=city&currentCityId={wine_city}&actionRequest={actionRequest}&ajax=1"
                 )
                 wait(1)
                 session.post(
-                    f"action=CollectDailyTasksFavor&taskId=26&ajax=1&backgroundView=city&currentCityId={wine_city['id']}&templateView=dailyTasks&actionRequest={actionRequest}&ajax=1"
+                    f"action=CollectDailyTasksFavor&taskId=26&ajax=1&backgroundView=city&currentCityId={wine_city}&templateView=dailyTasks&actionRequest={actionRequest}&ajax=1"
                 )
                 wait(1)
     
@@ -126,7 +127,7 @@ def stay_online_30_mins(session, table, wine_city, earliest_wakeup_time):
         if "task_amount_23" in r:  # stay online for 30 mins
             if is_collectable(r):
                 session.post(
-                    f"action=CollectDailyTasksFavor&taskId=23&ajax=1&backgroundView=city&currentCityId={wine_city['id']}&templateView=dailyTasks&actionRequest={actionRequest}&ajax=1"
+                    f"action=CollectDailyTasksFavor&taskId=23&ajax=1&backgroundView=city&currentCityId={wine_city}&templateView=dailyTasks&actionRequest={actionRequest}&ajax=1"
                 )
                 wait(1)
             else:
@@ -142,18 +143,27 @@ def complete_tasks(session, table, wine_city, earliest_wakeup_time):
         if is_collectable(row):
             taskId = re.search(r'taskId=([\S\s]*?)\\"', row).group(1)
             session.post(
-                f"action=CollectDailyTasksFavor&taskId={taskId}&ajax=1&backgroundView=city&currentCityId={wine_city['id']}&templateView=dailyTasks&actionRequest={actionRequest}&ajax=1"
+                f"action=CollectDailyTasksFavor&taskId={taskId}&ajax=1&backgroundView=city&currentCityId={wine_city}&templateView=dailyTasks&actionRequest={actionRequest}&ajax=1"
             )
             wait(1)
     return earliest_wakeup_time
 
 
 TASK_FUNCTIONS = {
-    "Collect resource favour": collect_resource_favour,
-    "Look at hightscore/shop/inventory": look,
-    "Stay online for 30 mins": stay_online_30_mins,
-    "Complete 2/all tasks": complete_tasks,
+    "resource": collect_resource_favour,
+    "look": look,
+    "online": stay_online_30_mins,
+    "complete": complete_tasks,
 }
+# names shown in the menu, also accepted in a config (configs saved before the short keys)
+TASK_NAMES = {
+    "resource": "Collect resource favour",
+    "look": "Look at highscore/shop/inventory",
+    "online": "Stay online for 30 mins",
+    "complete": "Complete 2/all tasks",
+}
+OLD_TASK_NAMES = dict((name, key) for key, name in TASK_NAMES.items())
+OLD_TASK_NAMES["Look at hightscore/shop/inventory"] = "look"
 
 
 def cinema_seconds_left(html, feature, remaining_time_str):
@@ -169,18 +179,73 @@ def cinema_seconds_left(html, feature, remaining_time_str):
     return timeStringToSec(remaining_time_str)
 
 
-@task("loginDaily")
-def do_it(session, wine_city, wood_city, luxury_city, favour_tasks, collect_ambrosia):
+def prepare_loginDaily(session, wine_city, wood_city=None, luxury_city=None, favour_tasks=None, collect_ambrosia=False):
+    """Checks the config of a loginDaily task started from the CLI
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    wine_city : int or str
+        id of the city that gets the daily login bonus wine and where the favour tasks are done
+    wood_city : int or str
+        id of the city where the cinetheatre wood bonus is activated, None skips it
+    luxury_city : int or str
+        id of the city where the cinetheatre luxury good bonus is activated, None skips it
+    favour_tasks : list or str
+        keys of TASK_FUNCTIONS (the menu names are accepted too), or "all"
+    collect_ambrosia : bool
+
+    Returns
+    -------
+    config : dict
+    """
+
+    def city_id(value, name):
+        if isinstance(value, dict):  # a city saved by an older version of the menu
+            value = value.get("id")
+        return requireOwnCity(session, value, name)
+
+    if favour_tasks is None:
+        favour_tasks = []
+    elif isinstance(favour_tasks, str) and favour_tasks.strip().lower() == "all":
+        favour_tasks = list(TASK_FUNCTIONS)
+    if not isinstance(favour_tasks, (list, tuple)):
+        raise ValueError('favour_tasks must be a list of tasks or "all", got {!r}'.format(favour_tasks))
+    tasks = []
+    for name in favour_tasks:
+        key = OLD_TASK_NAMES.get(name, str(name).strip().lower())
+        if key not in TASK_FUNCTIONS:
+            raise ValueError(
+                "favour_tasks: unknown task {!r}, use {}".format(name, ", ".join(TASK_FUNCTIONS))
+            )
+        if key not in tasks:
+            tasks.append(key)
+
+    return {
+        "wine_city": city_id(wine_city, "wine_city"),
+        "wood_city": None if wood_city is None else city_id(wood_city, "wood_city"),
+        "luxury_city": None if luxury_city is None else city_id(luxury_city, "luxury_city"),
+        "favour_tasks": tasks,
+        "collect_ambrosia": asBool(collect_ambrosia, "collect_ambrosia"),
+    }
+
+
+@task("loginDaily", prepare=prepare_loginDaily)
+def do_it(session, wine_city, wood_city=None, luxury_city=None, favour_tasks=None, collect_ambrosia=False):
     """
     Parameters
     ----------
     session : ikabot.web.session.Session
-    wine_city : dict
-    wood_city : dict
-    luxury_city : dict
+    wine_city : str
+        city id
+    wood_city : str
+        city id, or None
+    luxury_city : str
+        city id, or None
     favour_tasks : list
+        keys of TASK_FUNCTIONS
     collect_ambrosia : bool
     """
+    favour_tasks = favour_tasks or []
     info = "\nI enter every day\n"
     setInfoSignal(session, info)
     message_sent = False
@@ -192,9 +257,9 @@ def do_it(session, wine_city, wood_city, luxury_city, favour_tasks, collect_ambr
             # never sleep a full day, so the daily bonus streak is not lost
             earliest_wakeup_time = 12 * 60 * 60
             # collect daily bonus wine
-            html = session.post(city_url + str(wine_city["id"]))
+            html = session.post(city_url + str(wine_city))
             url = "action=AvatarAction&function=giveDailyActivityBonus&dailyActivityBonusCitySelect={0}&startPageShown=1&detectedDevice=1&autoLogin=on&cityId={0}&activeTab=multiTab2&backgroundView=city&currentCityId={0}&actionRequest={1}&ajax=1".format(
-                wine_city["id"], actionRequest
+                wine_city, actionRequest
             )
             session.post(url)
 
@@ -217,9 +282,9 @@ def do_it(session, wine_city, wood_city, luxury_city, favour_tasks, collect_ambr
 
             # collect wood cultural bonus
             if wood_city:
-                html = session.post(city_url + str(wood_city["id"]))
+                html = session.post(city_url + str(wood_city))
                 html = session.post(
-                    f"view=cinema&visit=1&currentCityId={wood_city['id']}&backgroundView=city&actionRequest={actionRequest}&ajax=1"
+                    f"view=cinema&visit=1&currentCityId={wood_city}&backgroundView=city&actionRequest={actionRequest}&ajax=1"
                 )
                 features = (
                     html.split('id=\\"VideoRewards\\"')[1].split("ul>")[0].split("li>")
@@ -238,21 +303,21 @@ def do_it(session, wine_city, wood_city, luxury_city, favour_tasks, collect_ambr
                     assert videoId, "Could not find a match for videoId in html"
                     videoId = videoId.group(1)
                     session.post(
-                        f"view=noViewChange&action=AdVideoRewardAction&function=requestBonus&bonusId=51&videoId={str(videoId)}&backgroundView=city&currentCityId={wood_city['id']}&templateView=cinema&actionRequest={actionRequest}&ajax=1"
+                        f"view=noViewChange&action=AdVideoRewardAction&function=requestBonus&bonusId=51&videoId={str(videoId)}&backgroundView=city&currentCityId={wood_city}&templateView=cinema&actionRequest={actionRequest}&ajax=1"
                     )
                     session.setStatus("Waiting 55s to watch video for wood bonus")
                     wait(55)
                     session.post(
-                        f"view=noViewChange&action=AdVideoRewardAction&function=watchVideo&videoId={str(videoId)}&backgroundView=city&currentCityId={wood_city['id']}&templateView=cinema&actionRequest={actionRequest}&ajax=1"
+                        f"view=noViewChange&action=AdVideoRewardAction&function=watchVideo&videoId={str(videoId)}&backgroundView=city&currentCityId={wood_city}&templateView=cinema&actionRequest={actionRequest}&ajax=1"
                     )
 
             wait(1)
 
             # collect luxury good cultural bonus
             if luxury_city:
-                html = session.post(city_url + str(luxury_city["id"]))
+                html = session.post(city_url + str(luxury_city))
                 html = session.post(
-                    f"view=cinema&visit=1&currentCityId={luxury_city['id']}&backgroundView=city&actionRequest={actionRequest}&ajax=1"
+                    f"view=cinema&visit=1&currentCityId={luxury_city}&backgroundView=city&actionRequest={actionRequest}&ajax=1"
                 )
                 features = (
                     html.split('id=\\"VideoRewards\\"')[1].split("ul>")[0].split("li>")
@@ -271,12 +336,12 @@ def do_it(session, wine_city, wood_city, luxury_city, favour_tasks, collect_ambr
                     assert videoId, "Could not find a match for videoId in html"
                     videoId = videoId.group(1)
                     session.post(
-                        f"view=noViewChange&action=AdVideoRewardAction&function=requestBonus&bonusId=52&videoId={str(videoId)}&backgroundView=city&currentCityId={luxury_city['id']}&templateView=cinema&actionRequest={actionRequest}&ajax=1"
+                        f"view=noViewChange&action=AdVideoRewardAction&function=requestBonus&bonusId=52&videoId={str(videoId)}&backgroundView=city&currentCityId={luxury_city}&templateView=cinema&actionRequest={actionRequest}&ajax=1"
                     )
                     session.setStatus("Waiting 55s to watch video for luxury good bonus")
                     wait(55)
                     session.post(
-                        f"view=noViewChange&action=AdVideoRewardAction&function=watchVideo&videoId={str(videoId)}&backgroundView=city&currentCityId={luxury_city['id']}&templateView=cinema&actionRequest={actionRequest}&ajax=1"
+                        f"view=noViewChange&action=AdVideoRewardAction&function=watchVideo&videoId={str(videoId)}&backgroundView=city&currentCityId={luxury_city}&templateView=cinema&actionRequest={actionRequest}&ajax=1"
                     )
 
             wait(1)
@@ -288,9 +353,9 @@ def do_it(session, wine_city, wood_city, luxury_city, favour_tasks, collect_ambr
             if luxury_city:
                 favour_cinetheater_city = luxury_city
             if favour_cinetheater_city:
-                html = session.post(city_url + str(favour_cinetheater_city["id"]))
+                html = session.post(city_url + str(favour_cinetheater_city))
                 html = session.post(
-                    f"view=cinema&visit=1&currentCityId={favour_cinetheater_city['id']}&backgroundView=city&actionRequest={actionRequest}&ajax=1"
+                    f"view=cinema&visit=1&currentCityId={favour_cinetheater_city}&backgroundView=city&actionRequest={actionRequest}&ajax=1"
                 )
                 features = (
                     html.split('id=\\"VideoRewards\\"')[1].split("ul>")[0].split("li>")
@@ -309,21 +374,21 @@ def do_it(session, wine_city, wood_city, luxury_city, favour_tasks, collect_ambr
                     assert videoId, "Could not find a match for videoId in html"
                     videoId = videoId.group(1)
                     session.post(
-                        f"view=noViewChange&action=AdVideoRewardAction&function=requestBonus&bonusId=53&videoId={str(videoId)}&backgroundView=city&currentCityId={favour_cinetheater_city['id']}&templateView=cinema&actionRequest={actionRequest}&ajax=1"
+                        f"view=noViewChange&action=AdVideoRewardAction&function=requestBonus&bonusId=53&videoId={str(videoId)}&backgroundView=city&currentCityId={favour_cinetheater_city}&templateView=cinema&actionRequest={actionRequest}&ajax=1"
                     )
                     session.setStatus(
                         "Waiting 55s to watch video for favour cultural bonus"
                     )
                     wait(55)
                     session.post(
-                        f"view=noViewChange&action=AdVideoRewardAction&function=watchVideo&videoId={str(videoId)}&backgroundView=city&currentCityId={favour_cinetheater_city['id']}&templateView=cinema&actionRequest={actionRequest}&ajax=1"
+                        f"view=noViewChange&action=AdVideoRewardAction&function=watchVideo&videoId={str(videoId)}&backgroundView=city&currentCityId={favour_cinetheater_city}&templateView=cinema&actionRequest={actionRequest}&ajax=1"
                     )
 
             # collect Imaginación divina ambrosia video bonus
             if collect_ambrosia:
-                html = session.post(city_url + str(wine_city["id"]))
+                html = session.post(city_url + str(wine_city))
                 html = session.post(
-                    f"view=cinema&visit=1&currentCityId={wine_city['id']}&backgroundView=city&actionRequest={actionRequest}&ajax=1"
+                    f"view=cinema&visit=1&currentCityId={wine_city}&backgroundView=city&actionRequest={actionRequest}&ajax=1"
                 )
                 features = (
                     html.split('id=\\"VideoRewards\\"')[1].split("ul>")[0].split("li>")
@@ -346,12 +411,12 @@ def do_it(session, wine_city, wood_city, luxury_city, favour_tasks, collect_ambr
                     assert videoId, "Could not find a match for videoId in ambrosia html"
                     videoId = videoId.group(1)
                     session.post(
-                        f"view=noViewChange&action=AdVideoRewardAction&function=requestBonus&bonusId=54&videoId={str(videoId)}&backgroundView=city&currentCityId={wine_city['id']}&templateView=cinema&actionRequest={actionRequest}&ajax=1"
+                        f"view=noViewChange&action=AdVideoRewardAction&function=requestBonus&bonusId=54&videoId={str(videoId)}&backgroundView=city&currentCityId={wine_city}&templateView=cinema&actionRequest={actionRequest}&ajax=1"
                     )
                     session.setStatus("Waiting 55s to watch video for ambrosia bonus")
                     wait(55)
                     session.post(
-                        f"view=noViewChange&action=AdVideoRewardAction&function=watchVideo&videoId={str(videoId)}&backgroundView=city&currentCityId={wine_city['id']}&templateView=cinema&actionRequest={actionRequest}&ajax=1"
+                        f"view=noViewChange&action=AdVideoRewardAction&function=watchVideo&videoId={str(videoId)}&backgroundView=city&currentCityId={wine_city}&templateView=cinema&actionRequest={actionRequest}&ajax=1"
                     )
 
             # get waiting times for all three cinetheatre features.
@@ -359,9 +424,9 @@ def do_it(session, wine_city, wood_city, luxury_city, favour_tasks, collect_ambr
             wait(1)
 
             if wood_city or luxury_city or favour_cinetheater_city:
-                html = session.post(city_url + str(wine_city["id"]))
+                html = session.post(city_url + str(wine_city))
                 html = session.post(
-                    f"view=cinema&visit=1&currentCityId={wine_city['id']}&backgroundView=city&actionRequest={actionRequest}&ajax=1"
+                    f"view=cinema&visit=1&currentCityId={wine_city}&backgroundView=city&actionRequest={actionRequest}&ajax=1"
                 )
                 features = (
                     html.split('id=\\"VideoRewards\\"')[1].split("ul>")[0].split("li>")
@@ -379,9 +444,9 @@ def do_it(session, wine_city, wood_city, luxury_city, favour_tasks, collect_ambr
             for task_name in favour_tasks:
                 if task_name not in TASK_FUNCTIONS:
                     continue
-                html = session.post(city_url + str(wine_city["id"]))
+                html = session.post(city_url + str(wine_city))
                 html = session.post(
-                    f"view=dailyTasks&backgroundView=city&currentCityId={wine_city['id']}&actionRequest={actionRequest}&ajax=1"
+                    f"view=dailyTasks&backgroundView=city&currentCityId={wine_city}&actionRequest={actionRequest}&ajax=1"
                 )
                 # check if favour is full
                 current_match = re.search(r'"currentFavor":\s*(\d+)', html)
@@ -495,9 +560,9 @@ def loginDaily(session, event, stdin_fd, predetermined_input):
             print("Press [ENTER] or type in [Y] to confirm selection")
             for i, task_name in enumerate(TASK_FUNCTIONS.keys()):
                 if task_name in favour_tasks:
-                    print(i + 1, ") ", bcolors.BLUE, task_name, bcolors.ENDC)
+                    print(i + 1, ") ", bcolors.BLUE, TASK_NAMES[task_name], bcolors.ENDC)
                 else:
-                    print(i + 1, ") ", bcolors.STONE, task_name, bcolors.ENDC)
+                    print(i + 1, ") ", bcolors.STONE, TASK_NAMES[task_name], bcolors.ENDC)
             choice = read(
                 min=1,
                 max=len(TASK_FUNCTIONS),
@@ -522,9 +587,9 @@ def loginDaily(session, event, stdin_fd, predetermined_input):
 
     return {
         "session": session,
-        "wine_city": wine_city,
-        "wood_city": wood_city,
-        "luxury_city": luxury_city,
+        "wine_city": wine_city["id"],
+        "wood_city": wood_city["id"] if wood_city else None,
+        "luxury_city": luxury_city["id"] if luxury_city else None,
         "favour_tasks": favour_tasks,
         "collect_ambrosia": collect_ambrosia,
     }
