@@ -16,7 +16,7 @@ import pytest
 
 from ikabot.helpers import piratesDecaptchaPure as P
 
-IMG_DIR = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, "api", "img")
+IMG_DIR = os.path.join(os.path.dirname(__file__), "img")
 
 # (C_in, C_out, H, W) for every 3x3 convolution that takes the Winograd path.
 # rb4 has H=6, which is not a multiple of 4, so it exercises the ceil-tiling

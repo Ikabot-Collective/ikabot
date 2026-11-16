@@ -141,6 +141,7 @@ class TestWarmer(unittest.TestCase):
         cls.folder = tempfile.TemporaryDirectory()
         cert, key = make_cert(cls.folder.name)
         context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        context.minimum_version = ssl.TLSVersion.TLSv1_2
         context.load_cert_chain(cert, key)
         cls.server = CountingServer(("127.0.0.1", 0), Handler)
         cls.server.socket = context.wrap_socket(cls.server.socket, server_side=True)
