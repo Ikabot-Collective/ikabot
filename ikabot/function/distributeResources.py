@@ -13,22 +13,141 @@ from ikabot.helpers.planRoutes import executeRoutes
 from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.resources import *
 from ikabot.helpers.signals import setInfoSignal
-from ikabot.helpers.varios import addThousandSeparator
+from ikabot.helpers.taskConfig import asBool, requireOwnCity
+from ikabot.helpers.varios import addThousandSeparator, getDateTime
+from ikabot.function.sendResources import RESOURCE_KEYS
 
 
-@task("distributeResources")
-def do_it(session, routes, useFreighters, resource):
+MODES = ("even", "producers")
+
+
+def plan_routes(session, resource_type, mode, cities_ids):
+    """The shipments that distribute a resource among some of the user's cities
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    resource_type : int
+        0 to 4 (wood, wine, marble, crystal, sulfur)
+    mode : str
+        "even": the same amount in every city; "producers": from the cities that
+        produce the resource to the ones that do not
+    cities_ids : list[str]
+
+    Returns
+    -------
+    routes : list
+        as executeRoutes takes them; ValueError when there is nothing to send
+    """
+    _, cities = getIdsOfCities(session)
+    if mode == "even":
+        routes = distribute_evenly(session, resource_type, cities_ids, cities)
+    else:
+        routes = distribute_unevenly(session, resource_type, cities_ids, cities)
+    if not routes:
+        raise ValueError("there is nothing to distribute: the cities already have about the same {}, or their ports are blockaded".format(
+            RESOURCE_KEYS[resource_type]))
+    return routes
+
+
+def prepare_distributeResources(session, resource, mode="even", cities_ids=None, useFreighters=False, routes=None):
+    """Checks the config of a distributeResources task started from the CLI
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    resource : str
+        wood, wine, marble, crystal or sulfur
+    mode : str
+        "even" or "producers"
+    cities_ids : list or None
+        the cities taking part; None is all of them
+    useFreighters : bool
+    routes : list
+        an older menu saved the shipments instead of what to distribute
+
+    Returns
+    -------
+    config : dict
+    """
+    if routes is not None:
+        raise ValueError(
+            "this config was saved by an older menu and holds the shipments calculated back then: "
+            'start the task again with "resource", "mode" and "cities_ids"'
+        )
+    name = str(resource).strip().lower()
+    if name not in RESOURCE_KEYS:
+        raise ValueError("resource must be one of {}, got {!r}".format(", ".join(RESOURCE_KEYS), resource))
+    resource_type = RESOURCE_KEYS.index(name)
+    mode = str(mode).strip().lower()
+    if mode not in MODES:
+        raise ValueError('mode must be "even" (the same amount in every city) or "producers" '
+                         "(from the cities that produce it to the ones that do not), got {!r}".format(mode))
+    if mode == "producers" and resource_type == 0:
+        raise ValueError('every city produces wood: use mode "even"')
+
+    own_ids, cities = getIdsOfCities(session)
+    if cities_ids is None:
+        ids = list(own_ids)
+    else:
+        if not isinstance(cities_ids, (list, tuple)):
+            raise ValueError("cities_ids must be a list of city ids, got {!r}".format(cities_ids))
+        ids = []
+        for i, city_id in enumerate(cities_ids):
+            city_id = requireOwnCity(session, city_id, "cities_ids[{}]".format(i))
+            if city_id not in ids:
+                ids.append(city_id)
+    if len(ids) < 2:
+        raise ValueError("cities_ids needs at least 2 cities, got {}".format(len(ids)))
+    if mode == "producers":
+        producers = [i for i in ids if int(cities[i]["tradegood"]) == resource_type]
+        if not producers:
+            raise ValueError("none of the cities produces {}".format(name))
+        if len(producers) == len(ids):
+            raise ValueError("every city produces {}: there is nowhere to send it".format(name))
+
+    plan_routes(session, resource_type, mode, ids)
+    return {
+        "resource": name,
+        "mode": mode,
+        "cities_ids": None if cities_ids is None else ids,
+        "useFreighters": asBool(useFreighters, "useFreighters"),
+    }
+
+
+@task("distributeResources", prepare=prepare_distributeResources)
+def do_it(session, resource, mode="even", cities_ids=None, useFreighters=False, routes=None):
     """
     Parameters
     ----------
     session : ikabot.web.session.Session
-    routes : list
+    resource : str
+        wood, wine, marble, crystal or sulfur
+    mode : str
+        "even" or "producers"
+    cities_ids : list or None
+        None is all the cities
     useFreighters : bool
-    resource : int
+    routes : list
+        the shipments, from a task started by an older menu
     """
-    info = "\nDistribute {}\n".format(materials_names[resource])
-    setInfoSignal(session, info)
+    if routes is not None:
+        # started by an older menu: resource is 0 to 4 and the shipments are ready
+        setInfoSignal(session, "\nDistribute {}\n".format(materials_names[resource]))
+        executeRoutes(session, routes, useFreighters)
+        return
+
+    resource_type = RESOURCE_KEYS.index(resource)
+    setInfoSignal(session, "\nDistribute {}\n".format(materials_names[resource_type]))
+    ids = cities_ids if cities_ids is not None else getIdsOfCities(session)[0]
+    # the amounts are those of now, not those of when the task was saved
+    try:
+        routes = plan_routes(session, resource_type, mode, [str(i) for i in ids])
+    except ValueError as e:
+        msg = "Distribute {}: {}".format(resource, e)
+        session.setStatus(msg)
+        sendToBot(session, msg)
+        return
     executeRoutes(session, routes, useFreighters)
+    session.setStatus("Distributed {} in {} shipments @{}".format(resource, len(routes), getDateTime()))
 
 
 @configurator
@@ -74,12 +193,12 @@ def distributeResources(session, event, stdin_fd, predetermined_input):
         distribution_msg = 'Select the cities to participate in the distribution:'
         cities_ids, cities = ignoreCities(session, msg=distribution_msg)
 
-        if evenly:
-            routes = distribute_evenly(session, resource, cities_ids, cities)
-        else:
-            routes = distribute_unevenly(session, resource, cities_ids, cities)
-
-        if routes is None:
+        mode = "even" if evenly else "producers"
+        try:
+            routes = plan_routes(session, resource, mode, cities_ids)
+        except ValueError as e:
+            print("\n{}.".format(str(e).capitalize()))
+            enter()
             return None
 
         banner()
@@ -102,11 +221,13 @@ def distributeResources(session, event, stdin_fd, predetermined_input):
     except KeyboardInterrupt:
         return None
 
+    # the task works out the shipments again when it starts: the config only holds what to distribute
     return {
         "session": session,
-        "routes": routes,
+        "resource": RESOURCE_KEYS[resource],
+        "mode": mode,
+        "cities_ids": cities_ids,
         "useFreighters": useFreighters,
-        "resource": resource,
     }
 
 
@@ -283,13 +404,9 @@ def distribute_unevenly(session, resource_type, cities_ids, cities):
                 destination_cities[destination_city_id] = city
 
     if total_available_resources_from_all_cities <= 0:
-        print("\nThere are no resources to send.")
-        enter()
-        return None
+        raise ValueError("the cities that produce {} have none to send".format(RESOURCE_KEYS[resource_type]))
     if len(destination_cities) == 0:
-        print("\nThere is no space available to send resources.")
-        enter()
-        return None
+        raise ValueError("the cities that do not produce {} have no space for it".format(RESOURCE_KEYS[resource_type]))
 
     remaining_resources_to_be_sent_to_each_city = (
         total_available_resources_from_all_cities // len(destination_cities)

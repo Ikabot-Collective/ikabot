@@ -100,7 +100,8 @@ def send_upgrade_request(session, city_id, position, unit_id, upgrade_type, acti
         session.setStatus(f"Failed to upgrade {unit_id} ({upgrade_type})")
         return False, "exception"
 
-def wait_for_upgrade_completion(session, city_id, position, tab):
+def wait_for_upgrade_completion(session, city_id, position, tab, label=None):
+    prefix = "{}: ".format(label) if label else ""
     first_check = True
     logged_duration = False
     while True:
@@ -121,7 +122,7 @@ def wait_for_upgrade_completion(session, city_id, position, tab):
                     hours = mins // 60
                     if not logged_duration:
                         logged_duration = True
-                    session.setStatus(f"Workshop upgrade in progress (~{mins}m)...")
+                    session.setStatus(f"{prefix}Workshop upgrade in progress (~{mins}m)...")
                     time.sleep(min(300, seconds_left))
                     continue
                 # Check for unit/ship upgrade in progress
@@ -133,7 +134,7 @@ def wait_for_upgrade_completion(session, city_id, position, tab):
                     hours = mins // 60
                     if not logged_duration:
                         logged_duration = True
-                    session.setStatus(f"Upgrade in progress (~{mins}m)...")
+                    session.setStatus(f"{prefix}Upgrade in progress (~{mins}m)...")
                     time.sleep(min(300, seconds_left))
                     continue
         except Exception:
@@ -162,42 +163,205 @@ def wait_for_upgrade_start(session, city_id, position, tab):
         attempts += 1
 
 from ikabot.helpers.decorators import configurator, task
+from ikabot.helpers.taskConfig import asId, asInt, getCityById, requireOwnCity
+
+TABS = ("tabUnits", "tabShips")
+MAX_UPGRADE_LEVEL = 25
 
 
-def run_city_upgrades(session, city_id, city_name, position, tab, tasks):
-    while tasks:
-        wait_for_upgrade_completion(session, city_id, position, tab)
+def workshop_tab_data(session, city_id, position, tab):
+    """The workshop tab's template data ("completeData", "unitDetails", "inProgress"), or None"""
+    html = session.get(city_url + str(city_id))
+    response = getWorkshopTab(session, city_id, position, getActionRequestFromHTML(html), tab)
+    try:
+        data = json.loads(response, strict=False)
+    except Exception:
+        return None
+    return next((b[1] for b in data if isinstance(b, list) and b[0] == "updateTemplateData"), None)
+
+
+def find_workshop(session, city_id):
+    """The city and its workshop (a "position" entry, with "position" and "level"), or None"""
+    city = getCityById(session, city_id)
+    workshop = next((b for b in city["position"] if b.get("building") == "workshop"), None)
+    return city, workshop
+
+
+def workshop_upgrades(session, city_id, position, tabs=TABS):
+    """What the workshop can upgrade, from the game
+    Returns
+    -------
+    upgrades : dict
+        {unit id: {"tab", "name", "types": {upgrade type: {"level", "desc"}}}}
+    """
+    upgrades = {}
+    for tab in tabs:
+        data = workshop_tab_data(session, city_id, position, tab) or {}
+        names = data.get("unitDetails", {})
+        for unit_id, types in data.get("completeData", {}).items():
+            upgrades[str(unit_id)] = {
+                "tab": tab,
+                "name": names.get(str(unit_id), {}).get("unitName", "Unit {}".format(unit_id)),
+                "types": {
+                    upgrade_type: {
+                        "level": int(upgrade.get("currentLevel", {}).get("upgradeLevel", 0)),
+                        "desc": upgrade.get("upgradeTypeDesc", upgrade_type),
+                    }
+                    for upgrade_type, upgrade in types.items()
+                    if isinstance(upgrade, dict)
+                },
+            }
+    return upgrades
+
+
+def job_from_saved(job):
+    """A job as {"city_id", "upgrades": [{"unitId", "upgradeType", "target"}]}; an older
+    menu saved every single level to upgrade in "tasks", with the city's name and workshop"""
+    if not isinstance(job, dict) or "tasks" not in job:
+        return job
+    targets = {}
+    for step in job["tasks"]:
+        key = (str(step["unitId"]), step["upgradeType"])
+        targets[key] = max(targets.get(key, 0), int(step["to"]))
+    return {
+        "city_id": job["city_id"],
+        "upgrades": [{"unitId": unit_id, "upgradeType": upgrade_type, "target": target}
+                     for (unit_id, upgrade_type), target in targets.items()],
+    }
+
+
+def prepare_UpgradeUnits(session, jobs):
+    """Checks the config of an UpgradeUnits task started from the CLI
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    jobs : list
+        [{"city_id": city id, "upgrades": [{"unitId": unit id, "upgradeType": "offensive" or
+        "defensive", "target": level}, ...]}, ...]
+
+    Returns
+    -------
+    config : dict
+    """
+    usage = '{"city_id": ..., "upgrades": [{"unitId": ..., "upgradeType": "offensive", "target": ...}]}'
+    if not isinstance(jobs, (list, tuple)) or not jobs:
+        raise ValueError("jobs must be a list of {}, got {!r}".format(usage, jobs))
+    checked = []
+    cities_seen = {}
+    pending = False
+    for i, job in enumerate(jobs):
+        name = "jobs[{}]".format(i)
+        job = job_from_saved(job)
+        if not isinstance(job, dict):
+            raise ValueError("{} must be {}, got {!r}".format(name, usage, job))
+        city_id = requireOwnCity(session, job.get("city_id"), name + ".city_id")
+        if city_id in cities_seen:
+            raise ValueError("{}.city_id {} is already in jobs[{}]".format(name, city_id, cities_seen[city_id]))
+        cities_seen[city_id] = i
+        upgrades = job.get("upgrades")
+        if not isinstance(upgrades, (list, tuple)) or not upgrades:
+            raise ValueError(
+                '{}.upgrades must be a list of {{"unitId": ..., "upgradeType": "offensive", "target": ...}}, got {!r}'.format(name, upgrades)
+            )
+        city, workshop = find_workshop(session, city_id)
+        city_name = city["name"]
+        if workshop is None:
+            raise ValueError("{}.city_id {}: {} has no workshop".format(name, city_id, city_name))
+        max_level = min(MAX_UPGRADE_LEVEL, int(workshop.get("level") or 0))
+        available = workshop_upgrades(session, city_id, workshop["position"])
+
+        checked_upgrades = []
+        for j, upgrade in enumerate(upgrades):
+            up_name = "{}.upgrades[{}]".format(name, j)
+            if not isinstance(upgrade, dict):
+                raise ValueError('{} must be {{"unitId": ..., "upgradeType": ..., "target": ...}}, got {!r}'.format(up_name, upgrade))
+            unit_id = asId(upgrade.get("unitId"), up_name + ".unitId")
+            if unit_id not in available:
+                units = ", ".join("{} = {}".format(uid, unit["name"]) for uid, unit in available.items())
+                raise ValueError("{}.unitId {} cannot be upgraded in the workshop of {}. Units: {}".format(up_name, unit_id, city_name, units))
+            unit = available[unit_id]
+            upgrade_type = str(upgrade.get("upgradeType", "")).strip().lower()
+            if upgrade_type not in unit["types"]:
+                raise ValueError("{}.upgradeType must be {}, got {!r}".format(
+                    up_name, " or ".join(unit["types"]), upgrade.get("upgradeType")))
+            target = asInt(upgrade.get("target"), up_name + ".target", minimum=1)
+            if target > max_level:
+                raise ValueError("{}.target {} is above what the workshop of {} allows: {} (workshop level {}, at most {})".format(
+                    up_name, target, city_name, max_level, workshop.get("level"), MAX_UPGRADE_LEVEL))
+            if unit["types"][upgrade_type]["level"] < target:
+                pending = True
+            checked_upgrades.append({"unitId": unit_id, "upgradeType": upgrade_type, "target": target})
+        checked.append({"city_id": city_id, "upgrades": checked_upgrades})
+
+    if not pending:
+        raise ValueError("every upgrade is already at its target level")
+    return {"jobs": checked}
+
+
+def run_city_upgrades(session, city_id, upgrades):
+    """Takes each upgrade of one city's workshop to its target level, one level at a time"""
+    city, workshop = find_workshop(session, city_id)
+    city_name = city["name"]
+    if workshop is None:
+        session.setStatus("{}: no workshop".format(city_name))
+        sendToBot(session, "Upgrade aborted in city {}: it has no workshop.".format(city_name))
+        return
+    position = workshop["position"]
+    available = workshop_upgrades(session, city_id, position)
+    # the workshop does one upgrade at a time: wait on every tab this city uses
+    tabs = sorted({available[str(u["unitId"])]["tab"] for u in upgrades if str(u["unitId"]) in available})
+
+    pending = list(upgrades)
+    while pending:
+        upgrade = pending[0]
+        unit_id, upgrade_type, target = str(upgrade["unitId"]), upgrade["upgradeType"], int(upgrade["target"])
+        if unit_id not in available or upgrade_type not in available[unit_id]["types"]:
+            session.setStatus("{}: unit {} cannot be upgraded".format(city_name, unit_id))
+            sendToBot(session, "Upgrade aborted in city {}: the workshop cannot upgrade unit {} ({}).".format(city_name, unit_id, upgrade_type))
+            return
+        tab = available[unit_id]["tab"]
+        for t in tabs:
+            wait_for_upgrade_completion(session, city_id, position, t, label=city_name)
+
+        # the level is read from the game each time, so a relaunched task goes on where it was
+        available.update(workshop_upgrades(session, city_id, position, tabs=(tab,)))
+        unit = available[unit_id]
+        level = unit["types"][upgrade_type]["level"]
+        if level >= target:
+            pending.pop(0)
+            continue
+
         html = session.get(city_url + str(city_id))
         action_request = getActionRequestFromHTML(html)
-
-        task = tasks.pop(0)
-
-        from_lvl = task.get('from', '?')
-        to_lvl = task.get('to', '?')
-        session.setStatus(f"Upgrading {task['unit']} ({task['type']}) {from_lvl}→{to_lvl}")
-        success, error = send_upgrade_request(session, city_id, position, task['unitId'], task['upgradeType'], action_request, tab)
+        desc = unit["types"][upgrade_type]["desc"]
+        session.setStatus("{}: upgrading {} ({}) {}→{}, target {}".format(city_name, unit["name"], desc, level, level + 1, target))
+        success, error = send_upgrade_request(session, city_id, position, unit_id, upgrade_type, action_request, tab)
         if not success:
-
             if error in ("insufficient_resources", "insufficient_workshop_level", "feedback"):
-                session.setStatus(f"Upgrade aborted: {error}")
-                city_name_str = city_name if isinstance(city_name, str) else str(city_name)
+                session.setStatus("{}: upgrade aborted: {}".format(city_name, error))
                 try:
-                    sendToBot(session, f"Upgrade aborted in city {city_name_str}: {error} for {task['unit']} ({task['type']}).")
+                    sendToBot(session, f"Upgrade aborted in city {city_name}: {error} for {unit['name']} ({desc}).")
                 except Exception:
                     session.setStatus("Failed to send Telegram notification")
                 return
-
-            tasks.insert(0, task)
             time.sleep(60)
         else:
-
             wait_for_upgrade_start(session, city_id, position, tab)
 
-    session.setStatus("All workshop upgrades completed")
+    session.setStatus("{}: all workshop upgrades completed @{}".format(city_name, getDateTime()))
 
 
-@task("UpgradeUnits")
+@task("UpgradeUnits", prepare=prepare_UpgradeUnits)
 def execute_sequential_upgrades(session, jobs):
+    """
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    jobs : list
+        [{"city_id", "upgrades": [{"unitId", "upgradeType", "target"}]}]; the task reads
+        the workshop and the current levels from the game
+    """
+    jobs = [job_from_saved(job) for job in jobs]
     plural = "city" if len(jobs) == 1 else "cities"
     info = f"Workshop upgrade: {len(jobs)} {plural} queued"
     setInfoSignal(session, info)
@@ -205,7 +369,7 @@ def execute_sequential_upgrades(session, jobs):
     for job in jobs:
         t = threading.Thread(
             target=run_city_upgrades,
-            args=(session, job["city_id"], job["city_name"], job["position"], job["tab"], job["tasks"]),
+            args=(session, job["city_id"], job["upgrades"]),
         )
         t.start()
         threads.append(t)
@@ -418,6 +582,7 @@ def run_workshop_upgrade_interface(session, city_id, city_name, position, action
             new_task['effect_to'] = str(int(base_task.get('effect_from', 0)) + effect_step * (n + 1))
             queued_tasks.append(new_task)
 
+    base_tasks = selected_tasks
     selected_tasks = queued_tasks
 
     if not selected_tasks:
@@ -439,10 +604,12 @@ def run_workshop_upgrade_interface(session, city_id, city_name, position, action
         enter()
         return None
 
+    # the task reads the workshop and the current levels again: the config only holds the targets
     return {
         "city_id": city_id,
-        "city_name": city_name,
-        "position": position,
-        "tab": filter_type,
-        "tasks": selected_tasks
+        "upgrades": [
+            {"unitId": str(task["unitId"]), "upgradeType": task["upgradeType"], "target": int(task["from"]) + upgrade_levels[idx]}
+            for idx, task in enumerate(base_tasks)
+            if upgrade_levels.get(idx, 0) > 0
+        ],
     }

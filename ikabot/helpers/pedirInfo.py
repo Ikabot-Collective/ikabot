@@ -276,6 +276,10 @@ def getIdsOfCities(session, all=False):
         cities_cache = cities_cache.replace("\\", "")
         cities_cache = cities_cache.replace("city_", "")
         cities_cache = json.loads(cities_cache, strict=False)
+        # removing the backslashes above leaves "Nu00e9stor" where the game sent "Néstor"
+        for city in cities_cache.values():
+            if isinstance(city, dict) and isinstance(city.get("name"), str):
+                city["name"] = decodeUnicodeEscape(city["name"])
 
         ids_cache = [city_id for city_id in cities_cache]
         ids_cache = sorted(ids_cache)

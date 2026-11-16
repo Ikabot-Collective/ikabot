@@ -13,6 +13,7 @@ from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.decorators import configurator, task
 from ikabot.helpers.signals import setInfoSignal
+from ikabot.helpers.taskConfig import asInt
 from ikabot.helpers.varios import *
 
 MAX_WONDER_ACTIVATION_LEVEL = 5
@@ -29,6 +30,20 @@ WONDER_SHORTCUTS = {
     "7": "p",  # Poseidon
     "8": "c",  # Colossus
 }
+
+# the wonder types by their god's name, for configs
+WONDER_NAMES = {
+    "1": "hephaistos",
+    "2": "hades",
+    "3": "demeter",
+    "4": "athene",
+    "5": "hermes",
+    "6": "ares",
+    "7": "poseidon",
+    "8": "colossus",
+}
+WONDER_TYPES = {name: number for number, name in WONDER_NAMES.items()}
+WONDER_TYPES["athena"] = "4"
 
 
 def wonder_letters(name):
@@ -354,16 +369,110 @@ def refresh_best_city(session, island):
         island["available_in"] = best["available_in"]
 
 
-@task("activateMiracle")
-def do_it(session, island, iterations):
+def wonder_type(value):
+    """The wonder type ("1" to "8") from its number or its god's name
+    Parameters
+    ----------
+    value : int or str
+
+    Returns
+    -------
+    wonder : str
+    """
+    text = "" if value is None or isinstance(value, bool) else str(value).strip()
+    if text.isdigit() and str(int(text)) in WONDER_NAMES:
+        return str(int(text))
+    name = "".join(wonder_letters(text))
+    if name in WONDER_TYPES:
+        return WONDER_TYPES[name]
+    raise ValueError(
+        "wonder must be a number from 1 to 8 or a god's name ({}), got {!r}".format(
+            ", ".join(WONDER_NAMES.values()), value
+        )
+    )
+
+
+def find_wonder(session, wonder):
+    """The best island (highest wonder level) of this wonder type among the islands
+    where the user has a temple, as returned by obtainMiraclesAvailable
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    wonder : str
+        the wonder type, "1" to "8"
+
+    Returns
+    -------
+    island : dict
+    """
+    islands = obtainMiraclesAvailable(session)
+    island = next((isl for isl in islands if str(isl["wonder"]) == wonder), None)
+    if island is None:
+        yours = ", ".join(
+            "{} = {} (level {})".format(
+                WONDER_NAMES.get(str(isl["wonder"]), isl["wonder"]), isl["wonderName"], isl["wonderActivationLevel"]
+            )
+            for isl in islands
+        )
+        raise ValueError(
+            "none of your cities with a temple is on an island with the {} wonder. {}".format(
+                WONDER_NAMES[wonder], "Your wonders: " + yours if yours else "None of your cities has a temple"
+            )
+        )
+    return island
+
+
+def prepare_activateMiracle(session, wonder=None, iterations=1, island=None):
+    """Checks the config of an activateMiracle task started from the CLI
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    wonder : int or str
+        the wonder type, 1 to 8, or its god's name (e.g. "hermes")
+    iterations : int
+        how many times to activate it, each time as soon as it is available
+    island : dict
+        an older menu saved the whole island instead of ``wonder``
+
+    Returns
+    -------
+    config : dict
+    """
+    if wonder is None and isinstance(island, dict):
+        wonder = island.get("wonder")
+    if wonder is None:
+        raise ValueError(
+            "wonder is needed: a number from 1 to 8 or a god's name ({})".format(", ".join(WONDER_NAMES.values()))
+        )
+    wonder = wonder_type(wonder)
+    iterations = asInt(iterations, "iterations", minimum=1)
+    find_wonder(session, wonder)
+    return {"wonder": wonder, "iterations": iterations}
+
+
+@task("activateMiracle", prepare=prepare_activateMiracle)
+def do_it(session, wonder=None, iterations=1, island=None):
     """
     Parameters
     ----------
     session : ikabot.web.session.Session
-    island : dict
+    wonder : str
+        the wonder type, "1" to "8"; the task looks for the island with its highest level
     iterations : int
+    island : dict
+        an older menu saved the whole island instead of ``wonder``
     """
-    info = "\nI activate the miracle {} {:d} times\n".format(
+    if wonder is None:
+        wonder = island["wonder"]
+    try:
+        island = find_wonder(session, wonder_type(wonder))
+    except ValueError as e:
+        msg = "The miracle was not activated: {}".format(e)
+        session.setStatus(msg)
+        sendToBot(session, msg)
+        return
+
+    info ="\nI activate the miracle {} {:d} times\n".format(
         island["wonderName"], iterations
     )
     setInfoSignal(session, info)
@@ -391,6 +500,8 @@ def do_it(session, island, iterations):
             island["wonderName"], island["wonderActivationLevel"], island["ciudad"]["name"]
         )
         sendToBotDebug(session, msg, debugON_activateMiracle)
+
+
 @configurator
 def activateMiracle(session, event, stdin_fd, predetermined_input):
     """
@@ -519,5 +630,6 @@ def activateMiracle(session, event, stdin_fd, predetermined_input):
                     banner()
                     continue
             break
-    return {"session": session, "island": island, "iterations": iterations}
+    # the task looks for the island again: the saved config only holds the wonder type
+    return {"session": session, "wonder": str(island["wonder"]), "iterations": iterations}
 

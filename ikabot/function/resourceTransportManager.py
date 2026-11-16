@@ -18,6 +18,8 @@ from ikabot.helpers.decorators import configurator, task
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.naval import getAvailableShips, getAvailableFreighters
 from ikabot.helpers.varios import addThousandSeparator, getDateTime
+from ikabot.helpers.taskConfig import asBool, asId, asInt, requireOwnCity
+from ikabot.function.sendResources import RESOURCE_KEYS, get_island
 
 
 def print_module_banner(page_title=None):
@@ -199,13 +201,179 @@ def readResourceAmount(resource_name):
             print("  Please enter a number, 0, leave blank, or press ' to exit")
 
 
-@task("resourceTransportManager")
-def do_it_unified(session, mode, info="", origin_cities=None, destination_city=None, island=None, interval_hours=None, resource_config=None, useFreighters=None, send_mode=None, telegram_enabled=None, notify_on_start=None, origin_city=None, destination_cities=None):
-    setInfoSignal(session, info)
+MODES = ("consolidate", "distribute")
+SEND_MODES = {"keep": 1, "send": 2}
+NOTIFY = ("none", "start", "all")
+
+
+def city_id_from_saved(value):
+    """An older menu saved whole cities: keep their id"""
+    return value["id"] if isinstance(value, dict) else value
+
+
+def amounts_config(value, name, ignore_allowed):
+    """The 5 resource amounts as a list; ``None`` means the resource is left out"""
+    if isinstance(value, dict):
+        unknown = [key for key in value if key not in RESOURCE_KEYS]
+        if unknown:
+            raise ValueError("{} has unknown resources {}, use {}".format(name, unknown, ", ".join(RESOURCE_KEYS)))
+        value = [value.get(key) for key in RESOURCE_KEYS]
+    if not isinstance(value, (list, tuple)) or len(value) != len(RESOURCE_KEYS):
+        raise ValueError(
+            '{} must be 5 amounts (wood, wine, marble, crystal, sulfur) or an object like {{"wood": 5000}}, got {!r}'.format(name, value)
+        )
+    amounts = []
+    for key, amount in zip(RESOURCE_KEYS, value):
+        if amount is None:
+            amounts.append(None if ignore_allowed else 0)
+        else:
+            amounts.append(asInt(amount, "{}.{}".format(name, key), minimum=0))
+    return amounts
+
+
+def notify_from_saved(notify, telegram_enabled, notify_on_start):
+    """An older menu saved two flags: telegram_enabled (every shipment) and notify_on_start"""
+    if notify is not None:
+        return notify
+    if telegram_enabled:
+        return "all"
+    if notify_on_start:
+        return "start"
+    return "none"
+
+
+def prepare_resourceTransportManager(
+    session, mode, origin_cities=None, destination_city=None, island=None, interval_hours=0, resource_config=None,
+    useFreighters=False, send_mode=None, notify=None, origin_city=None, destination_cities=None,
+    info=None, telegram_enabled=None, notify_on_start=None,
+):
+    """Checks the config of a resourceTransportManager task started from the CLI
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    mode : str
+        "consolidate": from origin_cities to destination_city; "distribute": from
+        origin_city to each of destination_cities
+    origin_cities, destination_city, origin_city, destination_cities : city ids
+    island : int or str
+        id or "X:Y" of destination_city's island, only when it is another player's city
+    interval_hours : int
+        0 sends once
+    resource_config : list or dict
+        consolidate "keep": amount to keep, 0 sends all, null leaves the resource out;
+        consolidate "send" and distribute: amount to send
+    useFreighters : bool
+    send_mode : str
+        "keep" or "send", for consolidate
+    notify : str
+        "none", "start" (when each round starts) or "all" (every shipment)
+    info, telegram_enabled, notify_on_start :
+        saved by older menus
+
+    Returns
+    -------
+    config : dict
+    """
+    mode = str(mode).strip().lower()
+    if mode not in MODES:
+        raise ValueError('mode must be "consolidate" (several cities to one) or "distribute" (one city to several), got {!r}'.format(mode))
+    interval_hours = asInt(interval_hours, "interval_hours", minimum=0)
+    useFreighters = asBool(useFreighters, "useFreighters")
+    notify = str(notify_from_saved(notify, telegram_enabled, notify_on_start)).strip().lower()
+    if notify not in NOTIFY:
+        raise ValueError('notify must be "none", "start" or "all", got {!r}'.format(notify))
+    if notify != "none" and not (telegramDataIsValid(session) or discordDataIsValid(session)):
+        raise ValueError('notify "{}" needs Telegram or Discord, set one of them up first (Options > Notifications) or use "none"'.format(notify))
+    own_ids, _ = getIdsOfCities(session)
+    config = {"mode": mode, "interval_hours": interval_hours, "useFreighters": useFreighters, "notify": notify}
+
     if mode == "consolidate":
-        do_it(session, origin_cities, destination_city, island, interval_hours, resource_config, useFreighters, send_mode, telegram_enabled, notify_on_start)
+        if isinstance(send_mode, int) and not isinstance(send_mode, bool):
+            send_mode = {1: "keep", 2: "send"}.get(send_mode, send_mode)
+        send_mode = str(send_mode).strip().lower() if send_mode is not None else None
+        if send_mode not in SEND_MODES:
+            raise ValueError('send_mode must be "keep" (keep these amounts, send the rest) or "send" (send these amounts), got {!r}'.format(send_mode))
+        if destination_city is None:
+            raise ValueError("destination_city is needed")
+        destination = asId(city_id_from_saved(destination_city), "destination_city")
+        if not isinstance(origin_cities, (list, tuple)) or not origin_cities:
+            raise ValueError("origin_cities must be a list of your city ids, got {!r}".format(origin_cities))
+        origins = []
+        for i, city in enumerate(origin_cities):
+            city_id = requireOwnCity(session, city_id_from_saved(city), "origin_cities[{}]".format(i))
+            # like the menu, the destination does not send to itself
+            if city_id != destination and city_id not in origins:
+                origins.append(city_id)
+        if not origins:
+            raise ValueError("origin_cities has no city other than destination_city")
+        amounts = amounts_config(resource_config, "resource_config", ignore_allowed=True)
+        sends = any(a is not None for a in amounts) if send_mode == "keep" else any(a for a in amounts)
+        if not sends:
+            raise ValueError("resource_config sends nothing")
+        config.update({"origin_cities": origins, "destination_city": destination, "send_mode": send_mode, "resource_config": amounts})
+        if destination not in own_ids:
+            if isinstance(island, dict):
+                island = island.get("id")
+            if island is None:
+                raise ValueError('island is needed when destination_city is not your city: the id of its island or its "X:Y" coordinates')
+            found = get_island(session, island, "island")
+            if not any(str(c.get("id")) == destination for c in found["cities"] if c.get("type") == "city"):
+                raise ValueError("destination_city {} is not on island {}:{}".format(destination, found["x"], found["y"]))
+            config["island"] = str(found["id"])
+        return config
+
+    if origin_city is None:
+        raise ValueError("origin_city is needed")
+    origin = requireOwnCity(session, city_id_from_saved(origin_city), "origin_city")
+    if not isinstance(destination_cities, (list, tuple)) or not destination_cities:
+        raise ValueError("destination_cities must be a list of your city ids, got {!r}".format(destination_cities))
+    destinations = []
+    for i, city in enumerate(destination_cities):
+        city_id = requireOwnCity(session, city_id_from_saved(city), "destination_cities[{}]".format(i))
+        if city_id != origin and city_id not in destinations:
+            destinations.append(city_id)
+    if not destinations:
+        raise ValueError("destination_cities has no city other than origin_city")
+    amounts = amounts_config(resource_config, "resource_config", ignore_allowed=False)
+    if not any(amounts):
+        raise ValueError("resource_config sends nothing")
+    config.update({"origin_city": origin, "destination_cities": destinations, "resource_config": amounts})
+    return config
+
+
+@task("resourceTransportManager", prepare=prepare_resourceTransportManager)
+def do_it_unified(session, mode, origin_cities=None, destination_city=None, island=None, interval_hours=0, resource_config=None,
+                  useFreighters=False, send_mode=None, notify="none", origin_city=None, destination_cities=None,
+                  info="", telegram_enabled=None, notify_on_start=None):
+    """The config holds city ids; the task reads the cities and islands from the game"""
+    notify = notify_from_saved(notify, telegram_enabled, notify_on_start)
+    # telegram_enabled: a message for every shipment; notify_on_start: one when each round starts
+    every_shipment = True if notify == "all" else None
+    on_start = notify in ("all", "start")
+    own_ids, _ = getIdsOfCities(session)
+
+    if mode == "consolidate":
+        origins = [getCity(session.get(city_url + str(city_id))) for city_id in origin_cities]
+        destination_id = str(destination_city)
+        if destination_id in own_ids:
+            destination = getCity(session.get(city_url + destination_id))
+            dest_island = getIsland(session.get(island_url + str(destination["islandId"])))
+        else:
+            dest_island = getIsland(session.get(island_url + str(island)))
+            name = next((c.get("name") for c in dest_island["cities"] if str(c.get("id")) == destination_id), destination_id)
+            destination = {"id": destination_id, "name": name, "islandId": str(dest_island["id"])}
+        destination["isOwnCity"] = destination_id in own_ids
+        setInfoSignal(session, "\nAuto-send resources from {} to {} every {} hour(s)\n".format(
+            ", ".join(c["name"] for c in origins), destination["name"], interval_hours))
+        send_mode = SEND_MODES.get(send_mode, send_mode)
+        do_it(session, origins, destination, dest_island, interval_hours, resource_config, useFreighters, send_mode, every_shipment, on_start)
     elif mode == "distribute":
-        do_it_distribute(session, origin_city, destination_cities, interval_hours, resource_config, useFreighters, telegram_enabled, notify_on_start)
+        origin = getCity(session.get(city_url + str(origin_city)))
+        destinations = [getCity(session.get(city_url + str(city_id))) for city_id in destination_cities]
+        setInfoSignal(session, "\nDistribute resources from {} to {} cities every {} hour(s)\n".format(
+            origin["name"], len(destinations), interval_hours))
+        do_it_distribute(session, origin, destinations, interval_hours, [a or 0 for a in resource_config], useFreighters, every_shipment, on_start)
+
 
 @configurator
 def resourceTransportManager(session, event, stdin_fd, predetermined_input):
@@ -687,22 +855,21 @@ def consolidateMode(session, telegram_enabled):
     except KeyboardInterrupt:
         return None
     
-    info = f"\nAuto-send resources from {source_cities_summary} to {destination_city['name']} every {interval_hours} hour(s)\n"
-
-    return {
+    # the task reads the cities and the island again: the config only holds their ids
+    config = {
         "session": session,
         "mode": "consolidate",
-        "info": info,
-        "origin_cities": origin_cities,
-        "destination_city": destination_city,
-        "island": island,
+        "origin_cities": [str(city["id"]) for city in origin_cities],
+        "destination_city": str(destination_city["id"]),
         "interval_hours": interval_hours,
         "resource_config": resource_config,
         "useFreighters": useFreighters,
-        "send_mode": send_mode,
-        "telegram_enabled": telegram_enabled,
-        "notify_on_start": notify_on_start
+        "send_mode": "keep" if send_mode == 1 else "send",
+        "notify": notify_from_saved(None, telegram_enabled, notify_on_start),
     }
+    if not destination_city["isOwnCity"]:
+        config["island"] = str(island["id"])
+    return config
 
 
 def distributeMode(session, telegram_enabled):
@@ -885,19 +1052,16 @@ def distributeMode(session, telegram_enabled):
     except KeyboardInterrupt:
         return None
     
-    info = f"\nDistribute resources from {origin_city['name']} to {len(destination_cities)} cities every {interval_hours} hour(s)\n"
-
+    # the task reads the cities again: the config only holds their ids
     return {
         "session": session,
         "mode": "distribute",
-        "info": info,
-        "origin_city": origin_city,
-        "destination_cities": destination_cities,
+        "origin_city": str(origin_city["id"]),
+        "destination_cities": [str(city["id"]) for city in destination_cities],
         "interval_hours": interval_hours,
         "resource_config": resource_config,
         "useFreighters": useFreighters,
-        "telegram_enabled": telegram_enabled,
-        "notify_on_start": notify_on_start
+        "notify": notify_from_saved(None, telegram_enabled, notify_on_start),
     }
 
 
@@ -971,9 +1135,11 @@ def do_it(session, origin_cities, destination_city, island, interval_hours, reso
                 start_msg = f"🚢 SHIPMENT STARTING\nAccount: {session.username}\nFrom: {source_cities_names}\nTo: [{island['x']}:{island['y']}] {destination_city['name']}\nShip type: {ship_type_name}\nTotal resources: {', '.join(resources_list)}\nGrand total: {addThousandSeparator(grand_total_this_cycle)}"
                 sendToBot(session, start_msg)
         
-        # Get updated destination city data once per cycle
-        html = session.get(city_url + str(destination_city['id']))
-        destination_city = getCity(html)
+        # Get updated destination city data once per cycle. Only for an own city: getCity
+        # marks every city as own, and another player's city has no storage data for us
+        if destination_city.get('isOwnCity', False):
+            html = session.get(city_url + str(destination_city['id']))
+            destination_city = getCity(html)
         
         # Loop through each origin city
         for origin_city in origin_cities:
