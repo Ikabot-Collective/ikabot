@@ -14,6 +14,7 @@ import ikabot.function.donationBot, ikabot.function.tavernManager, ikabot.functi
 import ikabot.function.webServer, ikabot.function.loginDaily, ikabot.function.research, ikabot.function.dumpWorld  # noqa
 import ikabot.function.sendResources, ikabot.function.activateMiracle, ikabot.function.UpgradeUnits  # noqa
 import ikabot.function.distributeResources, ikabot.function.resourceTransportManager  # noqa
+import ikabot.function.buyResources  # noqa
 from ikabot.helpers.decorators import _TASK_REGISTRY
 from ikabot.helpers.ipc import _validate_task_config
 
@@ -21,6 +22,8 @@ OWN = (["111", "222"], {"111": {"name": "Alpha"}, "222": {"name": "Beta"}})
 FORTRESS = [{"id": "111", "name": "Alpha", "position": [{"building": "pirateFortress"}]}]
 HERMES = {"id": "4415", "wonder": "5", "wonderName": "Temple of Hermes", "wonderActivationLevel": 3, "available": True,
           "ciudad": {"id": "111", "name": "Alpha", "islandId": "4415", "pos": "4"}, "cities": [{"type": "city", "id": 9000}]}
+
+MARKET_OFFER = {"precio": 20, "amountAvailable": 5000, "jugadorAComprar": "Seller", "ciudadDestino": "Shop", "resource": "2"}
 
 MENU = {
     "alertAttacks": {"minutes": 20},
@@ -74,6 +77,11 @@ MENU = {
                                             "island": {"id": "77", "x": 1, "y": 2, "cities": []}, "interval_hours": 1,
                                             "resource_config": [0, None, None, None, None], "useFreighters": False, "send_mode": 1,
                                             "telegram_enabled": None, "notify_on_start": False},
+    "buyResources": {"city_id": "111", "resource": "marble", "amount": 3000, "max_price": 25, "seller_player": None, "seller_city": None},
+    "buyResources (one player)": {"city_id": "111", "resource": "wine", "amount": 100, "max_price": 20, "seller_player": "Seller", "seller_city": None},
+    # buyResources started from an older menu, which saved the trading post's city and the offers it showed
+    "buyResources (old menu)": {"city": {"id": "111", "name": "Alpha", "position": [], "pos": 4, "rango": 10},
+                                "offers": [MARKET_OFFER], "amount_to_buy": 300},
     "loginDaily (old menu)": {"wine_city": {"id": 111, "name": "Alpha", "position": []}, "wood_city": None, "luxury_city": None,
                               "favour_tasks": ["Collect resource favour", "Look at hightscore/shop/inventory"], "collect_ambrosia": False},
 }
@@ -114,6 +122,10 @@ class TestRelaunchFromExportedConfig(unittest.TestCase):
         stack.enter_context(patch("ikabot.function.distributeResources.getIdsOfCities", return_value=OWN))
         stack.enter_context(patch("ikabot.function.resourceTransportManager.getIdsOfCities", return_value=OWN))
         stack.enter_context(patch("ikabot.function.distributeResources.plan_routes", return_value=[("a route",)]))
+        market = {"id": "111", "name": "Alpha", "freeSpaceForResources": [9000] * 5}
+        stack.enter_context(patch("ikabot.function.buyResources.market_city", return_value=market))
+        stack.enter_context(patch("ikabot.function.buyResources.live_offers", return_value=[dict(MARKET_OFFER)]))
+        stack.enter_context(patch("ikabot.function.buyResources.getGold", return_value=(10 ** 7, 0)))
 
     def test_every_task_relaunches_from_its_exported_config(self):
         session = MagicMock()

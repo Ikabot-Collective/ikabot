@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import html as html_lib
 import json
 import math
 import re
@@ -20,6 +21,8 @@ from ikabot.helpers.resources import *
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import addThousandSeparator, getDateTime
 from ikabot.helpers.pedirInfo import getShipCapacity
+from ikabot.helpers.taskConfig import asInt, getCityById, requireOwnCity
+from ikabot.function.sendResources import RESOURCE_KEYS
 
 
 BUY_FROM_ANYONE = 1
@@ -39,15 +42,28 @@ def chooseResource(session, city):
         print("({:d}) {}".format(index + 1, material_name))
     choise = read(min=1, max=5)
     resource = choise - 1
-    if resource == 0:
-        resource = "resource"
+    search_offers(session, city, resource)
+    # return the chosen resource
+    return resource
+
+
+def search_offers(session, city, resource):
+    """Sets the resource the trading post of ``city`` lists offers of
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    city : dict
+        with the trading post's position (``pos``) and range (``rango``)
+    resource : int
+        0 (wood) to 4 (sulfur)
+    """
     data = {
         "cityId": city["id"],
         "position": city["pos"],
         "view": "branchOffice",
         "activeTab": "bargain",
         "type": 444,
-        "searchResource": resource,
+        "searchResource": "resource" if resource == 0 else resource,
         "range": city["rango"],
         "backgroundView": "city",
         "currentCityId": city["id"],
@@ -58,9 +74,6 @@ def chooseResource(session, city):
     }
     # this will set the chosen resource in the store
     session.post(params=data)
-    resource = choise - 1
-    # return the chosen resource
-    return resource
 
 
 def getOffers(session, city):
@@ -161,9 +174,10 @@ def filterOffers(offers):
 
     Returns
     -------
-    (offers, seller) : tuple
-        the offers that belong to the chosen seller, and its name (None if the user did
-        not choose one)
+    (offers, key, seller) : tuple
+        the offers that belong to the chosen seller, the offer key the seller was chosen
+        by ("jugadorAComprar" or "ciudadDestino") and its name (None if the user did not
+        choose one)
     """
     print("Buy from:")
     print("({:d}) Anyone in range".format(BUY_FROM_ANYONE))
@@ -171,7 +185,7 @@ def filterOffers(offers):
     print("({:d}) A specific city".format(BUY_FROM_CITY))
     choice = read(min=BUY_FROM_ANYONE, max=BUY_FROM_CITY, default=BUY_FROM_ANYONE)
     if choice == BUY_FROM_ANYONE:
-        return offers, None
+        return offers, None, None
 
     if choice == BUY_FROM_PLAYER:
         key = "jugadorAComprar"
@@ -186,10 +200,10 @@ def filterOffers(offers):
         print("({:d}) {}".format(i + 1, seller))
     seller = sellers[read(min=1, max=len(sellers)) - 1]
 
-    return [offer for offer in offers if offer[key] == seller], seller
+    return [offer for offer in offers if offer[key] == seller], key, seller
 
 
-def buy(session, city, offer, amount_to_buy, ships_available, ship_capacity):
+def buy(session, city, offer, amount_to_buy, ships_available, ship_capacity, max_price=None):
     """
     Parameters
     ----------
@@ -197,6 +211,14 @@ def buy(session, city, offer, amount_to_buy, ships_available, ship_capacity):
     city : dict
     offer : dict
     amount_to_buy : int
+    max_price : int
+        the seller may have raised the price since the offers were read: nothing is
+        bought when the price of the offer is now above it
+
+    Returns
+    -------
+    (price, problem) : tuple
+        the price paid per unit, and None; or None and why nothing was bought
     """
     ships = int(math.ceil((Decimal(amount_to_buy) / Decimal(ship_capacity))))
     data_dict = {
@@ -244,11 +266,19 @@ def buy(session, city, offer, amount_to_buy, ships_available, ship_capacity):
         data_dict["resourcePrice"] = int(hit.group(1))
         data_dict["cargo_resource"] = 0
     resource = offer["resource"]
+    price_key = "resourcePrice" if resource == "resource" else "tradegood{}Price".format(resource)
+    price = data_dict.get(price_key)
+    if max_price is not None and (price is None or price > max_price):
+        if price is None:
+            return None, "could not read the price of the offer of {}".format(offer["ciudadDestino"])
+        return None, "the offer of {} now costs {} gold, above max_price {}".format(offer["ciudadDestino"], price, max_price)
     if resource == "resource":
         data_dict["cargo_resource"] = amount_to_buy
     else:
         data_dict["cargo_tradegood{}".format(resource)] = amount_to_buy
-    session.post(params=data_dict)
+    problem = rejection(session.post(params=data_dict))
+    if problem is not None:
+        return None, "the game did not take the purchase: {}".format(problem)
     msg = "I buy {} to {} from {}".format(
         addThousandSeparator(amount_to_buy),
         offer["ciudadDestino"],
@@ -259,38 +289,297 @@ def buy(session, city, offer, amount_to_buy, ships_available, ship_capacity):
     session.setStatus(
         f"Bought {addThousandSeparator(amount_to_buy)} {resource_name} for {offer['precio']} gold from {offer['ciudadDestino']} ({offer['jugadorAComprar']}) ---> {city['name']} | {getDateTime()}"
     )
+    return (price if price is not None else offer["precio"]), None
 
 
-@task("buyResources")
-def do_it(session, city, offers, amount_to_buy):
+def rejection(response):
+    """The text of the game's rejection (feedback type 11) in a response, or None
+    Parameters
+    ----------
+    response : str
+
+    Returns
+    -------
+    text : str or None
     """
+    try:
+        data = json.loads(response, strict=False)
+    except (TypeError, ValueError):
+        return None
+    for entry in data if isinstance(data, list) else []:
+        if isinstance(entry, list) and len(entry) >= 2 and entry[0] == "provideFeedback":
+            for item in entry[1] if isinstance(entry[1], list) else []:
+                if isinstance(item, dict) and item.get("type") == 11:
+                    return re.sub(r"<[^>]+>", " ", str(item.get("text", ""))).strip() or "rejected"
+    return None
+
+
+def resource_index(value, name="resource"):
+    """0 (wood) to 4 (sulfur), from a number or a name"""
+    text = "" if value is None or isinstance(value, bool) else str(value).strip().lower()
+    if text.isdigit() and int(text) < len(RESOURCE_KEYS):
+        return int(text)
+    if text in RESOURCE_KEYS:
+        return RESOURCE_KEYS.index(text)
+    # how the trading post names wood and crystal
+    if text in ("resource", "glass"):
+        return {"resource": 0, "glass": 3}[text]
+    raise ValueError("{} must be {} (or 0 to 4), got {!r}".format(name, ", ".join(RESOURCE_KEYS), value))
+
+
+def market_city(session, city_id):
+    """One of the user's cities with its trading post: position (``pos``) and range (``rango``)
     Parameters
     ----------
     session : ikabot.web.session.Session
-    city : dict
-    offers : list[dict]
-    amount_to_buy : int
-    """
-    info = "\nI will buy {} {} to {}\n".format(
-        addThousandSeparator(amount_to_buy), offers[0]['tipo'] if len(offers) > 0 else "resources", city["cityName"]
-    )
-    setInfoSignal(session, info)
-    ship_capacity, freighter_capacity = getShipCapacity(session)
-    while True:
-        for offer in offers:
-            if amount_to_buy == 0:
-                return
-            if offer["amountAvailable"] == 0:
-                continue
-            ships_available = waitForArrival(session)
-            storageCapacity = ships_available * ship_capacity
-            buy_amount = min(amount_to_buy, storageCapacity, offer["amountAvailable"])
+    city_id : str
 
-            amount_to_buy -= buy_amount
-            offer["amountAvailable"] -= buy_amount
-            buy(session, city, offer, buy_amount, ships_available, ship_capacity)
-            # start from the beginning again, so that we always buy from the cheapest offers fisrt
+    Returns
+    -------
+    city : dict
+    """
+    city = getCityById(session, city_id)
+    for pos, building in enumerate(city["position"]):
+        if building["building"] == "branchOffice":
+            city["pos"] = pos
+            positions = re.findall(r"<option.*?>(\d+)</option>", getMarketHtml(session, city))
+            city["rango"] = int(positions[-1])
+            return city
+    raise ValueError("{} has no trading post".format(city.get("name", city_id)))
+
+
+def live_offers(session, city, resource):
+    """The offers of ``resource`` in range of the trading post of ``city``, cheapest first"""
+    search_offers(session, city, resource)
+    offers = getOffers(session, city)
+    offers.sort(key=lambda o: o["precio"])
+    return offers
+
+
+def matching_offers(offers, max_price=None, seller_player=None, seller_city=None):
+    """The offers that can be bought from, cheapest first
+    Parameters
+    ----------
+    offers : list[dict]
+    max_price : int or None
+    seller_player, seller_city : str or None
+        only that player's offers, or only that city's
+
+    Returns
+    -------
+    offers : list[dict]
+    """
+    def same(a, b):
+        return html_lib.unescape(str(a)).strip().lower() == html_lib.unescape(str(b)).strip().lower()
+
+    return sorted(
+        (
+            offer for offer in offers
+            if offer["amountAvailable"] > 0
+            and (max_price is None or offer["precio"] <= max_price)
+            and (seller_player is None or same(offer["jugadorAComprar"], seller_player))
+            and (seller_city is None or same(offer["ciudadDestino"], seller_city))
+        ),
+        key=lambda o: o["precio"],
+    )
+
+
+def next_purchase(offers, remaining, ship_space, gold, max_price=None, seller_player=None, seller_city=None):
+    """The offer to buy from next and how much: the cheapest one that matches, as much as
+    the ships carry and the gold pays for
+    Parameters
+    ----------
+    offers : list[dict]
+        the offers on the market now
+    remaining : int
+        what is left to buy
+    ship_space : int
+        what the available ships carry
+    gold : int
+
+    Returns
+    -------
+    (offer, amount) : tuple
+        (None, 0) when no offer matches; amount is 0 when the gold does not pay for one unit
+    """
+    candidates = matching_offers(offers, max_price, seller_player, seller_city)
+    if not candidates:
+        return None, 0
+    offer = candidates[0]
+    return offer, max(0, min(remaining, offer["amountAvailable"], ship_space, gold // offer["precio"]))
+
+
+def price_cap(offers, amount):
+    """The highest price among the cheapest offers that cover ``amount``"""
+    cap = None
+    for offer in sorted(offers, key=lambda o: o["precio"]):
+        if amount <= 0:
             break
+        if offer["amountAvailable"] > 0:
+            cap = offer["precio"]
+            amount -= offer["amountAvailable"]
+    return cap
+
+
+def config_from_saved(city, offers, amount_to_buy):
+    """An older menu saved the trading post's city and the offers it showed: buy the same
+    amount, never above the highest price it showed for that amount"""
+    config = {"city_id": city["id"], "amount": amount_to_buy, "max_price": price_cap(offers or [], amount_to_buy)}
+    if offers:
+        config["resource"] = resource_index(offers[0]["resource"])
+    return config
+
+
+def offers_text(resource, max_price, seller_player, seller_city):
+    text = "{} offers".format(RESOURCE_KEYS[resource])
+    if max_price is not None:
+        text += " at or below {} gold".format(max_price)
+    if seller_player is not None:
+        text += " from {}".format(seller_player)
+    if seller_city is not None:
+        text += " from the city {}".format(seller_city)
+    return text
+
+
+def prepare_buyResources(session, city_id=None, resource=None, amount=None, max_price=None, seller_player=None,
+                         seller_city=None, city=None, offers=None, amount_to_buy=None):
+    """Checks the config of a buyResources task started from the CLI
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    city_id : int or str
+        one of your cities with a trading post; it receives what is bought
+    resource : str or int
+        wood, wine, marble, crystal or sulfur (or 0 to 4)
+    amount : int
+    max_price : int
+        highest price per unit to pay; null pays what the offers ask
+    seller_player, seller_city : str
+        buy only from that player, or only from that city (names as the trading post shows them)
+    city, offers, amount_to_buy :
+        saved by older menus
+
+    Returns
+    -------
+    config : dict
+    """
+    if city is not None:
+        saved = config_from_saved(city, offers, amount_to_buy)
+        city_id = saved["city_id"]
+        amount = saved["amount"]
+        resource = saved.get("resource", resource)
+        if max_price is None:
+            max_price = saved["max_price"]
+    if city_id is None:
+        raise ValueError("city_id is needed: one of your cities with a trading post")
+    if resource is None:
+        raise ValueError("resource is needed: {}".format(", ".join(RESOURCE_KEYS)))
+    if amount is None:
+        raise ValueError("amount is needed")
+    city_id = requireOwnCity(session, city_id, "city_id")
+    resource = resource_index(resource)
+    amount = asInt(amount, "amount", minimum=1)
+    if max_price is not None:
+        max_price = asInt(max_price, "max_price", minimum=1)
+    sellers = {}
+    for key, value in (("seller_player", seller_player), ("seller_city", seller_city)):
+        if value is not None and not str(value).strip():
+            raise ValueError("{} must be a name or null, got {!r}".format(key, value))
+        sellers[key] = str(value).strip() if value is not None else None
+
+    market = market_city(session, city_id)
+    name = market["name"]
+    free = market["freeSpaceForResources"][resource]
+    if amount > free:
+        raise ValueError("{} has room for {} {}, asked to buy {}".format(
+            name, addThousandSeparator(free), RESOURCE_KEYS[resource], addThousandSeparator(amount)))
+    matching = matching_offers(live_offers(session, market, resource), max_price, **sellers)
+    on_offer = sum(o["amountAvailable"] for o in matching)
+    what = offers_text(resource, max_price, sellers["seller_player"], sellers["seller_city"])
+    if on_offer == 0:
+        raise ValueError("there are no {} in range of {}".format(what, name))
+    if amount > on_offer:
+        raise ValueError("the {} in range of {} add up to {}, asked to buy {}".format(
+            what, name, addThousandSeparator(on_offer), addThousandSeparator(amount)))
+    cost = calculateCost(matching, amount)
+    gold, _ = getGold(session, market)
+    if cost > gold:
+        raise ValueError("buying {} {} costs {} gold and you have {}".format(
+            addThousandSeparator(amount), RESOURCE_KEYS[resource], addThousandSeparator(cost), addThousandSeparator(gold)))
+    return {"city_id": city_id, "resource": RESOURCE_KEYS[resource], "amount": amount, "max_price": max_price, **sellers}
+
+
+@task("buyResources", prepare=prepare_buyResources)
+def do_it(session, city_id=None, resource=None, amount=None, max_price=None, seller_player=None, seller_city=None,
+          city=None, offers=None, amount_to_buy=None):
+    """Buys from the cheapest offers that match, reading them again before each purchase.
+    Ends when it bought ``amount``, or when no offer matches any more
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    city_id : str
+    resource : str
+    amount : int
+    max_price : int or None
+    seller_player, seller_city : str or None
+    city, offers, amount_to_buy :
+        saved by older menus
+    """
+    if city is not None:
+        saved = config_from_saved(city, offers, amount_to_buy)
+        city_id, amount = saved["city_id"], saved["amount"]
+        resource = saved.get("resource", resource)
+        max_price = saved["max_price"] if max_price is None else max_price
+    resource = resource_index(resource)
+    name = RESOURCE_KEYS[resource]
+    try:
+        market = market_city(session, city_id)
+    except ValueError as e:
+        msg = "Nothing was bought: {}".format(e)
+        session.setStatus(msg)
+        sendToBot(session, msg)
+        return
+
+    setInfoSignal(session, "\nI will buy {} {} to {}\n".format(addThousandSeparator(amount), name, market["name"]))
+    # what is bought travels to the city: only what fits in its warehouse now
+    total = min(amount, market["freeSpaceForResources"][resource])
+    ship_capacity, _ = getShipCapacity(session)
+    bought = 0
+    spent = 0
+    problem = None
+    if total < amount:
+        problem = "{} has room for {} {}".format(market["name"], addThousandSeparator(total), name)
+    while bought < total:
+        session.setStatus("Buying {} {} for {}: waiting for free ships".format(
+            addThousandSeparator(total - bought), name, market["name"]))
+        ships_available = waitForArrival(session)
+        # read after the wait: the offers may have changed meanwhile
+        offers_now = live_offers(session, market, resource)
+        gold, _ = getGold(session, market)
+        offer, buy_amount = next_purchase(
+            offers_now, total - bought, ships_available * ship_capacity, gold, max_price, seller_player, seller_city
+        )
+        if offer is None:
+            problem = "there are no more {}".format(offers_text(resource, max_price, seller_player, seller_city))
+            break
+        if buy_amount == 0:
+            problem = "not enough gold: {} gold, the cheapest offer asks {} per unit".format(
+                addThousandSeparator(gold), offer["precio"])
+            break
+        price, problem = buy(session, market, offer, buy_amount, ships_available, ship_capacity, max_price)
+        if problem is not None:
+            break
+        bought += buy_amount
+        spent += buy_amount * price
+
+    msg = "Bought {} of {} {} for {} gold @{}".format(
+        addThousandSeparator(bought), addThousandSeparator(amount), name, addThousandSeparator(spent), getDateTime())
+    if problem is not None:
+        msg += ": {}".format(problem)
+        sendToBot(session, msg)
+    session.setStatus(msg)
+
+
 @configurator
 def buyResources(session, event, stdin_fd, predetermined_input):
     """
@@ -330,7 +619,7 @@ def buyResources(session, event, stdin_fd, predetermined_input):
         return None
 
     # let the user buy from one seller only
-    (offers, seller) = filterOffers(offers)
+    (offers, seller_key, seller) = filterOffers(offers)
     banner()
 
     # display offers to the user
@@ -391,5 +680,15 @@ def buyResources(session, event, stdin_fd, predetermined_input):
 
     print("It will be purchased {}".format(addThousandSeparator(amount_to_buy)))
     enter()
-    return {"session": session, "city": city, "offers": offers, "amount_to_buy": amount_to_buy}
+    # the task reads the offers again before each purchase: the config keeps what the user
+    # decided, and never more than the highest price shown for this amount
+    return {
+        "session": session,
+        "city_id": str(city["id"]),
+        "resource": RESOURCE_KEYS[resource],
+        "amount": amount_to_buy,
+        "max_price": price_cap(offers, amount_to_buy),
+        "seller_player": seller if seller_key == "jugadorAComprar" else None,
+        "seller_city": seller if seller_key == "ciudadDestino" else None,
+    }
 
