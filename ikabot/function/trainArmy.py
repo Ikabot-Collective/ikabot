@@ -1,22 +1,18 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import asyncio
-import copy
 import json
 import re
-import traceback
 
 from ikabot.config import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.getJson import getCity
 from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import *
-from ikabot.helpers.process import set_child_mode
-from ikabot.helpers.resources import getAvailableResources
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import *
 from ikabot.helpers.varios import addThousandSeparator
+from ikabot.helpers.taskConfig import asInt, getCityById, findBuildingPosition, requireOwnCity
 
 
 def getBuildingInfo(session, city, trainTroops):
@@ -97,6 +93,11 @@ def planTrainings(session, city, trainings, trainTroops):
     city : dict
     trainings : list[list[dict]]
     trainTroops : bool
+
+    Returns
+    -------
+    finished : bool
+        False when it stopped for lack of resources
     """
     buildingPos = city["pos"]
 
@@ -106,7 +107,7 @@ def planTrainings(session, city, trainings, trainTroops):
         # total number of units to create
         total = sum([unit["cantidad"] for training in trainings for unit in training])
         if total == 0:
-            return
+            return True
 
         for training in trainings:
             waitForTraining(session, city, trainTroops)
@@ -154,10 +155,9 @@ def planTrainings(session, city, trainings, trainTroops):
             # amount of units that will be trained
             total = sum([unit["train"] for unit in training])
             if total == 0:
-                msg = "It was not possible to finish the training due to lack of resources."
-                
+                msg = "It was not possible to finish the training in {} due to lack of resources.".format(city["name"])
                 sendToBot(session, msg)
-                return
+                return False
 
             train(session, city, training, trainTroops)
 
@@ -184,49 +184,178 @@ def generateArmyData(units_info):
 
 from ikabot.helpers.decorators import configurator, task
 
-@task("trainArmy")
-def do_trainArmy(session, city, tranings, trainTroops, replicate, countRepeat, cityTrainings, units):
-    if replicate == "y":
-        countRepeat = countRepeat + 1
-        while countRepeat > 0:
-            for cityId in cityTrainings:
-                html = session.get(city_url + str(cityId))
-                loop_city = getCity(html)
+TYPES = {"troops": "barracks", "ships": "shipyard"}
 
-                lookfor = "barracks" if trainTroops else "shipyard"
-                try:
-                    for i in range(len(loop_city["position"])):
-                        if loop_city["position"][i]["building"] == lookfor:
-                            loop_city["pos"] = str(i)
-                            tranings_copy = []
-                            units_copy = copy.deepcopy(units)
-                            tranings_copy.append(units_copy)
-                            planTrainings(
-                                session, loop_city, tranings_copy, trainTroops
-                            )
-                            break
-                except Exception as e:
-                    if trainTroops:
-                        info = "\nI train troops in {}\n".format(
-                            loop_city["cityName"]
-                        )
-                    else:
-                        info = "\nI train fleets in {}\n".format(
-                            loop_city["cityName"]
-                        )
-                    msg = "Error in:\n{}\nCause:\n{}".format(
-                        info, traceback.format_exc()
-                    )
-                    sendToBot(session, msg)
-            countRepeat = countRepeat - 1
 
-    else:
-        if trainTroops:
-            info = "\nI train troops in {}\n".format(city["cityName"])
-        else:
-            info = "\nI train fleets in {}\n".format(city["cityName"])
-        setInfoSignal(session, info)
-        planTrainings(session, city, tranings, trainTroops)
+def building_units(session, city, troops):
+    """The units the barracks (or shipyard) of ``city`` trains, with their costs
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    city : dict
+        with the building's position in ``pos``
+    troops : bool
+
+    Returns
+    -------
+    units : list[dict]
+    """
+    return generateArmyData(getBuildingInfo(session, city, troops)[2][1])
+
+
+def city_with_building(session, city_id, troops):
+    """The city, with its barracks' (or shipyard's) position in ``pos``
+    Raises ValueError when it does not have one"""
+    city = getCityById(session, city_id)
+    pos = findBuildingPosition(city, TYPES["troops" if troops else "ships"])
+    if pos is None:
+        raise ValueError("{} has no {}".format(city["name"], TYPES["troops" if troops else "ships"]))
+    city["pos"] = str(pos)
+    return city
+
+
+def unit_key(units, value, name):
+    """The identifier of one of ``units``, given its identifier, id or name"""
+    text = str(value).strip().lower()
+    for unit in units:
+        if text in (str(unit["identifier"]).lower(), str(unit["unit_type_id"]), str(unit["local_name"]).lower()):
+            return unit["identifier"]
+    raise ValueError("{} {!r} is not trained there. Units: {}".format(
+        name, value, ", ".join("{} = {} ({})".format(u["identifier"], u["local_name"], u["unit_type_id"]) for u in units)))
+
+
+def rounds_from_saved(tranings):
+    """An older menu saved each round as the building's units with their amounts"""
+    rounds = [
+        {unit["identifier"]: unit["cantidad"] for unit in training if unit.get("cantidad")}
+        for training in tranings
+    ]
+    # a round where nothing was asked for trains nothing
+    return [training for training in rounds if training]
+
+
+def trainings_for(units, rounds):
+    """What planTrainings takes: one list of units with their amounts for each round"""
+    return [
+        [dict(unit, cantidad=training[unit["identifier"]]) for unit in units if training.get(unit["identifier"])]
+        for training in rounds
+    ]
+
+
+def prepare_trainArmy(session, city_id=None, type=None, rounds=None, repeat=0, replicate_to=None, city=None, tranings=None,
+                      trainTroops=None, replicate=None, countRepeat=None, cityTrainings=None, units=None):
+    """Checks the config of a trainArmy task started from the CLI
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    city_id : int or str
+        one of your cities with barracks (troops) or a shipyard (ships)
+    type : str
+        "troops" or "ships"
+    rounds : list[dict]
+        trained one after another, each one when the previous has finished, e.g.
+        [{"phalanx": 20, "archer": 10}]; units by identifier, id or name
+    repeat : int
+        how many more times to train all the rounds
+    replicate_to : list
+        other city ids that train the same rounds; null trains only in city_id
+    city, tranings, trainTroops, replicate, countRepeat, cityTrainings, units :
+        saved by older menus
+
+    Returns
+    -------
+    config : dict
+    """
+    if city is not None:
+        city_id = city["id"]
+        type = "troops" if trainTroops else "ships"
+        rounds = rounds_from_saved(tranings or [])
+        repeat = countRepeat or 0
+        replicate_to = cityTrainings if str(replicate).lower() == "y" else None
+    type = str(type).strip().lower() if type is not None else None
+    if type not in TYPES:
+        raise ValueError('type must be "troops" (barracks) or "ships" (shipyard), got {!r}'.format(type))
+    troops = type == "troops"
+    if city_id is None:
+        raise ValueError("city_id is needed: one of your cities with {}".format(TYPES[type]))
+    city_id = requireOwnCity(session, city_id, "city_id")
+    repeat = asInt(repeat if repeat is not None else 0, "repeat", minimum=0)
+    main = city_with_building(session, city_id, troops)
+    known = building_units(session, main, troops)
+    if not isinstance(rounds, (list, tuple)) or not rounds:
+        raise ValueError('rounds must be a list like [{{"{}": 10}}], got {!r}'.format(known[0]["identifier"] if known else "phalanx", rounds))
+    checked = []
+    for i, training in enumerate(rounds):
+        if not isinstance(training, dict):
+            raise ValueError("rounds[{}] must be an object with units and amounts, got {!r}".format(i, training))
+        amounts = {}
+        for unit, amount in training.items():
+            key = unit_key(known, unit, "rounds[{}]".format(i))
+            amounts[key] = amounts.get(key, 0) + asInt(amount, "rounds[{}].{}".format(i, unit), minimum=0)
+        amounts = {key: amount for key, amount in amounts.items() if amount > 0}
+        if not amounts:
+            raise ValueError("rounds[{}] trains nothing".format(i))
+        checked.append(amounts)
+    others = []
+    if replicate_to is not None:
+        if not isinstance(replicate_to, (list, tuple)):
+            raise ValueError("replicate_to must be a list of your city ids or null, got {!r}".format(replicate_to))
+        for i, other in enumerate(replicate_to):
+            other = requireOwnCity(session, other, "replicate_to[{}]".format(i))
+            # the menu's "all cities" also lists the city itself
+            if other != city_id and other not in others:
+                city_with_building(session, other, troops)
+                others.append(other)
+    return {"city_id": city_id, "type": type, "rounds": checked, "repeat": repeat, "replicate_to": others or None}
+
+
+@task("trainArmy", prepare=prepare_trainArmy)
+def do_trainArmy(session, city_id=None, type=None, rounds=None, repeat=0, replicate_to=None, city=None, tranings=None,
+                 trainTroops=None, replicate=None, countRepeat=None, cityTrainings=None, units=None):
+    """Trains the rounds one after another in city_id and in each city of replicate_to, and
+    all of it ``repeat`` more times. Costs and units are read from the building each time
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    city_id : str
+    type : str
+        "troops" or "ships"
+    rounds : list[dict]
+        identifier -> amount, one dict per round
+    repeat : int
+    replicate_to : list[str] or None
+    city, tranings, trainTroops, replicate, countRepeat, cityTrainings, units :
+        saved by older menus
+    """
+    if city is not None:
+        city_id = city["id"]
+        type = "troops" if trainTroops else "ships"
+        rounds = rounds_from_saved(tranings or [])
+        repeat = countRepeat or 0
+        replicate_to = cityTrainings if str(replicate).lower() == "y" else None
+    troops = type == "troops"
+    cities = [str(city_id)] + [str(c) for c in (replicate_to or []) if str(c) != str(city_id)]
+    passes = (repeat or 0) + 1
+    setInfoSignal(session, "\nI train {} in {} cities, {} round(s), {} time(s)\n".format(type, len(cities), len(rounds), passes))
+    problems = []
+    for done in range(passes):
+        for cid in cities:
+            try:
+                city_now = city_with_building(session, cid, troops)
+            except ValueError as e:
+                problems.append(str(e))
+                continue
+            session.setStatus("Training {} in {} ({}/{})".format(type, city_now["name"], done + 1, passes))
+            trainings = trainings_for(building_units(session, city_now, troops), rounds)
+            if not planTrainings(session, city_now, trainings, troops):
+                problems.append("{}: not enough resources".format(city_now["name"]))
+    msg = "Trained {} in {} @{}".format(type, ", ".join(cities), getDateTime())
+    if problems:
+        msg = "Trained {} @{}, with problems: {}".format(type, getDateTime(), "; ".join(dict.fromkeys(problems)))
+        sendToBot(session, msg)
+    session.setStatus(msg)
+
+
 @configurator
 def trainArmy(session, event, stdin_fd, predetermined_input):
     """
@@ -453,15 +582,15 @@ def trainArmy(session, event, stdin_fd, predetermined_input):
         print("\nThe selected fleet will be trained.")
     enter()
 
+    # the task reads the units and their costs from the building: the config keeps the
+    # amounts the user chose
     return {
         "session": session,
-        "city": city,
-        "tranings": tranings,
-        "trainTroops": trainTroops,
-        "replicate": replicate.lower(),
-        "countRepeat": countRepeat,
-        "cityTrainings": cityTrainings,
-        "units": units
+        "city_id": str(city["id"]),
+        "type": "troops" if trainTroops else "ships",
+        "rounds": rounds_from_saved(tranings),
+        "repeat": countRepeat,
+        "replicate_to": [str(c) for c in cityTrainings if str(c) != str(city["id"])] or None,
     }
 
 

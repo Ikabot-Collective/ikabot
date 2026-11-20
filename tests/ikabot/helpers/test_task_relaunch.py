@@ -14,7 +14,7 @@ import ikabot.function.donationBot, ikabot.function.tavernManager, ikabot.functi
 import ikabot.function.webServer, ikabot.function.loginDaily, ikabot.function.research, ikabot.function.dumpWorld  # noqa
 import ikabot.function.sendResources, ikabot.function.activateMiracle, ikabot.function.UpgradeUnits  # noqa
 import ikabot.function.distributeResources, ikabot.function.resourceTransportManager  # noqa
-import ikabot.function.buyResources, ikabot.function.sellResources  # noqa
+import ikabot.function.buyResources, ikabot.function.sellResources, ikabot.function.trainArmy  # noqa
 from ikabot.helpers.decorators import _TASK_REGISTRY
 from ikabot.helpers.ipc import _validate_task_config
 
@@ -23,6 +23,7 @@ FORTRESS = [{"id": "111", "name": "Alpha", "position": [{"building": "pirateFort
 HERMES = {"id": "4415", "wonder": "5", "wonderName": "Temple of Hermes", "wonderActivationLevel": 3, "available": True,
           "ciudad": {"id": "111", "name": "Alpha", "islandId": "4415", "pos": "4"}, "cities": [{"type": "city", "id": 9000}]}
 
+PHALANX = {"identifier": "phalanx", "unit_type_id": 303, "local_name": "Hoplite", "costs": {"citizens": 1, "wood": 30}}
 MARKET_OFFER = {"precio": 20, "amountAvailable": 5000, "jugadorAComprar": "Seller", "ciudadDestino": "Shop", "resource": "2"}
 
 MENU = {
@@ -91,6 +92,12 @@ MENU = {
                                  "city_to_buy_from": {"id": "111", "name": "Alpha", "position": []}},
     "sellResources (old menu, offer)": {"mode": "create_offer", "amount_to_sell": 300, "price": 9, "resource_type": 2,
                                         "sell_market_capacity": 14400, "city": {"id": "111", "name": "Alpha", "position": []}},
+    "trainArmy": {"city_id": "111", "type": "troops", "rounds": [{"phalanx": 10}, {"phalanx": 5}], "repeat": 2, "replicate_to": None},
+    "trainArmy (replicated)": {"city_id": "111", "type": "troops", "rounds": [{"phalanx": 10}], "repeat": 0, "replicate_to": ["222"]},
+    # trainArmy started from an older menu, which saved the city and the building's units with their costs
+    "trainArmy (old menu)": {"city": {"id": "111", "name": "Alpha", "pos": "4", "position": []}, "trainTroops": True,
+                             "tranings": [[dict(PHALANX, cantidad=10)]], "replicate": "n", "countRepeat": 1, "cityTrainings": [],
+                             "units": [dict(PHALANX, cantidad=10)]},
     "loginDaily (old menu)": {"wine_city": {"id": 111, "name": "Alpha", "position": []}, "wood_city": None, "luxury_city": None,
                               "favour_tasks": ["Collect resource favour", "Look at hightscore/shop/inventory"], "collect_ambrosia": False},
 }
@@ -139,6 +146,8 @@ class TestRelaunchFromExportedConfig(unittest.TestCase):
         stack.enter_context(patch("ikabot.function.sellResources.getOffers", return_value=[("Shop", "Buyer", 5000, 12, 2, 9000)]))
         stack.enter_context(patch("ikabot.function.sellResources.getMarketInfo", return_value=""))
         stack.enter_context(patch("ikabot.function.sellResources.price_limits", return_value=(4, 21)))
+        stack.enter_context(patch("ikabot.function.trainArmy.city_with_building", return_value={"id": "111", "name": "Alpha", "pos": "4"}))
+        stack.enter_context(patch("ikabot.function.trainArmy.building_units", return_value=[PHALANX]))
         stack.enter_context(patch("ikabot.function.sellResources.own_offers", return_value=[{"type": "444", "amount": 0, "price": 7}] * 5))
 
     def test_every_task_relaunches_from_its_exported_config(self):
