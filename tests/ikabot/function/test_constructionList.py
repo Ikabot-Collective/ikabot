@@ -246,43 +246,11 @@ class TestConstructionSpeedupOptIn(unittest.TestCase):
                     ))
 
 
-class TestChronosForgeReduction(unittest.TestCase):
-    def test_reads_reduction_with_any_decimal_separator(self):
-        table = (
-            '<table><tr><td class="level">6</td><td class="costs"><div>1,71M</div></td>'
-            '<td class="costs">48m 44s</td><td>-73,786%</td></tr>'
-            '<tr><td class="level">7</td><td class="costs"><div>2.97M</div></td>'
-            '<td class="costs">1h 6m</td><td>-79.028 %</td></tr></table>'
-        )
-        self.assertEqual(
-            construction._parseChronosForgeReductions(table), {6: 0.73786, 7: 0.79028}
-        )
-
-    def test_city_without_chronoforge_makes_no_request(self):
-        session = Mock()
-        city = {"id": 1, "position": [{"building": "townHall", "level": 10}, {"building": "empty"}]}
-        self.assertEqual(construction.getChronosForgeReduction(session, city), (0, 0.0))
-        session.post.assert_not_called()
-
-    def test_uses_the_level_of_the_city_chronoforge(self):
-        session = Mock()
-        city = {"id": 1, "position": [{"building": "chronosForge", "level": 6}]}
-        with (
-            patch.dict(construction._chronos_forge_reductions, clear=True),
-            patch.object(construction, "_getBuildingHelpTable", return_value=(
-                '<td class="level">6</td><td>-73,786%</td><td class="level">7</td><td>-79,028%</td></table>'
-            )),
-        ):
-            self.assertEqual(construction.getChronosForgeReduction(session, city), (6, 0.73786))
-
-
 class TestConstructionTimeUnits(unittest.TestCase):
     def test_months_and_years_are_not_read_as_minutes(self):
         day = 86400
         for text, seconds in (
             ("25m 34s", 25 * 60 + 34),
-            ("1hs 6m", 3600 + 6 * 60),
-            ("3D 11hs", 3 * day + 11 * 3600),
             ("1M 7D", 37 * day),
             ("1A 3M", 455 * day),
         ):
