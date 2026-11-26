@@ -205,15 +205,15 @@ class TestFreeBuildingSpeedup(unittest.TestCase):
 class TestConstructionSpeedupOptIn(unittest.TestCase):
     def test_wait_and_total_follow_real_duration_and_speedup_opt_in(self):
         for enabled, remaining, speedup_result, expected_calls, expected_wait, total in (
-            (False, 600, True, 0, 610, "20M"),
-            (False, 300, True, 0, 310, "15M"),
-            (False, 200, True, 0, 210, "13M 20S"),
-            (True, 600, True, 0, 300, "20M"),
-            (True, 301, True, 0, 5, "15M 1S"),
-            (True, 300, True, 1, 5, "15M"),
-            (True, 200, True, 1, 5, "13M 20S"),
-            (True, 200, False, 1, 5, "13M 20S"),
-            (True, 0, True, 0, 5, "10M"),
+            (False, 600, True, 0, 610, 1200),
+            (False, 300, True, 0, 310, 900),
+            (False, 200, True, 0, 210, 800),
+            (True, 600, True, 0, 300, 1200),
+            (True, 301, True, 0, 5, 901),
+            (True, 300, True, 1, 5, 900),
+            (True, 200, True, 1, 5, 800),
+            (True, 200, False, 1, 5, 800),
+            (True, 0, True, 0, 5, 600),
         ):
             with self.subTest(enabled=enabled, remaining=remaining, speedup_result=speedup_result):
                 session = Mock()
@@ -234,10 +234,58 @@ class TestConstructionSpeedupOptIn(unittest.TestCase):
                 self.assertEqual(speedup.call_count, expected_calls)
                 wait.assert_called_once_with(expected_wait)
                 self.assertTrue(session.setStatus.call_args_list[0].args[0].endswith(
-                    " , total " + total
+                    " , ends {} , all done {}".format(
+                        construction._formatEndTime(1000 + remaining),
+                        construction._formatEndTime(1000 + total),
+                    )
                 ))
                 if not enabled:
                     self.assertFalse(any(
                         "speedup" in call.args[0]
                         for call in session.setStatus.call_args_list
                     ))
+
+
+class TestChronosForgeReduction(unittest.TestCase):
+    def test_reads_reduction_with_any_decimal_separator(self):
+        table = (
+            '<table><tr><td class="level">6</td><td class="costs"><div>1,71M</div></td>'
+            '<td class="costs">48m 44s</td><td>-73,786%</td></tr>'
+            '<tr><td class="level">7</td><td class="costs"><div>2.97M</div></td>'
+            '<td class="costs">1h 6m</td><td>-79.028 %</td></tr></table>'
+        )
+        self.assertEqual(
+            construction._parseChronosForgeReductions(table), {6: 0.73786, 7: 0.79028}
+        )
+
+    def test_city_without_chronoforge_makes_no_request(self):
+        session = Mock()
+        city = {"id": 1, "position": [{"building": "townHall", "level": 10}, {"building": "empty"}]}
+        self.assertEqual(construction.getChronosForgeReduction(session, city), (0, 0.0))
+        session.post.assert_not_called()
+
+    def test_uses_the_level_of_the_city_chronoforge(self):
+        session = Mock()
+        city = {"id": 1, "position": [{"building": "chronosForge", "level": 6}]}
+        with (
+            patch.dict(construction._chronos_forge_reductions, clear=True),
+            patch.object(construction, "_getBuildingHelpTable", return_value=(
+                '<td class="level">6</td><td>-73,786%</td><td class="level">7</td><td>-79,028%</td></table>'
+            )),
+        ):
+            self.assertEqual(construction.getChronosForgeReduction(session, city), (6, 0.73786))
+
+
+class TestConstructionTimeUnits(unittest.TestCase):
+    def test_months_and_years_are_not_read_as_minutes(self):
+        day = 86400
+        for text, seconds in (
+            ("25m 34s", 25 * 60 + 34),
+            ("1hs 6m", 3600 + 6 * 60),
+            ("3D 11hs", 3 * day + 11 * 3600),
+            ("1M 7D", 37 * day),
+            ("1A 3M", 455 * day),
+        ):
+            with self.subTest(text=text):
+                row = '<td class="costs"><div>1</div></td><td class="costs">{}</td>'.format(text)
+                self.assertEqual(construction._parseConstructionTime(row), seconds)
