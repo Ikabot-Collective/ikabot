@@ -396,13 +396,23 @@ def next_sale(offers, remaining, ship_space, available, min_price=None, buyers=N
 def config_from_saved(mode, amount_to_sell, offers, resource_type, city_to_buy_from, city):
     """An older menu saved the trading post's city, and the offers it showed"""
     if mode == "sell_to_offers" and city_to_buy_from is not None:
+        if not isinstance(city_to_buy_from, dict):
+            raise ValueError("city_to_buy_from must be an object, got {!r}".format(city_to_buy_from))
+        if offers is not None and not isinstance(offers, (list, tuple)):
+            raise ValueError("offers must be a list, got {!r}".format(offers))
+        try:
+            min_price = min(int(o[3]) for o in offers) if offers else None
+            buyers = [str(o[5]) for o in offers] if offers else None
+        except (IndexError, TypeError, ValueError):
+            raise ValueError("offers has an invalid entry: {!r}".format(offers))
         return {
-            "city_id": city_to_buy_from["id"], "resource": resource_type, "amount": amount_to_sell,
-            "min_price": min(int(o[3]) for o in offers) if offers else None,
-            "buyers": [str(o[5]) for o in offers] if offers else None,
+            "city_id": city_to_buy_from.get("id"), "resource": resource_type, "amount": amount_to_sell,
+            "min_price": min_price, "buyers": buyers,
         }
     if mode == "create_offer" and city is not None:
-        return {"city_id": city["id"], "resource": resource_type, "amount": amount_to_sell}
+        if not isinstance(city, dict):
+            raise ValueError("city must be an object, got {!r}".format(city))
+        return {"city_id": city.get("id"), "resource": resource_type, "amount": amount_to_sell}
     return {}
 
 
@@ -702,8 +712,14 @@ def create_offer(session, city, resource, amount, price):
     while True:
         html = getMarketInfo(session, city)
         offers_now = own_offers(html)
+        if offers_now[resource]["type"] == BUY and offers_now[resource]["amount"] > 0:
+            return stop("there is an offer to buy {} {}".format(addThousandSeparator(offers_now[resource]["amount"]), name))
         on_sale = offers_now[resource]["amount"]
-        room = max(0, storageCapacityOfMarket(html) - on_sale)
+        # if part of the pre-existing offer sold while we waited, lower the baseline so we wait for our own units
+        previous_on_sell = min(previous_on_sell, on_sale)
+        # trading post capacity is shared across all 5 goods
+        total_on_market = sum(o["amount"] for o in offers_now)
+        room = max(0, storageCapacityOfMarket(html) - total_on_market)
         available = getCityById(session, city["id"])["availableResources"][resource]
         add = min(left, room, available)
         if add > 0:
@@ -722,7 +738,10 @@ def create_offer(session, city, resource, amount, price):
     # wait until the last of our offer is actually bought, and let the user know
     session.setStatus("Offered {} {} at {} in {}: waiting until it is sold".format(
         addThousandSeparator(amount), name, price, city["name"]))
-    while own_offers(getMarketInfo(session, city))[resource]["amount"] > previous_on_sell:
+    while True:
+        current_offer = own_offers(getMarketInfo(session, city))[resource]
+        if current_offer["type"] != SELL or current_offer["amount"] <= previous_on_sell:
+            break
         wait(60 * 60 * 2)
     msg = "{} of {} was sold at {:d}".format(addThousandSeparator(amount), materials_names[resource], price)
     sendToBot(session, msg)

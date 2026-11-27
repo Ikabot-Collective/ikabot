@@ -158,7 +158,7 @@ def do_it(session, limits, sourceCityIds, destinationCityId, intervalInHours=1, 
         destinationCityName = getCity(session.get(city_url + str(destinationCityId)))['name']
 
         session.setStatus(
-            f"Sent {addThousandSeparator(loop_amount_sent)} resources from {source_city_names_str} -> {destinationCity['name']} | Total sent: {addThousandSeparator(total_amount_sent)} | Next shipment at {getDateTime(nextRunTime.timestamp())}"
+            f"Sent {addThousandSeparator(loop_amount_sent)} resources from {source_city_names_str} -> {destinationCityName} | Total sent: {addThousandSeparator(total_amount_sent)} | Next shipment at {getDateTime(nextRunTime.timestamp())}"
         )
 
         firstRun = False
@@ -211,6 +211,10 @@ def consolidateResources(session, event, stdin_fd, predetermined_input):
     if destination_id_str in sourceCities:
         sourceCities.remove(destination_id_str)
         del sourceCitiesDict[destination_id_str]
+    if not sourceCitiesDict:
+        print('No source cities selected (other than the destination).')
+        enter()
+        return None
 
     banner()
     print('Define resource limits to keep:')

@@ -91,6 +91,8 @@ class TestPrepareUpgradeUnits(unittest.TestCase):
             ([{"city_id": "111", "upgrades": [dict(upgrade, target=11)]}],
              "target 11 is above what the workshop of Alpha allows: 10"),
             ([{"city_id": "111", "upgrades": [dict(upgrade, target=5)]}], "every upgrade is already at its target level"),
+            ([{"city_id": "111", "tasks": "bad"}], "tasks must be a list"),
+            ([{"city_id": "111", "tasks": [{}]}], "invalid saved task entry"),
         ]
         for jobs, error in bad:
             with self.subTest(error):
@@ -149,6 +151,15 @@ class TestUpgradeTask(unittest.TestCase):
         )
         self.assertEqual(self.send_upgrade_request.call_count, 2)
         self.assertEqual({call.args[1] for call in self.send_upgrade_request.call_args_list}, {"111", "222"})
+
+    def test_empty_php_list_in_tab_does_not_crash_and_waits_on_both_tabs(self, _city, mock_wait, *_mocks):
+        from ikabot.function.UpgradeUnits import workshop_upgrades
+
+        with patch("ikabot.function.UpgradeUnits.workshop_tab_data", return_value={"completeData": [], "unitDetails": []}):
+            self.assertEqual(workshop_upgrades(self.session, "111", 5), {})
+        run_city_upgrades(self.session, "111", [{"unitId": "303", "upgradeType": "offensive", "target": 6}])
+        waited_tabs = {c.args[3] for c in mock_wait.call_args_list}
+        self.assertEqual(waited_tabs, {"tabUnits", "tabShips"})
 
 
 if __name__ == "__main__":

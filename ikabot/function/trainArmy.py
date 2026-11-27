@@ -110,6 +110,9 @@ def planTrainings(session, city, trainings, trainTroops):
             return True
 
         for training in trainings:
+            # skip rounds that are already finished (pass 2+) or empty (units unavailable in a replicated city)
+            if sum(unit["cantidad"] for unit in training) == 0:
+                continue
             waitForTraining(session, city, trainTroops)
             html = session.get(city_url + city["id"])
             city = getCity(html)
@@ -226,12 +229,21 @@ def unit_key(units, value, name):
 
 def rounds_from_saved(tranings):
     """An older menu saved each round as the building's units with their amounts"""
-    rounds = [
-        {unit["identifier"]: unit["cantidad"] for unit in training if unit.get("cantidad")}
-        for training in tranings
-    ]
-    # a round where nothing was asked for trains nothing
-    return [training for training in rounds if training]
+    if not isinstance(tranings, (list, tuple)):
+        raise ValueError("tranings must be a list, got {!r}".format(tranings))
+    rounds = []
+    for training in tranings:
+        if not isinstance(training, (list, tuple)):
+            raise ValueError("each entry in tranings must be a list, got {!r}".format(training))
+        amounts = {}
+        for unit in training:
+            if not isinstance(unit, dict) or "identifier" not in unit:
+                raise ValueError("invalid saved unit entry: {!r}".format(unit))
+            if unit.get("cantidad"):
+                amounts[unit["identifier"]] = unit["cantidad"]
+        if amounts:
+            rounds.append(amounts)
+    return rounds
 
 
 def trainings_for(units, rounds):
@@ -267,7 +279,9 @@ def prepare_trainArmy(session, city_id=None, type=None, rounds=None, repeat=0, r
     config : dict
     """
     if city is not None:
-        city_id = city["id"]
+        if not isinstance(city, dict):
+            raise ValueError("city must be an object, got {!r}".format(city))
+        city_id = city.get("id")
         type = "troops" if trainTroops else "ships"
         rounds = rounds_from_saved(tranings or [])
         repeat = countRepeat or 0
@@ -328,7 +342,9 @@ def do_trainArmy(session, city_id=None, type=None, rounds=None, repeat=0, replic
         saved by older menus
     """
     if city is not None:
-        city_id = city["id"]
+        if not isinstance(city, dict):
+            raise ValueError("city must be an object, got {!r}".format(city))
+        city_id = city.get("id")
         type = "troops" if trainTroops else "ships"
         rounds = rounds_from_saved(tranings or [])
         repeat = countRepeat or 0
@@ -398,6 +414,10 @@ def trainArmy(session, event, stdin_fd, predetermined_input):
     units_info = data[2][1]
     units = generateArmyData(units_info)
 
+    if not units:
+        print("No units can be trained in this city right now.")
+        enter()
+        return None
     maxSize = max([len(unit["local_name"]) for unit in units])
 
     tranings = []
@@ -582,13 +602,19 @@ def trainArmy(session, event, stdin_fd, predetermined_input):
         print("\nThe selected fleet will be trained.")
     enter()
 
+    rounds = rounds_from_saved(tranings)
+    if not rounds:
+        print("\nNo units selected.")
+        enter()
+        return None
+
     # the task reads the units and their costs from the building: the config keeps the
     # amounts the user chose
     return {
         "session": session,
         "city_id": str(city["id"]),
         "type": "troops" if trainTroops else "ships",
-        "rounds": rounds_from_saved(tranings),
+        "rounds": rounds,
         "repeat": countRepeat,
         "replicate_to": [str(c) for c in cityTrainings if str(c) != str(city["id"])] or None,
     }
@@ -596,7 +622,7 @@ def trainArmy(session, event, stdin_fd, predetermined_input):
 
 def filterCitiesByResource(cities, resource_id, cityTrainings):
     for cityId, cityData in cities.items():
-        if cityData["tradegood"] == resource_id:
+        if str(cityData["tradegood"]) == str(resource_id):
             cityTrainings.append(cityData["id"])
     return cityTrainings
 

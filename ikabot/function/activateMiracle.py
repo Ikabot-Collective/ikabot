@@ -44,6 +44,7 @@ WONDER_NAMES = {
 }
 WONDER_TYPES = {name: number for number, name in WONDER_NAMES.items()}
 WONDER_TYPES["athena"] = "4"
+WONDER_TYPES["hephaestus"] = "1"
 
 
 def wonder_letters(name):
@@ -166,10 +167,16 @@ def obtainMiraclesAvailable(session):
     """
     ids, cities = getIdsOfCities(session)
     islands = {}
+    world_key = (
+        getattr(session, "mundo", None),
+        getattr(session, "servidor", None),
+        getattr(session, "username", None),
+    )
 
     for city_id in cities:
         city_info = cities[city_id]
-        temple_city = _CITY_TEMPLE_CACHE.get(city_id)
+        city_cache_key = (world_key, city_id)
+        temple_city = _CITY_TEMPLE_CACHE.get(city_cache_key)
 
         if temple_city is None:
             html = session.get(city_url + str(city_info["id"]))
@@ -178,14 +185,15 @@ def obtainMiraclesAvailable(session):
             if pos is None:
                 continue
             temple_city = {"id": city["id"], "name": city["name"], "islandId": city["islandId"], "pos": pos}
-            _CITY_TEMPLE_CACHE[city_id] = temple_city
+            _CITY_TEMPLE_CACHE[city_cache_key] = temple_city
 
         island_id = temple_city["islandId"]
-        cached_island = _ISLAND_CACHE.get(island_id)
+        island_cache_key = (world_key, island_id)
+        cached_island = _ISLAND_CACHE.get(island_cache_key)
         if cached_island is None:
             html = session.get(island_url + island_id)
             cached_island = getIsland(html)
-            _ISLAND_CACHE[island_id] = cached_island
+            _ISLAND_CACHE[island_cache_key] = cached_island
 
         target_island = islands.get(island_id)
         if target_island is None:
@@ -196,13 +204,27 @@ def obtainMiraclesAvailable(session):
         temple_info = get_temple_info(session, temple_city)
 
         # wonder level belongs to the island, not the temple; keep the highest
-        # instance of this wonder type across all islands
+        # instance of this wonder type across all islands (preferring a ready one on ties)
         existing_best = next(
             (isl for isl in islands.values() if isl["activable"] and isl["wonder"] == target_island["wonder"]),
             None,
         )
         if existing_best is not None:
-            if temple_info["level"] > existing_best["wonderActivationLevel"]:
+            better = temple_info["level"] > existing_best["wonderActivationLevel"]
+            if not better and temple_info["level"] == existing_best["wonderActivationLevel"]:
+                if temple_info["available"] and not existing_best["available"]:
+                    better = True
+                elif (
+                    not temple_info["available"]
+                    and not existing_best["available"]
+                    and temple_info["available_in"] is not None
+                    and (
+                        existing_best.get("available_in") is None
+                        or temple_info["available_in"] < existing_best["available_in"]
+                    )
+                ):
+                    better = True
+            if better:
                 existing_best["activable"] = False
             else:
                 continue
@@ -306,7 +328,7 @@ def wait_for_miracle(session, island):
         temple_response = temple_response[2][1]
 
         for elem in temple_response:
-            if "countdown" in temple_response[elem]:
+            if isinstance(temple_response[elem], dict) and "countdown" in temple_response[elem]:
                 enddate = temple_response[elem]["countdown"]["enddate"]
                 currentdate = temple_response[elem]["countdown"]["currentdate"]
                 wait_time = int(float(enddate)) - int(float(currentdate))
@@ -529,8 +551,7 @@ def activateMiracle(session, event, stdin_fd, predetermined_input):
         print("Proceed? [Y/n]")
         activate_miracle_input = read(values=["y", "Y", "n", "N", ""])
         if activate_miracle_input.lower() == "n":
-            event.set()
-            return
+            return None
 
         miracle_activation_result = activateMiracleHttpCall(session, island)
 
@@ -541,16 +562,16 @@ def activateMiracle(session, event, stdin_fd, predetermined_input):
                 )
             )
             enter()
-            event.set()
-            return
+            return None
 
         data = miracle_activation_result[2][1]
+        wait_time = 0
         for elem in data:
-            if "countdown" in data[elem]:
+            if isinstance(data[elem], dict) and "countdown" in data[elem]:
                 enddate = data[elem]["countdown"]["enddate"]
                 currentdate = data[elem]["countdown"]["currentdate"]
+                wait_time = int(float(enddate)) - int(float(currentdate))
                 break
-        wait_time = int(float(enddate)) - int(float(currentdate))
 
         print("The miracle {} was activated.".format(island["wonderName"]))
         enter()
@@ -561,14 +582,12 @@ def activateMiracle(session, event, stdin_fd, predetermined_input):
 
             reactivate_again_input = read(values=["y", "Y", "n", "N", ""])
             if reactivate_again_input.lower() != "y":
-                event.set()
-                return
+                return None
 
             iterations = read(msg="How many times?: ", digit=True, min=0)
 
             if iterations == 0:
-                event.set()
-                return
+                return None
 
             duration = wait_time * iterations
 
@@ -589,8 +608,7 @@ def activateMiracle(session, event, stdin_fd, predetermined_input):
         print("Proceed? [Y/n]")
         user_confirm = read(values=["y", "Y", "n", "N", ""])
         if user_confirm.lower() == "n":
-            event.set()
-            return
+            return None
         wait_time = island["available_in"]
         iterations = 1
 

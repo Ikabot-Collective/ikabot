@@ -115,14 +115,16 @@ def derived_port(session):
     port : str
     """
     port = (
-        sum(ord(c) ** 2 for c in session.mail)
-        + sum(ord(c) ** 2 for c in session.host)
-        + sum(ord(c) ** 2 for c in session.username)
+        sum(ord(c) ** 2 for c in (session.mail or ""))
+        + sum(ord(c) ** 2 for c in (session.host or ""))
+        + sum(ord(c) ** 2 for c in (session.username or ""))
     ) % 2000 + 43000
 
     # bang on ports from `port` to 65535 until an available one is found
-    while is_port_in_use(port):
+    while port <= 65535 and is_port_in_use(port):
         port += 1
+    if port > 65535:
+        raise RuntimeError("No free TCP port found between 43000 and 65535")
     return str(port)
 
 

@@ -30,6 +30,8 @@ class TestPrepareDumpWorld(unittest.TestCase):
             prepare_dumpWorld(MagicMock(), waiting_time=1500)
         with self.assertRaisesRegex(ValueError, "waiting_time must be a number of seconds"):
             prepare_dumpWorld(MagicMock(), waiting_time="fast")
+        with self.assertRaisesRegex(ValueError, "waiting_time must be a number of seconds"):
+            prepare_dumpWorld(MagicMock(), waiting_time=True)
         with self.assertRaisesRegex(ValueError, "coords must be"):
             prepare_dumpWorld(MagicMock(), coords="50")
         with self.assertRaisesRegex(ValueError, "coords x must be at most 100"):

@@ -24,7 +24,7 @@ FORGE = wonder("1", "Hephaistos' Forge", 2, city_id="222")
 class TestWonderType(unittest.TestCase):
     def test_a_number_or_a_gods_name(self):
         for value, expected in [(5, "5"), ("5", "5"), ("05", "5"), ("Hermes", "5"), (" hermes ", "5"),
-                                ("athena", "4"), ("Athène", "4"), ("COLOSSUS", "8")]:
+                                ("athena", "4"), ("Athène", "4"), ("hephaestus", "1"), ("COLOSSUS", "8")]:
             with self.subTest(value):
                 self.assertEqual(wonder_type(value), expected)
 

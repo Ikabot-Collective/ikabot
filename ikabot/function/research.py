@@ -199,12 +199,25 @@ def experiment_multi(session, cities):
 EXPERIMENT_CRYSTAL = 300000
 
 
-def ids_from_saved_config(experiments=None, cities=None):
+def ids_from_saved_config(experiments=None, cities=None, automatic=None):
     """(cities_ids, qty) of a config saved by an older menu, which held the academy cities"""
-    if experiments:
+    if experiments is not None:
+        if not isinstance(experiments, dict) or "cityID" not in experiments:
+            raise ValueError("experiments must be an object with 'cityID', got {!r}".format(experiments))
+        if automatic:
+            return [experiments["cityID"]], None
+        if "qty" not in experiments:
+            raise ValueError("experiments must include 'qty', got {!r}".format(experiments))
         return [experiments["cityID"]], experiments["qty"]
-    if cities:
-        return [city["cityID"] for city in cities], None
+    if cities is not None:
+        if not isinstance(cities, (list, tuple)):
+            raise ValueError("cities must be a list of objects, got {!r}".format(cities))
+        ids = []
+        for city in cities:
+            if not isinstance(city, dict) or "cityID" not in city:
+                raise ValueError("each entry in cities must be an object with 'cityID', got {!r}".format(city))
+            ids.append(city["cityID"])
+        return ids, None
     return None, None
 
 
@@ -235,7 +248,7 @@ def prepare_research(session, cities_ids=None, qty=None, mode=None, experiments=
     config : dict
     """
     if cities_ids is None and qty is None:
-        cities_ids, qty = ids_from_saved_config(experiments, cities)
+        cities_ids, qty = ids_from_saved_config(experiments, cities, automatic)
     if qty is not None:
         qty = asInt(qty, "qty", minimum=1)
     if cities_ids is not None and not isinstance(cities_ids, (list, tuple)):
@@ -283,11 +296,16 @@ def do_it(session, cities_ids=None, qty=None, mode=None, experiments=None, autom
         a config saved by an older menu
     """
     if cities_ids is None and qty is None:
-        cities_ids, qty = ids_from_saved_config(experiments, cities)
+        cities_ids, qty = ids_from_saved_config(experiments, cities, automatic)
     if cities_ids is None:
         academies = find_academy_cities(session)
     else:
         academies = [city for city in (academy_city(session, city_id) for city_id in cities_ids) if city]
+    if not academies:
+        msg = "Experiments stopped: none of the selected cities has an academy"
+        session.setStatus(msg)
+        sendToBot(session, msg)
+        return
     names = ", ".join(city["cityName"] for city in academies)
 
     if qty is not None:

@@ -139,6 +139,16 @@ class TestBuyTask(unittest.TestCase):
         status = session.setStatus.call_args.args[0]
         self.assertRegex(status, r"^Bought 400 of 3\.000 marble for 8\.000 gold @.*: there are no more marble offers at or below 25 gold$")
 
+    def test_keeps_warehouse_cap_notice_after_buying_what_fits(self, _market, _gold, _wait, _cap, _info, mock_bot):
+        tight_market = dict(MARKET, freeSpaceForResources=[500] * 5)
+        session = MagicMock()
+        with patch("ikabot.function.buyResources.market_city", return_value=tight_market), \
+                patch("ikabot.function.buyResources.live_offers", return_value=[offer(20, 5000)]), \
+                patch("ikabot.function.buyResources.buy", return_value=(20, None)):
+            do_it.__wrapped__(session, city_id="111", resource="marble", amount=3000, max_price=25)
+        self.assertIn("Alpha has room for 500 marble", session.setStatus.call_args.args[0])
+        mock_bot.assert_called_once()
+
 
 if __name__ == "__main__":
     unittest.main()

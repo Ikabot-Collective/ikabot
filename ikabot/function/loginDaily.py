@@ -212,13 +212,20 @@ def prepare_loginDaily(session, wine_city, wood_city=None, luxury_city=None, fav
         raise ValueError('favour_tasks must be a list of tasks or "all", got {!r}'.format(favour_tasks))
     tasks = []
     for name in favour_tasks:
-        key = OLD_TASK_NAMES.get(name, str(name).strip().lower())
+        if not isinstance(name, str):
+            raise ValueError(
+                "favour_tasks: unknown task {!r}, use {}".format(name, ", ".join(TASK_FUNCTIONS))
+            )
+        key = OLD_TASK_NAMES.get(name, name.strip().lower())
         if key not in TASK_FUNCTIONS:
             raise ValueError(
                 "favour_tasks: unknown task {!r}, use {}".format(name, ", ".join(TASK_FUNCTIONS))
             )
         if key not in tasks:
             tasks.append(key)
+    if "complete" in tasks:
+        tasks.remove("complete")
+        tasks.append("complete")
 
     return {
         "wine_city": city_id(wine_city, "wine_city"),

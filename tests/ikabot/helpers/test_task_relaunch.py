@@ -15,6 +15,7 @@ import ikabot.function.webServer, ikabot.function.loginDaily, ikabot.function.re
 import ikabot.function.sendResources, ikabot.function.activateMiracle, ikabot.function.UpgradeUnits  # noqa
 import ikabot.function.distributeResources, ikabot.function.resourceTransportManager  # noqa
 import ikabot.function.buyResources, ikabot.function.sellResources, ikabot.function.trainArmy  # noqa
+import ikabot.function.trainSpies  # noqa
 from ikabot.helpers.decorators import _TASK_REGISTRY
 from ikabot.helpers.ipc import _validate_task_config
 
@@ -98,6 +99,12 @@ MENU = {
     "trainArmy (old menu)": {"city": {"id": "111", "name": "Alpha", "pos": "4", "position": []}, "trainTroops": True,
                              "tranings": [[dict(PHALANX, cantidad=10)]], "replicate": "n", "countRepeat": 1, "cityTrainings": [],
                              "units": [dict(PHALANX, cantidad=10)]},
+    "trainSpies": {"run_hours": 4, "cities_ids": ["111"],
+                   "settings": {"target": 10, "goldFloor": 50000, "crystalFloor": 1000, "maxPerPass": 50},
+                   "notification_mode": 2, "check_now": False},
+    "trainSpies (all cities)": {"run_hours": 6, "cities_ids": None,
+                                "settings": {"target": 0, "goldFloor": 0, "crystalFloor": 0, "maxPerPass": 100},
+                                "notification_mode": 3, "check_now": False},
     "loginDaily (old menu)": {"wine_city": {"id": 111, "name": "Alpha", "position": []}, "wood_city": None, "luxury_city": None,
                               "favour_tasks": ["Collect resource favour", "Look at hightscore/shop/inventory"], "collect_ambrosia": False},
 }

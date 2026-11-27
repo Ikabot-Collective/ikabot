@@ -174,10 +174,15 @@ def prepare_autoPirate(
     piracy_cities = getPiracyCities(session, max(missions))
     if not piracy_cities:
         raise ValueError("none of your cities has a pirate fortress able to do mission {}".format(max(missions)))
-    first_city = piracyCities[0] if piracyCities else piracy_cities[0]
-    first_city_id = first_city["id"] if isinstance(first_city, dict) else first_city
+    if piracyCities is not None:
+        if not isinstance(piracyCities, (list, tuple)):
+            raise ValueError("piracyCities must be a list of city ids or objects, got {!r}".format(piracyCities))
+        first_city = piracyCities[0] if piracyCities else piracy_cities[0]
+    else:
+        first_city = piracy_cities[0]
+    first_city_id = asId(first_city.get("id") if isinstance(first_city, dict) else first_city, "piracyCities")
     # the task only reads the first city's id: keep the saved config small
-    config["piracyCities"] = [{"id": asId(first_city_id, "piracyCities")}]
+    config["piracyCities"] = [{"id": first_city_id}]
     return config
 
 

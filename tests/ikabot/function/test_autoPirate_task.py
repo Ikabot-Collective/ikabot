@@ -74,6 +74,9 @@ class TestPrepareAutoPirate(unittest.TestCase):
             prepare_autoPirate(
                 MagicMock(), pirateCount=5, pirateSchedule=True, pirateMissionDayChoice=1, pirateMissionNightChoice=1, dayStart=24
             )
+        for bad in ("7665", 123, [{}]):
+            with self.assertRaises(ValueError):
+                prepare_autoPirate(MagicMock(), pirateCount=5, pirateMissionChoice=1, piracyCities=bad)
 
     def test_needs_a_fortress(self, mock_cities):
         mock_cities.return_value = []

@@ -330,6 +330,9 @@ class TestIPC(unittest.TestCase):
         self.assertTrue(server._session_matches(sess, None, "s74-es", None, "playerone"))
         self.assertFalse(server._session_matches(sess, None, "s74-es", None, "PlayerTwo"))
         self.assertTrue(server._session_matches(sess, None, None, None, None))
+        # --server alone must still filter by server language
+        self.assertTrue(server._session_matches(sess, None, None, "es", None))
+        self.assertFalse(server._session_matches(sess, None, None, "de", None))
 
     @patch("ikabot.helpers.ipc.Session.from_saved")
     @patch("ikabot.helpers.ipc.updateProcessList")
@@ -438,6 +441,35 @@ class TestIPC(unittest.TestCase):
         self.assertEqual(mock_proc_cls.call_args.kwargs["args"][2], {"port": "43123"})
         saved_entry = mock_update_plist.call_args.kwargs["programprocesslist"][0]
         self.assertEqual(saved_entry["config"], {"port": "43123"})
+
+    @patch("ikabot.helpers.ipc.updateProcessList")
+    @patch("ikabot.helpers.ipc.multiprocessing.Process")
+    def test_start_task_clears_stale_city_cache_before_prepare(self, mock_proc_cls, _mock_update_plist):
+        from ikabot.helpers import pedirInfo
+
+        seen = {}
+
+        def check_cache(session):
+            seen["ids_cache"] = pedirInfo.ids_cache
+            return {}
+
+        @task("ipc_cache_check_task", prepare=check_cache)
+        def cache_task(session):
+            pass
+
+        mock_proc_cls.side_effect = self._started_process(MagicMock(pid=66))
+        pedirInfo.ids_cache = ["stale_city"]
+        pedirInfo.cities_cache = {"stale_city": {"name": "OtherAccount"}}
+        try:
+            menu_session = MagicMock(logged=True, mail="", username="PlayerOne", mundo="74", servidor="es")
+            resp = IPCServer(default_session=menu_session).handle_request(
+                {"action": "start_task", "task": "ipc_cache_check_task", "config": {}}
+            )
+            self.assertEqual(resp["status"], "ok")
+            self.assertIsNone(seen["ids_cache"])
+        finally:
+            pedirInfo.ids_cache = None
+            pedirInfo.cities_cache = None
 
 
 if __name__ == "__main__":

@@ -197,11 +197,19 @@ def workshop_upgrades(session, city_id, position, tabs=TABS):
     upgrades = {}
     for tab in tabs:
         data = workshop_tab_data(session, city_id, position, tab) or {}
-        names = data.get("unitDetails", {})
-        for unit_id, types in data.get("completeData", {}).items():
+        names = data.get("unitDetails")
+        if not isinstance(names, dict):
+            names = {}
+        complete = data.get("completeData")
+        if not isinstance(complete, dict):
+            continue
+        for unit_id, types in complete.items():
+            if not isinstance(types, dict):
+                continue
+            unit_info = names.get(str(unit_id))
             upgrades[str(unit_id)] = {
                 "tab": tab,
-                "name": names.get(str(unit_id), {}).get("unitName", "Unit {}".format(unit_id)),
+                "name": unit_info.get("unitName", "Unit {}".format(unit_id)) if isinstance(unit_info, dict) else "Unit {}".format(unit_id),
                 "types": {
                     upgrade_type: {
                         "level": int(upgrade.get("currentLevel", {}).get("upgradeLevel", 0)),
@@ -219,12 +227,18 @@ def job_from_saved(job):
     menu saved every single level to upgrade in "tasks", with the city's name and workshop"""
     if not isinstance(job, dict) or "tasks" not in job:
         return job
+    tasks = job.get("tasks")
+    if not isinstance(tasks, (list, tuple)):
+        raise ValueError("tasks must be a list, got {!r}".format(tasks))
     targets = {}
-    for step in job["tasks"]:
+    for step in tasks:
+        if not isinstance(step, dict) or "unitId" not in step or "upgradeType" not in step or "to" not in step:
+            raise ValueError("invalid saved task entry: {!r}".format(step))
+        to_lvl = asInt(step["to"], "to", minimum=1)
         key = (str(step["unitId"]), step["upgradeType"])
-        targets[key] = max(targets.get(key, 0), int(step["to"]))
+        targets[key] = max(targets.get(key, 0), to_lvl)
     return {
-        "city_id": job["city_id"],
+        "city_id": job.get("city_id"),
         "upgrades": [{"unitId": unit_id, "upgradeType": upgrade_type, "target": target}
                      for (unit_id, upgrade_type), target in targets.items()],
     }
@@ -308,9 +322,7 @@ def run_city_upgrades(session, city_id, upgrades):
         return
     position = workshop["position"]
     available = workshop_upgrades(session, city_id, position)
-    # the workshop does one upgrade at a time: wait on every tab this city uses
-    tabs = sorted({available[str(u["unitId"])]["tab"] for u in upgrades if str(u["unitId"]) in available})
-
+    # the workshop does one upgrade at a time across both tabs (units and ships)
     pending = list(upgrades)
     while pending:
         upgrade = pending[0]
@@ -320,7 +332,7 @@ def run_city_upgrades(session, city_id, upgrades):
             sendToBot(session, "Upgrade aborted in city {}: the workshop cannot upgrade unit {} ({}).".format(city_name, unit_id, upgrade_type))
             return
         tab = available[unit_id]["tab"]
-        for t in tabs:
+        for t in TABS:
             wait_for_upgrade_completion(session, city_id, position, t, label=city_name)
 
         # the level is read from the game each time, so a relaunched task goes on where it was
@@ -414,11 +426,15 @@ def UpgradeUnits(session, event, stdin_fd, predetermined_input):
             selected_workshops = workshops
         else:
             selected_workshops = []
+            seen_city_ids = set()
             for token in sel:
                 if token.isdigit():
                     i = int(token)
                     if 0 < i <= len(workshops):
-                        selected_workshops.append(workshops[i - 1])
+                        w = workshops[i - 1]
+                        if w["city_id"] not in seen_city_ids:
+                            seen_city_ids.add(w["city_id"])
+                            selected_workshops.append(w)
 
         if not selected_workshops:
             enter()

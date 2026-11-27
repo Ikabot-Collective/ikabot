@@ -139,6 +139,35 @@ class TestSellTask(unittest.TestCase):
         self.assertRegex(session.setStatus.call_args.args[0],
                          r"^Sold 400 of 3\.000 wood for 4\.800 gold @.*: there are no more offers to buy wood at 10 gold or more$")
 
+    def test_create_offer_counts_other_goods_against_market_capacity(self, *_):
+        from ikabot.function.sellResources import SELL, create_offer
+
+        session = MagicMock()
+        session.post.return_value = "[]"
+        # trading post capacity is 5000, wine already uses 4000 -> only 1000 room for wood
+        other_offers = [
+            {"type": SELL, "amount": 0, "price": 5},
+            {"type": SELL, "amount": 4000, "price": 10},
+            {"type": SELL, "amount": 0, "price": 5},
+            {"type": SELL, "amount": 0, "price": 5},
+            {"type": SELL, "amount": 0, "price": 5},
+        ]
+        # pass 1: 4000 wine takes room -> offers 1000 wood; pass 2: all sold -> offers remaining 500; final check: sold
+        offers_seq = [
+            other_offers,
+            other_offers,
+            [{"type": SELL, "amount": 0, "price": 5}] * 5,
+            [{"type": SELL, "amount": 0, "price": 5}] * 5,
+        ]
+        posted = []
+        session.post.side_effect = lambda params=None: (posted.append(params), "[]")[1]
+        with patch("ikabot.function.sellResources.getMarketInfo", return_value=""), \
+                patch("ikabot.function.sellResources.own_offers", side_effect=offers_seq), \
+                patch("ikabot.function.sellResources.storageCapacityOfMarket", return_value=5000), \
+                patch("ikabot.function.sellResources.wait"):
+            create_offer(session, dict(MARKET), 0, 1500, 8)
+        self.assertEqual([p["resource"] for p in posted], [1000, 500])
+
 
 if __name__ == "__main__":
     unittest.main()

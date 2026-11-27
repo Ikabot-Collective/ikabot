@@ -26,8 +26,8 @@ def route_from_saved(route):
     if isinstance(route, (list, tuple)) and len(route) == 3 + len(RESOURCE_KEYS):
         origin, destination, island_id = route[0], route[1], route[2]
         return {
-            "from": origin["id"] if isinstance(origin, dict) else origin,
-            "to": destination["id"] if isinstance(destination, dict) else destination,
+            "from": origin.get("id") if isinstance(origin, dict) else origin,
+            "to": destination.get("id") if isinstance(destination, dict) else destination,
             "island": island_id,
             "resources": list(route[3:]),
         }
@@ -38,9 +38,20 @@ def get_island(session, value, name):
     """The island with this id or "X:Y" coordinates, as returned by getIsland"""
     text = str(value).strip()
     if re.fullmatch(r"\d+\s*:\s*\d+", text):
-        x, y = text.replace(" ", "").split(":")
-        return getIsland(session.get("view=island&xcoord={}&ycoord={}".format(x, y)))
-    return getIsland(session.get(island_url + asId(value, name)))
+        x, y = (int(p) for p in text.replace(" ", "").split(":"))
+        html = session.get("view=island&xcoord={}&ycoord={}".format(x, y))
+        try:
+            island = getIsland(html)
+        except (AttributeError, KeyError, TypeError, ValueError):
+            raise ValueError("{}: no island found at {}:{}".format(name, x, y))
+        if "x" in island and "y" in island and (str(island["x"]) != str(x) or str(island["y"]) != str(y)):
+            raise ValueError("{}: no island found at {}:{}".format(name, x, y))
+        return island
+    island_id = asId(value, name)
+    try:
+        return getIsland(session.get(island_url + island_id))
+    except (AttributeError, KeyError, TypeError, ValueError):
+        raise ValueError("{}: island {} was not found".format(name, island_id))
 
 
 def resource_amounts(value, name):

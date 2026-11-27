@@ -423,5 +423,34 @@ class TestPauses(unittest.TestCase):
         self.assertNotIn(call(READ_DELAY), pause.call_args_list)
 
 
+@patch("ikabot.helpers.taskConfig.getIdsOfCities", return_value=(["111", "222"], {"111": {"name": "Alpha"}, "222": {"name": "Beta"}}))
+class TestPrepareTrainSpies(unittest.TestCase):
+    def test_is_registered_and_normalizes_config(self, _mock_ids):
+        from ikabot.function.trainSpies import prepare_trainSpies
+        from ikabot.helpers.decorators import _TASK_REGISTRY
+
+        self.assertIs(_TASK_REGISTRY["trainSpies"].prepare, prepare_trainSpies)
+        cfg = prepare_trainSpies(
+            Mock(), run_hours=4, cities_ids=[111, "111"], cities={"111": {"name": "Old"}},
+            settings={"target": 10}, notification_mode=2, check_now=False,
+        )
+        self.assertEqual(cfg, {
+            "run_hours": 4,
+            "cities_ids": ["111"],
+            "settings": {"target": 10, "goldFloor": 0, "crystalFloor": 0, "maxPerPass": 100},
+            "notification_mode": 2,
+        })
+
+    def test_rejects_bad_values(self, _mock_ids):
+        from ikabot.function.trainSpies import prepare_trainSpies
+
+        with self.assertRaisesRegex(ValueError, "non-empty list"):
+            prepare_trainSpies(Mock(), run_hours=4, cities_ids=[])
+        with self.assertRaisesRegex(ValueError, "unknown settings key"):
+            prepare_trainSpies(Mock(), run_hours=4, settings={"bogus": 1})
+        with self.assertRaisesRegex(ValueError, "run_hours must be at most 24"):
+            prepare_trainSpies(Mock(), run_hours=25)
+
+
 if __name__ == "__main__":
     unittest.main()

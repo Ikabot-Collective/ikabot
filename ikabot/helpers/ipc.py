@@ -329,17 +329,20 @@ def _resolve_task(task_name):
                 if found_func is not None:
                     return found_name, found_func
 
+    custom_name = name[4:] if name.lower().startswith("lcm_") else name
     custom_paths = read_json_file(get_global_config_path(), {}).get("customModules", [])
     for cpath in custom_paths:
         if not isinstance(cpath, str) or not os.path.isfile(cpath):
             continue
         cstem = os.path.splitext(os.path.basename(cpath))[0]
-        if cstem.lower() == name.lower():
+        if cstem.lower() in (name.lower(), custom_name.lower()):
             spec = importlib.util.spec_from_file_location(cstem, cpath)
             if spec and spec.loader:
                 mod = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(mod)
             found_name, found_func = _lookup_registry(name)
+            if found_func is None and custom_name != name:
+                found_name, found_func = _lookup_registry(custom_name)
             if found_func is not None:
                 return found_name, found_func
 
@@ -476,15 +479,22 @@ class IPCServer:
         self._running = True
 
         ipc_path = get_ipc_file_path()
-        write_json_file(
-            ipc_path,
-            {
-                "pid": os.getpid(),
-                "host": "127.0.0.1",
-                "port": self.port,
-                "authkey": self.authkey,
-            },
-        )
+        ipc_info = {
+            "pid": os.getpid(),
+            "host": "127.0.0.1",
+            "port": self.port,
+            "authkey": self.authkey,
+        }
+        if self._sessions:
+            owner_sess = self._sessions[0]
+            if getattr(owner_sess, "username", None) and getattr(owner_sess, "servidor", None):
+                ipc_info["owner"] = [
+                    (getattr(owner_sess, "mail", None) or "").lower(),
+                    owner_sess.username,
+                    str(getattr(owner_sess, "mundo", "")),
+                    owner_sess.servidor,
+                ]
+        write_json_file(ipc_path, ipc_info)
         try:
             os.chmod(ipc_path, 0o600)
         except OSError:
@@ -570,23 +580,15 @@ class IPCServer:
         want_mundo, want_servidor, raw_world = parse_world_spec(world, server)
         if not raw_world and want_servidor is None:
             return True
+        if want_servidor is not None:
+            s_srv = (getattr(sess, "servidor", "") or "").lower()
+            l_srv = (getattr(sess, "login_servidor", "") or "").lower()
+            if want_servidor not in (s_srv, l_srv):
+                return False
         if want_mundo is not None:
-            if str(getattr(sess, "mundo", "")) != want_mundo:
-                return False
-            if want_servidor is not None:
-                s_srv = (getattr(sess, "servidor", "") or "").lower()
-                l_srv = (getattr(sess, "login_servidor", "") or "").lower()
-                if want_servidor not in (s_srv, l_srv):
-                    return False
-            return True
+            return str(getattr(sess, "mundo", "")) == want_mundo
         if raw_world:
-            if (getattr(sess, "word", "") or "").strip().lower() != raw_world.lower():
-                return False
-            if want_servidor is not None:
-                s_srv = (getattr(sess, "servidor", "") or "").lower()
-                l_srv = (getattr(sess, "login_servidor", "") or "").lower()
-                if want_servidor not in (s_srv, l_srv):
-                    return False
+            return (getattr(sess, "word", "") or "").strip().lower() == raw_world.lower()
         return True
 
     def _get_or_create_session(self, email, world, server, player=None):
@@ -665,6 +667,11 @@ class IPCServer:
         session = self._get_or_create_session(email, world, server, player)
         prepare = getattr(task_func, "prepare", None)
         if prepare is not None:
+            from ikabot.helpers import pedirInfo
+
+            # fresh city list for every CLI launch (a city may be new, renamed, or another account's)
+            pedirInfo.ids_cache = None
+            pedirInfo.cities_cache = None
             # errors found here go back to the CLI instead of only to the task's log
             prepared = prepare(session, **clean_config)
             if prepared is not None:
@@ -759,9 +766,13 @@ def stop_ipc_server():
     """Stop this process's IPC server if one was started."""
     global _LOCAL_SERVER
     with _LOCAL_SERVER_LOCK:
-        if _LOCAL_SERVER is not None:
-            _LOCAL_SERVER.stop()
-            _LOCAL_SERVER = None
+        server = _LOCAL_SERVER
+        _LOCAL_SERVER = None
+    if server is not None:
+        server.stop()
+        deadline = time.time() + 5.0
+        while server.has_active_requests and time.time() < deadline:
+            time.sleep(0.1)
 
 
 class _JsonArgumentParser(argparse.ArgumentParser):

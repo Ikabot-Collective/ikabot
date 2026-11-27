@@ -23,6 +23,7 @@ from ikabot import config
 from ikabot.config import *
 from ikabot.helpers.aesCipher import *
 from ikabot.helpers.sessionStorage import (
+    get_ikabot_dir,
     get_session_data,
     set_session_data,
     delete_session_data,
@@ -247,8 +248,9 @@ class Session:
                     ]
                     own_pids, other_pids = self.__accountTaskPids()
                     # padre is still True while the menu waits for this task's configurator
-                    shared_parent = not self.padre and any(
-                        proc.pid in other_pids for proc in siblings
+                    shared_parent = not self.padre and (
+                        any(proc.pid in other_pids for proc in siblings)
+                        or self.__parentOwnedByOtherAccount(parent.pid)
                     )
                     for proc in siblings:
                         if shared_parent and proc.pid not in own_pids:
@@ -264,14 +266,29 @@ class Session:
             pass
         os._exit(1)
 
-    def __accountTaskPids(self):
-        """Returns (pids of this account's tasks, pids of every other account's tasks)"""
-        own_key = (
+    def __accountKey(self):
+        return (
             (getattr(self, "mail", None) or "").lower(),
             getattr(self, "username", None),
             str(getattr(self, "mundo", "")),
             getattr(self, "servidor", None),
         )
+
+    def __parentOwnedByOtherAccount(self, parent_pid):
+        """True when the parent menu owns ipc.json for a different account (even with 0 own tasks)."""
+        try:
+            ipc_path = os.path.join(get_ikabot_dir(), "ipc.json")
+            info = read_json_file(ipc_path, {})
+            owner = info.get("owner")
+            if info.get("pid") == parent_pid and isinstance(owner, list) and len(owner) == 4:
+                return tuple(owner) != self.__accountKey()
+        except Exception:
+            pass
+        return False
+
+    def __accountTaskPids(self):
+        """Returns (pids of this account's tasks, pids of every other account's tasks)"""
+        own_key = self.__accountKey()
         own_pids, other_pids = set(), set()
         for key, pids in get_task_pids_by_account().items():
             if key == own_key:

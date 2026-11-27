@@ -48,6 +48,8 @@ def prepare_dumpWorld(session, waiting_time=1.5, coords=None, radius=None, shall
     -------
     config : dict
     """
+    if isinstance(waiting_time, bool):
+        raise ValueError("waiting_time must be a number of seconds, got {!r}".format(waiting_time))
     try:
         seconds = float(waiting_time)
     except (TypeError, ValueError):
@@ -213,7 +215,7 @@ def do_it(session, waiting_time, coords, radius, shallow, non_empty_islands, sha
 
     shared_data[2] = time.time()
     partial = (
-        True if (coords and radius and radius >= 0) or non_empty_islands else False
+        True if (coords is not None and radius is not None and radius >= 0) or non_empty_islands else False
     )
     world = {
         "name": "s" + str(session.mundo) + "-" + str(session.servidor),
@@ -346,8 +348,8 @@ def do_it(session, waiting_time, coords, radius, shallow, non_empty_islands, sha
         if non_empty_islands and not int(island["players"]):
             continue
         if (
-            coords
-            and radius
+            coords is not None
+            and radius is not None
             and ((x - coords[0]) ** 2 + (y - coords[1]) ** 2) ** 0.5 > radius
         ):
             continue

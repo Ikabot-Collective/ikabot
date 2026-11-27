@@ -463,8 +463,10 @@ if __name__ == "__main__":
     main()
 
 #############################################################
-# This is necessary to ensure that flask is frozen together #
-# with other requirements when creating ikabot.exe          #
+# This is necessary to ensure that flask and CLI-only tasks #
+# are frozen together with other requirements in ikabot.exe #
 try: import flask                                           #
+except: pass                                                #
+try: import ikabot.function.resourceTransportManager        #
 except: pass                                                #
 #############################################################

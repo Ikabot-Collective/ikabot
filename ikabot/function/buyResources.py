@@ -256,7 +256,13 @@ def buy(session, city, offer, amount_to_buy, ships_available, ship_capacity, max
         actionRequest,
     )
     data = session.post(url)
-    html = json.loads(data, strict=False)[1][1][1]
+    problem = rejection(data)
+    if problem is not None:
+        return None, "the offer of {} is no longer available: {}".format(offer["ciudadDestino"], problem)
+    try:
+        html = json.loads(data, strict=False)[1][1][1]
+    except (IndexError, KeyError, TypeError, ValueError):
+        return None, "could not open the offer of {}".format(offer["ciudadDestino"])
     hits = re.findall(r'"tradegood(\d)Price"\s*value="(\d+)', html)
     for hit in hits:
         data_dict["tradegood{}Price".format(hit[0])] = int(hit[1])
@@ -286,10 +292,11 @@ def buy(session, city, offer, amount_to_buy, ships_available, ship_capacity, max
     )
     sendToBotDebug(session, msg, debugON_buyResources)
     resource_name = offer['tipo']
+    paid = price if price is not None else offer["precio"]
     session.setStatus(
-        f"Bought {addThousandSeparator(amount_to_buy)} {resource_name} for {offer['precio']} gold from {offer['ciudadDestino']} ({offer['jugadorAComprar']}) ---> {city['name']} | {getDateTime()}"
+        f"Bought {addThousandSeparator(amount_to_buy)} {resource_name} for {paid} gold from {offer['ciudadDestino']} ({offer['jugadorAComprar']}) ---> {city['name']} | {getDateTime()}"
     )
-    return (price if price is not None else offer["precio"]), None
+    return paid, None
 
 
 def rejection(response):
@@ -343,6 +350,8 @@ def market_city(session, city_id):
         if building["building"] == "branchOffice":
             city["pos"] = pos
             positions = re.findall(r"<option.*?>(\d+)</option>", getMarketHtml(session, city))
+            if not positions:
+                raise ValueError("{} has no working trading post".format(city.get("name", city_id)))
             city["rango"] = int(positions[-1])
             return city
     raise ValueError("{} has no trading post".format(city.get("name", city_id)))
@@ -424,8 +433,19 @@ def price_cap(offers, amount):
 def config_from_saved(city, offers, amount_to_buy):
     """An older menu saved the trading post's city and the offers it showed: buy the same
     amount, never above the highest price it showed for that amount"""
-    config = {"city_id": city["id"], "amount": amount_to_buy, "max_price": price_cap(offers or [], amount_to_buy)}
+    if not isinstance(city, dict):
+        raise ValueError("city must be an object, got {!r}".format(city))
+    if offers is not None and not isinstance(offers, (list, tuple)):
+        raise ValueError("offers must be a list, got {!r}".format(offers))
+    parsed_amount = asInt(amount_to_buy, "amount_to_buy", minimum=1) if amount_to_buy is not None else None
+    try:
+        cap = price_cap(offers or [], parsed_amount) if parsed_amount is not None else None
+    except (KeyError, TypeError, ValueError):
+        raise ValueError("offers has an invalid entry: {!r}".format(offers))
+    config = {"city_id": city.get("id"), "amount": parsed_amount, "max_price": cap}
     if offers:
+        if not isinstance(offers[0], dict) or "resource" not in offers[0]:
+            raise ValueError("offers[0] must include 'resource', got {!r}".format(offers[0]))
         config["resource"] = resource_index(offers[0]["resource"])
     return config
 
@@ -542,13 +562,14 @@ def do_it(session, city_id=None, resource=None, amount=None, max_price=None, sel
 
     setInfoSignal(session, "\nI will buy {} {} to {}\n".format(addThousandSeparator(amount), name, market["name"]))
     # what is bought travels to the city: only what fits in its warehouse now
-    total = min(amount, market["freeSpaceForResources"][resource])
+    total = min(amount, max(0, market["freeSpaceForResources"][resource]))
     ship_capacity, _ = getShipCapacity(session)
     bought = 0
     spent = 0
-    problem = None
+    cap_problem = None
     if total < amount:
-        problem = "{} has room for {} {}".format(market["name"], addThousandSeparator(total), name)
+        cap_problem = "{} has room for {} {}".format(market["name"], addThousandSeparator(total), name)
+    problem = None
     while bought < total:
         session.setStatus("Buying {} {} for {}: waiting for free ships".format(
             addThousandSeparator(total - bought), name, market["name"]))
@@ -572,6 +593,7 @@ def do_it(session, city_id=None, resource=None, amount=None, max_price=None, sel
         bought += buy_amount
         spent += buy_amount * price
 
+    problem = problem or cap_problem
     msg = "Bought {} of {} {} for {} gold @{}".format(
         addThousandSeparator(bought), addThousandSeparator(amount), name, addThousandSeparator(spent), getDateTime())
     if problem is not None:
@@ -647,7 +669,7 @@ def buyResources(session, event, stdin_fd, predetermined_input):
             addThousandSeparator(total_amount), addThousandSeparator(total_price)
         )
     )
-    available = city["freeSpaceForResources"][resource]
+    available = max(0, city["freeSpaceForResources"][resource])
     if available < total_amount:
         print(
             "You just can buy {} due to storing capacity".format(
@@ -659,7 +681,7 @@ def buyResources(session, event, stdin_fd, predetermined_input):
     amount_to_buy = read(
         msg="How much do you want to buy?: ", min=0, max=total_amount
     )
-    if amount_to_buy == 0:
+    if not amount_to_buy:
         return None
 
     # calculate the total cost

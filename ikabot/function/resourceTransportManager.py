@@ -208,7 +208,7 @@ NOTIFY = ("none", "start", "all")
 
 def city_id_from_saved(value):
     """An older menu saved whole cities: keep their id"""
-    return value["id"] if isinstance(value, dict) else value
+    return value.get("id") if isinstance(value, dict) else value
 
 
 def amounts_config(value, name, ignore_allowed):
@@ -343,7 +343,7 @@ def prepare_resourceTransportManager(
 
 @task("resourceTransportManager", prepare=prepare_resourceTransportManager)
 def do_it_unified(session, mode, origin_cities=None, destination_city=None, island=None, interval_hours=0, resource_config=None,
-                  useFreighters=False, send_mode=None, notify="none", origin_city=None, destination_cities=None,
+                  useFreighters=False, send_mode=None, notify=None, origin_city=None, destination_cities=None,
                   info="", telegram_enabled=None, notify_on_start=None):
     """The config holds city ids; the task reads the cities and islands from the game"""
     notify = notify_from_saved(notify, telegram_enabled, notify_on_start)
@@ -353,13 +353,14 @@ def do_it_unified(session, mode, origin_cities=None, destination_city=None, isla
     own_ids, _ = getIdsOfCities(session)
 
     if mode == "consolidate":
-        origins = [getCity(session.get(city_url + str(city_id))) for city_id in origin_cities]
-        destination_id = str(destination_city)
+        origins = [getCity(session.get(city_url + str(city_id_from_saved(city_id)))) for city_id in origin_cities]
+        destination_id = str(city_id_from_saved(destination_city))
         if destination_id in own_ids:
             destination = getCity(session.get(city_url + destination_id))
             dest_island = getIsland(session.get(island_url + str(destination["islandId"])))
         else:
-            dest_island = getIsland(session.get(island_url + str(island)))
+            island_id = island.get("id") if isinstance(island, dict) else island
+            dest_island = getIsland(session.get(island_url + str(island_id)))
             name = next((c.get("name") for c in dest_island["cities"] if str(c.get("id")) == destination_id), destination_id)
             destination = {"id": destination_id, "name": name, "islandId": str(dest_island["id"])}
         destination["isOwnCity"] = destination_id in own_ids
@@ -368,8 +369,8 @@ def do_it_unified(session, mode, origin_cities=None, destination_city=None, isla
         send_mode = SEND_MODES.get(send_mode, send_mode)
         do_it(session, origins, destination, dest_island, interval_hours, resource_config, useFreighters, send_mode, every_shipment, on_start)
     elif mode == "distribute":
-        origin = getCity(session.get(city_url + str(origin_city)))
-        destinations = [getCity(session.get(city_url + str(city_id))) for city_id in destination_cities]
+        origin = getCity(session.get(city_url + str(city_id_from_saved(origin_city))))
+        destinations = [getCity(session.get(city_url + str(city_id_from_saved(city_id)))) for city_id in destination_cities]
         setInfoSignal(session, "\nDistribute resources from {} to {} cities every {} hour(s)\n".format(
             origin["name"], len(destinations), interval_hours))
         do_it_distribute(session, origin, destinations, interval_hours, [a or 0 for a in resource_config], useFreighters, every_shipment, on_start)
@@ -664,11 +665,24 @@ def consolidateMode(session, telegram_enabled):
                 # Get the selected city (subtract 1 for 0-based index)
                 destination_city_data = cities_on_island[city_choice - 1]
                 destination_city_id = destination_city_data["id"]
-                
-                # Get full city data
-                html = session.get(city_url + str(destination_city_id))
-                destination_city = getCity(html)
-                destination_city["isOwnCity"] = destination_city_data.get("state", "") == "" and destination_city_data.get("Name", "") == session.username
+                is_own_city = (
+                    destination_city_data.get("state", "") == ""
+                    and destination_city_data.get("Name", "") == session.username
+                )
+
+                # Only own cities can be opened via view=city; foreign ids render our own active city
+                if is_own_city:
+                    html = session.get(city_url + str(destination_city_id))
+                    destination_city = getCity(html)
+                else:
+                    destination_city = {
+                        "id": str(destination_city_id),
+                        "name": decodeUnicodeEscape(
+                            destination_city_data.get("name", str(destination_city_id))
+                        ),
+                        "islandId": str(island["id"]),
+                    }
+                destination_city["isOwnCity"] = is_own_city
                 
                 # Confirm city selection
                 print("")

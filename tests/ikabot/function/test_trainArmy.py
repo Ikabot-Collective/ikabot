@@ -104,6 +104,29 @@ class TestPlanTrainings(unittest.TestCase):
         self.assertEqual(trained, [[10]])
         self.assertIn("Alpha due to lack of resources", mock_bot.call_args.args[1])
 
+    @patch("ikabot.function.trainArmy.sendToBot")
+    @patch("ikabot.function.trainArmy.train")
+    @patch("ikabot.function.trainArmy.waitForTraining")
+    @patch("ikabot.function.trainArmy.getCity", side_effect=[
+        {"id": "111", "name": "Alpha", "availableResources": [300, 0, 0, 0, 220], "freeCitizens": 100},
+        {"id": "111", "name": "Alpha", "availableResources": [300, 0, 0, 0, 220], "freeCitizens": 100},
+        {"id": "111", "name": "Alpha", "availableResources": [300, 0, 0, 0, 220], "freeCitizens": 100},
+    ])
+    def test_skips_completed_first_round_and_finishes_second_round(self, _city, _wait, mock_train, mock_bot):
+        trained = []
+        mock_train.side_effect = lambda session, city, training, troops: trained.append([u["train"] for u in training])
+        # Round 1 fits in 1 pass (10); Round 2 needs 2 passes (10 + 5)
+        trainings = [[dict(UNITS[0], cantidad=10)], [dict(UNITS[0], cantidad=15)]]
+        self.assertTrue(planTrainings(MagicMock(), {"id": "111", "pos": "4"}, trainings, True))
+        self.assertEqual(trained, [[10], [10], [5]])
+        mock_bot.assert_not_called()
+
+    def test_filter_cities_by_resource_matches_int_tradegood(self):
+        from ikabot.function.trainArmy import filterCitiesByResource, resourceMapping
+
+        cities = {"1": {"id": 1, "tradegood": 1}, "2": {"id": 2, "tradegood": 2}}
+        self.assertEqual(filterCitiesByResource(cities, resourceMapping[1], []), [1])
+
 
 if __name__ == "__main__":
     unittest.main()

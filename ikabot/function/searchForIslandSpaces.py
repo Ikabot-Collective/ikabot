@@ -42,9 +42,18 @@ def islandIdFromCoords(session, coords):
     -------
     island_id : str
     """
-    x, y = coords.replace(" ", "").split(":")
+    x_raw, y_raw = coords.replace(" ", "").split(":")
+    x, y = int(x_raw), int(y_raw)
     html = session.get("view=island&xcoord={}&ycoord={}".format(x, y))
-    return getIsland(html)["id"]
+    try:
+        island = getIsland(html)
+        island_id = island["id"]
+    except (AttributeError, KeyError, TypeError, ValueError):
+        raise ValueError("no island found at {}:{}".format(x, y))
+    if "x" in island and "y" in island:
+        if str(island["x"]) != str(x) or str(island["y"]) != str(y):
+            raise ValueError("no island found at {}:{}".format(x, y))
+    return island_id
 
 
 def prepare_searchForIslandSpaces(session, time, islandList=None, fights="n"):
@@ -63,6 +72,8 @@ def prepare_searchForIslandSpaces(session, time, islandList=None, fights="n"):
     config : dict
     """
     requireNotifications(session)
+    time = asInt(time, "time", minimum=3)
+    fights = "y" if asBool(fights, "fights") else "n"
     if islandList is None:
         islandList = []
     if not isinstance(islandList, (list, tuple)):
@@ -70,13 +81,15 @@ def prepare_searchForIslandSpaces(session, time, islandList=None, fights="n"):
     island_ids = []
     for island in islandList:
         if isinstance(island, str) and re.fullmatch(r"\s*\d+\s*:\s*\d+\s*", island):
-            island_ids.append(str(islandIdFromCoords(session, island)))
+            resolved = str(islandIdFromCoords(session, island))
         else:
-            island_ids.append(asId(island, "islandList"))
+            resolved = asId(island, "islandList")
+        if resolved not in island_ids:
+            island_ids.append(resolved)
     return {
-        "time": asInt(time, "time", minimum=3),
+        "time": time,
         "islandList": island_ids,
-        "fights": "y" if asBool(fights, "fights") else "n",
+        "fights": fights,
     }
 
 

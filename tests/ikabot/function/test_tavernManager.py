@@ -37,6 +37,8 @@ class TestPrepareTavernManager(unittest.TestCase):
             prepare_tavernManager(MagicMock(), run_hours=4, notification_mode=4)
         with self.assertRaisesRegex(ValueError, "cities_ids 999 is not one of your cities"):
             prepare_tavernManager(MagicMock(), run_hours=4, cities_ids=["999"])
+        with self.assertRaisesRegex(ValueError, "non-empty list"):
+            prepare_tavernManager(MagicMock(), run_hours=4, cities_ids=[])
 
 
 class TestProcessEquilibrium(unittest.TestCase):

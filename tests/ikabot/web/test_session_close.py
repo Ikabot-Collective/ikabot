@@ -71,6 +71,17 @@ class TestCloseIkabot(unittest.TestCase):
         self.assertEqual(self.terminated(), {OWN_TASK, OTHER_ACCOUNT_TASK, MANAGER})
         self.parent.terminate.assert_called_once()
 
+    def test_parent_menu_owned_by_another_account_is_kept_even_with_zero_other_tasks(self):
+        self.parent.pid = 500
+        self.parent.children.return_value = [self.children[MY_PID], self.children[OWN_TASK], self.children[MANAGER]]
+        with tempfile.TemporaryDirectory() as tmp:
+            with open(os.path.join(tmp, "ipc.json"), "w", encoding="utf-8") as f:
+                json.dump({"pid": 500, "owner": ["", "MenuOwner", "74", "es"]}, f)
+            with mock.patch("ikabot.web.session.get_ikabot_dir", return_value=tmp):
+                self.close({("", "PlayerOne", "74", "es"): {MY_PID, OWN_TASK}})
+        self.assertEqual(self.terminated(), {OWN_TASK})
+        self.parent.terminate.assert_not_called()
+
 
 class TestTaskPidsByAccount(unittest.TestCase):
     def test_reads_every_saved_account(self):

@@ -441,9 +441,9 @@ def prepare_tavernManager(session, run_hours, cities_ids=None, cities=None, noti
     config : dict
     """
     if cities_ids is not None:
-        if not isinstance(cities_ids, (list, tuple)):
-            raise ValueError("cities_ids must be a list of city ids, got {!r}".format(cities_ids))
-        cities_ids = [requireOwnCity(session, city_id, "cities_ids") for city_id in cities_ids] or None
+        if not isinstance(cities_ids, (list, tuple)) or not cities_ids:
+            raise ValueError("cities_ids must be a non-empty list of city ids or null, got {!r}".format(cities_ids))
+        cities_ids = list(dict.fromkeys(requireOwnCity(session, city_id, "cities_ids") for city_id in cities_ids))
     return {
         "run_hours": asInt(run_hours, "run_hours", minimum=0, maximum=24),
         "cities_ids": cities_ids,
@@ -469,13 +469,13 @@ def do_tavernManager(session, run_hours, cities_ids=None, cities=None, notificat
     """
     mgr = TavernManager(session, notification_mode)
     def run_check():
-        if cities is not None:
+        if cities is not None and cities_ids is not None:
             return mgr.process_equilibrium(cities_ids, cities)
         own_ids, own_cities = getIdsOfCities(session)
-        ids = [city_id for city_id in (cities_ids or own_ids) if city_id in own_cities]
+        ids = [city_id for city_id in (cities_ids if cities_ids is not None else own_ids) if city_id in own_cities]
         return mgr.process_equilibrium(ids, own_cities)
 
-    which = "{} cities".format(len(cities_ids)) if cities_ids else "all cities"
+    which = "{} cities".format(len(cities_ids)) if cities_ids is not None else "all cities"
     info = f"\nTavern Equilibrium: {which}, every {run_hours}h\n"
     setInfoSignal(session, info)
 
@@ -485,6 +485,8 @@ def do_tavernManager(session, run_hours, cities_ids=None, cities=None, notificat
             session.setStatus(f"Equilibrium check @{getDateTime()}")
             return
         session.setStatus(checked_status(run_hours))
+    elif run_hours == 0:
+        return
 
     while True:
         wait(run_hours * 3600)
@@ -621,8 +623,13 @@ def _run_equilibrium_mode(session):
 
     print()
 
+    all_cities = city_choice != 1
     if city_choice == 1:
         cities_ids, cities = ignoreCities(session, msg="Select cities:")
+        if not cities_ids:
+            print("No cities selected.")
+            enter()
+            return None
     else:
         cities_ids, cities = getIdsOfCities(session)
 
@@ -664,7 +671,7 @@ def _run_equilibrium_mode(session):
     return {
         "session": session,
         "run_hours": run_hours,
-        "cities_ids": cities_ids,
+        "cities_ids": None if all_cities else cities_ids,
         # no "cities": the task fetches them on each check, so the saved config stays small
         "notification_mode": notification_mode,
         "check_now": False,
