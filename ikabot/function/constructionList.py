@@ -42,21 +42,26 @@ def _parseConstructionTime(row):
 
     values = re.findall(r'title=["\']([^"\']+)', cell)
     values.append(re.sub(r"<[^>]+>", " ", html.unescape(cell)))
-    units = {"d": 86400, "h": 3600, "m": 60, "s": 1}
+    # case matters: "25m 34s" are minutes but "1M 7D" is one month and "1A 3M" one year (A, Spanish "anio").
+    # The game rounds long times to two units, so months and years are approximate anyway.
+    units = {
+        "A": 365 * 86400, "Y": 365 * 86400, "y": 365 * 86400,
+        "M": 30 * 86400,
+        "D": 86400, "d": 86400,
+        "H": 3600, "h": 3600,
+        "m": 60,
+        "S": 1, "s": 1,
+    }
     for value in values:
-        parts = re.findall(r"(\d+)\s*([dhms])", value.lower())
+        parts = re.findall(r"(\d+)\s*([AYyMDdHhmSs])", value)
         if parts:
             return sum(int(amount) * units[unit] for amount, unit in parts)
     return None
 
 
-def _formatRemainingTime(seconds):
-    seconds = max(0, int(seconds))
-    days, seconds = divmod(seconds, 86400)
-    hours, seconds = divmod(seconds, 3600)
-    minutes, seconds = divmod(seconds, 60)
-    values = ((days, "D"), (hours, "H"), (minutes, "M"), (seconds, "S"))
-    return " ".join("{}{}".format(value, unit) for value, unit in values if value) or "0S"
+def _formatEndTime(timestamp):
+    # an absolute date stays correct while the task sleeps until the construction ends
+    return time.strftime("%b %d %H:%M", time.localtime(timestamp))
 
 
 def _findHtml(value, element_id):
@@ -181,14 +186,14 @@ def waitForConstruction(session, city_id, final_lvl, construction_queue=None):
         current_time = int(time.time())
         final_time = int(construction_time)
         seconds_to_wait = final_time - current_time
-        current_remaining = max(0, seconds_to_wait)
-        total_remaining = current_remaining + sum(construction_queue or [])
-        status = "{}: {} -> level {} , current {} , total {}".format(
+        current_end = max(final_time, current_time)
+        total_end = current_end + sum(construction_queue or [])
+        status = "{}: {} -> level {} , ends {} , all done {}".format(
             city["cityName"],
             construction_building["name"],
             construction_building["level"] + 1,
-            _formatRemainingTime(seconds_to_wait),
-            _formatRemainingTime(total_remaining),
+            _formatEndTime(current_end),
+            _formatEndTime(total_end),
         )
         session.setStatus(status)
 
@@ -329,20 +334,14 @@ def getCostsReducers(city):
     return reducers_per_material
 
 
-def getResourcesNeeded(session, city, building, current_level, final_level, simulated_reducers=None):
-    """
+def _getBuildingHelpTable(session, city, building_type):
+    """Returns the html of the help (Ikipedia) page of a building, the one with the table of costs per level
     Parameters
     ----------
     session : ikabot.web.session.Session
     city : dict
-    building : dict
-    current_level : int
-    final_level : int
-    simulated_reducers : list[int]
-
-    Returns
-    -------
-    costs_per_material : dict[int, int]
+    building_type : str
+        technical name of the building, eg. townHall or chronosForge
     """
     # get html with information about buildings
     building_detail_url = "view=buildingDetail&buildingId=0&helpId=1&backgroundView=city&currentCityId={}&templateView=ikipedia&actionRequest={}&ajax=1".format(
@@ -355,7 +354,7 @@ def getResourcesNeeded(session, city, building, current_level, final_level, simu
     # get html with information about buildings costs
     regex_building_detail = (
         r'<div class="(?:selected)? button_building '
-        + re.escape(building["building"])
+        + re.escape(building_type)
         + r'"\s*onmouseover="\$\(this\)\.addClass\(\'hover\'\);" onmouseout="\$\(this\)\.removeClass\(\'hover\'\);"\s*onclick="ajaxHandlerCall\(\'\?(.*?)\'\);'
     )
     match = re.search(regex_building_detail, building_html)
@@ -365,7 +364,83 @@ def getResourcesNeeded(session, city, building, current_level, final_level, simu
     )
     building_costs_response = session.post(building_costs_url)
     building_costs = json.loads(building_costs_response, strict=False)
-    html_costs = building_costs[1][1][1]
+    return building_costs[1][1][1]
+
+
+def _parseChronosForgeReductions(html_table):
+    """Reads the construction time reduction of every Chronoforge level from its help table
+    Parameters
+    ----------
+    html_table : str
+
+    Returns
+    -------
+    reductions : dict[int, float]
+        level -> fraction of the construction time that is removed (eg. 6 -> 0.73786)
+    """
+    reductions = {}
+    rows = re.findall(
+        r'<td class="level">(\d+)</td>(.*?)(?=<td class="level">|</table>|$)',
+        html_table,
+        re.DOTALL,
+    )
+    for level, row in rows:
+        # the reduction is the only percentage of the row, eg. "-73,786%" or "-73.786%"
+        percentages = re.findall(r"(\d+(?:[.,]\d+)?)\s*%", re.sub(r"<[^>]+>", " ", row))
+        if percentages:
+            reductions[int(level)] = round(float(percentages[-1].replace(",", ".")) / 100, 6)
+    return reductions
+
+
+_chronos_forge_reductions = {}
+
+
+def getChronosForgeReduction(session, city):
+    """Returns the construction time reduction given by the Chronoforge of the city
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    city : dict
+
+    Returns
+    -------
+    (level, reduction) : (int, float or None)
+        Chronoforge level (0 if the city has none) and the fraction of the construction
+        time that is removed. reduction is None if the help table could not be read.
+    """
+    levels = [
+        int(b["level"]) for b in city["position"] if b.get("building") == "chronosForge"
+    ]
+    level = max(levels) if levels else 0
+    if level == 0:
+        return 0, 0.0
+    if not _chronos_forge_reductions:
+        try:
+            html_table = _getBuildingHelpTable(session, city, "chronosForge")
+            _chronos_forge_reductions.update(_parseChronosForgeReductions(html_table))
+        except Exception:
+            session.logger.warning("Could not read the Chronoforge help table", exc_info=True)
+    return level, _chronos_forge_reductions.get(level)
+
+
+def getResourcesNeeded(session, city, building, current_level, final_level, simulated_reducers=None, time_reduction=0.0):
+    """
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    city : dict
+    building : dict
+    current_level : int
+    final_level : int
+    simulated_reducers : list[int]
+    time_reduction : float
+        fraction of the construction time removed by the Chronoforge
+
+    Returns
+    -------
+    costs_per_material : dict[int, int]
+    """
+    html_costs = _getBuildingHelpTable(session, city, building["building"])
 
     # if the user has all the resource saving studies, we save that in the session data (one less request)
     sessionData = session.getSessionData()
@@ -437,7 +512,9 @@ def getResourcesNeeded(session, city, building, current_level, final_level, simu
         levels_to_upgrade += 1
         level_time = _parseConstructionTime(match)
         if level_time is not None:
-            # Keep full durations: optional speedups may be unavailable or rejected.
+            # The help table shows base times, apply the Chronoforge of the city.
+            # Keep full durations otherwise: optional speedups may be unavailable or rejected.
+            level_time = int(round(level_time * (1 - time_reduction)))
             construction_time += level_time
             construction_times.append(level_time)
         # get the costs for the current level
@@ -772,8 +849,8 @@ def checkhash(url):
 def do_it(session, city_id, city_name, buildings, shipments, expand_overall, wait_resources,
           construction_queue, total_time):
     session.setStatus(
-        "{}: queued {} upgrades | total {}".format(
-            city_name, len(construction_queue), _formatRemainingTime(total_time)
+        "{}: queued {} upgrades | all done {}".format(
+            city_name, len(construction_queue), _formatEndTime(time.time() + total_time)
         )
     )
     info = "\nUpgrade building\n"
@@ -811,6 +888,18 @@ def do_it(session, city_id, city_name, buildings, shipments, expand_overall, wai
         sendToBot(session, msg)
 
 
+def _printUpgradeSummary(building, current_level, final_level, resourcesNeeded):
+    print("\nMaterials needed for {} (lv {:d} -> {:d}):".format(building["name"], current_level, final_level))
+    for i, name in enumerate(materials_names):
+        amount = resourcesNeeded[i]
+        if amount == 0:
+            continue
+        print("- {}: {}".format(name, addThousandSeparator(max(0, amount))))
+    if building.get("constructionTimes"):
+        print("Construction time: {}".format(daysHoursMinutes(building["constructionTime"])))
+    print("")
+
+
 @configurator
 def constructionList(session, event, stdin_fd, predetermined_input):
     """
@@ -829,6 +918,13 @@ def constructionList(session, event, stdin_fd, predetermined_input):
     buildings = getBuildingsToExpand(session, cityId)
     if buildings is None or len(buildings) == 0:
         return None
+
+    chronos_level, time_reduction = getChronosForgeReduction(session, city)
+    if time_reduction is None:
+        print("\nCould not read the Chronoforge (lv {:d}) reduction, construction times are shown without it.".format(chronos_level))
+        time_reduction = 0.0
+    elif chronos_level > 0:
+        print("\nChronoforge lv {:d}: construction times -{:.3f}%".format(chronos_level, time_reduction * 100))
 
     #simulated resources
     simulated_resources = list(city["availableResources"])
@@ -863,7 +959,7 @@ def constructionList(session, event, stdin_fd, predetermined_input):
 
         # calculate the resources that are needed
         resourcesNeeded = getResourcesNeeded(
-            session, city, building, current_level, final_level, current_reducers
+            session, city, building, current_level, final_level, current_reducers, time_reduction
         )
 
         if -2 in resourcesNeeded:
@@ -880,13 +976,7 @@ def constructionList(session, event, stdin_fd, predetermined_input):
 
         # show missing resources to the user
         if sum(missing) > 0:
-            print("\nMaterials needed for {} (lv {:d} -> {:d}):".format(building["name"], current_level, final_level))
-            for i, name in enumerate(materials_names):
-                amount = resourcesNeeded[i]
-                if amount == 0:
-                    continue
-                print("- {}: {}".format(name, addThousandSeparator(max(0, amount))))
-            print("")
+            _printUpgradeSummary(building, current_level, final_level, resourcesNeeded)
 
             print("Missing:")
             for i in range(len(materials_names)):
@@ -934,13 +1024,7 @@ def constructionList(session, event, stdin_fd, predetermined_input):
                         "useRounding": useRounding
                     })
         else:
-            print("\nMaterials needed for {} (lv {:d} -> {:d}):".format(building["name"], current_level, final_level))
-            for i, name in enumerate(materials_names):
-                amount = resourcesNeeded[i]
-                if amount == 0:
-                    continue
-                print("- {}: {}".format(name, addThousandSeparator(max(0, amount))))
-            print("")
+            _printUpgradeSummary(building, current_level, final_level, resourcesNeeded)
 
             print("You have enough materials")
             print("Proceed? [Y/n]")

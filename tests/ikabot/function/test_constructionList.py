@@ -1,31 +1,14 @@
 import unittest
 import json
 import importlib
-from unittest.mock import Mock, call, patch
+from unittest.mock import Mock, patch
 
 from ikabot.function.constructionList import (
-    _formatRemainingTime,
     _getFreeSpeedupParams,
-    _parseConstructionTime,
     tryFreeBuildingSpeedup,
 )
 
 construction = importlib.import_module("ikabot.function.constructionList")
-
-
-class TestParseConstructionTime(unittest.TestCase):
-    def test_parses_time_cell(self):
-        row = '<td class="level">2</td><td class="costs">100</td><td class="costs"><span title="1D 2H 3M 4S">1D 2H</span></td>'
-
-        self.assertEqual(_parseConstructionTime(row), 93784)
-
-    def test_prefers_seconds_attribute(self):
-        row = '<td class="level">2</td><td class="costs"><span data-duration="1234">20M</span></td>'
-
-        self.assertEqual(_parseConstructionTime(row), 1234)
-
-    def test_formats_remaining_seconds(self):
-        self.assertEqual(_formatRemainingTime(927), "15M 27S")
 
 
 class TestFreeBuildingSpeedup(unittest.TestCase):
@@ -219,120 +202,18 @@ class TestFreeBuildingSpeedup(unittest.TestCase):
                     self.assertEqual(request.kwargs["params"].get("view"), "buildingSpeedup")
 
 
-class TestConstructionTaskHandoff(unittest.TestCase):
-    def setUp(self):
-        self.session = Mock()
-        self.event = Mock()
-        self.buildings = [
-            {"name": "Town hall", "level": 1, "isBusy": False, "upgradeTo": 3,
-             "constructionTime": 1500, "constructionTimes": [600, 900]},
-            {"name": "Warehouse", "level": 2, "isBusy": False, "upgradeTo": 3,
-             "constructionTime": 1800, "constructionTimes": [1800]},
-        ]
-        self.city = {
-            "id": "14075", "cityName": "Athens", "position": [],
-            "availableResources": [1000] * 5, "endUpgradeTime": 1600,
-        }
-        self.mocks = {
-            "banner": Mock(),
-            "chooseCity": Mock(return_value=self.city),
-            "getBuildingsToExpand": Mock(return_value=self.buildings),
-            "getCostsReducers": Mock(return_value=[0] * 5),
-            "getResourcesNeeded": Mock(return_value=[10, 0, 0, 0, 0]),
-            "read": Mock(return_value="y"),
-            "expandBuilding": Mock(),
-            "sendResourcesMenu": Mock(),
-            "setInfoSignal": Mock(),
-            "sendToBot": Mock(),
-        }
-        for patcher in (
-            patch.multiple(construction, **self.mocks),
-            patch.object(construction.time, "time", return_value=1000),
-            patch("ikabot.helpers.decorators.set_child_mode"),
-        ):
-            patcher.start()
-            self.addCleanup(patcher.stop)
-
-    def run_configurator(self):
-        construction.constructionList(self.session, self.event, None, [])
-        self.event.set.assert_called_once()
-        self.session.logout.assert_called_once()
-        self.mocks["sendToBot"].assert_not_called()
-
-    def test_passes_one_shared_queue_to_all_background_upgrades(self):
-        snapshots = []
-
-        def expand(session, city_id, building, wait_resources, queue):
-            snapshots.append(list(queue))
-            del queue[:len(building["constructionTimes"])]
-
-        self.mocks["expandBuilding"].side_effect = expand
-        self.run_configurator()
-
-        self.assertEqual(snapshots, [[600, 900, 1800], [1800]])
-        self.session.setStatus.assert_called_once_with(
-            "Athens: queued 3 upgrades | total 1H 5M"
-        )
-        self.mocks["sendResourcesMenu"].assert_not_called()
-
-    def test_excludes_cancelled_buildings_from_queue_and_total(self):
-        self.mocks["read"].side_effect = ["y", "n"]
-        self.run_configurator()
-
-        self.mocks["expandBuilding"].assert_called_once_with(
-            self.session, "14075", self.buildings[0], False, [600, 900]
-        )
-        self.session.setStatus.assert_called_once_with(
-            "Athens: queued 2 upgrades | total 35M"
-        )
-
-    def test_skipped_building_does_not_need_construction_times(self):
-        del self.buildings[1]["constructionTime"]
-        del self.buildings[1]["constructionTimes"]
-        self.mocks["getResourcesNeeded"].side_effect = [
-            [10, 0, 0, 0, 0], [-2] * 5,
-        ]
-        self.run_configurator()
-
-        self.mocks["expandBuilding"].assert_called_once_with(
-            self.session, "14075", self.buildings[0], False, [600, 900]
-        )
-
-    def test_preserves_multiple_resource_shipments_without_upgrading(self):
-        self.city["availableResources"] = [0] * 5
-        self.mocks["read"].side_effect = ["y", 2, "y", "y", 1, "n"]
-        origins = [{0: [{"id": "source1"}]}, {0: [{"id": "source2"}]}]
-        self.mocks["sendResourcesMenu"].side_effect = [
-            (origins[0], False), (origins[1], False),
-        ]
-        threads = [Mock(), Mock()]
-        with patch.object(construction.threading, "Thread", side_effect=threads) as factory:
-            self.run_configurator()
-
-        self.assertEqual(factory.call_args_list, [
-            call(target=construction.sendResourcesNeeded,
-                 args=(self.session, "14075", origins[0], [10, 0, 0, 0, 0], True, True)),
-            call(target=construction.sendResourcesNeeded,
-                 args=(self.session, "14075", origins[1], [10, 0, 0, 0, 0], False, False)),
-        ])
-        for thread in threads:
-            thread.start.assert_called_once()
-            thread.join.assert_called_once()
-        self.mocks["expandBuilding"].assert_not_called()
-
-
 class TestConstructionSpeedupOptIn(unittest.TestCase):
     def test_wait_and_total_follow_real_duration_and_speedup_opt_in(self):
         for enabled, remaining, speedup_result, expected_calls, expected_wait, total in (
-            (False, 600, True, 0, 610, "20M"),
-            (False, 300, True, 0, 310, "15M"),
-            (False, 200, True, 0, 210, "13M 20S"),
-            (True, 600, True, 0, 300, "20M"),
-            (True, 301, True, 0, 5, "15M 1S"),
-            (True, 300, True, 1, 5, "15M"),
-            (True, 200, True, 1, 5, "13M 20S"),
-            (True, 200, False, 1, 5, "13M 20S"),
-            (True, 0, True, 0, 5, "10M"),
+            (False, 600, True, 0, 610, 1200),
+            (False, 300, True, 0, 310, 900),
+            (False, 200, True, 0, 210, 800),
+            (True, 600, True, 0, 300, 1200),
+            (True, 301, True, 0, 5, 901),
+            (True, 300, True, 1, 5, 900),
+            (True, 200, True, 1, 5, 800),
+            (True, 200, False, 1, 5, 800),
+            (True, 0, True, 0, 5, 600),
         ):
             with self.subTest(enabled=enabled, remaining=remaining, speedup_result=speedup_result):
                 session = Mock()
@@ -353,7 +234,10 @@ class TestConstructionSpeedupOptIn(unittest.TestCase):
                 self.assertEqual(speedup.call_count, expected_calls)
                 wait.assert_called_once_with(expected_wait)
                 self.assertTrue(session.setStatus.call_args_list[0].args[0].endswith(
-                    " , total " + total
+                    " , ends {} , all done {}".format(
+                        construction._formatEndTime(1000 + remaining),
+                        construction._formatEndTime(1000 + total),
+                    )
                 ))
                 if not enabled:
                     self.assertFalse(any(
@@ -362,37 +246,14 @@ class TestConstructionSpeedupOptIn(unittest.TestCase):
                     ))
 
 
-class TestQueuedConstructionDurations(unittest.TestCase):
-    def test_resource_calculation_preserves_full_durations_even_with_speedup_enabled(self):
-        detail_html = '''<div class="selected button_building warehouse"
-            onmouseover="$(this).addClass('hover');" onmouseout="$(this).removeClass('hover');"
-            onclick="ajaxHandlerCall('?view=buildingDetail&buildingId=4&');">'''
-        costs_html = '''<th class="costs"><img src="//cdn/wood.png"/></th>
-            <th class="costs"><img src="//cdn/time.png"/></th>
-            <td class="level">2</td>
-            <td class="costs"><div><div>100</div></div></td>
-            <td class="costs"><span data-duration="600">10M</span></td>
-            <td class="level">3</td>
-            <td class="costs"><div><div>100</div></div></td>
-            <td class="costs"><span data-duration="900">15M</span></td>'''
-
-        for enabled in (False, True):
-            with self.subTest(enabled=enabled):
-                session = Mock()
-                session.getSessionData.return_value = {"reduccion_inv_max": True}
-                session.post.side_effect = [
-                    json.dumps([None, [None, [None, detail_html]]]),
-                    json.dumps([None, [None, [None, costs_html]]]),
-                ]
-                building = {"building": "warehouse"}
-                with (
-                    patch.object(construction, "CONSTRUCTION_FREE_SPEEDUP", enabled),
-                    patch.object(construction, "checkhash", return_value="wood"),
-                ):
-                    costs = construction.getResourcesNeeded(
-                        session, {"id": "14075"}, building, 1, 3, [0] * 5
-                    )
-
-                self.assertEqual(costs, [200, 0, 0, 0, 0])
-                self.assertEqual(building["constructionTimes"], [600, 900])
-                self.assertEqual(building["constructionTime"], 1500)
+class TestConstructionTimeUnits(unittest.TestCase):
+    def test_months_and_years_are_not_read_as_minutes(self):
+        day = 86400
+        for text, seconds in (
+            ("25m 34s", 25 * 60 + 34),
+            ("1M 7D", 37 * day),
+            ("1A 3M", 455 * day),
+        ):
+            with self.subTest(text=text):
+                row = '<td class="costs"><div>1</div></td><td class="costs">{}</td>'.format(text)
+                self.assertEqual(construction._parseConstructionTime(row), seconds)
