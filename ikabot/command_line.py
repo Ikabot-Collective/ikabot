@@ -40,6 +40,7 @@ from ikabot.function.sendResources import sendResources
 from ikabot.function.shipMovements import shipMovements
 from ikabot.function.stationArmy import stationArmy
 from ikabot.function.viewArmy import viewArmy
+from ikabot.function.trainSpies import trainSpies
 from ikabot.function.testTelegramBot import testTelegramBot
 from ikabot.function.trainArmy import trainArmy
 from ikabot.function.update import update
@@ -142,6 +143,7 @@ def menu(session, checkUpdate=True):
          1202: stationArmy,
          1203: UpgradeUnits,
          1204: viewArmy,
+         1205: trainSpies,
         13: shipMovements,
         14: constructBuilding,
         15: update,
@@ -262,7 +264,8 @@ def menu(session, checkUpdate=True):
         print("(2) Send Troops/Ships")
         print("(3) Upgrade Army")
         print("(4) View Army")
-        selected = read(min=0, max=4, digit=True)
+        print("(5) Train Spies")
+        selected = read(min=0, max=5, digit=True)
         if selected == 0:
             menu(session)
             return
