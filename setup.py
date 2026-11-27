@@ -8,7 +8,8 @@ setuptools.setup(
     author="physics-sp",
     author_email="physics-sp@protonmail.com",
     license="MIT",
-    long_description=open("README.md", "r").read(),
+    description="An educational Python project exploring stateful HTTP sessions, multiprocessing, and task automation.",
+    long_description=open("README.md", "r", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
     url="https://github.com/Ikabot-Collective/ikabot",
     include_package_data=True,
@@ -22,5 +23,7 @@ setuptools.setup(
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
+        "Intended Audience :: Education",
+        "Topic :: Education",
     ],
 )

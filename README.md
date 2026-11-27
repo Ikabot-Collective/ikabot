@@ -4,10 +4,16 @@
 
 [![Downloads](https://static.pepy.tech/badge/ikabot)](https://pepy.tech/project/ikabot) ![GitHub Repo stars](https://img.shields.io/github/stars/Ikabot-Collective/ikabot?style=flat) ![licence](https://img.shields.io/github/license/Ikabot-Collective/ikabot?style=flat)
 
-Ikabot is a cross-platform Python program that enhances your Ikariam game by offering premium features for free, focusing on city management, warfare strategies, and streamlined alerts.
+Ikabot is an open-source, cross-platform educational Python project for studying stateful HTTP session management, multiprocessing, and task automation using browser-strategy game mechanics as a testbed.
 
 -[Discover the features](https://github.com/Ikabot-Collective/ikabot/wiki/Features)- 
 </div>
+
+## Concepts Demonstrated
+- Stateful HTTP session and network connection management
+- Cross-platform multiprocessing and background task orchestration
+- Encrypted local state and session persistence
+- Automated task scheduling, resource routing, and webhook notifications
 
 ## Getting Started
 - Checkout the [Getting Started guide](https://github.com/Ikabot-Collective/ikabot/wiki/Getting-Started)
@@ -35,3 +41,8 @@ This project exists thanks to all the people who contribute.
 ## Screenshots
 
 ![Ikabot Screenshot](assets/screenshot-1.jpg)
+
+## Disclaimer
+
+This project is developed strictly for **educational and research purposes** to explore Python networking, concurrency, and automation concepts. Ikabot is an independent open-source project and is not affiliated with, endorsed by, or sponsored by Gameforge. Automated interaction with live servers may violate third-party Terms of Service; users assume full responsibility for how they use this software.
+
