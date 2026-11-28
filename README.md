@@ -24,7 +24,7 @@ Ikabot is an open-source, cross-platform educational Python project for studying
   - GitHub issues are for bugs and feature requests.
   - For questions, help and chat in general, join our Discord Server:
 
-     [![Discord server!](https://invidget.switchblade.xyz/3hyxPRj)](http://discord.gg/3hyxPRj)
+     [![Discord](https://img.shields.io/badge/Discord-Ikabot%20Community-5865F2?logo=discord&logoColor=white)](http://discord.gg/3hyxPRj)
 
   
 - Want to say thanks?
