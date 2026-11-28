@@ -1,7 +1,9 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import json
 import math
+import time
 import traceback
 import re
 from decimal import *
@@ -20,7 +22,9 @@ from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import *
 from ikabot.helpers.pedirInfo import getShipCapacity
 
+from ikabot.helpers.taskConfig import asBool, asInt, getCityById, requireOwnCity
 from ikabot.function.activateMiracle import obtainMiraclesAvailable
+from ikabot.function.sendResources import get_island
 from ikabot.function.attackBarbarians import (
     get_barbarians_info,
     get_current_attacks,
@@ -406,9 +410,9 @@ def get_barbarians_attack_plan(barbarians_info, schematic):
         return
 
     return {
-        "waves": scheme["waves"],
-        "looting": scheme["looting"],
-        "needed_units": get_max_schematics_units(scheme),
+        "waves": selected_scheme["waves"],
+        "looting": selected_scheme["looting"],
+        "needed_units": get_max_schematics_units(selected_scheme),
     }
 
 
@@ -441,8 +445,203 @@ def has_units_in_city(session, city, units):
     )
 
 
-@task("autoBarbarians")
-def do_it(session, island, city, float_city, schematic, units_data, ship_capacity, send_notifications=True):
+SCHEMATIC_NAMES = {"default": "WITHOUT_HEPHAESTUS", "without_hephaestus": "WITHOUT_HEPHAESTUS"}
+
+
+def schematic_units(value, name):
+    """{"unit id": amount} with ids as text and amounts as whole numbers"""
+    if not isinstance(value, dict) or not value:
+        raise ValueError('{} must be an object like {{"302": 90}}, got {!r}'.format(name, value))
+    units = {}
+    for unit_id, amount in value.items():
+        text = str(unit_id).strip()
+        if not text.isdigit():
+            raise ValueError("{}: {!r} is not a unit id".format(name, unit_id))
+        units[text] = asInt(amount, "{}.{}".format(name, text), minimum=0)
+    return units
+
+
+def check_schematic(value):
+    """The attack scheme: "default", or a list of levels like the default one
+    Parameters
+    ----------
+    value : str or list[dict]
+        each item: {"level": N or [from, to], "looting": {"from_float", "units"},
+        "waves": {"1": {"send": [{"from_float", "units"}, ...]}, ...}, "needed_units" (optional)}
+
+    Returns
+    -------
+    schematic : list[dict]
+    """
+    if isinstance(value, str):
+        key = SCHEMATIC_NAMES.get(value.strip().lower())
+        if key is None or not DEFAULT_SCHEMATICS.get(key):
+            raise ValueError('schematic must be "default" or a list of levels, got {!r}'.format(value))
+        return DEFAULT_SCHEMATICS[key]
+    if not isinstance(value, (list, tuple)) or not value:
+        raise ValueError('schematic must be "default" or a list of levels, got {!r}'.format(value))
+    checked = []
+    for i, item in enumerate(value):
+        name = "schematic[{}]".format(i)
+        if not isinstance(item, dict):
+            raise ValueError("{} must be an object, got {!r}".format(name, item))
+        level = item.get("level")
+        if isinstance(level, (list, tuple)) and len(level) == 2:
+            level = [asInt(level[0], name + ".level", minimum=1), asInt(level[1], name + ".level", minimum=1)]
+            if level[0] > level[1]:
+                raise ValueError("{}.level goes from {} down to {}".format(name, level[0], level[1]))
+        else:
+            level = asInt(level, name + ".level", minimum=1)
+        looting = item.get("looting")
+        if not isinstance(looting, dict):
+            raise ValueError('{}.looting must be an object like {{"from_float": false, "units": {{"302": 1}}}}'.format(name))
+        looting = {"from_float": asBool(looting.get("from_float", False), name + ".looting.from_float"),
+                   "units": schematic_units(looting.get("units"), name + ".looting.units")}
+        waves = item.get("waves")
+        if not isinstance(waves, dict) or not waves:
+            raise ValueError('{}.waves must be an object like {{"1": {{"send": [...]}}}}'.format(name))
+        checked_waves = {}
+        for wave_id, wave in waves.items():
+            wave_name = "{}.waves.{}".format(name, wave_id)
+            asInt(wave_id, wave_name, minimum=1)
+            sends = wave.get("send") if isinstance(wave, dict) else None
+            if not isinstance(sends, (list, tuple)) or not sends:
+                raise ValueError("{}.send must be a list of groups of units".format(wave_name))
+            checked_waves[str(int(wave_id))] = {"send": [
+                {"from_float": asBool(send.get("from_float", False), "{}.send[{}].from_float".format(wave_name, j)),
+                 "units": schematic_units(send.get("units"), "{}.send[{}].units".format(wave_name, j))}
+                if isinstance(send, dict) else schematic_units(None, "{}.send[{}]".format(wave_name, j))
+                for j, send in enumerate(sends)
+            ]}
+        needed = item.get("needed_units")
+        if needed is None:
+            # every unit the waves send, from each city
+            needed = {"main": {}, "float": {}}
+            for wave in checked_waves.values():
+                for send in wave["send"]:
+                    group = needed["float" if send["from_float"] else "main"]
+                    for unit_id, amount in send["units"].items():
+                        group[unit_id] = group.get(unit_id, 0) + amount
+        elif not isinstance(needed, dict):
+            raise ValueError("{}.needed_units must be an object with main and float units".format(name))
+        else:
+            needed = {group: schematic_units(needed[group], "{}.needed_units.{}".format(name, group))
+                      for group in ("main", "float") if needed.get(group)}
+        checked.append({"level": level, "looting": looting, "waves": checked_waves, "needed_units": needed})
+    return checked
+
+
+def schematic_levels(schematic):
+    return ", ".join(
+        "{}-{}".format(*item["level"]) if isinstance(item["level"], (list, tuple)) else str(item["level"])
+        for item in schematic
+    )
+
+
+def schematic_from_saved(schematic):
+    """An older menu saved the default scheme itself: keep its name"""
+    default = json.loads(json.dumps(DEFAULT_SCHEMATICS["WITHOUT_HEPHAESTUS"]))
+    if isinstance(schematic, (list, tuple)) and json.loads(json.dumps(schematic)) == default:
+        return "default"
+    return schematic
+
+
+def auto_ids_from_saved(island_id, city_id, float_city_id, island, city, float_city):
+    """An older menu saved the whole island and cities"""
+    if isinstance(island, dict):
+        island_id = island.get("id")
+    if isinstance(city, dict):
+        city_id = city.get("id")
+    if isinstance(float_city, dict):
+        float_city_id = float_city.get("id")
+    return island_id, city_id, float_city_id
+
+
+def prepare_autoBarbarians(session, island_id=None, city_id=None, float_city_id=None, schematic="default",
+                           send_notifications=True, island=None, city=None, float_city=None, units_data=None,
+                           ship_capacity=None):
+    """Checks the config of an autoBarbarians task started from the CLI
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    island_id : int or str
+        the island of the barbarians, by id or "X:Y"
+    city_id : int or str
+        one of your cities, the troops leave from it
+    float_city_id : int or str
+        one of your cities on that island, only when the scheme sends units from it
+    schematic : str or list
+        "default", or the levels and waves of your own scheme
+    send_notifications : bool
+    island, city, float_city, units_data, ship_capacity :
+        saved by older menus
+
+    Returns
+    -------
+    config : dict
+    """
+    island_id, city_id, float_city_id = auto_ids_from_saved(island_id, city_id, float_city_id, island, city, float_city)
+    if island is not None:
+        schematic = schematic_from_saved(schematic)
+    for key, value in (("island_id", island_id), ("city_id", city_id)):
+        if value is None:
+            raise ValueError("{} is needed".format(key))
+    city_id = requireOwnCity(session, city_id, "city_id")
+    found = get_island(session, island_id, "island_id")
+    if not isinstance(found.get("barbarians"), dict):
+        raise ValueError("island {}:{} has no barbarian village".format(found["x"], found["y"]))
+    checked = check_schematic(schematic)
+    known = get_units(session, getCityById(session, city_id))
+    used = set(get_max_schematics_units(checked)["total"]) | {u for item in checked for u in item["looting"]["units"]}
+    unknown = sorted(u for u in used if u not in known)
+    if unknown:
+        raise ValueError("the schematic uses units {} that are not units of the city. Units: {}".format(
+            unknown, ", ".join("{} = {}".format(uid, unit["name"]) for uid, unit in known.items())))
+    level = found["barbarians"].get("level")
+    if get_barbarians_attack_plan({"level": level}, checked) is None:
+        raise ValueError("the barbarians of {}:{} are level {}, the schematic covers levels {}".format(
+            found["x"], found["y"], level, schematic_levels(checked)))
+    config = {
+        "island_id": str(found["id"]),
+        "city_id": city_id,
+        "float_city_id": None,
+        "schematic": "default" if isinstance(schematic, str) else checked,
+        "send_notifications": asBool(send_notifications, "send_notifications"),
+    }
+    if check_need_float_city(checked):
+        if float_city_id is None:
+            raise ValueError("float_city_id is needed: the schematic sends units from a city on the island {}:{}".format(found["x"], found["y"]))
+        float_city_id = requireOwnCity(session, float_city_id, "float_city_id")
+        if str(getCityById(session, float_city_id)["islandId"]) != str(found["id"]):
+            raise ValueError("float_city_id {} is not on the island {}:{}".format(float_city_id, found["x"], found["y"]))
+        config["float_city_id"] = float_city_id
+    return config
+
+
+@task("autoBarbarians", prepare=prepare_autoBarbarians)
+def do_it(session, island_id=None, city_id=None, float_city_id=None, schematic="default", send_notifications=True,
+          island=None, city=None, float_city=None, units_data=None, ship_capacity=None):
+    """Attacks the barbarians of the island again and again, with the waves of the scheme for
+    their level, until they reach a level the scheme does not cover
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    island_id, city_id, float_city_id : str
+    schematic : str or list
+    send_notifications : bool
+    island, city, float_city, units_data, ship_capacity :
+        saved by older menus; the task reads them from the game
+    """
+    island_id, city_id, float_city_id = auto_ids_from_saved(island_id, city_id, float_city_id, island, city, float_city)
+    schematic = check_schematic(schematic_from_saved(schematic))
+    island = getIsland(session.get(island_url + str(island_id)))
+    city = getCityById(session, city_id)
+    float_city = getCityById(session, float_city_id) if float_city_id is not None else None
+    ship_capacity, _ = getShipCapacity(session)
+    # weight and speed of every unit the scheme sends; load_troops adds any other it meets
+    units_data = {}
+    for unit_id in get_max_schematics_units(schematic)["total"]:
+        units_data[unit_id] = get_unit_data(session, city["id"], str(unit_id))
     info = "\nI grinding the barbarians in [{}:{}]\n".format(
         island["x"], island["y"]
     )
@@ -521,16 +720,24 @@ def do_it(session, island, city, float_city, schematic, units_data, ship_capacit
                 for unit_id, amount in needed_units.items()
                 if city_units.get(str(unit_id), {"amount": 0})["amount"] < amount
             }
+            # names as the game shows them, with the id: nobody knows the ids by heart
+            missing_text = ", ".join(
+                "{} {} ({})".format(amount, city_units.get(str(unit_id), {}).get("name", "unit"), unit_id)
+                for unit_id, amount in missing.items()
+            )
             _logger.warning(
-                "autoBarbarians stopped: not enough troops in city %s for barbarians level %s, missing (unit id: amount): %s",
+                "autoBarbarians stopped: not enough troops in city %s for barbarians level %s, missing: %s",
                 city["id"],
                 babarians_info["level"],
-                missing,
+                missing_text,
             )
+            session.setStatus("Stopped: {} lacks {} for barbarians level {}".format(
+                city["name"], missing_text, babarians_info["level"]))
             if send_notifications:
                 sendToBot(
                     session,
-                    "It was not possible to continue the attack on the barbarians due to the lack of necessary troops in the city(ies).",
+                    "It was not possible to continue the attack on the barbarians due to the lack of necessary troops in the city(ies).\n"
+                    "{} lacks: {}".format(city["name"], missing_text),
                 )
             break
         if send_notifications:
@@ -563,12 +770,17 @@ def do_it(session, island, city, float_city, schematic, units_data, ship_capacit
         )
 
 
+def ordered_waves(waves):
+    """The waves in battle order: by number, so wave 10 goes after wave 2"""
+    return sorted(waves.items(), key=lambda wave: int(wave[0]))
+
+
 def do_attack(session, island, city, schematic, ship_capacity, float_city=None, units_data={}):
     battle_start = None
     babarians_info = None
 
     i = 0
-    for wave_id, wave_data in sorted(schematic["waves"].items()):
+    for wave_id, wave_data in ordered_waves(schematic["waves"]):
         i += 1
         wave_id = int(wave_id)
 
@@ -647,8 +859,8 @@ def do_attack(session, island, city, schematic, ship_capacity, float_city=None, 
                 main_city_data[0]["attack_data"]["transporter"] = max(
                     babarians_info["ships"], ships_available
                 )
-            elif len(float_attack_data) > 0:
-                float_attack_data[0]["attack_data"]["transporter"] = max(
+            elif float_city_data:
+                float_city_data[0]["attack_data"]["transporter"] = max(
                     babarians_info["ships"], ships_available
                 )
 
@@ -719,7 +931,7 @@ def loot(session, island, city, schematic, ship_capacity, float_city=None, units
                     "countdown"
                 ]["enddate"]
 
-        time_left = barbarian_countdown - time.time()
+        time_left = barbarian_countdown - time.time() if barbarian_countdown is not None else None
         send_scatter = False
         if time_left is not None and travel_time > (
             time_left - (travel_time + FIVE_MINUTES)
@@ -730,15 +942,16 @@ def loot(session, island, city, schematic, ship_capacity, float_city=None, units
 
         if send_scatter:
             # same "units" key requirement as above
-            ram_attack_data, ram_travel_time, _ = get_send_attack_data(
+            ram_attack_data, _, ram_travel_time = get_send_attack_data(
                 session, island, destin_city, {"from_float": False, "units": {"307": 1}}, units_data, ship_capacity
             )
             session.post(params=ram_attack_data)
-            new_countdown = wait_next_scatter(session, ram_travel_time)
+            # wait_next_scatter takes the moment the ram arrives
+            new_countdown = wait_next_scatter(session, time.time() + ram_travel_time)
             if new_countdown is not None:
                 barbarian_countdown = new_countdown
 
-        time_left = barbarian_countdown - time.time()
+        time_left = barbarian_countdown - time.time() if barbarian_countdown is not None else None
         if time_left is not None and travel_time > time_left:
             break
         wait_for_arrival(session, city, island)
@@ -848,10 +1061,11 @@ def wait_next_scatter(session, travel_time, city_id=None, old_scatter=None):
         wait(wait_time + 5)
 
         new_scatter = get_units_scattered(session, city_id)
+        seen = {(entry["arrival_time"], entry["amount"]) for entry in old_scatter}
         new_entries = [
             entry
             for entry in new_scatter
-            if (entry["arrival_time"], entry["amount"]) not in old_scatter
+            if (entry["arrival_time"], entry["amount"]) not in seen
         ]
         if len(new_entries) == 0:
             return None
@@ -982,7 +1196,6 @@ def autoBarbarians(session, event, stdin_fd, predetermined_input):
         ship_capacity,
         is_in_island=True if city["islandId"] == island["id"] else False,
     )
-    units_data = schematic_informations["units_data"]
     schematic_units = schematic_informations["schematic_units"]
     main_city_units = schematic_informations["main_city_units"]
     schematic_ships = schematic_informations["schematic_ships"]
@@ -1017,13 +1230,12 @@ def autoBarbarians(session, event, stdin_fd, predetermined_input):
     print("Do you want to receive Telegram/Discord notifications for this grind? [Y/n]")
     send_notifications = read(values=["y", "Y", "n", "N"], default="y") not in ["n", "N"]
 
+    # the task reads the island, the cities and the units' data again: the config keeps ids
     return {
         "session": session,
-        "island": island,
-        "city": city,
-        "float_city": float_city,
-        "schematic": schematic,
-        "units_data": units_data,
-        "ship_capacity": ship_capacity,
+        "island_id": str(island["id"]),
+        "city_id": str(city["id"]),
+        "float_city_id": str(float_city["id"]) if float_city is not None else None,
+        "schematic": "default" if schematic is DEFAULT_SCHEMATICS["WITHOUT_HEPHAESTUS"] else schematic,
         "send_notifications": send_notifications,
     }

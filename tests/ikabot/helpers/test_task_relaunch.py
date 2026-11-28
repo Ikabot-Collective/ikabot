@@ -16,6 +16,9 @@ import ikabot.function.sendResources, ikabot.function.activateMiracle, ikabot.fu
 import ikabot.function.distributeResources, ikabot.function.resourceTransportManager  # noqa
 import ikabot.function.buyResources, ikabot.function.sellResources, ikabot.function.trainArmy  # noqa
 import ikabot.function.trainSpies  # noqa
+import ikabot.function.attackBarbarians, ikabot.function.autoBarbarians, ikabot.function.constructionList  # noqa
+from ikabot.function.autoBarbarians import DEFAULT_SCHEMATICS
+import ikabot.function.modifyProduction, ikabot.function.donate, ikabot.function.constructBuilding  # noqa
 from ikabot.helpers.decorators import _TASK_REGISTRY
 from ikabot.helpers.ipc import _validate_task_config
 
@@ -25,6 +28,26 @@ HERMES = {"id": "4415", "wonder": "5", "wonderName": "Temple of Hermes", "wonder
           "ciudad": {"id": "111", "name": "Alpha", "islandId": "4415", "pos": "4"}, "cities": [{"type": "city", "id": 9000}]}
 
 PHALANX = {"identifier": "phalanx", "unit_type_id": 303, "local_name": "Hoplite", "costs": {"citizens": 1, "wood": 30}}
+BARBARIANS_ISLAND = {"id": "4415", "x": 50, "y": 60, "barbarians": {"level": 12, "destroyed": 0}}
+CITY_UNITS = {uid: {"name": "Unit " + uid, "amount": 500} for uid in ("302", "303", "304", "305", "307", "308", "309", "310", "311")}
+BUILDINGS_CITY = {"id": "111", "name": "Alpha", "availableResources": [0] * 5, "position": [
+    {"position": 0, "building": "townHall", "name": "Town Hall", "level": 10, "isBusy": False},
+    {"position": 1, "building": "warehouse", "name": "Warehouse", "level": 7, "isBusy": False}]}
+
+
+def all_levels(session, city, building, current, final, reducers, time_reduction=0.0):
+    building["levelsAvailable"] = final - current
+    building["constructionTimes"] = [60] * (final - current)
+    return [0] * 5
+
+
+WORKERS_CITY = {"id": "111", "name": "Alpha", "availableResources": [5000, 0, 0, 0, 0],
+                "position": [{"building": "academy", "position": 3}, {"building": "temple", "position": 4}]}
+BUILDABLE = {"building": "museum", "name": "Museum", "buildingId": "10", "type": "land", "costs": [500, 0, 0, 0, 0], "canAfford": True}
+EMPTY_CITY = {"id": "111", "name": "Alpha", "availableResources": [5000, 0, 0, 0, 0],
+              "position": [{"position": 4, "building": "empty", "type": "land"}]}
+DONATION = {"islandId": "77", "woodOnInventory": 0, "resource": {"name": "Saw mill", "upgrading": False, "endUpgradeTime": 0},
+            "tradegood": {"name": "Quarry", "upgrading": False, "endUpgradeTime": 0}}
 MARKET_OFFER = {"precio": 20, "amountAvailable": 5000, "jugadorAComprar": "Seller", "ciudadDestino": "Shop", "resource": "2"}
 
 MENU = {
@@ -105,6 +128,33 @@ MENU = {
     "trainSpies (all cities)": {"run_hours": 6, "cities_ids": None,
                                 "settings": {"target": 0, "goldFloor": 0, "crystalFloor": 0, "maxPerPass": 100},
                                 "notification_mode": 3, "check_now": False},
+    "attackBarbarians": {"island_id": "4415", "city_id": "111", "plan": [
+        {"units": {"303": 50}, "loot": False, "round": 1, "ships": 2}, {"units": {"307": 2}, "loot": True, "round": 2}]},
+    # attackBarbarians started from an older menu, which saved the island, the city and the barbarians
+    "attackBarbarians (old menu)": {"island": dict(BARBARIANS_ISLAND, cities=[]), "city": {"id": "111", "position": []},
+                                    "babarians_info": {"ships": 3, "resources": [1] * 5}, "ship_capacity": 500,
+                                    "plan": [{"units": {"303": 50}, "loot": False, "round": 1, "ships": 2}]},
+    "autoBarbarians": {"island_id": "4415", "city_id": "111", "float_city_id": None, "schematic": "default", "send_notifications": True},
+    # autoBarbarians started from an older menu, which saved the island, the city, the scheme and the units' data
+    "autoBarbarians (old menu)": {"island": dict(BARBARIANS_ISLAND, cities=[]), "city": {"id": "111", "position": []},
+                                  "float_city": None, "schematic": DEFAULT_SCHEMATICS["WITHOUT_HEPHAESTUS"],
+                                  "units_data": {"302": {"speed": 60, "weight": 1}}, "ship_capacity": 500, "send_notifications": False},
+    "constructionList": {"city_id": "111", "buildings": [
+        {"position": 1, "upgradeTo": 9, "transport": {"origins": {"wood": ["222"]}, "useFreighters": False, "useRounding": True}},
+        {"position": 0, "upgradeTo": 12}], "transport": None, "expand": True},
+    # constructionList started from an older menu, which saved the buildings, the shipments and the times
+    "constructionList (old menu)": {"city_id": "111", "city_name": "Alpha",
+                                    "buildings": [dict(BUILDINGS_CITY["position"][1], upgradeTo=9, constructionTimes=[60, 60])],
+                                    "shipments": [{"origins": {"0": [{"id": "222"}]}, "missing": [5, 0, 0, 0, 0],
+                                                   "useFreighters": False, "useRounding": True}],
+                                    "expand_overall": False, "wait_resources": True, "construction_queue": [60, 60], "total_time": 120},
+    "modifyProduction": {"cities_ids": ["111"], "resources": "both", "percentage": 100, "overcharge": True, "show_results": True},
+    "modifyProduction (all cities)": {"cities_ids": None, "resources": "tradegood", "percentage": 50, "overcharge": False, "show_results": True},
+    "modifyAcademyWorkers": {"cities_ids": None, "percentage": 80, "show_results": True},
+    "modifyTempleWorkers": {"cities_ids": ["111"], "percentage": 100, "show_results": True},
+    "donate": {"city_id": "111", "type": "tradegood", "amount": 1000, "show_results": True},
+    "donate (all)": {"city_id": "111", "type": "resource", "amount": "all"},
+    "constructBuilding": {"city_id": "111", "building": "museum", "position": 4, "show_results": True},
     "loginDaily (old menu)": {"wine_city": {"id": 111, "name": "Alpha", "position": []}, "wood_city": None, "luxury_city": None,
                               "favour_tasks": ["Collect resource favour", "Look at hightscore/shop/inventory"], "collect_ambrosia": False},
 }
@@ -153,6 +203,19 @@ class TestRelaunchFromExportedConfig(unittest.TestCase):
         stack.enter_context(patch("ikabot.function.sellResources.getOffers", return_value=[("Shop", "Buyer", 5000, 12, 2, 9000)]))
         stack.enter_context(patch("ikabot.function.sellResources.getMarketInfo", return_value=""))
         stack.enter_context(patch("ikabot.function.sellResources.price_limits", return_value=(4, 21)))
+        for mod in ("attackBarbarians", "autoBarbarians"):
+            stack.enter_context(patch("ikabot.function.{}.get_island".format(mod), return_value=BARBARIANS_ISLAND))
+            stack.enter_context(patch("ikabot.function.{}.getCityById".format(mod), return_value={"id": "111", "islandId": "77"}))
+            stack.enter_context(patch("ikabot.function.{}.get_units".format(mod), return_value=CITY_UNITS))
+        stack.enter_context(patch("ikabot.function.attackBarbarians.getTotalShips", return_value=10))
+        stack.enter_context(patch("ikabot.function.constructionList.getCityById", return_value=BUILDINGS_CITY))
+        stack.enter_context(patch("ikabot.function.constructionList.getResourcesNeeded", side_effect=all_levels))
+        stack.enter_context(patch("ikabot.function.modifyProduction.getCityById", return_value=WORKERS_CITY))
+        stack.enter_context(patch("ikabot.function.modifyProduction.getIdsOfCities", return_value=OWN))
+        stack.enter_context(patch("ikabot.function.donate.getCityById", return_value=WORKERS_CITY))
+        stack.enter_context(patch("ikabot.function.donate.donation_info", return_value=DONATION))
+        stack.enter_context(patch("ikabot.function.constructBuilding.getCityById", return_value=EMPTY_CITY))
+        stack.enter_context(patch("ikabot.function.constructBuilding.buildable_buildings", return_value=([BUILDABLE], "REQ")))
         stack.enter_context(patch("ikabot.function.trainArmy.city_with_building", return_value={"id": "111", "name": "Alpha", "pos": "4"}))
         stack.enter_context(patch("ikabot.function.trainArmy.building_units", return_value=[PHALANX]))
         stack.enter_context(patch("ikabot.function.sellResources.own_offers", return_value=[{"type": "444", "amount": 0, "price": 7}] * 5))
