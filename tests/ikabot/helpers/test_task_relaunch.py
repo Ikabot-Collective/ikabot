@@ -16,7 +16,8 @@ import ikabot.function.sendResources, ikabot.function.activateMiracle, ikabot.fu
 import ikabot.function.distributeResources, ikabot.function.resourceTransportManager  # noqa
 import ikabot.function.buyResources, ikabot.function.sellResources, ikabot.function.trainArmy  # noqa
 import ikabot.function.trainSpies  # noqa
-import ikabot.function.constructionList, ikabot.function.attackBarbarians  # noqa
+import ikabot.function.attackBarbarians, ikabot.function.autoBarbarians, ikabot.function.constructionList  # noqa
+from ikabot.function.autoBarbarians import DEFAULT_SCHEMATICS
 from ikabot.helpers.decorators import _TASK_REGISTRY
 from ikabot.helpers.ipc import _validate_task_config
 
@@ -125,6 +126,11 @@ MENU = {
     "attackBarbarians (old menu)": {"island": dict(BARBARIANS_ISLAND, cities=[]), "city": {"id": "111", "position": []},
                                     "babarians_info": {"ships": 3, "resources": [1] * 5}, "ship_capacity": 500,
                                     "plan": [{"units": {"303": 50}, "loot": False, "round": 1, "ships": 2}]},
+    "autoBarbarians": {"island_id": "4415", "city_id": "111", "float_city_id": None, "schematic": "default", "send_notifications": True},
+    # autoBarbarians started from an older menu, which saved the island, the city, the scheme and the units' data
+    "autoBarbarians (old menu)": {"island": dict(BARBARIANS_ISLAND, cities=[]), "city": {"id": "111", "position": []},
+                                  "float_city": None, "schematic": DEFAULT_SCHEMATICS["WITHOUT_HEPHAESTUS"],
+                                  "units_data": {"302": {"speed": 60, "weight": 1}}, "ship_capacity": 500, "send_notifications": False},
     "constructionList": {"city_id": "111", "buildings": [
         {"position": 1, "upgradeTo": 9, "transport": {"origins": {"wood": ["222"]}, "useFreighters": False, "useRounding": True}},
         {"position": 0, "upgradeTo": 12}], "transport": None, "expand": True},
@@ -182,9 +188,10 @@ class TestRelaunchFromExportedConfig(unittest.TestCase):
         stack.enter_context(patch("ikabot.function.sellResources.getOffers", return_value=[("Shop", "Buyer", 5000, 12, 2, 9000)]))
         stack.enter_context(patch("ikabot.function.sellResources.getMarketInfo", return_value=""))
         stack.enter_context(patch("ikabot.function.sellResources.price_limits", return_value=(4, 21)))
-        stack.enter_context(patch("ikabot.function.attackBarbarians.get_island", return_value=BARBARIANS_ISLAND))
-        stack.enter_context(patch("ikabot.function.attackBarbarians.getCityById", return_value={"id": "111", "islandId": "77"}))
-        stack.enter_context(patch("ikabot.function.attackBarbarians.get_units", return_value=CITY_UNITS))
+        for mod in ("attackBarbarians", "autoBarbarians"):
+            stack.enter_context(patch("ikabot.function.{}.get_island".format(mod), return_value=BARBARIANS_ISLAND))
+            stack.enter_context(patch("ikabot.function.{}.getCityById".format(mod), return_value={"id": "111", "islandId": "77"}))
+            stack.enter_context(patch("ikabot.function.{}.get_units".format(mod), return_value=CITY_UNITS))
         stack.enter_context(patch("ikabot.function.attackBarbarians.getTotalShips", return_value=10))
         stack.enter_context(patch("ikabot.function.constructionList.getCityById", return_value=BUILDINGS_CITY))
         stack.enter_context(patch("ikabot.function.constructionList.getResourcesNeeded", side_effect=all_levels))
