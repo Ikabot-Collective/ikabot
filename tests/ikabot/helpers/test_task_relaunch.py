@@ -18,7 +18,7 @@ import ikabot.function.buyResources, ikabot.function.sellResources, ikabot.funct
 import ikabot.function.trainSpies  # noqa
 import ikabot.function.attackBarbarians, ikabot.function.autoBarbarians, ikabot.function.constructionList  # noqa
 from ikabot.function.autoBarbarians import DEFAULT_SCHEMATICS
-import ikabot.function.modifyProduction  # noqa
+import ikabot.function.modifyProduction, ikabot.function.donate, ikabot.function.constructBuilding  # noqa
 from ikabot.helpers.decorators import _TASK_REGISTRY
 from ikabot.helpers.ipc import _validate_task_config
 
@@ -43,6 +43,11 @@ def all_levels(session, city, building, current, final, reducers, time_reduction
 
 WORKERS_CITY = {"id": "111", "name": "Alpha", "availableResources": [5000, 0, 0, 0, 0],
                 "position": [{"building": "academy", "position": 3}, {"building": "temple", "position": 4}]}
+BUILDABLE = {"building": "museum", "name": "Museum", "buildingId": "10", "type": "land", "costs": [500, 0, 0, 0, 0], "canAfford": True}
+EMPTY_CITY = {"id": "111", "name": "Alpha", "availableResources": [5000, 0, 0, 0, 0],
+              "position": [{"position": 4, "building": "empty", "type": "land"}]}
+DONATION = {"islandId": "77", "woodOnInventory": 0, "resource": {"name": "Saw mill", "upgrading": False, "endUpgradeTime": 0},
+            "tradegood": {"name": "Quarry", "upgrading": False, "endUpgradeTime": 0}}
 MARKET_OFFER = {"precio": 20, "amountAvailable": 5000, "jugadorAComprar": "Seller", "ciudadDestino": "Shop", "resource": "2"}
 
 MENU = {
@@ -147,6 +152,9 @@ MENU = {
     "modifyProduction (all cities)": {"cities_ids": None, "resources": "tradegood", "percentage": 50, "overcharge": False, "show_results": True},
     "modifyAcademyWorkers": {"cities_ids": None, "percentage": 80, "show_results": True},
     "modifyTempleWorkers": {"cities_ids": ["111"], "percentage": 100, "show_results": True},
+    "donate": {"city_id": "111", "type": "tradegood", "amount": 1000, "show_results": True},
+    "donate (all)": {"city_id": "111", "type": "resource", "amount": "all"},
+    "constructBuilding": {"city_id": "111", "building": "museum", "position": 4, "show_results": True},
     "loginDaily (old menu)": {"wine_city": {"id": 111, "name": "Alpha", "position": []}, "wood_city": None, "luxury_city": None,
                               "favour_tasks": ["Collect resource favour", "Look at hightscore/shop/inventory"], "collect_ambrosia": False},
 }
@@ -204,6 +212,10 @@ class TestRelaunchFromExportedConfig(unittest.TestCase):
         stack.enter_context(patch("ikabot.function.constructionList.getResourcesNeeded", side_effect=all_levels))
         stack.enter_context(patch("ikabot.function.modifyProduction.getCityById", return_value=WORKERS_CITY))
         stack.enter_context(patch("ikabot.function.modifyProduction.getIdsOfCities", return_value=OWN))
+        stack.enter_context(patch("ikabot.function.donate.getCityById", return_value=WORKERS_CITY))
+        stack.enter_context(patch("ikabot.function.donate.donation_info", return_value=DONATION))
+        stack.enter_context(patch("ikabot.function.constructBuilding.getCityById", return_value=EMPTY_CITY))
+        stack.enter_context(patch("ikabot.function.constructBuilding.buildable_buildings", return_value=([BUILDABLE], "REQ")))
         stack.enter_context(patch("ikabot.function.trainArmy.city_with_building", return_value={"id": "111", "name": "Alpha", "pos": "4"}))
         stack.enter_context(patch("ikabot.function.trainArmy.building_units", return_value=[PHALANX]))
         stack.enter_context(patch("ikabot.function.sellResources.own_offers", return_value=[{"type": "444", "amount": 0, "price": 7}] * 5))
