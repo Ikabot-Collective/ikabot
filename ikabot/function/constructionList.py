@@ -28,6 +28,8 @@ from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import *
 from ikabot.web.session import normal_get
 from ikabot.helpers.decorators import configurator, task
+from ikabot.helpers.taskConfig import asBool, asInt, getCityById, requireOwnCity
+from ikabot.function.sendResources import RESOURCE_KEYS
 
 
 def _parseConstructionTime(row):
@@ -562,18 +564,9 @@ def getResourcesNeeded(session, city, building, current_level, final_level, simu
         elif building["building"] == "fireworker":
             costs_reductions[4] = min(50, costs_reductions[4] + 1)
 
-    if levels_to_upgrade < final_level - current_level:
-        print(
-            "This building only allows you to expand {:d} more levels".format(
-                levels_to_upgrade
-            )
-        )
-        msg = "Expand {:d} levels? [Y/n]:".format(levels_to_upgrade)
-        rta = read(msg=msg, values=["Y", "y", "N", "n", ""])
-        if rta.lower() == "n":
-            #Skip only this building
-            return [-2, -2, -2, -2, -2]
-
+    # the help table ends at the building's last level: the caller decides what to do when
+    # fewer levels than asked are left
+    building["levelsAvailable"] = levels_to_upgrade
     building["constructionTime"] = construction_time
     building["constructionTimes"] = construction_times
     return final_costs
@@ -845,41 +838,260 @@ def checkhash(url):
     return material
 
 
-@task("constructionList")
-def do_it(session, city_id, city_name, buildings, shipments, expand_overall, wait_resources,
-          construction_queue, total_time):
+REDUCERS = ("carpentering", "vineyard", "architect", "optician", "fireworker")
+
+
+def busy_reducers(city):
+    """The cost reducers of the city, counting a level more for those being expanded"""
+    reducers = getCostsReducers(city)
+    for building in city["position"]:
+        if building["name"] != "empty" and building.get("isBusy", False) and building["building"] in REDUCERS:
+            i = REDUCERS.index(building["building"])
+            reducers[i] = min(50, reducers[i] + 1)
+    return reducers
+
+
+def plan_construction(session, city, buildings, time_reduction=0.0):
+    """Works out, in order, what each upgrade costs, what the city lacks for it and how long
+    it takes, as the menu does: each upgrade spends from what the previous ones left, and a
+    cost reducer that is expanded lowers the costs of the next ones
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    city : dict
+    buildings : list[dict]
+        {"position", "upgradeTo"}
+    time_reduction : float
+        fraction of the construction time removed by the Chronoforge
+
+    Returns
+    -------
+    plans : list[dict]
+        {"building" (the city's building with upgradeTo, capped at its last level),
+        "requested", "costs", "missing", "times"}
+    """
+    resources = list(city["availableResources"])
+    reducers = busy_reducers(city)
+    plans = []
+    for wanted in buildings:
+        building = dict(city["position"][int(wanted["position"])], upgradeTo=int(wanted["upgradeTo"]))
+        current_level = building["level"] + (1 if building["isBusy"] else 0)
+        current_reducers = list(reducers)
+        costs = getResourcesNeeded(
+            session, city, building, current_level, building["upgradeTo"], current_reducers, time_reduction
+        )
+        requested = building["upgradeTo"]
+        building["upgradeTo"] = min(requested, current_level + building["levelsAvailable"])
+        missing = [max(0, costs[i] - resources[i]) for i in range(len(resources))]
+        resources = [max(0, resources[i] - costs[i]) for i in range(len(resources))]
+        reducers = current_reducers
+        plans.append({
+            "building": building,
+            "requested": requested,
+            "costs": costs,
+            "missing": missing,
+            "times": list(building.get("constructionTimes", [])),
+        })
+    return plans
+
+
+def buildings_list(city):
+    return ", ".join(
+        "{} = {} ({}, level {})".format(b["position"], b["name"], b["building"], b["level"])
+        for b in city["position"] if b["name"] != "empty"
+    )
+
+
+def building_position(city, value, name):
+    """The position of a building of the city, given its position, its technical name
+    (townHall) or its name in the game; the first one when there are several"""
+    text = str(value).strip().lower()
+    for building in city["position"]:
+        if building["name"] == "empty":
+            continue
+        if text in (str(building["position"]), str(building["building"]).lower(), str(building["name"]).lower()):
+            return int(building["position"])
+    raise ValueError("{} {!r} is not a building of {}. Buildings: {}".format(name, value, city["name"], buildings_list(city)))
+
+
+def transport_config(session, value, city_id, name):
+    """{"origins": {resource: [city ids]}, "useFreighters", "useRounding"}"""
+    if value is None:
+        return None
+    if not isinstance(value, dict) or not isinstance(value.get("origins"), dict) or not value["origins"]:
+        raise ValueError('{} must be an object like {{"origins": {{"marble": [1111, 2222]}}}} or null, got {!r}'.format(name, value))
+    origins = {}
+    for resource, cities in value["origins"].items():
+        text = str(resource).strip().lower()
+        if text.isdigit() and int(text) < len(RESOURCE_KEYS):
+            text = RESOURCE_KEYS[int(text)]
+        if text == "glass":
+            text = "crystal"
+        if text not in RESOURCE_KEYS:
+            raise ValueError("{}.origins: unknown resource {!r}, use {}".format(name, resource, ", ".join(RESOURCE_KEYS)))
+        if not isinstance(cities, (list, tuple)) or not cities:
+            raise ValueError("{}.origins.{} must be a list of your city ids".format(name, text))
+        ids = []
+        for i, city in enumerate(cities):
+            origin = requireOwnCity(session, city, "{}.origins.{}[{}]".format(name, text, i))
+            if origin == city_id:
+                raise ValueError("{}.origins.{}: the city cannot send to itself".format(name, text))
+            if origin not in ids:
+                ids.append(origin)
+        origins[text] = origins.get(text, []) + [i for i in ids if i not in origins.get(text, [])]
+    return {
+        "origins": origins,
+        "useFreighters": asBool(value.get("useFreighters", False), name + ".useFreighters"),
+        "useRounding": asBool(value.get("useRounding", True), name + ".useRounding"),
+    }
+
+
+def config_from_saved(buildings, shipments, expand_overall):
+    """An older menu saved the city's buildings and the shipments it worked out"""
+    transport = None
+    for shipment in shipments or []:
+        if not isinstance(shipment, dict):
+            continue
+        if transport is None:
+            transport = {"origins": {}, "useFreighters": bool(shipment.get("useFreighters", False)),
+                         "useRounding": bool(shipment.get("useRounding", True))}
+        for resource, cities in (shipment.get("origins") or {}).items():
+            key = RESOURCE_KEYS[int(resource)]
+            for origin in cities or []:
+                origin_id = str(origin.get("id")) if isinstance(origin, dict) else str(origin)
+                if origin_id not in transport["origins"].setdefault(key, []):
+                    transport["origins"][key].append(origin_id)
+    return {
+        "buildings": [
+            {"position": b.get("position"), "upgradeTo": b.get("upgradeTo")} if isinstance(b, dict) else b
+            for b in buildings or []
+        ],
+        "transport": transport,
+        "expand": True if expand_overall is None else bool(expand_overall),
+    }
+
+
+def prepare_constructionList(session, city_id=None, buildings=None, transport=None, expand=True, city_name=None,
+                             shipments=None, expand_overall=None, wait_resources=None, construction_queue=None,
+                             total_time=None):
+    """Checks the config of a constructionList task started from the CLI
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    city_id : int or str
+    buildings : list[dict]
+        expanded one after another: {"position": position, technical name or name in the game,
+        "upgradeTo": level, "transport": optional, like the top one}
+    transport : dict
+        for every building without its own: {"origins": {"marble": [city ids], ...},
+        "useFreighters": false, "useRounding": true}; null sends nothing
+    expand : bool
+        false only sends the resources
+    city_name, shipments, expand_overall, wait_resources, construction_queue, total_time :
+        saved by older menus
+
+    Returns
+    -------
+    config : dict
+    """
+    if shipments is not None or construction_queue is not None or city_name is not None:
+        saved = config_from_saved(buildings, shipments, expand_overall)
+        buildings, transport, expand = saved["buildings"], saved["transport"], saved["expand"]
+    if city_id is None:
+        raise ValueError("city_id is needed")
+    city_id = requireOwnCity(session, city_id, "city_id")
+    expand = asBool(expand, "expand")
+    transport = transport_config(session, transport, city_id, "transport")
+    city = getCityById(session, city_id)
+    if not isinstance(buildings, (list, tuple)) or not buildings:
+        raise ValueError('buildings must be a list like [{{"position": 4, "upgradeTo": 20}}]. Buildings of {}: {}'.format(
+            city["name"], buildings_list(city)))
+    checked = []
+    for i, wanted in enumerate(buildings):
+        name = "buildings[{}]".format(i)
+        if not isinstance(wanted, dict):
+            raise ValueError("{} must be an object, got {!r}".format(name, wanted))
+        position = building_position(city, wanted.get("position", wanted.get("building")), name)
+        if any(b["position"] == position for b in checked):
+            raise ValueError("{}: the building at position {} is already in the list".format(name, position))
+        building = city["position"][position]
+        current = building["level"] + (1 if building["isBusy"] else 0)
+        target = asInt(wanted.get("upgradeTo"), name + ".upgradeTo", minimum=1)
+        if target <= current:
+            raise ValueError("{}: {} is already at level {}".format(name, building["name"], current))
+        item = {"position": position, "upgradeTo": target}
+        own_transport = transport_config(session, wanted.get("transport"), city_id, name + ".transport")
+        if own_transport is not None:
+            item["transport"] = own_transport
+        checked.append(item)
+    for plan in plan_construction(session, city, checked):
+        if plan["building"]["upgradeTo"] < plan["requested"]:
+            raise ValueError("{} can only be expanded up to level {}".format(plan["building"]["name"], plan["building"]["upgradeTo"]))
+    return {"city_id": city_id, "buildings": checked, "transport": transport, "expand": expand}
+
+
+@task("constructionList", prepare=prepare_constructionList)
+def do_it(session, city_id=None, buildings=None, transport=None, expand=True, city_name=None, shipments=None,
+          expand_overall=None, wait_resources=None, construction_queue=None, total_time=None):
+    """Sends the resources the upgrades lack and expands the buildings one after another
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    city_id : str
+    buildings : list[dict]
+        {"position", "upgradeTo", "transport" (optional)}
+    transport : dict or None
+    expand : bool
+    city_name, shipments, expand_overall, wait_resources, construction_queue, total_time :
+        saved by older menus; the task works them out again
+    """
+    if shipments is not None or construction_queue is not None or city_name is not None:
+        saved = config_from_saved(buildings, shipments, expand_overall)
+        buildings, transport, expand = saved["buildings"], saved["transport"], saved["expand"]
+    city = getCityById(session, city_id)
+    chronos_level, time_reduction = getChronosForgeReduction(session, city)
+    plans = plan_construction(session, city, buildings, time_reduction or 0.0)
+
+    construction_queue = [duration for plan in plans for duration in plan["times"]]
+    total_time = sum(construction_queue) + max(0, int(city.get("endUpgradeTime", 0)) - int(time.time()))
     session.setStatus(
         "{}: queued {} upgrades | all done {}".format(
-            city_name, len(construction_queue), _formatEndTime(time.time() + total_time)
+            city["name"], len(construction_queue), _formatEndTime(time.time() + total_time)
         )
     )
     info = "\nUpgrade building\n"
-    building_log_name = buildings[0]["name"] if len(buildings) == 1 else "Multiple buildings"
-    info = info + "City: {}\nBuilding: {}".format(city_name, building_log_name)
+    building_log_name = plans[0]["building"]["name"] if len(plans) == 1 else "Multiple buildings"
+    info = info + "City: {}\nBuilding: {}".format(city["name"], building_log_name)
     setInfoSignal(session, info)
-    
+    for plan in plans:
+        if plan["building"]["upgradeTo"] < plan["requested"]:
+            sendToBot(session, "{}: {} can only be expanded up to level {}".format(
+                city["name"], plan["building"]["name"], plan["building"]["upgradeTo"]))
+
+    # the resources each upgrade lacks, from the cities chosen for it
     threads = []
-    for shipment in shipments:
+    for wanted, plan in zip(buildings, plans):
+        shipping = wanted.get("transport") or transport
+        if not shipping or sum(plan["missing"]) == 0:
+            continue
+        origins = {}
+        for i, key in enumerate(RESOURCE_KEYS):
+            if plan["missing"][i] > 0 and shipping["origins"].get(key):
+                origins[i] = [getCityById(session, origin) for origin in shipping["origins"][key]]
+        if not origins:
+            continue
         t = threading.Thread(
             target=sendResourcesNeeded,
-            args=(
-                session,
-                city_id,
-                shipment["origins"],
-                shipment["missing"],
-                shipment["useFreighters"],
-                shipment["useRounding"],
-            ),
+            args=(session, str(city_id), origins, plan["missing"], shipping.get("useFreighters", False),
+                  shipping.get("useRounding", True)),
         )
         t.start()
         threads.append(t)
 
     try:
-        if expand_overall:
-            for building in buildings:
-                expandBuilding(
-                    session, city_id, building, wait_resources, construction_queue
-                )
+        if expand:
+            for plan in plans:
+                expandBuilding(session, str(city_id), plan["building"], len(threads) > 0, construction_queue)
         else:
             for t in threads:
                 t.join()
@@ -911,7 +1123,6 @@ def constructionList(session, event, stdin_fd, predetermined_input):
     predetermined_input : multiprocessing.managers.SyncManager.list
     """
     banner()
-    wait_resources = False
     print("In which city do you want to expand buildings?")
     city = chooseCity(session)
     cityId = city["id"]
@@ -962,9 +1173,21 @@ def constructionList(session, event, stdin_fd, predetermined_input):
             session, city, building, current_level, final_level, current_reducers, time_reduction
         )
 
-        if -2 in resourcesNeeded:
-            print(f"\nSkipping {building['name']}.\n")
-            continue
+        levels_available = building["levelsAvailable"]
+        if levels_available < final_level - current_level:
+            print(
+                "This building only allows you to expand {:d} more levels".format(
+                    levels_available
+                )
+            )
+            msg = "Expand {:d} levels? [Y/n]:".format(levels_available)
+            rta = read(msg=msg, values=["Y", "y", "N", "n", ""])
+            if rta.lower() == "n":
+                print(f"\nSkipping {building['name']}.\n")
+                continue
+            # the task would otherwise try the levels the building does not have
+            final_level = current_level + levels_available
+            building["upgradeTo"] = final_level
 
         if -1 in resourcesNeeded:
             return None
@@ -1010,7 +1233,6 @@ def constructionList(session, event, stdin_fd, predetermined_input):
                 print("(amounts will be rounded up but capped at what each city can provide)")
                 rta_round = read(values=["y", "Y", "n", "N", ""])
                 useRounding = rta_round.lower() != "n"
-                wait_resources = True
                 origins, current_expand = sendResourcesMenu(session, cityId, missing)
                 
                 if not current_expand:
@@ -1023,6 +1245,14 @@ def constructionList(session, event, stdin_fd, predetermined_input):
                         "useFreighters": useFreighters,
                         "useRounding": useRounding
                     })
+                    building["transport"] = {
+                        "origins": {
+                            RESOURCE_KEYS[int(resource)]: [str(origin["id"]) for origin in cities]
+                            for resource, cities in origins.items()
+                        },
+                        "useFreighters": useFreighters,
+                        "useRounding": useRounding,
+                    }
         else:
             _printUpgradeSummary(building, current_level, final_level, resourcesNeeded)
 
@@ -1049,25 +1279,23 @@ def constructionList(session, event, stdin_fd, predetermined_input):
     total_time = sum(building["constructionTime"] for building in buildings)
     active_time = int(city.get("endUpgradeTime", 0)) - int(time.time())
     total_time += max(0, active_time)
-    construction_queue = [
-        duration
-        for building in buildings
-        for duration in building["constructionTimes"]
-    ]
     if buildings:
         print("\nTotal construction time: {}".format(daysHoursMinutes(total_time)))
 
-    if (not buildings or len(buildings) == 0) and len(shipments) == 0:
+    # every shipment belongs to a confirmed building: without buildings there is nothing to do
+    if not buildings:
         return None
 
+    # the task works out the costs, what is missing and the times again when it starts: the
+    # config keeps the buildings, their levels and where their resources come from
     return {
         "session": session,
-        "city_id": cityId,
-        "city_name": city["cityName"],
-        "buildings": buildings,
-        "shipments": shipments,
-        "expand_overall": expand_overall,
-        "wait_resources": wait_resources,
-        "construction_queue": construction_queue,
-        "total_time": total_time,
+        "city_id": str(cityId),
+        "buildings": [
+            dict({"position": building["position"], "upgradeTo": building["upgradeTo"]},
+                 **({"transport": building["transport"]} if building.get("transport") else {}))
+            for building in buildings
+        ],
+        "transport": None,
+        "expand": expand_overall,
     }
