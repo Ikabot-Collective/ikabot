@@ -54,6 +54,12 @@ from ikabot.helpers.gui import *
 from ikabot.helpers.pedirInfo import read
 from ikabot.helpers.process import updateProcessList
 from ikabot.helpers.sessionStorage import init_storage
+from ikabot.helpers.ipc import (
+    ensure_ipc_server,
+    is_cli_invocation,
+    run_cli_task,
+    stop_ipc_server,
+)
 from ikabot.web.session import *
 from ikabot.function.UpgradeUnits import UpgradeUnits
 from ikabot.function.modifyProduction import modifyProduction, modifyAcademyWorkers, modifyTempleWorkers
@@ -70,6 +76,9 @@ def menu(session, checkUpdate=True):
     session : ikabot.web.session.Session
     checkUpdate : bool
     """
+    if len(config.predetermined_input) == 0:
+        ensure_ipc_server(default_session=session)
+
     if checkUpdate:
         checkForUpdate()
 
@@ -306,7 +315,7 @@ def menu(session, checkUpdate=True):
         print("(0) Back")
         print("(1) Configure Proxy")
         print("(2) Notifications")
-        print("(3) Kill tasks")
+        print("(3) Manage running tasks (kill / view / save)")
         print("(4) Configure captcha resolver")
         print("(5) Logs")
         print("(6) Import / Export cookie")
@@ -401,6 +410,7 @@ def menu(session, checkUpdate=True):
             print("Closing this console will kill the processes.")
             enter()
         clear()
+        stop_ipc_server()
         os._exit(
             0
         )  # kills the process which executes this statement, but it does not kill it's child processes
@@ -427,10 +437,16 @@ def start():
         menu(session)
     finally:
         clear()
+        stop_ipc_server()
         session.logout()
 
 
 def main():
+    if sys.platform.startswith("win"):
+        multiprocessing.freeze_support()
+    if is_cli_invocation(sys.argv):
+        run_cli_task(sys.argv[1:])
+        return
     manager = multiprocessing.Manager()
     predetermined_input = manager.list()
     config.predetermined_input = predetermined_input
@@ -447,8 +463,10 @@ if __name__ == "__main__":
     main()
 
 #############################################################
-# This is necessary to ensure that flask is frozen together #
-# with other requirements when creating ikabot.exe          #
+# This is necessary to ensure that flask and CLI-only tasks #
+# are frozen together with other requirements in ikabot.exe #
 try: import flask                                           #
+except: pass                                                #
+try: import ikabot.function.resourceTransportManager        #
 except: pass                                                #
 #############################################################

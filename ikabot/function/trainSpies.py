@@ -15,10 +15,17 @@ from ikabot.helpers.gui import *
 from ikabot.helpers.market import getGold
 from ikabot.helpers.pedirInfo import *
 from ikabot.helpers.signals import setInfoSignal
+from ikabot.helpers.taskConfig import asInt, requireOwnCity
 from ikabot.helpers.varios import *
 
 CRYSTAL = 3  # index of crystal in the 5 resource list
 FEEDBACK_SUCCESS = 10  # provideFeedback type the game uses for an accepted order
+DEFAULT_SETTINGS = {
+    "target": 0,
+    "goldFloor": 0,
+    "crystalFloor": 0,
+    "maxPerPass": 100,
+}
 
 # random pauses, in seconds, so a pass over many cities does not fire a burst of requests
 READ_DELAY = (2, 6)  # between reading one city and the next
@@ -459,22 +466,117 @@ def _print_results_table(results):
     print()
 
 
-@task("trainSpies")
-def do_trainSpies(session, run_hours, cities_ids, cities, settings, notification_mode):
+def prepare_trainSpies(
+    session,
+    run_hours,
+    cities_ids=None,
+    cities=None,
+    settings=None,
+    notification_mode=3,
+    check_now=True,
+):
+    """Checks the config of a trainSpies task started from the CLI.
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    run_hours : int
+        hours between passes, 0 runs once and stops
+    cities_ids : list or None
+        None checks all own cities
+    cities : dict
+        ignored, fetched fresh by the task
+    settings : dict or None
+        target, goldFloor, crystalFloor, maxPerPass
+    notification_mode : int
+        1 = every training/error, 2 = only errors, 3 = never
+    check_now : bool
+        always on from the CLI
+
+    Returns
+    -------
+    config : dict
+    """
+    run_hours = asInt(run_hours, "run_hours", minimum=0, maximum=24)
+    notification_mode = asInt(notification_mode, "notification_mode", minimum=1, maximum=3)
+
+    if cities_ids is not None:
+        if not isinstance(cities_ids, (list, tuple)) or not cities_ids:
+            raise ValueError(
+                "cities_ids must be a non-empty list of city ids or null, got {!r}".format(
+                    cities_ids
+                )
+            )
+        cities_ids = list(
+            dict.fromkeys(requireOwnCity(session, cid, "cities_ids") for cid in cities_ids)
+        )
+
+    if settings is None:
+        checked_settings = dict(DEFAULT_SETTINGS)
+    else:
+        if not isinstance(settings, dict):
+            raise ValueError("settings must be an object, got {!r}".format(settings))
+        unknown = [k for k in settings if k not in DEFAULT_SETTINGS]
+        if unknown:
+            raise ValueError(
+                "unknown settings key(s): {}. Expected: {}".format(
+                    unknown, sorted(DEFAULT_SETTINGS)
+                )
+            )
+        checked_settings = {
+            key: asInt(settings.get(key, default), "settings." + key, minimum=0)
+            for key, default in DEFAULT_SETTINGS.items()
+        }
+
+    return {
+        "run_hours": run_hours,
+        "cities_ids": cities_ids,
+        "settings": checked_settings,
+        "notification_mode": notification_mode,
+    }
+
+
+@task("trainSpies", prepare=prepare_trainSpies)
+def do_trainSpies(
+    session,
+    run_hours,
+    cities_ids=None,
+    cities=None,
+    settings=None,
+    notification_mode=3,
+    check_now=True,
+):
+    settings = {**DEFAULT_SETTINGS, **(settings or {})}
     trainer = SpyTrainer(session, settings, notification_mode)
+    which = "{:d} cities".format(len(cities_ids)) if cities_ids is not None else "all cities"
     setInfoSignal(
         session,
-        "\nTrain spies: {:d} cities, every {:d}h\n".format(len(cities_ids), run_hours),
+        "\nTrain spies: {}, every {:d}h\n".format(which, run_hours),
     )
 
-    while True:
-        wait(run_hours * 3600, maxrandom=600)
+    def run_pass():
         try:
-            trainer.run_pass(cities_ids, cities)
+            own_ids, own_cities = getIdsOfCities(session)
+            if cities_ids is None:
+                ids = own_ids
+            else:
+                ids = [str(cid) for cid in cities_ids if str(cid) in own_cities]
+            if ids:
+                trainer.run_pass(ids, own_cities)
         except Exception:
             if notification_mode in (1, 2):
                 sendToBot(session, "❌ Train spies\n{}".format(traceback.format_exc()))
         session.setStatus("Spies checked @{}".format(getDateTime()))
+
+    if check_now:
+        run_pass()
+        if run_hours == 0:
+            return
+    elif run_hours == 0:
+        return
+
+    while True:
+        wait(run_hours * 3600, maxrandom=600)
+        run_pass()
 
 
 @configurator
@@ -500,10 +602,15 @@ def trainSpies(session, event, stdin_fd, predetermined_input):
     choice = read(min=1, max=2, digit=True, additionalValues=["'"])
     if choice == "'":
         return None
-    if int(choice) == 1:
-        cities_ids, cities = ignoreCities(session, msg="Select cities:")
-    else:
+    all_cities = int(choice) == 2
+    if all_cities:
         cities_ids, cities = getIdsOfCities(session)
+    else:
+        cities_ids, cities = ignoreCities(session, msg="Select cities:")
+        if not cities_ids:
+            print("No cities selected.")
+            enter()
+            return None
 
     print("\nHow many spies should each city have?")
     print("  0 = fill the safehouse")
@@ -566,8 +673,8 @@ def trainSpies(session, event, stdin_fd, predetermined_input):
     return {
         "session": session,
         "run_hours": int(run_hours),
-        "cities_ids": cities_ids,
-        "cities": cities,
+        "cities_ids": None if all_cities else cities_ids,
         "settings": settings,
         "notification_mode": notification_mode,
+        "check_now": False,
     }

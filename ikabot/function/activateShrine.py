@@ -13,6 +13,7 @@ from ikabot.helpers.resources import *
 from ikabot.helpers.varios import *
 from ikabot.helpers.botComm import *
 from ikabot.helpers.decorators import configurator, task
+from ikabot.helpers.taskConfig import asInt
 
 
 def findShrine(session):
@@ -99,8 +100,46 @@ def donateShrine(session, godid, cityid, pos, selected_gods):
     return current_favor, last_donation_time, last_donation_status
 
 
-@task("activateShrine")
-def do_it(session, godids, mode, times, selected_gods, wait_time):
+WAIT_TIME = 60 * 60 * 12  # 12 hours, WAIT_TIME*6 equals total shrine grace time of 72h
+
+
+def prepare_activateShrine(session, godids, mode, times=0, selected_gods=None, wait_time=WAIT_TIME):
+    """Checks the config of an activateShrine task started from the CLI
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    godids : list[int]
+        gods from 1 (Pan) to 6 (Hephaestus)
+    mode : int
+        1 = a number of times in a row, 2 = every 70 hours, 3 = both
+    times : int
+        1 to 10, ignored in mode 2
+    selected_gods : str
+        built from godids
+    wait_time : int
+
+    Returns
+    -------
+    config : dict
+    """
+    if not isinstance(godids, (list, tuple)) or len(godids) == 0:
+        raise ValueError("godids must be a list of gods from 1 (Pan) to 6 (Hephaestus), got {!r}".format(godids))
+    godids = [asInt(godid, "godids", minimum=1, maximum=6) for godid in godids]
+    mode = asInt(mode, "mode", minimum=1, maximum=3)
+    times = 0 if mode == 2 else asInt(times, "times", minimum=1, maximum=10)
+    if findShrine(session) == (None, None):
+        raise ValueError("none of your cities has the Shrine of Olympus")
+    return {
+        "godids": godids,
+        "mode": mode,
+        "times": times,
+        "selected_gods": ", ".join(gods(godid) for godid in godids),
+        "wait_time": asInt(wait_time, "wait_time", minimum=1),
+    }
+
+
+@task("activateShrine", prepare=prepare_activateShrine)
+def do_it(session, godids, mode, times=0, selected_gods=None, wait_time=WAIT_TIME):
     """
     Parameters
     ----------
@@ -111,6 +150,8 @@ def do_it(session, godids, mode, times, selected_gods, wait_time):
     selected_gods : str
     wait_time : int
     """
+    if selected_gods is None:
+        selected_gods = ", ".join(gods(godid) for godid in godids)
     last_donation_status = ""
     last_donation_time = ""
     current_favor = ""
@@ -182,7 +223,7 @@ def activateShrine(session, event, stdin_fd, predetermined_input):
     banner()
     godids = []
     selected_gods = ""
-    wait_time = 60 * 60 * 12  # 12 hours, wait_time*6 equals total shrine grace time of 72h
+    wait_time = WAIT_TIME
 
     while True:
         print(

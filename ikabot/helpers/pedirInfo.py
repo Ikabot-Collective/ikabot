@@ -249,6 +249,9 @@ def askForValue(text, max_val):
     return var
 
 
+_cities_cache_account = None
+
+
 def getIdsOfCities(session, all=False):
     """Gets the user's cities
     Parameters
@@ -265,7 +268,19 @@ def getIdsOfCities(session, all=False):
     """
     global cities_cache
     global ids_cache
-    if ids_cache is None or cities_cache is None or session.padre is False:
+    global _cities_cache_account
+    account_key = (
+        getattr(session, "mail", None),
+        getattr(session, "username", None),
+        str(getattr(session, "mundo", "")),
+        getattr(session, "servidor", None),
+    )
+    if (
+        ids_cache is None
+        or cities_cache is None
+        or session.padre is False
+        or _cities_cache_account != account_key
+    ):
         html = session.get()
         cities_cache = (
             re.search(
@@ -276,9 +291,14 @@ def getIdsOfCities(session, all=False):
         cities_cache = cities_cache.replace("\\", "")
         cities_cache = cities_cache.replace("city_", "")
         cities_cache = json.loads(cities_cache, strict=False)
+        # removing the backslashes above leaves "Nu00e9stor" where the game sent "Néstor"
+        for city in cities_cache.values():
+            if isinstance(city, dict) and isinstance(city.get("name"), str):
+                city["name"] = decodeUnicodeEscape(city["name"])
 
         ids_cache = [city_id for city_id in cities_cache]
         ids_cache = sorted(ids_cache)
+        _cities_cache_account = account_key
 
     # {'coords': '[x:y] ', 'id': idCiudad, 'tradegood': '..', 'name': 'nomberCiudad', 'relationship': 'ownCity'|'occupiedCities'|..}
     if all is False:
