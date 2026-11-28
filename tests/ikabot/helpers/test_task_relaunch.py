@@ -16,7 +16,7 @@ import ikabot.function.sendResources, ikabot.function.activateMiracle, ikabot.fu
 import ikabot.function.distributeResources, ikabot.function.resourceTransportManager  # noqa
 import ikabot.function.buyResources, ikabot.function.sellResources, ikabot.function.trainArmy  # noqa
 import ikabot.function.trainSpies  # noqa
-import ikabot.function.constructionList  # noqa
+import ikabot.function.constructionList, ikabot.function.attackBarbarians  # noqa
 from ikabot.helpers.decorators import _TASK_REGISTRY
 from ikabot.helpers.ipc import _validate_task_config
 
@@ -26,6 +26,8 @@ HERMES = {"id": "4415", "wonder": "5", "wonderName": "Temple of Hermes", "wonder
           "ciudad": {"id": "111", "name": "Alpha", "islandId": "4415", "pos": "4"}, "cities": [{"type": "city", "id": 9000}]}
 
 PHALANX = {"identifier": "phalanx", "unit_type_id": 303, "local_name": "Hoplite", "costs": {"citizens": 1, "wood": 30}}
+BARBARIANS_ISLAND = {"id": "4415", "x": 50, "y": 60, "barbarians": {"level": 12, "destroyed": 0}}
+CITY_UNITS = {uid: {"name": "Unit " + uid, "amount": 500} for uid in ("302", "303", "304", "305", "307", "308", "309", "310", "311")}
 BUILDINGS_CITY = {"id": "111", "name": "Alpha", "availableResources": [0] * 5, "position": [
     {"position": 0, "building": "townHall", "name": "Town Hall", "level": 10, "isBusy": False},
     {"position": 1, "building": "warehouse", "name": "Warehouse", "level": 7, "isBusy": False}]}
@@ -117,6 +119,12 @@ MENU = {
     "trainSpies (all cities)": {"run_hours": 6, "cities_ids": None,
                                 "settings": {"target": 0, "goldFloor": 0, "crystalFloor": 0, "maxPerPass": 100},
                                 "notification_mode": 3, "check_now": False},
+    "attackBarbarians": {"island_id": "4415", "city_id": "111", "plan": [
+        {"units": {"303": 50}, "loot": False, "round": 1, "ships": 2}, {"units": {"307": 2}, "loot": True, "round": 2}]},
+    # attackBarbarians started from an older menu, which saved the island, the city and the barbarians
+    "attackBarbarians (old menu)": {"island": dict(BARBARIANS_ISLAND, cities=[]), "city": {"id": "111", "position": []},
+                                    "babarians_info": {"ships": 3, "resources": [1] * 5}, "ship_capacity": 500,
+                                    "plan": [{"units": {"303": 50}, "loot": False, "round": 1, "ships": 2}]},
     "constructionList": {"city_id": "111", "buildings": [
         {"position": 1, "upgradeTo": 9, "transport": {"origins": {"wood": ["222"]}, "useFreighters": False, "useRounding": True}},
         {"position": 0, "upgradeTo": 12}], "transport": None, "expand": True},
@@ -174,6 +182,10 @@ class TestRelaunchFromExportedConfig(unittest.TestCase):
         stack.enter_context(patch("ikabot.function.sellResources.getOffers", return_value=[("Shop", "Buyer", 5000, 12, 2, 9000)]))
         stack.enter_context(patch("ikabot.function.sellResources.getMarketInfo", return_value=""))
         stack.enter_context(patch("ikabot.function.sellResources.price_limits", return_value=(4, 21)))
+        stack.enter_context(patch("ikabot.function.attackBarbarians.get_island", return_value=BARBARIANS_ISLAND))
+        stack.enter_context(patch("ikabot.function.attackBarbarians.getCityById", return_value={"id": "111", "islandId": "77"}))
+        stack.enter_context(patch("ikabot.function.attackBarbarians.get_units", return_value=CITY_UNITS))
+        stack.enter_context(patch("ikabot.function.attackBarbarians.getTotalShips", return_value=10))
         stack.enter_context(patch("ikabot.function.constructionList.getCityById", return_value=BUILDINGS_CITY))
         stack.enter_context(patch("ikabot.function.constructionList.getResourcesNeeded", side_effect=all_levels))
         stack.enter_context(patch("ikabot.function.trainArmy.city_with_building", return_value={"id": "111", "name": "Alpha", "pos": "4"}))

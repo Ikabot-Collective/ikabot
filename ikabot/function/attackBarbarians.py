@@ -20,6 +20,8 @@ from ikabot.helpers.process import set_child_mode
 from ikabot.helpers.signals import setInfoSignal
 from ikabot.helpers.varios import *
 from ikabot.helpers.pedirInfo import getShipCapacity
+from ikabot.helpers.taskConfig import asBool, asInt, getCityById, requireOwnCity
+from ikabot.function.sendResources import get_island
 
 getcontext().prec = 30
 
@@ -341,6 +343,9 @@ def wait_until_can_attack(session, city, island, travel_time=0):
             wait_time = max(eventTimes)
             wait_time -= time.time()
             wait(wait_time + 5)
+        else:
+            # someone else's battle: it is not listed in our movements, check again later
+            wait(60)
         wait_until_can_attack(session, city, island, travel_time)
 
     if island["barbarians"]["destroyed"] == 1:
@@ -351,6 +356,9 @@ def wait_until_can_attack(session, city, island, travel_time=0):
             wait_time -= time.time()
             wait_time -= travel_time
             wait(wait_time + 5)
+        else:
+            # no cooldown shown yet: check again later instead of asking the game in a loop
+            wait(60)
         wait_until_can_attack(session, city, island, travel_time)
 
 
@@ -420,7 +428,8 @@ def wait_for_round(session, city, island, travel_time, battle_start, round_numbe
         wait(wait_time + 5)
 
         if battle_start < time.time():
-            html = session.get(island_url + city["id"])
+            # the island's id: it used to read the island with the city's id
+            html = session.get(island_url + str(island["id"]))
             island = getIsland(html)
             assert (
                 island["barbarians"]["underAttack"] == 1
@@ -580,8 +589,139 @@ def loot(session, island, city, units_data, loot_round, ship_capacity):
         session.post(params=attack_data)
 
 
-@task("attackBarbarians")
-def do_it(session, island, city, babarians_info, plan, ship_capacity):
+def unit_id(units, value, name):
+    """The id of one of the city's units ("303"), given its id or its name in the game"""
+    text = str(value).strip().lower()
+    for uid, unit in units.items():
+        if text in (str(uid), str(unit["name"]).strip().lower()):
+            return str(uid)
+    raise ValueError("{} {!r} is not a unit of the city. Units: {}".format(
+        name, value, ", ".join("{} = {}".format(uid, unit["name"]) for uid, unit in units.items())))
+
+
+def check_plan(plan, units, total_ships):
+    """Checks an attack plan against the units of the city and the ships of the account
+    Parameters
+    ----------
+    plan : list[dict]
+        rounds like the menu builds them: {"round", "units", "ships"}, and optionally one
+        last {"loot": true, "units"} that collects the resources once the wall is destroyed
+    units : dict
+        the city's units, as returned by get_units
+    total_ships : int
+
+    Returns
+    -------
+    plan : list[dict]
+        sorted by round, the loot round last, units by id
+    """
+    if not isinstance(plan, (list, tuple)) or not plan:
+        raise ValueError('plan must be a list of rounds like [{{"round": 1, "units": {{"303": 50}}, "ships": 0}}], got {!r}'.format(plan))
+    rounds = []
+    loot_round = None
+    sent = {}
+    for i, attack_round in enumerate(plan):
+        name = "plan[{}]".format(i)
+        if not isinstance(attack_round, dict):
+            raise ValueError("{} must be an object, got {!r}".format(name, attack_round))
+        if loot_round is not None:
+            raise ValueError("the loot round must be the last one of the plan")
+        amounts = {}
+        round_units = attack_round.get("units")
+        if not isinstance(round_units, dict):
+            raise ValueError('{}.units must be an object like {{"303": 50}}, got {!r}'.format(name, round_units))
+        for unit, amount in round_units.items():
+            uid = unit_id(units, unit, name + ".units")
+            amounts[uid] = amounts.get(uid, 0) + asInt(amount, "{}.units.{}".format(name, unit), minimum=0)
+        amounts = {uid: amount for uid, amount in amounts.items() if amount > 0}
+        if not amounts:
+            raise ValueError("{} sends no units".format(name))
+        for uid, amount in amounts.items():
+            sent[uid] = sent.get(uid, 0) + amount
+        if asBool(attack_round.get("loot", False), name + ".loot"):
+            loot_round = {"units": amounts, "loot": True}
+            continue
+        rounds.append({
+            "round": asInt(attack_round.get("round"), name + ".round", minimum=1),
+            "units": amounts,
+            "ships": asInt(attack_round.get("ships", 0), name + ".ships", minimum=0),
+            "loot": False,
+        })
+    if not rounds:
+        raise ValueError("the plan needs a first round of attack before the loot round")
+    rounds.sort(key=lambda r: r["round"])
+    if rounds[0]["round"] != 1 or any(r["round"] == 1 for r in rounds[1:]):
+        raise ValueError("the plan needs exactly one round 1; the other rounds go in battle round 2 or later")
+    ships = sum(r["ships"] for r in rounds)
+    if ships > total_ships:
+        raise ValueError("the plan sends {} ships and the account has {}".format(ships, total_ships))
+    for uid, amount in sent.items():
+        if amount > units[uid]["amount"]:
+            raise ValueError("the city has {} {} ({}), the plan sends {}".format(
+                units[uid]["amount"], units[uid]["name"], uid, amount))
+    if loot_round is not None:
+        loot_round["round"] = len(rounds) + 1
+        rounds.append(loot_round)
+    return rounds
+
+
+def ids_from_saved(island_id, city_id, island, city):
+    """An older menu saved the whole island and city"""
+    if isinstance(island, dict):
+        island_id = island.get("id")
+    if isinstance(city, dict):
+        city_id = city.get("id")
+    return island_id, city_id
+
+
+def prepare_attackBarbarians(session, island_id=None, city_id=None, plan=None, island=None, city=None,
+                             babarians_info=None, ship_capacity=None):
+    """Checks the config of an attackBarbarians task started from the CLI
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    island_id : int or str
+        the island of the barbarians, by id or "X:Y"
+    city_id : int or str
+        one of your cities, the troops leave from it
+    plan : list[dict]
+        the rounds, see check_plan
+    island, city, babarians_info, ship_capacity :
+        saved by older menus
+
+    Returns
+    -------
+    config : dict
+    """
+    island_id, city_id = ids_from_saved(island_id, city_id, island, city)
+    for key, value in (("island_id", island_id), ("city_id", city_id), ("plan", plan)):
+        if value is None:
+            raise ValueError("{} is needed".format(key))
+    city_id = requireOwnCity(session, city_id, "city_id")
+    found = get_island(session, island_id, "island_id")
+    if not isinstance(found.get("barbarians"), dict):
+        raise ValueError("island {}:{} has no barbarian village".format(found["x"], found["y"]))
+    units = get_units(session, getCityById(session, city_id))
+    return {"island_id": str(found["id"]), "city_id": city_id, "plan": check_plan(plan, units, getTotalShips(session))}
+
+
+@task("attackBarbarians", prepare=prepare_attackBarbarians)
+def do_it(session, island_id=None, city_id=None, plan=None, island=None, city=None, babarians_info=None,
+          ship_capacity=None):
+    """
+    Parameters
+    ----------
+    session : ikabot.web.session.Session
+    island_id : str
+    city_id : str
+    plan : list[dict]
+    island, city, babarians_info, ship_capacity :
+        saved by older menus; the task reads them from the game
+    """
+    island_id, city_id = ids_from_saved(island_id, city_id, island, city)
+    island = getIsland(session.get(island_url + str(island_id)))
+    city = getCityById(session, city_id)
+    ship_capacity, _ = getShipCapacity(session)
     info = "\nI attack the barbarians in [{}:{}]\n".format(island["x"], island["y"])
     setInfoSignal(session, info)
 
@@ -635,6 +775,7 @@ def do_it(session, island, city, babarians_info, plan, ship_capacity):
             session, city, island, attack_round, units_data, attack_data, ship_capacity
         )
 
+        session.setStatus("Barbarians [{}:{}]: waiting to send round {}".format(island["x"], island["y"], attack_round["round"]))
         try:
             wait_for_round(
                 session, city, island, travel_time, battle_start, attack_round["round"]
@@ -650,12 +791,15 @@ def do_it(session, island, city, babarians_info, plan, ship_capacity):
 
         # if the number of available troops changed, the POST request might not work as intended
 
+        babarians_info = get_barbarians_lv(session, island, ship_capacity)
         attack_data["transporter"] = min(
             babarians_info["ships"], attack_round["ships"], ships_available
         )
 
         # send new round
         session.post(params=attack_data)
+        session.setStatus("Barbarians [{}:{}]: round {} sent, waiting for the battle".format(
+            island["x"], island["y"], attack_round["round"]))
 
         if attack_round["round"] == 1:
             battle_start = time.time() + travel_time
@@ -664,7 +808,9 @@ def do_it(session, island, city, babarians_info, plan, ship_capacity):
 
     last_round = plan[-1]
     if last_round["loot"]:
-        loot(session, city, island, units_data, last_round, ship_capacity)
+        session.setStatus("Collecting the resources of the barbarians [{}:{}]".format(island["x"], island["y"]))
+        loot(session, island, city, units_data, last_round, ship_capacity)
+    session.setStatus("Attack on the barbarians [{}:{}] finished @{}".format(island["x"], island["y"], getDateTime()))
 
 
 @configurator
@@ -699,11 +845,10 @@ def attackBarbarians(session, event, stdin_fd, predetermined_input):
     )
     enter()
 
+    # the task reads the island, the city and the barbarians again: the config keeps ids
     return {
         "session": session,
-        "island": island,
-        "city": city,
-        "babarians_info": babarians_info,
+        "island_id": str(island["id"]),
+        "city_id": str(city["id"]),
         "plan": plan,
-        "ship_capacity": ship_capacity,
     }
